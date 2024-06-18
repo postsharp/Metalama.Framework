@@ -5,24 +5,25 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompileTimeIfRunTime
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var p = meta.Target.Parameters[0];
+
             if (string.Equals( meta.Target.Method.Name, "NotNullMethod", StringComparison.Ordinal ))
             {
                 if (p.Value == null)
                 {
-                    throw new ArgumentNullException(p.Name);
+                    throw new ArgumentNullException( p.Name );
                 }
             }
             else
             {
-                if (string.IsNullOrEmpty(p.Value))
+                if (string.IsNullOrEmpty( p.Value ))
                 {
-                    throw new ArgumentException("IsNullOrEmpty", p.Name);
+                    throw new ArgumentException( "IsNullOrEmpty", p.Name );
                 }
             }
 
@@ -30,9 +31,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        string Method(string a)
+        private string Method( string a )
         {
             return a;
         }

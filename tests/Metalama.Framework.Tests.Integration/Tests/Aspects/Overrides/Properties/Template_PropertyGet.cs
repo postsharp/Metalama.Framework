@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_PropertyGet
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideProperty) );
+            builder.Override( nameof(OverrideProperty) );
         }
 
         [Template]

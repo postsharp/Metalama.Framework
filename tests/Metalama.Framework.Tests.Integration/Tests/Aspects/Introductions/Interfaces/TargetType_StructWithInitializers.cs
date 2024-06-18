@@ -29,20 +29,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine("Introduced interface member");
-                return 42; 
+                Console.WriteLine( "Introduced interface member" );
+
+                return 42;
             }
 
             set
             {
-                Console.WriteLine("Introduced interface member");
+                Console.WriteLine( "Introduced interface member" );
             }
         }
 
         [InterfaceMember]
         public void IntroducedMethod()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
         [InterfaceMember]
@@ -50,12 +51,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine("Introduced interface member");
+                Console.WriteLine( "Introduced interface member" );
             }
 
             remove
             {
-                Console.WriteLine("Introduced interface member");            
+                Console.WriteLine( "Introduced interface member" );
             }
         }
 
@@ -78,11 +79,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     // <target>
     [IntroduceAspect]
-    public struct TargetStruct 
+    public struct TargetStruct
     {
-        public TargetStruct()
-        {
-        }
+        public TargetStruct() { }
 
         public int ExistingField = 42;
 
@@ -90,7 +89,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         public void ExistingMethod()
         {
-            Console.WriteLine("Original struct member");
+            Console.WriteLine( "Original struct member" );
         }
     }
 }

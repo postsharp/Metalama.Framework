@@ -5,24 +5,24 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.CompileSimpleLambda2
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            Action<object?> action = a => Console.WriteLine(a?.ToString());
+            Action<object?> action = a => Console.WriteLine( a?.ToString() );
 
-            var result = meta.CompileTime(1);
+            var result = meta.CompileTime( 1 );
 
-            action(result);
+            action( result );
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

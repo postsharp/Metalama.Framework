@@ -21,7 +21,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
     {
         private string? q;
 
-        
         public string Q
         {
             [return: NotNull]

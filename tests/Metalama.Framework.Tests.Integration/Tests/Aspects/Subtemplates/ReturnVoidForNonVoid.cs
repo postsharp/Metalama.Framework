@@ -11,6 +11,7 @@ internal class Aspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         CalledTemplate();
+
         return default;
     }
 

@@ -18,7 +18,7 @@ public class MyAspect : TypeAspect
 [MyAspect]
 public class A
 {
-    public A(int x)
+    public A( int x )
     {
         X = x;
     }
@@ -29,7 +29,7 @@ public class A
 // <target>
 public class C : A
 {
-    public C(int x) : base(42)
+    public C( int x ) : base( 42 )
     {
         Y = x;
     }

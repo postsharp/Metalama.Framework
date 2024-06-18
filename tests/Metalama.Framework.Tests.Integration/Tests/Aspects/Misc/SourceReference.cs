@@ -9,7 +9,7 @@ public class TheAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine( meta.CompileTime( Path.GetFileName( meta.Target.Declaration.Sources.Single( s => s.IsImplementationPart ).Span.FilePath) ) );
+        Console.WriteLine( meta.CompileTime( Path.GetFileName( meta.Target.Declaration.Sources.Single( s => s.IsImplementationPart ).Span.FilePath ) ) );
 
         return meta.Proceed();
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ParameterMapping
@@ -12,15 +13,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Param
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceEvent(
-                builder.Target,
+            builder.IntroduceEvent(
                 "Event",
                 nameof(Template),
                 nameof(Template) );
         }
 
         [Template]
-        public void Template(EventHandler x)
+        public void Template( EventHandler x )
         {
             var z = x;
         }

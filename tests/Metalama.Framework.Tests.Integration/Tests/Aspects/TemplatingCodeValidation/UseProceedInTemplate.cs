@@ -16,4 +16,3 @@ internal class RetryAttribute : OverrideMethodAspect
         meta.Proceed();
     }
 }
-

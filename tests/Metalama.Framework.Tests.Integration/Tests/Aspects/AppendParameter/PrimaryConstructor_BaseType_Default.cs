@@ -22,12 +22,10 @@ public class MyAspect : TypeAspect
 
 // <target>
 [MyAspect]
-public class A()
-{
-}
+public class A() { }
 
 // <target>
-public class C(int x) : A
+public class C( int x ) : A
 {
     public int Y { get; } = x;
 }

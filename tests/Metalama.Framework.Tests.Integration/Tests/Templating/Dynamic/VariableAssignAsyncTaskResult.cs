@@ -6,22 +6,24 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.VariableAssignAsyncTaskResult
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        async Task<dynamic?> Template()
+        private async Task<dynamic?> Template()
         {
             var result = meta.ProceedAsync();
+
             return await result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        async Task<int> Method(int a, int b)
+        private async Task<int> Method( int a, int b )
         {
             await Task.Yield();
-            Console.WriteLine(a / b);
+            Console.WriteLine( a / b );
+
             return 1;
         }
     }

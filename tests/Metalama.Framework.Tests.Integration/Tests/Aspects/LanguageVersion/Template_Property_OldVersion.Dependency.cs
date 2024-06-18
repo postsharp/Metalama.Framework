@@ -22,7 +22,7 @@ public class TheAspect : TypeAspect
         get => "";
         set
         {
-            Console.WriteLine("""set""");
+            Console.WriteLine( """set""" );
         }
     }
 }

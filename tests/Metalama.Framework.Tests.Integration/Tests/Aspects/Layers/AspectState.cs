@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectState
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectState
                     break;
 
                 case "Second":
-                    builder.Advice.Override( builder.Target, nameof(OverrideMethod), args: new { value = ( (State)builder.AspectState! ).Value } );
+                    builder.Override( nameof(OverrideMethod), args: new { value = ( (State)builder.AspectState! ).Value } );
 
                     break;
             }

@@ -5,10 +5,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33018;
 
 public abstract class IntroductionAttribute : TypeAspect
 {
-    [Introduce(IsVirtual = false)]
-    public virtual void M() 
+    [Introduce( IsVirtual = false )]
+    public virtual void M()
     {
-        Console.WriteLine("Base template (wrong).");
+        Console.WriteLine( "Base template (wrong)." );
     }
 }
 
@@ -16,7 +16,7 @@ public class InheritedIntroductionAttribute : IntroductionAttribute
 {
     public override void M()
     {
-        Console.WriteLine("Override template (expected).");
+        Console.WriteLine( "Override template (expected)." );
     }
 }
 

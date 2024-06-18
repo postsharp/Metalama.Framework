@@ -21,6 +21,7 @@ internal sealed class IgnoreExceptionAttribute : OverrideMethodAspect
         {
             var asyncInfo = meta.Target.Method.GetAsyncInfo();
             var returnType = asyncInfo.IsAsync == true ? asyncInfo.ResultType : meta.Target.Method.ReturnType;
+
             return returnType.DefaultValue();
         }
     }
@@ -39,6 +40,7 @@ public class TestClass
     public async void AsyncVoidMethod()
     {
         await Task.Yield();
+
         throw new InvalidOperationException();
     }
 
@@ -58,6 +60,7 @@ public class TestClass
     public async Task AsyncTaskMethod()
     {
         await Task.Yield();
+
         throw new InvalidOperationException();
     }
 
@@ -71,6 +74,7 @@ public class TestClass
     public async Task<int> AsyncTaskIntMethod()
     {
         await Task.Yield();
+
         throw new InvalidOperationException();
     }
 
@@ -84,6 +88,7 @@ public class TestClass
     public async ValueTask AsyncValueTaskMethod()
     {
         await Task.Yield();
+
         throw new InvalidOperationException();
     }
 
@@ -97,6 +102,7 @@ public class TestClass
     public async ValueTask<int> AsyncValueTaskIntMethod()
     {
         await Task.Yield();
+
         throw new InvalidOperationException();
     }
 }

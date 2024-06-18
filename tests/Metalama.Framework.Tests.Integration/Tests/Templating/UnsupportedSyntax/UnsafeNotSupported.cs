@@ -5,29 +5,31 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.UnsafeNotSupported
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            int i = meta.Target.Parameters.Count;
+            var i = meta.Target.Parameters.Count;
+
             unsafe
             {
-                int* p = &i;
+                var p = &i;
 
                 *p = 42;
             }
 
-            Console.WriteLine("Test result = " + i);
+            Console.WriteLine( "Test result = " + i );
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

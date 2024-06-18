@@ -6,25 +6,28 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Cast.RunTimeCast
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             object arg0 = null;
+
             if (meta.Target.Parameters.Count > 0)
             {
                 arg0 = meta.Target.Parameters[0].Value;
+
                 if (arg0 is string)
                 {
-                    string s = (string)arg0;
-                    Console.WriteLine(s);
+                    var s = (string)arg0;
+                    Console.WriteLine( s );
                 }
             }
 
             var result = meta.Proceed();
             object obj = result;
-            string text = obj as string;
+            var text = obj as string;
+
             if (text != null)
             {
                 return text.Trim();
@@ -34,9 +37,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Cast.RunTimeCas
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        string Method(string a)
+        private string Method( string a )
         {
             return a;
         }

@@ -1,5 +1,6 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
@@ -26,8 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             }
 
             // Introduce a property in the main type to store the Optional object.
-            var optionalValuesProperty = builder.Advice.IntroduceProperty(
-                    builder.Target,
+            var optionalValuesProperty = builder.IntroduceProperty(
                     nameof(OptionalValues),
                     buildProperty: p =>
                     {

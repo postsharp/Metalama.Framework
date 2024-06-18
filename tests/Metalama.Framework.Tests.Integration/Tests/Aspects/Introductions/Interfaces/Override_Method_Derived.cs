@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Interfaces.Override_Method_Derived;
@@ -10,7 +11,7 @@ public class TheAspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.ImplementInterface( builder.Target, typeof(IDisposable), whenExists: OverrideStrategy.Override );
+        builder.ImplementInterface( typeof(IDisposable), whenExists: OverrideStrategy.Override );
     }
 
     [InterfaceMember]

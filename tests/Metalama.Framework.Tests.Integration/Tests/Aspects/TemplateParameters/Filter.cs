@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.Filter;
@@ -10,7 +11,7 @@ internal class MyAspect : FieldAspect
 {
     public override void BuildAspect( IAspectBuilder<IField> builder )
     {
-        builder.Advice.AddContract( builder.Target, nameof(Filter),  args: new { p = "hey"} );
+        builder.AddContract( nameof(Filter), args: new { p = "hey" } );
     }
 
     [Template]

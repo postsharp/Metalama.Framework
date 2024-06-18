@@ -18,9 +18,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.Collection
 
 public class TheAspect : OverrideMethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
     }
 
     public override dynamic? OverrideMethod()
@@ -38,9 +38,7 @@ public class C
 {
     // <target>
     [TheAspect]
-    static void M(List<int> numbers)
-    {
-    }
+    private static void M( List<int> numbers ) { }
 }
 
 #endif

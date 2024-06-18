@@ -1,4 +1,4 @@
-class TargetCode
+internal class TargetCode
 {
   [Aspect]
   private void Method1(int x)

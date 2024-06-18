@@ -8,13 +8,14 @@ namespace Metalama.Framework.Tests.Integration.Aspects.IncrementInRuntimeConditi
 internal class AutoIncrementAttribute : OverrideFieldOrPropertyAspect
 {
     [Introduce]
-    int oldValue;
+    private int oldValue;
 
     public override dynamic? OverrideProperty
     {
         get
         {
             var property = meta.Target.Property;
+
             if (oldValue != property.Value)
             {
                 property.Value = property.Value + 1;
@@ -33,5 +34,5 @@ internal class TargetCode
 {
     // <target>
     [AutoIncrementAttribute]
-    int Property { get; set; }
+    private int Property { get; set; }
 }

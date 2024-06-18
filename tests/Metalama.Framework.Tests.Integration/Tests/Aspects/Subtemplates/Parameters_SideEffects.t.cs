@@ -1,5 +1,5 @@
 [Aspect]
-class TargetCode
+internal class TargetCode
 {
   private global::System.Int32 Add(global::System.Int32 a)
   {

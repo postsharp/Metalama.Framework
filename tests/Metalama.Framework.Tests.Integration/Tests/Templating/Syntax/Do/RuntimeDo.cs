@@ -4,12 +4,12 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Do.RunTimeDo;
 
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
-        int i = 0;
+        var i = 0;
 
         do
         {
@@ -17,16 +17,17 @@ class Aspect
         }
         while (i < meta.Target.Parameters.Count);
 
-        Console.WriteLine("Test result = " + i);
+        Console.WriteLine( "Test result = " + i );
 
-        dynamic? result = meta.Proceed();
+        var result = meta.Proceed();
+
         return result;
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

@@ -1,5 +1,6 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -27,8 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel
 
             foreach (var member in enumType.Fields)
             {
-                var propertyBuilder = builder.Advice.IntroduceProperty(
-                    builder.Target,
+                var propertyBuilder = builder.IntroduceProperty(
                     nameof(IsMemberTemplate),
                     buildProperty: p => p.Name = "Is" + member.Name,
                     tags: new { member = member } );

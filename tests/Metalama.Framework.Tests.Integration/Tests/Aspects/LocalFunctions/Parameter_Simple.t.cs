@@ -1,5 +1,5 @@
 [Aspect]
-class C
+internal class C
 {
   private void M()
   {

@@ -4,24 +4,24 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Tuples.ScopeMismatchTuples4
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var a = 1;
-            var b = 2; 
-            
-            var namedItems = meta.CompileTime((a, b));
-            Console.WriteLine(namedItems.a);
-            
+            var b = 2;
+
+            var namedItems = meta.CompileTime( ( a, b ) );
+            Console.WriteLine( namedItems.a );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

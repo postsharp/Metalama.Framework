@@ -1,4 +1,3 @@
-
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
@@ -10,8 +9,9 @@ public sealed class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.Target.Type.Events.Single().Add(null);
-        meta.Target.Type.Events.Single().Remove(null);
+        meta.Target.Type.Events.Single().Add( null );
+        meta.Target.Type.Events.Single().Remove( null );
+
         return meta.Proceed();
     }
 }
@@ -31,8 +31,5 @@ public partial class TestClass : ITestInterface
     }
 
     [TestAspect]
-    public void Foo()
-    {
-    }
+    public void Foo() { }
 }
-

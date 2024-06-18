@@ -15,7 +15,7 @@ public record Options : IHierarchicalOptions<INamedType>
     }
 }
 
-class Aspect : TypeAspect
+internal class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
@@ -26,13 +26,12 @@ class Aspect : TypeAspect
         var options = externalType.Enhancements().GetOptions<Options>();
 
         if (options is null)
+        {
             throw new Exception();
+        }
     }
 }
 
 // <target>
 [Aspect]
-class Target
-{
-    
-}
+internal class Target { }

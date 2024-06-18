@@ -1,7 +1,7 @@
-class TargetCode
+internal class TargetCode
 {
   [LogAttribute]
-  int Method(int a)
+  private int Method(int a)
   {
     global::System.Console.ForegroundColor = global::System.ConsoleColor.Blue;
     return a;

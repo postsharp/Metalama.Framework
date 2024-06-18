@@ -31,9 +31,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Partia
     [Override]
     internal partial class TargetClass
     {
-        public static TargetClass operator +(TargetClass a, TargetClass b)
+        public static TargetClass operator +( TargetClass a, TargetClass b )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
@@ -42,9 +42,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Partia
     // <target>
     internal partial class TargetClass
     {
-        public static TargetClass operator -(TargetClass a, TargetClass b)
+        public static TargetClass operator -( TargetClass a, TargetClass b )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
@@ -53,9 +53,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Partia
     // <target>
     internal partial class TargetClass
     {
-        public static TargetClass operator *(TargetClass a, TargetClass b)
+        public static TargetClass operator *( TargetClass a, TargetClass b )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }

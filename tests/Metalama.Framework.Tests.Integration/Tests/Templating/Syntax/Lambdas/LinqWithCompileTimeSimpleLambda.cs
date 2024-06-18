@@ -6,26 +6,26 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.LinqWithCompileTimeSimpleLambda
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var list = new List<int>();
-            list.Add(1);
-            list.Add(2);
-            list.Add(5);
+            list.Add( 1 );
+            list.Add( 2 );
+            list.Add( 5 );
 
-            var p = list.Where(a => a > meta.Target.Parameters.Count).Count();
-            Console.WriteLine(p);
-            
+            var p = list.Where( a => a > meta.Target.Parameters.Count ).Count();
+            Console.WriteLine( p );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

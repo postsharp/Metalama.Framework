@@ -1,9 +1,9 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.Initializer;
 using System;
 using System.Linq;
-using Metalama.Framework.Advising;
 using Metalama.Framework.Code.Invokers;
 
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAndInitializeAttribute), typeof(ResetInitializerAttribute) )]
@@ -21,8 +21,8 @@ public class ResetInitializerAttribute : TypeAspect
         var f = builder.Target.Fields.OfName( "TestField" ).Single();
         var p = builder.Target.Properties.OfName( "TestProperty" ).Single();
 
-        builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = f } );
-        builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = p } );
+        builder.AddInitializer( nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = f } );
+        builder.AddInitializer( nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = p } );
     }
 
     [Template]

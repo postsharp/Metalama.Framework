@@ -217,7 +217,7 @@ F1.cs:
         using var testContext = this.CreateTestContext();
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects; 
 
                             public class Aspect : OverrideMethodAspect
                             {
@@ -252,7 +252,7 @@ F1.cs:
         var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
         const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -421,7 +421,7 @@ Target.cs:
         var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
 
         const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -533,7 +533,7 @@ Target.cs:
         var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
         const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -606,7 +606,7 @@ partial class C
 
         // The main compilation must have a compile-time syntax tree.
         var compilation = context.CreateCompilationModel(
-            "using Metalama.Framework.Aspects; class A : TypeAspect {}",
+            "using Metalama.Framework.Aspects;  class A : TypeAspect {}",
             additionalReferences: new[] { dependency.ToMetadataReference() } );
 
         Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, default, out _ ) );
@@ -624,7 +624,7 @@ partial class C
         var dependentCode = new Dictionary<string, string>()
         {
             ["dependent.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -721,7 +721,7 @@ class C : BaseClass
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         const string code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 class MyAspect : TypeAspect
@@ -737,7 +737,7 @@ class MyAspect : TypeAspect
         Assert.False( result1.IsSuccessful );
 
         const string code2 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 class MyAspect : TypeAspect
@@ -764,7 +764,7 @@ class MyAspect : TypeAspect
         var code = new Dictionary<string, string>()
         {
             ["dependent.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -890,7 +890,7 @@ class C
         var masterCode = new Dictionary<string, string>()
         {
             ["aspect.cs"] = $@"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -944,7 +944,8 @@ class D{version}
     public void OverrideMethodWithMultipleTargetFrameworks()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
 
                             class Aspect : OverrideMethodAspect
                             {
@@ -998,7 +999,8 @@ class D{version}
             {
                 ["Aspect.cs"] =
                     $$"""
-                      using Metalama.Framework.Aspects;
+                      using Metalama.Framework.Advising;
+                      using Metalama.Framework.Aspects; 
                       using System;
 
                       public class Aspect : OverrideMethodAspect
@@ -1065,7 +1067,8 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
 
                             public class RepositoryAspect : TypeAspect
@@ -1258,7 +1261,8 @@ class D{version}
                 """,
             ["aspect.cs"] =
                 """
-                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects; 
                 using Metalama.Framework.Code;
                 public class AddAnnotation : TypeAspect
                 {
@@ -1271,7 +1275,7 @@ class D{version}
                     
                     public override void BuildAspect( IAspectBuilder<INamedType> builder )
                     {
-                        builder.Advice.AddAnnotation( builder.Target, new TheAnnotation(this.Value), true );
+                        builder.AddAnnotation( new TheAnnotation(this.Value), true );
                     }
                 }
                 """,
@@ -1286,7 +1290,8 @@ class D{version}
         {
             ["aspect.cs"] =
                 """
-                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects; 
                 using Metalama.Framework.Code;
                 using Metalama.Framework.Diagnostics;
                 using Metalama.Framework.Eligibility;
@@ -1425,7 +1430,8 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
 
                             public class RepositoryAspect : TypeAspect
@@ -1470,7 +1476,8 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Fabrics;
                             using System;
@@ -1576,7 +1583,8 @@ class D{version}
             """
             using System;
             using System.Linq;
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using Metalama.Framework.Eligibility;
 
@@ -1586,7 +1594,7 @@ class D{version}
                 {
                     builder.MustSatisfy(method => !method.Enhancements().HasAspect<Aspect2>(), _ => $"");
                 }
-
+            
                 public override dynamic? OverrideMethod()
                 {
                     throw new NotImplementedException();
@@ -1600,7 +1608,7 @@ class D{version}
                     builder.MustSatisfy(method => !method.Enhancements().HasAspect<OverrideMethodAspect>(), _ => $"");
                 }
             }
-            
+
             class TargetCode
             {
                 private void NoAspectMethod() {}
@@ -1610,7 +1618,7 @@ class D{version}
                 {
                     return a;
                 }
-
+            
                 [Aspect2]
                 private void Aspect2Method() { }
             }
@@ -1628,7 +1636,10 @@ class D{version}
         var aspect1Method = compilation.GetSymbolsWithName( "Aspect1Method" ).OfType<IMethodSymbol>().Single();
         var aspect2Method = compilation.GetSymbolsWithName( "Aspect2Method" ).OfType<IMethodSymbol>().Single();
 
-        Assert.Equal( ["Aspect1", "Aspect2"], pipeline.GetEligibleAspects( compilation, noAspectMethod, default ).SelectAsArray( a => a.FullName ).OrderBy( a => a ) );
+        Assert.Equal(
+            ["Aspect1", "Aspect2"],
+            pipeline.GetEligibleAspects( compilation, noAspectMethod, default ).SelectAsArray( a => a.FullName ).OrderBy( a => a ) );
+
         Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect1Method, default ) );
         Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect2Method, default ) );
     }

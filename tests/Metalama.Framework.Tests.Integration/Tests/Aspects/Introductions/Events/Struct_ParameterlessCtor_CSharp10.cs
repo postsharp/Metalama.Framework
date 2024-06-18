@@ -24,18 +24,14 @@ public class IntroductionAttribute : TypeAspect
     public event EventHandler? IntroducedEvent_Static_Initializer = Foo;
 
     [Introduce]
-    public static void Foo(object? sender, EventArgs args)
-    {
-    }
+    public static void Foo( object? sender, EventArgs args ) { }
 }
 
 // <target>
 [Introduction]
 internal struct TargetStruct
 {
-    public TargetStruct()
-    {
-    }
+    public TargetStruct() { }
 
     public int ExistingField = 42;
 

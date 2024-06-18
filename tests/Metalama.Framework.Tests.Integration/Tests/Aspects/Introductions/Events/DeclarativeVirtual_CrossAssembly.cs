@@ -8,15 +8,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
 [RunTimeOrCompileTime]
 public class InheritedIntroductionAttribute : IntroductionAttribute
 {
-    public override event System.EventHandler VirtualOverriddenIntroduction
+    public override event EventHandler VirtualOverriddenIntroduction
     {
         add
         {
-            Console.WriteLine("Base template (expected).");
+            Console.WriteLine( "Base template (expected)." );
         }
         remove
         {
-            Console.WriteLine("Base template (expected).");
+            Console.WriteLine( "Base template (expected)." );
         }
     }
 }

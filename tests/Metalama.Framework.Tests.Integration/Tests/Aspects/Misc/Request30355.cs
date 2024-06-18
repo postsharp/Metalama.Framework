@@ -7,6 +7,7 @@
 using System.ComponentModel;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
@@ -56,7 +57,7 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
+        builder.ImplementInterface( typeof(INotifyPropertyChanged) );
 
         foreach (var property in builder.Target.Properties.Where( p => !p.IsAbstract && p.Writeability == Writeability.All ))
         {
@@ -94,8 +95,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
 
         // Introduce a property in the main type to store the Optional object.
         var optionalValuesProperty =
-            builder.Advice.IntroduceProperty(
-                builder.Target,
+            builder.IntroduceProperty(
                 nameof(OptionalValues),
                 buildProperty: p =>
                 {

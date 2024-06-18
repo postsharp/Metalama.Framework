@@ -13,7 +13,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug2876
         {
             // The cast to IEnumerable is to avoid using the LinqExtensions class in the engine project.
 
-            var parameterNamesTypes = meta.RunTime( ((IEnumerable<IParameter>) meta.Target.Parameters).Select( p => ( (IParameter)p ).Type.ToType() ).ToArray() );
+            var parameterNamesTypes =
+                meta.RunTime( ( (IEnumerable<IParameter>)meta.Target.Parameters ).Select( p => ( (IParameter)p ).Type.ToType() ).ToArray() );
 
             return meta.Proceed();
         }

@@ -5,16 +5,16 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTimeIfCompileTime
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             if (meta.Target.Parameters[0].Value == null)
             {
                 if (meta.Target.Method.Name == "DontThrowMethod")
                 {
-                    Console.WriteLine("Oops");
+                    Console.WriteLine( "Oops" );
                 }
                 else
                 {
@@ -26,10 +26,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTi
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method(object a)
-        {
-        }
+        private void Method( object a ) { }
     }
 }

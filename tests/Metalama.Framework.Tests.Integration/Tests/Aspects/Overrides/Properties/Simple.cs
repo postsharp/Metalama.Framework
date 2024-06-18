@@ -13,13 +13,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
             }
         }
@@ -35,12 +36,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                return this._field;
+                return _field;
             }
 
             set
             {
-                this._field = value;
+                _field = value;
             }
         }
 

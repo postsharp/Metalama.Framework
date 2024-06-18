@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33532;
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
@@ -14,25 +14,27 @@ class Aspect : OverrideMethodAspect
 }
 
 // <target>
-class Target
+internal class Target
 {
     [Aspect]
-    static void UnreachableAfterReturn() 
-    { 
-        return; 
+    private static void UnreachableAfterReturn()
+    {
+        return;
+
         throw new Exception();
     }
 
     [Aspect]
-    static void ReachableAfterReturn(int i)
+    private static void ReachableAfterReturn( int i )
     {
         if (i == 0)
         {
             goto label;
         }
+
         return;
 
-        label:
-        Console.WriteLine("Test");
+    label:
+        Console.WriteLine( "Test" );
     }
 }

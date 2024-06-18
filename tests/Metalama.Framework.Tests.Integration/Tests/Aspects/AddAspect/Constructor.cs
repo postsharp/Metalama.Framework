@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.Constructor
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
         private string _value;
 
@@ -14,16 +14,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.Construct
 
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(_value);
+            Console.WriteLine( _value );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
         // <target>
-        [Aspect("The Value")]
-        int Method(int a)
+        [Aspect( "The Value" )]
+        private int Method( int a )
         {
             return a;
         }

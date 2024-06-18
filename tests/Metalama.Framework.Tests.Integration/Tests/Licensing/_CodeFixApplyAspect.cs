@@ -8,13 +8,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixApplyAspec
 
 internal class SuggestManualImplementationAttribute : MethodAspect
 {
-    private static DiagnosticDefinition _diag = new("MY001", Severity.Warning, "Implement manually");
+    private static DiagnosticDefinition _diag = new( "MY001", Severity.Warning, "Implement manually" );
 
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Diagnostics.Report(_diag.WithCodeFixes(CodeFixFactory.ApplyAspect(builder.Target, new MyAspect())));
+        builder.Diagnostics.Report( _diag.WithCodeFixes( CodeFixFactory.ApplyAspect( builder.Target, new MyAspect() ) ) );
     }
 }
 
@@ -22,7 +22,7 @@ internal class MyAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("This line was implemented using application of and aspect using a code fix.");
+        Console.WriteLine( "This line was implemented using application of and aspect using a code fix." );
 
         return meta.Proceed();
     }
@@ -32,7 +32,7 @@ internal class MyAspect : OverrideMethodAspect
 internal class TargetCode
 {
     [SuggestManualImplementationAttribute]
-    private int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

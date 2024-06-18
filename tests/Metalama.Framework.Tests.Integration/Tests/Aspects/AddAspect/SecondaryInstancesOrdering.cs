@@ -37,8 +37,7 @@ public class MyAspect : OverrideMethodAspect, IAspect<ICompilation>, IAspect<INa
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(
-            $"Aspect order: {_tag}, {string.Join( ", ", meta.AspectInstance.SecondaryInstances.Select( x => ( (MyAspect)x.Aspect )._tag ) )}" );
+        Console.WriteLine( $"Aspect order: {_tag}, {string.Join( ", ", meta.AspectInstance.SecondaryInstances.Select( x => ( (MyAspect)x.Aspect )._tag ) )}" );
 
         return meta.Proceed();
     }

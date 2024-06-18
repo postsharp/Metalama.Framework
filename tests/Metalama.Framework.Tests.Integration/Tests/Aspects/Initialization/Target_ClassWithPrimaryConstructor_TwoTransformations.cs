@@ -15,8 +15,8 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse($"Property = 13;"), InitializerKind.BeforeInstanceConstructor);
-        builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse($"Property = 42;"), InitializerKind.BeforeInstanceConstructor);
+        builder.AddInitializer( StatementFactory.Parse( $"Property = 13;" ), InitializerKind.BeforeInstanceConstructor );
+        builder.AddInitializer( StatementFactory.Parse( $"Property = 42;" ), InitializerKind.BeforeInstanceConstructor );
     }
 }
 
@@ -24,7 +24,7 @@ public class Aspect : TypeAspect
 
 // <target>
 [Aspect]
-abstract class TargetCode()
+internal abstract class TargetCode()
 {
     public int Property { get; }
 }

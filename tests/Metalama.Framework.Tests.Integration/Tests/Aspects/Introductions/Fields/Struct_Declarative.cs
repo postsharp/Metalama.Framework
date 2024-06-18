@@ -28,9 +28,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct
     {
         private int _existingField;
 
-        public TargetStruct(int x)
+        public TargetStruct( int x )
         {
-            this._existingField = x;
+            _existingField = x;
         }
     }
 }

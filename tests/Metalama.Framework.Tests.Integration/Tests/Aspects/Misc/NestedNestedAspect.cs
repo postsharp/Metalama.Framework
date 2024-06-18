@@ -13,7 +13,8 @@ public class Outer
         {
             public override dynamic? OverrideMethod()
             {
-                Console.WriteLine(meta.Target.Method.ToDisplayString() + " started.");
+                Console.WriteLine( meta.Target.Method.ToDisplayString() + " started." );
+
                 return meta.Proceed();
             }
         }
@@ -21,10 +22,8 @@ public class Outer
 }
 
 // <target>
-class C
+internal class C
 {
     [Outer.Inner.Log]
-    void M()
-    {
-    }
+    private void M() { }
 }

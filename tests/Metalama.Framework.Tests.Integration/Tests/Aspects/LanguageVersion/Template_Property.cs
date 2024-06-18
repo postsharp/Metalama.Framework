@@ -26,15 +26,13 @@ public class TheAspect : TypeAspect
         get => "";
         set
         {
-            Console.WriteLine("""set""");
+            Console.WriteLine( """set""" );
         }
     }
 }
 
 // <target>
 [TheAspect]
-class Target
-{
-}
+internal class Target { }
 
 #endif

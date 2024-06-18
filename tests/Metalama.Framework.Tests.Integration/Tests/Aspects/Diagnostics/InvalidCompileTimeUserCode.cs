@@ -6,7 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.InvalidCompil
 {
     public class ErrorAttribute : OverrideMethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
 #if TESTRUNNER // Avoid the code to be parsed in the IDE.
             builder.BadMethod();
@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.InvalidCompil
 
         public override dynamic? OverrideMethod()
         {
-            throw new NotImplementedException("This code should not be emitted.");
+            throw new NotImplementedException( "This code should not be emitted." );
         }
     }
 
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.InvalidCompil
     internal class TargetClass
     {
         [Error]
-        public static int Add(int a, int b)
+        public static int Add( int a, int b )
         {
             return a + b;
         }

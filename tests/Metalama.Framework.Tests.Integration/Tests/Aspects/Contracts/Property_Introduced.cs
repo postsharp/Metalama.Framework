@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS8618, CS0169
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
                 builder.Advice.AddContract( property, nameof(Filter), ContractDirection.Both );
             }
 
-            var introducedField = builder.Advice.IntroduceProperty( builder.Target, nameof(IntroducedProperty) ).Declaration;
+            var introducedField = builder.IntroduceProperty( nameof(IntroducedProperty) ).Declaration;
 
             builder.Advice.AddContract( introducedField, nameof(Filter), ContractDirection.Both );
         }

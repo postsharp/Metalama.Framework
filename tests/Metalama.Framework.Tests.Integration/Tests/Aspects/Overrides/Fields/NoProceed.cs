@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.NoProceed
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
     {
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(Template) );
+            builder.Override( nameof(Template) );
         }
 
         [Template]

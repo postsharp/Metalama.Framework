@@ -4,27 +4,29 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.While.CompileTimeWhile
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var i = meta.CompileTime(0);
+            var i = meta.CompileTime( 0 );
+
             while (i < meta.Target.Method.Name.Length)
             {
                 i++;
             }
 
-            Console.WriteLine("Test result = " + i);
+            Console.WriteLine( "Test result = " + i );
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

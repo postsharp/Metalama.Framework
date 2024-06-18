@@ -5,35 +5,34 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.E
 {
     public class IntroductionAttribute : TypeAspect
     {
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int ExistingProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int ExistingProperty_Static
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int ExistingVirtualProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }

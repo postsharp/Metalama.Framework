@@ -12,8 +12,8 @@ public class Override : OverrideMethodAspect
         }
 
         LocalFunction();
-        return default;
 
+        return default;
     }
 }
 

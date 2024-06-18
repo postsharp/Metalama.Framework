@@ -8,11 +8,13 @@ internal class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var provider = new MyTemplateProvider(new MyContext(42));
-        builder.Advice.WithTemplateProvider(provider)
-            .IntroduceMethod(builder.Target, nameof(MyTemplateProvider.NewMethod));
-        builder.Advice.WithTemplateProvider(provider)
-            .IntroduceMethod(builder.Target, nameof(MyTemplateProvider.NewMethod2));
+        var provider = new MyTemplateProvider( new MyContext( 42 ) );
+
+        builder.Advice.WithTemplateProvider( provider )
+            .IntroduceMethod( builder.Target, nameof(MyTemplateProvider.NewMethod) );
+
+        builder.Advice.WithTemplateProvider( provider )
+            .IntroduceMethod( builder.Target, nameof(MyTemplateProvider.NewMethod2) );
     }
 }
 
@@ -20,21 +22,21 @@ internal class MyTemplateProvider : ITemplateProvider
 {
     private readonly MyContext _context;
 
-    public MyTemplateProvider(MyContext context)
+    public MyTemplateProvider( MyContext context )
     {
-        this._context = context;
+        _context = context;
     }
 
     [Template]
     public void NewMethod()
     {
-        Console.WriteLine( $"Hello, world {this._context.I++}." );
+        Console.WriteLine( $"Hello, world {_context.I++}." );
     }
 
     [Template]
     public void NewMethod2()
     {
-        Console.WriteLine($"Hello, world {this._context.I++}.");
+        Console.WriteLine( $"Hello, world {_context.I++}." );
     }
 }
 
@@ -43,9 +45,9 @@ public class MyContext
 {
     public int I { get; set; }
 
-    public MyContext(int i)
+    public MyContext( int i )
     {
-        this.I = i;
+        I = i;
     }
 }
 

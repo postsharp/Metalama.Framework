@@ -23,7 +23,7 @@ namespace Metalama.Framework.Aspects
                 "get_" + nameof(this.OverrideEnumerableProperty),
                 "get_" + nameof(this.OverrideEnumeratorProperty) );
 
-            builder.Advice.OverrideAccessors( builder.Target, getterTemplateSelector, "set_" + nameof(this.OverrideProperty) );
+            builder.OverrideAccessors( getterTemplateSelector, "set_" + nameof(this.OverrideProperty) );
         }
 
         /// <inheritdoc />

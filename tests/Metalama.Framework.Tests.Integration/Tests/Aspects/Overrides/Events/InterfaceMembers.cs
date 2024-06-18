@@ -13,15 +13,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
 
     internal class OverrideAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd(dynamic value)
+        public override void OverrideAdd( dynamic value )
         {
-            Console.WriteLine("Override.");
+            Console.WriteLine( "Override." );
             meta.Proceed();
         }
 
-        public override void OverrideRemove(dynamic value)
+        public override void OverrideRemove( dynamic value )
         {
-            Console.WriteLine("Override.");
+            Console.WriteLine( "Override." );
             meta.Proceed();
         }
     }
@@ -30,7 +30,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
     public interface Interface
     {
 #if NET5_0_OR_GREATER
-
         [Override]
         private event EventHandler PrivateEvent
         {
@@ -62,7 +61,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
     }
 
     // <target>
-    public class TargetClass : Interface
-    {
-    }
+    public class TargetClass : Interface { }
 }

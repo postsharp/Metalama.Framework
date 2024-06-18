@@ -18,10 +18,10 @@ internal class Aspect : OverrideMethodAspect
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

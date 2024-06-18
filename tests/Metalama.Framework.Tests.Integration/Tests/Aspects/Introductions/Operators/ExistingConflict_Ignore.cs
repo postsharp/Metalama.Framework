@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.ExistingConflict_Ignore
@@ -8,16 +9,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Ex
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceUnaryOperator(
-                builder.Target,
+            builder.IntroduceUnaryOperator(
                 nameof(UnaryOperatorTemplate),
                 builder.Target,
                 builder.Target,
                 OperatorKind.UnaryNegation,
                 whenExists: OverrideStrategy.Ignore );
 
-            builder.Advice.IntroduceBinaryOperator(
-                builder.Target,
+            builder.IntroduceBinaryOperator(
                 nameof(BinaryOperatorTemplate),
                 builder.Target,
                 builder.Target,
@@ -25,8 +24,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Ex
                 OperatorKind.Addition,
                 whenExists: OverrideStrategy.Ignore );
 
-            builder.Advice.IntroduceConversionOperator(
-                builder.Target,
+            builder.IntroduceConversionOperator(
                 nameof(ConversionOperatorTemplate),
                 TypeFactory.GetType( typeof(int) ),
                 builder.Target,

@@ -56,7 +56,7 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
+        builder.ImplementInterface( typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
 
         foreach (var property in builder.Target.Properties.Where(
                      p =>
@@ -100,7 +100,7 @@ public class TrackChangesAttribute : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // Implement the IChangeTracking interface.         
-        var implementInterfaceResult = builder.Advice.ImplementInterface( builder.Target, typeof(IChangeTracking), OverrideStrategy.Ignore );
+        var implementInterfaceResult = builder.ImplementInterface( typeof(IChangeTracking), OverrideStrategy.Ignore );
 
         // If the type already implements IChangeTracking, it must have a protected method called OnChanged, without parameters, otherwise
         // this is a contract violation, so we report an error.

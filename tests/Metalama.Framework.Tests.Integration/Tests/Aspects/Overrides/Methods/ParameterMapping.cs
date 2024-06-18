@@ -13,53 +13,58 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Paramete
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Advice.Override(
-                builder.Target.Methods.OfName("Method_InvertedParameters").Single(),
+                builder.Target.Methods.OfName( "Method_InvertedParameters" ).Single(),
                 nameof(InvertedParameters) );
 
             builder.Advice.Override(
-                builder.Target.Methods.OfName("Method_SelectFirstParameter").Single(),
-                nameof(SelectFirstParameter));
+                builder.Target.Methods.OfName( "Method_SelectFirstParameter" ).Single(),
+                nameof(SelectFirstParameter) );
 
             builder.Advice.Override(
-                builder.Target.Methods.OfName("Method_SelectSecondParameter").Single(),
-                nameof(SelectSecondParameter));
+                builder.Target.Methods.OfName( "Method_SelectSecondParameter" ).Single(),
+                nameof(SelectSecondParameter) );
         }
 
         [Template]
-        public int InvertedParameters(int y, string x)
+        public int InvertedParameters( int y, string x )
         {
             var z = meta.Proceed();
+
             return x.Length + y;
         }
 
         [Template]
-        public int SelectFirstParameter(string x)
+        public int SelectFirstParameter( string x )
         {
             var z = meta.Proceed();
+
             return x.Length;
         }
 
         [Template]
-        public int SelectSecondParameter(int y)
+        public int SelectSecondParameter( int y )
         {
             var z = meta.Proceed();
+
             return y;
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass 
+    internal class TargetClass
     {
-        public int Method_InvertedParameters(string x, int y)
+        public int Method_InvertedParameters( string x, int y )
         {
             return x.Length + y;
         }
-        public int Method_SelectFirstParameter(string x, int y)
+
+        public int Method_SelectFirstParameter( string x, int y )
         {
             return x.Length + y;
         }
-        public int Method_SelectSecondParameter(string x, int y)
+
+        public int Method_SelectSecondParameter( string x, int y )
         {
             return x.Length + y;
         }

@@ -12,7 +12,8 @@ internal class Aspect
     {
         var func = meta.CompileTime( new Func<string>( () => { return "Hello, world."; } ) );
 
-        Console.WriteLine(func());
+        Console.WriteLine( func() );
+
         return null;
     }
 }

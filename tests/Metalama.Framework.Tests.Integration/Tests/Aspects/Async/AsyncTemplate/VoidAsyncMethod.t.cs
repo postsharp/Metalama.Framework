@@ -1,14 +1,14 @@
-class TargetCode
+internal class TargetCode
 {
   [Aspect]
-  void NonAsyncMethod()
+  private void NonAsyncMethod()
   {
     object result = null;
     global::System.Console.WriteLine($"result={result}");
     return;
   }
   [Aspect]
-  async void AsyncMethod()
+  private async void AsyncMethod()
   {
     await global::System.Threading.Tasks.Task.Yield();
     await this.AsyncMethod_Source();

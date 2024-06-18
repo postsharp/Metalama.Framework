@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.CompileTimeType;
@@ -12,7 +13,7 @@ public class Aspect1 : MethodAspect
 
         var version = typeof(IAspectBuilder).Assembly.GetName().Name;
 
-        builder.Advice.Override( builder.Target, nameof(OverrideMethod), args: new { versionFromBuildAspect = version } );
+        builder.Override( nameof(OverrideMethod), args: new { versionFromBuildAspect = version } );
     }
 
     [Template]

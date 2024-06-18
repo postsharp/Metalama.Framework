@@ -11,7 +11,7 @@ public class TheAspect : OverrideMethodAspect
 public class C
 {
   [TheAspect]
-  void M()
+  private void M()
   {
     var addWithDefault_1 = (int addTo_1 = 2) => addTo_1 + 1;
     addWithDefault_1();

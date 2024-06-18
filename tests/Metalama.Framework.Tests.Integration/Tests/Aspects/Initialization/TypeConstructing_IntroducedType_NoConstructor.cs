@@ -9,7 +9,7 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.Advice.IntroduceClass( builder.Target, "IntroducedType" ).Declaration;
+        var introducedType = builder.IntroduceClass( "IntroducedType" ).Declaration;
         builder.Advice.AddInitializer( introducedType, nameof(Template), InitializerKind.BeforeTypeConstructor );
     }
 

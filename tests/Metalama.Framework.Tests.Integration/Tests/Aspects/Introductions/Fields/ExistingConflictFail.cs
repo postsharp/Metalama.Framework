@@ -1,10 +1,10 @@
 ﻿using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.ExistingConflictFail
-{ 
+{
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Fail)]
+        [Introduce( WhenExists = OverrideStrategy.Fail )]
         public int ExistingField;
     }
 
@@ -15,7 +15,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Exist
 
     // <target>
     [Introduction]
-    internal class TargetClass : BaseClass
-    {
-    }
+    internal class TargetClass : BaseClass { }
 }

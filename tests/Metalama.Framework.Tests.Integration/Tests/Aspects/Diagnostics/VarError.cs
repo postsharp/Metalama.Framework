@@ -6,7 +6,7 @@ public class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        var varDeclaration = meta.RunTime(meta.Target.Declaration);
+        var varDeclaration = meta.RunTime( meta.Target.Declaration );
 
         return meta.Proceed();
     }

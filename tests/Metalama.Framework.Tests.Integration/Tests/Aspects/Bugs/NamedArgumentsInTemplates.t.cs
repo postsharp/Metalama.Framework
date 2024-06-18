@@ -1,7 +1,7 @@
 internal class TargetCode
 {
   [Aspect]
-  void M()
+  private void M()
   {
     this.M_Source();
     this.M_Source();

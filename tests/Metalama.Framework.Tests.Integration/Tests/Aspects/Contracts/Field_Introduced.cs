@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Introduced;
 
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Int
                 builder.Advice.AddContract( field, nameof(Filter), ContractDirection.Both );
             }
 
-            var introducedField = builder.Advice.IntroduceField( builder.Target, nameof(IntroducedField) ).Declaration;
+            var introducedField = builder.IntroduceField( nameof(IntroducedField) ).Declaration;
 
             builder.Advice.AddContract( introducedField, nameof(Filter), ContractDirection.Both );
         }

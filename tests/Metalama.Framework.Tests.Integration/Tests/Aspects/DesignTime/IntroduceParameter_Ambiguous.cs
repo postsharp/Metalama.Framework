@@ -15,12 +15,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParame
 {
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var constructor in builder.Target.Constructors)
+            foreach (var constructor in builder.Target.Constructors)
             {
-                builder.Advice.IntroduceParameter(constructor, "introduced1", typeof(int), TypedConstant.Create(42));
-                builder.Advice.IntroduceParameter(constructor, "introduced2", typeof(string), TypedConstant.Create("42"));
+                builder.Advice.IntroduceParameter( constructor, "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+                builder.Advice.IntroduceParameter( constructor, "introduced2", typeof(string), TypedConstant.Create( "42" ) );
             }
         }
     }
@@ -28,20 +28,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParame
     [Introduction]
     internal partial class TestClass
     {
-        public TestClass(int param, int optional = 42)
-        {
-        }
+        public TestClass( int param, int optional = 42 ) { }
 
-        public TestClass(int param, string optional = "42")
-        {
-        }
+        public TestClass( int param, string optional = "42" ) { }
 
         public void Foo()
         {
-            _ = new TestClass(42, 42);
-            _ = new TestClass(42, "42");
-            _ = new TestClass(42, optional: 42);
-            _ = new TestClass(42, optional: "42");
+            _ = new TestClass( 42, 42 );
+            _ = new TestClass( 42, "42" );
+            _ = new TestClass( 42, optional: 42 );
+            _ = new TestClass( 42, optional: "42" );
         }
     }
 }

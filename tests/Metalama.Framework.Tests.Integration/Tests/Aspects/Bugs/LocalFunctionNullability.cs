@@ -1,4 +1,4 @@
-#pragma warning disable CS8321 
+#pragma warning disable CS8321
 
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;

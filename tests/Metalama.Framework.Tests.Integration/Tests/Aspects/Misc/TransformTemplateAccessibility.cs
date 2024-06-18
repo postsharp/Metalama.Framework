@@ -7,17 +7,17 @@ using System;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTemplateAccessibility
 {
     /*
-     
+
     Tests that the visibility of all templates, including accessors, is not changed, and
     that an [Accessibility] attribute is added.
 
      */
 
-    internal class MyAspect : Framework.Aspects.TypeAspect
+    internal class MyAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            base.BuildAspect(builder);
+            base.BuildAspect( builder );
         }
 
         [Template]
@@ -27,7 +27,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTempl
         internal int AutomaticPropertyTemplate { get; private set; }
 
         [Template]
-        internal int ExplicitPropertyTemplate { get => 5; private set { } }
+        internal int ExplicitPropertyTemplate
+        {
+            get => 5;
+            private set { }
+        }
 
         [Template]
         private int _fieldTemplate = 5;

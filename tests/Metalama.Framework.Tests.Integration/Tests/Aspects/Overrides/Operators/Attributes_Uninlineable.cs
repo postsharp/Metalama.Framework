@@ -13,37 +13,32 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Oper
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(Override));
+                builder.Advice.Override( method, nameof(Override) );
             }
         }
 
         [Template]
         public dynamic? Override()
         {
-            Console.WriteLine("This is the overridden method.");
+            Console.WriteLine( "This is the overridden method." );
             _ = meta.Proceed();
+
             return meta.Proceed();
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class MethodOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Method )]
+    public class MethodOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class ParameterOnly : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Parameter )]
+    public class ParameterOnly : Attribute { }
 
-    [AttributeUsage(AttributeTargets.ReturnValue)]
-    public class ReturnValueOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.ReturnValue )]
+    public class ReturnValueOnlyAttribute : Attribute { }
 
     // <target>
     [Override]
@@ -51,14 +46,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Oper
     {
         [MethodOnly]
         [return: ReturnValueOnly]
-        public static TargetClass operator +([ParameterOnly] TargetClass right)
+        public static TargetClass operator +( [ParameterOnly] TargetClass right )
         {
             return right;
         }
 
         [MethodOnly]
         [return: ReturnValueOnly]
-        public static explicit operator int([ParameterOnly] TargetClass x)
+        public static explicit operator int( [ParameterOnly] TargetClass x )
         {
             return 42;
         }

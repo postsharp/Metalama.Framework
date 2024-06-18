@@ -24,7 +24,7 @@ internal class NotNullAttribute : ContractAspect
 internal class Target( [NotNull] out int x )
 {
     // This is just to keep out parameter possible.
-    int z = (x = 42);
+    private int z = ( x = 42 );
 }
 
 #endif

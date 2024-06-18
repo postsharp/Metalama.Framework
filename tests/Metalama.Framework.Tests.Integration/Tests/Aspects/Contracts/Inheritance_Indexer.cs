@@ -17,13 +17,13 @@ internal class NotNullAttribute : ContractAspect
 internal interface ITarget
 {
     [NotNull]
-    string this[int i] { get; }
+    string this[ int i ] { get; }
 }
 
 // <target>
 internal class Target : ITarget
 {
-    public string this[int i]
+    public string this[ int i ]
     {
         get => "42";
         set { }

@@ -26,7 +26,7 @@ public sealed class TestAttribute : TypeAspect
 
             if (method.ReturnType.IsReferenceType.GetValueOrDefault()
                 && !method.ReturnType.IsNullable.GetValueOrDefault()
-                && !method.GetAsyncInfo().ResultType.Is(SpecialType.Void) )
+                && !method.GetAsyncInfo().ResultType.Is( SpecialType.Void ))
             {
                 builder.Advice.AddContract(
                     method.ReturnParameter,

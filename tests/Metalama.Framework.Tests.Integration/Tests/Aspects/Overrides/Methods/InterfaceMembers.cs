@@ -15,7 +15,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Override.");
+            Console.WriteLine( "Override." );
+
             return meta.Proceed();
         }
     }
@@ -41,7 +42,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
     }
 
     // <target>
-    public class TargetClass : Interface
-    {
-    }
+    public class TargetClass : Interface { }
 }

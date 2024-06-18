@@ -54,7 +54,6 @@ public class TestClass
     }
 
 #if NET5_0_OR_GREATER
-
     [IgnoreException]
     public IAsyncEnumerable<int> IAsyncEnumerableMethod()
     {
@@ -70,5 +69,4 @@ public class TestClass
     }
 
 #endif
-
 }

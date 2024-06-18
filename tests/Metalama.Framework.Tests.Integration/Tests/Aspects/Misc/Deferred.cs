@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Utilities;
 
@@ -10,7 +11,7 @@ public class TheAspect : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         var someType = new Promise<INamedType>();
-        builder.Advice.IntroduceMethod( builder.Target, nameof(MethodTemplate), args: new { someType } );
+        builder.IntroduceMethod( nameof(MethodTemplate), args: new { someType } );
         someType.Value = builder.Target;
     }
 

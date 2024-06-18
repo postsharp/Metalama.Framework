@@ -2,13 +2,12 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33163;
 
-
 public sealed class TestAspectAttribute : OverrideFieldOrPropertyAspect
 {
-    public override dynamic? OverrideProperty 
+    public override dynamic? OverrideProperty
     {
         get => 42;
-        set 
+        set
         {
             meta.Proceed();
             meta.Proceed();
@@ -20,16 +19,14 @@ public sealed class TestAspectAttribute : OverrideFieldOrPropertyAspect
 public class TestClass
 {
     [TestAspect]
-    public int PrivateSetter 
+    public int PrivateSetter
     {
         get
         {
             return 42;
         }
-        
-        private set
-        {
-        }
+
+        private set { }
     }
 
     [TestAspect]
@@ -43,9 +40,7 @@ public class TestClass
             return 42;
         }
 
-        set
-        {
-        }
+        set { }
     }
 
     [TestAspect]

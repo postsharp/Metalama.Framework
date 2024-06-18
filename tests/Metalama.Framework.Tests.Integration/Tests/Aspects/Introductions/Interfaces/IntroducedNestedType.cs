@@ -1,5 +1,4 @@
-﻿using System;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,10 +6,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var type = builder.Advice.IntroduceClass(builder.Target, "TestType");
-        type.ImplementInterface(typeof(ITestInterface));
+        var type = builder.IntroduceClass( "TestType" );
+        type.ImplementInterface( typeof(ITestInterface) );
     }
 }
 

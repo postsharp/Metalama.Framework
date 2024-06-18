@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.NoProceed
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         public override void BuildAspect( IAspectBuilder<IEvent> builder )
         {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(AccessorTemplate), nameof(AccessorTemplate), null );
+            builder.OverrideAccessors( nameof(AccessorTemplate), nameof(AccessorTemplate), null );
         }
 
         [Template]

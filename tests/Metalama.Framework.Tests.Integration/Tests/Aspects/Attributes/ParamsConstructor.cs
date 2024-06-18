@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 
@@ -16,29 +17,24 @@ public class MyAspect : MethodAspect
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
         // Zero parameter.
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
-            AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.IntroduceAttribute( AttributeConstruction.Create( typeof(MyAttribute) ) );
 
         // One parameter.
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
+        builder.IntroduceAttribute(
             AttributeConstruction.Create(
                 typeof(MyAttribute),
                 constructorArguments: new object[] { 1 } ),
             whenExists: OverrideStrategy.New );
 
         // Many parameters.
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
+        builder.IntroduceAttribute(
             AttributeConstruction.Create(
                 typeof(MyAttribute),
                 constructorArguments: new object[] { 1, 2 } ),
             whenExists: OverrideStrategy.New );
 
         // Passing an array.
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
+        builder.IntroduceAttribute(
             AttributeConstruction.Create(
                 typeof(MyAttribute),
                 constructorArguments: new object[] { new int[] { 1, 2, 3 } } ),

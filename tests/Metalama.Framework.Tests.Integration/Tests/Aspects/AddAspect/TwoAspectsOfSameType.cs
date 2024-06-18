@@ -3,21 +3,23 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.TwoAspectsOfSameType
 {
-    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
-    class Aspect : OverrideMethodAspect
+    [AttributeUsage( AttributeTargets.All, AllowMultiple = true )]
+    internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine($"{meta.AspectInstance.SecondaryInstances.Length} other instance(s)");
+            Console.WriteLine( $"{meta.AspectInstance.SecondaryInstances.Length} other instance(s)" );
+
             return meta.Proceed();
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        [Aspect, Aspect]
-        int Method(int a)
+        [Aspect]
+        [Aspect]
+        private int Method( int a )
         {
             return a;
         }

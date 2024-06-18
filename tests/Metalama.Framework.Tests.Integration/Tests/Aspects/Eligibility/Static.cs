@@ -5,25 +5,24 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Static
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
-
-        public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
-            base.BuildEligibility(builder);
+            base.BuildEligibility( builder );
             builder.MustBeStatic();
         }
- 
+
         public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
         [Aspect]
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

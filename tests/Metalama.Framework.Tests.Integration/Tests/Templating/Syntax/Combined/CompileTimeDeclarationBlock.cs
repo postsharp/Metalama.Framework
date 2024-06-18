@@ -4,10 +4,10 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Combined.CompileTimeDeclarationBlock;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
         // This tests that statements that cannot be embedded are not embedded in template code.
 
@@ -25,9 +25,7 @@ class Aspect
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    void Method()
-    {
-    }
+    private void Method() { }
 }

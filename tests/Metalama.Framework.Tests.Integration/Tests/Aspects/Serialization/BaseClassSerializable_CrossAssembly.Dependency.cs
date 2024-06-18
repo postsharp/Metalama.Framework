@@ -8,9 +8,9 @@ public class MiddleType : BaseType
 {
     public int MiddleValue { get; }
 
-    public MiddleType(int baseValue, int middleValue) : base(baseValue)
+    public MiddleType( int baseValue, int middleValue ) : base( baseValue )
     {
-        this.MiddleValue = middleValue;
+        MiddleValue = middleValue;
     }
 }
 
@@ -19,7 +19,7 @@ public class DerivedType : MiddleType
 {
     public int Value { get; }
 
-    public DerivedType(int baseValue, int middleValue, int value) : base(baseValue, middleValue)
+    public DerivedType( int baseValue, int middleValue, int value ) : base( baseValue, middleValue )
     {
         Value = value;
     }
@@ -30,25 +30,23 @@ public class TestAspect : OverrideMethodAspect
 {
     public DerivedType SerializedValue;
 
-    public TestAspect(int x, int y, int z)
+    public TestAspect( int x, int y, int z )
     {
-        SerializedValue = new DerivedType(x, y, z);
+        SerializedValue = new DerivedType( x, y, z );
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.BaseValue));
-        Console.WriteLine(meta.CompileTime(SerializedValue.MiddleValue));
-        Console.WriteLine(meta.CompileTime(SerializedValue.Value));
+        Console.WriteLine( meta.CompileTime( SerializedValue.BaseValue ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.MiddleValue ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.Value ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(13, 27, 42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 13, 27, 42 )]
+    public virtual void Foo() { }
 }

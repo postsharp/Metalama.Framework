@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
@@ -6,15 +5,16 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.LinqNotSupported
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
 
 #pragma warning disable CS0618
-            IEnumerable<int> list = from i in new int[] { 1, 2, 3 } select i * i;
+            var list = from i in new int[] { 1, 2, 3 }
+                       select i * i;
 #pragma warning restore CS0618
             if (result == null)
             {
@@ -33,9 +33,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.Linq
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

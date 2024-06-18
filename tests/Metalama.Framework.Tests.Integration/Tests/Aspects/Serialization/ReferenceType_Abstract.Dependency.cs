@@ -9,9 +9,9 @@ public abstract class AbstractBaseType : ICompileTimeSerializable
 {
     public int BaseValue { get; }
 
-    public AbstractBaseType(int value)
+    public AbstractBaseType( int value )
     {
-        this.BaseValue = value;
+        BaseValue = value;
     }
 }
 
@@ -20,9 +20,9 @@ public class ReferenceType : AbstractBaseType
 {
     public int Value { get; }
 
-    public ReferenceType(int value) : base(value)
+    public ReferenceType( int value ) : base( value )
     {
-        this.Value = value;
+        Value = value;
     }
 }
 
@@ -31,24 +31,22 @@ public class TestAspect : OverrideMethodAspect
 {
     public ReferenceType SerializedValue;
 
-    public TestAspect(int x)
+    public TestAspect( int x )
     {
-        SerializedValue = new ReferenceType(x);
+        SerializedValue = new ReferenceType( x );
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.BaseValue));
-        Console.WriteLine(meta.CompileTime(SerializedValue.Value));
+        Console.WriteLine( meta.CompileTime( SerializedValue.BaseValue ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.Value ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 42 )]
+    public virtual void Foo() { }
 }

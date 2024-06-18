@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.OverrideMethod;
@@ -12,22 +13,22 @@ public class Aspect : MethodAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.Override( builder.Target, nameof(Method), args: new { T = builder.Target.ReturnType } );
+        builder.Override( nameof(Method), args: new { T = builder.Target.ReturnType } );
     }
 
     [Template]
-    private T Method<[CompileTime] T>() where T : class 
+    private T Method<[CompileTime] T>() where T : class
     {
         // Try all possible type constructs.
         var x = default(T);
-        var t = (T) null!;
-        var t2 = (T?) null;
-        var t3 = (List<T>) null!;
-        var t4 = (T[]) null!;
-        var t5 = (List<T[]>) null!;
-        var t6 = (List<T>[]) null!;
+        var t = (T)null!;
+        var t2 = (T?)null;
+        var t3 = (List<T>)null!;
+        var t4 = (T[])null!;
+        var t5 = (List<T[]>)null!;
+        var t6 = (List<T>[])null!;
 
-        return Target.GenericMethod<T>( (T) meta.Proceed()! );
+        return Target.GenericMethod<T>( (T)meta.Proceed()! );
     }
 }
 
@@ -37,5 +38,5 @@ public class Target
     [Aspect]
     public string M() => "";
 
-    public static T GenericMethod<T>(T x) => x;
+    public static T GenericMethod<T>( T x ) => x;
 }

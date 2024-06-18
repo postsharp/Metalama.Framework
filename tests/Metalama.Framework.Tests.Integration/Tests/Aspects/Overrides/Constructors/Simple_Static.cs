@@ -12,7 +12,7 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.StaticConstructor, nameof(Template));
+        builder.Advice.Override( builder.Target.StaticConstructor, nameof(Template) );
     }
 
     [Template]
@@ -29,6 +29,6 @@ public class TargetClass
 {
     static TargetClass()
     {
-        Console.WriteLine("This is the original static constructor.");
+        Console.WriteLine( "This is the original static constructor." );
     }
 }

@@ -21,7 +21,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         [Introduce]
         public async Task IntroducedMethod_TaskVoid()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
             await Task.Yield();
             await meta.ProceedAsync();
         }
@@ -31,6 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         {
             Console.WriteLine( "This is introduced method." );
             await Task.Yield();
+
             return await meta.ProceedAsync();
         }
     }

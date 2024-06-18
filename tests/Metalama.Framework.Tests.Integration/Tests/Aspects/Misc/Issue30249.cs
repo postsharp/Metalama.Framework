@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 /*
  * #30249 Async templates do not support Task/void async methods in some expressions
- */ 
+ */
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30249
 {
@@ -18,6 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30249
         public override async Task<dynamic?> OverrideAsyncMethod()
         {
             var result = meta.ProceedAsync();
+
             return await result;
         }
     }
@@ -35,6 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30249
         internal async Task<int> IntAsyncMethod()
         {
             await Task.Yield();
+
             return 5;
         }
     }

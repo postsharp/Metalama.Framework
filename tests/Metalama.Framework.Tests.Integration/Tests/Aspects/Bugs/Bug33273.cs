@@ -1,4 +1,3 @@
-
 using System;
 using Metalama.Framework.Aspects;
 
@@ -9,7 +8,7 @@ public sealed class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        _ = meta.Cast(meta.Target.Method.ReturnType, StaticClass.StaticMethod());
+        _ = meta.Cast( meta.Target.Method.ReturnType, StaticClass.StaticMethod() );
 
         return meta.Proceed();
     }
@@ -29,4 +28,3 @@ public class StaticClass
 {
     public static double StaticMethod() => Math.PI;
 }
-

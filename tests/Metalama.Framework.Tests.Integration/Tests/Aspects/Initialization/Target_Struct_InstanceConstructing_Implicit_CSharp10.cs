@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.Target_Str
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor );
+            builder.AddInitializer( nameof(Template), InitializerKind.BeforeInstanceConstructor );
         }
 
         [Template]

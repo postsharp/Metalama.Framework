@@ -10,9 +10,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests introducing closed generic type with a type parameter type argument.
      */
 
-    public interface IInterface<T> 
+    public interface IInterface<T>
     {
-        void Foo(T t); 
+        void Foo( T t );
     }
 
     public class IntroductionAttribute : TypeAspect
@@ -21,24 +21,23 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(aspectBuilder.Target.TypeParameters[0]));
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( aspectBuilder.Target.TypeParameters[0] ) );
 
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(TypeFactory.MakeArrayType(aspectBuilder.Target.TypeParameters[0])));
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments(
+                    TypeFactory.MakeArrayType( aspectBuilder.Target.TypeParameters[0] ) ) );
 
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>)))
+                ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) )
                 .WithTypeArguments(
-                    ((INamedType)TypeFactory.GetType(typeof(Tuple<,>)))
-                    .WithTypeArguments(aspectBuilder.Target.TypeParameters[0], aspectBuilder.Target.TypeParameters[0])));
+                    ( (INamedType)TypeFactory.GetType( typeof(Tuple<,>) ) )
+                    .WithTypeArguments( aspectBuilder.Target.TypeParameters[0], aspectBuilder.Target.TypeParameters[0] ) ) );
         }
     }
 
     // <target>
     [Introduction]
-    public class TargetClass<T>
-    {
-    }
+    public class TargetClass<T> { }
 }

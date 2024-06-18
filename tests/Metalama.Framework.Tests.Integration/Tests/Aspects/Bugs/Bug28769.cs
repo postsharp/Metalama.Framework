@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28769
         public override dynamic? OverrideMethod()
         {
             // The cast to IEnumerable is to avoid referencing the LinqExtensions in the engine assembly.
-            var parameterNamesCompileTime = ((IEnumerable<IParameter>) meta.Target.Parameters).Select( p => p.Name ).ToArray();
+            var parameterNamesCompileTime = ( (IEnumerable<IParameter>)meta.Target.Parameters ).Select( p => p.Name ).ToArray();
             var parameterNames = meta.RunTime( parameterNamesCompileTime );
 
             return null;

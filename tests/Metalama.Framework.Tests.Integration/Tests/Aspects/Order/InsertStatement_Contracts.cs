@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Order.InsertStatement_Contracts;
@@ -20,8 +21,8 @@ internal class Test1Attribute : Attribute, IAspect<IParameter>
     public void BuildAspect( IAspectBuilder<IParameter> builder )
     {
         var direction = builder.Target.IsReturnParameter ? ContractDirection.Output : ContractDirection.Both;
-        builder.Advice.AddContract( builder.Target, nameof(Validate), direction, args: new { order = 1 } );
-        builder.Advice.AddContract( builder.Target, nameof(Validate), direction, args: new { order = 2 } );
+        builder.AddContract( nameof(Validate), direction, args: new { order = 1 } );
+        builder.AddContract( nameof(Validate), direction, args: new { order = 2 } );
     }
 
     public void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
@@ -49,8 +50,8 @@ internal class Test2Attribute : Attribute, IAspect<IParameter>
     public void BuildAspect( IAspectBuilder<IParameter> builder )
     {
         var direction = builder.Target.IsReturnParameter ? ContractDirection.Output : ContractDirection.Both;
-        builder.Advice.AddContract( builder.Target, nameof(Validate), direction, args: new { order = 1 } );
-        builder.Advice.AddContract( builder.Target, nameof(Validate), direction, args: new { order = 2 } );
+        builder.AddContract( nameof(Validate), direction, args: new { order = 1 } );
+        builder.AddContract( nameof(Validate), direction, args: new { order = 2 } );
     }
 
     public void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }

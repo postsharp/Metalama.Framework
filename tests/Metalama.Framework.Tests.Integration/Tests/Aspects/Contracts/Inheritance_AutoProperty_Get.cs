@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Inheritan
 
         public Target()
         {
-            this.P = "42";
+            P = "42";
         }
     }
 }

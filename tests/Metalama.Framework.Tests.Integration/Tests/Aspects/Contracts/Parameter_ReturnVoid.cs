@@ -20,8 +20,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
     internal class Target
     {
         [return: NotNull]
-        private void M()
-        {
-        }
+        private void M() { }
     }
 }

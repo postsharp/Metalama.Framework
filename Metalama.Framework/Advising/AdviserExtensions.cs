@@ -19,6 +19,7 @@ public static class AdviserExtensions
 {
     /// <summary>
     /// Overrides the implementation of a method.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a method.</param>
     /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
@@ -38,6 +39,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a new method or overrides the implementation of the existing one.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
@@ -74,6 +76,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a finalizer or overrides the implementation of the existing one.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced finalizer. This method must be
@@ -164,6 +167,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Overrides the implementation of a constructor.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a constructor.</param>
     /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
@@ -201,6 +205,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Overrides a field or property by specifying a property template.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a property.</param>
     /// <param name="template">The name of a property of the aspect class, with a getter, a setter, or both, whose implementation will be used as a template.
@@ -219,6 +224,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a field, or a property or an indexer.</param>
     /// <param name="getTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
@@ -275,6 +281,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a field to the target type by specifying a template.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">Name of the introduced field.</param>
@@ -303,6 +310,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a field to the target type by specifying a field name and <see cref="IType"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="fieldName">Name of the introduced field.</param>
@@ -334,6 +342,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a field to the target type by specifying a field name and <see cref="Type"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="fieldName">Name of the introduced field.</param>
@@ -365,6 +374,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces an auto-implemented property to the target type by specifying a property name and <see cref="Type"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="propertyName">Name of the introduced field.</param>
@@ -396,6 +406,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces an auto-implemented property to the target type by specifying a property name and <see cref="IType"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="propertyName">Name of the introduced field.</param>
@@ -427,6 +438,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying a property template.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">The name of the property in the aspect class that will be used as a template for the new property.
@@ -461,6 +473,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="name">Name of the introduced property.</param>
@@ -504,6 +517,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indexType">The type of the initial index parameter.</param>
@@ -547,6 +561,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indexType">The type of the initial index parameter.</param>
@@ -590,6 +605,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indices">The types and names of the index parameters.</param>
@@ -633,6 +649,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indices">The types and names of the index parameters.</param>
@@ -676,6 +693,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Overrides an event by specifying a template for the adder, the remover, and/or the raiser.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for an event.</param>
     /// <param name="addTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the adder, or <c>null</c>
@@ -706,6 +724,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying an event template.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="eventTemplate">The name of the event in the aspect class that must be used as a template for the introduced event. This event
@@ -740,6 +759,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying individual template methods
     /// for the adder, the remover, and the raiser.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="eventName">The name of the introduced event.</param>
@@ -781,11 +801,13 @@ public static class AdviserExtensions
             scope,
             whenExists,
             buildEvent,
+            args,
             tags );
 
     /// <summary>
     /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
     /// Interface members can be introduced declaratively by marking an aspect member by <see cref="InterfaceMemberAttribute"/> or 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// <see cref="IntroduceAttribute"/>, or programmatically using <c>Introduce</c> methods for public implementations of <c>result.ExplicitImplementations.Introduce</c> for private implementations.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
@@ -810,6 +832,7 @@ public static class AdviserExtensions
     /// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
     /// Interface members can be introduced by marking an aspect member by <see cref="InterfaceMemberAttribute"/>, 
     /// <see cref="IntroduceAttribute"/> or programmatically using <c>Introduce</c> methods.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="interfaceType">The type of the implemented interface.</param>
@@ -831,6 +854,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Adds a type or instance initializer by using a template. 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">The name of the template. This method must have no run-time parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
@@ -842,8 +866,8 @@ public static class AdviserExtensions
         this IAdviser<INamedType> adviser,
         string template,
         InitializerKind kind,
-        object? tags = null,
-        object? args = null )
+        object? args = null,
+        object? tags = null)
         => ((IAdviserInternal) adviser).AdviceFactory.AddInitializer(
             adviser.Target,
             template,
@@ -853,6 +877,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Adds a type or instance initializer by specifying an <see cref="IStatement"/>. 
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="statement">The statement to be inserted at the top of constructors.</param>
@@ -868,6 +893,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Adds an initializer to a specific constructor by using a template.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a constructor.</param>
     /// <param name="template">The name of the template. This method must have no run-time parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
@@ -877,8 +903,8 @@ public static class AdviserExtensions
     public static IAddInitializerAdviceResult AddInitializer(
         this IAdviser<IConstructor> adviser,
         string template,
-        object? tags = null,
-        object? args = null )
+        object? args = null,
+        object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.AddInitializer(
             adviser.Target,
             template,
@@ -887,6 +913,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Adds an initializer to a specific constructor by specifying an <see cref="IStatement"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a constructor.</param>
     /// <param name="statement">The statement to be inserted at the top of the constructor.</param>
@@ -899,6 +926,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Adds a contract to a parameter. Contracts are usually used to validate parameters (pre- or post-conditions) or to normalize their value (null-to-empty, trimming, normalizing case, ...).
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a parameter.</param>
     /// <param name="template">The name of the template method. This method must have a single run-time parameter named <c>value</c>, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
@@ -910,8 +938,8 @@ public static class AdviserExtensions
         this IAdviser<IParameter> adviser,
         string template,
         ContractDirection direction = ContractDirection.Default,
-        object? tags = null,
-        object? args = null )
+        object? args = null,
+        object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.AddContract(
             adviser.Target,
             template,
@@ -922,6 +950,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Adds a contract to a field, property or indexer. Contracts are usually used to validate the value assigned to fields properties or indexers or to normalize their value (null-to-empty, trimming, normalizing case, ...)
     /// before assignment. Alternatively, a contract can be used to validate the value <i>returned</i> by a property or indexer, in which case the <paramref name="direction"/> parameter should be set to <see cref="ContractDirection.Output"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a field, or an property or an indexer.</param>
     /// <param name="template">The name of the template method. This method must have a single run-time parameter named <c>value</c>, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
@@ -933,8 +962,8 @@ public static class AdviserExtensions
         this IAdviser<IFieldOrPropertyOrIndexer> adviser,
         string template,
         ContractDirection direction = ContractDirection.Default,
-        object? tags = null,
-        object? args = null )
+        object? args = null,
+        object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.AddContract(
             adviser.Target,
             template,
@@ -944,6 +973,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Adds a custom attribute to a given declaration.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a declaration.</param>
     /// <param name="attribute">The custom attribute to be added. It can be an existing <see cref="IAttribute"/>, or you can use <see cref="AttributeConstruction"/>
@@ -962,6 +992,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Removes all custom attributes of a given <see cref="INamedType"/> from a given declaration.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a declaration.</param>
     /// <param name="attributeType">The type of custom attributes to be removed.</param>
@@ -974,6 +1005,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Removes all custom attributes of a given <see cref="Type"/> from a given declaration.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a declaration.</param>
     /// <param name="attributeType">The type of custom attributes to be removed.</param>
@@ -989,6 +1021,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Appends a parameter to a constructor by specifying its name and <see cref="IType"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a constructor.</param>
     /// <param name="parameterName">The name of the parameter.</param>
@@ -1016,6 +1049,7 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Appends a parameter to a constructor by specifying its name and <see cref="Type"/>.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a constructor.</param>
     /// <param name="parameterName">The name of the parameter.</param>
@@ -1055,7 +1089,7 @@ public static class AdviserExtensions
             adviser.Target.GlobalNamespace,
             name );
 
-    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<INamespace> adviser, string name ) 
+    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<INamespace> adviser, string name )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
             adviser.Target,
             name );
@@ -1064,6 +1098,7 @@ public static class AdviserExtensions
     /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
     /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.
     /// Annotations are a way of communication between aspects or classes of aspects.
+    /// Use the <see cref="IAdviser{T}.With{TNewDeclaration}"/> method to apply the advice to another declaration than the current one.
     /// </summary>
     /// <param name="adviser">An adviser for a declaration.</param>
     /// <param name="annotation">The annotation.</param>
@@ -1079,10 +1114,4 @@ public static class AdviserExtensions
             adviser.Target,
             annotation,
             export );
-
-    public static IAdviser<TTarget> WithTarget<TTarget, TAdvised>(
-        this IAdviser<TAdvised> adviser,
-        TTarget target )
-        where TTarget : IDeclaration
-        => adviser.With( target );
 }

@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInlineableIntroduced;
 
@@ -11,15 +12,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInli
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
+            builder.IntroduceIndexer(
                 new[] { ( typeof(int), "x" ) },
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),
                 buildIndexer: p => { p.Accessibility = Accessibility.Public; } );
 
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
+            builder.IntroduceIndexer(
                 new[] { ( typeof(string), "x" ) },
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),

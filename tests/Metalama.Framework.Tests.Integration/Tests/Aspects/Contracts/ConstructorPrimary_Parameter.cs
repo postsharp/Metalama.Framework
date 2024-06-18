@@ -21,7 +21,7 @@ internal class NotNullAttribute : ContractAspect
 }
 
 // <target>
-internal class Target( [NotNull]string x )
+internal class Target( [NotNull] string x )
 {
     public string X { get; set; } = x;
 }

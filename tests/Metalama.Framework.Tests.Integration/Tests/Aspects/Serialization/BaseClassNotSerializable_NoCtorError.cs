@@ -12,9 +12,9 @@ public class BaseType
 {
     public int BaseValue { get; }
 
-    public BaseType(int baseValue)
+    public BaseType( int baseValue )
     {
-        this.BaseValue = 13;
+        BaseValue = 13;
     }
 }
 
@@ -23,7 +23,7 @@ public class DerivedType : BaseType, ICompileTimeSerializable
 {
     public int Value { get; }
 
-    public DerivedType(int value, int baseValue) : base(baseValue)
+    public DerivedType( int value, int baseValue ) : base( baseValue )
     {
         Value = value;
     }

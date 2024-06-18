@@ -1,3 +1,4 @@
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -6,20 +7,20 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
     namespace Qualified
     {
         [CompileTime]
-        class Aspect
+        internal class Aspect
         {
             [TestTemplate]
-            dynamic? Template()
+            private dynamic? Template()
             {
-               System.Console.WriteLine("Oops");
-                
+                Console.WriteLine( "Oops" );
+
                 return meta.Proceed();
             }
         }
 
-        class TargetCode
+        internal class TargetCode
         {
-            int Method(int a)
+            private int Method( int a )
             {
                 return a;
             }

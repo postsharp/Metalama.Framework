@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,67 +7,61 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
             buildConstructor: c =>
             {
-                c.AddParameter("a", typeof(byte));
-                c.AddParameter("b", typeof(string), defaultValue: TypedConstant.Create("Private"));
+                c.AddParameter( "a", typeof(byte) );
+                c.AddParameter( "b", typeof(string), defaultValue: TypedConstant.Create( "Private" ) );
                 c.Accessibility = Accessibility.Private;
-            });
+            } );
 
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
             buildConstructor: c =>
             {
-                c.AddParameter("a", typeof(short));
-                c.AddParameter("b", typeof(string), defaultValue: TypedConstant.Create("ProtectedInternal"));
+                c.AddParameter( "a", typeof(short) );
+                c.AddParameter( "b", typeof(string), defaultValue: TypedConstant.Create( "ProtectedInternal" ) );
                 c.Accessibility = Accessibility.ProtectedInternal;
-            });
+            } );
 
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
             buildConstructor: c =>
             {
-                c.AddParameter("a", typeof(int));
-                c.AddParameter("b", typeof(string), defaultValue: TypedConstant.Create("PrivateProtected"));
+                c.AddParameter( "a", typeof(int) );
+                c.AddParameter( "b", typeof(string), defaultValue: TypedConstant.Create( "PrivateProtected" ) );
                 c.Accessibility = Accessibility.PrivateProtected;
-            });
+            } );
 
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
             buildConstructor: c =>
             {
-                c.AddParameter("a", typeof(long));
-                c.AddParameter("b", typeof(string), defaultValue: TypedConstant.Create("Internal"));
+                c.AddParameter( "a", typeof(long) );
+                c.AddParameter( "b", typeof(string), defaultValue: TypedConstant.Create( "Internal" ) );
                 c.Accessibility = Accessibility.Internal;
-            });
+            } );
 
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
             buildConstructor: c =>
             {
-                c.AddParameter("a", typeof(float));
-                c.AddParameter("b", typeof(string), defaultValue: TypedConstant.Create("Protected"));
+                c.AddParameter( "a", typeof(float) );
+                c.AddParameter( "b", typeof(string), defaultValue: TypedConstant.Create( "Protected" ) );
                 c.Accessibility = Accessibility.Protected;
-            });
+            } );
 
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
             buildConstructor: c =>
             {
-                c.AddParameter("a", typeof(double));
-                c.AddParameter("b", typeof(string), defaultValue: TypedConstant.Create("Public"));
+                c.AddParameter( "a", typeof(double) );
+                c.AddParameter( "b", typeof(string), defaultValue: TypedConstant.Create( "Public" ) );
                 c.Accessibility = Accessibility.Public;
-            });
+            } );
     }
 
     [Template]

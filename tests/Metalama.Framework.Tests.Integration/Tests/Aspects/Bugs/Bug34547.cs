@@ -6,13 +6,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug34547;
 
 public class Fabric : ProjectFabric
 {
-    public override void AmendProject(IProjectAmender amender)
+    public override void AmendProject( IProjectAmender amender )
     {
         amender
-            .SelectMany(compilation => compilation.AllTypes)
-            .Where(type => type.Accessibility is Metalama.Framework.Code.Accessibility.Public)
-            .SelectMany(type => type.Methods)
-            .Where(method => method.Accessibility is Accessibility.Public)
+            .SelectMany( compilation => compilation.AllTypes )
+            .Where( type => type.Accessibility is Accessibility.Public )
+            .SelectMany( type => type.Methods )
+            .Where( method => method.Accessibility is Accessibility.Public )
             .AddAspectIfEligible<LogAttribute>();
     }
 }

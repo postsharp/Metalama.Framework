@@ -10,9 +10,10 @@ internal class Aspect
     [TestTemplate]
     private dynamic? Template()
     {
-        var func = meta.CompileTime( delegate() { return "Hello, world."; }  );
+        var func = meta.CompileTime( delegate() { return "Hello, world."; } );
 
-        Console.WriteLine(func());
+        Console.WriteLine( func() );
+
         return null;
     }
 }

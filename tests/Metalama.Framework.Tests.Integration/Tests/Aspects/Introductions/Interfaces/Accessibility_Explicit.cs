@@ -13,28 +13,34 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     public interface IInterface
     {
         void Method();
+
         int Property { get; set; }
+
         int Property_GetOnly { get; }
+
         int Property_ExpressionBody { get; }
+
         int AutoProperty { get; set; }
+
         event EventHandler? EventField;
+
         event EventHandler? Event;
     }
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private void Method()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private int Property
         {
             get
@@ -42,12 +48,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 return 42;
             }
 
-            set
-            {
-            }
+            set { }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private int Property_GetOnly
         {
             get
@@ -56,16 +60,16 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private int Property_ExpressionBody => 42;
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private int AutoProperty { get; set; }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private event EventHandler? EventField;
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         private event EventHandler? Event
         {
             add { }

@@ -7,15 +7,17 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("regular template");
+        Console.WriteLine( "regular template" );
         CalledTemplate();
+
         throw new Exception();
     }
 
     [Template]
-    dynamic? CalledTemplate()
+    private dynamic? CalledTemplate()
     {
-        Console.WriteLine("called template");
+        Console.WriteLine( "called template" );
+
         return meta.Proceed();
     }
 }
@@ -24,9 +26,7 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void VoidMethod()
-    {
-    }
+    private void VoidMethod() { }
 
     [Aspect]
     private int IntMethod()

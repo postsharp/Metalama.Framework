@@ -8,16 +8,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LanguageVersion.Aux
 public class TheAspect : TypeAspect
 {
     [Introduce]
-    void M()
+    private void M()
     {
         AuxiliaryTemplate();
-        meta.InvokeTemplate(nameof(AuxiliaryTemplate));
+        meta.InvokeTemplate( nameof(AuxiliaryTemplate) );
     }
 
     [Template]
-    void AuxiliaryTemplate()
+    private void AuxiliaryTemplate()
     {
-        Console.WriteLine("""aux""");
+        Console.WriteLine( """aux""" );
     }
 }
 

@@ -1,4 +1,4 @@
-class Target
+internal class Target
 {
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.AbstractPropertyTemplate.DerivedAspect]
   private global::System.Int32 i

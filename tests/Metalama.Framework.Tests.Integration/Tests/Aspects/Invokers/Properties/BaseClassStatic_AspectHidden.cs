@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_AspectHidden;
@@ -16,8 +17,7 @@ public class InvokerBeforeAspect : PropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        builder.Advice.OverrideAccessors(
-            builder.Target,
+        builder.OverrideAccessors(
             nameof(GetTemplate),
             nameof(SetTemplate),
             new { target = builder.Target.DeclaringType!.BaseType!.Properties.OfName( "Property" ).Single() } );
@@ -94,8 +94,7 @@ public class InvokerAfterAspect : PropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        builder.Advice.OverrideAccessors(
-            builder.Target,
+        builder.OverrideAccessors(
             nameof(GetTemplate),
             nameof(SetTemplate),
             new { target = builder.Target.DeclaringType!.AllProperties.OfName( "Property" ).Single() } );

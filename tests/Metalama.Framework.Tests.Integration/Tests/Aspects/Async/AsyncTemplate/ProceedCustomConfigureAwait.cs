@@ -13,14 +13,16 @@ public sealed class TransactionalMethodAttribute : OverrideMethodAspect
     {
         var result = await meta.ProceedAsync().NoContext();
         await meta.This.OnTransactionMethodSuccessAsync();
+
         return result;
     }
 }
 
-static class TaskExtensions
+internal static class TaskExtensions
 {
-    public static ConfiguredTaskAwaitable NoContext(this Task task) => task.ConfigureAwait(false);
-    public static ConfiguredTaskAwaitable<T> NoContext<T>(this Task<T> task) => task.ConfigureAwait(false);
+    public static ConfiguredTaskAwaitable NoContext( this Task task ) => task.ConfigureAwait( false );
+
+    public static ConfiguredTaskAwaitable<T> NoContext<T>( this Task<T> task ) => task.ConfigureAwait( false );
 }
 
 // <target>
@@ -35,7 +37,8 @@ public class TargetClass
     public async Task<int> DoSomethingAsync()
     {
         await Task.Yield();
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
+
         return 42;
     }
 
@@ -43,6 +46,6 @@ public class TargetClass
     public async Task DoSomethingAsync2()
     {
         await Task.Yield();
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
     }
 }

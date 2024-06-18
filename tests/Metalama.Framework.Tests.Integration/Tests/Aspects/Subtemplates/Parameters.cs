@@ -3,25 +3,23 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Parameters;
 
-class Aspect : TypeAspect
+internal class Aspect : TypeAspect
 {
     [Introduce]
-    int Add(int a)
+    private int Add( int a )
     {
-        AddImpl(a, 1, meta.CompileTime(1), 1, meta.CompileTime(1));
+        AddImpl( a, 1, meta.CompileTime( 1 ), 1, meta.CompileTime( 1 ) );
 
         throw new Exception();
     }
 
     [Template]
-    void AddImpl(int a, int b, int c, [CompileTime] int d, [CompileTime] int e)
+    private void AddImpl( int a, int b, int c, [CompileTime] int d, [CompileTime] int e )
     {
-        meta.Return(a + b + c + d + e);
+        meta.Return( a + b + c + d + e );
     }
 }
 
 // <target>
 [Aspect]
-class TargetCode
-{
-}
+internal class TargetCode { }

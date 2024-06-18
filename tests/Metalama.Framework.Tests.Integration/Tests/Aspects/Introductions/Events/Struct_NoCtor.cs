@@ -24,9 +24,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Struc
         public event EventHandler? IntroducedEvent_Static_Initializer = Foo;
 
         [Introduce]
-        public static void Foo(object? sender, EventArgs args)
-        {
-        }
+        public static void Foo( object? sender, EventArgs args ) { }
     }
 
     // <target>

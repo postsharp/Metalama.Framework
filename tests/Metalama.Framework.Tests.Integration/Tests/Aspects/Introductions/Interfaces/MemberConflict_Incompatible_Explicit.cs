@@ -7,7 +7,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Explicit
 {
     /*
-     * Tests that when a member of the same name already exists in the target class for an implicit interface member, the interface is introduced and 
+     * Tests that when a member of the same name already exists in the target class for an implicit interface member, the interface is introduced and
      * its members are implements explicitly.
      */
 

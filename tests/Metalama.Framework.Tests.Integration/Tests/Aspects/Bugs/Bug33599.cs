@@ -8,6 +8,7 @@ public class Test1Attribute : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         meta.Proceed();
+
         return default;
     }
 }
@@ -17,23 +18,24 @@ public class Test2Attribute : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         _ = meta.Proceed();
+
         return default;
     }
 }
 
 // <target>
-class Target
+internal class Target
 {
     [Test1]
     public MemoryStream M1()
     {
-        return new();
+        return new MemoryStream();
     }
 
     [Test2]
     public MemoryStream M2()
     {
-        return new();
+        return new MemoryStream();
     }
 
     [Test1]

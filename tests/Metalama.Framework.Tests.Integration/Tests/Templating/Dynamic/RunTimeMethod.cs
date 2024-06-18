@@ -5,25 +5,26 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.RunTimeMethod
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var list = meta.CompileTime(new List<string>());
-            list.Add("a");
-            list.Add("b");
-            list.Add("c");
-            list.Add("d");
+            var list = meta.CompileTime( new List<string>() );
+            list.Add( "a" );
+            list.Add( "b" );
+            list.Add( "c" );
+            list.Add( "d" );
             var x = meta.RunTime( list );
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

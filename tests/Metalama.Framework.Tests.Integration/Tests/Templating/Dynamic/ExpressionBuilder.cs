@@ -12,54 +12,52 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicExpress
         [TestTemplate]
         private dynamic? Template()
         {
-            var guid = meta.CompileTime(Guid.Parse("04cee639-acf2-46e3-be3e-916089c72a1e"));
+            var guid = meta.CompileTime( Guid.Parse( "04cee639-acf2-46e3-be3e-916089c72a1e" ) );
 
             var expressionBuilder = new ExpressionBuilder();
-            expressionBuilder.AppendVerbatim("Test( ");
-            expressionBuilder.AppendLiteral(1, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral(1D, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral(1F, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral("s\"\n");
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral(1M, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral(1L, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral(1UL, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral( (byte) 1, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral( (sbyte) 1, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral( (short) 1, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral( (ushort) 1, true);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendExpression(42);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendExpression(guid);
-            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendVerbatim( "Test( " );
+            expressionBuilder.AppendLiteral( 1, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( 1D, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( 1F, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( "s\"\n" );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( 1M, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( 1L, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( 1UL, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( (byte)1, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( (sbyte)1, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( (short)1, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendLiteral( (ushort)1, true );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendExpression( 42 );
+            expressionBuilder.AppendVerbatim( ", " );
+            expressionBuilder.AppendExpression( guid );
+            expressionBuilder.AppendVerbatim( ", " );
 
             var arrayBuilder = new ArrayBuilder();
             arrayBuilder.Add( 1 );
             arrayBuilder.Add( 2 );
             arrayBuilder.Add( 3 );
             arrayBuilder.Add( guid );
-            
-            
+
             expressionBuilder.AppendExpression( arrayBuilder );
-            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendVerbatim( ", " );
             expressionBuilder.AppendExpression( meta.Target.Parameters[0] );
-            expressionBuilder.AppendVerbatim(", typeof(");
+            expressionBuilder.AppendVerbatim( ", typeof(" );
             expressionBuilder.AppendTypeName( ( (IExpression)meta.Target.Parameters[0] ).Type );
-            expressionBuilder.AppendVerbatim(") )");
-            
-            
+            expressionBuilder.AppendVerbatim( ") )" );
+
             var expression = expressionBuilder.ToExpression();
-            Console.WriteLine($"type={expression.Type}");
+            Console.WriteLine( $"type={expression.Type}" );
             var value = expressionBuilder.ToValue();
 
             return default;

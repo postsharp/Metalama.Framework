@@ -6,27 +6,27 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.CompileTimeVariableInRunTimeConditionalBlock;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
         if (meta.Target.Parameters.Single().Value > 0)
         {
-            int i = meta.CompileTime(0);
+            var i = meta.CompileTime( 0 );
             i++;
             i += 1;
             i = i + 1;
-            Console.WriteLine($"i={i}");
+            Console.WriteLine( $"i={i}" );
         }
 
         return meta.Proceed();
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

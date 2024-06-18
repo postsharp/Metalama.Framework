@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserHidden_AspectOverride;
@@ -17,8 +18,7 @@ public class InvokerBeforeAspect : EventAspect
 {
     public override void BuildAspect( IAspectBuilder<IEvent> builder )
     {
-        builder.Advice.OverrideAccessors(
-            builder.Target,
+        builder.OverrideAccessors(
             nameof(AddTemplate),
             nameof(RemoveTemplate),
             null,
@@ -60,7 +60,7 @@ public class OverrideAspect : EventAspect
 {
     public override void BuildAspect( IAspectBuilder<IEvent> builder )
     {
-        builder.Advice.OverrideAccessors( builder.Target, nameof(AddTemplate), nameof(RemoveTemplate) );
+        builder.OverrideAccessors( nameof(AddTemplate), nameof(RemoveTemplate) );
     }
 
     [Template]
@@ -98,8 +98,7 @@ public class InvokerAfterAspect : EventAspect
 {
     public override void BuildAspect( IAspectBuilder<IEvent> builder )
     {
-        builder.Advice.OverrideAccessors(
-            builder.Target,
+        builder.OverrideAccessors(
             nameof(AddTemplate),
             nameof(RemoveTemplate),
             null,

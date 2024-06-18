@@ -9,25 +9,25 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
 {
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var @event in builder.Target.Events.Where( e => e.Name is "Event" or "StaticEvent" ) )
+            foreach (var @event in builder.Target.Events.Where( e => e.Name is "Event" or "StaticEvent" ))
             {
-                builder.Advice.OverrideAccessors(@event, nameof(OverrideAdd), nameof(OverrideRemove));
+                builder.Advice.OverrideAccessors( @event, nameof(OverrideAdd), nameof(OverrideRemove) );
             }
         }
 
         [Template]
-        public void OverrideAdd(dynamic value)
+        public void OverrideAdd( dynamic value )
         {
-            Console.WriteLine("This is the add template.");
+            Console.WriteLine( "This is the add template." );
             meta.Proceed();
         }
 
         [Template]
-        public void OverrideRemove(dynamic value)
+        public void OverrideRemove( dynamic value )
         {
-            Console.WriteLine("This is the remove template.");
+            Console.WriteLine( "This is the remove template." );
             meta.Proceed();
         }
     }
@@ -37,44 +37,46 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     internal class TargetClass
     {
         public event EventHandler? Event;
+
         public static event EventHandler? StaticEvent;
 
         static TargetClass()
         {
-            StaticEvent?.Invoke(null, new EventArgs());
+            StaticEvent?.Invoke( null, new EventArgs() );
         }
 
         public TargetClass()
         {
-            this.Event?.Invoke(this, new EventArgs());
+            Event?.Invoke( this, new EventArgs() );
         }
 
         ~TargetClass()
         {
-            this.Event?.Invoke(this, new EventArgs());
+            Event?.Invoke( this, new EventArgs() );
         }
 
         public void Foo()
         {
-            this.Event?.Invoke(this, new EventArgs());
+            Event?.Invoke( this, new EventArgs() );
         }
 
         public static void Bar()
         {
-            StaticEvent?.Invoke(null, new EventArgs());
+            StaticEvent?.Invoke( null, new EventArgs() );
         }
 
         public int Baz
         {
             get
             {
-                this.Event?.Invoke(this, new EventArgs());
+                Event?.Invoke( this, new EventArgs() );
+
                 return 0;
             }
 
             init
             {
-                this.Event?.Invoke(this, new EventArgs());
+                Event?.Invoke( this, new EventArgs() );
             }
         }
 
@@ -82,38 +84,41 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             add
             {
-                this.Event?.Invoke(this, new EventArgs());
+                Event?.Invoke( this, new EventArgs() );
             }
 
             remove
             {
-                this.Event?.Invoke(this, new EventArgs());
+                Event?.Invoke( this, new EventArgs() );
             }
         }
 
-        public static explicit operator int(TargetClass targetClass)
+        public static explicit operator int( TargetClass targetClass )
         {
-            StaticEvent?.Invoke(null, new EventArgs());
+            StaticEvent?.Invoke( null, new EventArgs() );
+
             return 0;
         }
 
-        public static int operator +(TargetClass a, TargetClass b)
+        public static int operator +( TargetClass a, TargetClass b )
         {
-            StaticEvent?.Invoke(null, new EventArgs());
+            StaticEvent?.Invoke( null, new EventArgs() );
+
             return 0;
         }
 
-        public int this[int index]
+        public int this[ int index ]
         {
             get
             {
-                this.Event?.Invoke(this, new EventArgs());
+                Event?.Invoke( this, new EventArgs() );
+
                 return 0;
             }
 
             set
             {
-                this.Event?.Invoke(this, new EventArgs());
+                Event?.Invoke( this, new EventArgs() );
             }
         }
     }

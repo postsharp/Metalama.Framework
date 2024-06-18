@@ -20,26 +20,22 @@ public class MyAspect : TypeAspect
     }
 }
 
-public class A(int x)
+public class A( int x )
 {
     public int X { get; set; } = x;
 }
 
 // <target>
 [MyAspect]
-public partial class C
-{
-}
+public partial class C { }
 
 // <target>
-public partial class C(int x) : A(42)
+public partial class C( int x ) : A( 42 )
 {
     public int Y { get; } = x;
 }
 
 // <target>
-public partial class C
-{
-}
+public partial class C { }
 
 #endif

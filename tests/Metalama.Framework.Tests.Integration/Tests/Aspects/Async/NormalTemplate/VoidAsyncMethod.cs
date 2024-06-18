@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplat
     internal class TargetCode
     {
         [Aspect]
-        async void MethodReturningVoid( int a )
+        private async void MethodReturningVoid( int a )
         {
             await Task.Yield();
             Console.WriteLine( "Oops" );

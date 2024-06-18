@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.TypeOfInInterpolatedString;
@@ -13,21 +14,20 @@ public class Aspect : MethodAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.Override( builder.Target, nameof(Method), args: new { T = builder.Target.ReturnType } );
+        builder.Override( nameof(Method), args: new { T = builder.Target.ReturnType } );
     }
 
     [Template]
-    private T Method<[CompileTime] T>() where T : class 
+    private T Method<[CompileTime] T>() where T : class
     {
-        Console.WriteLine($"{typeof(T)}");
-        Console.WriteLine($"{typeof(List<T>)}");
-        Console.WriteLine($"{typeof(Target)}");
-        Console.WriteLine($"{typeof(string)}");
-
+        Console.WriteLine( $"{typeof(T)}" );
+        Console.WriteLine( $"{typeof(List<T>)}" );
+        Console.WriteLine( $"{typeof(Target)}" );
+        Console.WriteLine( $"{typeof(string)}" );
 
         // Not sure what should happen here. Seems to be an unimportant side case.
-        Console.WriteLine($"{typeof(IMethod)}");
-        
+        Console.WriteLine( $"{typeof(IMethod)}" );
+
         return null!;
     }
 }
@@ -37,5 +37,4 @@ public class Target
 {
     [Aspect]
     public string M() => "";
-
 }

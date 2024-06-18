@@ -4,7 +4,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Exist
 {
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Override)]
+        [Introduce( WhenExists = OverrideStrategy.Override )]
         public int ExistingField;
     }
 
@@ -15,7 +15,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Exist
 
     // <target>
     [Introduction]
-    internal class TargetClass : BaseClass
-    {
-    }
+    internal class TargetClass : BaseClass { }
 }

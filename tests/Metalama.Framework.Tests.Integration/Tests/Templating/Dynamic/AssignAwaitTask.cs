@@ -6,12 +6,12 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignAwaitTask
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        async Task<dynamic?> Template()
+        private async Task<dynamic?> Template()
         {
-            dynamic? x = TypeFactory.GetType(SpecialType.Int32).DefaultValue();
+            var x = TypeFactory.GetType( SpecialType.Int32 ).DefaultValue();
 
             x = await meta.ProceedAsync();
             x += await meta.ProceedAsync();
@@ -21,13 +21,12 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignAwaitTas
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        async Task Method(int a)
+        private async Task Method( int a )
         {
             await Task.Yield();
-            Console.WriteLine("Hello, world.");
+            Console.WriteLine( "Hello, world." );
         }
-        
     }
 }

@@ -13,4 +13,4 @@ internal class TheAspect : TypeAspect
 
 // <target>
 [TheAspect]
-class C { }
+internal class C { }

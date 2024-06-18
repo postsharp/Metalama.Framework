@@ -9,21 +9,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.FieldOrPropert
         [Introduce]
         public void Method()
         {
-            foreach ( var field in meta.Target.Type.Fields )
+            foreach (var field in meta.Target.Type.Fields)
             {
                 field.Value = field.Value;
             }
-
         }
     }
 
     // <target>
     [MyAspect]
-    internal class C 
+    internal class C
     {
-        int _instanceField = 5;
+        private int _instanceField = 5;
         private static int _staticField = 6;
-
     }
-
 }

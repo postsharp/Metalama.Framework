@@ -1,20 +1,21 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.RefReadonlyParameter_Invoke;
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
-class TheAspect : TypeAspect
+internal class TheAspect : TypeAspect
 {
   public override void BuildAspect(IAspectBuilder<INamedType> builder) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
   [Template]
   [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility = global::Metalama.Framework.Code.Accessibility.Private, IsAsync = false, IsIteratorMethod = false)]
-  void Called(in int i, ref readonly int j) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+  private void Called(in int i, ref readonly int j) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
   [Template]
   [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility = global::Metalama.Framework.Code.Accessibility.Private, IsAsync = false, IsIteratorMethod = false)]
-  void Caller(IMethod called, in int i, ref int j, ref readonly int k) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+  private void Caller(IMethod called, in int i, ref int j, ref readonly int k) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 }
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
 [TheAspect]
-class C
+internal class C
 {
   private void Called(in global::System.Int32 i, ref readonly global::System.Int32 j)
   {

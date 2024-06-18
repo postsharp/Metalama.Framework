@@ -15,26 +15,25 @@ public interface IInterface;
 
 public class Attr : Attribute;
 
-public class Ann : IAnnotation<IDeclaration>
-{
-}
+public class Ann : IAnnotation<IDeclaration> { }
 
 public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var explicitImplementation = builder.Advice.ImplementInterface(builder.Target, typeof(IInterface)).ExplicitImplementation;
+        var explicitImplementation = builder.ImplementInterface( typeof(IInterface) ).ExplicitImplementation;
 
-        Action[] advices = [
-            () => explicitImplementation.AddAnnotation(new Ann()),
-            () => explicitImplementation.AddInitializer(StatementFactory.Parse(";"), InitializerKind.BeforeInstanceConstructor),
-            () => explicitImplementation.ImplementInterface(typeof(IDisposable)),
-            () => explicitImplementation.IntroduceAttribute(AttributeConstruction.Create(typeof(Attr))),
-            () => explicitImplementation.IntroduceClass("C"),
-            () => explicitImplementation.IntroduceConstructor(nameof(EmptyMethod)),
-            () => explicitImplementation.IntroduceField("f", typeof(int)),
-            () => explicitImplementation.IntroduceFinalizer(nameof(EmptyMethod)),
-            () => explicitImplementation.RemoveAttributes(typeof(Attr))
+        Action[] advices =
+        [
+            () => explicitImplementation.AddAnnotation( new Ann() ),
+            () => explicitImplementation.AddInitializer( StatementFactory.Parse( ";" ), InitializerKind.BeforeInstanceConstructor ),
+            () => explicitImplementation.ImplementInterface( typeof(IDisposable) ),
+            () => explicitImplementation.IntroduceAttribute( AttributeConstruction.Create( typeof(Attr) ) ),
+            () => explicitImplementation.IntroduceClass( "C" ),
+            () => explicitImplementation.IntroduceConstructor( nameof(EmptyMethod) ),
+            () => explicitImplementation.IntroduceField( "f", typeof(int) ),
+            () => explicitImplementation.IntroduceFinalizer( nameof(EmptyMethod) ),
+            () => explicitImplementation.RemoveAttributes( typeof(Attr) )
         ];
 
         foreach (var advice in advices)
@@ -48,19 +47,19 @@ public class IntroductionAttribute : TypeAspect
                 continue;
             }
 
-            throw new Exception("Some advice did not throw.");
+            throw new Exception( "Some advice did not throw." );
         }
 
         try
         {
-            explicitImplementation.With(builder.Target);
+            explicitImplementation.With( builder.Target );
         }
         catch (NotSupportedException)
         {
             return;
         }
 
-        throw new Exception("With did not throw.");
+        throw new Exception( "With did not throw." );
     }
 
     [Template]

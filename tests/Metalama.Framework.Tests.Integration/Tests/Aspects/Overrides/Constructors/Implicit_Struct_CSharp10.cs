@@ -17,7 +17,7 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template));
+        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template) );
     }
 
     [Template]
@@ -30,6 +30,4 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public struct TargetStruct
-{
-}
+public struct TargetStruct { }

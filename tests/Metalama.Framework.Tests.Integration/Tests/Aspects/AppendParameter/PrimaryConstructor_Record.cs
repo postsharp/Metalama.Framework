@@ -19,14 +19,14 @@ public class MyAspect : TypeAspect
     }
 }
 
-public record A(int x)
+public record A( int x )
 {
     public int X { get; set; } = x;
 }
 
 // <target>
 [MyAspect]
-public record C(int x) : A(42)
+public record C( int x ) : A( 42 )
 {
     public int Y { get; } = x;
 }

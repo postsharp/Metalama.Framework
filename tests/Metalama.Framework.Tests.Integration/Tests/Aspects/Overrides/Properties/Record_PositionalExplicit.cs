@@ -20,18 +20,19 @@ internal class MyAspect : OverrideFieldOrPropertyAspect
 internal record MyRecord( int A, int B )
 {
     public int A { get; init; }
-    
-    public int B 
-    { 
+
+    public int B
+    {
         get
         {
-            Console.WriteLine("Original.");
+            Console.WriteLine( "Original." );
+
             return 42;
-        } 
-        init 
-        { 
-            Console.WriteLine("Original."); 
-        } 
+        }
+        init
+        {
+            Console.WriteLine( "Original." );
+        }
     }
 }
 

@@ -1,8 +1,8 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
-using Metalama.Framework.Advising;
 
 #pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
 
@@ -12,8 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Index
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceIndexer(
-                builder.Target,
+            var result = builder.IntroduceIndexer(
                 typeof(int),
                 nameof(GetTemplate),
                 nameof(SetTemplate),

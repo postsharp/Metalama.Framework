@@ -5,21 +5,21 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.InlineDeclarationWithNameClash
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            Dictionary<string,string> d = new();
+            Dictionary<string, string> d = new();
             d.TryGetValue( "", out var a );
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -10,16 +10,12 @@ internal class Aspect
     [TestTemplate]
     private dynamic? Template()
     {
-        if (meta.Proceed())
-        {
-        }
+        if (meta.Proceed()) { }
 
         var b = new ExpressionBuilder();
-        b.AppendExpression(true);
+        b.AppendExpression( true );
 
-        if (b.ToValue())
-        {
-        }
+        if (b.ToValue()) { }
 
         return default;
     }

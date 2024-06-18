@@ -13,11 +13,11 @@ public struct ValueType : ICompileTimeSerializable
 
     public int ValueInitOnly { get; init; }
 
-    public ValueType(int value)
+    public ValueType( int value )
     {
-        this.Value = value;
-        this.ValueGetOnly = value;
-        this.ValueInitOnly = value;
+        Value = value;
+        ValueGetOnly = value;
+        ValueInitOnly = value;
     }
 }
 
@@ -26,25 +26,26 @@ public class TestAspect : OverrideMethodAspect
 {
     public ValueType SerializedValue;
 
-    public TestAspect(int x)
+    public TestAspect( int x )
     {
-        SerializedValue = new ValueType(x);
+        SerializedValue = new ValueType( x );
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.Value));
-        Console.WriteLine(meta.CompileTime(SerializedValue.ValueGetOnly));
-        Console.WriteLine(meta.CompileTime(SerializedValue.ValueInitOnly));
+        Console.WriteLine( meta.CompileTime( SerializedValue.Value ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.ValueGetOnly ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.ValueInitOnly ) );
+
         return meta.Proceed();
     }
 }
 
 public class BaseClass
 {
-    [TestAspect(42)]
+    [TestAspect( 42 )]
     public virtual void Foo()
     {
-        Console.WriteLine("Original");
+        Console.WriteLine( "Original" );
     }
 }

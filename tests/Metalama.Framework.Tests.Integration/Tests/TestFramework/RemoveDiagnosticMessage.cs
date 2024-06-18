@@ -1,5 +1,3 @@
-// @RemoveDiagnosticMessage
-
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -8,7 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.TestFramework.RemoveDiagnos
 
 public class TheAspect : TypeAspect
 {
-    public static DiagnosticDefinition MyWarning = new DiagnosticDefinition( "ID001", Severity.Warning, "The warning." );
+    public static DiagnosticDefinition MyWarning = new( "ID001", Severity.Warning, "The warning." );
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {

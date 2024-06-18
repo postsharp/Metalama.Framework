@@ -15,7 +15,7 @@ public class Aspect : OverrideMethodAspect
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
     public int Foo()

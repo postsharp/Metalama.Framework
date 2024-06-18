@@ -21,7 +21,7 @@ internal class C
     private int _x;
 
     [TheAspect]
-    public ref int GetX() => ref this._x;
+    public ref int GetX() => ref _x;
 }
 
 #endif

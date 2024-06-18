@@ -5,24 +5,23 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.CompileTimeToRuntimeAssignmentExpression
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var x = meta.CompileTime(0);
+            var x = meta.CompileTime( 0 );
             var y = 0;
-            
+
             x = y = 1;
-            
-            
+
             return null;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

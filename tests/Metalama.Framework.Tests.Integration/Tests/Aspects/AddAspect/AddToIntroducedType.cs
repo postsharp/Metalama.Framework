@@ -1,6 +1,5 @@
-using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.AddToIntroducedType;
 
@@ -12,7 +11,7 @@ internal class Aspect1 : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.Advice.IntroduceClass( builder.Target, "IntroducedType" ).Declaration;
+        var introducedType = builder.IntroduceClass( "IntroducedType" ).Declaration;
 
         builder.Outbound.SelectMany( t => t.Types ).AddAspect<Aspect2>();
     }

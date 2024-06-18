@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using Metalama.Framework;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncIterators.AsyncIteratorDefaultTemplateThrow;
@@ -19,7 +20,7 @@ class Aspect : MethodAspect
     {
         base.BuildAspect(builder);
 
-        builder.Advice.Override(builder.Target, nameof(OverrideMethod));
+        builder.Override( nameof(OverrideMethod));
     }
 
     [Template]

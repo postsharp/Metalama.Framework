@@ -16,7 +16,7 @@ public class TheAspect : TypeAspect
     {
         add
         {
-            Console.WriteLine("""add""");
+            Console.WriteLine( """add""" );
         }
         remove { }
     }
@@ -24,19 +24,16 @@ public class TheAspect : TypeAspect
     [Introduce]
     public event EventHandler Event2
     {
-        add { 
-        }
+        add { }
         remove
         {
-            Console.WriteLine("""remove""");
+            Console.WriteLine( """remove""" );
         }
     }
 }
 
 // <target>
 [TheAspect]
-class Target
-{
-}
+internal class Target { }
 
 #endif

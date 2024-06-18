@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Programmatic
@@ -7,10 +8,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Progra
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceField( builder.Target, "IntroducedField", typeof(int) );
+            builder.IntroduceField( "IntroducedField", typeof(int) );
 
-            builder.Advice.IntroduceField(
-                builder.Target,
+            builder.IntroduceField(
                 "IntroducedField_Static",
                 typeof(int),
                 buildField: p => { p.IsStatic = true; } );

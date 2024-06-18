@@ -46,7 +46,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     public T Target { get; }
 
-    public AdviceFactory( T target, AdviceFactoryState state, TemplateClassInstance? templateClassInstance, string? layerName, INamedType? explicitlyImplementedInterfaceType )
+    public AdviceFactory(
+        T target,
+        AdviceFactoryState state,
+        TemplateClassInstance? templateClassInstance,
+        string? layerName,
+        INamedType? explicitlyImplementedInterfaceType )
     {
         this.Target = target;
         this._state = state;
@@ -315,7 +320,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             // Check that the advised target is under the aspect target.
             // The situation where the target was introduced by the current aspect is allowed.
             var currentTarget = target.ForCompilation( this.MutableCompilation );
-            
+
             if ( !currentTarget.IsContainedIn( this._aspectTargetType ?? this._aspectTarget )
                  && !(currentTarget.Origin is IAspectDeclarationOrigin { AspectInstance: { } originAspect }
                       && originAspect == this._state.AspectInstance) )
@@ -345,7 +350,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             throw new InvalidOperationException( "The template class instance cannot be null." );
         }
 
-        return new( this._state.AspectInstance, this._templateClassInstance, target, this._compilation, this._layerName );
+        return new Advice.AdviceConstructorParameters<TDeclaration>(
+            this._state.AspectInstance,
+            this._templateClassInstance,
+            target,
+            this._compilation,
+            this._layerName );
     }
 
     public IOverrideAdviceResult<IMethod> Override(
@@ -1567,7 +1577,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             }
 
             var advice = new AddAnnotationAdvice(
-                new(
+                new Advice.AdviceConstructorParameters(
                     this._state.AspectInstance,
                     this._templateClassInstance,
                     declaration,

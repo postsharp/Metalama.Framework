@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using System;
 using System.IO;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
     {
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(OverrideGet), args: new { T = builder.Target.Type } );
+            builder.OverrideAccessors( nameof(OverrideGet), args: new { T = builder.Target.Type } );
         }
 
         [Introduce( WhenExists = OverrideStrategy.Ignore )]
@@ -31,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
 
                 // Set the field/property to the new value.
                 meta.Target.FieldOrProperty.Value = value
-                                             ?? throw new InvalidOperationException( $"Cannot get a service of type {typeof(T)}." );
+                                                    ?? throw new InvalidOperationException( $"Cannot get a service of type {typeof(T)}." );
             }
 
             return value;

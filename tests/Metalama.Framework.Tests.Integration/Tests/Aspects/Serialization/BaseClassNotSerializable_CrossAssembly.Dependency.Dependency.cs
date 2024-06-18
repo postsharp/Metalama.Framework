@@ -9,6 +9,6 @@ public class BaseType
 
     public BaseType()
     {
-        this.BaseValue = 13;
+        BaseValue = 13;
     }
 }

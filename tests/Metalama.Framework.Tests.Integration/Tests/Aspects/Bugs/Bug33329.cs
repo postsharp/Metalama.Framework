@@ -4,14 +4,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33329;
 
 // <target>
 [CompileTime]
-class C
-{    [CompileTime]
-    void M()
+internal class C
+{
+    [CompileTime]
+    private void M()
     {
         LocalFunction();
         StaticLocalFunction();
 
         void LocalFunction() { }
+
         static void StaticLocalFunction() { }
     }
 }

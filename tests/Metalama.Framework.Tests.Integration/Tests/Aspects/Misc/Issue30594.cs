@@ -14,7 +14,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30594
 
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(this.Property.ToString());
+            Console.WriteLine( Property.ToString() );
+
             return meta.Proceed();
         }
     }
@@ -25,7 +26,4 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30594
         [MyAspect( Property = MyEnum.MyValue )]
         public void M() { }
     }
-
-
-
 }

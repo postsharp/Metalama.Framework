@@ -11,11 +11,14 @@ public class TestAttribute : OverrideMethodAspect
     {
         if (meta.Target.Parameters[0].Value == 0)
         {
-            var expr = ExpressionFactory.Capture(TypedConstant.Create(42));
-            return meta.Target.Method.Invoke(TypedConstant.Create(42), expr);
+            var expr = ExpressionFactory.Capture( TypedConstant.Create( 42 ) );
+
+            return meta.Target.Method.Invoke( TypedConstant.Create( 42 ), expr );
         }
         else
+        {
             return meta.Proceed();
+        }
     }
 }
 
@@ -23,5 +26,5 @@ public class TestAttribute : OverrideMethodAspect
 internal class TargetClass
 {
     [Test]
-    void M(int i, int j) => Console.WriteLine(i + j);
+    private void M( int i, int j ) => Console.WriteLine( i + j );
 }

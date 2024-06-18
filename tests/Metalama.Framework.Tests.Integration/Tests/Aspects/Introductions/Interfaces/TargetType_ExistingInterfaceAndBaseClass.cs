@@ -10,15 +10,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
 
     public class IntroduceAspectAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IIntroducedInterface));
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IIntroducedInterface) );
         }
 
         [InterfaceMember]
         public void IntroducedMethod()
         {
-            Console.WriteLine("Introduced interface member.");
+            Console.WriteLine( "Introduced interface member." );
         }
     }
 
@@ -43,12 +43,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
     {
         public void ExistingMethod()
         {
-            Console.WriteLine("Original interface member.");
+            Console.WriteLine( "Original interface member." );
         }
 
         public override void ExistingBaseMethod()
         {
-            Console.WriteLine("Original base class member.");
+            Console.WriteLine( "Original base class member." );
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Constructor_OrderBeforeOverride;
 
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Construct
     {
         public override void BuildAspect( IAspectBuilder<IConstructor> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(Template) );
+            builder.Override( nameof(Template) );
         }
 
         [Template]

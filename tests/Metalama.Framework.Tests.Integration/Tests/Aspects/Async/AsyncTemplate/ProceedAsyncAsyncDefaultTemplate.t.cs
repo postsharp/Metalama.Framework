@@ -1,7 +1,7 @@
-class TargetCode
+internal class TargetCode
 {
   [Aspect]
-  async Task AsyncTaskMethod()
+  private async Task AsyncTaskMethod()
   {
     await this.AsyncTaskMethod_Source();
   }

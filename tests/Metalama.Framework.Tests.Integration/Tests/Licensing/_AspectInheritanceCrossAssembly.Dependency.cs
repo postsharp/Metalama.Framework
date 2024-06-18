@@ -19,7 +19,7 @@ internal class InheritableAspect2 : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(nameof(InheritableAspect2));
+        Console.WriteLine( nameof(InheritableAspect2) );
 
         return meta.Proceed();
     }
@@ -30,7 +30,7 @@ internal class InheritableAspect3 : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(nameof(InheritableAspect3));
+        Console.WriteLine( nameof(InheritableAspect3) );
 
         return meta.Proceed();
     }
@@ -41,7 +41,7 @@ internal class InheritableAspect4 : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(nameof(InheritableAspect4));
+        Console.WriteLine( nameof(InheritableAspect4) );
 
         return meta.Proceed();
     }

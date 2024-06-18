@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS8618
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
                 }
             }
 
-            var introducedMethod = builder.Advice.IntroduceMethod( builder.Target, nameof(IntroducedMethod) ).Declaration;
+            var introducedMethod = builder.IntroduceMethod( nameof(IntroducedMethod) ).Declaration;
 
             builder.Advice.AddContract( introducedMethod.ReturnParameter, nameof(Filter) );
 

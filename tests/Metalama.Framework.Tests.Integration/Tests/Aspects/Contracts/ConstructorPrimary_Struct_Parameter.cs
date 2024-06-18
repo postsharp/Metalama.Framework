@@ -21,7 +21,7 @@ internal class NotNullAttribute : ContractAspect
 }
 
 // <target>
-internal record struct Target([NotNull] string X)
+internal record struct Target( [NotNull] string X )
 {
     public string Y { get; set; } = X;
 }

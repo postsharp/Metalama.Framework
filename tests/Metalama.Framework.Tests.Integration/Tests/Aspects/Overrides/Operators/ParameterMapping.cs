@@ -13,39 +13,41 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Parame
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Advice.Override(
-                builder.Target.Methods.Single(m => m.OperatorKind == OperatorKind.Addition),
+                builder.Target.Methods.Single( m => m.OperatorKind == OperatorKind.Addition ),
                 nameof(InvertedParameters) );
 
             builder.Advice.Override(
-                builder.Target.Methods.Single(m => m.OperatorKind == OperatorKind.ExplicitConversion),
+                builder.Target.Methods.Single( m => m.OperatorKind == OperatorKind.ExplicitConversion ),
                 nameof(DifferentlyNamedParameter) );
         }
 
         [Template]
-        public int InvertedParameters(dynamic y, int x)
+        public int InvertedParameters( dynamic y, int x )
         {
             var z = meta.Proceed();
+
             return y.ToString().Length + x;
         }
 
         [Template]
-        public int DifferentlyNamedParameter(dynamic y)
+        public int DifferentlyNamedParameter( dynamic y )
         {
             var z = meta.Proceed();
+
             return y.ToString().Length + 42;
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass 
+    internal class TargetClass
     {
-        public static int operator +(TargetClass x, int y)
+        public static int operator +( TargetClass x, int y )
         {
             return x.ToString()!.Length + y;
         }
 
-        public static explicit operator int(TargetClass x)
+        public static explicit operator int( TargetClass x )
         {
             return x.ToString()!.Length + 42;
         }

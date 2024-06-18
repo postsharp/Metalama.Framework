@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_G
 {
     internal class NotZeroAttribute : ContractAspect
     {
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value == 0)
             {
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_G
         private int q;
 
         [NotZero]
-        public int this[int x]
+        public int this[ int x ]
         {
             get
             {
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_G
         }
 
         [NotZero]
-        public int this[int x, int y]
+        public int this[ int x, int y ]
         {
             get => q;
         }

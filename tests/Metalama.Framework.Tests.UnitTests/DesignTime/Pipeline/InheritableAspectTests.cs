@@ -19,7 +19,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 
             // Initial compilation.
             const string code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [Inheritable]
 public class Aspect : TypeAspect {}
@@ -48,7 +49,8 @@ public interface I {}
             using var testContext = this.CreateTestContext();
 
             const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [Inheritable]
 public class Aspect : TypeAspect { }
@@ -109,7 +111,8 @@ public class Aspect : TypeAspect { }
             using var testContext = this.CreateTestContext();
 
             const string code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [Inheritable]
 public class Aspect : TypeAspect

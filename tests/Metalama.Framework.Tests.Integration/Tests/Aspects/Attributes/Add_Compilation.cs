@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Compilation;
@@ -14,6 +15,6 @@ public class MyAspect : CompilationAspect
 {
     public override void BuildAspect( IAspectBuilder<ICompilation> builder )
     {
-        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.IntroduceAttribute( AttributeConstruction.Create( typeof(MyAttribute) ) );
     }
 }

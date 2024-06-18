@@ -9,7 +9,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.E
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine( "This is the overriding method." );
+
             return meta.Proceed();
         }
     }
@@ -18,9 +19,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.E
     internal partial class Target
     {
         [Override]
-        public void M1(string m) => throw new Exception();
+        public void M1( string m ) => throw new Exception();
 
         [Override]
-        public int M2(string m) => throw new Exception();
+        public int M2( string m ) => throw new Exception();
     }
 }

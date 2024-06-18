@@ -8,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
 
     public class ImplicitlyInstanceExplicitlyVirtualIntroductionAttribute : TypeAspect
     {
-        [Introduce(IsVirtual = true)]
+        [Introduce( IsVirtual = true )]
         public int Method_ImplicitlyInstanceExplicitlyVirtual()
         {
             return meta.Proceed();
@@ -26,7 +26,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
 
     public class ExplicitlyInstanceExplicitlyVirtualIntroductionAttribute : TypeAspect
     {
-        [Introduce(Scope = IntroductionScope.Instance, IsVirtual = true)]
+        [Introduce( Scope = IntroductionScope.Instance, IsVirtual = true )]
         public static int Method_ExplicitlyInstanceExplicitlyVirtual()
         {
             return meta.Proceed();
@@ -37,23 +37,17 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     [ImplicitlyInstanceExplicitlyVirtualIntroduction]
     [ImplicitlyInstanceImplicitlyVirtualIntroduction]
     [ExplicitlyInstanceExplicitlyVirtualIntroduction]
-    internal struct TargetStruct
-    {
-    }
+    internal struct TargetStruct { }
 
     // <target>
     [ImplicitlyInstanceExplicitlyVirtualIntroduction]
     [ImplicitlyInstanceImplicitlyVirtualIntroduction]
     [ExplicitlyInstanceExplicitlyVirtualIntroduction]
-    internal sealed class SealedTargetClass
-    {
-    }
+    internal sealed class SealedTargetClass { }
 
     // <target>
     [ImplicitlyInstanceExplicitlyVirtualIntroduction]
     [ImplicitlyInstanceImplicitlyVirtualIntroduction]
     [ExplicitlyInstanceExplicitlyVirtualIntroduction]
-    internal static class StaticTargetClass
-    {
-    }
+    internal static class StaticTargetClass { }
 }

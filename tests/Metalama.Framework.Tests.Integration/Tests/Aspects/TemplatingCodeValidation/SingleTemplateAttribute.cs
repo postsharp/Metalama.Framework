@@ -21,4 +21,4 @@ public class DerivedAspect : Aspect
 
 // <target>
 [Aspect]
-class TargetCode { }
+internal class TargetCode { }

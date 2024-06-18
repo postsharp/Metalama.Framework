@@ -1,22 +1,23 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.VoidTemplate;
 
 public class OverrideAttribute : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.OverrideAccessors(builder.Target, nameof(OverrideMethod));
+        builder.OverrideAccessors( nameof(OverrideMethod) );
     }
 
     [Template]
     public void OverrideMethod()
     {
         var value = meta.Proceed();
-        meta.Return(value == null ? default : value);
+        meta.Return( value == null ? default : value );
     }
 }
 
@@ -24,5 +25,5 @@ public class OverrideAttribute : PropertyAspect
 internal class TargetClass
 {
     [Override]
-    int P { get; set; }
+    private int P { get; set; }
 }

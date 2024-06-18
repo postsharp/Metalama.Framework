@@ -19,8 +19,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Expressio
     // <target>
     internal partial class Target
     {
-        public void M1([NotNull] string m) => throw new Exception();
+        public void M1( [NotNull] string m ) => throw new Exception();
 
-        public int M2([NotNull] string m) => throw new Exception();
+        public int M2( [NotNull] string m ) => throw new Exception();
     }
 }

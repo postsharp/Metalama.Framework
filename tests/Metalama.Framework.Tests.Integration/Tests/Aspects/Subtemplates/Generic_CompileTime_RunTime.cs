@@ -6,11 +6,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Generi
 
 internal class Aspect : TypeAspect
 {
-
     [Introduce]
     private void Introduced<T>()
     {
-        Console.WriteLine($"introduced T={typeof(T)}");
+        Console.WriteLine( $"introduced T={typeof(T)}" );
 
         CalledTemplate2<T>();
         CalledTemplate2<T[]>();
@@ -20,12 +19,10 @@ internal class Aspect : TypeAspect
     [Template]
     private void CalledTemplate2<[CompileTime] T>()
     {
-        Console.WriteLine($"called template T={typeof(T)}");
+        Console.WriteLine( $"called template T={typeof(T)}" );
     }
 }
 
 // <target>
 [Aspect]
-class TargetCode
-{
-}
+internal class TargetCode { }

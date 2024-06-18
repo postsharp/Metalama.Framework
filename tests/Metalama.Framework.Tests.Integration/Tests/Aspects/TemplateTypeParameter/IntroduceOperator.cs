@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceOperator;
@@ -11,30 +12,27 @@ public class Aspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.IntroduceBinaryOperator(
-            builder.Target,
+        builder.IntroduceBinaryOperator(
             nameof(BinaryOperator),
             builder.Target,
-            TypeFactory.GetType(typeof(int)),
+            TypeFactory.GetType( typeof(int) ),
             builder.Target,
             OperatorKind.Addition,
-            args: new { T = builder.Target, x = 42 });
+            args: new { T = builder.Target, x = 42 } );
 
-        builder.Advice.IntroduceUnaryOperator(
-            builder.Target,
+        builder.IntroduceUnaryOperator(
             nameof(UnaryOperator),
             builder.Target,
             builder.Target,
             OperatorKind.UnaryNegation,
-            args: new { T = builder.Target, x = 42 });
+            args: new { T = builder.Target, x = 42 } );
 
-        builder.Advice.IntroduceConversionOperator(
-            builder.Target,
+        builder.IntroduceConversionOperator(
             nameof(ConversionOperator),
             builder.Target,
-            TypeFactory.GetType(typeof(int)),
+            TypeFactory.GetType( typeof(int) ),
             true,
-            args: new { T = builder.Target, x = 42 });
+            args: new { T = builder.Target, x = 42 } );
     }
 
     [Template]
@@ -44,13 +42,13 @@ public class Aspect : TypeAspect
     }
 
     [Template]
-    public static T? UnaryOperator<[CompileTime] T>([CompileTime] int x, T y) where T : class
+    public static T? UnaryOperator<[CompileTime] T>( [CompileTime] int x, T y ) where T : class
     {
         return default;
     }
 
     [Template]
-    public static int ConversionOperator<[CompileTime] T>([CompileTime] int x, T y) where T : class
+    public static int ConversionOperator<[CompileTime] T>( [CompileTime] int x, T y ) where T : class
     {
         return default;
     }

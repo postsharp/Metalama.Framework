@@ -4,19 +4,19 @@ using System;
 using System.Linq;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TryFindImplementationForInterfaceMember_FromBase;
 
-[assembly: AspectOrder(AspectOrderDirection.CompileTime, typeof(IntroduceInterfaceAttribute), typeof(CheckInterfaceAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.CompileTime, typeof(IntroduceInterfaceAttribute), typeof(CheckInterfaceAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TryFindImplementationForInterfaceMember_FromBase;
 
 public class IntroduceInterfaceAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+    public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
     {
-        aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+        aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
     }
 
-    [InterfaceMember(IsExplicit = true)]
-    public void M1(int i) { }
+    [InterfaceMember( IsExplicit = true )]
+    public void M1( int i ) { }
 
     [Introduce]
     public int M2() => 0;
@@ -24,30 +24,31 @@ public class IntroduceInterfaceAttribute : TypeAspect
 
 public class CheckInterfaceAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+    public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
     {
-        var methods = ((INamedType)TypeFactory.GetType(typeof(IInterface))).Methods;
+        var methods = ( (INamedType)TypeFactory.GetType( typeof(IInterface) ) ).Methods;
 
-        aspectBuilder.Target.TryFindImplementationForInterfaceMember(methods.OfName("M1").Single(), out var m1);
-        aspectBuilder.Target.TryFindImplementationForInterfaceMember(methods.OfName("M2").Single(), out var m2);
+        aspectBuilder.Target.TryFindImplementationForInterfaceMember( methods.OfName( "M1" ).Single(), out var m1 );
+        aspectBuilder.Target.TryFindImplementationForInterfaceMember( methods.OfName( "M2" ).Single(), out var m2 );
 
         if (m1 == null || m2 == null)
         {
-            throw new Exception($"m1: {m1}, m2: {m2}");
+            throw new Exception( $"m1: {m1}, m2: {m2}" );
         }
     }
 }
 
 public interface IInterface
 {
-    void M1(int i);
+    void M1( int i );
+
     int M2();
 }
 
 // <target>
 [IntroduceInterface]
-class BaseClass { }
+internal class BaseClass { }
 
 // <target>
 [CheckInterfaceAttribute]
-class TargetClass : BaseClass { }
+internal class TargetClass : BaseClass { }

@@ -5,35 +5,36 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Combined.ForEachParamIfName
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             foreach (var p in meta.Target.Parameters)
             {
                 if (p.Name.Length == 1)
                 {
-                    Console.WriteLine("{0} = {1}", p.Name, p.Value);
+                    Console.WriteLine( "{0} = {1}", p.Name, p.Value );
                 }
             }
 
             foreach (var p in meta.Target.Parameters)
             {
-                if (p.Name.StartsWith("b"))
+                if (p.Name.StartsWith( "b" ))
                 {
-                    Console.WriteLine("{0} = {1}", p.Name, p.Value);
+                    Console.WriteLine( "{0} = {1}", p.Name, p.Value );
                 }
             }
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        string Method(object a, object bb)
+        private string Method( object a, object bb )
         {
             return a.ToString() + bb.ToString();
         }

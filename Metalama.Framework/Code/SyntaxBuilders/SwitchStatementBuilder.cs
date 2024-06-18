@@ -35,7 +35,7 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
     {
         this._cases.Add( new SwitchStatementSection( label, null, statements, appendBreak ) );
     }
-    
+
     /// <summary>
     /// Add a <c>case</c> switch section. This overload accepts an <see cref="IStatement"/>.
     /// </summary>
@@ -58,7 +58,7 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
     {
         this._cases.Add( new SwitchStatementSection( label, when, statements, appendBreak ) );
     }
-    
+
     /// <summary>
     /// Add a <c>case</c> switch section with a <c>when</c> expression.  This overload accepts an <see cref="IStatement"/>.
     /// </summary>
@@ -80,7 +80,7 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
     {
         this._cases.Add( new SwitchStatementSection( null, null, statements, appendBreak ) );
     }
-    
+
     /// <summary>
     /// Add a <c>default</c> switch section.  This overload accepts an <see cref="IStatement"/>.
     /// </summary>

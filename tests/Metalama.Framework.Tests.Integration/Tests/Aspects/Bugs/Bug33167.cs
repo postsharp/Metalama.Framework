@@ -9,14 +9,12 @@ internal class TestContract : ContractAspect
 {
     public override void Validate( dynamic? value )
     {
-        ((IMethod)meta.Target.Parameter.ContainingDeclaration!).Invoke(value);
+        ( (IMethod)meta.Target.Parameter.ContainingDeclaration! ).Invoke( value );
     }
 }
 
 // <target>
 internal class TestClass
 {
-    public void Method1( [TestContract] string nonNullableString )
-    {
-    }
+    public void Method1( [TestContract] string nonNullableString ) { }
 }

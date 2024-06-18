@@ -41,33 +41,33 @@ public sealed class TestAttribute : TypeAspect
 [Test]
 public class TestClass
 {
-    public string DoSomething(string text)
+    public string DoSomething( string text )
     {
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
 
         return null!;
     }
 
-    public async Task DoSomethingAsync(string text)
+    public async Task DoSomethingAsync( string text )
     {
         await Task.Yield();
 
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
     }
 
-    public async Task<string> DoSomethingAsyncT(string text)
+    public async Task<string> DoSomethingAsyncT( string text )
     {
         await Task.Yield();
 
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
 
         return null!;
     }
 
-    public async void DoSomethingAsyncVoid(string text)
+    public async void DoSomethingAsyncVoid( string text )
     {
         await Task.Yield();
 
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
     }
 }

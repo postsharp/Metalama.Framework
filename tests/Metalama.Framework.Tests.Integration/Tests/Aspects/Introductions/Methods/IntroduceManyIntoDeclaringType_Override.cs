@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Methods.Int
     {
         [Aspect]
         private void M() { }
-        
+
         [Aspect]
         private void M2() { }
     }

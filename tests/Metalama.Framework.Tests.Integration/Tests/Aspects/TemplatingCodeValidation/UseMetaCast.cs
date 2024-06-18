@@ -9,6 +9,6 @@ internal class TestAttribute : TypeAspect
     {
         var x = meta.Proceed();
 
-        return meta.Cast(meta.Target.Type, x);
+        return meta.Cast( meta.Target.Type, x );
     }
 }

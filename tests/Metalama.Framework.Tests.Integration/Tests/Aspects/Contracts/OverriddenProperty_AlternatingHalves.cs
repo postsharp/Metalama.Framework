@@ -17,20 +17,23 @@ internal class NotNullAttribute : ContractAspect
 }
 
 // <target>
-class B
+internal class B
 {
     public virtual string P { get; set; }
 }
 
 // <target>
-class C : B
+internal class C : B
 {
     [NotNull]
     public override string P => "C";
 }
 
 // <target>
-class C2 : C
+internal class C2 : C
 {
-    public override string P { set { } }
+    public override string P
+    {
+        set { }
+    }
 }

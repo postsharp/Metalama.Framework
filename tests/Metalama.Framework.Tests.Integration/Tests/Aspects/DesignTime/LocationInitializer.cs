@@ -20,7 +20,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DesignTime.Location
 
     // <target>
     [Id]
-    internal partial class TargetCode
-    {
-    }
+    internal partial class TargetCode { }
 }

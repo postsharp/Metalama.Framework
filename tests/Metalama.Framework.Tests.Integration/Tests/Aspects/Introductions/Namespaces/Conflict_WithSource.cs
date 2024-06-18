@@ -2,27 +2,23 @@
 // @OutputAllSyntaxTrees
 # endif
 
-using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Namespaces.Conflict_WithSource
 {
-
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var n = builder.Advice.IntroduceNamespace(builder.Target.ContainingNamespace, "TestNamespace");
-            builder.Advice.IntroduceClass(n.Declaration, "TestNestedType");
+            var n = builder.Advice.IntroduceNamespace( builder.Target.ContainingNamespace, "TestNamespace" );
+            builder.Advice.IntroduceClass( n.Declaration, "TestNestedType" );
         }
     }
 
     // <target>
     [IntroductionAttribute]
-    public class TargetType
-    {
-    }
+    public class TargetType { }
 
     namespace TestNamespace
     {

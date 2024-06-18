@@ -16,10 +16,13 @@ internal class ReturnNumbers : OverrideMethodAspect
         {
             case DayOfWeek.Monday:
                 return numbers?.ToReadOnlyList();
+
             case DayOfWeek.Tuesday:
                 return numbers?.ToReadOnlyList().ToReadOnlyList();
+
             case DayOfWeek.Wednesday:
                 return numbers.ToReadOnlyList()?.ToReadOnlyList();
+
             default:
                 return numbers?.ToReadOnlyList()?.ToReadOnlyList();
         }

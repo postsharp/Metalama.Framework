@@ -5,36 +5,35 @@
 #if ROSLYN_4_8_0_OR_GREATER
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.RefReadonlyParameter_Invoke;
 
-class TheAspect : TypeAspect
+internal class TheAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        var called = builder.Advice.IntroduceMethod(builder.Target, nameof(Called)).Declaration;
+        var called = builder.IntroduceMethod( nameof(Called) ).Declaration;
 
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Caller), args: new { called });
+        builder.IntroduceMethod( nameof(Caller), args: new { called } );
     }
 
     [Template]
-    void Called(in int i, ref readonly int j) { }
+    private void Called( in int i, ref readonly int j ) { }
 
     [Template]
-    void Caller(IMethod called, in int i, ref int j, ref readonly int k)
+    private void Caller( IMethod called, in int i, ref int j, ref readonly int k )
     {
-        called.Invoke(meta.Target.Parameters[0].Value, meta.Target.Parameters[0].Value);
-        called.Invoke(meta.Target.Parameters[1].Value, meta.Target.Parameters[1].Value);
-        called.Invoke(meta.Target.Parameters[2].Value, meta.Target.Parameters[2].Value);
+        called.Invoke( meta.Target.Parameters[0].Value, meta.Target.Parameters[0].Value );
+        called.Invoke( meta.Target.Parameters[1].Value, meta.Target.Parameters[1].Value );
+        called.Invoke( meta.Target.Parameters[2].Value, meta.Target.Parameters[2].Value );
     }
 }
 
 [TheAspect]
-class C
-{
-}
+internal class C { }
 
 #endif

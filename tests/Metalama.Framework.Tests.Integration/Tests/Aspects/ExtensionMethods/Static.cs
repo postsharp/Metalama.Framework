@@ -12,7 +12,7 @@ internal class ReturnNumbers : OverrideMethodAspect
     {
         var numbers = new object[] { 42 };
 
-        return Enumerable.ToList(numbers);
+        return Enumerable.ToList( numbers );
     }
 }
 

@@ -1,6 +1,6 @@
-using System;
 using System.ComponentModel;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
@@ -10,10 +10,10 @@ public class TheAspect : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override( builder.Target, nameof(OverrideMethod) );
+        builder.Override( nameof(OverrideMethod) );
     }
 
-[Template]
+    [Template]
     private void OverrideMethod( PropertyChangedEventArgs nonNullable, PropertyChangedEventArgs? nullable )
     {
         var nonNullableExpression = ExpressionFactory.Capture( nonNullable );
@@ -21,7 +21,7 @@ public class TheAspect : MethodAspect
 
         // The null-forgiving token should stay.
         _ = nullableExpression.Value!.PropertyName;
-        
+
         // The null-forgiving token should be removed.
         _ = nonNullableExpression.Value!.PropertyName;
 
@@ -33,8 +33,5 @@ public class TheAspect : MethodAspect
 internal class C
 {
     [TheAspect]
-    private void M(PropertyChangedEventArgs nonNullable, PropertyChangedEventArgs? nullable)
-    {
-        
-    }
+    private void M( PropertyChangedEventArgs nonNullable, PropertyChangedEventArgs? nullable ) { }
 }

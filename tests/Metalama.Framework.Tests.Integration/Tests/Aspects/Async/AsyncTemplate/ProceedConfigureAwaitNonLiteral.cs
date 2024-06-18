@@ -6,15 +6,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate
 
 public sealed class TransactionalMethodAttribute : OverrideMethodAspect
 {
-    [Introduce(WhenExists = OverrideStrategy.Ignore)]
+    [Introduce( WhenExists = OverrideStrategy.Ignore )]
     private bool _continueOnCapturedContext = false;
 
     public override dynamic? OverrideMethod() => throw new NotSupportedException();
 
     public override async Task<dynamic?> OverrideAsyncMethod()
     {
-        var result = await meta.ProceedAsync().ConfigureAwait(_continueOnCapturedContext);
+        var result = await meta.ProceedAsync().ConfigureAwait( _continueOnCapturedContext );
         await meta.This.OnTransactionMethodSuccessAsync();
+
         return result;
     }
 }
@@ -31,7 +32,8 @@ public class TargetClass
     public async Task<int> DoSomethingAsync()
     {
         await Task.Yield();
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
+
         return 42;
     }
 
@@ -39,6 +41,6 @@ public class TargetClass
     public async Task DoSomethingAsync2()
     {
         await Task.Yield();
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
     }
 }

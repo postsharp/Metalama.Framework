@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Tests.Integration.Aspects.Diagnostics.IncorrectMetaMember;
@@ -21,7 +22,7 @@ internal abstract class AspectBase : Aspect, IAspect<IFieldOrPropertyOrIndexer>
 {
     public void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
     {
-        builder.Advice.OverrideAccessors( builder.Target, getTemplate: nameof(Template) );
+        builder.OverrideAccessors( getTemplate: nameof(Template) );
     }
 
     public void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder ) { }

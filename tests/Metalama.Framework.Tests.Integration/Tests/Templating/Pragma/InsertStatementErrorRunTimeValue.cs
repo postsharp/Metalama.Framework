@@ -3,19 +3,20 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Pragma.InsertStatementErrorRunTimeValue
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            meta.InsertStatement(meta.This);
+            meta.InsertStatement( meta.This );
+
             return default;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

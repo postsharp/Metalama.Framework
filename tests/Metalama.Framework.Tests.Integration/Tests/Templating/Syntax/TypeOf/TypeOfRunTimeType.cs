@@ -12,7 +12,6 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
         [TestTemplate]
         private dynamic Template()
         {
-            
             var rt = meta.RunTime( typeof(MyClass1) );
             var ct = meta.CompileTime( typeof(MyClass1) );
             Console.WriteLine( "rt=" + rt );
@@ -26,7 +25,6 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
             // Use in a run-time class.
             Console.WriteLine( typeof(MyClass1) );
             Console.WriteLine( typeof(MyClass1).FullName );
-            
 
             // Use in a compile-time class.
             _ = TypeFactory.GetType( typeof(MyClass1) );

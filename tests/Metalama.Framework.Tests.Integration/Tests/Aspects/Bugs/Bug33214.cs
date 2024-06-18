@@ -1,4 +1,3 @@
-
 using System;
 using Metalama.Framework.Aspects;
 
@@ -7,9 +6,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33214;
 [Inheritable]
 public sealed class TestContract : ContractAspect
 {
-    public override void Validate(dynamic? value)
+    public override void Validate( dynamic? value )
     {
-        Console.WriteLine("Should be applied only on Foo(int) parameter.");
+        Console.WriteLine( "Should be applied only on Foo(int) parameter." );
     }
 }
 
@@ -18,7 +17,8 @@ public sealed class TestOverride : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("Should be applied only on Bar(int) method.");
+        Console.WriteLine( "Should be applied only on Bar(int) method." );
+
         return meta.Proceed();
     }
 }
@@ -26,17 +26,23 @@ public sealed class TestOverride : OverrideMethodAspect
 public interface TestInterface
 {
     void Foo();
-    void Foo([TestContract] int value);
+
+    void Foo( [TestContract] int value );
+
     void Bar();
+
     [TestOverride]
-    void Bar(int value);
+    void Bar( int value );
 }
 
 // <target>
 public class TestClass : TestInterface
 {
     public void Foo() { }
-    public void Foo(int value) { }
+
+    public void Foo( int value ) { }
+
     public void Bar() { }
-    public void Bar(int value) { }
+
+    public void Bar( int value ) { }
 }

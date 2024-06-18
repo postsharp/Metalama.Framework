@@ -16,16 +16,10 @@ public class TheAspect : Attribute, IAspect<IDeclaration>
 }
 
 [TheAspect]
-public class InstanceClass
-{
-    
-}
+public class InstanceClass { }
 
 [TheAspect]
-public static class StaticClass
-{
-    
-}
+public static class StaticClass { }
 
 public class Class1
 {
@@ -36,8 +30,7 @@ public class Class1
 public class Class3
 {
     // The class is intentionally not static.
-    
+
     [TheAspect]
     public static void StaticMember() { }
 }
-

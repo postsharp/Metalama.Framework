@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.DoNotPull;
@@ -7,7 +8,7 @@ public class MyAspect : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.IntroduceParameter( builder.Target, "p", typeof(int), TypedConstant.Create( 15 ) );
+        builder.IntroduceParameter( "p", typeof(int), TypedConstant.Create( 15 ) );
     }
 }
 

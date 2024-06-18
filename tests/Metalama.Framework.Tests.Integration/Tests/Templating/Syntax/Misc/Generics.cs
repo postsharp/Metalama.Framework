@@ -5,44 +5,42 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Generics
 {
     [RunTimeOrCompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             A<Aspect, int, string> x = new C<object, int, string>();
             meta.Target.Parameters[0].Value = x;
-            dynamic result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    interface A<in T1, out T2, T3> : B
+    internal interface A<in T1, out T2, T3> : B
+        where T1 : class, new()
+        where T2 : struct { }
+
+    internal interface B { }
+
+    internal class C<T1, T2, T3> : A<T1, T2, T3>
         where T1 : class, new()
         where T2 : struct
     {
-    }
+        private B c1;
+        private D.E c2;
+        private (int i, string) t;
 
-    interface B
-    {
-    }
+        private event Action1<T1> Event1;
 
-    class C<T1, T2, T3> : A<T1, T2, T3>
-        where T1 : class, new()
-        where T2 : struct
-    {
-        B c1;
-        D.E c2;
-        (int i, string) t;
-        event Action1<T1> Event1;
-
-        ref int M<T>(ref int n)
-           where T : D.E
+        private ref int M<T>( ref int n )
+            where T : D.E
         {
             return ref n;
         }
 
-        public int this[int i]
+        public int this[ int i ]
         {
             get
             {
@@ -50,25 +48,24 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Gene
             }
         }
 
-        ~C()
-        {
-        }
+        ~C() { }
     }
 
-    class D
+    internal class D
     {
         public class E
         {
-            public static E operator !(E e) => null;
-            public static implicit operator D(E e) => null;
+            public static E operator !( E e ) => null;
+
+            public static implicit operator D( E e ) => null;
         }
     }
 
-    delegate void Action1<T>(in int i) where T : class;
+    internal delegate void Action1<T>( in int i ) where T : class;
 
-    class TargetCode
+    internal class TargetCode
     {
-        object Method(object a)
+        private object Method( object a )
         {
             return a;
         }

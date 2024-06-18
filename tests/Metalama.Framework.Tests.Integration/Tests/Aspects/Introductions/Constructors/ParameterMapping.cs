@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors.ParameterMapping;
@@ -11,19 +12,18 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(InvertedParameterNames),
             buildConstructor: b =>
             {
                 b.Parameters[0].Name = "y";
                 b.Parameters[1].Name = "x";
-                b.AddParameter("z", typeof(int));
+                b.AddParameter( "z", typeof(int) );
             } );
     }
 
     [Template]
-    public void InvertedParameterNames(int x, string y)
+    public void InvertedParameterNames( int x, string y )
     {
         _ = x + y.Length;
     }

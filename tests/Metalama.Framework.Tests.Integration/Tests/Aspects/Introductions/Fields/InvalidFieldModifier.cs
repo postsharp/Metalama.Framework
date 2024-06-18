@@ -1,16 +1,17 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.InvalidFieldModifier;
 
 public class Aspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceField(builder.Target, "field", typeof(int), buildField: field => field.Writeability = Writeability.InitOnly);
+        builder.IntroduceField( "field", typeof(int), buildField: field => field.Writeability = Writeability.InitOnly );
     }
 }
 
 // <target>
 [Aspect]
-class TargetClass { }
+internal class TargetClass { }

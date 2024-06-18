@@ -4,6 +4,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValid
 
 public class Aspect : TypeAspect
 {
-    [Introduce, Template]
-    void M() { }
+    [Introduce]
+    [Template]
+    private void M() { }
 }

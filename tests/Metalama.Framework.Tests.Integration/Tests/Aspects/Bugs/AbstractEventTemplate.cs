@@ -1,14 +1,15 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.AbstractEventTemplate;
 
 public abstract class AbstractAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceEvent(builder.Target, nameof(IntroducedEvent));
+        builder.IntroduceEvent( nameof(IntroducedEvent) );
     }
 
     [Template]
@@ -26,6 +27,4 @@ public class DerivedAspect : AbstractAspect
 
 // <target>
 [DerivedAspect]
-class Target
-{
-}
+internal class Target { }

@@ -4,7 +4,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Initi
 {
     public class IntroductionAttribute : TypeAspect
     {
-
         [Introduce]
         public string IntroducedField = meta.Target.Member.Name;
 

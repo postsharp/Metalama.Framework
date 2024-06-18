@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Properties.
     {
         [Aspect]
         private void M() { }
-        
+
         [Aspect]
         private void M2() { }
     }

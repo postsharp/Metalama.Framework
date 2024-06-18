@@ -1,5 +1,5 @@
 [TestAspect]
-class TargetCode
+internal class TargetCode
 {
   public static void Bar()
   {

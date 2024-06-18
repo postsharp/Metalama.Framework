@@ -5,25 +5,29 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.GotoNotSupported
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-            dynamic result = meta.Proceed();
+            var result = meta.Proceed();
 
-            if (result != null) goto end;
+            if (result != null)
+            {
+                goto end;
+            }
 
             return default;
 
         end:
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

@@ -8,15 +8,15 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        CalledTemplate<IType?>(meta.Target.Type);
+        CalledTemplate<IType?>( meta.Target.Type );
 
         return default;
     }
 
     [Template]
-    private void CalledTemplate<[CompileTime] T>(T x)
+    private void CalledTemplate<[CompileTime] T>( T x )
     {
-        Console.WriteLine($"called template T={typeof(T)} x={x}");
+        Console.WriteLine( $"called template T={typeof(T)} x={x}" );
     }
 }
 
@@ -24,7 +24,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

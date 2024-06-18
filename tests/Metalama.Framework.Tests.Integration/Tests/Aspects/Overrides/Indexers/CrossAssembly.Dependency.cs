@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAssembly;
 using System;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAs
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceIndexer( builder.Target, typeof(int), nameof(Template), nameof(Template) );
+            builder.IntroduceIndexer( typeof(int), nameof(Template), nameof(Template) );
         }
 
         [Template]

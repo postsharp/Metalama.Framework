@@ -5,19 +5,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
 {
     public class IntroductionAttribute : TypeAspect
     {
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler ExistingEvent
         {
             add
             {
-                meta.InsertComment("Write that the code is original.");
+                meta.InsertComment( "Write that the code is original." );
                 meta.Proceed();
             }
 
             remove
             {
-                meta.InsertComment("Write that the code is original.");
+                meta.InsertComment( "Write that the code is original." );
                 meta.Proceed();
             }
         }

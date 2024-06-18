@@ -8,29 +8,29 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.InvokeTemplate(nameof(CalledTemplate), args: new { T = typeof(int), i = 1 });
+        meta.InvokeTemplate( nameof(CalledTemplate), args: new { T = typeof(int), i = 1 } );
 
         return default;
     }
 
     [Template]
-    private void CalledTemplate<[CompileTime] T>([CompileTime] int i)
+    private void CalledTemplate<[CompileTime] T>( [CompileTime] int i )
     {
-        Console.WriteLine($"called template T={typeof(T)} i={i}");
+        Console.WriteLine( $"called template T={typeof(T)} i={i}" );
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(T) });
+        meta.InvokeTemplate( nameof(CalledTemplate2), args: new { T = typeof(T) } );
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(T[]) });
+        meta.InvokeTemplate( nameof(CalledTemplate2), args: new { T = typeof(T[]) } );
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(Dictionary<int, T>) });
+        meta.InvokeTemplate( nameof(CalledTemplate2), args: new { T = typeof(Dictionary<int, T>) } );
 
-        meta.InvokeTemplate(nameof(CalledTemplate2), args: new { T = typeof(TargetCode) });
+        meta.InvokeTemplate( nameof(CalledTemplate2), args: new { T = typeof(TargetCode) } );
     }
 
     [Template]
     private void CalledTemplate2<[CompileTime] T>()
     {
-        Console.WriteLine($"called template 2 T={typeof(T)}");
+        Console.WriteLine( $"called template 2 T={typeof(T)}" );
     }
 }
 
@@ -38,7 +38,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

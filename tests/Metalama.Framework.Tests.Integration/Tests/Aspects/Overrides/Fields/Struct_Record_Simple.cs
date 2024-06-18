@@ -14,12 +14,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Re
         {
             get
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
+
                 return meta.Proceed();
             }
             set
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
                 meta.Proceed();
             }
         }

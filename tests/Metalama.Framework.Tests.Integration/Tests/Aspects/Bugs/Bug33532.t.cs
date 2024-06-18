@@ -1,7 +1,7 @@
-class Target
+internal class Target
 {
   [Aspect]
-  static void UnreachableAfterReturn()
+  private static void UnreachableAfterReturn()
   {
     goto __aspect_return_1;
     throw new Exception();
@@ -10,7 +10,7 @@ class Target
     throw new global::System.NotImplementedException();
   }
   [Aspect]
-  static void ReachableAfterReturn(int i)
+  private static void ReachableAfterReturn(int i)
   {
     if (i == 0)
     {

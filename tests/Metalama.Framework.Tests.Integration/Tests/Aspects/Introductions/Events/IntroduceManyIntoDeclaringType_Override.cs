@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.Intr
             add
             {
                 Console.WriteLine( $"{meta.AspectInstance.TargetDeclaration} says hello." );
-                meta.Proceed();    
+                meta.Proceed();
             }
 
             remove
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.Intr
     {
         [Aspect]
         private void M() { }
-        
+
         [Aspect]
         private void M2() { }
     }

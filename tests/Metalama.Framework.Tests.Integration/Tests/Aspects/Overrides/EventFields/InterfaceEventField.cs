@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField;
 
@@ -20,7 +21,7 @@ internal class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.ImplementInterface( builder.Target, typeof(Interface) );
+        builder.ImplementInterface( typeof(Interface) );
     }
 
     [InterfaceMember( IsExplicit = true )]

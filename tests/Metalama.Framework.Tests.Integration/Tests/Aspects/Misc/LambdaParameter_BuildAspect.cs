@@ -11,40 +11,44 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParamete
 
 internal class Aspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
         var propertyBody = builder.Target.GetSymbol()
             ?.DeclaringSyntaxReferences
-            .Select(r => r.GetSyntax())
+            .Select( r => r.GetSyntax() )
             .Cast<PropertyDeclarationSyntax>()
-            .Select(SyntaxNode? (p) =>
-            {
-                if (p.ExpressionBody != null)
+            .Select(
+                SyntaxNode? ( p ) =>
                 {
-                    return p.ExpressionBody;
-                }
+                    if (p.ExpressionBody != null)
+                    {
+                        return p.ExpressionBody;
+                    }
 
-                var getter = p.AccessorList?.Accessors
-                    .SingleOrDefault(a => a.Keyword.IsKind(SyntaxKind.GetKeyword));
+                    var getter = p.AccessorList?.Accessors
+                        .SingleOrDefault( a => a.Keyword.IsKind( SyntaxKind.GetKeyword ) );
 
-                return (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body;
-            })
+                    return (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body;
+                } )
             .WhereNotNull()
             .FirstOrDefault()
             ?.ToString();
 
-        builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(PropertyBody), args: new { propertyBody });
+        builder.Advice.IntroduceMethod( builder.Target.DeclaringType, nameof(PropertyBody), args: new { propertyBody } );
     }
 
     [Template]
-    string? PropertyBody([CompileTime] string propertyBody) => propertyBody;
+    private string? PropertyBody( [CompileTime] string propertyBody ) => propertyBody;
 }
 
 // <target>
 internal class TargetCode
 {
     [Aspect]
-    public int P { get => 42; }
+    public int P
+    {
+        get => 42;
+    }
 }

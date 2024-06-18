@@ -1,7 +1,7 @@
-class EmptyOverrideFieldOrPropertyExample
+internal class EmptyOverrideFieldOrPropertyExample
 {
   [Aspect]
-  IEnumerable<int> M()
+  private IEnumerable<int> M()
   {
     global::System.Console.WriteLine("enumerable");
     return new[]

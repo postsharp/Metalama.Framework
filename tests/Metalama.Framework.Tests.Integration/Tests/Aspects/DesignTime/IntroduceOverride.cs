@@ -21,10 +21,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceOverri
     [Introduction]
     internal class TargetClass
     {
-
         public void M()
         {
-            Console.WriteLine("Source");
+            Console.WriteLine( "Source" );
         }
     }
 }

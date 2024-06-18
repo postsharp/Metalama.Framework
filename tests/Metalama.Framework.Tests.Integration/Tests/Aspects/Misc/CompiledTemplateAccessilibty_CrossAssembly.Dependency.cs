@@ -1,39 +1,40 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.CompiledTemplateAccessilibty_CrossAssembly;
 
 public class MyAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Private), args: new { x = new PrivateCompileTimeType() });
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Protected), args: new { x = new ProtectedCompileTimeType() });
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Internal), args: new { x = new InternalCompileTimeType() });
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Public), args: new { x = new PublicCompileTimeType() });
-        builder.Advice.IntroduceMethod(builder.Target, nameof(PrivateProtected), args: new { x = new ProtectedCompileTimeType(), y = new InternalCompileTimeType() });
-        builder.Advice.IntroduceMethod(builder.Target, nameof(ProtectedInternal), args: new { x = new ProtectedInternalCompileTimeType() });
+        builder.IntroduceMethod( nameof(Private), args: new { x = new PrivateCompileTimeType() } );
+        builder.IntroduceMethod( nameof(Protected), args: new { x = new ProtectedCompileTimeType() } );
+        builder.IntroduceMethod( nameof(Internal), args: new { x = new InternalCompileTimeType() } );
+        builder.IntroduceMethod( nameof(Public), args: new { x = new PublicCompileTimeType() } );
+        builder.IntroduceMethod( nameof(PrivateProtected), args: new { x = new ProtectedCompileTimeType(), y = new InternalCompileTimeType() } );
+        builder.IntroduceMethod( nameof(ProtectedInternal), args: new { x = new ProtectedInternalCompileTimeType() } );
     }
 
     [Template]
-    private string Private(PrivateCompileTimeType x) => $"{x}";
+    private string Private( PrivateCompileTimeType x ) => $"{x}";
 
     // TODO: call Tostring everywhere else
 
     [Template]
-    protected string Protected(ProtectedCompileTimeType x) => $"{x}";
+    protected string Protected( ProtectedCompileTimeType x ) => $"{x}";
 
     [Template]
-    internal string Internal(InternalCompileTimeType x) => $"{x}";
+    internal string Internal( InternalCompileTimeType x ) => $"{x}";
 
     [Template]
-    public string Public(PublicCompileTimeType x) => $"{x}";
+    public string Public( PublicCompileTimeType x ) => $"{x}";
 
     [Template]
-    private protected string PrivateProtected(ProtectedCompileTimeType x, InternalCompileTimeType y) => $"{x}, {y}";
+    private protected string PrivateProtected( ProtectedCompileTimeType x, InternalCompileTimeType y ) => $"{x}, {y}";
 
     [Template]
-    protected internal string ProtectedInternal(ProtectedInternalCompileTimeType x) => $"{x}";
+    protected internal string ProtectedInternal( ProtectedInternalCompileTimeType x ) => $"{x}";
 
     [CompileTime]
     private class PrivateCompileTimeType { }

@@ -6,18 +6,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.T
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(Override));
+                builder.Advice.Override( method, nameof(Override) );
             }
         }
 
         [Template]
         public dynamic? Override()
         {
-            Console.WriteLine("Aspect code");
+            Console.WriteLine( "Aspect code" );
+
             return meta.Proceed();
         }
     }

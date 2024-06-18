@@ -10,7 +10,8 @@ public class MyAspect : OverrideMethodAspect
     {
         var stringBuilder = new InterpolatedStringBuilder();
         stringBuilder.AddExpression( meta.Target.Method.Name );
-        Console.WriteLine(stringBuilder.ToExpression().Value);
+        Console.WriteLine( stringBuilder.ToExpression().Value );
+
         return meta.Proceed();
     }
 }

@@ -12,9 +12,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Mid
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Begin override.");
-            dynamic? result = meta.Proceed();
-            Console.WriteLine("End override.");
+            Console.WriteLine( "Begin override." );
+            var result = meta.Proceed();
+            Console.WriteLine( "End override." );
+
             return result;
         }
     }
@@ -23,44 +24,44 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Mid
     internal class TargetClass
     {
         [Override]
-        public void VoidMethod(int x)
+        public void VoidMethod( int x )
         {
-            Console.WriteLine("Begin target.");
+            Console.WriteLine( "Begin target." );
 
             if (x == 0)
             {
                 return;
             }
 
-            Console.WriteLine("End target.");
+            Console.WriteLine( "End target." );
         }
 
         [Override]
-        public int Method(int x)
+        public int Method( int x )
         {
-            Console.WriteLine("Begin target.");
+            Console.WriteLine( "Begin target." );
 
             if (x == 0)
             {
                 return 42;
             }
 
-            Console.WriteLine("End target.");
+            Console.WriteLine( "End target." );
 
             return x;
         }
 
         [Override]
-        public T? GenericMethod<T>(T? x)
+        public T? GenericMethod<T>( T? x )
         {
-            Console.WriteLine("Begin target.");
+            Console.WriteLine( "Begin target." );
 
-            if (x?.Equals(default) ?? false)
+            if (x?.Equals( default ) ?? false)
             {
                 return x;
             }
 
-            Console.WriteLine("End target.");
+            Console.WriteLine( "End target." );
 
             return x;
         }

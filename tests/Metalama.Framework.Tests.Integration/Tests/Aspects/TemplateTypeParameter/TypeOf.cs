@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.TypeOf;
@@ -12,16 +13,16 @@ public class Aspect : MethodAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.Override( builder.Target, nameof(Method), args: new { T = builder.Target.ReturnType } );
+        builder.Override( nameof(Method), args: new { T = builder.Target.ReturnType } );
     }
 
     [Template]
-    private T Method<[CompileTime] T>() where T : class 
+    private T Method<[CompileTime] T>() where T : class
     {
         // Try all possible type constructs.
-      
-        var t7 = meta.RunTime(typeof(T));
-        var t8 = meta.RunTime(typeof(List<T>));
+
+        var t7 = meta.RunTime( typeof(T) );
+        var t8 = meta.RunTime( typeof(List<T>) );
 
         return null!;
     }
@@ -32,5 +33,4 @@ public class Target
 {
     [Aspect]
     public string M() => "";
-
 }

@@ -1,7 +1,7 @@
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
@@ -15,66 +15,62 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.MemberInfoAsIE
 
 public sealed class TestAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        var arrayBuilder = new ArrayBuilder(typeof(object));
+        var arrayBuilder = new ArrayBuilder( typeof(object) );
 
         var types = new Type[] { typeof(RunTimeClass), typeof(RunTimeOrCompileTimeClass) };
 
         foreach (var type in types)
         {
-            var members = ((INamedType)TypeFactory.GetType(type)).Members();
+            var members = ( (INamedType)TypeFactory.GetType( type ) ).Members();
 
             if (type.Name == nameof(RunTimeClass))
             {
-                arrayBuilder.Add(type.ToExpression());
+                arrayBuilder.Add( type.ToExpression() );
             }
 
             foreach (var member in members)
             {
-                arrayBuilder.Add(member.ToMemberInfo().ToExpression());
+                arrayBuilder.Add( member.ToMemberInfo().ToExpression() );
 
                 if (member is IField field)
                 {
-                    arrayBuilder.Add(field.ToFieldInfo().ToExpression());
+                    arrayBuilder.Add( field.ToFieldInfo().ToExpression() );
                 }
 
                 if (member is IProperty property)
                 {
-                    arrayBuilder.Add(property.ToPropertyInfo().ToExpression());
+                    arrayBuilder.Add( property.ToPropertyInfo().ToExpression() );
                 }
 
                 if (member is IMethod method)
                 {
-                    arrayBuilder.Add(method.ReturnParameter.ToParameterInfo().ToExpression());
+                    arrayBuilder.Add( method.ReturnParameter.ToParameterInfo().ToExpression() );
                 }
 
                 if (member is IHasParameters hasParameters)
                 {
                     foreach (var parameter in hasParameters.Parameters)
                     {
-                        arrayBuilder.Add(parameter.ToParameterInfo().ToExpression());
+                        arrayBuilder.Add( parameter.ToParameterInfo().ToExpression() );
                     }
                 }
             }
         }
 
-        builder.Advice.IntroduceField(
-            builder.Target,
+        builder.IntroduceField(
             "members",
             typeof(object[]),
-            buildField: b =>
-            {
-                b.InitializerExpression = arrayBuilder.ToExpression();
-            });
+            buildField: b => { b.InitializerExpression = arrayBuilder.ToExpression(); } );
     }
 }
 
-class Program
+internal class Program
 {
-    static void TestMain() => new TargetCode();
+    private static void TestMain() => new TargetCode();
 }
 
 // <target>
@@ -83,29 +79,49 @@ internal class TargetCode
 {
     public TargetCode()
     {
-        var members = (object[])this.GetType().GetField("members", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(this)!;
+        var members = (object[])GetType().GetField( "members", BindingFlags.Instance | BindingFlags.NonPublic )!.GetValue( this )!;
 
-        for (int i = 0; i < members.Length; i++)
+        for (var i = 0; i < members.Length; i++)
         {
             if (members[i] == null)
-                throw new Exception($"Member at index {i} was not resolved correctly.");
+            {
+                throw new Exception( $"Member at index {i} was not resolved correctly." );
+            }
         }
     }
 }
 
-class RunTimeClass
+internal class RunTimeClass
 {
-    void M(int i) { }
-    int P { get; set; }
-    event EventHandler E { add { } remove { } }
-    int this[int i] { get => 42; set { } }
+    private void M( int i ) { }
+
+    private int P { get; set; }
+
+    private event EventHandler E
+    {
+        add { }
+        remove { }
+    }
+
+    private int this[ int i ]
+    {
+        get => 42;
+        set { }
+    }
 }
 
 [RunTimeOrCompileTime]
-class RunTimeOrCompileTimeClass
+internal class RunTimeOrCompileTimeClass
 {
-    void M(int i) { }
-    int P { get; set; }
-    event EventHandler E { add { } remove { } }
+    private void M( int i ) { }
+
+    private int P { get; set; }
+
+    private event EventHandler E
+    {
+        add { }
+        remove { }
+    }
+
     // indexers are not supported in compile-time code
 }

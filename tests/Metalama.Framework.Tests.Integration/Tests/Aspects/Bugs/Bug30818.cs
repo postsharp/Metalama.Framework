@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30818;
 
@@ -14,14 +15,12 @@ internal class ValidationAspect : FieldOrPropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
     {
-        builder.Advice.AddContract(
-            builder.Target,
+        builder.AddContract(
             nameof(ValidatePropertyGetter),
             ContractDirection.Output,
             args: new { propertyName = builder.Target.Name } );
 
-        builder.Advice.AddContract(
-            builder.Target,
+        builder.AddContract(
             nameof(ValidatePropertySetter),
             ContractDirection.Input,
             args: new { propertyName = builder.Target.Name } );

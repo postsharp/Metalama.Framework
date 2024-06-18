@@ -10,7 +10,7 @@ public class IntroducePrivateFieldAttribute : OverrideMethodAspect
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(_text);
+        Console.WriteLine( _text );
 
         return meta.Proceed();
     }

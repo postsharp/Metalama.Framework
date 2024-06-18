@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.OverrideMethod;
@@ -10,7 +11,7 @@ public class Aspect : MethodAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.Override( builder.Target, nameof(Method), args: new { a = 5, t = builder.Target.ReturnType } );
+        builder.Override( nameof(Method), args: new { a = 5, t = builder.Target.ReturnType } );
     }
 
     [Template]

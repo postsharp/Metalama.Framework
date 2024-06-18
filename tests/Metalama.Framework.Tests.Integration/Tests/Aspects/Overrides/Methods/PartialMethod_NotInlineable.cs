@@ -23,6 +23,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialM
         {
             Console.WriteLine( $"This is the override of {meta.Tags["name"]}." );
             _ = meta.Proceed();
+
             return meta.Proceed();
         }
     }

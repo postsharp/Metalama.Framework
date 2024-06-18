@@ -31,7 +31,8 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
         await testContext.WhenFullyInitialized;
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Advising;
                             using Metalama.Framework.Code;
                             using Metalama.Framework.CodeFixes;

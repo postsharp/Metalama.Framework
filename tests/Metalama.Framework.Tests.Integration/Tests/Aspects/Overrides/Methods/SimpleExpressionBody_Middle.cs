@@ -9,9 +9,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.SimpleEx
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine( "This is the overriding method." );
             var x = meta.Proceed();
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine( "This is the overriding method." );
+
             return x;
         }
     }
@@ -20,35 +21,27 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.SimpleEx
     internal class TargetClass
     {
         [Override]
-        public void TargetMethod_Void()
-            => Console.WriteLine("This is the original method.");
+        public void TargetMethod_Void() => Console.WriteLine( "This is the original method." );
 
         [Override]
-        public void TargetMethod_Void(int x, int y)
-            => Console.WriteLine($"This is the original method {x} {y}.");        
+        public void TargetMethod_Void( int x, int y ) => Console.WriteLine( $"This is the original method {x} {y}." );
 
         [Override]
-        public int TargetMethod_Int()
-            => 42;
+        public int TargetMethod_Int() => 42;
 
         [Override]
-        public int TargetMethod_Int(int x, int y)
-            => x + y;
+        public int TargetMethod_Int( int x, int y ) => x + y;
 
         [Override]
-        public static void TargetMethod_Static()
-            => Console.WriteLine("This is the original static method.");
+        public static void TargetMethod_Static() => Console.WriteLine( "This is the original static method." );
 
         [Override]
-        public void TargetMethod_Out(out int x)
-            => x = 42;
+        public void TargetMethod_Out( out int x ) => x = 42;
 
         [Override]
-        public void TargetMethod_Ref(ref int x)
-            => x = 42;        
+        public void TargetMethod_Ref( ref int x ) => x = 42;
 
         [Override]
-        public void TargetMethod_In(in DateTime x)
-            => Console.WriteLine($"This is the original method {x}.");
+        public void TargetMethod_In( in DateTime x ) => Console.WriteLine( $"This is the original method {x}." );
     }
 }

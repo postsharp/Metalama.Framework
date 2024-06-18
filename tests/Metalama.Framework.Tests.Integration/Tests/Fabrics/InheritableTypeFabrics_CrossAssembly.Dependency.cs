@@ -30,5 +30,4 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.InheritableTyp
             }
         }
     }
-
 }

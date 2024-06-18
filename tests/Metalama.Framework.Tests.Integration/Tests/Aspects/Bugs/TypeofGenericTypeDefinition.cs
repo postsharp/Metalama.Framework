@@ -8,7 +8,7 @@ internal class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        return TypeFactory.GetType(typeof(List<>)).ToTypeOfExpression().Value;
+        return TypeFactory.GetType( typeof(List<>) ).ToTypeOfExpression().Value;
     }
 }
 
@@ -16,5 +16,5 @@ internal class TargetCode
 {
     // <target>
     [TestAspect]
-    object? Method() => null;
+    private object? Method() => null;
 }

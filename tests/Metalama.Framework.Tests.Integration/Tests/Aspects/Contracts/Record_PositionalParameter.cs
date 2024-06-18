@@ -5,15 +5,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Report_Po
 {
     internal class NotNullAttribute : ContractAspect
     {
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value == null)
             {
-                throw new ArgumentNullException(meta.Target.Property.Name);
+                throw new ArgumentNullException( meta.Target.Property.Name );
             }
         }
     }
 
     // <target>
-    internal record Target([NotNull] string m);
+    internal record Target( [NotNull] string m );
 }

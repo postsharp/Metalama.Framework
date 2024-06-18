@@ -4,11 +4,10 @@
 #endif
 
 #if ROSLYN_4_8_0_OR_GREATER && NET7_0_OR_GREATER
-
 #pragma warning disable CS0169
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
@@ -21,7 +20,7 @@ public class Aspect : TypeAspect
     {
         for (int i = 1; i <= 19; i++)
         {
-            builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse($"x{i} = {i};"), InitializerKind.BeforeInstanceConstructor);
+            builder.AddInitializer( StatementFactory.Parse($"x{i} = {i};"), InitializerKind.BeforeInstanceConstructor);
         }
     }
 }

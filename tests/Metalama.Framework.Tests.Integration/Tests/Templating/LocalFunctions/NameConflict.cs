@@ -6,10 +6,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.N
 #pragma warning disable CS8321
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
         object? TheLocalFunction()
         {
@@ -19,10 +19,10 @@ class Aspect
         return TheLocalFunction();
     }
 }
-    
-class TargetCode
+
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         void TheLocalFunction()
         {

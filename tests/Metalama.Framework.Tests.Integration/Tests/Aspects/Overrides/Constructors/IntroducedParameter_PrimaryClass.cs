@@ -19,13 +19,19 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(p => !p.IsImplicitlyDeclared), nameof(Template), args: new { i = 1 });
-        builder.Advice.IntroduceParameter(builder.Target.Constructors.Single(p => !p.IsImplicitlyDeclared), "introduced", TypeFactory.GetType(SpecialType.Int32), TypedConstant.Create(42));
-        builder.Advice.Override(builder.Target.Constructors.Single(p => !p.IsImplicitlyDeclared), nameof(Template), args: new { i = 2 });
+        builder.Advice.Override( builder.Target.Constructors.Single( p => !p.IsImplicitlyDeclared ), nameof(Template), args: new { i = 1 } );
+
+        builder.Advice.IntroduceParameter(
+            builder.Target.Constructors.Single( p => !p.IsImplicitlyDeclared ),
+            "introduced",
+            TypeFactory.GetType( SpecialType.Int32 ),
+            TypedConstant.Create( 42 ) );
+
+        builder.Advice.Override( builder.Target.Constructors.Single( p => !p.IsImplicitlyDeclared ), nameof(Template), args: new { i = 2 } );
     }
 
     [Template]
-    public void Template([CompileTime] int i)
+    public void Template( [CompileTime] int i )
     {
         Console.WriteLine( $"This is the override {i}." );
 
@@ -40,7 +46,7 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public class TargetClass(int x)
+public class TargetClass( int x )
 {
     public int Z = x;
 }

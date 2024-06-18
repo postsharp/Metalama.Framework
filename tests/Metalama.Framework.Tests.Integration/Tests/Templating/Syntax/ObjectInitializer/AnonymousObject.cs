@@ -5,36 +5,29 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.AnonymousObject
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var x = new
-            {
-                A = meta.Target.Parameters[0].Value,
-                B = meta.Target.Parameters[1].Value,
-                Count = meta.Target.Parameters.Count
-            };
+            var x = new { A = meta.Target.Parameters[0].Value, B = meta.Target.Parameters[1].Value, Count = meta.Target.Parameters.Count };
 
-            var y = new
-            {
-                Count = meta.Target.Parameters.Count
-            };
+            var y = new { Count = meta.Target.Parameters.Count };
 
-            Console.WriteLine(x);
-            Console.WriteLine(x.A);
-            Console.WriteLine(x.Count);
-            Console.WriteLine(y.Count);
+            Console.WriteLine( x );
+            Console.WriteLine( x.A );
+            Console.WriteLine( x.Count );
+            Console.WriteLine( y.Count );
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

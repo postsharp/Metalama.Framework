@@ -1,6 +1,6 @@
-class Target
+internal class Target
 {
-  int MaybeBuff([ActionSpeed] int speed)
+  private int MaybeBuff([ActionSpeed] int speed)
   {
     if (this is global::Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.MetaThis.IBuffable)
     {

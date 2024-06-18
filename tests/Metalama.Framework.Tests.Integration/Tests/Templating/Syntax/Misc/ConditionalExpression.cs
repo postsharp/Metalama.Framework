@@ -7,18 +7,18 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.ConditionalExpression
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-            var extraField = meta.Target.Method.DeclaringType.Fields.OfName("extra").SingleOrDefault();
+            var extraField = meta.Target.Method.DeclaringType.Fields.OfName( "extra" ).SingleOrDefault();
 
             // compile-time condition, compile-time result
-            Console.WriteLine(extraField != null ? extraField.Name : "undefined");
+            Console.WriteLine( extraField != null ? extraField.Name : "undefined" );
 
             // run-time condition, compile-time result
-            Console.WriteLine(meta.This.extra != null ? extraField!.Name : "undefined");
+            Console.WriteLine( meta.This.extra != null ? extraField!.Name : "undefined" );
 
             // run-time condition, run-time result, inside compile-time condition, run-time result
             var extra = extraField != null ? meta.This.extra != null ? meta.This.extra.Value : 0 : 0;
@@ -27,11 +27,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.Cond
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int? extra;
+        private int? extra;
 
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
@@ -11,25 +12,24 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ta
 
 public class InvokerAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(
-            builder.Target,
+        builder.Override(
             nameof(Template),
-            new { target = builder.Target.DeclaringType!.Methods.OfName("Method").Single() });
+            new { target = builder.Target.DeclaringType!.Methods.OfName( "Method" ).Single() } );
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? Template( [CompileTime] IMethod target )
     {
-        meta.InsertComment("Invoke instance.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!).Invoke();
-        meta.InsertComment("Invoke instance?.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.NullConditional).Invoke();
-        meta.InsertComment("Invoke instance.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Final).Invoke();
-        meta.InsertComment("Invoke instance?.Method");
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Final | InvokerOptions.NullConditional).Invoke();
+        meta.InsertComment( "Invoke instance.Method" );
+        target.With( (IExpression)meta.Target.Method.Parameters[0].Value! ).Invoke();
+        meta.InsertComment( "Invoke instance?.Method" );
+        target.With( (IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.NullConditional ).Invoke();
+        meta.InsertComment( "Invoke instance.Method" );
+        target.With( (IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Final ).Invoke();
+        meta.InsertComment( "Invoke instance?.Method" );
+        target.With( (IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Final | InvokerOptions.NullConditional ).Invoke();
 
         return meta.Proceed();
     }
@@ -38,12 +38,8 @@ public class InvokerAspect : MethodAspect
 // <target>
 public class TargetClass
 {
-    public void Method()
-    {
-    }
+    public void Method() { }
 
     [InvokerAspect]
-    public void Invoker(TargetClass instance)
-    {
-    }
+    public void Invoker( TargetClass instance ) { }
 }

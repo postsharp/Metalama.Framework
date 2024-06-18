@@ -13,12 +13,12 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template), args: new { order = 1 });
-        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template), args: new { order = 2 });
+        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { order = 1 } );
+        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { order = 2 } );
     }
 
     [Template]
-    public void Template([CompileTime] int order)
+    public void Template( [CompileTime] int order )
     {
         Console.WriteLine( $"This is the override {order}." );
 

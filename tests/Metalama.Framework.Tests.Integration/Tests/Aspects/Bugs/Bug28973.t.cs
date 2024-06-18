@@ -1,11 +1,9 @@
-class TargetCode
+internal class TargetCode
 {
-  private readonly
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-  IFormatProvider _formatProvider = default !;
+  private readonly IFormatProvider _formatProvider = default !;
   [Import]
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-  IFormatProvider FormatProvider
+  private IFormatProvider FormatProvider
   {
     get
     {

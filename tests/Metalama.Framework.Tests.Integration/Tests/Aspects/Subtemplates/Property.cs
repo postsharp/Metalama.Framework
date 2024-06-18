@@ -11,11 +11,12 @@ internal class Aspect : OverrideMethodAspect
     }
 
     [Template]
-    int P
+    private int P
     {
         get
         {
-            Console.WriteLine("property subtemplate");
+            Console.WriteLine( "property subtemplate" );
+
             return 42;
         }
     }

@@ -1,4 +1,4 @@
-class TargetClass
+internal class TargetClass
 {
   private readonly IServiceProvider? _serviceProvider;
   [ImportServiceAspect]
@@ -15,6 +15,6 @@ class TargetClass
   }
   public string? Format(object? o)
   {
-    return ((ICustomFormatter? )this.FormatProvider?.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);
+    return ((ICustomFormatter? )FormatProvider?.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, FormatProvider);
   }
 }

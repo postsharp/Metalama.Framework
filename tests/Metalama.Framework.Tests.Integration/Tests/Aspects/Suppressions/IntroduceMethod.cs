@@ -9,6 +9,7 @@
 #endif
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMet
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var introduced = builder.Advice.IntroduceMethod( builder.Target, nameof(Introduced) ).Declaration;
+            var introduced = builder.IntroduceMethod( nameof(Introduced) ).Declaration;
             builder.Diagnostics.Suppress( _suppression1, introduced );
         }
     }

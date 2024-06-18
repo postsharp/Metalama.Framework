@@ -7,21 +7,21 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.DuplicateD
  * Tests that ambiguous declaration does not cause a crash in the linker. The output may not be correct.
  */
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("Aspect");
+        Console.WriteLine( "Aspect" );
+
         return meta.Proceed();
     }
-
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

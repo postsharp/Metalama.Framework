@@ -5,14 +5,15 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.ReturnDefault
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             try
             {
-                dynamic result = meta.Proceed();
+                var result = meta.Proceed();
+
                 return result;
             }
             catch
@@ -22,11 +23,10 @@ namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         }
     }
 
-   
-    class TargetCode
+    internal class TargetCode
     {
         // <target>
-        int Method(int a)
+        private int Method( int a )
         {
             return 42 / a;
         }

@@ -25,9 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct
     [Introduction]
     internal struct TargetStruct
     {
-        public TargetStruct()
-        {
-        }
+        public TargetStruct() { }
 
         public int ExistingField = 42;
 

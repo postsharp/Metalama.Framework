@@ -344,7 +344,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
 
     // <target>
     [Introduction]
-    internal class TargetClass : DerivedClass
-    {
-    }
+    internal class TargetClass : DerivedClass { }
 }

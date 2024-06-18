@@ -19,7 +19,7 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override(constructor, nameof(Template));
+            builder.Advice.Override( constructor, nameof(Template) );
         }
     }
 
@@ -30,7 +30,7 @@ public class OverrideAttribute : TypeAspect
 
         foreach (var param in meta.Target.Parameters)
         {
-            Console.WriteLine($"Param {param.Name} = {param.Value}");
+            Console.WriteLine( $"Param {param.Name} = {param.Value}" );
         }
 
         meta.Proceed();
@@ -41,7 +41,5 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public struct TargetStruct(int x, int y)
-{
-}
+public struct TargetStruct( int x, int y ) { }
 #endif

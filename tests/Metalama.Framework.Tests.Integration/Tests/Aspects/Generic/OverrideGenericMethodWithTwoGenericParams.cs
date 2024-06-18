@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.OverrideGenericMethodWithTwoGenericParams
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
@@ -11,10 +11,10 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.OverrideGeneri
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
         [Aspect]
-        T Method<T,S>(T a, S b)
+        private T Method<T, S>( T a, S b )
         {
             return a;
         }

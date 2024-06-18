@@ -2,9 +2,8 @@
 // @Skipped(constructed generics not supported)
 # endif
 
-using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.BaseType_SelfReferencing;
@@ -13,8 +12,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceClass(
-            builder.Target,
+        builder.IntroduceClass(
             "TestNestedType",
             buildType: t => { t.BaseType = builder.Target.WithTypeArguments( t ); } );
     }

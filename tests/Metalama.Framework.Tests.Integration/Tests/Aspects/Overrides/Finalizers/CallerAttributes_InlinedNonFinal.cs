@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using System;
 using System.Runtime.CompilerServices;
@@ -14,16 +15,17 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fina
 
     public class OverrideAttribute : MethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Override));
-            builder.Advice.Override(builder.Target, nameof(Override2));
+            builder.Override( nameof(Override) );
+            builder.Override( nameof(Override2) );
         }
 
         [Template]
         public dynamic? Override()
         {
-            Console.WriteLine("This is the overridden method (1).");
+            Console.WriteLine( "This is the overridden method (1)." );
+
             return meta.Proceed();
         }
 
@@ -32,7 +34,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fina
         {
             // Block inlining.
             _ = meta.Proceed();
-            Console.WriteLine("This is the overridden method (2).");
+            Console.WriteLine( "This is the overridden method (2)." );
+
             return meta.Proceed();
         }
     }
@@ -43,15 +46,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fina
         [Override]
         ~TargetClass()
         {
-            this.MethodWithCallerMemberName(42);
-            this.MethodWithCallerMemberName(42, y: 27);
-            this.MethodWithCallerMemberName(42, name1: "foo", y: 27);
-            this.MethodWithCallerMemberName(42, "foo", 27);
-            this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+            MethodWithCallerMemberName( 42 );
+            MethodWithCallerMemberName( 42, y: 27 );
+            MethodWithCallerMemberName( 42, name1: "foo", y: 27 );
+            MethodWithCallerMemberName( 42, "foo", 27 );
+            MethodWithCallerMemberName( 42, "foo", 27, "bar" );
         }
 
-        public void MethodWithCallerMemberName(int x, [CallerMemberName]string name1 = "", int y = 0, [CallerMemberName] string name2 = "")
-        {
-        }
+        public void MethodWithCallerMemberName( int x, [CallerMemberName] string name1 = "", int y = 0, [CallerMemberName] string name2 = "" ) { }
     }
 }

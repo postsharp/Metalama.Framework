@@ -19,6 +19,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Method_Pa
     // <target>
     internal partial class Target
     {
-        partial void M([NotNull] string m);
+        partial void M( [NotNull] string m );
     }
 }

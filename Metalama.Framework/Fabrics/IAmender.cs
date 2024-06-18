@@ -26,7 +26,7 @@ namespace Metalama.Framework.Fabrics
         where T : class, IDeclaration
     {
         new IProject Project { get; }
-        
+
         /// <summary>
         /// Gets an object that allows to add child advice and to validate code and code references.
         /// </summary>

@@ -16,23 +16,21 @@ public class TestAspect : OverrideMethodAspect
 {
     public SerializableClass SerializedValue;
 
-    public TestAspect(int x)
+    public TestAspect( int x )
     {
         SerializedValue = new SerializableClass() { Foo = 42 };
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.Foo));
+        Console.WriteLine( meta.CompileTime( SerializedValue.Foo ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 42 )]
+    public virtual void Foo() { }
 }

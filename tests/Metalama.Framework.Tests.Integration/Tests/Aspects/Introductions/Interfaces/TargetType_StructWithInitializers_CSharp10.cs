@@ -29,20 +29,21 @@ public class IntroduceAspectAttribute : TypeAspect
     {
         get
         {
-            Console.WriteLine("Introduced interface member");
-            return 42; 
+            Console.WriteLine( "Introduced interface member" );
+
+            return 42;
         }
 
         set
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 
     [InterfaceMember]
     public void IntroducedMethod()
     {
-        Console.WriteLine("Introduced interface member");
+        Console.WriteLine( "Introduced interface member" );
     }
 
     [InterfaceMember]
@@ -50,12 +51,12 @@ public class IntroduceAspectAttribute : TypeAspect
     {
         add
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
         remove
         {
-            Console.WriteLine("Introduced interface member");            
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 
@@ -78,11 +79,9 @@ public interface IInterface
 
 // <target>
 [IntroduceAspect]
-public struct TargetStruct 
+public struct TargetStruct
 {
-    public TargetStruct()
-    {
-    }
+    public TargetStruct() { }
 
     public int ExistingField = 42;
 
@@ -90,6 +89,6 @@ public struct TargetStruct
 
     public void ExistingMethod()
     {
-        Console.WriteLine("Original struct member");
+        Console.WriteLine( "Original struct member" );
     }
 }

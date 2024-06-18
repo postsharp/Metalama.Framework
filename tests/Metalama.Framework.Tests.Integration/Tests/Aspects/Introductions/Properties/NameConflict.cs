@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
@@ -12,31 +13,30 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.N
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty(
-                builder.Target,
+            builder.IntroduceProperty(
                 "Property_NameConflict",
                 nameof(NameConflict_Get),
                 nameof(NameConflict_Set) );
 
-            builder.Advice.IntroduceProperty(
-                builder.Target,
+            builder.IntroduceProperty(
                 "Property_ValueConflict",
                 nameof(ValueConflict_Get),
-                nameof(ValueConflict_Set));
+                nameof(ValueConflict_Set) );
         }
 
         [Template]
         public int NameConflict_Get()
         {
-            var Property_NameConflict = $"{ExpressionFactory.Parse("Property_NameConflict").Value}";
-            return ExpressionFactory.Parse("Property_NameConflict").Value + Property_NameConflict.Length;
+            var Property_NameConflict = $"{ExpressionFactory.Parse( "Property_NameConflict" ).Value}";
+
+            return ExpressionFactory.Parse( "Property_NameConflict" ).Value + Property_NameConflict.Length;
         }
 
         [Template]
-        public void NameConflict_Set(int value)
+        public void NameConflict_Set( int value )
         {
-            var Property_NameConflict = $"{ExpressionFactory.Parse("Property_NameConflict").Value}";
-            ExpressionFactory.Parse("Property_NameConflict").Value = value + Property_NameConflict.Length;
+            var Property_NameConflict = $"{ExpressionFactory.Parse( "Property_NameConflict" ).Value}";
+            ExpressionFactory.Parse( "Property_NameConflict" ).Value = value + Property_NameConflict.Length;
         }
 
         [Template]
@@ -48,7 +48,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.N
         [Template]
         public void ValueConflict_Set()
         {
-            string value = ExpressionFactory.Parse("value").Value!.ToString();
+            string value = ExpressionFactory.Parse( "value" ).Value!.ToString();
         }
     }
 

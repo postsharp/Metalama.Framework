@@ -7,30 +7,31 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.NameClashWithTargetSymbols
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var PI = 3.14d;
-            Console.WriteLine(PI);
+            Console.WriteLine( PI );
             var r = 42;
-            Console.WriteLine(r);
+            Console.WriteLine( r );
             var area = r * r;
-            Console.WriteLine(area);
+            Console.WriteLine( area );
             var StringBuilder = new object();
-            Console.WriteLine(StringBuilder.ToString());
+            Console.WriteLine( StringBuilder.ToString() );
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        double Method(double r)
+        private double Method( double r )
         {
             StringBuilder stringBuilder = new();
-            double area = PI * r * r;
+            var area = PI * r * r;
+
             return area;
         }
     }

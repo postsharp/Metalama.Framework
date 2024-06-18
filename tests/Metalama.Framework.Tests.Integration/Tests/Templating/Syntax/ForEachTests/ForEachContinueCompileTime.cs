@@ -5,28 +5,34 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachContinueCompileTime
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            int i = meta.CompileTime(0);
+            var i = meta.CompileTime( 0 );
+
             foreach (var p in meta.Target.Parameters)
             {
-                if (p.Name.Length <= 1) continue;
+                if (p.Name.Length <= 1)
+                {
+                    continue;
+                }
+
                 i++;
             }
 
-            Console.WriteLine(i);
+            Console.WriteLine( i );
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int bb)
+        private int Method( int a, int bb )
         {
             return a + bb;
         }

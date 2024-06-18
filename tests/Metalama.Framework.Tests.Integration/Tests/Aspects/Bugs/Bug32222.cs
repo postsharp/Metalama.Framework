@@ -15,24 +15,23 @@ public class MyAspect : OverrideMethodAspect
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(this._tag);
+        Console.WriteLine( _tag );
 
         return meta.Proceed();
     }
 }
 
-
 // <target>
 internal class C
 {
-    [MyAspect("Direct")]
+    [MyAspect( "Direct" )]
     private void M() { }
 
-    class Fabric : TypeFabric
+    private class Fabric : TypeFabric
     {
         public override void AmendType( ITypeAmender amender )
         {
-            amender.SelectMany( t=>t.Methods ).AddAspect<MyAspect>( _ => new MyAspect( "Fabric" ));
+            amender.SelectMany( t => t.Methods ).AddAspect<MyAspect>( _ => new MyAspect( "Fabric" ) );
         }
     }
 }

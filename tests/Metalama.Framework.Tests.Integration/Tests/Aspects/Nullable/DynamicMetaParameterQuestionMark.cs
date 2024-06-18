@@ -13,93 +13,91 @@ internal class Aspect : OverrideMethodAspect
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
-    class Nullable
+    private class Nullable
     {
         [Aspect]
-        void ValueType(int i) { }
+        private void ValueType( int i ) { }
 
         [Aspect]
-        void NullableValueType(int? i) { }
+        private void NullableValueType( int? i ) { }
 
         [Aspect]
-        void ReferenceType(string s) { }
+        private void ReferenceType( string s ) { }
 
         [Aspect]
-        void NullableReferenceType(string? s) { }
+        private void NullableReferenceType( string? s ) { }
 
         [Aspect]
-        void Generic<T>(T t) { }
+        private void Generic<T>( T t ) { }
 
         [Aspect]
-        void NullableGeneric<T>(T? t) { }
+        private void NullableGeneric<T>( T? t ) { }
 
         [Aspect]
-        void NotNullGeneric<T>(T t) where T : notnull { }
+        private void NotNullGeneric<T>( T t ) where T : notnull { }
 
         [Aspect]
-        void NullableNotNullGeneric<T>(T? t) where T : notnull { }
+        private void NullableNotNullGeneric<T>( T? t ) where T : notnull { }
 
         [Aspect]
-        void ValueTypeGeneric<T>(T t) where T : struct { }
+        private void ValueTypeGeneric<T>( T t ) where T : struct { }
 
         [Aspect]
-        void NullableValueTypeGeneric<T>(T? t) where T : struct { }
+        private void NullableValueTypeGeneric<T>( T? t ) where T : struct { }
 
         [Aspect]
-        void ReferenceTypeGeneric<T>(T t) where T : class { }
+        private void ReferenceTypeGeneric<T>( T t ) where T : class { }
 
         [Aspect]
-        void NullableReferenceTypeGeneric<T>(T? t) where T : class { }
-
-
-        [Aspect]
-        void ReferenceTypeNullableGeneric<T>(T t) where T : class? { }
+        private void NullableReferenceTypeGeneric<T>( T? t ) where T : class { }
 
         [Aspect]
-        void NullableReferenceTypeNullableGeneric<T>(T? t) where T : class? { }
+        private void ReferenceTypeNullableGeneric<T>( T t ) where T : class? { }
 
         [Aspect]
-        void SpecificReferenceTypeGeneric<T>(T t) where T : IComparable { }
+        private void NullableReferenceTypeNullableGeneric<T>( T? t ) where T : class? { }
 
         [Aspect]
-        void SpecificNullableReferenceTypeGeneric<T>(T? t) where T : IComparable { }
+        private void SpecificReferenceTypeGeneric<T>( T t ) where T : IComparable { }
 
         [Aspect]
-        void SpecificReferenceTypeNullableGeneric<T>(T t) where T : IComparable? { }
+        private void SpecificNullableReferenceTypeGeneric<T>( T? t ) where T : IComparable { }
 
         [Aspect]
-        void SpecificNullableReferenceTypeNullableGeneric<T>(T? t) where T : IComparable? { }
+        private void SpecificReferenceTypeNullableGeneric<T>( T t ) where T : IComparable? { }
+
+        [Aspect]
+        private void SpecificNullableReferenceTypeNullableGeneric<T>( T? t ) where T : IComparable? { }
     }
 
 #nullable disable
 
-    class NonNullable
+    private class NonNullable
     {
         [Aspect]
-        void ValueType(int i) { }
+        private void ValueType( int i ) { }
 
         [Aspect]
-        void NullableValueType(int? i) { }
+        private void NullableValueType( int? i ) { }
 
         [Aspect]
-        void ReferenceType(string s) { }
+        private void ReferenceType( string s ) { }
 
         [Aspect]
-        void Generic<T>(T t) { }
+        private void Generic<T>( T t ) { }
 
         [Aspect]
-        void ValueTypeGeneric<T>(T t) where T : struct { }
+        private void ValueTypeGeneric<T>( T t ) where T : struct { }
 
         [Aspect]
-        void NullableValueTypeGeneric<T>(T? t) where T : struct { }
+        private void NullableValueTypeGeneric<T>( T? t ) where T : struct { }
 
         [Aspect]
-        void ReferenceTypeGeneric<T>(T t) where T : class { }
+        private void ReferenceTypeGeneric<T>( T t ) where T : class { }
 
         [Aspect]
-        void SpecificReferenceTypeGeneric<T>(T t) where T : IComparable { }
-
+        private void SpecificReferenceTypeGeneric<T>( T t ) where T : IComparable { }
     }
 }

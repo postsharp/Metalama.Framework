@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
             amender
                 .SelectTypes()
                 .SelectMany( t => t.Methods )
-                .Where( m => m.ReturnType.Is( typeof(string) ) ) 
+                .Where( m => m.ReturnType.Is( typeof(string) ) )
                 .AddAspect<Aspect>();
         }
     }

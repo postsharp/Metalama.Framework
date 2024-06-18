@@ -3,19 +3,20 @@
 #endif
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicParameterQuestionMarkSyntax;
 
 internal class Aspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(builder.Target, nameof(Template));
+        builder.Override( nameof(Template) );
     }
 
     [Template]
-    void Template(dynamic? arg)
+    private void Template( dynamic? arg )
     {
         var s = arg?.Nullable?.ToString();
         s = arg?.NonNullable?.ToString();
@@ -28,31 +29,31 @@ internal class Aspect : MethodAspect
     }
 }
 
-class Foo
+internal class Foo
 {
     public object? Nullable = null;
     public object NonNullable = null!;
 
-    public int[] this[int i] => null!;
+    public int[] this[ int i ] => null!;
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
-    class Nullable
+    private class Nullable
     {
         [Aspect]
-        void ReferenceType(Foo arg) { }
+        private void ReferenceType( Foo arg ) { }
 
         [Aspect]
-        void NullableReferenceType(Foo? arg) { }
+        private void NullableReferenceType( Foo? arg ) { }
     }
 
 #nullable disable
 
-    class NonNullable
+    private class NonNullable
     {
         [Aspect]
-        void ReferenceType(Foo arg) { }
+        private void ReferenceType( Foo arg ) { }
     }
 }

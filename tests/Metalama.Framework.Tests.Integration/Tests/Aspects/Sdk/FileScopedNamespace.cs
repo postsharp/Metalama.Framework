@@ -9,22 +9,22 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.FileScopedNamespace;
 
-[RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.FileScopedNamespace.AspectWeaver")]
+[RequireAspectWeaver( "Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.FileScopedNamespace.AspectWeaver" )]
 internal class Aspect : MethodAspect { }
 
 [MetalamaPlugIn]
 internal class AspectWeaver : IAspectWeaver
 {
-    public Task TransformAsync(AspectWeaverContext context)
+    public Task TransformAsync( AspectWeaverContext context )
     {
-        return context.RewriteAspectTargetsAsync(new Rewriter());
+        return context.RewriteAspectTargetsAsync( new Rewriter() );
     }
 
     private class Rewriter : SafeSyntaxRewriter
     {
-        public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
+        public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            return base.VisitMethodDeclaration(node)!.WithLeadingTrivia(SyntaxFactory.Comment("// Rewritten."), SyntaxFactory.CarriageReturnLineFeed);
+            return base.VisitMethodDeclaration( node )!.WithLeadingTrivia( SyntaxFactory.Comment( "// Rewritten." ), SyntaxFactory.CarriageReturnLineFeed );
         }
     }
 }
@@ -33,7 +33,7 @@ internal class AspectWeaver : IAspectWeaver
 internal class TargetCode
 {
     [Aspect]
-    private int TransformedMethod(int a) => 0;
+    private int TransformedMethod( int a ) => 0;
 
-    private int NotTransformedMethod(int a) => 0;
+    private int NotTransformedMethod( int a ) => 0;
 }

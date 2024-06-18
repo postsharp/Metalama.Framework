@@ -5,16 +5,17 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.BackingFi
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
+        public override dynamic? OverrideProperty
         {
             get
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
+
                 return meta.Proceed();
             }
             set
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
                 meta.Proceed();
             }
         }
@@ -23,7 +24,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.BackingFi
     // <target>
     internal class TargetClass
     {
-        [field:Test]
+        [field: Test]
         public int AutoProperty { get; set; }
     }
 }

@@ -14,7 +14,7 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override(constructor, nameof(Template));
+            builder.Advice.Override( constructor, nameof(Template) );
         }
     }
 
@@ -25,7 +25,7 @@ public class OverrideAttribute : TypeAspect
 
         foreach (var param in meta.Target.Parameters)
         {
-            Console.WriteLine($"Param {param.Name} = {param.Value}");
+            Console.WriteLine( $"Param {param.Name} = {param.Value}" );
         }
 
         meta.Proceed();
@@ -34,20 +34,20 @@ public class OverrideAttribute : TypeAspect
 
 public class BaseClass
 {
-    public BaseClass(int x) { }
+    public BaseClass( int x ) { }
 }
 
 // <target>
 [Override]
 public class TargetClass : BaseClass
 {
-    public TargetClass(int x, string s) : base(x)
+    public TargetClass( int x, string s ) : base( x )
     {
         Console.WriteLine( $"This is the original constructor." );
     }
 
-    public TargetClass() : this(42, "42")
+    public TargetClass() : this( 42, "42" )
     {
-        Console.WriteLine($"This is the original constructor.");
+        Console.WriteLine( $"This is the original constructor." );
     }
 }

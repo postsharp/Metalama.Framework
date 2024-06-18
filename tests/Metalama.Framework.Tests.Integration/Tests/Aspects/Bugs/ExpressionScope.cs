@@ -11,19 +11,19 @@ internal class NotNullAttribute : MethodAspect
     {
         base.BuildAspect( builder );
 
-        foreach ( var parameter in builder.Target.Parameters.Where(
+        foreach (var parameter in builder.Target.Parameters.Where(
                      p => p.RefKind is RefKind.None or RefKind.In
                           && !p.Type.IsNullable.GetValueOrDefault()
-                          && p.Type.IsReferenceType.GetValueOrDefault() ) )
+                          && p.Type.IsReferenceType.GetValueOrDefault() ))
         {
-            builder.Advice.AddContract( parameter, nameof(this.Validate), args: new { parameterName = parameter.Name } );
+            builder.Advice.AddContract( parameter, nameof(Validate), args: new { parameterName = parameter.Name } );
         }
     }
 
     [Template]
     private void Validate( dynamic? value, [CompileTime] string parameterName )
     {
-        if ( value == null )
+        if (value == null)
         {
             throw new ArgumentNullException( parameterName );
         }

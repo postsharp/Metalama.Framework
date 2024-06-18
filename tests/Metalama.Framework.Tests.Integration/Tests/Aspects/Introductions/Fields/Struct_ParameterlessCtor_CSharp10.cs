@@ -25,9 +25,7 @@ public class IntroductionAttribute : TypeAspect
 [Introduction]
 internal struct TargetStruct
 {
-    public TargetStruct()
-    {
-    }
+    public TargetStruct() { }
 
     public int ExistingField = 42;
 

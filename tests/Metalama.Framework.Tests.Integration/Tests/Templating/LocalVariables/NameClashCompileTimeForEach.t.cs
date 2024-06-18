@@ -1,4 +1,4 @@
-int Method(int a, int b)
+private int Method(int a, int b)
 {
   string text = "a = " + a;
   global::System.Console.WriteLine(text);

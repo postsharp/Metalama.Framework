@@ -12,23 +12,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.Pri
 
 public class MyAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.IntroduceParameter(constructor, "p", typeof(int), TypedConstant.Create(15), (p, c) => PullAction.UseExpression(TypedConstant.Create(51)));
+            builder.Advice.IntroduceParameter(
+                constructor,
+                "p",
+                typeof(int),
+                TypedConstant.Create( 15 ),
+                ( p, c ) => PullAction.UseExpression( TypedConstant.Create( 51 ) ) );
         }
     }
 }
 
 // <target>
 [MyAspect]
-public class A()
-{
-}
+public class A() { }
 
 // <target>
-public class C(int x) : A
+public class C( int x ) : A
 {
     public int Y { get; } = x;
 }

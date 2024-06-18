@@ -1,9 +1,9 @@
-class TargetCode
+internal class TargetCode
 {
-  class Nullable
+  private class Nullable
   {
     [Aspect]
-    void ReferenceType(Foo arg)
+    private void ReferenceType(Foo arg)
     {
       var s = arg.Nullable?.ToString();
       s = arg.NonNullable?.ToString();
@@ -13,7 +13,7 @@ class TargetCode
       i = arg[0]![1];
     }
     [Aspect]
-    void NullableReferenceType(Foo? arg)
+    private void NullableReferenceType(Foo? arg)
     {
       var s = arg?.Nullable?.ToString();
       s = arg?.NonNullable?.ToString();
@@ -24,10 +24,10 @@ class TargetCode
     }
   }
 #nullable disable
-  class NonNullable
+  private class NonNullable
   {
     [Aspect]
-    void ReferenceType(Foo arg)
+    private void ReferenceType(Foo arg)
     {
       var s = arg?.Nullable?.ToString();
       s = arg?.NonNullable?.ToString();

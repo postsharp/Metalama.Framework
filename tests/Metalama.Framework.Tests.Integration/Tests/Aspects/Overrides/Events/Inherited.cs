@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
@@ -8,9 +9,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Overrides.Events.Inherite
 
 public abstract class OverrideEventAttribute : EventAspect
 {
-    public override void BuildAspect(IAspectBuilder<IEvent> builder)
+    public override void BuildAspect( IAspectBuilder<IEvent> builder )
     {
-        builder.Advice.OverrideAccessors(builder.Target, "add_Event", "remove_Event");
+        builder.OverrideAccessors( "add_Event", "remove_Event" );
     }
 
     [Template]
@@ -23,11 +24,11 @@ public class InheritedOverrideEventAttribute : OverrideEventAttribute
     {
         add
         {
-            Console.WriteLine("Add accessor.");
+            Console.WriteLine( "Add accessor." );
         }
         remove
         {
-            Console.WriteLine("Remove accessor.");
+            Console.WriteLine( "Remove accessor." );
         }
     }
 }

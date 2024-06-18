@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossAssembly;
 using System;
@@ -11,23 +12,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossA
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceUnaryOperator(
-                builder.Target,
+            builder.IntroduceUnaryOperator(
                 nameof(UnaryOperatorTemplate),
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ),
                 OperatorKind.UnaryNegation );
 
-            builder.Advice.IntroduceBinaryOperator(
-                builder.Target,
+            builder.IntroduceBinaryOperator(
                 nameof(BinaryOperatorTemplate),
                 builder.Target,
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ),
                 OperatorKind.Addition );
 
-            builder.Advice.IntroduceConversionOperator(
-                builder.Target,
+            builder.IntroduceConversionOperator(
                 nameof(ConversionOperatorTemplate),
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ) );

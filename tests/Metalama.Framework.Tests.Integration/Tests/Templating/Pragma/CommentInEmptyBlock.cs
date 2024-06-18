@@ -5,23 +5,23 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyBlock
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            if ( meta.RunTime( false ) )
+            if (meta.RunTime( false ))
             {
-                meta.InsertComment("Oops 1");
+                meta.InsertComment( "Oops 1" );
             }
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
 public class MyAspect : TypeAspect
 {
     [Introduce]
-    private InternalClass IntroducedMethod() => new InternalClass();
+    private InternalClass IntroducedMethod() => new();
 }
 
 internal class InternalClass { }

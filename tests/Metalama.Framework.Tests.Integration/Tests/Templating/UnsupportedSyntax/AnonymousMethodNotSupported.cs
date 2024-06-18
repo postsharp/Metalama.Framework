@@ -5,28 +5,25 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.AnonymousMethodNotSupported
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            Action<object?> action =
-            delegate (object? p)
-            {
-                Console.WriteLine(p?.ToString());
-            };
+            var action =
+                delegate( object? p ) { Console.WriteLine( p?.ToString() ); };
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
 
-            action(result);
+            action( result );
 
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2;
@@ -23,8 +23,7 @@ public class EnumViewModelAttribute : TypeAspect
     {
         var enumType = builder.Target.Types.Single();
 
-        var viewModelType = builder.Advice.IntroduceClass(
-                builder.Target,
+        var viewModelType = builder.IntroduceClass(
                 enumType.Name + "ViewModel",
                 b => { b.Accessibility = Accessibility.Public; } )
             .Declaration;

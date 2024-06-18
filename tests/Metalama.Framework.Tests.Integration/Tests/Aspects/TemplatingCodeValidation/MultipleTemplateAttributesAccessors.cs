@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValid
 public class Aspect : TypeAspect
 {
     [Template]
-    int P
+    private int P
     {
         [Template]
         get => 42;

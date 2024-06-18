@@ -4,21 +4,21 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.ReturnObjectWithCast
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             object? x = meta.Target.Parameters[0].Value;
+
             return x;
         }
     }
 
-  
-    class TargetCode
+    internal class TargetCode
     {
         // <target>
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

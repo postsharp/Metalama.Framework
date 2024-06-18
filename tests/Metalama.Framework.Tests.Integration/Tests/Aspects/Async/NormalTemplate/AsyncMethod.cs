@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplat
         }
 
         [Aspect]
-        async Task MethodReturningTask( int a )
+        private async Task MethodReturningTask( int a )
         {
             await Task.Yield();
             Console.WriteLine( "Oops" );
@@ -47,10 +47,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplat
         }
 
         [Aspect]
-        async ValueTask MethodReturningValueTask( int a )
+        private async ValueTask MethodReturningValueTask( int a )
         {
             await Task.Yield();
-            Console.WriteLine("Oops");
+            Console.WriteLine( "Oops" );
         }
     }
 }

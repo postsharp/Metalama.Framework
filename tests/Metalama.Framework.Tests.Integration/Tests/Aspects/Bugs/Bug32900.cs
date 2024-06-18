@@ -14,9 +14,7 @@ public sealed class TestAspect : OverrideMethodAspect
         {
             result = meta.Proceed();
         }
-        catch
-        {
-        }
+        catch { }
 
         return result;
     }
@@ -28,7 +26,7 @@ public partial class TargetClass
     [TestAspect]
     public async Task AsyncTaskMethod()
     {
-        int result = 42;
+        var result = 42;
         await Task.Yield();
         _ = result;
     }
@@ -36,9 +34,9 @@ public partial class TargetClass
     [TestAspect]
     public async Task<int> AsyncTaskIntMethod()
     {
-        int result = 42;
+        var result = 42;
         await Task.Yield();
+
         return result;
     }
 }
-

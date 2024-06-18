@@ -1,25 +1,26 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LocalFunctions.Parameter_Simple;
 
-class Aspect : TypeAspect
+internal class Aspect : TypeAspect
 {
     [Template]
-    void M()
+    private void M()
     {
-        Log("foo");
+        Log( "foo" );
 
-        void Log(string instance) => Console.WriteLine(instance);
+        void Log( string instance ) => Console.WriteLine( instance );
     }
 
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceMethod(builder.Target, nameof(M));
+        builder.IntroduceMethod( nameof(M) );
     }
 }
 
 // <target>
 [Aspect]
-class C { }
+internal class C { }

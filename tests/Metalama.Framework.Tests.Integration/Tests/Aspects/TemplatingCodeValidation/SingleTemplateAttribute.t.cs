@@ -1,4 +1,4 @@
 [Aspect]
-class TargetCode
+internal class TargetCode
 {
 }

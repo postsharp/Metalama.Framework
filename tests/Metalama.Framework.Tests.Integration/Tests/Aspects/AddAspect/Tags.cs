@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.Tags
@@ -8,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.Tags
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideMethod), tags: new { Friend = "Bernard" } );
+            builder.Override( nameof(OverrideMethod), tags: new { Friend = "Bernard" } );
         }
 
         [Template]

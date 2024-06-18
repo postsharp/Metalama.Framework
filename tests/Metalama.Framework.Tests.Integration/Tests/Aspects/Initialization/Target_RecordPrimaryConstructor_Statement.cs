@@ -10,8 +10,8 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer( builder.Target.PrimaryConstructor, StatementFactory.Parse("x = 13;") );
-        builder.Advice.AddInitializer(builder.Target.PrimaryConstructor, StatementFactory.Parse("Y = 27;"));
+        builder.Advice.AddInitializer( builder.Target.PrimaryConstructor, StatementFactory.Parse( "x = 13;" ) );
+        builder.Advice.AddInitializer( builder.Target.PrimaryConstructor, StatementFactory.Parse( "Y = 27;" ) );
     }
 }
 

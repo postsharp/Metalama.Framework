@@ -9,25 +9,19 @@ public class MyAspect : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.IntroduceParameter(constructor, "p1", typeof(int), TypedConstant.Create(13));
-            builder.Advice.IntroduceParameter(constructor, "p2", typeof(int), TypedConstant.Create(42));
+            builder.Advice.IntroduceParameter( constructor, "p1", typeof(int), TypedConstant.Create( 13 ) );
+            builder.Advice.IntroduceParameter( constructor, "p2", typeof(int), TypedConstant.Create( 42 ) );
         }
     }
 }
 
 // <target>
 [MyAspect]
-public class C 
+public class C
 {
-    public C()
-    {
-    }
+    public C() { }
 
-    public C(int p0)
-    {
-    }
+    public C( int p0 ) { }
 
-    public C(string p0)
-    {
-    }
+    public C( string p0 ) { }
 }

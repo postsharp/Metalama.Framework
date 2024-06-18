@@ -10,7 +10,7 @@ public class InheritedIntroductionAttribute : IntroductionAttribute
 {
     public override void VirtualOverriddenIntroduction()
     {
-        Console.WriteLine("Override template (expected).");
+        Console.WriteLine( "Override template (expected)." );
     }
 }
 

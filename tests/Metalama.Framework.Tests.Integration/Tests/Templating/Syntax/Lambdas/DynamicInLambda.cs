@@ -7,20 +7,20 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.Dynamic
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
-        Console.WriteLine(string.Join(", ", meta.Target.Parameters.Select(p => p.Value)));
+        Console.WriteLine( string.Join( ", ", meta.Target.Parameters.Select( p => p.Value ) ) );
 
         return meta.Proceed();
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    int Method(int a, int b)
+    private int Method( int a, int b )
     {
         return a + b;
     }

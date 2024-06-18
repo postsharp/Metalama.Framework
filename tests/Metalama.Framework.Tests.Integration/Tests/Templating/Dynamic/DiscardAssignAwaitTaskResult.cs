@@ -4,23 +4,24 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DiscardAssignAwaitTaskResult
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        async Task<dynamic?> Template()
+        private async Task<dynamic?> Template()
         {
-            _ = await meta.ProceedAsync();            
+            _ = await meta.ProceedAsync();
+
             return default;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        async Task<int> Method(int a)
+        private async Task<int> Method( int a )
         {
             await Task.Yield();
+
             return a;
         }
-        
     }
 }

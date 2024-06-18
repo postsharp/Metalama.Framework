@@ -1,4 +1,4 @@
-string Method(MyClass1 a)
+private string Method(MyClass1 a)
 {
   var rt = "MyClass1";
   var ct = "MyClass1";

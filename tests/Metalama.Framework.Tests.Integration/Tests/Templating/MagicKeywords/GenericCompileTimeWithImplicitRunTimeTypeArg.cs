@@ -4,20 +4,20 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericCompileTimeWithImplicitRunTimeTypeArg;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
-        _ = meta.CompileTime(new TargetCode());
+        _ = meta.CompileTime( new TargetCode() );
 
         return meta.Proceed();
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

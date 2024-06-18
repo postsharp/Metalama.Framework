@@ -1,14 +1,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
-
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.LocalFunction;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
         object? TheLocalFunction()
         {
@@ -18,10 +17,10 @@ class Aspect
         return TheLocalFunction();
     }
 }
-    
-class TargetCode
+
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

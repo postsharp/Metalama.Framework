@@ -10,7 +10,7 @@ public class DerivedAspect : BaseAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
-        base.BuildEligibility(builder);
+        base.BuildEligibility( builder );
     }
 
     public override void Validate( dynamic? value )

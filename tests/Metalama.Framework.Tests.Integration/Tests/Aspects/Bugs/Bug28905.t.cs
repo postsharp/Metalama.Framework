@@ -1,8 +1,8 @@
-class Yack
+internal class Yack
 {
   private IGreetingService? _service1;
   [Import]
-  IGreetingService? _service
+  private IGreetingService? _service
   {
     get
     {

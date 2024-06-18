@@ -29,7 +29,8 @@ public sealed class CompileTimeErrorNotificationTests : DistributedDesignTimeTes
         await testContext.WhenFullyInitialized;
 
         const string codeWithError = """
-                                                 using Metalama.Framework.Aspects;
+                                                 using Metalama.Framework.Advising;
+                                                 using Metalama.Framework.Aspects; 
                                                  using Metalama.Framework.Code;
                                                  using System;
                                      

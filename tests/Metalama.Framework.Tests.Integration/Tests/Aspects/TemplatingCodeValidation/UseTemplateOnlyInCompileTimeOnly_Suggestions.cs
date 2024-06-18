@@ -5,37 +5,35 @@ using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.UseTemplateOnlyInCompileTimeOnly_Suggestions;
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.InsertStatement(GetLoggingExpression(meta.Target.Parameters[0]));
+        meta.InsertStatement( GetLoggingExpression( meta.Target.Parameters[0] ) );
 
         return meta.Proceed();
     }
 
-    private IExpression GetLoggingExpression(IParameter parameter)
+    private IExpression GetLoggingExpression( IParameter parameter )
     {
         var builder = new ExpressionBuilder();
 
-        builder.AppendTypeName(typeof(Console));
-        builder.AppendVerbatim(".WriteLine(\"this: {0}, {1}: {2}\", ");
-        builder.AppendExpression(ExpressionFactory.This());
-        builder.AppendVerbatim(", ");
-        builder.AppendLiteral(parameter.Name);
-        builder.AppendVerbatim(", ");
-        builder.AppendExpression(parameter);
-        builder.AppendVerbatim(")");
+        builder.AppendTypeName( typeof(Console) );
+        builder.AppendVerbatim( ".WriteLine(\"this: {0}, {1}: {2}\", " );
+        builder.AppendExpression( ExpressionFactory.This() );
+        builder.AppendVerbatim( ", " );
+        builder.AppendLiteral( parameter.Name );
+        builder.AppendVerbatim( ", " );
+        builder.AppendExpression( parameter );
+        builder.AppendVerbatim( ")" );
 
         return builder.ToExpression();
     }
 }
 
 // <target>
-class Target
+internal class Target
 {
     [Aspect]
-    void M(object obj)
-    {
-    }
+    private void M( object obj ) { }
 }

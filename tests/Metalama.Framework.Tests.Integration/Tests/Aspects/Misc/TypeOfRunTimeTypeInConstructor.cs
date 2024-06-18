@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.TypeOfRunTimeTypeInConstructor;
 
-class TestAspect : TypeAspect
+internal class TestAspect : TypeAspect
 {
     public TestAspect()
     {
@@ -10,8 +10,8 @@ class TestAspect : TypeAspect
     }
 }
 
-class RunTimeClass { }
+internal class RunTimeClass { }
 
 // <target>
 [TestAspect]
-class TargetClass { }
+internal class TargetClass { }

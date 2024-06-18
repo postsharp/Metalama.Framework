@@ -26,8 +26,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Targe
     [Introduction]
     internal readonly struct TargetStruct
     {
-        public TargetStruct(int x)
-        {
-        }
+        public TargetStruct( int x ) { }
     }
 }

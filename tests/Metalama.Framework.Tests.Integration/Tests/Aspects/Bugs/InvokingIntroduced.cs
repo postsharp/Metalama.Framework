@@ -16,18 +16,16 @@ internal class IntroduceAndInvokeAttribute : TypeAspect
     {
         base.BuildAspect( builder );
 
-        var introducedMember = builder.Advice.IntroduceMethod( builder.Target, nameof(Introduce) );
+        var introducedMember = builder.IntroduceMethod( nameof(Introduce) );
 
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(Invoke),
             buildMethod: method => method.Name = "Invoke0",
             args: new { introduced = introducedMember.Declaration } );
 
-        var interfaceImplementation = builder.Advice.ImplementInterface( builder.Target, typeof(IFoo) );
+        var interfaceImplementation = builder.ImplementInterface( typeof(IFoo) );
 
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(Invoke),
             args: new { introduced = interfaceImplementation.GetObsoleteInterfaceMembers().Single().TargetMember } );
     }

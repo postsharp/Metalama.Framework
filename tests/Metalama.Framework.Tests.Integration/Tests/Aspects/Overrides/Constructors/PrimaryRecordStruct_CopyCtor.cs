@@ -18,7 +18,7 @@ public class OverrideAttribute : TypeAspect
                 continue;
             }
 
-            builder.Advice.Override(constructor, nameof(Template));
+            builder.Advice.Override( constructor, nameof(Template) );
         }
     }
 
@@ -31,6 +31,4 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public record class TargetStruct(int X, int Y)
-{
-}
+public record class TargetStruct( int X, int Y ) { }

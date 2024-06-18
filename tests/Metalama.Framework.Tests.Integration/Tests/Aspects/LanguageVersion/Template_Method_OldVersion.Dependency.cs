@@ -10,7 +10,7 @@ public class TheAspect : TypeAspect
     [Introduce]
     public void Method()
     {
-        Console.WriteLine("""method""");
+        Console.WriteLine( """method""" );
     }
 }
 

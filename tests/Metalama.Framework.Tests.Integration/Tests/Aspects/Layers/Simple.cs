@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Layers
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Layers
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideMethod), args: new { layerName = builder.Layer } );
+            builder.Override( nameof(OverrideMethod), args: new { layerName = builder.Layer } );
         }
 
         [Template]

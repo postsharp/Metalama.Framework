@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS8618, CS0169
@@ -10,7 +11,7 @@ internal class MyAspect : FieldAspect
 {
     public override void BuildAspect( IAspectBuilder<IField> builder )
     {
-        builder.Advice.AddContract( builder.Target, nameof(Filter), tags: new { tag = "tag" } );
+        builder.AddContract( nameof(Filter), tags: new { tag = "tag" } );
     }
 
     [Template]

@@ -10,10 +10,10 @@ public class BaseType : ICompileTimeSerializable
 
     public ValueContainer BaseContainer { get; }
 
-    public BaseType(int baseValue)
+    public BaseType( int baseValue )
     {
-        this.BaseValue = baseValue;
-        this.BaseContainer = new ValueContainer(baseValue);
+        BaseValue = baseValue;
+        BaseContainer = new ValueContainer( baseValue );
     }
 }
 
@@ -22,8 +22,8 @@ public class ValueContainer : ICompileTimeSerializable
 {
     public int Value { get; }
 
-    public ValueContainer(int value)
+    public ValueContainer( int value )
     {
-        this.Value = value;
+        Value = value;
     }
 }

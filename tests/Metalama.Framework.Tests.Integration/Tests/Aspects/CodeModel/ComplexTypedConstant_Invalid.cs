@@ -11,15 +11,15 @@ namespace Metalama.Framework.Tests.Integration.Aspects.CodeModel.ComplexTypedCon
 public class Aspect : TypeAspect
 {
     [Template]
-    int[] P { get; } = null!;
+    private int[] P { get; } = null!;
 
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var typedConstant = TypedConstant.Create(new[] { 42 });
-        builder.Advice.IntroduceParameter(builder.Target.Constructors.Single(), "p", typeof(int[]), typedConstant);
+        var typedConstant = TypedConstant.Create( new[] { 42 } );
+        builder.Advice.IntroduceParameter( builder.Target.Constructors.Single(), "p", typeof(int[]), typedConstant );
     }
 }
 
 // <target>
 [Aspect]
-class TargetCode { }
+internal class TargetCode { }

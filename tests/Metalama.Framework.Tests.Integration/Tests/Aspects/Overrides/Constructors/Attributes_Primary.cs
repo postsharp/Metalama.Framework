@@ -22,13 +22,13 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template));
+        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template) );
     }
 
     [Template]
     public void Template()
     {
-        Console.WriteLine("This is the overridden constructor.");
+        Console.WriteLine( "This is the overridden constructor." );
     }
 }
 
@@ -40,10 +40,10 @@ public class ParamOnlyAttribute : Attribute { }
 
 // <target>
 [Override]
-[method:ConstructorOnly]
-internal class TargetClass([ParamOnly] int x)
+[method: ConstructorOnly]
+internal class TargetClass( [ParamOnly] int x )
 {
-    int Z = x;
+    private int Z = x;
 }
 
 #endif

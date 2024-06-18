@@ -231,7 +231,7 @@ namespace Metalama.Framework.Code.Collections
         {
             private readonly IEnumerable<T> _underlying;
             private List<T>? _cache;
-            
+
             public EnumerableCache( IEnumerable<T> underlying )
             {
                 this._underlying = underlying;

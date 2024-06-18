@@ -1,9 +1,9 @@
 // Warning CS8618 on `P`: `Non-nullable property 'P' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.`
-class B
+internal class B
 {
   public virtual string P { get; set; }
 }
-class C : B
+internal class C : B
 {
   [NotNull]
   public override string P
@@ -20,7 +20,7 @@ class C : B
     }
   }
 }
-class C2 : C
+internal class C2 : C
 {
   public override string P
   {

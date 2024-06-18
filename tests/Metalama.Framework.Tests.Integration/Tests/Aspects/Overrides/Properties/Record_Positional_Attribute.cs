@@ -7,9 +7,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     {
         public override dynamic? OverrideProperty
         {
-            get {
-                Console.WriteLine("Sob");
-                return meta.Proceed(); }
+            get
+            {
+                Console.WriteLine( "Sob" );
+
+                return meta.Proceed();
+            }
             set
             {
                 meta.Proceed();
@@ -19,6 +22,4 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
 
     // <target>
     internal record MyRecord( int A, [property: MyAspect] int B );
-
-
 }

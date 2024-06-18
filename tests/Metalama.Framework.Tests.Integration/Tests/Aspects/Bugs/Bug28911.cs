@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug18911
 {
- public class EmptyOverrideFieldOrPropertyAttribute : OverrideFieldOrPropertyAspect
+    public class EmptyOverrideFieldOrPropertyAttribute : OverrideFieldOrPropertyAspect
     {
         public override dynamic? OverrideProperty
         {
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug18911
     }
 
     // <target>
-   class EmptyOverrideFieldOrPropertyExample
+    internal class EmptyOverrideFieldOrPropertyExample
     {
         [EmptyOverrideFieldOrProperty]
         public string? Property { get; set; }

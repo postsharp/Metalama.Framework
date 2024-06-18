@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.GenericReturnType;
@@ -7,7 +8,7 @@ public class Override : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override( builder.Target, nameof(Template), args: new { T = builder.Target.ReturnType } );
+        builder.Override( nameof(Template), args: new { T = builder.Target.ReturnType } );
     }
 
     [Template]

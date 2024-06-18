@@ -26,7 +26,8 @@ public sealed class XmlDocTriviaTests : AspectTestBase
         const string code = @"
 using System;
 using System.Linq;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 
@@ -85,7 +86,7 @@ public class TestClass
             .ToString();
 
         var expectedTransformedProperty =
-            codeFormattingOptions != CodeFormattingOptions.Formatted 
+            codeFormattingOptions != CodeFormattingOptions.Formatted
                 ? @"
 [TestAspect]
 public class TestClass

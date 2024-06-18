@@ -4,22 +4,22 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Misc.ElementAccess
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-           Console.WriteLine( (string?) meta.Tags["TestKey"] );
-           Console.WriteLine( meta.This[0] );
-           Console.WriteLine( meta.Target.Parameters[0].Value );
+            Console.WriteLine( (string?)meta.Tags["TestKey"] );
+            Console.WriteLine( meta.This[0] );
+            Console.WriteLine( meta.Target.Parameters[0].Value );
 
-           return 0;
+            return 0;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -5,12 +5,12 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignVoid
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            dynamic? x = TypeFactory.GetType(SpecialType.Int32).DefaultValue();
+            var x = TypeFactory.GetType( SpecialType.Int32 ).DefaultValue();
 
             x = meta.Proceed();
 
@@ -18,12 +18,11 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignVoid
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method(int a)
+        private void Method( int a )
         {
-            Console.WriteLine("Hello, world.");
+            Console.WriteLine( "Hello, world." );
         }
-        
     }
 }

@@ -10,14 +10,14 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("virtual method");
+        Console.WriteLine( "virtual method" );
 
         return meta.Proceed();
     }
 
-    public async override Task<dynamic?> OverrideAsyncMethod()
+    public override async Task<dynamic?> OverrideAsyncMethod()
     {
-        Console.WriteLine("normal template");
+        Console.WriteLine( "normal template" );
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         base.OverrideAsyncMethod();
@@ -30,7 +30,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private async Task Method()
-    {
-    }
+    private async Task Method() { }
 }

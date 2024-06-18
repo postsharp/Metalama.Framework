@@ -10,6 +10,7 @@ public class Override : OverrideMethodAspect
         int LocalFunction()
         {
             var x = meta.Proceed();
+
             return x?.GetHashCode() ?? 0;
         }
 

@@ -4,7 +4,7 @@ internal struct TargetStruct
   private int _existingField;
   public TargetStruct(int x)
   {
-    this._existingField = x;
+    _existingField = x;
   }
   public global::System.Int32 IntroducedProperty { get; set; }
   public global::System.Int32 IntroducedProperty_Initializer { get; set; } = (global::System.Int32)42;

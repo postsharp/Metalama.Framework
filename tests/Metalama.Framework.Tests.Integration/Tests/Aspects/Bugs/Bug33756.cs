@@ -9,7 +9,6 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33756;
 
-
 public class CacheAttribute : OverrideMethodAspect
 {
     [Introduce( WhenExists = OverrideStrategy.Ignore )]

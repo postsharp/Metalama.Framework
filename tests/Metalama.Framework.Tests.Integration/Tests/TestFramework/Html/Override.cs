@@ -8,17 +8,18 @@ namespace Metalama.Framework.IntegrationTests.TestFramework.Html.Override
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "This is overridden method." );
+
             return meta.Proceed();
         }
     }
 
     // <target>
-    internal class TargetClass 
+    internal class TargetClass
     {
         [Override]
         public void TargetMethod()
         {
             Console.WriteLine( "This is target method." );
-        }   
+        }
     }
 }

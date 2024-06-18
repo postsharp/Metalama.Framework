@@ -6,29 +6,29 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.OutVarInRunTimeConditionalBlock_Error;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
-    void M(out int i) => i = 1;
+    private void M( out int i ) => i = 1;
 
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
-        int i = meta.CompileTime(0);
+        var i = meta.CompileTime( 0 );
 
         if (meta.Target.Parameters.Single().Value > 0)
         {
-            M(out i);
+            M( out i );
         }
 
-        Console.WriteLine($"i={i}");
+        Console.WriteLine( $"i={i}" );
 
         return meta.Proceed();
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.IntroducedType;
@@ -8,16 +9,14 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var type = builder.Advice.IntroduceClass( builder.Target, "IntroducedType" ).Declaration;
+        var type = builder.IntroduceClass( "IntroducedType" ).Declaration;
 
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(Method),
             args: new { t = type },
             buildMethod: b => { b.Name = "FromBaseCompilation"; } );
 
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(Method),
             args: new { t = type },
             buildMethod: b => { b.Name = "FromMutableCompilation"; } );

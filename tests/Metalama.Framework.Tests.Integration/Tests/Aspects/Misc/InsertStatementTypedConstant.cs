@@ -7,7 +7,7 @@ public class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.InsertStatement(TypedConstant.Create(42));
+        meta.InsertStatement( TypedConstant.Create( 42 ) );
 
         return null;
     }
@@ -17,5 +17,5 @@ public class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    void M() { }
+    private void M() { }
 }

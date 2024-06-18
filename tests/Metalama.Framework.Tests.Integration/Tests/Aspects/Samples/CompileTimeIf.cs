@@ -9,11 +9,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.CompileTime
         {
             if (meta.Target.Method.IsStatic)
             {
-                Console.WriteLine($"Invoking {meta.Target.Method.ToDisplayString()}");
+                Console.WriteLine( $"Invoking {meta.Target.Method.ToDisplayString()}" );
             }
             else
             {
-                Console.WriteLine($"Invoking {meta.Target.Method.ToDisplayString()} on instance {meta.This.ToString()}.");
+                Console.WriteLine( $"Invoking {meta.Target.Method.ToDisplayString()} on instance {meta.This.ToString()}." );
             }
 
             return meta.Proceed();
@@ -26,13 +26,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.CompileTime
         [CompileTimeIf]
         public void InstanceMethod()
         {
-            Console.WriteLine("InstanceMethod");
+            Console.WriteLine( "InstanceMethod" );
         }
 
         [CompileTimeIf]
         public static void StaticMethod()
         {
-            Console.WriteLine("StaticMethod");
+            Console.WriteLine( "StaticMethod" );
         }
     }
 }

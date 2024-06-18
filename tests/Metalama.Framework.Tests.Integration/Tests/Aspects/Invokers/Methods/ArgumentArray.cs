@@ -10,23 +10,23 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ar
 
 public class TestAttribute : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(GetMethodInvokerDelegate), args: new { method = builder.Target });
+        builder.Advice.IntroduceMethod( builder.Target.DeclaringType, nameof(GetMethodInvokerDelegate), args: new { method = builder.Target } );
     }
 
     [Template]
-    public Func<object?, object?[], object?> GetMethodInvokerDelegate(IMethod method)
+    public Func<object?, object?[], object?> GetMethodInvokerDelegate( IMethod method )
     {
         return Invoke;
 
-        object? Invoke(object? instance, object?[] args)
+        object? Invoke( object? instance, object?[] args )
         {
-            var argExpressions = method.Parameters.Select(p => ExpressionFactory.Capture(args[p.Index]!));
+            var argExpressions = method.Parameters.Select( p => ExpressionFactory.Capture( args[p.Index]! ) );
 
-            return method.Invoke(argExpressions);
+            return method.Invoke( argExpressions );
         }
     }
 }
@@ -35,5 +35,5 @@ public class TestAttribute : MethodAspect
 internal class TargetClass
 {
     [Test]
-    int M(int i, int j) => i + j;
+    private int M( int i, int j ) => i + j;
 }

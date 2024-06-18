@@ -9,5 +9,5 @@ internal class IntroductionAttribute : TypeAspect
 }
 
 // <target>
-[Introduction(IntroducedProperty = 42)]
+[Introduction( IntroducedProperty = 42 )]
 internal class TargetClass { }

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810;
 
@@ -14,8 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advice.IntroduceMethod(
-                builder.Target,
+            var typedMethod = builder.IntroduceMethod(
                 nameof(CloneImpl),
                 buildMethod: m =>
                 {
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
                     m.ReturnType = builder.Target;
                 } );
 
-            builder.Advice.ImplementInterface( builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
+            builder.ImplementInterface( typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
         }
 
         [Template]

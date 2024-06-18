@@ -8,21 +8,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericC
     namespace UsingStatic
     {
         [CompileTime]
-        class Aspect
+        internal class Aspect
         {
             [TestTemplate]
-            dynamic? Template()
+            private dynamic? Template()
             {
-                var x = meta.CompileTime<TargetCode?>(null);
-                var y = meta.CompileTime<TargetCode>(null);
+                var x = meta.CompileTime<TargetCode?>( null );
+                var y = meta.CompileTime<TargetCode>( null );
 
                 return meta.Proceed();
             }
         }
 
-        class TargetCode
+        internal class TargetCode
         {
-            int Method(int a)
+            private int Method( int a )
             {
                 return a;
             }

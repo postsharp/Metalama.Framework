@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_Introduced;
 
@@ -27,8 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
                 }
             }
 
-            var introducedIndexer = builder.Advice.IntroduceIndexer(
-                    builder.Target,
+            var introducedIndexer = builder.IntroduceIndexer(
                     TypeFactory.GetType( typeof(string) ).ToNullableType(),
                     nameof(GetTemplate),
                     nameof(SetTemplate) )

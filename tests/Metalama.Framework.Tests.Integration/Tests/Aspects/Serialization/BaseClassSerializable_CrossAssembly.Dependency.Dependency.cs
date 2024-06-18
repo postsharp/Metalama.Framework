@@ -8,8 +8,8 @@ public class BaseType : ICompileTimeSerializable
 {
     public int BaseValue { get; }
 
-    public BaseType(int baseValue)
+    public BaseType( int baseValue )
     {
-        this.BaseValue = baseValue;
+        BaseValue = baseValue;
     }
 }

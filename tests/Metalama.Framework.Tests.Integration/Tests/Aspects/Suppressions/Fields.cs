@@ -16,15 +16,15 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Fields
 {
     public class SuppressWarningAttribute : FieldAspect
     {
-        private static readonly SuppressionDefinition _suppression1 = new("CS0169");
-        private static readonly SuppressionDefinition _suppression2 = new("CS0649");
+        private static readonly SuppressionDefinition _suppression1 = new( "CS0169" );
+        private static readonly SuppressionDefinition _suppression2 = new( "CS0649" );
 
         public SuppressWarningAttribute() { }
 
         public override void BuildAspect( IAspectBuilder<IField> builder )
         {
-            builder.Diagnostics.Suppress(_suppression1, builder.Target);
-            builder.Diagnostics.Suppress(_suppression2, builder.Target);
+            builder.Diagnostics.Suppress( _suppression1, builder.Target );
+            builder.Diagnostics.Suppress( _suppression2, builder.Target );
         }
     }
 

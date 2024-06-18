@@ -7,20 +7,20 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DesignTime.NullableGenericSpecialType;
 
-class MyAspect : MethodAspect
+internal class MyAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
         _ = builder.Target.ReturnType.SpecialType;
     }
 }
 
 // <target>
-class C
+internal class C
 {
     [MyAspect]
-    T? MStruct<T>() where T : struct => null;
+    private T? MStruct<T>() where T : struct => null;
 
     [MyAspect]
-    T? MClass<T>() where T : class => null;
+    private T? MClass<T>() where T : class => null;
 }

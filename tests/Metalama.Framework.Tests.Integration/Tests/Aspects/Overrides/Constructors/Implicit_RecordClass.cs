@@ -13,7 +13,7 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(c => c is { Parameters.Count: 0 }), nameof(Template));
+        builder.Advice.Override( builder.Target.Constructors.Single( c => c is { Parameters.Count: 0 } ), nameof(Template) );
     }
 
     [Template]
@@ -26,6 +26,4 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public record class TargetClass
-{
-}
+public record class TargetClass { }

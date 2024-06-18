@@ -8,7 +8,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicPar
 
 internal class Aspect : ContractAspect
 {
-    public override void Validate(dynamic? value)
+    public override void Validate( dynamic? value )
     {
         value?.ToString();
         value!.ToString();
@@ -16,24 +16,24 @@ internal class Aspect : ContractAspect
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
-    class Nullable
+    private class Nullable
     {
         [Aspect]
         public string? Field = null;
-        
+
         [Aspect]
         public string? Property { get; set; }
 
         [Aspect]
-        public string? this[int i] => null;
+        public string? this[ int i ] => null;
 
         [return: Aspect]
-        string? Method([Aspect] string? arg) => arg;
+        private string? Method( [Aspect] string? arg ) => arg;
     }
 
-    class NotNullable
+    private class NotNullable
     {
         [Aspect]
         public string Field = null!;
@@ -42,15 +42,15 @@ class TargetCode
         public string Property { get; set; } = null!;
 
         [Aspect]
-        public string this[int i] => null!;
+        public string this[ int i ] => null!;
 
         [return: Aspect]
-        string Method([Aspect] string arg) => arg;
+        private string Method( [Aspect] string arg ) => arg;
     }
 
 #nullable disable
 
-    class Oblivious
+    private class Oblivious
     {
         [Aspect]
         public string Field = null;
@@ -59,9 +59,9 @@ class TargetCode
         public string Property { get; set; }
 
         [Aspect]
-        public string this[int i] => null;
+        public string this[ int i ] => null;
 
         [return: Aspect]
-        string Method([Aspect] string arg) => arg;
+        private string Method( [Aspect] string arg ) => arg;
     }
 }

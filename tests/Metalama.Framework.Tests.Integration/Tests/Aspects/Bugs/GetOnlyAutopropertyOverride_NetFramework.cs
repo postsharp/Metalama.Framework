@@ -14,13 +14,13 @@ public sealed class TestAspect : OverrideFieldOrPropertyAspect
     {
         get
         {
-            Console.WriteLine("getter");
+            Console.WriteLine( "getter" );
 
             return meta.Proceed();
         }
         set
         {
-            Console.WriteLine("setter");
+            Console.WriteLine( "setter" );
 
             meta.Proceed();
         }

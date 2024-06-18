@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
@@ -13,37 +14,36 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties
 
 public class InvokerAspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        builder.Advice.OverrideAccessors(
-            builder.Target,
+        builder.OverrideAccessors(
             nameof(GetTemplate),
             nameof(SetTemplate),
-            new { target = ((INamedType)builder.Target.DeclaringType.Fields.Single().Type).Properties.OfName("Property").Single() });
+            new { target = ( (INamedType)builder.Target.DeclaringType.Fields.Single().Type ).Properties.OfName( "Property" ).Single() } );
     }
 
     [Template]
-    public dynamic? GetTemplate([CompileTime] IProperty target)
+    public dynamic? GetTemplate( [CompileTime] IProperty target )
     {
-        meta.InsertComment("Invoke instance.Property");
-        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value).Value;
-        meta.InsertComment("Invoke instance?.Property");
-        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.NullConditional).Value;
-        meta.InsertComment("Invoke instance.Property");
-        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final).Value;
-        meta.InsertComment("Invoke instance?.Property");
-        _ = target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final | InvokerOptions.NullConditional).Value;
+        meta.InsertComment( "Invoke instance.Property" );
+        _ = target.With( (IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value ).Value;
+        meta.InsertComment( "Invoke instance?.Property" );
+        _ = target.With( (IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.NullConditional ).Value;
+        meta.InsertComment( "Invoke instance.Property" );
+        _ = target.With( (IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final ).Value;
+        meta.InsertComment( "Invoke instance?.Property" );
+        _ = target.With( (IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final | InvokerOptions.NullConditional ).Value;
 
         return meta.Proceed();
     }
 
     [Template]
-    public void SetTemplate([CompileTime] IProperty target)
+    public void SetTemplate( [CompileTime] IProperty target )
     {
-        meta.InsertComment("Invoke instance.Property");
-        target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value).Value = 42;
-        meta.InsertComment("Invoke instance.Property");
-        target.With((IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final).Value = 42;
+        meta.InsertComment( "Invoke instance.Property" );
+        target.With( (IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value ).Value = 42;
+        meta.InsertComment( "Invoke instance.Property" );
+        target.With( (IExpression?)meta.Target.Property.DeclaringType.Fields.Single().Value, InvokerOptions.Final ).Value = 42;
 
         meta.Proceed();
     }
@@ -53,8 +53,11 @@ public class DifferentClass
 {
     public int Property
     {
-        get { return 0; }
-        set {}       
+        get
+        {
+            return 0;
+        }
+        set { }
     }
 }
 
@@ -66,7 +69,10 @@ public class TargetClass
     [InvokerAspect]
     public int Invoker
     {
-        get { return 0; }
+        get
+        {
+            return 0;
+        }
         set { }
     }
 }

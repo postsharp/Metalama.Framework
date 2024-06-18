@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33446;
 
 // <target>
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {

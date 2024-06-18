@@ -11,7 +11,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.A
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine( "This is the overriding method." );
+
             return meta.Proceed();
         }
     }
@@ -22,37 +23,37 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.A
         [Override]
         private void PrivateMethod()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
 
         [Override]
         private protected void PrivateProtectedMethod()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
 
         [Override]
         protected void ProtectedMethod()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
 
         [Override]
         internal void InternalMethod()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
 
         [Override]
         protected internal void ProtectedInternalMethod()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
 
         [Override]
         public void PublicMethod()
         {
-            Console.WriteLine("This is the original method.");
+            Console.WriteLine( "This is the original method." );
         }
     }
 }

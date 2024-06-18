@@ -1,5 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Finalizers.ExistingConflict_Override
@@ -10,15 +11,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Finalizers.E
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var introductionResult = builder.Advice.IntroduceFinalizer(builder.Target, nameof(IntroduceTemplate), whenExists: OverrideStrategy.Override);
+            var introductionResult = builder.IntroduceFinalizer( nameof(IntroduceTemplate), whenExists: OverrideStrategy.Override );
         }
 
         [Template]
         public dynamic? IntroduceTemplate()
         {
-            Console.WriteLine("This is the introduction.");
+            Console.WriteLine( "This is the introduction." );
+
             return meta.Proceed();
         }
     }
@@ -29,7 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Finalizers.E
     {
         ~TargetClass()
         {
-            Console.WriteLine("This is the existing finalizer.");
+            Console.WriteLine( "This is the existing finalizer." );
         }
     }
 }

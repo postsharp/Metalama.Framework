@@ -6,13 +6,13 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.DictionaryInitializer
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             // Neutral.
-            var x = new Dictionary<int,int> { [1] = 1, [2] = 2, [3] = 3 };
+            var x = new Dictionary<int, int> { [1] = 1, [2] = 2, [3] = 3 };
 
             // Compile-time.
             var y = new Dictionary<int, int> { [1] = meta.Target.Parameters.Count, [2] = 2, [3] = 3 };
@@ -23,19 +23,21 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Dict
 
             // Run-time, other form.
             Dictionary<string, string> report =
-                 new Dictionary<string, string>() {
-                            { "Title", meta.Target.Member.Name },
-                            { "ID", Guid.NewGuid().ToString() },
-                            { "HTTP result", "400"},
-                            { "Exception type",  meta.Target.Parameters[0].Value.ToString()}
-                 };
+                new()
+                {
+                    { "Title", meta.Target.Member.Name },
+                    { "ID", Guid.NewGuid().ToString() },
+                    { "HTTP result", "400" },
+                    { "Exception type", meta.Target.Parameters[0].Value.ToString() }
+                };
+
             return default;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

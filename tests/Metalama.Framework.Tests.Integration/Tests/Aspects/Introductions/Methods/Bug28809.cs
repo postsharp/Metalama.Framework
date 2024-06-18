@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28809
@@ -8,13 +9,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var newEvent = builder.Advice.IntroduceEvent(
-                    builder.Target,
-                    nameof(PropertyChanged) )
+            var newEvent = builder.IntroduceEvent( nameof(PropertyChanged) )
                 .Declaration;
 
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(OnPropertyChanged),
                 tags: new { @event = newEvent } );
         }

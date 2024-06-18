@@ -14,7 +14,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Loc
         public override dynamic? OverrideMethod()
         {
             var result = meta.Proceed();
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine( "This is the overriding method." );
+
             return result;
         }
     }
@@ -45,7 +46,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Loc
         }
 
         [Override]
-        public int ParameterCapture(int x)
+        public int ParameterCapture( int x )
         {
             return Foo();
 
@@ -56,9 +57,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Loc
         }
 
         [Override]
-        public int LocalCapture(int x)
+        public int LocalCapture( int x )
         {
-            int y = x + 1;
+            var y = x + 1;
 
             return Foo();
 

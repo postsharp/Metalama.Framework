@@ -1,7 +1,7 @@
 [Override]
 public class C
 {
-  void M()
+  private void M()
   {
   }
   private global::System.Int32 _introducedField;

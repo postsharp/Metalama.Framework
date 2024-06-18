@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using System;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.InterfaceMember;
 using Metalama.Framework.Code;
@@ -56,7 +57,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.ImplementInterface( builder.Target, typeof(IntroducedInterface) );
+            builder.ImplementInterface( typeof(IntroducedInterface) );
         }
 
         [InterfaceMember( IsExplicit = false )]

@@ -1,4 +1,4 @@
-int Method(int a)
+private int Method(int a)
 {
   var x = global::System.DateTime.Now.DayOfWeek switch
   {

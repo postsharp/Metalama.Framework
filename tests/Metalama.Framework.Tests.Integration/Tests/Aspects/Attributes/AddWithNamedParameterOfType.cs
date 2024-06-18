@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 
@@ -15,8 +16,7 @@ public class MyAspect : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
+        builder.IntroduceAttribute(
             AttributeConstruction.Create(
                 typeof(MyAttribute),
                 namedArguments: new KeyValuePair<string, object?>[] { new( "Property", typeof(C) ) } ) );

@@ -7,15 +7,16 @@ public class AspectAttribute : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Enumerable.Range(0, 10).Select(i => (i, 0)).Select(x => x.i);
-        Enumerable.Range(0, 10).Select(i => (i, 1)).Select(x => x.i);
+        Enumerable.Range( 0, 10 ).Select( i => ( i, 0 ) ).Select( x => x.i );
+        Enumerable.Range( 0, 10 ).Select( i => ( i, 1 ) ).Select( x => x.i );
+
         return null;
     }
 }
 
-class Target
+internal class Target
 {
     // <target>
     [Aspect]
-    void M() { }
+    private void M() { }
 }

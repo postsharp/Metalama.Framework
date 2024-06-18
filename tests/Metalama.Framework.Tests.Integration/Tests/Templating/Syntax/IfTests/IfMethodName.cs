@@ -5,12 +5,12 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfMethodName
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            int b = meta.CompileTime(0);
+            var b = meta.CompileTime( 0 );
 
             if (meta.Target.Method.Name == "Method")
             {
@@ -21,16 +21,14 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfMetho
                 b = 2;
             }
 
-            Console.WriteLine(b);
+            Console.WriteLine( b );
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method()
-        {
-        }
+        private void Method() { }
     }
 }

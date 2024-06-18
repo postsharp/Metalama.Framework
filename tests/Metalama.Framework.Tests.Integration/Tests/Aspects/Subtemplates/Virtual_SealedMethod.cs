@@ -10,14 +10,14 @@ internal class Aspect : OverrideMethodAspect
 {
     public sealed override dynamic? OverrideMethod()
     {
-        Console.WriteLine("virtual method");
+        Console.WriteLine( "virtual method" );
 
         return meta.Proceed();
     }
 
     public override async Task<dynamic?> OverrideAsyncMethod()
     {
-        Console.WriteLine("normal template");
+        Console.WriteLine( "normal template" );
 
         OverrideMethod();
 

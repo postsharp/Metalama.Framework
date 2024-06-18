@@ -14,14 +14,14 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override(constructor, nameof(Template), args: new { i = 1 });
-            builder.Advice.IntroduceParameter(constructor, "introduced", TypeFactory.GetType(SpecialType.Int32), TypedConstant.Create(42));
-            builder.Advice.Override(constructor, nameof(Template), args: new { i = 2 });
+            builder.Advice.Override( constructor, nameof(Template), args: new { i = 1 } );
+            builder.Advice.IntroduceParameter( constructor, "introduced", TypeFactory.GetType( SpecialType.Int32 ), TypedConstant.Create( 42 ) );
+            builder.Advice.Override( constructor, nameof(Template), args: new { i = 2 } );
         }
     }
 
     [Template]
-    public void Template([CompileTime] int i)
+    public void Template( [CompileTime] int i )
     {
         Console.WriteLine( $"This is the override {i}." );
 
@@ -40,10 +40,11 @@ public class TargetClass
 {
     public TargetClass()
     {
-        Console.WriteLine($"This is the original constructor.");
+        Console.WriteLine( $"This is the original constructor." );
     }
-    public TargetClass(int x)
+
+    public TargetClass( int x )
     {
-        Console.WriteLine($"This is the original constructor.");
+        Console.WriteLine( $"This is the original constructor." );
     }
 }

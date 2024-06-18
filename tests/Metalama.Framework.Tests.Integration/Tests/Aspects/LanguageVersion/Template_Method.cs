@@ -14,14 +14,12 @@ public class TheAspect : TypeAspect
     [Introduce]
     public void Method()
     {
-        Console.WriteLine("""method""");
+        Console.WriteLine( """method""" );
     }
 }
 
 // <target>
 [TheAspect]
-class Target
-{
-}
+internal class Target { }
 
 #endif

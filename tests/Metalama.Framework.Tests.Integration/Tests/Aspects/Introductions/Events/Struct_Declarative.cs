@@ -25,9 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Struc
         public event EventHandler? IntroducedEvent_Static_Initializer = Foo;
 
         [Introduce]
-        public static void Foo(object? sender, EventArgs args)
-        {
-        }
+        public static void Foo( object? sender, EventArgs args ) { }
     }
 
     // <target>
@@ -36,9 +34,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Struc
     {
         private int _existingField;
 
-        public TargetStruct(int x)
+        public TargetStruct( int x )
         {
-            this._existingField = x;
+            _existingField = x;
         }
     }
 }

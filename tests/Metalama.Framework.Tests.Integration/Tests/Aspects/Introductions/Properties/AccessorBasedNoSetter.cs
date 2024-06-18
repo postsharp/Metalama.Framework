@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Properties.AccessorBasedNoSetter
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty( builder.Target, "TheProperty", nameof(Getter), null );
+            builder.IntroduceProperty( "TheProperty", nameof(Getter), null );
         }
     }
 

@@ -2,10 +2,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValid
 
 using Metalama.Framework.Aspects;
 
-
-class C
+internal class C
 {
-    void M()
+    private void M()
     {
         meta.Proceed();
     }

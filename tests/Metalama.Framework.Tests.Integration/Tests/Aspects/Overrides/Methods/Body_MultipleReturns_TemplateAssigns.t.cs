@@ -13,7 +13,9 @@ internal class TargetClass
       x--;
     }
     if (x > 0)
+    {
       goto __aspect_return_1;
+    }
     __aspect_return_1:
       object result = null;
     global::System.Console.WriteLine("End override.");
@@ -49,7 +51,7 @@ internal class TargetClass
   {
     global::System.Console.WriteLine("Begin override.");
     T? result;
-    int z = 42;
+    var z = 42;
     {
       while (z > 0)
       {

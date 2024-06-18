@@ -16,31 +16,31 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.Parameter
             builder.Advice.OverrideAccessors(
                 builder.Target.Events.Single(),
                 nameof(RenamedValueParameter),
-                nameof(RenamedValueParameter));
+                nameof(RenamedValueParameter) );
         }
 
         [Template]
-        public void RenamedValueParameter(EventHandler x)
+        public void RenamedValueParameter( EventHandler x )
         {
-            x.Invoke(null, new EventArgs());
+            x.Invoke( null, new EventArgs() );
             meta.Proceed();
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass 
+    internal class TargetClass
     {
         public event EventHandler Event
         {
             add
             {
-                EventHandler ev = value;
+                var ev = value;
             }
 
             remove
             {
-                EventHandler ev = value;
+                var ev = value;
             }
         }
     }

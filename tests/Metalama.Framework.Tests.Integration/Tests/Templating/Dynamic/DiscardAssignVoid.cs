@@ -4,23 +4,22 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DiscardAssignVoid
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             _ = meta.Proceed();
-            
+
             return default;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method(int a)
+        private void Method( int a )
         {
-            Console.WriteLine("Hello, world.");
+            Console.WriteLine( "Hello, world." );
         }
-        
     }
 }

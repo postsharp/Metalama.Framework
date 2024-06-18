@@ -1,16 +1,15 @@
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32744;
 
 #pragma warning disable CS8321
-
 using Metalama.Framework.Aspects;
 
 public class TestAttribute : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
-    {        
+    {
         return meta.Proceed();
 
-        void Foo(int i) {}
+        void Foo( int i ) { }
     }
 }
 

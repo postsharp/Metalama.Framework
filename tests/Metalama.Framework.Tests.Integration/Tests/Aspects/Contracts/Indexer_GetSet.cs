@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618 
+#pragma warning disable CS8618
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_GetSet
 {
@@ -22,20 +22,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_G
         private int q;
 
         [NotZero]
-        public int this[int x]
+        public int this[ int x ]
         {
             get
             {
                 return 42;
             }
 
-            set
-            {
-            }
+            set { }
         }
 
         [NotZero]
-        public int this[int x, int y]
+        public int this[ int x, int y ]
         {
             get => q;
             set => q = value + 1;

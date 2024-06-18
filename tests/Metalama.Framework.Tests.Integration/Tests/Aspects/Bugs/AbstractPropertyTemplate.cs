@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0169 // The field 'Target.i' is never used
@@ -8,17 +9,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.AbstractProper
 
 public abstract class AbstractAspect : FieldOrPropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
     {
-        builder.Advice.Override(builder.Target, nameof(OverrideProperty));
+        builder.Override( nameof(OverrideProperty) );
     }
 
     [Template]
-    public abstract dynamic? OverrideProperty
-    {
-        get;
-        set;
-    }
+    public abstract dynamic? OverrideProperty { get; set; }
 }
 
 public class DerivedAspect : AbstractAspect
@@ -31,8 +28,8 @@ public class DerivedAspect : AbstractAspect
 }
 
 // <target>
-class Target
+internal class Target
 {
     [DerivedAspect]
-    int i;
+    private int i;
 }

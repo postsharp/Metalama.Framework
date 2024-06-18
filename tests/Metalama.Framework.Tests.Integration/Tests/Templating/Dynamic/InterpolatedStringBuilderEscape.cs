@@ -6,34 +6,33 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.InterpolatedStringBuilderEscape
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-        
             // Normal literals.
-            Console.WriteLine("\\\n{}\"");
-            Console.WriteLine( meta.CompileTime( "\\" + "\n{}\"" ));
-            
-        
+            Console.WriteLine( "\\\n{}\"" );
+            Console.WriteLine( meta.CompileTime( "\\" + "\n{}\"" ) );
+
             // Interpolated string.
             var s = new InterpolatedStringBuilder();
             s.AddText( "{ " );
             s.AddText( "$" );
             s.AddText( "\\" );
             s.AddText( "\n" );
-            s.AddText(" }");
-            
+            s.AddText( " }" );
+
             var a = s.ToValue();
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, string c, DateTime dt)
+        private int Method( int a, string c, DateTime dt )
         {
             return a;
         }

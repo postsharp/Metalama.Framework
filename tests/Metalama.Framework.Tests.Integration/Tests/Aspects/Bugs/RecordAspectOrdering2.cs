@@ -10,32 +10,29 @@ namespace Metalama.Framework.Tests.Integration.Aspects.RecordAspectOrdering2;
 
 internal class Fabric : ProjectFabric
 {
-    public override void AmendProject(IProjectAmender amender)
+    public override void AmendProject( IProjectAmender amender )
     {
         amender
-            .SelectMany(compilation => compilation.AllTypes)
+            .SelectMany( compilation => compilation.AllTypes )
             .AddAspectIfEligible<LogAttribute>();
 
         amender
-            .SelectMany(compilation => compilation.AllTypes)
-            .SelectMany(type => type.Methods)
-            .Where(method => method.Accessibility == Accessibility.Public && method.Name != "ToString")
+            .SelectMany( compilation => compilation.AllTypes )
+            .SelectMany( type => type.Methods )
+            .Where( method => method.Accessibility == Accessibility.Public && method.Name != "ToString" )
             .AddAspectIfEligible<LogAttribute>();
     }
 }
 
 public class LogAttribute : Aspect, IAspect<IDeclaration>
 {
-    public void BuildAspect(IAspectBuilder<IDeclaration> builder)
-    {
-    }
-    public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder)
-    {
-    }
+    public void BuildAspect( IAspectBuilder<IDeclaration> builder ) { }
+
+    public void BuildEligibility( IEligibilityBuilder<IDeclaration> builder ) { }
 }
 
 // <target>
-public record Person(string Name)
+public record Person( string Name )
 {
     public Guid Id { get; init; }
 }

@@ -9,9 +9,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests that attempting to introduce open generic type (without specifying type arguments) results in an error.
      */
 
-    public interface IInterface<T> 
+    public interface IInterface<T>
     {
-        void Foo(T t); 
+        void Foo( T t );
     }
 
     public class IntroductionAttribute : TypeAspect
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                typeof(IInterface<>));
+                typeof(IInterface<>) );
         }
     }
 

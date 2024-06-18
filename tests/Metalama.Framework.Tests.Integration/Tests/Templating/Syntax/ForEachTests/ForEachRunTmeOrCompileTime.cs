@@ -5,21 +5,19 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachRunTmeOrCompileTime;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    void Template()
+    private void Template()
     {
         foreach (var i in new[] { 42 })
         {
-            Console.WriteLine(i);
+            Console.WriteLine( i );
         }
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    void Method()
-    {
-    }
+    private void Method() { }
 }

@@ -4,20 +4,18 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Eligibility.TypeFactory_;
 
-class TestAspect : TypeAspect
+internal class TestAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder) { }
+    public override void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
-    public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
+    public override void BuildEligibility( IEligibilityBuilder<INamedType> builder )
     {
-        TypeFactory.GetType(typeof(RunTimeClass));
+        TypeFactory.GetType( typeof(RunTimeClass) );
     }
 }
 
-class RunTimeClass { }
+internal class RunTimeClass { }
 
 // <target>
 [TestAspect]
-class TargetClass
-{
-}
+internal class TargetClass { }

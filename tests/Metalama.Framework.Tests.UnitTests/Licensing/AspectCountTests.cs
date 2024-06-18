@@ -96,7 +96,8 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             var licenseKey = GetLicenseKey( licenseKeyName );
 
             const string usingsCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using System;
 ";
 
@@ -242,7 +243,7 @@ namespace {0}
             {
                 Assert.Single( diagnostics, d => d.Id == expectedErrorId );
             }
-            
+
             if ( expectedErrorId == null && numberOfAspects == 0 && numberOfContracts == 0 )
             {
                 Assert.False( this.ToastNotifications.WasDetectionTriggered );
@@ -257,7 +258,8 @@ namespace {0}
         public async Task MultipleUsagesOfOneAspectAcceptedAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using System;
 
 public class Aspect : OverrideMethodAspect
@@ -303,7 +305,8 @@ class TargetClass
         public async Task SkippedAspectsDontCountAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 
@@ -369,7 +372,8 @@ class TargetClass
         public async Task PartiallySkippedAspectsDoCountAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 
@@ -453,7 +457,8 @@ class TargetClass
         public async Task AbstractAspectInstancesDontCountAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 using System.ComponentModel;
@@ -538,7 +543,8 @@ interface ITargetInterface
             var licenseKey = GetLicenseKey( licenseKeyName );
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 using System.ComponentModel;
@@ -621,7 +627,7 @@ class TargetClass : ITargetInterface
             {
                 Assert.Single( diagnostics, d => d.Id == expectedErrorId );
             }
-            
+
             Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
 
@@ -629,7 +635,8 @@ class TargetClass : ITargetInterface
         public async Task ExcludedAspectInstancesDontCountAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 
@@ -701,7 +708,8 @@ class TargetClass : ITargetInterface
         public async Task NotificationsAreTriggeredWhenOnlyAspectsAreUsedAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 

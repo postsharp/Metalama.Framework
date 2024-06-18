@@ -5,24 +5,24 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.NameClashCompileTimeForEach
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             foreach (var p in meta.Target.Parameters)
             {
                 string text = p.Name + " = " + p.Value;
-                Console.WriteLine(text);
+                Console.WriteLine( text );
             }
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

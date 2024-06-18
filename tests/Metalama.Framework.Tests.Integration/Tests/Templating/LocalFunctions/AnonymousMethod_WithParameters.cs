@@ -13,7 +13,7 @@ internal class Aspect
         object? result = null;
 
         RunTimeClass.Execute(
-            delegate ( object x )
+            delegate( object x )
             {
                 Console.WriteLine( x );
                 result = meta.Proceed();

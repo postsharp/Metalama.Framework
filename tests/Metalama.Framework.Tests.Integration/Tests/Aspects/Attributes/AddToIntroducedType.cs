@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroducedType;
@@ -14,7 +15,7 @@ internal class TypeIntroducingAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceClass( builder.Target, "TestType" );
+        var result = builder.IntroduceClass( "TestType" );
         builder.With( result.Declaration ).Outbound.AddAspect<IntroducingAspect>();
         builder.With( result.Declaration ).Outbound.AddAspect<AddAttributeAspect>();
     }
@@ -41,7 +42,7 @@ internal class AddAttributeAspect : TypeAspect
     {
         var attribute = AttributeConstruction.Create( typeof(MyAttribute) );
 
-        builder.Advice.IntroduceAttribute( builder.Target, attribute );
+        builder.IntroduceAttribute( attribute );
 
         foreach (var field in builder.Target.Fields)
         {

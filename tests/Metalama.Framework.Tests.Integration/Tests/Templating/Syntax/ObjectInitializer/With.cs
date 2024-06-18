@@ -23,10 +23,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.With
     internal record Entity1
     {
         public int Property1 { get; set; }
-
     }
 
-   
     internal class TargetCode
     {
         private object Method( object a )

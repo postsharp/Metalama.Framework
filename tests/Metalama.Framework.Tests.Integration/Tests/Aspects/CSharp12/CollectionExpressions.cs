@@ -13,29 +13,29 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.Collection
 
 public class TheAspect : OverrideMethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        int[] collection = [1, 2, 3, ..Enumerable.Range(3, 2)];
+        int[] collection = [1, 2, 3, ..Enumerable.Range( 3, 2 )];
     }
 
     public override dynamic? OverrideMethod()
     {
-        int[] collection1 = [1, 2, 3, ..Enumerable.Range(3, 2)];
-        Console.WriteLine(collection1);
+        int[] collection1 = [1, 2, 3, ..Enumerable.Range( 3, 2 )];
+        Console.WriteLine( collection1 );
 
-        int[] collection2 = [meta.Target.Parameters[0].Value, 2, 3, .. Enumerable.Range(3, 2)];
-        Console.WriteLine(collection2);
+        int[] collection2 = [meta.Target.Parameters[0].Value, 2, 3, .. Enumerable.Range( 3, 2 )];
+        Console.WriteLine( collection2 );
 
-        int[] collection3 = meta.CompileTime<int[]>([1, 2, 3, .. Enumerable.Range(3, 2)]);
-        Console.WriteLine(collection3);
+        var collection3 = meta.CompileTime<int[]>( [1, 2, 3, .. Enumerable.Range( 3, 2 )] );
+        Console.WriteLine( collection3 );
 
-        int[] collection4 = [1, meta.CompileTime(2), 3, ..Enumerable.Range(3, 2)];
-        Console.WriteLine(collection4);
+        int[] collection4 = [1, meta.CompileTime( 2 ), 3, ..Enumerable.Range( 3, 2 )];
+        Console.WriteLine( collection4 );
 
-        int[] collection5 = [1, 2, 3, ..meta.CompileTime(Enumerable.Range(3, 2))];
-        Console.WriteLine(collection5);
+        int[] collection5 = [1, 2, 3, ..meta.CompileTime( Enumerable.Range( 3, 2 ) )];
+        Console.WriteLine( collection5 );
 
         return meta.Proceed();
     }
@@ -45,9 +45,9 @@ public class C
 {
     // <target>
     [TheAspect]
-    static void M(int i)
+    private static void M( int i )
     {
-        int[] collection = [1, 2, ..Enumerable.Range(3, 2)];
+        int[] collection = [1, 2, ..Enumerable.Range( 3, 2 )];
     }
 }
 

@@ -9,14 +9,14 @@ public sealed class TestAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect( builder ); 
+        base.BuildAspect( builder );
 
         foreach (var property in builder.Target.Properties)
         {
             builder.Advice.AddContract(
                 property,
-                nameof(ValidateParameter), 
-                direction: ContractDirection.Input);
+                nameof(ValidateParameter),
+                direction: ContractDirection.Input );
 
             // #32616
             //builder.Advice.AddContract(
@@ -46,9 +46,7 @@ public class TestClass
         {
             yield return "Hello";
         }
-        set
-        {
-        }
+        set { }
     }
 
     public IEnumerator<string> Enumerator
@@ -57,8 +55,6 @@ public class TestClass
         {
             yield return "Hello";
         }
-        set
-        {
-        }
+        set { }
     }
 }

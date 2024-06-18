@@ -10,10 +10,12 @@ public class Override : OverrideMethodAspect
         {
             // Invalid code generated here.
             meta.Proceed();
+
             return "something";
         }
 
         var s = LocalFunction();
+
         return s.Length;
     }
 }

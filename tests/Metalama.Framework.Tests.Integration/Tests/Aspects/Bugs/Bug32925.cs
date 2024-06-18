@@ -7,7 +7,7 @@ public class TheAspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         var result = meta.Proceed();
-        
+
         // We invoke an extension method, but as a plain method.
         ExtensionClass.ExtensionMethod( result );
 

@@ -7,29 +7,29 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
 
 public abstract class IntroductionAttribute : TypeAspect
 {
-    [Introduce(IsVirtual = false)]
-    public virtual event System.EventHandler VirtualOverriddenIntroduction
+    [Introduce( IsVirtual = false )]
+    public virtual event EventHandler VirtualOverriddenIntroduction
     {
         add
         {
-            Console.WriteLine("Base template (wrong).");
+            Console.WriteLine( "Base template (wrong)." );
         }
         remove
         {
-            Console.WriteLine("Base template (wrong).");
+            Console.WriteLine( "Base template (wrong)." );
         }
     }
 
-    [Introduce(IsVirtual = false)]
-    public virtual event System.EventHandler VirtualIntroduction
+    [Introduce( IsVirtual = false )]
+    public virtual event EventHandler VirtualIntroduction
     {
         add
         {
-            Console.WriteLine("Base template (expected).");
+            Console.WriteLine( "Base template (expected)." );
         }
         remove
         {
-            Console.WriteLine("Base template (expected).");
+            Console.WriteLine( "Base template (expected)." );
         }
     }
 }

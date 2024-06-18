@@ -1,4 +1,5 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceProperty;
@@ -7,13 +8,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
 
 public class Aspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.IntroduceProperty(builder.Target, "Property", nameof(GetTemplate), nameof(SetTemplate), args: new { T = builder.Target, x = 42 });
-        builder.Advice.IntroduceProperty(builder.Target, "Property_GetOnly", nameof(GetTemplate), null, args: new { T = builder.Target, x = 42 });
-        builder.Advice.IntroduceProperty(builder.Target, "Property_SetOnly", null, nameof(SetTemplate), args: new { T = builder.Target, x = 42 });
+        builder.IntroduceProperty( "Property", nameof(GetTemplate), nameof(SetTemplate), args: new { T = builder.Target, x = 42 } );
+        builder.IntroduceProperty( "Property_GetOnly", nameof(GetTemplate), null, args: new { T = builder.Target, x = 42 } );
+        builder.IntroduceProperty( "Property_SetOnly", null, nameof(SetTemplate), args: new { T = builder.Target, x = 42 } );
     }
 
     [Template]
@@ -23,9 +24,7 @@ public class Aspect : TypeAspect
     }
 
     [Template]
-    private void SetTemplate<[CompileTime] T>([CompileTime] int x, T p) where T : class
-    {
-    }
+    private void SetTemplate<[CompileTime] T>( [CompileTime] int x, T p ) where T : class { }
 }
 
 // <target>

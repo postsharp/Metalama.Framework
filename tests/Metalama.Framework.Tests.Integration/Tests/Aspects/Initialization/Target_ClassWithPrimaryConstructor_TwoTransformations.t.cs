@@ -1,5 +1,5 @@
 [Aspect]
-abstract class TargetCode
+internal abstract class TargetCode
 {
   public int Property { get; }
   public TargetCode()

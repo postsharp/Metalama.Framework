@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618 
+#pragma warning disable CS8618
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_SetParam
 {
@@ -21,8 +21,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
     {
         private string? q;
 
-        public string P { get; [param: NotNull] set; }
-        
+        public string P
+        {
+            get;
+            [param: NotNull]
+            set;
+        }
+
         public string Q
         {
             get => q!;

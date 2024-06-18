@@ -22,21 +22,21 @@ internal class TargetClass
     get
     {
       global::System.Console.WriteLine("This is the overridden method.");
-      this.MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
       return 42;
     }
     set
     {
       global::System.Console.WriteLine("This is the overridden method.");
-      this.MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
       return;
     }
   }

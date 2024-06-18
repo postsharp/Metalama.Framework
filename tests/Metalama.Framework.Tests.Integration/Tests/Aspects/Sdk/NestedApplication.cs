@@ -9,23 +9,25 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.NestedApplication
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.NestedApplication.AspectWeaver")]
+    [RequireAspectWeaver( "Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.NestedApplication.AspectWeaver" )]
     internal class Aspect : TypeAspect { }
 
     [MetalamaPlugIn]
     internal class AspectWeaver : IAspectWeaver
     {
-        public Task TransformAsync(AspectWeaverContext context)
+        public Task TransformAsync( AspectWeaverContext context )
         {
-            return context.RewriteAspectTargetsAsync(new Rewriter());
+            return context.RewriteAspectTargetsAsync( new Rewriter() );
         }
 
         private class Rewriter : SafeSyntaxRewriter
         {
-            public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node)
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                var rewrittenNode = base.VisitClassDeclaration(node)!;
-                return rewrittenNode.WithLeadingTrivia(rewrittenNode.GetLeadingTrivia().AddRange(new[] { SyntaxFactory.Comment("// Rewritten."), SyntaxFactory.CarriageReturnLineFeed }));
+                var rewrittenNode = base.VisitClassDeclaration( node )!;
+
+                return rewrittenNode.WithLeadingTrivia(
+                    rewrittenNode.GetLeadingTrivia().AddRange( new[] { SyntaxFactory.Comment( "// Rewritten." ), SyntaxFactory.CarriageReturnLineFeed } ) );
             }
         }
     }
@@ -37,9 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.NestedApplicati
         internal class Outer
         {
             [Aspect]
-            internal class Inner
-            {
-            }
+            internal class Inner { }
         }
     }
 }

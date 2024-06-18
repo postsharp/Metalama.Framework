@@ -11,14 +11,8 @@ internal class TheAspect : TypeAspect
     }
 }
 
-internal class D<T> 
-{
-   
-}
+internal class D<T> { }
 
 // <target>
 [TheAspect]
-internal class DD<T> : D<T>
-{
-   
-}
+internal class DD<T> : D<T> { }

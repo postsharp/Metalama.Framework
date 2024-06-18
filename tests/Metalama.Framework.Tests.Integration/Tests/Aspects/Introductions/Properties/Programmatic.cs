@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,11 +9,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoProperty), buildProperty: p => p.Accessibility = Accessibility.Public );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(Property), buildProperty: p => p.Accessibility = Accessibility.Public );
+            builder.IntroduceProperty( nameof(AutoProperty), buildProperty: p => p.Accessibility = Accessibility.Public );
+            builder.IntroduceProperty( nameof(Property), buildProperty: p => p.Accessibility = Accessibility.Public );
 
-            builder.Advice.IntroduceProperty(
-                builder.Target,
+            builder.IntroduceProperty(
                 "PropertyFromAccessors",
                 nameof(GetPropertyTemplate),
                 nameof(SetPropertyTemplate),

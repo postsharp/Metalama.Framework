@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Redirection_Property;
 
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Redirecti
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceMethod( builder.Target, nameof(Foo) );
+            var result = builder.IntroduceMethod( nameof(Foo) );
 
             ContractAspect.RedirectContracts( builder, builder.Target.Properties.OfName( "P" ).Single(), result.Declaration.Parameters[0] );
             ContractAspect.RedirectContracts( builder, builder.Target.Properties.OfName( "Q" ).Single(), result.Declaration.Parameters[1] );

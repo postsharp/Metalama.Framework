@@ -18,9 +18,6 @@ public class TheAspect : TypeAspect
 }
 
 [TheAspect]
-internal class C
-{
-    
-}
+internal class C { }
 
 #endif

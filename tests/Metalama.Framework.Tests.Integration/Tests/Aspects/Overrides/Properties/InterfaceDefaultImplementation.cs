@@ -13,17 +13,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
 
     internal class OverrideAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
-        { 
+        public override dynamic? OverrideProperty
+        {
             get
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
                 meta.Proceed();
             }
         }

@@ -4,11 +4,11 @@
 #endif
 
 #if NET8_0_OR_GREATER && ROSLYN_4_8_0_OR_GREATER
-
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.InlineArrays_CompileTime;

@@ -31,7 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Targe
 
         public TargetStruct()
         {
-            this._fieldInitializedByCtor = 42;
+            _fieldInitializedByCtor = 42;
         }
     }
 }

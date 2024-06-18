@@ -7,8 +7,8 @@ public class MiddleType : BaseType
 {
     public int MiddleValue { get; }
 
-    public MiddleType(int baseValue, int middleValue) : base(baseValue)
+    public MiddleType( int baseValue, int middleValue ) : base( baseValue )
     {
-        this.MiddleValue = middleValue;
+        MiddleValue = middleValue;
     }
 }

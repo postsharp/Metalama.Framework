@@ -682,7 +682,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
                 A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( this._nextTransformationOrdinal++ );
 
-                A.CallTo( () => transformation.TargetDeclaration ).ReturnsLazily( () => (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
+                A.CallTo( () => transformation.TargetDeclaration )
+                    .ReturnsLazily( () => (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );

@@ -3,27 +3,30 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtual;
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("normal template");
+        Console.WriteLine( "normal template" );
 
         switch (meta.Target.Parameters["x"].Value)
         {
             case 0:
                 CalledTemplate();
+
                 break;
 
             case 1:
-                this.CalledTemplate();
+                CalledTemplate();
+
                 break;
 
             case 2:
-                {
-                    var aspect = this;
-                    aspect.CalledTemplate();
-                }
+            {
+                var aspect = this;
+                aspect.CalledTemplate();
+            }
+
                 break;
         }
 
@@ -33,28 +36,24 @@ class Aspect : OverrideMethodAspect
     [Template]
     protected virtual void CalledTemplate()
     {
-        Console.WriteLine("base called template");
+        Console.WriteLine( "base called template" );
     }
 }
 
-class DerivedAspect : Aspect
+internal class DerivedAspect : Aspect
 {
     protected override void CalledTemplate()
     {
-        Console.WriteLine("derived called template");
+        Console.WriteLine( "derived called template" );
     }
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
-    private void Method1(int x)
-    {
-    }
+    private void Method1( int x ) { }
 
     [DerivedAspect]
-    private void Method2(int x)
-    {
-    }
+    private void Method2( int x ) { }
 }

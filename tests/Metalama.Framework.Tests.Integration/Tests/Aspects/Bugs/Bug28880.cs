@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880;
 
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880
 
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideProperty) );
+            builder.Override( nameof(OverrideProperty) );
         }
     }
 

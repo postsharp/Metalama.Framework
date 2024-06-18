@@ -15,18 +15,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Paramet
             builder.Advice.OverrideAccessors(
                 builder.Target.Indexers.Single(),
                 nameof(RenamedParameterGetTemplate),
-                nameof(RenamedParameterSetTemplate));
+                nameof(RenamedParameterSetTemplate) );
         }
 
         [Template]
-        public int RenamedParameterGetTemplate(int y, string x)
+        public int RenamedParameterGetTemplate( int y, string x )
         {
             var q = y + x.ToString().Length;
+
             return meta.Proceed();
         }
 
         [Template]
-        public void RenamedParameterSetTemplate(int y, string x, int z)
+        public void RenamedParameterSetTemplate( int y, string x, int z )
         {
             var q = y + x.ToString().Length + z;
             meta.Proceed();
@@ -35,9 +36,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Paramet
 
     // <target>
     [Introduction]
-    internal class TargetClass 
+    internal class TargetClass
     {
-        public int this[int x, string y]
+        public int this[ int x, string y ]
         {
             get
             {

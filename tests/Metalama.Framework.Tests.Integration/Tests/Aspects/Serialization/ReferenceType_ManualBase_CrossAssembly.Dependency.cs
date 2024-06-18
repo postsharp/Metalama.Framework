@@ -7,10 +7,10 @@ public class SerializableType_ParameterlessCtor : BaseSerializableType_Parameter
 {
     public int Bar { get; set; }
 
-    public SerializableType_ParameterlessCtor(int foo, int bar)
+    public SerializableType_ParameterlessCtor( int foo, int bar )
     {
-        this.Foo = foo;
-        this.Bar = bar;
+        Foo = foo;
+        Bar = bar;
     }
 }
 
@@ -18,10 +18,10 @@ public class SerializableType_DeserializingCtor : BaseSerializableType_Deseriali
 {
     public int Bar { get; set; }
 
-    public SerializableType_DeserializingCtor(int foo, int bar)
+    public SerializableType_DeserializingCtor( int foo, int bar )
     {
-        this.Foo = foo;
-        this.Bar = bar;
+        Foo = foo;
+        Bar = bar;
     }
 }
 
@@ -32,27 +32,25 @@ public class TestAspect : OverrideMethodAspect
 
     public SerializableType_DeserializingCtor SerializedValue_DeserializingCtor;
 
-    public TestAspect(int x, int y)
+    public TestAspect( int x, int y )
     {
-        SerializedValue_ParameterlessCtor = new SerializableType_ParameterlessCtor(x, y);
-        SerializedValue_DeserializingCtor = new SerializableType_DeserializingCtor(x, y);
+        SerializedValue_ParameterlessCtor = new SerializableType_ParameterlessCtor( x, y );
+        SerializedValue_DeserializingCtor = new SerializableType_DeserializingCtor( x, y );
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue_ParameterlessCtor.Foo));
-        Console.WriteLine(meta.CompileTime(SerializedValue_ParameterlessCtor.Bar));
-        Console.WriteLine(meta.CompileTime(SerializedValue_DeserializingCtor.Foo));
-        Console.WriteLine(meta.CompileTime(SerializedValue_DeserializingCtor.Bar));
+        Console.WriteLine( meta.CompileTime( SerializedValue_ParameterlessCtor.Foo ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue_ParameterlessCtor.Bar ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue_DeserializingCtor.Foo ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue_DeserializingCtor.Bar ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(13, 42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 13, 42 )]
+    public virtual void Foo() { }
 }

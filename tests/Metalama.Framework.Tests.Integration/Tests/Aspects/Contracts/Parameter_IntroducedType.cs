@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS8618
@@ -12,8 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var introducedType =
-                builder.Advice.IntroduceClass(
-                        builder.Target,
+                builder.IntroduceClass(
                         "IntroducedType",
                         buildType: b => { b.Accessibility = Accessibility.Public; } )
                     .Declaration;

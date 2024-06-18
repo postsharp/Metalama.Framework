@@ -12,8 +12,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     public interface IInterface
     {
         int TemplateWithGet { set; }
+
         int TemplateWithSet { get; }
+
         int TemplateWithInit { set; }
+
         int TemplateWithoutInit { init; }
     }
 
@@ -25,43 +28,35 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember( IsExplicit = true )]
-        int TemplateWithGet 
-        { 
+        private int TemplateWithGet
+        {
             get
             {
                 return 42;
             }
-            set
-            {
-            }
+            set { }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public int TemplateWithSet
         {
             get
             {
                 return 42;
             }
-            set
-            {
-            }
+            set { }
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        int TemplateWithInit
+        [InterfaceMember( IsExplicit = true )]
+        private int TemplateWithInit
         {
-            init
-            {
-            }
+            init { }
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        int TemplateWithoutInit
+        [InterfaceMember( IsExplicit = true )]
+        private int TemplateWithoutInit
         {
-            set
-            {
-            }
+            set { }
         }
     }
 

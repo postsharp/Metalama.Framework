@@ -1,21 +1,20 @@
 using System;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
 
-[assembly: MyOptions("FromAssembly")]
+[assembly: MyOptions( "FromAssembly" )]
+
 namespace Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
-
-
 
 public class PrintOptionsAspect : Attribute, IAspect<IDeclaration>
 {
     public void BuildAspect( IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
+        builder.IntroduceAttribute(
             AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { builder.Target.Enhancements().GetOptions<MyOptions>().Value } ) );
     }
 
@@ -45,9 +44,8 @@ internal class OtherClass
 
 // <target>
 [PrintOptionsAspect]
-internal class ClassWithoutOptions { } 
-
+internal class ClassWithoutOptions { }
 
 // <target>
 [PrintOptionsAspect]
-internal class DerivedFromBaseClassWithoutDirectOptions : BaseClassWithoutDirectOptions { } 
+internal class DerivedFromBaseClassWithoutDirectOptions : BaseClassWithoutDirectOptions { }

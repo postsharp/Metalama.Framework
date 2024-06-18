@@ -1,4 +1,4 @@
-class EmptyOverrideFieldOrPropertyExample
+internal class EmptyOverrideFieldOrPropertyExample
 {
   private string? _property;
   [EmptyOverrideFieldOrProperty]

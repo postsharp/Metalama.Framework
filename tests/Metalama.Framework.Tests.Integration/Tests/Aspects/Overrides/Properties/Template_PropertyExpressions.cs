@@ -14,8 +14,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     {
         public override dynamic? OverrideProperty
         {
-            get => ExpressionFactory.Parse("default");
-            set => Console.WriteLine("Overridden");
+            get => ExpressionFactory.Parse( "default" );
+            set => Console.WriteLine( "Overridden" );
         }
     }
 
@@ -27,25 +27,25 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 return 42;
             }
             set
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
 
         [Test]
         public int ExpressionBodiedAccessors
         {
-            get => 42;            
-            set => Console.WriteLine("Original");
+            get => 42;
+            set => Console.WriteLine( "Original" );
         }
 
         [Test]
         public int ExpressionBodiedProperty => 42;
-
 
         [Test]
         public int AutoProperty { get; set; }

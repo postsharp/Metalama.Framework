@@ -1,7 +1,7 @@
-class Program
+internal class Program
 {
   [Log]
-  static void MyMethod(string who)
+  private static void MyMethod(string who)
   {
     global::System.Console.WriteLine("Entering " + $"MyMethod( who = {who} )");
     try
@@ -15,7 +15,7 @@ class Program
       global::System.Console.WriteLine("Leaving " + $"MyMethod( who = {who} )");
     }
   }
-  static void TestMain()
+  private static void TestMain()
   {
     MyMethod("Lama");
   }

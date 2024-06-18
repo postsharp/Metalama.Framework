@@ -17,13 +17,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.NameOf
         {
             Console.WriteLine(
                 "From template run-time: " +
-                    string.Join(", ", nameof(value), nameof(MyAspect), nameof(MyDateTime), nameof(C), nameof(MyDateTime.UtcNow)));
+                string.Join( ", ", nameof(value), nameof(MyAspect), nameof(MyDateTime), nameof(C), nameof(MyDateTime.UtcNow) ) );
 
             Console.WriteLine(
                 "From template compile-time: " + meta.CompileTime(
                     string.Join( ", ", nameof(value), nameof(MyAspect), nameof(MyDateTime), nameof(C), nameof(MyDateTime.UtcNow) ) ) );
 
-            Console.WriteLine( "From BuildAspect: " + ( (State) meta.AspectInstance.AspectState! ).Names );
+            Console.WriteLine( "From BuildAspect: " + ( (State)meta.AspectInstance.AspectState! ).Names );
         }
 
         private class State : IAspectState

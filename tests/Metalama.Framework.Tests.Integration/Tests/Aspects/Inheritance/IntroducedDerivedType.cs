@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.IntroducedDerivedType
@@ -21,8 +22,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Introduced
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceClass(
-                builder.Target,
+            builder.IntroduceClass(
                 "IntroducedDerived",
                 b => { b.BaseType = builder.Target.Types.OfName( "BaseType" ).Single(); } );
         }

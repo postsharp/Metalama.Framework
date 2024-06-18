@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.ParameterMapping
@@ -11,12 +12,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Pa
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceBinaryOperator(
-                builder.Target,
+            builder.IntroduceBinaryOperator(
                 nameof(InvertedParameterNames),
                 builder.Target,
-                TypeFactory.GetType(typeof(int)),
-                TypeFactory.GetType(typeof(int)),
+                TypeFactory.GetType( typeof(int) ),
+                TypeFactory.GetType( typeof(int) ),
                 OperatorKind.Addition,
                 buildOperator: b =>
                 {
@@ -24,37 +24,29 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Pa
                     b.Parameters[1].Name = "x";
                 } );
 
-            builder.Advice.IntroduceUnaryOperator(
-                builder.Target,
+            builder.IntroduceUnaryOperator(
                 nameof(ParameterName),
                 builder.Target,
-                TypeFactory.GetType(typeof(int)),
+                TypeFactory.GetType( typeof(int) ),
                 OperatorKind.UnaryNegation,
-                buildOperator: b =>
-                {
-                    b.Parameters[0].Name = "y";
-                });
+                buildOperator: b => { b.Parameters[0].Name = "y"; } );
 
-            builder.Advice.IntroduceConversionOperator(
-                builder.Target,
+            builder.IntroduceConversionOperator(
                 nameof(ParameterName),
                 builder.Target,
-                TypeFactory.GetType(typeof(int)),
+                TypeFactory.GetType( typeof(int) ),
                 true,
-                buildOperator: b =>
-                {
-                    b.Parameters[0].Name = "y";
-                });
+                buildOperator: b => { b.Parameters[0].Name = "y"; } );
         }
 
         [Template]
-        public int InvertedParameterNames(dynamic? x, int y)
+        public int InvertedParameterNames( dynamic? x, int y )
         {
             return x!.ToString().Length + y;
         }
 
         [Template]
-        public int ParameterName(dynamic? x)
+        public int ParameterName( dynamic? x )
         {
             return x!.ToString().Length;
         }

@@ -3,7 +3,7 @@
 internal class TargetCode
 {
   [Aspect]
-  void M()
+  private void M()
   {
     42;
     return;

@@ -1,27 +1,28 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
-
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.ParameterAssignment
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var result = meta.Proceed();
             meta.Target.Parameters[0].Value = 5;
+
             return result;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(out int a)
+        private int Method( out int a )
         {
             a = 1;
+
             return 1;
         }
     }

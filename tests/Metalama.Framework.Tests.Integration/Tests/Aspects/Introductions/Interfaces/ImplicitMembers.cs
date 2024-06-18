@@ -80,14 +80,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
 
                 return 42;
             }
 
             set
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
             }
         }
 

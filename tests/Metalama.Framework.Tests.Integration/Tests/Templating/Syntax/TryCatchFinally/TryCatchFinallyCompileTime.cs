@@ -5,33 +5,33 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.TryCatchFinallyCompileTime
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            int n = meta.CompileTime(1);
+            var n = meta.CompileTime( 1 );
+
             try
             {
                 n = 2;
             }
             catch
             {
-                Console.WriteLine(meta.Target.Parameters.Count);
-                
+                Console.WriteLine( meta.Target.Parameters.Count );
             }
             finally
             {
-                Console.WriteLine(meta.Target.Parameters.Count);
+                Console.WriteLine( meta.Target.Parameters.Count );
             }
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

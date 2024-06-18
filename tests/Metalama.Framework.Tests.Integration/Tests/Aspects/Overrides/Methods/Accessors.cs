@@ -21,6 +21,7 @@ internal class C
         [MyAspect]
         get;
     }
+
     public int Property2
     {
         [MyAspect]
@@ -60,38 +61,40 @@ internal class C
         remove { }
     }
 
-    public int this[int x]
+    public int this[ int x ]
     {
         [MyAspect]
         get
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
+
             return x;
         }
     }
 
-    public int this[int x, int y]
+    public int this[ int x, int y ]
     {
         [MyAspect]
         set
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
         }
     }
 
-    public int this[int x, int y, int z]
+    public int this[ int x, int y, int z ]
     {
         [MyAspect]
         get
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
+
             return x + y;
         }
 
         [MyAspect]
         set
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
         }
     }
 }

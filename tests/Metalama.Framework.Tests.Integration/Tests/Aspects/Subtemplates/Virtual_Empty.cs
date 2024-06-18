@@ -10,9 +10,9 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("virtual method");
+        Console.WriteLine( "virtual method" );
 
-        this.OverrideAsyncMethod();
+        OverrideAsyncMethod();
 
         return meta.Proceed();
     }
@@ -22,7 +22,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private async Task Method()
-    {
-    }
+    private async Task Method() { }
 }
