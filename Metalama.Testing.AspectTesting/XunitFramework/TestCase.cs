@@ -42,7 +42,21 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
         string ITestCase.DisplayName => Path.GetFileNameWithoutExtension( this._relativePath );
 
         public string? SkipReason
-            => this._factory.TestInputFactory.FromFile( this._factory.ProjectProperties, this._factory.DirectoryOptionsReader, this._relativePath ).SkipReason;
+        {
+            get
+            {
+                try
+                {
+                    return this._factory.TestInputFactory.FromFile( this._factory.ProjectProperties, this._factory.DirectoryOptionsReader, this._relativePath )
+                        .SkipReason;
+                }
+                catch ( Exception )
+                {
+                    // We want an exception here to be reported, so we cannot skip the test in this case.
+                    return null;
+                }
+            }
+        }
 
         ISourceInformation ITestCase.SourceInformation
         {

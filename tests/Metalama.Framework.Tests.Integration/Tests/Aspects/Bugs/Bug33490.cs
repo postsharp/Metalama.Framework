@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @Skipped(#33490 - serialization of nullability and tuple element names)
+#endif
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;

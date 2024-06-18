@@ -478,7 +478,7 @@ public class TestOptions
     /// <summary>
     /// Parses <c>// @</c> directives from source code and apply them to the current object. 
     /// </summary>
-    internal void ApplySourceDirectives( string sourceCode )
+    internal void ApplySourceDirectives( string sourceCode, string? path )
     {
         var options = _optionRegex.Matches( sourceCode );
         var ifDirectiveIndex = sourceCode.IndexOf( "#if", StringComparison.InvariantCulture );
@@ -495,7 +495,7 @@ public class TestOptions
 
             if ( ifDirectiveIndex < 0 || option.Index < ifDirectiveIndex )
             {
-                throw new InvalidTestOptionException( $"The '@{optionName}' option must be in an #if block." );
+                throw new InvalidTestOptionException( $"The '@{optionName}' option must be in an #if block in '{path}'." );
             }
 
             switch ( optionName )
@@ -559,7 +559,7 @@ public class TestOptions
                     else
                     {
                         throw new InvalidTestOptionException(
-                            $"'{optionArg} is not a TestScenario value. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
+                            $"'{optionArg} is not a TestScenario value in '{path}'. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
                     }
 
                     break;
@@ -642,7 +642,7 @@ public class TestOptions
                     }
                     else
                     {
-                        throw new InvalidTestOptionException( $"'{optionArg} is not a valid code fix index number." );
+                        throw new InvalidTestOptionException( $"'{optionArg} is not a valid code fix index number in '{path}'." );
                     }
 
                     break;
@@ -697,7 +697,7 @@ public class TestOptions
                         else
                         {
                             // Throwing here may kill test discovery. 
-                            throw new InvalidTestOptionException( $"@LanguageVersion '{optionArg}' is not a valid language version." );
+                            throw new InvalidTestOptionException( $"@LanguageVersion '{optionArg}' is not a valid language version in '{path}'." );
                         }
                     }
 
@@ -718,7 +718,7 @@ public class TestOptions
                         else
                         {
                             // Throwing here may kill test discovery. 
-                            throw new InvalidTestOptionException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version." );
+                            throw new InvalidTestOptionException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version in '{path}'." );
                         }
                     }
 
@@ -831,7 +831,7 @@ public class TestOptions
     /// </summary>
     internal void ApplyOptions( string sourceCode, string path, TestDirectoryOptionsReader optionsReader )
     {
-        this.ApplySourceDirectives( sourceCode );
+        this.ApplySourceDirectives( sourceCode, path );
         this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
     }
 
