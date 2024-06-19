@@ -768,12 +768,7 @@ internal abstract partial class BaseTestRunner
 
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
-                if ( syntaxTree.InputDocument == null )
-                {
-                    continue;
-                }
-
-                var isTargetCode = Path.GetFileName( syntaxTree.InputPath )!.Count( c => c == '.' ) == 1;
+                var writeDiff = Path.GetFileName( syntaxTree.FilePath )!.Count( c => c == '.' ) == 1;
 
                 await this.WriteHtmlAsync(
                     compilationWithDesignTimeTrees,
@@ -781,7 +776,7 @@ internal abstract partial class BaseTestRunner
                     syntaxTree,
                     htmlDirectory,
                     htmlCodeWriter,
-                    isTargetCode,
+                    writeDiff,
                     designTimePipelineResult.Suppressions );
             }
         }
@@ -841,9 +836,16 @@ internal abstract partial class BaseTestRunner
 
         if ( testResult.TestInput.Options.WriteOutputHtml == true && testResult.OutputProject != null )
         {
+            var fileName = Path.GetFileNameWithoutExtension( testSyntaxTree.FilePath );
+
+            if ( !fileName.StartsWith( testResult.TestInput.TestName ) )
+            {
+                fileName = testResult.TestInput.TestName + "." + fileName;
+            }
+
             testSyntaxTree.HtmlOutputPath = Path.Combine(
                 htmlDirectory,
-                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument?.FilePath ?? testSyntaxTree.OutputDocument.AssertNotNull().FilePath ) + FileExtensions.TransformedHtml );
+                fileName + FileExtensions.TransformedHtml );
 
             this.Logger?.WriteLine( "HTML of output: " + testSyntaxTree.HtmlOutputPath );
 
