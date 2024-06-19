@@ -1,153 +1,153 @@
-class TargetCode
+internal class TargetCode
 {
-  class Nullable
+  private class Nullable
   {
     [Aspect]
-    void ValueType(int arg)
+    private void ValueType(int arg)
     {
       arg.ToString();
     }
     [Aspect]
-    void NullableValueType(int? arg)
+    private void NullableValueType(int? arg)
     {
       arg.ToString();
     }
     [Aspect]
-    void ReferenceType(string arg)
+    private void ReferenceType(string arg)
     {
       arg.ToString();
     }
     [Aspect]
-    void NullableReferenceType(string? arg)
+    private void NullableReferenceType(string? arg)
     {
       arg!.ToString();
     }
     [Aspect]
-    void Generic<T>(T arg)
+    private void Generic<T>(T arg)
     {
       arg!.ToString();
     }
     [Aspect]
-    void NullableGeneric<T>(T? arg)
+    private void NullableGeneric<T>(T? arg)
     {
       arg!.ToString();
     }
     [Aspect]
-    void NotNullGeneric<T>(T arg)
+    private void NotNullGeneric<T>(T arg)
       where T : notnull
     {
       arg.ToString();
     }
     [Aspect]
-    void NullableNotNullGeneric<T>(T? arg)
+    private void NullableNotNullGeneric<T>(T? arg)
       where T : notnull
     {
       arg!.ToString();
     }
     [Aspect]
-    void ValueTypeGeneric<T>(T arg)
+    private void ValueTypeGeneric<T>(T arg)
       where T : struct
     {
       arg.ToString();
     }
     [Aspect]
-    void NullableValueTypeGeneric<T>(T? arg)
+    private void NullableValueTypeGeneric<T>(T? arg)
       where T : struct
     {
       arg.ToString();
     }
     [Aspect]
-    void ReferenceTypeGeneric<T>(T arg)
+    private void ReferenceTypeGeneric<T>(T arg)
       where T : class
     {
       arg.ToString();
     }
     [Aspect]
-    void NullableReferenceTypeGeneric<T>(T? arg)
+    private void NullableReferenceTypeGeneric<T>(T? arg)
       where T : class
     {
       arg!.ToString();
     }
     [Aspect]
-    void ReferenceTypeNullableGeneric<T>(T arg)
+    private void ReferenceTypeNullableGeneric<T>(T arg)
       where T : class?
     {
       arg!.ToString();
     }
     [Aspect]
-    void NullableReferenceTypeNullableGeneric<T>(T? arg)
+    private void NullableReferenceTypeNullableGeneric<T>(T? arg)
       where T : class?
     {
       arg!.ToString();
     }
     [Aspect]
-    void SpecificReferenceTypeGeneric<T>(T arg)
+    private void SpecificReferenceTypeGeneric<T>(T arg)
       where T : IComparable
     {
       arg.ToString();
     }
     [Aspect]
-    void SpecificNullableReferenceTypeGeneric<T>(T? arg)
+    private void SpecificNullableReferenceTypeGeneric<T>(T? arg)
       where T : IComparable
     {
       arg!.ToString();
     }
     [Aspect]
-    void SpecificReferenceTypeNullableGeneric<T>(T arg)
+    private void SpecificReferenceTypeNullableGeneric<T>(T arg)
       where T : IComparable?
     {
       arg!.ToString();
     }
     [Aspect]
-    void SpecificNullableReferenceTypeNullableGeneric<T>(T? arg)
+    private void SpecificNullableReferenceTypeNullableGeneric<T>(T? arg)
       where T : IComparable?
     {
       arg!.ToString();
     }
   }
 #nullable disable
-  class NonNullable
+  private class NonNullable
   {
     [Aspect]
-    void ValueType(int arg)
+    private void ValueType(int arg)
     {
       arg.ToString();
     }
     [Aspect]
-    void NullableValueType(int? arg)
+    private void NullableValueType(int? arg)
     {
       arg.ToString();
     }
     [Aspect]
-    void ReferenceType(string arg)
+    private void ReferenceType(string arg)
     {
       arg.ToString();
     }
     [Aspect]
-    void Generic<T>(T arg)
+    private void Generic<T>(T arg)
     {
       arg.ToString();
     }
     [Aspect]
-    void ValueTypeGeneric<T>(T arg)
+    private void ValueTypeGeneric<T>(T arg)
       where T : struct
     {
       arg.ToString();
     }
     [Aspect]
-    void NullableValueTypeGeneric<T>(T? arg)
+    private void NullableValueTypeGeneric<T>(T? arg)
       where T : struct
     {
       arg.ToString();
     }
     [Aspect]
-    void ReferenceTypeGeneric<T>(T arg)
+    private void ReferenceTypeGeneric<T>(T arg)
       where T : class
     {
       arg.ToString();
     }
     [Aspect]
-    void SpecificReferenceTypeGeneric<T>(T arg)
+    private void SpecificReferenceTypeGeneric<T>(T arg)
       where T : IComparable
     {
       arg.ToString();

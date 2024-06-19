@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,7 +8,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Explicit
 {
     /*
-     * Tests that when a member of the same name already exists in the target class for an implicit interface member, the interface is introduced and 
+     * Tests that when a member of the same name already exists in the target class for an implicit interface member, the interface is introduced and
      * its members are implements explicitly.
      */
 
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
         [InterfaceMember( IsExplicit = true )]

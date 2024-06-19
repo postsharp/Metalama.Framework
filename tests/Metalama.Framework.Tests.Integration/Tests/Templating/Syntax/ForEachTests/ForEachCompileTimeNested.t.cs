@@ -1,4 +1,4 @@
-int Method(int a, int b)
+private int Method(int a, int b)
 {
   if (a <= 1)
   {

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,8 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var introducedType =
-                builder.Advice.IntroduceClass(
-                        builder.Target,
+                builder.IntroduceClass(
                         "IntroducedType",
                         buildType: b => { b.Accessibility = Accessibility.Public; } )
                     .Declaration;
@@ -21,13 +21,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
             // TODO: It's now necessary to translate the introduced type.
 
             var introducedMethod =
-                builder.Advice.IntroduceMethod(
-                        builder.Target.ForCompilation( builder.Advice.MutableCompilation ),
+                builder.With( builder.Target.ForCompilation( builder.Advice.MutableCompilation ) )
+                    .IntroduceMethod(
                         nameof(IntroducedMethodTemplate),
                         buildMethod: b => { b.AddParameter( "p", introducedType ); } )
                     .Declaration;
 
-            builder.Advice.AddContract( introducedMethod.Parameters.Single(), nameof(ValidateTemplate) );
+            builder.With( introducedMethod.Parameters.Single() ).AddContract( nameof(ValidateTemplate) );
         }
 
         [Template]

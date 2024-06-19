@@ -11,9 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncIterator
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override(
-                builder.Target,
-                new MethodTemplateSelector( nameof(OverrideMethod), nameof(OverrideAsyncMethod), useAsyncTemplateForAnyAwaitable: true ) );
+            builder.Override( new MethodTemplateSelector( nameof(OverrideMethod), nameof(OverrideAsyncMethod), useAsyncTemplateForAnyAwaitable: true ) );
         }
 
         [Template]

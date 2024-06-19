@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public async Task DeclarativeAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 
 public class IntroductionAspectAttribute : TypeAspect
 {
@@ -65,14 +65,15 @@ public partial class TargetClass
         public async Task ProgrammaticAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 public class IntroductionAspectAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Foo));
+        builder.IntroduceMethod( nameof(Foo));
     }
 
     [Template]
@@ -108,7 +109,7 @@ public partial class TargetClass
         public async Task NonPartialAsync()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 
 public class IntroductionAspectAttribute : TypeAspect
 {
@@ -183,7 +184,7 @@ public class TargetClass
 
             var emitResult = resultingCompilation.Emit( Stream.Null );
 
-            Assert.Empty( emitResult.Diagnostics );
+            Assert.Empty( emitResult.Diagnostics.Where( d => d.Severity != DiagnosticSeverity.Hidden ) );
         }
 
         private sealed class DesignTimeFallbackProjectOptions : ProjectOptionsWrapper

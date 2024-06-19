@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,19 +9,20 @@ internal class Aspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         CalledTemplate();
+
         return default;
     }
 
     [Template]
     private void CalledTemplate()
     {
-        if (meta.Target.Method.ReturnType.Is(SpecialType.Void))
+        if (meta.Target.Method.ReturnType.Is( SpecialType.Void ))
         {
             meta.Return();
         }
         else
         {
-            meta.Return(42);
+            meta.Return( 42 );
         }
     }
 }
@@ -29,9 +31,7 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void VoidMethod()
-    {
-    }
+    private void VoidMethod() { }
 
     [Aspect]
     private int IntMethod()

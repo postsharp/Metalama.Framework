@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.OverriddenProperty_Half;
@@ -9,9 +10,9 @@ internal class NotNullAttribute : ContractAspect
 {
     public ContractDirection Direction { get; set; }
 
-    protected override ContractDirection GetDefinedDirection(IAspectBuilder builder) => this.Direction;
+    protected override ContractDirection GetDefinedDirection( IAspectBuilder builder ) => Direction;
 
-    public override void Validate(dynamic? value)
+    public override void Validate( dynamic? value )
     {
         if (value == null)
         {
@@ -20,23 +21,23 @@ internal class NotNullAttribute : ContractAspect
     }
 }
 
-class B
+internal class B
 {
     [NotNull]
     public virtual string Default { get; set; }
 
-    [NotNull(Direction = ContractDirection.Both)]
+    [NotNull( Direction = ContractDirection.Both )]
     public virtual string Both { get; set; }
 
-    [NotNull(Direction = ContractDirection.Input)]
+    [NotNull( Direction = ContractDirection.Input )]
     public virtual string Input { get; set; }
 
-    [NotNull(Direction = ContractDirection.Output)]
+    [NotNull( Direction = ContractDirection.Output )]
     public virtual string Output { get; set; }
 }
 
 // <target>
-class C : B
+internal class C : B
 {
     public override string Default => "C";
 

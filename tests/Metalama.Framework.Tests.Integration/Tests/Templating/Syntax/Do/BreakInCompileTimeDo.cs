@@ -1,15 +1,16 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Do.BreakInCompileTimeDo;
 
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
-    {        
-        var i = meta.CompileTime(0);
+    private dynamic? Template()
+    {
+        var i = meta.CompileTime( 0 );
 
         do
         {
@@ -22,16 +23,17 @@ class Aspect
         }
         while (i < meta.Target.Method.Name.Length);
 
-        Console.WriteLine("Test result = " + i);
+        Console.WriteLine( "Test result = " + i );
 
-        dynamic? result = meta.Proceed();
+        var result = meta.Proceed();
+
         return result;
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

@@ -1,51 +1,48 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateClassMembers
 {
-    class Aspect : BaseAspect
+    internal class Aspect : BaseAspect
     {
-        public Aspect() : this("Result = {0}")
-        {
-        }
+        public Aspect() : this( "Result = {0}" ) { }
 
-        public Aspect(string formatString) : base("Result = {0}")
-        {
-        }
+        public Aspect( string formatString ) : base( "Result = {0}" ) { }
 
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
 
-            Console.WriteLine(this.Format(result));
+            Console.WriteLine( this.Format( result ) );
 
             return result;
         }
 
-        public override string? Format(object? o)
+        public override string? Format( object? o )
         {
-            return o == null ? null : string.Format(FormatString, o);
+            return o == null ? null : string.Format( FormatString, o );
         }
     }
 
     [CompileTime]
-    abstract class BaseAspect
+    internal abstract class BaseAspect
     {
-        protected BaseAspect(string formatString)
+        protected BaseAspect( string formatString )
         {
-            this.FormatString = formatString;
+            FormatString = formatString;
         }
 
         public string FormatString { get; set; }
 
-        public abstract string? Format(object? o);
+        public abstract string? Format( object? o );
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

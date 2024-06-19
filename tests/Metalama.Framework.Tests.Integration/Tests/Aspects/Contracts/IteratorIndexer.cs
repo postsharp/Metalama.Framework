@@ -6,6 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.IteratorI
 
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,23 +20,22 @@ public sealed class TestAttribute : TypeAspect
         {
             foreach (var parameter in indexer.GetMethod!.Parameters)
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name });
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
 
             foreach (var parameter in indexer.SetMethod!.Parameters)
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name });
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
 
             // TODO: #32616
-            //builder.Advice.AddContract(
-            //    indexer.GetMethod!.ReturnParameter,
+            //builder.With( //    indexer.GetMethod!.ReturnParameter ).AddContract(
             //    nameof(ValidateParameter),
             //    args: new { parameterName = indexer.GetMethod!.ReturnParameter.Name });
         }
@@ -55,18 +55,17 @@ public sealed class TestAttribute : TypeAspect
 [Test]
 public class TestClass
 {
-    public IEnumerable<string> this[string name]
+    public IEnumerable<string> this[ string name ]
     {
         get
         {
             yield return "Hello";
             yield return name;
         }
-        set
-        {
-        }
+        set { }
     }
-    public IEnumerator<string> this[string name1, string name2 ]
+
+    public IEnumerator<string> this[ string name1, string name2 ]
     {
         get
         {
@@ -74,8 +73,6 @@ public class TestClass
             yield return name1;
             yield return name2;
         }
-        set
-        {
-        }
+        set { }
     }
 }

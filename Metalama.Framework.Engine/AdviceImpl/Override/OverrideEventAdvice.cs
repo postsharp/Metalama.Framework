@@ -16,7 +16,11 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
     private readonly BoundTemplateMethod? _addTemplate;
     private readonly BoundTemplateMethod? _removeTemplate;
 
-    public OverrideEventAdvice( AdviceConstructorParameters<IEvent> parameters, BoundTemplateMethod? addTemplate, BoundTemplateMethod? removeTemplate, IObjectReader tags )
+    public OverrideEventAdvice(
+        AdviceConstructorParameters<IEvent> parameters,
+        BoundTemplateMethod? addTemplate,
+        BoundTemplateMethod? removeTemplate,
+        IObjectReader tags )
         : base( parameters, tags )
     {
         Invariant.Assert( addTemplate != null || removeTemplate != null );

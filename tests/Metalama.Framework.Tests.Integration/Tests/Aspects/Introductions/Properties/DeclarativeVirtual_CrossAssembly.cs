@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 
@@ -12,12 +13,13 @@ public class InheritedIntroductionAttribute : IntroductionAttribute
     {
         get
         {
-            Console.WriteLine("Base template (expected).");
+            Console.WriteLine( "Base template (expected)." );
+
             return 42;
         }
         set
         {
-            Console.WriteLine("Base template (expected).");
+            Console.WriteLine( "Base template (expected)." );
         }
     }
 }

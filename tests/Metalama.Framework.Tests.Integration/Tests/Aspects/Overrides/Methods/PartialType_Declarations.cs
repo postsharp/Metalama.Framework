@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialT
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(Template), tags: new { name = method.Name } );
+                builder.With( method ).Override( nameof(Template), tags: new { name = method.Name } );
             }
         }
 

@@ -1,56 +1,63 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew_Static
 {
     public class IntroductionAttribute : TypeAspect
     {
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int BaseClassMethod()
         {
-            meta.InsertComment("New keyword, call the base class method of the same name.");
+            meta.InsertComment( "New keyword, call the base class method of the same name." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassInaccessibleMethod()
         {
-            meta.InsertComment("No new keyword, return a default value.");
+            meta.InsertComment( "No new keyword, return a default value." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int BaseClassMethodHiddenByMethod()
         {
-            meta.InsertComment("New keyword, call the derived class method of the same name.");
+            meta.InsertComment( "New keyword, call the derived class method of the same name." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int BaseClassMethodHiddenByInaccessibleMethod()
         {
-            meta.InsertComment("New keyword, call the base class method of the same name.");
+            meta.InsertComment( "New keyword, call the base class method of the same name." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int DerivedClassMethod()
         {
-            meta.InsertComment("New keyword, call the derived class method of the same name.");
+            meta.InsertComment( "New keyword, call the derived class method of the same name." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int DerivedClassInaccessibleMethod()
         {
-            meta.InsertComment("No new keyword, return a default value.");
+            meta.InsertComment( "No new keyword, return a default value." );
+
             return meta.Proceed();
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int NonExistentMethod()
         {
-            meta.InsertComment("No new keyword, return a default value.");
+            meta.InsertComment( "No new keyword, return a default value." );
+
             return meta.Proceed();
         }
     }
@@ -84,6 +91,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         {
             return 33;
         }
+
         private new static int BaseClassMethodHiddenByInaccessibleMethod()
         {
             return 33;

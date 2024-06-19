@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
 
@@ -12,12 +13,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28883
         {
             get
             {
-                return meta.Target.FieldOrProperty.With(InvokerOptions.Final).Value;
+                return meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value;
             }
 
             set
             {
-                meta.Target.FieldOrProperty.With(InvokerOptions.Final).Value = value;
+                meta.Target.FieldOrProperty.With( InvokerOptions.Final ).Value = value;
             }
         }
     }

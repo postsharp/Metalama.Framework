@@ -1,11 +1,12 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.CaptureExpression_CompileTime;
 
-class TestAspect : OverrideMethodAspect
+internal class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
@@ -13,7 +14,7 @@ class TestAspect : OverrideMethodAspect
         {
             if (parameter.Value == null)
             {
-                throw GetNewExceptionExpression(parameter.Name, $"Parameter {parameter} can't be null.").Value!;
+                throw GetNewExceptionExpression( parameter.Name, $"Parameter {parameter} can't be null." ).Value!;
             }
         }
 
@@ -21,13 +22,13 @@ class TestAspect : OverrideMethodAspect
     }
 
     [CompileTime]
-    private static IExpression GetNewExceptionExpression(string parameterName, string errorMessage)
-        => ExpressionFactory.Capture(new ArgumentNullException(parameterName, errorMessage));
+    private static IExpression GetNewExceptionExpression( string parameterName, string errorMessage )
+        => ExpressionFactory.Capture( new ArgumentNullException( parameterName, errorMessage ) );
 }
 
 // <target>
-class TargetClass
+internal class TargetClass
 {
     [TestAspect]
-    void M(object obj) { }
+    private void M( object obj ) { }
 }

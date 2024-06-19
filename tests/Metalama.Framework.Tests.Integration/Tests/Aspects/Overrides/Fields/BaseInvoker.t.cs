@@ -1,4 +1,4 @@
-class TargetCode
+internal class TargetCode
 {
   private global::System.Int32 _field1;
   [global::Metalama.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.BaseInvoker.Aspect]

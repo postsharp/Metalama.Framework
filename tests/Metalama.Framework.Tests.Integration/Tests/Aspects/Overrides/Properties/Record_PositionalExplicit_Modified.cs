@@ -1,10 +1,8 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Record_PositionalExplicit_Modified;
 
@@ -14,12 +12,13 @@ internal class MyAspect : OverrideFieldOrPropertyAspect
     {
         get
         {
-            Console.WriteLine("MyAspect");
+            Console.WriteLine( "MyAspect" );
+
             return meta.Proceed();
         }
         set
         {
-            Console.WriteLine("MyAspect");
+            Console.WriteLine( "MyAspect" );
             meta.Proceed();
         }
     }
@@ -31,18 +30,19 @@ internal class MyAspect : OverrideFieldOrPropertyAspect
 internal record MyRecord( int A, int B )
 {
     public int A { get; init; }
-    
-    public int B 
-    { 
+
+    public int B
+    {
         get
         {
-            Console.WriteLine("Original.");
+            Console.WriteLine( "Original." );
+
             return 42;
-        } 
-        init 
-        { 
-            Console.WriteLine("Original."); 
-        } 
+        }
+        init
+        {
+            Console.WriteLine( "Original." );
+        }
     }
 }
 

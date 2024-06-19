@@ -1,4 +1,4 @@
-int Method(int a)
+private int Method(int a)
 {
   global::System.Console.WriteLine("extra");
   global::System.Console.WriteLine(this.extra != null ? "extra" : "undefined");

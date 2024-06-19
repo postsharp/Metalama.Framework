@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
@@ -11,25 +12,24 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ba
 
 public class InvokerAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(
-            builder.Target,
+        builder.Override(
             nameof(Template),
-            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName("Method").Single() });
+            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName( "Method" ).Single() } );
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? Template( [CompileTime] IMethod target )
     {
-        meta.InsertComment("Invoke this.Method");
+        meta.InsertComment( "Invoke this.Method" );
         target.Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke this.Method");
-        target.With(InvokerOptions.Final).Invoke();
+        meta.InsertComment( "Invoke this.Method" );
+        target.With( InvokerOptions.Base ).Invoke();
+        meta.InsertComment( "Invoke this.Method" );
+        target.With( InvokerOptions.Current ).Invoke();
+        meta.InsertComment( "Invoke this.Method" );
+        target.With( InvokerOptions.Final ).Invoke();
 
         return meta.Proceed();
     }
@@ -37,20 +37,14 @@ public class InvokerAspect : MethodAspect
 
 public class BaseClass
 {
-    public virtual void Method()
-    {
-    }
+    public virtual void Method() { }
 }
 
 // <target>
 public class TargetClass : BaseClass
 {
-    public new void Method()
-    {
-    }
+    public new void Method() { }
 
     [InvokerAspect]
-    public void Invoker()
-    {
-    }
+    public void Invoker() { }
 }

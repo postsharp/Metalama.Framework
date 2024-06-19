@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,28 +7,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceClass(builder.Target, "IntroducedNestedType", buildType: t => { t.Accessibility = Code.Accessibility.Public; });
+        var result = builder.IntroduceClass( "IntroducedNestedType", buildType: t => { t.Accessibility = Code.Accessibility.Public; } );
         var existingNested = builder.Target.Types.Single();
 
-        builder.Advice.IntroduceProperty(
-            builder.Target, 
+        builder.IntroduceProperty(
             nameof(PropertyTemplate),
-            buildProperty: b => 
+            buildProperty: b =>
             {
                 b.Name = "PropertyWithIntroduced";
                 b.Type = result.Declaration;
-            });
+            } );
 
-        builder.Advice.IntroduceProperty(
-            builder.Target,
+        builder.IntroduceProperty(
             nameof(PropertyTemplate),
             buildProperty: b =>
             {
                 b.Name = "PropertyWithExisting";
                 b.Type = existingNested;
-            });
+            } );
     }
 
     [Template]
@@ -39,7 +37,5 @@ public class IntroductionAttribute : TypeAspect
 [IntroductionAttribute]
 public class TargetType
 {
-    public class ExistingNestedType
-    {
-    }
+    public class ExistingNestedType { }
 }

@@ -2,6 +2,7 @@ using System;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.NestedNestedAspect;
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 [CompileTime]
@@ -13,7 +14,8 @@ public class Outer
         {
             public override dynamic? OverrideMethod()
             {
-                Console.WriteLine(meta.Target.Method.ToDisplayString() + " started.");
+                Console.WriteLine( meta.Target.Method.ToDisplayString() + " started." );
+
                 return meta.Proceed();
             }
         }
@@ -21,10 +23,8 @@ public class Outer
 }
 
 // <target>
-class C
+internal class C
 {
     [Outer.Inner.Log]
-    void M()
-    {
-    }
+    private void M() { }
 }

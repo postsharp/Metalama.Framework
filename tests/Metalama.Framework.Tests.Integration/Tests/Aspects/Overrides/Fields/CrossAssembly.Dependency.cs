@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.CrossAssembly;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.CrossAsse
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.Override( field, nameof(Template) );
+                builder.With( field ).Override( nameof(Template) );
             }
         }
 

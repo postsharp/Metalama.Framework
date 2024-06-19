@@ -41,7 +41,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
     {
         const string code =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using Metalama.Framework.Fabrics;
             using System;
@@ -115,7 +116,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
     public async Task TransformationsTest()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Code.DeclarationBuilders;
                             using System;
@@ -141,7 +143,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
                                     if (builder.Target.Methods.OfName("M").FirstOrDefault() is { } method)
                                     {
                                         //builder.Advice.Override(method, nameof(Template));
-                                        builder.WithTarget(method).Outbound.AddAspect<MethodAspect>();
+                                        builder.With(method).Outbound.AddAspect<MethodAspect>();
                                     }
                             
                                     if (builder.Target.Constructors.OfExactSignature(Array.Empty<IType>()) is { } constructor)
@@ -163,7 +165,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
                                 {
                                     base.BuildAspect(builder);
                             
-                                    builder.Advice.IntroduceAttribute(builder.Target, AttributeConstruction.Create(typeof(MyAttribute)));
+                                    builder.IntroduceAttribute( AttributeConstruction.Create(typeof(MyAttribute)));
                                 }
                             }
 
@@ -211,7 +213,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
     {
         const string aspect =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using Metalama.Framework.Fabrics;
             using System;
@@ -225,7 +228,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
 
         const string anotherAspect =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
 
             class AnotherAspect : TypeAspect { }
             """;
@@ -313,7 +317,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
     {
         static string GetCode( int i )
             => $$"""
-                 using Metalama.Framework.Aspects;
+                 using Metalama.Framework.Advising;
+                 using Metalama.Framework.Aspects; 
                  using Metalama.Framework.Code;
 
                  class Aspect : OverrideMethodAspect
@@ -359,7 +364,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
     {
         const string code =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using System.Linq;
 
@@ -406,7 +412,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
 
                 Assert.Collection(
                     aspectInstance.Transformations,
-                    
+
                     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
@@ -420,14 +426,14 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
 
                 Assert.Collection(
                     aspectInstance.Transformations.OrderBy( i => i.TargetDeclarationId ),
-                    
+
                     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
                         Assert.Equal( "Introduce the parameter 'p'.", transformation.Description );
                         Assert.Equal( "M:WithoutCtor.#ctor", transformation.TargetDeclarationId );
                     },
-                    
+
                     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {

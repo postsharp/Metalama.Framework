@@ -19,6 +19,6 @@ internal class Target : ITarget
   }
   public Target()
   {
-    this.P = "42";
+    P = "42";
   }
 }

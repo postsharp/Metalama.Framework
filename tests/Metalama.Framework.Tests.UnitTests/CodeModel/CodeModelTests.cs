@@ -999,7 +999,8 @@ namespace Ns1
             using var testContext = this.CreateTestContext( testServices );
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 class C { }

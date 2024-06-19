@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.CrossAssembly;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Cross
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceFinalizer( builder.Target, nameof(Template) );
+            builder.IntroduceFinalizer( nameof(Template) );
         }
 
         [Template]
@@ -27,7 +28,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Cross
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Finalizer!, nameof(Template) );
+            builder.With( builder.Target.Finalizer! ).Override( nameof(Template) );
         }
 
         [Template]

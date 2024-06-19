@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Generic_CompileTime;
@@ -8,15 +9,15 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        CalledTemplate<int>(1, 2, 3);
+        CalledTemplate<int>( 1, 2, 3 );
 
         return default;
     }
 
     [Template]
-    private void CalledTemplate<[CompileTime] T>(int i, [CompileTime] int j, T k)
+    private void CalledTemplate<[CompileTime] T>( int i, [CompileTime] int j, T k )
     {
-        Console.WriteLine($"called template T={typeof(T)} i={i} j={j} k={k}");
+        Console.WriteLine( $"called template T={typeof(T)} i={i} j={j} k={k}" );
 
         CalledTemplate2<T>();
 
@@ -30,7 +31,7 @@ internal class Aspect : OverrideMethodAspect
     [Template]
     private void CalledTemplate2<[CompileTime] T>()
     {
-        Console.WriteLine($"called template 2 T={typeof(T)}");
+        Console.WriteLine( $"called template 2 T={typeof(T)}" );
     }
 }
 
@@ -38,7 +39,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

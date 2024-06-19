@@ -1,26 +1,26 @@
 [TheAspect]
-class C
+internal class C
 {
   private void M()
   {
   }
 }
 [TheAspect]
-struct S
+internal struct S
 {
   private void M()
   {
   }
 }
 [TheAspect]
-record R
+internal record R
 {
   private void M()
   {
   }
 }
 [TheAspect]
-interface I
+internal interface I
 {
   private void M()
   {

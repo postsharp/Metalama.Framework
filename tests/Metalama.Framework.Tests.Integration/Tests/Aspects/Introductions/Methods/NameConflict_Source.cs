@@ -1,7 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.NameConflict_Source
 {
@@ -10,20 +10,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
      */
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
-        {
-        }
+        public override void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
         [Introduce]
         public int Bar()
         {
             Foo();
 
-            return ExpressionFactory.Parse("Foo()").Value;
+            return ExpressionFactory.Parse( "Foo()" ).Value;
 
-            void Foo()
-            {
-            }
+            void Foo() { }
         }
     }
 

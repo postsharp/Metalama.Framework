@@ -2,7 +2,7 @@
 // @Skipped(constructed generics are not supported)
 #endif
 
-using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,8 +12,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceClass(
-            builder.Target,
+        var result = builder.IntroduceClass(
             "TestNestedType",
             buildType: b =>
             {
@@ -21,8 +20,7 @@ public class IntroductionAttribute : TypeAspect
                 b.Accessibility = Code.Accessibility.Public;
             } );
 
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(Template),
             buildMethod: b => { b.AddParameter( "p", result.Declaration.WithTypeArguments( TypeFactory.GetType( SpecialType.Object ) ) ); } );
     }

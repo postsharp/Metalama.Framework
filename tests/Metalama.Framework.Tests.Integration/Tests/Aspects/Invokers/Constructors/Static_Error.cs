@@ -1,27 +1,22 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Constructors.Static_Error;
 
 public class InvokerAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(
-            builder.Target,
+        builder.Override(
             nameof(Template),
-            new { target = builder.Target.DeclaringType!.StaticConstructor });
+            new { target = builder.Target.DeclaringType!.StaticConstructor } );
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IConstructor target)
+    public dynamic? Template( [CompileTime] IConstructor target )
     {
-        meta.InsertComment("Invoke new <target>();");
+        meta.InsertComment( "Invoke new <target>();" );
         target.Invoke();
 
         return meta.Proceed();
@@ -31,12 +26,8 @@ public class InvokerAspect : MethodAspect
 // <target>
 public class TargetClass
 {
-    static TargetClass()
-    {
-    }
+    static TargetClass() { }
 
     [InvokerAspect]
-    public void Invoker()
-    {
-    }
+    public void Invoker() { }
 }

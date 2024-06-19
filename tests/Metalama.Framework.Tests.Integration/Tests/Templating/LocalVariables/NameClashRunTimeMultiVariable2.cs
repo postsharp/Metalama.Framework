@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.NameCla
     {
         private int Method( int a, int b )
         {
-            ( var i, var j ) = ( 4, 5 );
+            var (i, j) = ( 4, 5 );
 
             return a + b;
         }

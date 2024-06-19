@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 #pragma warning disable CS0169
@@ -14,9 +15,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28910
     }
 
     // <target>
-    class EmptyOverrideFieldOrPropertyExample
+    internal class EmptyOverrideFieldOrPropertyExample
     {
         [EmptyOverrideFieldOrProperty]
-        int _field;
+        private int _field;
     }
 }

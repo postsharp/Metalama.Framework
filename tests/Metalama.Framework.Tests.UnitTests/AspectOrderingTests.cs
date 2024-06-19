@@ -97,7 +97,8 @@ namespace Metalama.Framework.Tests.UnitTests
         public void OneSingleLayerAspect()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 class Aspect1 : TypeAspect { }
 ";
 
@@ -109,7 +110,8 @@ class Aspect1 : TypeAspect { }
         public void OneDoubleLayerAspect()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Layers(""Layer1"")]
 class Aspect1 : TypeAspect { }
 ";
@@ -122,7 +124,8 @@ class Aspect1 : TypeAspect { }
         public void TwoUnorderedDoubleLayerAspects()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Layers(""Layer1"")]
 class Aspect1 : TypeAspect { }
 
@@ -138,7 +141,8 @@ class Aspect2 : TypeAspect { }
         public void ThreeOrderedSingleLayerAspects()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 
@@ -166,7 +170,8 @@ class Aspect2 : TypeAspect
         public void TwoOrderedDoubleLayerAspects()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1) ) ]
 
@@ -185,7 +190,8 @@ class Aspect2 : TypeAspect { }
         public void TwoPartiallyOrderedDoubleLayerAspects()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( ""Aspect2"", ""Aspect1"" ) ]
 
@@ -204,7 +210,8 @@ class Aspect2  : TypeAspect { }
         public void TwoTotallyOrderedDoubleLayerAspects()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( ""Aspect2:Layer1"", ""Aspect1:Layer1"", ""Aspect2"", ""Aspect1"" ) ]
 
@@ -223,7 +230,8 @@ class Aspect2  : TypeAspect { }
         public void InheritedAspects()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [Layers(""Layer1"")]
 class Aspect1  : TypeAspect { }
@@ -239,7 +247,8 @@ class Aspect2 : Aspect1 {}
         public void ApplyToDerivedTypes()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( ""AspectAA"", ""AspectBA"", ApplyToDerivedTypes = true ) ]
 
@@ -262,8 +271,10 @@ class AspectBB : AspectBA {}
         public void InvalidAspectName()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( ""NonExistent1"", ""Aspect1"" ) ]
 
@@ -279,7 +290,8 @@ class Aspect1 : TypeAspect { }
         public void Cycle()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1) ) ]
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) ) ]
@@ -300,7 +312,8 @@ class Aspect2 : TypeAspect { }
             // therefore the sort algorithm goes to another branch.
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) ) ]

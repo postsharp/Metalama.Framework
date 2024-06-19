@@ -2,6 +2,7 @@
 // @ClearIgnoredDiagnostics
 # endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(Override) );
+            builder.Override( nameof(Override) );
             builder.Diagnostics.Suppress( _suppression, builder.Target );
         }
     }

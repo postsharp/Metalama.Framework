@@ -1,5 +1,5 @@
 [Aspect(I = -1)]
-class TargetM1
+internal class TargetM1
 {
   private void M()
   {
@@ -8,7 +8,7 @@ class TargetM1
   }
 }
 [Aspect(I = 1)]
-class Target1
+internal class Target1
 {
   private void M()
   {

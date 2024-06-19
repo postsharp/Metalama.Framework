@@ -33,7 +33,8 @@ public sealed class CodeLensTests : DesignTimeTestBase
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
                             using System;
                             using System.IO;
@@ -54,7 +55,7 @@ public sealed class CodeLensTests : DesignTimeTestBase
                             {
                                 public override void BuildAspect(IAspectBuilder<INamedType> builder)
                                 {
-                                    builder.Advice.IntroduceMethod(builder.Target, nameof(Get));
+                                    builder.IntroduceMethod( nameof(Get));
                             
                                     builder.Outbound.SelectMany(type => type.Methods)
                                         .AddAspectIfEligible<InjectedLoggerAttribute>();
@@ -106,7 +107,8 @@ public sealed class CodeLensTests : DesignTimeTestBase
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
@@ -139,7 +141,7 @@ public sealed class CodeLensTests : DesignTimeTestBase
                             
                                     builder.Outbound.AddAspect<MyChildAspect>();
                             
-                                    builder.Advice.IntroduceMethod(builder.Target, nameof(Template));
+                                    builder.IntroduceMethod( nameof(Template));
                                 }
                             
                                 [Template]

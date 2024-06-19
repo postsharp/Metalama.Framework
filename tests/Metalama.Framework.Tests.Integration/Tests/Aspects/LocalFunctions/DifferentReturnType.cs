@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.DifferentReturnType;
@@ -10,10 +11,12 @@ public class Override : OverrideMethodAspect
         {
             // Invalid code generated here.
             meta.Proceed();
+
             return "something";
         }
 
         var s = LocalFunction();
+
         return s.Length;
     }
 }

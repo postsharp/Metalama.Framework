@@ -2,6 +2,7 @@
 // @KeepDisabledCode
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Collections;
@@ -12,15 +13,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31077
 {
     public class TestAspect : MethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(OverrideMethod));
+            builder.Override( nameof(OverrideMethod) );
         }
 
         [Template]
         public dynamic? OverrideMethod()
         {
             _ = meta.Proceed();
+
             return meta.Proceed();
         }
     }
@@ -37,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31077
         [TestAspect]
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
     }
 }

@@ -1,7 +1,7 @@
 internal class TargetClass
 {
   [Override]
-  void VoidMethod(object arg)
+  private void VoidMethod(object arg)
   {
     if (arg == null)
     {
@@ -12,7 +12,7 @@ internal class TargetClass
     return;
   }
   [Override]
-  int IntMethod(object arg)
+  private int IntMethod(object arg)
   {
     if (arg == null)
     {

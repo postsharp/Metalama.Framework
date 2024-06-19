@@ -26,7 +26,7 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
     }
 
     /// <summary>
-    /// Add a <c>case</c> switch section.
+    /// Add a <c>case</c> switch section. This overload accepts an <see cref="IStatementList"/>.
     /// </summary>
     /// <param name="label">The label, i.e. the value to match.</param>
     /// <param name="statements">The statements to execute.</param>
@@ -37,7 +37,18 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
     }
 
     /// <summary>
-    /// Add a <c>case</c> switch section with a <c>when</c> expression.
+    /// Add a <c>case</c> switch section. This overload accepts an <see cref="IStatement"/>.
+    /// </summary>
+    /// <param name="label">The label, i.e. the value to match.</param>
+    /// <param name="statement">The statement to execute. To call a template, see <see cref="StatementFactory.FromTemplate(Metalama.Framework.Aspects.TemplateInvocation,object?)"/>.</param>
+    /// <param name="appendBreak">Value indicating whether a <c>break;</c> statement should be appended to <paramref name="statement"/>. The default value is <c>true</c>.</param>
+    public void AddCase( SwitchStatementLabel label, IStatement statement, bool appendBreak = true )
+    {
+        this._cases.Add( new SwitchStatementSection( label, null, statement.AsList(), appendBreak ) );
+    }
+
+    /// <summary>
+    /// Add a <c>case</c> switch section with a <c>when</c> expression. This overload accepts an <see cref="IStatementList"/>.
     /// </summary>
     /// <param name="label">The label, i.e. the value to match.</param>
     /// <param name="when">The <c>when</c> expression.</param>
@@ -49,13 +60,35 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
     }
 
     /// <summary>
-    /// Add a <c>default</c> switch section.
+    /// Add a <c>case</c> switch section with a <c>when</c> expression.  This overload accepts an <see cref="IStatement"/>.
+    /// </summary>
+    /// <param name="label">The label, i.e. the value to match.</param>
+    /// <param name="when">The <c>when</c> expression.</param>
+    /// <param name="statement">The statement to execute. To call a template, see <see cref="StatementFactory.FromTemplate(Metalama.Framework.Aspects.TemplateInvocation,object?)"/>.</param>
+    /// <param name="appendBreak">Value indicating whether a <c>break;</c> statement should be appended to <paramref name="statement"/>. The value is <c>true</c>.</param>
+    public void AddCase( SwitchStatementLabel label, IExpression? when, IStatement statement, bool appendBreak = true )
+    {
+        this._cases.Add( new SwitchStatementSection( label, when, statement.AsList(), appendBreak ) );
+    }
+
+    /// <summary>
+    /// Add a <c>default</c> switch section.  This overload accepts an <see cref="IStatementList"/>.
     /// </summary>
     /// <param name="statements">The statements to execute.</param>
     /// <param name="appendBreak">Value indicating whether a <c>break;</c> statement should be appended to <paramref name="statements"/>. The default value is <c>true</c>.</param>
     public void AddDefault( IStatementList statements, bool appendBreak = true )
     {
         this._cases.Add( new SwitchStatementSection( null, null, statements, appendBreak ) );
+    }
+
+    /// <summary>
+    /// Add a <c>default</c> switch section.  This overload accepts an <see cref="IStatement"/>.
+    /// </summary>
+    /// <param name="statement">The statements to execute.  To call a template, see <see cref="StatementFactory.FromTemplate(Metalama.Framework.Aspects.TemplateInvocation,object?)"/>.</param>
+    /// <param name="appendBreak">Value indicating whether a <c>break;</c> statement should be appended to <paramref name="statement"/>. The default value is <c>true</c>.</param>
+    public void AddDefault( IStatement statement, bool appendBreak = true )
+    {
+        this._cases.Add( new SwitchStatementSection( null, null, statement.AsList(), appendBreak ) );
     }
 
     /// <summary>

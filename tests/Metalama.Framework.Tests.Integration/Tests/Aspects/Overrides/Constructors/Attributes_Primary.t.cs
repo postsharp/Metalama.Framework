@@ -1,7 +1,7 @@
 [Override]
 internal class TargetClass
 {
-  int Z;
+  private int Z;
   [ConstructorOnly]
   public TargetClass([ParamOnly] int x)
   {

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.SourceReference;
@@ -9,7 +10,7 @@ public class TheAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine( meta.CompileTime( Path.GetFileName( meta.Target.Declaration.Sources.Single( s => s.IsImplementationPart ).Span.FilePath) ) );
+        Console.WriteLine( meta.CompileTime( Path.GetFileName( meta.Target.Declaration.Sources.Single( s => s.IsImplementationPart ).Span.FilePath ) ) );
 
         return meta.Proceed();
     }

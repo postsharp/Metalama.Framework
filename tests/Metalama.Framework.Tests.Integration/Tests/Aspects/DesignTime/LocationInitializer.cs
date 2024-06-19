@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DesignTime.LocationInitializer
@@ -20,7 +21,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DesignTime.Location
 
     // <target>
     [Id]
-    internal partial class TargetCode
-    {
-    }
+    internal partial class TargetCode { }
 }

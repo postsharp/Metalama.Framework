@@ -1,10 +1,11 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Interface;
 
 [CompileTime]
-interface IMyAspect : IAspect
+internal interface IMyAspect : IAspect
 {
     [Template]
     void CalledTemplate();
@@ -19,7 +20,7 @@ internal class Aspect : OverrideMethodAspect, IMyAspect
         IMyAspect myAspect = this;
         myAspect.CalledTemplate();
 
-        ((IMyAspect)this).CalledTemplate();
+        ( (IMyAspect)this ).CalledTemplate();
 
         return default;
     }
@@ -27,7 +28,7 @@ internal class Aspect : OverrideMethodAspect, IMyAspect
     [Template]
     public void CalledTemplate()
     {
-        Console.WriteLine("called template");
+        Console.WriteLine( "called template" );
     }
 }
 
@@ -35,7 +36,5 @@ internal class Aspect : OverrideMethodAspect, IMyAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

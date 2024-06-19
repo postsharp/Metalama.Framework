@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,25 +7,25 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Dynami
 
 internal class Aspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.Override(builder.Target, nameof(OverrideMethod));
+        builder.Override( nameof(OverrideMethod) );
     }
 
     [Template]
-    public dynamic? OverrideMethod(dynamic x, dynamic y)
+    public dynamic? OverrideMethod( dynamic x, dynamic y )
     {
-        CalledTemplate(0, x, y, 1, 2);
+        CalledTemplate( 0, x, y, 1, 2 );
 
         return default;
     }
 
     [Template]
-    private void CalledTemplate(dynamic a, dynamic b, int c, int d, [CompileTime] int e)
+    private void CalledTemplate( dynamic a, dynamic b, int c, int d, [CompileTime] int e )
     {
-        Console.WriteLine($"called template a={a} b={b} c={c} d={d} e={e}");
+        Console.WriteLine( $"called template a={a} b={b} c={c} d={d} e={e}" );
     }
 }
 
@@ -32,7 +33,5 @@ internal class Aspect : MethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method(int x, int y)
-    {
-    }
+    private void Method( int x, int y ) { }
 }

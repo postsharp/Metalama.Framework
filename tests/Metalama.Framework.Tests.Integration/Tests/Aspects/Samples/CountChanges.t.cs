@@ -1,5 +1,5 @@
 [CountChanges]
-class C
+internal class C
 {
   private string? _address;
   public string? Address
@@ -41,7 +41,7 @@ class C
   {
     get
     {
-      int sum = 0;
+      var sum = 0;
       sum += this.AddressChangeCount;
       sum += this.ItemsChangeCount;
       return (global::System.Int32)sum;

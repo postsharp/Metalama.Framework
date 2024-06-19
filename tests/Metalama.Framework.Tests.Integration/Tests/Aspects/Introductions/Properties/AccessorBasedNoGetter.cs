@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty( builder.Target, "TheProperty", null, nameof(Setter) );
+            builder.IntroduceProperty( "TheProperty", null, nameof(Setter) );
         }
     }
 

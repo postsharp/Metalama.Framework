@@ -1,5 +1,5 @@
 [AutoIncrementAttribute]
-int Property
+private int Property
 {
   get
   {

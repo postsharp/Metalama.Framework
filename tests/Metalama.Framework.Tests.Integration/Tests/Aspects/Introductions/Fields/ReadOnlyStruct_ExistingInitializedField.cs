@@ -3,6 +3,7 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Target_ReadOnlyStruct_ExistingInitializedField
@@ -31,7 +32,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Targe
 
         public TargetStruct()
         {
-            this._fieldInitializedByCtor = 42;
+            _fieldInitializedByCtor = 42;
         }
     }
 }

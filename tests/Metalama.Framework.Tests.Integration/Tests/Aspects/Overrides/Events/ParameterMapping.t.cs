@@ -6,12 +6,12 @@ internal class TargetClass
     add
     {
       value.Invoke(null, new global::System.EventArgs());
-      EventHandler ev = value;
+      var ev = value;
     }
     remove
     {
       value.Invoke(null, new global::System.EventArgs());
-      EventHandler ev = value;
+      var ev = value;
     }
   }
 }

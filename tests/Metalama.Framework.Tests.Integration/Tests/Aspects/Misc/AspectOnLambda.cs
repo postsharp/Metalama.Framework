@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -9,7 +10,7 @@ internal class MethodAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("Hello, world.");
+        Console.WriteLine( "Hello, world." );
 
         return meta.Proceed();
     }
@@ -17,29 +18,23 @@ internal class MethodAspect : OverrideMethodAspect
 
 internal class MethodBaseAspect : Attribute, IAspect<IMethodBase>
 {
-    public void BuildAspect(IAspectBuilder<IMethodBase> builder)
-    {
-    }
+    public void BuildAspect( IAspectBuilder<IMethodBase> builder ) { }
 
-    public void BuildEligibility(IEligibilityBuilder<IMethodBase> builder)
-    {
-    }
+    public void BuildEligibility( IEligibilityBuilder<IMethodBase> builder ) { }
 }
 
 internal class Contract : ContractAspect
 {
-    public override void Validate(dynamic? value)
-    {
-    }
+    public override void Validate( dynamic? value ) { }
 }
 
 internal class TargetCode
 {
-    private int Method(int a)
+    private int Method( int a )
     {
-        var lambda = [MethodAspect][MethodBaseAspect][return: Contract] ([Contract] int a) => a;
+        var lambda = [MethodAspect] [MethodBaseAspect] [return: Contract]( [Contract] int a ) => a;
 
-        lambda(a);
+        lambda( a );
 
         return a;
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtual_Empty;
@@ -10,9 +11,9 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("virtual method");
+        Console.WriteLine( "virtual method" );
 
-        this.OverrideAsyncMethod();
+        OverrideAsyncMethod();
 
         return meta.Proceed();
     }
@@ -22,7 +23,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private async Task Method()
-    {
-    }
+    private async Task Method() { }
 }

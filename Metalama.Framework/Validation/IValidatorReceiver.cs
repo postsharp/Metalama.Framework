@@ -160,7 +160,7 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
     /// </remarks>
     IValidatorReceiver<INamedType> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
-    
+
     /// <summary>
     /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="INamedType"/>. 
     /// </summary>
@@ -279,7 +279,7 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
     /// </remarks>
     new IValidatorReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
-    
+
     /// <summary>
     /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="INamedType"/>. 
     /// </summary>

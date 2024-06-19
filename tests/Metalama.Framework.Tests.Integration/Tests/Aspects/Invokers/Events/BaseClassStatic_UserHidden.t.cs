@@ -1,6 +1,6 @@
 public class TargetClass : BaseClass
 {
-  public new static event System.EventHandler Event
+  public new static event EventHandler Event
   {
     add
     {
@@ -10,7 +10,7 @@ public class TargetClass : BaseClass
     }
   }
   [InvokerAspect]
-  public event System.EventHandler Invoker
+  public event EventHandler Invoker
   {
     add
     { // Invoke BaseClass.Event
@@ -33,7 +33,7 @@ public class TargetClass : BaseClass
       global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassStatic_UserHidden.BaseClass.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassStatic_UserHidden.TargetClass.StaticTarget;
     }
   }
-  public static void StaticTarget(object? sender, System.EventArgs args)
+  public static void StaticTarget(object? sender, EventArgs args)
   {
   }
 }

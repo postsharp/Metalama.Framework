@@ -1,9 +1,10 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.OverrideGenericMethodWithConstraints
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
@@ -11,70 +12,64 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.OverrideGeneri
         }
     }
 
-    
-    class Base
+    internal class Base
     {
-        public virtual void VirtualMethod<T>() {}
+        public virtual void VirtualMethod<T>() { }
     }
-    
+
     // <target>
-    class TargetCode : Base
+    internal class TargetCode : Base
     {
         [Aspect]
-        T MethodWithTypeConstraint<T>(T a)
+        private T MethodWithTypeConstraint<T>( T a )
             where T : IDisposable
         {
             return a;
         }
-        
+
         [Aspect]
-        T MethodWithConstructorConstraint<T>(T a)
+        private T MethodWithConstructorConstraint<T>( T a )
             where T : IDisposable, new()
         {
             return a;
         }
-        
+
         [Aspect]
-        T MethodWithStructConstraint<T>(T a)
+        private T MethodWithStructConstraint<T>( T a )
             where T : struct, IDisposable
         {
             return a;
         }
-        
-                
+
         [Aspect]
-        T MethodWithNotNullConstraint<T>(T a)
+        private T MethodWithNotNullConstraint<T>( T a )
             where T : notnull, IDisposable
         {
             return a;
         }
-        
+
         [Aspect]
-        T MethodWithUnmanagedConstraint<T>(T a)
+        private T MethodWithUnmanagedConstraint<T>( T a )
             where T : unmanaged
         {
             return a;
         }
-        
-               
+
         [Aspect]
-        T MethodWithClassConstraint<T>(T a)
+        private T MethodWithClassConstraint<T>( T a )
             where T : class, IDisposable
         {
             return a;
         }
-        
+
         [Aspect]
-        T MethodWithNullableClassConstraint<T>(T a)
+        private T MethodWithNullableClassConstraint<T>( T a )
             where T : class?, IDisposable
         {
             return a;
         }
 
         [Aspect]
-        public override void VirtualMethod<T>() where T : default
-        {
-            
-        }
+        public override void VirtualMethod<T>() where T : default { }
     }
 }

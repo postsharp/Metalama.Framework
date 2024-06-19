@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
@@ -12,8 +13,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     public interface IInterface
     {
         int TemplateWithGet { set; }
+
         int TemplateWithSet { get; }
+
         int TemplateWithInit { set; }
+
         int TemplateWithoutInit { init; }
     }
 
@@ -21,47 +25,39 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
         [InterfaceMember( IsExplicit = true )]
-        int TemplateWithGet 
-        { 
+        private int TemplateWithGet
+        {
             get
             {
                 return 42;
             }
-            set
-            {
-            }
+            set { }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public int TemplateWithSet
         {
             get
             {
                 return 42;
             }
-            set
-            {
-            }
+            set { }
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        int TemplateWithInit
+        [InterfaceMember( IsExplicit = true )]
+        private int TemplateWithInit
         {
-            init
-            {
-            }
+            init { }
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        int TemplateWithoutInit
+        [InterfaceMember( IsExplicit = true )]
+        private int TemplateWithoutInit
         {
-            set
-            {
-            }
+            set { }
         }
     }
 

@@ -1,35 +1,35 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
-
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicPropertyMember
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             // Dynamic property as method argument.
-            Console.WriteLine(meta.This);
-            Console.WriteLine(meta.Target.Parameters[0].Value);
-            
+            Console.WriteLine( meta.This );
+            Console.WriteLine( meta.Target.Parameters[0].Value );
+
             // Dynamic property in assignment;
             object o;
             o = meta.This;
-            
+
             // Dynamic property in variable initialization/
             object x = meta.This;
-            
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

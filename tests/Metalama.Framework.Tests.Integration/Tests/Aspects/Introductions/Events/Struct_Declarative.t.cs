@@ -4,7 +4,7 @@ internal struct TargetStruct
   private int _existingField;
   public TargetStruct(int x)
   {
-    this._existingField = x;
+    _existingField = x;
   }
   public static void Foo(global::System.Object? sender, global::System.EventArgs args)
   {

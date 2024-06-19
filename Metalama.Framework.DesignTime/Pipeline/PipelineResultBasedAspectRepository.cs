@@ -36,10 +36,14 @@ internal sealed class PipelineResultBasedAspectRepository : AspectRepository
 
         var declarationId = declaration.ToSerializableId();
 
-        var aspectClass = this._result.Configuration?.AspectClasses.OfType<AspectClass>().FirstOrDefault( aspectClass => aspectClass.FullName == aspectFullName );
+        var aspectClass = this._result.Configuration?.AspectClasses.OfType<AspectClass>()
+            .FirstOrDefault( aspectClass => aspectClass.FullName == aspectFullName );
+
         var descentantClassesNames = new HashSet<string>( aspectClass?.DescendantClassesAndSelf.Select( c => c.FullName ) ?? [] );
 
-        return syntaxTreeResult.AspectInstances.Any( a => (a.AspectClassFullName == aspectFullName || descentantClassesNames.Contains( a.AspectClassFullName ) == true) && a.TargetDeclarationId == declarationId );
+        return syntaxTreeResult.AspectInstances.Any(
+            a => (a.AspectClassFullName == aspectFullName || descentantClassesNames.Contains( a.AspectClassFullName ))
+                 && a.TargetDeclarationId == declarationId );
     }
 
     public override IEnumerable<IAspectInstance> GetAspectInstances( IDeclaration declaration )

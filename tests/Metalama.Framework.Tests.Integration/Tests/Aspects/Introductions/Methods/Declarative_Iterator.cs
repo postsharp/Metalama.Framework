@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Declarative_Iterator
@@ -10,9 +11,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         public IEnumerable<int> IntroducedMethod_Enumerable()
         {
             Console.WriteLine( "This is introduced method." );
+
             yield return 42;
 
-            foreach(var x in meta.Proceed()!)
+            foreach (var x in meta.Proceed()!)
             {
                 yield return x;
             }
@@ -21,12 +23,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         [Introduce]
         public IEnumerator<int> IntroducedMethod_Enumerator()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
+
             yield return 42;
 
             var enumerator = meta.Proceed()!;
 
-            while(enumerator.MoveNext())
+            while (enumerator.MoveNext())
             {
                 yield return enumerator.Current;
             }

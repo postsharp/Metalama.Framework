@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,22 +8,21 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
 
 public class GenerateMethodsAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
         foreach (var field in builder.Target.Fields)
         {
-            builder.Advice.IntroduceMethod(
-                builder.Target,
-                nameof(this.Use),
+            builder.IntroduceMethod(
+                nameof(Use),
                 args: new { field = field, T = field.Type },
-                buildMethod: m => m.Name = "Use" + field.Name);
+                buildMethod: m => m.Name = "Use" + field.Name );
         }
     }
 
     [Template]
-    public void Use<[CompileTime] T>(IField field)
+    public void Use<[CompileTime] T>( IField field )
     {
         // not allowed by C#:
         // T? value = null;

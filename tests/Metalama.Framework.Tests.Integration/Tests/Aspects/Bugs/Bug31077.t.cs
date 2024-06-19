@@ -18,6 +18,6 @@ public class TargetClass<T> : IEnumerable<T>
   }
   private IEnumerator System_Collections_IEnumerable_GetEnumerator_Source()
   {
-    return this.GetEnumerator();
+    return GetEnumerator();
   }
 }

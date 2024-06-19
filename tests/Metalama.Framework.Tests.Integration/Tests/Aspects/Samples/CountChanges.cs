@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,26 +7,25 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples;
 
 public class CountChangesAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         var counterProperties = new List<IProperty>();
 
         foreach (var property in builder.Target.Properties)
         {
-            var counterProperty = builder.Advice.IntroduceProperty(
-                builder.Target,
-                nameof(CounterProperty),
-                buildProperty: b => b.Name = $"{property.Name}ChangeCount").Declaration;
+            var counterProperty = builder.IntroduceProperty(
+                    nameof(CounterProperty),
+                    buildProperty: b => b.Name = $"{property.Name}ChangeCount" )
+                .Declaration;
 
-            builder.Advice.Override(property, nameof(IncrementCounter), tags: new { CounterProperty = counterProperty });
+            builder.With( property ).Override( nameof(IncrementCounter), tags: new { CounterProperty = counterProperty } );
 
-            counterProperties.Add(counterProperty);
+            counterProperties.Add( counterProperty );
         }
 
-        builder.Advice.IntroduceProperty(
-            builder.Target,
+        builder.IntroduceProperty(
             nameof(TotalChanges),
-            tags: new { CounterProperties = counterProperties });
+            tags: new { CounterProperties = counterProperties } );
     }
 
     [Template]
@@ -55,9 +55,9 @@ public class CountChangesAttribute : TypeAspect
         get
         {
             var properties = (IReadOnlyList<IProperty>)meta.Tags["CounterProperties"]!;
-            int sum = 0;
+            var sum = 0;
 
-            foreach(var property in properties)
+            foreach (var property in properties)
             {
                 sum += property.Value;
             }
@@ -69,7 +69,7 @@ public class CountChangesAttribute : TypeAspect
 
 // <target>
 [CountChanges]
-class C
+internal class C
 {
     public string? Address { get; set; }
 

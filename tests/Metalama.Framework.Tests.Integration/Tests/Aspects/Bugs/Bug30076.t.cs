@@ -1,7 +1,7 @@
-class Target
+internal class Target
 {
   [Log]
-  void M()
+  private void M()
   {
     var errorColour = global::System.ConsoleColor.Red;
     var resultColour = global::System.ConsoleColor.Green;

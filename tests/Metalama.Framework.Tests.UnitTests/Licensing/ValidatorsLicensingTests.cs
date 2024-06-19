@@ -12,9 +12,10 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
     {
         private const string _noLicenseKeyErrorId = LicensingDiagnosticDescriptors.NoLicenseKeyRegisteredId;
         private const string _fabricsNotAvailableErrorId = LicensingDiagnosticDescriptors.FabricsNotAvailableId;
-        
+
         private const string _declarationValidationAspectAppliedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
@@ -47,7 +48,8 @@ class TargetClass
 ";
 
         private const string _declarationValidationFabricAppliedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;
@@ -92,7 +94,10 @@ class TargetClass
         [InlineData( nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution), "DEMO01" )]
         [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), LicensingDiagnosticDescriptors.InvalidLicenseKeyRegisteredId )]
         [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), "DEMO01", TestLicenseKeyProvider.MetalamaUltimateProjectBoundProjectName )]
-        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string? licenseKeyName, string expectedDiagnosticId, string projectName = "TestProject" )
+        public async Task DeclarationValidatorIsAcceptedViaAspectAsync(
+            string? licenseKeyName,
+            string expectedDiagnosticId,
+            string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
 
@@ -118,13 +123,13 @@ class TargetClass
         public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKeyName, string expectedDiagnosticId, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
-            
+
             var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey, projectName: projectName );
 
             Assert.Single( diagnostics, d => d.Id == expectedDiagnosticId );
             Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
-        
+
         [Fact]
         public async Task NotificationsAreTriggeredWhenOnlyValidatorsAreUsedAsync()
         {

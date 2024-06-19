@@ -48,7 +48,7 @@ namespace Metalama.Testing.AspectTesting
             }
             else
             {
-                this.Options.ApplySourceDirectives( sourceCode );
+                this.Options.ApplySourceDirectives( sourceCode, fullPath );
             }
 
             if ( fullPath != null )

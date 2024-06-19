@@ -67,6 +67,11 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
             if ( transformation.Observability != TransformationObservability.None )
             {
                 this.CurrentCompilation.AddTransformation( transformation );
+
+                if ( transformation is ISyntaxTreeTransformation syntaxTreeTransformation )
+                {
+                    UserCodeExecutionContext.CurrentOrNull?.AddDependencyTo( syntaxTreeTransformation.TransformedSyntaxTree );
+                }
             }
         }
     }

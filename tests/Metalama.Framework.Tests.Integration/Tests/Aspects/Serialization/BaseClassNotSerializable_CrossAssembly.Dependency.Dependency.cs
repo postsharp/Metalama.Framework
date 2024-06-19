@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassNotSerializable_CrossAssembly;
 
@@ -9,6 +10,6 @@ public class BaseType
 
     public BaseType()
     {
-        this.BaseValue = 13;
+        BaseValue = 13;
     }
 }

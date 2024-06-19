@@ -19,9 +19,12 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             private readonly ImmutableHashSet<INamedTypeSymbol>? _types;
 
+            private readonly ImmutableHashSet<string>? _observedSyntaxTreePaths;
+
             public PartialImpl(
                 CompilationContext compilationContext,
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
+                ImmutableHashSet<string>? observedSyntaxTreePaths,
                 ImmutableHashSet<INamedTypeSymbol>? types,
                 Lazy<DerivedTypeIndex> derivedTypeIndex,
                 ImmutableArray<ManagedResource> resources )
@@ -29,6 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this._types = types;
                 this.SyntaxTrees = syntaxTrees;
+                this._observedSyntaxTreePaths = observedSyntaxTreePaths;
 
 #if DEBUG
                 this.CheckTrees();
@@ -45,6 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this._types = types;
                 this.SyntaxTrees = syntaxTrees;
+                this._observedSyntaxTreePaths = null;
 
 #if DEBUG
                 this.CheckTrees();
@@ -68,6 +73,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override ImmutableHashSet<INamespaceSymbol> Namespaces
                 => this.Types.SelectAsReadOnlyCollection( t => t.ContainingNamespace ).ToImmutableHashSet();
+
+            public override bool IsSyntaxTreeObserved( string syntaxTreePath )
+                => this._observedSyntaxTreePaths == null || this._observedSyntaxTreePaths.Contains( syntaxTreePath );
 
             public override bool IsPartial => true;
 

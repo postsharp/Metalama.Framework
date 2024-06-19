@@ -1,4 +1,4 @@
-class Target
+internal class Target
 {
   [TestAspect]
   public void Foo<T>()

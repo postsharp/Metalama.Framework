@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -6,18 +7,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.Te
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors(@event, nameof(Override), nameof(Override), null);
+                builder.With( @event ).OverrideAccessors( nameof(Override), nameof(Override), null );
             }
         }
 
         [Template]
         public dynamic? Override()
         {
-            Console.WriteLine("Aspect code");
+            Console.WriteLine( "Aspect code" );
+
             return meta.Proceed();
         }
     }

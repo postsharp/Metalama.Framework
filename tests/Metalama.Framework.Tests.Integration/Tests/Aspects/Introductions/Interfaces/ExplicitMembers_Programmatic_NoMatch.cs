@@ -23,14 +23,15 @@ public interface IInterface
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var explicitImplementation = builder.Advice.ImplementInterface(builder.Target, typeof(IInterface)).ExplicitImplementation;
+        var explicitImplementation = builder.ImplementInterface( typeof(IInterface) ).ExplicitMembers;
 
-        Action[] introductions = [
-            () => explicitImplementation.IntroduceMethod(nameof(Method)),
-            () => explicitImplementation.IntroduceEvent(nameof(Event)),
-            () => explicitImplementation.IntroduceProperty(nameof(Property)),
+        Action[] introductions =
+        [
+            () => explicitImplementation.IntroduceMethod( nameof(Method) ),
+            () => explicitImplementation.IntroduceEvent( nameof(Event) ),
+            () => explicitImplementation.IntroduceProperty( nameof(Property) )
         ];
 
         var exceptions = new List<Exception>();
@@ -43,18 +44,19 @@ public class IntroductionAttribute : TypeAspect
             }
             catch (Exception ex)
             {
-                exceptions.Add(ex);
+                exceptions.Add( ex );
+
                 continue;
             }
         }
 
-        throw new AggregateException(exceptions);
+        throw new AggregateException( exceptions );
     }
 
     [Template]
     public int Method()
     {
-        Console.WriteLine("This is introduced interface member.");
+        Console.WriteLine( "This is introduced interface member." );
 
         return meta.Proceed();
     }

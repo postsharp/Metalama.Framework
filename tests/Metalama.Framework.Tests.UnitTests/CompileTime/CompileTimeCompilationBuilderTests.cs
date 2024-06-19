@@ -65,7 +65,8 @@ namespace Foo
         {
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Fabrics;
 
 [assembly: A(42, new[] { E.A }, new[] { typeof(C<int[]>.N<string>), typeof(C<>.N<>) }, P = 13)]
@@ -112,7 +113,8 @@ class A : Attribute
             // This tests that we can create compile-time assemblies that have reference projects in the same solution with compile-time code.
 
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -121,7 +123,8 @@ public class ReferencedClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -140,7 +143,8 @@ class ReferencingClass
         public void CompilationDuplicateMetadataReference()
         {
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -149,7 +153,8 @@ public class ReferencedClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -158,7 +163,9 @@ class ReferencingClass
 ";
 
             var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
-            var referencedCompilationModified = referencedCompilation.WithOptions( referencedCompilation.Options.WithAllowUnsafe( !referencedCompilation.Options.AllowUnsafe ) );
+
+            var referencedCompilationModified =
+                referencedCompilation.WithOptions( referencedCompilation.Options.WithAllowUnsafe( !referencedCompilation.Options.AllowUnsafe ) );
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation(
                 referencingCode,
@@ -175,7 +182,8 @@ class ReferencingClass
             // This tests that we can create compile-time assemblies that have reference compiled assemblies (out of the solution) with compile-time code.
 
             const string indirectlyReferencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -183,7 +191,8 @@ public class ReferencedClass
 ";
 
             const string directlyReferencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class MiddleClass
 {
@@ -193,7 +202,8 @@ public class MiddleClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -263,7 +273,8 @@ class ReferencingClass
 
             string GenerateVersionedCode( int version )
                 => @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class VersionedClass
 {
@@ -273,7 +284,8 @@ public class VersionedClass
 
             const string classA = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class A
 {
@@ -283,7 +295,8 @@ class A
 
             const string classB = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class B
 {
@@ -371,7 +384,8 @@ class C
         public void CacheWithSameLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -426,7 +440,8 @@ public class ReferencedClass
         public void CacheWithDifferentIdentityButSameCodeSameLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -468,7 +483,8 @@ public class ReferencedClass
         public void CacheWithDifferentIdentityButSameCodeDifferentLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -510,7 +526,8 @@ public class ReferencedClass
         public void CacheWithDifferentLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -572,7 +589,8 @@ public class ReferencedClass
         public void CleanCacheAndDeserialize()
         {
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -581,7 +599,8 @@ public class ReferencedClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -652,7 +671,8 @@ class ReferencingClass
             var loader = new CompileTimeProjectRepository.Builder( domain, testContext.ServiceProvider );
 
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -706,46 +726,46 @@ public class ReferencedClass
         public void RewriteTypeOf()
         {
             const string code = """
-                using System;
-                using Metalama.Framework.Aspects;
+                                using System;
+                                using Metalama.Framework.Aspects; 
 
-                [CompileTime]
-                public class CompileTimeOnlyClass
-                {
-                   static Type Type1 = typeof(RunTimeOnlyClass);
-                   static Type Type2 = typeof(CompileTimeOnlyClass);
-                   static string Name1 = nameof(RunTimeOnlyClass);
-                   static string Name2 = nameof(CompileTimeOnlyClass);
+                                [CompileTime]
+                                public class CompileTimeOnlyClass
+                                {
+                                   static Type Type1 = typeof(RunTimeOnlyClass);
+                                   static Type Type2 = typeof(CompileTimeOnlyClass);
+                                   static string Name1 = nameof(RunTimeOnlyClass);
+                                   static string Name2 = nameof(CompileTimeOnlyClass);
+                                
+                                   void Method() { var t = typeof(RunTimeOnlyClass); }
+                                   string Property => nameof(RunTimeOnlyClass);
+                                }
 
-                   void Method() { var t = typeof(RunTimeOnlyClass); }
-                   string Property => nameof(RunTimeOnlyClass);
-                }
+                                public class RunTimeOnlyClass
+                                {
+                                   static Type Type1 = typeof(RunTimeOnlyClass);
+                                   static Type Type3 = typeof(CompileTimeOnlyClass);
 
-                public class RunTimeOnlyClass
-                {
-                   static Type Type1 = typeof(RunTimeOnlyClass);
-                   static Type Type3 = typeof(CompileTimeOnlyClass);
-
-                }
-                """;
+                                }
+                                """;
 
             const string expected = """
-                using global::System;
-                using global::Metalama.Framework.Aspects;
+                                    using global::System;
+                                    using global::Metalama.Framework.Aspects;
 
-                [CompileTime]
-                public class CompileTimeOnlyClass
-                {
-                   static global::System.Type Type1 = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass");
-                   static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
-                   static string Name1 = "RunTimeOnlyClass";
-                   static string Name2 = "CompileTimeOnlyClass";
+                                    [CompileTime]
+                                    public class CompileTimeOnlyClass
+                                    {
+                                       static global::System.Type Type1 = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass");
+                                       static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
+                                       static string Name1 = "RunTimeOnlyClass";
+                                       static string Name2 = "CompileTimeOnlyClass";
+                                    
+                                       void Method() { var t = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass"); }
+                                       string Property => "RunTimeOnlyClass";
+                                    }
 
-                   void Method() { var t = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass"); }
-                   string Property => "RunTimeOnlyClass";
-                }
-
-                """;
+                                    """;
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 
@@ -783,7 +803,8 @@ public class ReferencedClass
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public class Anything
@@ -816,7 +837,8 @@ public class Anything
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 public class SomeRunTimeClass
 {
@@ -851,7 +873,8 @@ public class SomeRunTimeClass
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 public class MyAspect : OverrideMethodAspect
 {
@@ -941,7 +964,8 @@ public class MyAspect : OverrideMethodAspect
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 Method();
 
@@ -956,7 +980,8 @@ class CompileTimeClass { }
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 class CompileTimeClass { }
@@ -1077,7 +1102,8 @@ namespace SomeNamespace
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }
 
@@ -1110,7 +1136,8 @@ public delegate void SomeDelegate();
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public class SomeClass
@@ -1147,7 +1174,8 @@ public delegate void SomeDelegate();
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public interface SomeInterface
@@ -1160,7 +1188,8 @@ public interface SomeInterface
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public interface SomeInterface
@@ -1179,7 +1208,8 @@ public interface SomeInterface
             using var testContext1 = this.CreateTestContext();
 
             const string code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 #if SYMBOL
 public class ReferencedClass
@@ -1249,7 +1279,8 @@ Intentional syntax error.
             const string code = @"
 #region Namespaces
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using StrippedNamespace;
 #endregion
 
@@ -1297,7 +1328,8 @@ class C {
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 namespace RemainingNamespace
 {
@@ -1313,43 +1345,44 @@ namespace RemainingNamespace
         public void Manifest()
         {
             const string code = """
-using System;
-using Metalama.Framework.Aspects;
+                                using System;
+                                using Metalama.Framework.Advising;
+                                using Metalama.Framework.Aspects; 
 
-namespace Ns
-{
-    namespace Ns2
-    {
-        class Aspect1 : OverrideMethodAspect
-        {
-            public override dynamic? OverrideMethod() { return meta.Proceed(); }
-        }
+                                namespace Ns
+                                {
+                                    namespace Ns2
+                                    {
+                                        class Aspect1 : OverrideMethodAspect
+                                        {
+                                            public override dynamic? OverrideMethod() { return meta.Proceed(); }
+                                        }
+                                
+                                        class Aspect2 : OverrideFieldOrPropertyAspect
+                                        {
+                                            public override dynamic? OverrideProperty
+                                            {
+                                                get => null!;
+                                                set {}
+                                            }
+                                        }
+                                
+                                        class RunTimeOnlyClass {}
+                                
+                                        [CompileTime]
+                                        class CompileTimeOnlyClass {}
+                                
+                                        class Aspect3 : TypeAspect 
+                                        {
+                                            [Template]
+                                            void TemplateMethod<T1, [CompileTime] T2>( int runTimeParameter, [CompileTime] int compileTimeParameter ) {}
+                                        }
+                                    }
 
-        class Aspect2 : OverrideFieldOrPropertyAspect
-        {
-            public override dynamic? OverrideProperty
-            {
-                get => null!;
-                set {}
-            }
-        }
-
-        class RunTimeOnlyClass {}
-
-        [CompileTime]
-        class CompileTimeOnlyClass {}
-
-        class Aspect3 : TypeAspect 
-        {
-            [Template]
-            void TemplateMethod<T1, [CompileTime] T2>( int runTimeParameter, [CompileTime] int compileTimeParameter ) {}
-        }
-    }
-
-}
+                                }
 
 
-""";
+                                """;
 
             using var testContext = this.CreateTestContext();
 
@@ -1401,21 +1434,22 @@ namespace Ns
         public void DiagnosticsAreCached()
         {
             var code = $$"""
-                using Metalama.Framework.Aspects;
-                using Metalama.Framework.Code;
+                         using Metalama.Framework.Advising;
+                         using Metalama.Framework.Aspects; 
+                         using Metalama.Framework.Code;
 
-                namespace NS_{{Guid.NewGuid():N}};
+                         namespace NS_{{Guid.NewGuid():N}};
 
-                [CompileTime]
-                class C
-                {
-                    [Template]
-                    void Template(IField field)
-                    {
-                        field.Value.M();
-                    }
-                }
-                """;
+                         [CompileTime]
+                         class C
+                         {
+                             [Template]
+                             void Template(IField field)
+                             {
+                                 field.Value.M();
+                             }
+                         }
+                         """;
 
             using var testContext = this.CreateTestContext();
 
@@ -1454,21 +1488,22 @@ namespace Ns
         private static (CompileTimeProject Project, WeakReference WeakRef) CreateCompileTimeProject( TestContext testContext, CompileTimeDomain domain )
         {
             var code = $$"""
-                using Metalama.Framework.Aspects;
-                using Metalama.Framework.Code;
+                         using Metalama.Framework.Advising;
+                         using Metalama.Framework.Aspects; 
+                         using Metalama.Framework.Code;
 
-                namespace NS_{{Guid.NewGuid():N}};
+                         namespace NS_{{Guid.NewGuid():N}};
 
-                [CompileTime]
-                class C
-                {
-                    [Template]
-                    void Template(IField field)
-                    {
-                        field.Value.M();
-                    }
-                }
-                """;
+                         [CompileTime]
+                         class C
+                         {
+                             [Template]
+                             void Template(IField field)
+                             {
+                                 field.Value.M();
+                             }
+                         }
+                         """;
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( new ProjectModel( roslynCompilation, testContext.ServiceProvider ), roslynCompilation );

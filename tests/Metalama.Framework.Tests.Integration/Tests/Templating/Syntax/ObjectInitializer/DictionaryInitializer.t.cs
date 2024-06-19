@@ -1,4 +1,4 @@
-int Method(int a, int b)
+private int Method(int a, int b)
 {
   var x = new global::System.Collections.Generic.Dictionary<global::System.Int32, global::System.Int32>
   {
@@ -13,7 +13,7 @@ int Method(int a, int b)
     [2] = 2,
     [3] = 3
   };
-  global::System.Collections.Generic.Dictionary<global::System.String, global::System.String> report = new global::System.Collections.Generic.Dictionary<global::System.String, global::System.String>()
+  global::System.Collections.Generic.Dictionary<global::System.String, global::System.String> report = new()
   {
     {
       "Title",

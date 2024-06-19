@@ -1,26 +1,27 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNew_Error
 {
     public class IntroductionAttribute : TypeAspect
     {
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler ExistingEvent
         {
             add
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced event.");
+                Console.WriteLine( "This is introduced event." );
                 meta.Proceed();
             }
         }
+
         [Introduce( WhenExists = OverrideStrategy.New )]
         public event EventHandler ExistingVirtualEvent
         {

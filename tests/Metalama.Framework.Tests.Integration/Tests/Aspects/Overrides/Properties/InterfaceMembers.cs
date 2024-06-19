@@ -2,6 +2,7 @@
 // @RequiredConstant(NET5_0_OR_GREATER) - Default interface members need to be supported by the runtime.
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 
@@ -13,17 +14,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
 
     internal class OverrideAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
-        { 
+        public override dynamic? OverrideProperty
+        {
             get
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
                 meta.Proceed();
             }
         }
@@ -33,7 +35,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     public interface Interface
     {
 #if NET5_0_OR_GREATER
-
         [Override]
         private int PrivateProperty
         {
@@ -70,7 +71,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     }
 
     // <target>
-    public class TargetClass : Interface
-    {
-    }
+    public class TargetClass : Interface { }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Multiple;
@@ -16,8 +17,8 @@ public class InnerOverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { i = 1 } );
-        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { i = 2 } );
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template), args: new { i = 1 } );
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template), args: new { i = 2 } );
     }
 
     [Template]
@@ -32,8 +33,8 @@ public class OuterOverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { i = 1 } );
-        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { i = 2 } );
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template), args: new { i = 1 } );
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template), args: new { i = 2 } );
     }
 
     [Template]

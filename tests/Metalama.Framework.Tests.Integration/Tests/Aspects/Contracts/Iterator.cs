@@ -3,6 +3,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Iterator;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -16,10 +17,10 @@ public sealed class TestAttribute : TypeAspect
         {
             foreach (var parameter in method.Parameters)
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
         }
     }
@@ -27,7 +28,7 @@ public sealed class TestAttribute : TypeAspect
     [Template]
     private void ValidateParameter( dynamic? value, [CompileTime] string parameterName )
     {
-        Console.WriteLine($"Advice");
+        Console.WriteLine( $"Advice" );
 
         if (value is null)
         {
@@ -43,28 +44,28 @@ public class Program
         const string text = "testText";
         var test = new TestClass();
 
-        foreach (var item in test.Enumerable(text))
+        foreach (var item in test.Enumerable( text ))
         {
-            Console.WriteLine($"{item};");
+            Console.WriteLine( $"{item};" );
         }
 
-        var enumerator1 = test.Enumerator(text);
+        var enumerator1 = test.Enumerator( text );
 
         while (enumerator1.MoveNext())
         {
-            Console.WriteLine($"{enumerator1.Current};");
+            Console.WriteLine( $"{enumerator1.Current};" );
         }
 
-        foreach (var item in test.EnumerableT(text))
+        foreach (var item in test.EnumerableT( text ))
         {
-            Console.WriteLine($"{item};");
+            Console.WriteLine( $"{item};" );
         }
 
-        var enumerator2 = test.EnumeratorT(text);
+        var enumerator2 = test.EnumeratorT( text );
 
         while (enumerator2.MoveNext())
         {
-            Console.WriteLine($"{enumerator2.Current};");
+            Console.WriteLine( $"{enumerator2.Current};" );
         }
     }
 }
@@ -73,13 +74,13 @@ public class Program
 [Test]
 public class TestClass
 {
-    public IEnumerable Enumerable(string text)
+    public IEnumerable Enumerable( string text )
     {
         yield return "Hello";
         yield return text;
     }
 
-    public IEnumerator Enumerator(string text)
+    public IEnumerator Enumerator( string text )
     {
         yield return "Hello";
         yield return text;
@@ -91,7 +92,7 @@ public class TestClass
         yield return text;
     }
 
-    public IEnumerator<string> EnumeratorT(string text)
+    public IEnumerator<string> EnumeratorT( string text )
     {
         yield return "Hello";
         yield return text;

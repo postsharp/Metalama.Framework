@@ -20,34 +20,29 @@ internal class Aspect : TypeAspect
         base.BuildAspect( builder );
 
         AssertResult(
-            builder.Advice.IntroduceField(
-                builder.Target,
+            builder.IntroduceField(
                 nameof(_field),
                 whenExists: OverrideStrategy.Ignore ) );
 
         AssertResult(
-            builder.Advice.IntroduceProperty(
-                builder.Target,
+            builder.IntroduceProperty(
                 nameof(Property),
                 whenExists: OverrideStrategy.Ignore ) );
 
         AssertResult(
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
+            builder.IntroduceIndexer(
                 typeof(int),
                 nameof(IndexerGet),
                 null,
                 whenExists: OverrideStrategy.Ignore ) );
 
         AssertResult(
-            builder.Advice.IntroduceEvent(
-                builder.Target,
+            builder.IntroduceEvent(
                 nameof(Event),
                 whenExists: OverrideStrategy.Ignore ) );
 
         AssertResult(
-            builder.Advice.IntroduceUnaryOperator(
-                builder.Target,
+            builder.IntroduceUnaryOperator(
                 nameof(OperatorMinus),
                 builder.Target,
                 builder.Target,
@@ -55,19 +50,17 @@ internal class Aspect : TypeAspect
                 whenExists: OverrideStrategy.Ignore ) );
 
         AssertResult(
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(CloneMethod),
                 whenExists: OverrideStrategy.Ignore,
                 buildMethod: method => method.Name = nameof(Clone) ) );
 
         AssertResult(
-            builder.Advice.IntroduceAttribute(
-                builder.Target,
+            builder.IntroduceAttribute(
                 AttributeConstruction.Create( typeof(Aspect) ),
                 OverrideStrategy.Ignore ) );
 
-        var implementInterfaceResult = builder.Advice.ImplementInterface( builder.Target, typeof(ICloneable), OverrideStrategy.Ignore );
+        var implementInterfaceResult = builder.ImplementInterface( typeof(ICloneable), OverrideStrategy.Ignore );
 
         if (implementInterfaceResult.Outcome != AdviceOutcome.Ignore)
         {

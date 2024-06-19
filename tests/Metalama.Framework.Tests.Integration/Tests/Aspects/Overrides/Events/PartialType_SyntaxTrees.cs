@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -14,7 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.PartialTy
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors( @event, nameof(Template), nameof(Template), null, tags: new { name = @event.Name } );
+                builder.With( @event ).OverrideAccessors( nameof(Template), nameof(Template), null, tags: new { name = @event.Name } );
             }
         }
 

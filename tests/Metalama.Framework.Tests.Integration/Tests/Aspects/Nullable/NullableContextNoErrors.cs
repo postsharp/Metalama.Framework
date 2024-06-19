@@ -1,5 +1,6 @@
 #nullable disable
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.NullableContextNoErrors

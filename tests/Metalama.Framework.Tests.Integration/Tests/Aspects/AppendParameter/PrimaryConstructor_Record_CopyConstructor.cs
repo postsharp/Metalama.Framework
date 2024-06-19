@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,19 +10,19 @@ public class MyAspect : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.IntroduceParameter( constructor, "p", typeof(int), TypedConstant.Create( 15 ) );
+            builder.With( constructor ).IntroduceParameter( "p", typeof(int), TypedConstant.Create( 15 ) );
         }
     }
 }
 
-public record A(int x)
+public record A( int x )
 {
     public int X { get; set; } = x;
 }
 
 // <target>
 [MyAspect]
-public record C(int x) : A(42)
+public record C( int x ) : A( 42 )
 {
     public int Y { get; } = x;
 }

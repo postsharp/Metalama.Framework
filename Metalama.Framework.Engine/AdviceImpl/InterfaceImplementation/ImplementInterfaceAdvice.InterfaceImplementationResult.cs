@@ -10,8 +10,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
 internal sealed partial class ImplementInterfaceAdvice
 {
-    public sealed record ImplementationResult : IInterfaceImplementationResult, IAdviserInternal
+    public sealed record ImplementationResult : IInterfaceImplementationResult, IAdviserInternal, IInterfaceImplementationAdviser
     {
+        private readonly Ref<INamedType> _targetDeclaration;
+        private readonly IAdviceFactory? _adviceFactory;
+
         public ImplementationResult(
             INamedType interfaceType,
             InterfaceImplementationOutcome outcome,
@@ -30,16 +33,11 @@ internal sealed partial class ImplementInterfaceAdvice
 
         public InterfaceImplementationOutcome Outcome { get; }
 
-        private readonly Ref<INamedType> _targetDeclaration;
+        IInterfaceImplementationAdviser IInterfaceImplementationResult.ExplicitMembers => this;
+      
+        INamedType IInterfaceImplementationAdviser.Target => this._targetDeclaration.GetTarget( ReferenceResolutionOptions.Default );
 
-        public INamedType Target => this._targetDeclaration.GetTarget( ReferenceResolutionOptions.Default );
-
-        IAdviser<TNewDeclaration> IAdviser<INamedType>.WithTarget<TNewDeclaration>( TNewDeclaration target )
-            => throw new NotSupportedException( "Can't change the target for an explicit interface implementation adviser." );
-
-        private readonly IAdviceFactory? _adviceFactory;
-
-        public IAdviceFactory AdviceFactory
+        IAdviceFactory IAdviserInternal.AdviceFactory
             => this._adviceFactory
                ?? throw new InvalidOperationException( $"Can't introduce explicit interface members for {this.InterfaceType}, because it was ignored." );
     }

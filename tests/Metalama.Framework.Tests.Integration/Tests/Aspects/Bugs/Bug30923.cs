@@ -1,4 +1,5 @@
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30923
 
             foreach (var property in builder.Target.Properties.Where( p => p.Type.Is( typeof(int) ) ))
             {
-                builder.Advice.Override( property, nameof(TheAnswer) );
+                builder.With( property ).Override( nameof(TheAnswer) );
             }
         }
 

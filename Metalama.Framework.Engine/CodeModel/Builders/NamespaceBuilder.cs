@@ -44,7 +44,7 @@ internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         this.ContainingNamespace = containingNamespace;
     }
 
-    public override SyntaxTree PrimarySyntaxTree => throw new NotSupportedException();
+    public override SyntaxTree? PrimarySyntaxTree => null;
 
     public INamespace? GetDescendant( string ns )
     {

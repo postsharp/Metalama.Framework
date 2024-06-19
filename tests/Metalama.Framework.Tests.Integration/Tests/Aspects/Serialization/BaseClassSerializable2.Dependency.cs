@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 using System;
 
@@ -13,9 +14,9 @@ public class BaseType : ICompileTimeSerializable
 {
     public int BaseValue { get; }
 
-    public BaseType(int baseValue)
+    public BaseType( int baseValue )
     {
-        this.BaseValue = baseValue;
+        BaseValue = baseValue;
     }
 }
 
@@ -24,7 +25,7 @@ public class DerivedType : BaseType
 {
     public int Value { get; }
 
-    public DerivedType(int baseValue, int value) : base(baseValue)
+    public DerivedType( int baseValue, int value ) : base( baseValue )
     {
         Value = value;
     }
@@ -35,24 +36,22 @@ public class TestAspect : OverrideMethodAspect
 {
     public DerivedType SerializedValue;
 
-    public TestAspect(int x, int y)
+    public TestAspect( int x, int y )
     {
-        SerializedValue = new DerivedType(x, y);
+        SerializedValue = new DerivedType( x, y );
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.BaseValue));
-        Console.WriteLine(meta.CompileTime(SerializedValue.Value));
+        Console.WriteLine( meta.CompileTime( SerializedValue.BaseValue ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.Value ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(13, 42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 13, 42 )]
+    public virtual void Foo() { }
 }

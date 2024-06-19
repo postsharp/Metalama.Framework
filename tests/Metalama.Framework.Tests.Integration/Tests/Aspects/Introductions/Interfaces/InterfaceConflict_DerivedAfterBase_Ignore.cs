@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -24,13 +25,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IBaseInterface), tags: new { Source = "Base" } );
+            aspectBuilder.ImplementInterface( typeof(IBaseInterface), tags: new { Source = "Base" } );
 
-            aspectBuilder.Advice.ImplementInterface(
-                aspectBuilder.Target,
-                typeof(IDerivedInterface),
-                OverrideStrategy.Ignore,
-                tags: new { Source = "Derived" } );
+            aspectBuilder
+                .ImplementInterface(
+                    typeof(IDerivedInterface),
+                    OverrideStrategy.Ignore,
+                    tags: new { Source = "Derived" } );
         }
 
         [InterfaceMember]

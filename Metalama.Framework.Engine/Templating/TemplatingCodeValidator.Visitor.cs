@@ -605,7 +605,8 @@ namespace Metalama.Framework.Engine.Templating
                 if ( declaredSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
                 {
                     var adviceAttribute = declaredSymbol.GetAttributes()
-                        .FirstOrDefault( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
+                        .FirstOrDefault(
+                            a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
 
                     if ( adviceAttribute != null )
                     {

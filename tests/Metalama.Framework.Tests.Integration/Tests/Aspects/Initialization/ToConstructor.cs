@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,7 +10,7 @@ public class MyAspect : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.AddInitializer( builder.Target, nameof(Initialize) );
+        builder.AddInitializer( nameof(Initialize) );
     }
 
     [Introduce]

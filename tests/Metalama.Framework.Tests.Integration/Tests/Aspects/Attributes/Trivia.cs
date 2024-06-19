@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -33,7 +34,7 @@ public class IntroduceAttributeAspect : TypeAspect
     {
         foreach (var member in builder.Target.Members().Cast<IDeclaration>().Concat( builder.Target.Types ))
         {
-            builder.Advice.IntroduceAttribute( member, AttributeConstruction.Create( typeof(NewAttribute) ) );
+            builder.With( member ).IntroduceAttribute( AttributeConstruction.Create( typeof(NewAttribute) ) );
         }
     }
 }
@@ -44,7 +45,7 @@ public class RemoveAttributeAspect : TypeAspect
     {
         foreach (var member in builder.Target.Members().Cast<IDeclaration>().Concat( builder.Target.Types ))
         {
-            builder.Advice.RemoveAttributes( member, typeof(OldAttribute) );
+            builder.With( member ).RemoveAttributes( typeof(OldAttribute) );
         }
     }
 }

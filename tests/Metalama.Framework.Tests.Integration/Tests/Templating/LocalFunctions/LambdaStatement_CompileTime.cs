@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -12,7 +13,8 @@ internal class Aspect
     {
         var func = meta.CompileTime( new Func<string>( () => { return "Hello, world."; } ) );
 
-        Console.WriteLine(func());
+        Console.WriteLine( func() );
+
         return null;
     }
 }

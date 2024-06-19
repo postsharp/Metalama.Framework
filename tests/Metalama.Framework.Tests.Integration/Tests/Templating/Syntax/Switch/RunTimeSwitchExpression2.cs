@@ -1,14 +1,15 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchExpression2
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
-        {    
-            object o = new ();
+        private dynamic? Template()
+        {
+            object o = new();
 
             var y = o switch
             {
@@ -20,9 +21,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchEx
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

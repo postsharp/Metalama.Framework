@@ -1,5 +1,5 @@
 [IntroduceInterface]
-class BaseClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TryFindImplementationForInterfaceMember_FromBase.IInterface
+internal class BaseClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TryFindImplementationForInterfaceMember_FromBase.IInterface
 {
   public global::System.Int32 M2()
   {
@@ -10,6 +10,6 @@ class BaseClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspect
   }
 }
 [CheckInterfaceAttribute]
-class TargetClass : BaseClass
+internal class TargetClass : BaseClass
 {
 }

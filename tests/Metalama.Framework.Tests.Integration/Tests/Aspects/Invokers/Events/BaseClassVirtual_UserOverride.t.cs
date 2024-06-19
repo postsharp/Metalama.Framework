@@ -1,6 +1,6 @@
 public class TargetClass : BaseClass
 {
-  public override event System.EventHandler Event
+  public override event EventHandler Event
   {
     add
     {
@@ -11,7 +11,7 @@ public class TargetClass : BaseClass
       this.Event_Source -= value;
     }
   }
-  private event System.EventHandler Event_Source
+  private event EventHandler Event_Source
   {
     add
     {
@@ -21,7 +21,7 @@ public class TargetClass : BaseClass
     }
   }
   [InvokerAspect]
-  public event System.EventHandler Invoker
+  public event EventHandler Invoker
   {
     add
     { // Invoke this.Event
@@ -44,7 +44,7 @@ public class TargetClass : BaseClass
       this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_UserOverride.TargetClass.StaticTarget;
     }
   }
-  public static void StaticTarget(object? sender, System.EventArgs args)
+  public static void StaticTarget(object? sender, EventArgs args)
   {
   }
 }

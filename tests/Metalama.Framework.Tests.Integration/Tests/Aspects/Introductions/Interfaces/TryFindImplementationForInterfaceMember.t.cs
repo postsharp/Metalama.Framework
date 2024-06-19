@@ -1,4 +1,5 @@
-[IntroduceInterface, CheckInterface]
+[IntroduceInterface]
+[CheckInterface]
 public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TryFindImplementationForInterfaceMember.IInterface
 {
   public global::System.Int32 M2()

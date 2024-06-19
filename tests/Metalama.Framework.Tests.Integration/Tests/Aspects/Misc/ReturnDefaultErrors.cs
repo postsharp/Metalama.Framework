@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -54,7 +55,6 @@ public class TestClass
     }
 
 #if NET5_0_OR_GREATER
-
     [IgnoreException]
     public IAsyncEnumerable<int> IAsyncEnumerableMethod()
     {
@@ -70,5 +70,4 @@ public class TestClass
     }
 
 #endif
-
 }

@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.IntroduceManyIntoDeclaringType_Override
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.Intr
             add
             {
                 Console.WriteLine( $"{meta.AspectInstance.TargetDeclaration} says hello." );
-                meta.Proceed();    
+                meta.Proceed();
             }
 
             remove
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.Intr
     {
         [Aspect]
         private void M() { }
-        
+
         [Aspect]
         private void M2() { }
     }

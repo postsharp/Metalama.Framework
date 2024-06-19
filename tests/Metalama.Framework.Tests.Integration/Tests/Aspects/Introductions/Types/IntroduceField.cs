@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,9 +8,9 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceClass( builder.Target, "TestNestedType" );
+        var result = builder.IntroduceClass( "TestNestedType" );
 
-        builder.Advice.IntroduceField( result.Declaration, nameof(Field) );
+        builder.With( result.Declaration ).IntroduceField( nameof(Field) );
     }
 
     [Template]

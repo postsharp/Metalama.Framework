@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict_Introduced;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         {
             foreach (var method in builder.Target.Methods.Where( m => !m.IsImplicitlyDeclared ))
             {
-                builder.Advice.Override( method, nameof(OverrideMethod) );
+                builder.With( method ).Override( nameof(OverrideMethod) );
             }
         }
 
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         {
             foreach (var method in builder.Target.Methods.Where( m => !m.IsImplicitlyDeclared ))
             {
-                builder.Advice.Override( method, nameof(OverrideMethod) );
+                builder.With( method ).Override( nameof(OverrideMethod) );
             }
         }
 

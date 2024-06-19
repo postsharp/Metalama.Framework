@@ -1,4 +1,4 @@
-int Method(int a)
+private int Method(int a)
 {
   /*
 for ( int i = 0; i < n; i++ )

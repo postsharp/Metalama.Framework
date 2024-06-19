@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
             amender
                 .SelectTypes()
                 .SelectMany( t => t.Methods )
-                .Where( m => m.ReturnType.Is( typeof(string) ) ) 
+                .Where( m => m.ReturnType.Is( typeof(string) ) )
                 .AddAspect<Aspect>();
         }
     }

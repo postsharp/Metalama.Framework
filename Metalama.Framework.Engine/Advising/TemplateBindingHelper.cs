@@ -688,13 +688,7 @@ internal static class TemplateBindingHelper
         // Check that all provided properties map to a compile-time parameter.
         foreach ( var name in compileTimeArguments.Keys )
         {
-            if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format( $"There is no parameter '{name}' in template '{template.Declaration}'." ) );
-            }
-
-            if ( !parameter.IsCompileTime )
+            if ( template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) && !parameter.IsCompileTime )
             {
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format( $"The parameter '{name}' of template '{template.Declaration}' is not compile-time." ) );

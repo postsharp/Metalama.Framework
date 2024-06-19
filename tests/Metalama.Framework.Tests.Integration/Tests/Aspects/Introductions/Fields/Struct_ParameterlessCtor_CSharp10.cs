@@ -2,6 +2,7 @@
 // @LanguageVersion(10)
 # endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct_ParameterlessCtor_CSharp10;
@@ -25,9 +26,7 @@ public class IntroductionAttribute : TypeAspect
 [Introduction]
 internal struct TargetStruct
 {
-    public TargetStruct()
-    {
-    }
+    public TargetStruct() { }
 
     public int ExistingField = 42;
 

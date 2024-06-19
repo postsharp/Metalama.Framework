@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,7 +20,7 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override(constructor, nameof(Template));
+            builder.With( constructor ).Override( nameof(Template) );
         }
     }
 
@@ -30,7 +31,7 @@ public class OverrideAttribute : TypeAspect
 
         foreach (var param in meta.Target.Parameters)
         {
-            Console.WriteLine($"Param {param.Name} = {param.Value}");
+            Console.WriteLine( $"Param {param.Name} = {param.Value}" );
         }
 
         meta.Proceed();
@@ -39,7 +40,7 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public class TargetClass(int x, int y)
+public class TargetClass( int x, int y )
 {
     public int Foo() => x;
 

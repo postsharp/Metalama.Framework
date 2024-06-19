@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,7 +12,7 @@ public class MyAdviceAttribute : DeclarativeAdviceAttribute
 {
     public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advice.IntroduceField( (INamedType)builder.Target, "_field", TypeFactory.GetType(typeof(string)).ToNullableType() );
+        builder.With( (INamedType)builder.Target ).IntroduceField( "_field", TypeFactory.GetType( typeof(string) ).ToNullableType() );
     }
 }
 

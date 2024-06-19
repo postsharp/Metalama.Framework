@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -5,15 +6,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.
 
 internal class MyAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Method), args: new { T = typeof(int) });
+        builder.IntroduceMethod( nameof(Method), args: new { T = typeof(int) } );
     }
 
     [Template]
     public void Method<[CompileTime] T>()
     {
-        _ = meta.CompileTime(default(T));
+        _ = meta.CompileTime( default(T) );
     }
 }
 

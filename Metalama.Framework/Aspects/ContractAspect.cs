@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
@@ -212,7 +213,7 @@ namespace Metalama.Framework.Aspects
                     // TODO: Use AssertNotNull() extension method instead of `throw` if it can be made accessible.
 
                     this.BuildAspect(
-                        ((IAspectBuilder) builder).WithTarget(
+                        ((IAspectBuilder) builder).With(
                             parameter.ForCompilation( builder.Target.Compilation ) ?? throw new InvalidOperationException( "Assertion failed." ) ) );
                 }
             }
@@ -242,7 +243,7 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            builder.Advice.AddContract( builder.Target, nameof(this.Validate), direction );
+            builder.AddContract( nameof(this.Validate), direction );
         }
 
         void IAspect<IParameter>.BuildAspect( IAspectBuilder<IParameter> builder )
@@ -260,7 +261,7 @@ namespace Metalama.Framework.Aspects
             {
                 foreach ( var parameter in redirectToParameters )
                 {
-                    this.BuildAspect( builder.WithTarget( parameter ) );
+                    this.BuildAspect( builder.With( parameter ) );
                 }
             }
             else
@@ -307,7 +308,7 @@ namespace Metalama.Framework.Aspects
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
-        { 
+        {
             // We don't know the actual direction yet, but we can apply common eligibility rules.
             BuildEligibilityForDirection( builder, ContractDirection.Default );
         }

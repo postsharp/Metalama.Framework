@@ -4,7 +4,7 @@ public record struct TargetStruct
   public int X { get; set; }
   public void Foo()
   {
-    this.X = 42;
+    X = 42;
     var(x, y) = this;
     _ = this with
     {

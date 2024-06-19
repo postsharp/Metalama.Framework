@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Property;
@@ -11,11 +12,12 @@ internal class Aspect : OverrideMethodAspect
     }
 
     [Template]
-    int P
+    private int P
     {
         get
         {
-            Console.WriteLine("property subtemplate");
+            Console.WriteLine( "property subtemplate" );
+
             return 42;
         }
     }

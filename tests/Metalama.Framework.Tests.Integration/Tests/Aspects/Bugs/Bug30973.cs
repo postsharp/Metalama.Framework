@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 using System;
@@ -16,17 +17,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine($"Executing {meta.Target.Method.ToDisplayString()}");
-            return meta.Proceed();
+            Console.WriteLine( $"Executing {meta.Target.Method.ToDisplayString()}" );
 
+            return meta.Proceed();
         }
     }
 
     public class FieldOrPropertyLoggingAspect : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(OverrideProperty));
+            builder.Override( nameof(OverrideProperty) );
         }
 
         [Template]
@@ -34,13 +35,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
         {
             get
             {
-                Console.WriteLine($"Executing {meta.Target.Method.ToDisplayString()}");
+                Console.WriteLine( $"Executing {meta.Target.Method.ToDisplayString()}" );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine($"Executing {meta.Target.Method.ToDisplayString()}");
+                Console.WriteLine( $"Executing {meta.Target.Method.ToDisplayString()}" );
                 meta.Proceed();
             }
         }
@@ -62,86 +64,86 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        public void IntroducedMethod()
-        {
-        }
+        public void IntroducedMethod() { }
     }
 
     public class InterfaceIntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.ImplementInterface(builder.Target, typeof(IIntroducedInterface));
+            builder.ImplementInterface( typeof(IIntroducedInterface) );
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public int InterfaceMethod()
         {
-            Console.WriteLine("This is introduced interface member.");
+            Console.WriteLine( "This is introduced interface member." );
+
             return meta.Proceed();
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler? InterfaceEvent
         {
             add
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
                 meta.Proceed();
             }
 
             remove
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
                 meta.Proceed();
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler? InterfaceEventField;
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public int Property
         {
             get
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
 
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("This is introduced interface member.");
+                Console.WriteLine( "This is introduced interface member." );
                 meta.Proceed();
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember( IsExplicit = true )]
         public string? AutoProperty { get; set; }
     }
 
     public class TestProjectFabric : ProjectFabric
     {
-
-        public override void AmendProject(IProjectAmender amender)
+        public override void AmendProject( IProjectAmender amender )
         {
-            amender.SelectMany(p =>
-                p.Types
-                .Where(t => t is { Name: nameof(BackorderMode) })
-                .SelectMany(t => t.Methods.Where( m => !m.IsImplicitlyDeclared ))
-                    .Cast<IMethod>())
+            amender.SelectMany(
+                    p =>
+                        p.Types
+                            .Where( t => t is { Name: nameof(BackorderMode) } )
+                            .SelectMany( t => t.Methods.Where( m => !m.IsImplicitlyDeclared ) )
+                            .Cast<IMethod>() )
                 .AddAspect<LoggingAspect>();
 
-            amender.SelectMany(p =>
-                p.Types
-                .Where(t => t is { Name: nameof(BackorderMode) })
-                .SelectMany(t => t.Fields.Where(m => !m.IsImplicitlyDeclared) )
-                    .Cast<IFieldOrProperty>())
+            amender.SelectMany(
+                    p =>
+                        p.Types
+                            .Where( t => t is { Name: nameof(BackorderMode) } )
+                            .SelectMany( t => t.Fields.Where( m => !m.IsImplicitlyDeclared ) )
+                            .Cast<IFieldOrProperty>() )
                 .AddAspect<FieldOrPropertyLoggingAspect>();
 
-            amender.SelectMany(p => p.Types.Where(t => t is { Name: nameof(BackorderMode) })).AddAspect<IntroductionAttribute>();
-            amender.SelectMany(p => p.Types.Where(t => t is { Name: nameof(BackorderMode) })).AddAspect<InterfaceIntroductionAttribute>();
+            amender.SelectMany( p => p.Types.Where( t => t is { Name: nameof(BackorderMode) } ) ).AddAspect<IntroductionAttribute>();
+            amender.SelectMany( p => p.Types.Where( t => t is { Name: nameof(BackorderMode) } ) ).AddAspect<InterfaceIntroductionAttribute>();
         }
     }
 
@@ -163,6 +165,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
         /// <summary>
         /// Allow qty below 0 and notify customer
         /// </summary>
-        AllowQtyBelow0AndNotifyCustomer = 2,
+        AllowQtyBelow0AndNotifyCustomer = 2
     }
 }

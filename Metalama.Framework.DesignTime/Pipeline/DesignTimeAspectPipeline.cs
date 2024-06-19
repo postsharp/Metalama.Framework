@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Contracts.Pipeline;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
@@ -76,6 +77,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     // ReSharper disable once InconsistentlySynchronizedField
     internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
+
+    internal DependencyGraph Dependencies => this._currentState.Dependencies;
 
     internal ImmutableArray<PortableExecutableReference> MetadataReferences { get; }
 

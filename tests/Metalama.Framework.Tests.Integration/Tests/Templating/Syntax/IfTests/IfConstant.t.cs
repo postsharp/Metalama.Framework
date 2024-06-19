@@ -1,4 +1,4 @@
-void Method()
+private void Method()
 {
   global::System.Console.WriteLine("true");
   const bool c = true;
@@ -6,7 +6,7 @@ void Method()
   {
     global::System.Console.WriteLine("c");
   }
-  bool b = true;
+  var b = true;
   if (b)
   {
     global::System.Console.WriteLine("b");

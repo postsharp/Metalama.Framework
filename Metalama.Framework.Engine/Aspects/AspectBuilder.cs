@@ -143,19 +143,23 @@ namespace Metalama.Framework.Engine.Aspects
 
         public string? Layer => this._aspectBuilderState.Layer;
 
-        public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget )
+        IAspectBuilder<T1> IAspectBuilder.WithTarget<T1>( T1 newTarget ) => this.With( newTarget );
+
+        IAspectBuilder<T1> IAspectBuilder<T>.WithTarget<T1>( T1 newTarget ) => this.With( newTarget );
+
+        public IAspectBuilder<TNewTarget> With<TNewTarget>( TNewTarget declaration )
             where TNewTarget : class, IDeclaration
         {
-            if ( newTarget == this.Target )
+            if ( declaration == this.Target )
             {
                 return (IAspectBuilder<TNewTarget>) (object) this;
             }
             else
             {
                 return new AspectBuilder<TNewTarget>(
-                    newTarget,
+                    declaration,
                     this._aspectBuilderState,
-                    this.AdviceFactory.WithDeclaration( newTarget ),
+                    this.AdviceFactory.WithDeclaration( declaration ),
                     this.AspectPredecessor );
             }
         }
@@ -185,6 +189,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         T IAdviser<T>.Target => this.Target;
 
-        IAdviser<TNewDeclaration> IAdviser<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => throw new NotImplementedException();
+        IAdviser<TNewDeclaration> IAdviser<T>.With<TNewDeclaration>( TNewDeclaration declaration ) => throw new NotImplementedException();
     }
 }

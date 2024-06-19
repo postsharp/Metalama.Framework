@@ -1,5 +1,5 @@
 [TheAspect]
-class C
+internal class C
 {
   public global::System.String Product
   {

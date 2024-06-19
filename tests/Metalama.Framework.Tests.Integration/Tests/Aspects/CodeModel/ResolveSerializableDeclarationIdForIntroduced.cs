@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -47,32 +48,30 @@ internal class IntroduceMembersAttribute : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod( builder.Target, nameof(M) );
-        builder.Advice.IntroduceField( builder.Target, nameof(_field) );
-        builder.Advice.IntroduceEvent( builder.Target, nameof(Event) );
-        builder.Advice.IntroduceProperty( builder.Target, nameof(Property) );
-        builder.Advice.IntroduceIndexer( builder.Target, typeof(int), nameof(IndexerGet), nameof(IndexerSet) );
+        builder.IntroduceMethod( nameof(M) );
+        builder.IntroduceField( nameof(_field) );
+        builder.IntroduceEvent( nameof(Event) );
+        builder.IntroduceProperty( nameof(Property) );
+        builder.IntroduceIndexer( typeof(int), nameof(IndexerGet), nameof(IndexerSet) );
 
-        builder.Advice.IntroduceUnaryOperator(
-            builder.Target,
+        builder.IntroduceUnaryOperator(
             nameof(NotOperator),
             builder.Target,
             TypeFactory.GetType( typeof(bool) ),
             OperatorKind.LogicalNot );
 
-        builder.Advice.IntroduceBinaryOperator(
-            builder.Target,
+        builder.IntroduceBinaryOperator(
             nameof(PlusOperator),
             builder.Target,
             builder.Target,
             TypeFactory.GetType( typeof(int) ),
             OperatorKind.Addition );
 
-        builder.Advice.IntroduceConversionOperator( builder.Target, nameof(CastOperator), builder.Target, TypeFactory.GetType( typeof(bool) ) );
+        builder.IntroduceConversionOperator( nameof(CastOperator), builder.Target, TypeFactory.GetType( typeof(bool) ) );
 
-        builder.Advice.IntroduceFinalizer( builder.Target, nameof(Finalizer) );
+        builder.IntroduceFinalizer( nameof(Finalizer) );
 
-        builder.Advice.IntroduceParameter( builder.Target.Constructors.First(), "x", typeof(int), TypedConstant.Create( 42 ) );
+        builder.With( builder.Target.Constructors.First() ).IntroduceParameter( "x", typeof(int), TypedConstant.Create( 42 ) );
     }
 }
 

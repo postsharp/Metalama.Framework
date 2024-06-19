@@ -44,6 +44,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
         /// <summary>
+        /// Returns whether the given path is of interest to the current <see cref="PartialCompilation"/>.
+        /// This is used to avoid processing of transformations that affect currently irrelevant syntax trees.
+        /// </summary>
+        public abstract bool IsSyntaxTreeObserved( string syntaxTreePath );
+
+        /// <summary>
         /// Gets the types declared in the current subset.
         /// </summary>
         public abstract ImmutableHashSet<INamedTypeSymbol> Types { get; }
@@ -213,6 +219,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return new PartialImpl(
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
+                observedSyntaxTreePaths: null,
                 closure.DeclaredTypes,
                 new Lazy<DerivedTypeIndex>( () => closure.DerivedTypeIndex ),
                 resources );
@@ -221,9 +228,13 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a given subset of syntax trees and its closure.
         /// </summary>
+        /// <param name="compilation">The complete compilation.</param>
+        /// <param name="syntaxTrees">The trees to include in the partial compilation.</param>
+        /// <param name="observedSyntaxTreePaths">List of paths that should return <see langword="true"/> from <see cref="IsSyntaxTreeObserved(string)"/>, or <see langword="null" /> if all paths should be considered observed.</param>
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
+            ImmutableHashSet<string>? observedSyntaxTreePaths = null,
             ImmutableArray<ManagedResource> resources = default )
         {
             var compilationContext = CompilationContextFactory.GetInstance( compilation );
@@ -232,6 +243,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return new PartialImpl(
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
+                observedSyntaxTreePaths,
                 closure.DeclaredTypes.ToImmutableHashSet(),
                 new Lazy<DerivedTypeIndex>( () => closure.DerivedTypeIndex ),
                 resources );
@@ -379,11 +391,7 @@ namespace Metalama.Framework.Engine.CodeModel
                    .OrderBy( x => x.FilePath.Length )
                    .ThenBy( x => x.FilePath )
                    .FirstOrDefault()
-               ?? this.SyntaxTrees
-                   .OrderBy( t => t.Key.Length )
-                   .ThenBy( t => t.Key )
-                   .First()
-                   .Value;
+                ?? this.Compilation.CreateEmptySyntaxTree( "MetalamaAssemblyAttributes.cs" );
 
         private static void Validate( IReadOnlyCollection<SyntaxTreeTransformation>? transformations )
         {

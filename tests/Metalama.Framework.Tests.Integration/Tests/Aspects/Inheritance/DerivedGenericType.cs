@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.InheritedG
         {
             foreach (var m in builder.Target.Methods)
             {
-                builder.Advice.Override( m, nameof(Template) );
+                builder.With( m ).Override( nameof(Template) );
             }
         }
 

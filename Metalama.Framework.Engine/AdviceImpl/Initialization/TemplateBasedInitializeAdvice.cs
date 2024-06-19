@@ -14,7 +14,11 @@ internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
     private readonly BoundTemplateMethod _boundTemplate;
     private readonly IObjectReader _tags;
 
-    public TemplateBasedInitializeAdvice( AdviceConstructorParameters<IMemberOrNamedType> parameters, BoundTemplateMethod boundTemplate, InitializerKind kind, IObjectReader tags )
+    public TemplateBasedInitializeAdvice(
+        AdviceConstructorParameters<IMemberOrNamedType> parameters,
+        BoundTemplateMethod boundTemplate,
+        InitializerKind kind,
+        IObjectReader tags )
         : base( parameters, kind )
     {
         this._boundTemplate = boundTemplate;

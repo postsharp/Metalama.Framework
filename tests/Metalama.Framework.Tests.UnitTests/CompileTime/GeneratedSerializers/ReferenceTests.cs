@@ -12,7 +12,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         {
             // Verifies that a reference-type property is deserialized in DeserializeFields method even if it was readonly.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -58,7 +59,8 @@ public class A : ICompileTimeSerializable
         {
             // Verifies that a primitive value-type property is deserialized in constructor.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -103,7 +105,8 @@ public class A : ICompileTimeSerializable
         {
             // Verifies that a value-type property is deserialized in constructor.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -156,7 +159,8 @@ public struct S : ICompileTimeSerializable
         {
             // Verifies that a value-type property containing a reference is deserialized in DeserializeFields method even if it was readonly.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -210,7 +214,8 @@ public struct S : ICompileTimeSerializable
         {
             // Verifies that a value-type property indirectly containing a reference is deserialized in DeserializeFields method even if it was readonly.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -281,7 +286,8 @@ public struct U : ICompileTimeSerializable
         {
             // Verifies that a value-type property containing a non-serialized reference is deserialized in constructor even if it was readonly.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable

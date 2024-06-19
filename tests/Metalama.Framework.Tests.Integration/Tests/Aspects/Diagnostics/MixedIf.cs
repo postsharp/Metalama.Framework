@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -18,10 +19,10 @@ internal class Aspect : OverrideMethodAspect
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

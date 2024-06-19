@@ -13,7 +13,9 @@ internal class TargetClass
       x--;
     }
     if (x > 0)
+    {
       goto __aspect_return_1;
+    }
     __aspect_return_1:
       return;
   }
@@ -30,14 +32,16 @@ internal class TargetClass
       x--;
     }
     if (x > 0)
+    {
       return -1;
+    }
     return 0;
   }
   [Override]
   public T? GenericMethod<T>(T? x)
   {
     global::System.Console.WriteLine("Override.");
-    int z = 42;
+    var z = 42;
     {
       while (z > 0)
       {
@@ -48,7 +52,9 @@ internal class TargetClass
         z--;
       }
       if (z > 0)
+      {
         return x;
+      }
       return default;
     }
   }

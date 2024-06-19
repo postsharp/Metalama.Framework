@@ -1,34 +1,33 @@
 #pragma warning disable CS0162 // Unreachable code detected
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Misc.Throw
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-        
             try
             {
-                throw new ArgumentNullException(meta.Target.Parameters[0].Name);
+                throw new ArgumentNullException( meta.Target.Parameters[0].Name );
             }
-            catch 
+            catch
             {
                 throw;
             }
-            
-            
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

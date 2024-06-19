@@ -33,7 +33,8 @@ public sealed class CodeFixTests : UnitTestClass
 
         const string code =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using Metalama.Framework.CodeFixes;
             using Metalama.Framework.Diagnostics;
@@ -123,7 +124,8 @@ public sealed class CodeFixTests : UnitTestClass
 
         const string libraryCode =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using Metalama.Framework.CodeFixes;
             using Metalama.Framework.Diagnostics;

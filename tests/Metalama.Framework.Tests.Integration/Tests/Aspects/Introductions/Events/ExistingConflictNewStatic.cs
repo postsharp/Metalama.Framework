@@ -1,54 +1,55 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic
 {
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler BaseClassEvent
         {
             add
             {
-                meta.InsertComment("Call base class event.");
+                meta.InsertComment( "Call base class event." );
                 meta.Proceed();
             }
 
             remove
             {
-                meta.InsertComment("Call base class event.");
+                meta.InsertComment( "Call base class event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler BaseClassEventHiddenByEvent
         {
             add
             {
-                meta.InsertComment("Call derived class event.");
+                meta.InsertComment( "Call derived class event." );
                 meta.Proceed();
             }
 
             remove
             {
-                meta.InsertComment("Call derived class event.");
+                meta.InsertComment( "Call derived class event." );
                 meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static event EventHandler DerivedClassEvent
         {
             add
             {
-                meta.InsertComment("Call derived class event.");
+                meta.InsertComment( "Call derived class event." );
                 meta.Proceed();
             }
 
             remove
             {
-                meta.InsertComment("Call derived class event.");
+                meta.InsertComment( "Call derived class event." );
                 meta.Proceed();
             }
         }
@@ -58,13 +59,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
         {
             add
             {
-                meta.InsertComment("Do nothing.");
+                meta.InsertComment( "Do nothing." );
                 meta.Proceed();
             }
 
             remove
             {
-                meta.InsertComment("Do nothing.");
+                meta.InsertComment( "Do nothing." );
                 meta.Proceed();
             }
         }
@@ -72,59 +73,39 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
 
     internal abstract class BaseClass
     {
-
         public static event EventHandler BaseClassEvent
         {
-            add
-            {
-            }
+            add { }
 
-            remove
-            {
-            }
+            remove { }
         }
 
         public static event EventHandler BaseClassEventHiddenByEvent
         {
-            add
-            {
-            }
+            add { }
 
-            remove
-            {
-            }
+            remove { }
         }
     }
 
     internal class DerivedClass : BaseClass
     {
-
         public new static event EventHandler BaseClassEventHiddenByEvent
         {
-            add
-            {
-            }
+            add { }
 
-            remove
-            {
-            }
+            remove { }
         }
 
         public static event EventHandler DerivedClassEvent
         {
-            add
-            {
-            }
+            add { }
 
-            remove
-            {
-            }
+            remove { }
         }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass : DerivedClass
-    {
-    }
+    internal class TargetClass : DerivedClass { }
 }

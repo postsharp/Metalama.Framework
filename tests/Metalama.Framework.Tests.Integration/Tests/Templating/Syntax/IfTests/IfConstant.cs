@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 using System;
@@ -5,31 +6,33 @@ using System;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfConstant;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    void Template()
+    private void Template()
     {
         if (true)
         {
-            Console.WriteLine("true");
+            Console.WriteLine( "true" );
         }
 
         const bool c = true;
+
         if (c)
         {
-            Console.WriteLine("c");
+            Console.WriteLine( "c" );
         }
 
-        bool b = true;
+        var b = true;
+
         if (b)
         {
-            Console.WriteLine("b");
+            Console.WriteLine( "b" );
         }
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    void Method() { }
+    private void Method() { }
 }

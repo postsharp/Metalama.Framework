@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.Attributes;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(Override) );
+                builder.With( method ).Override( nameof(Override) );
             }
         }
 

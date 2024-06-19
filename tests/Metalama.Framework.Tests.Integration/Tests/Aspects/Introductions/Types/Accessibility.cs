@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,22 +8,20 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceClass( builder.Target, "PrivateType", buildType: t => { t.Accessibility = Code.Accessibility.Private; } );
-        builder.Advice.IntroduceClass( builder.Target, "ProtectedType", buildType: t => { t.Accessibility = Code.Accessibility.Protected; } );
+        builder.IntroduceClass( "PrivateType", buildType: t => { t.Accessibility = Code.Accessibility.Private; } );
+        builder.IntroduceClass( "ProtectedType", buildType: t => { t.Accessibility = Code.Accessibility.Protected; } );
 
-        builder.Advice.IntroduceClass(
-            builder.Target,
+        builder.IntroduceClass(
             "PrivateProtectedType",
             buildType: t => { t.Accessibility = Code.Accessibility.PrivateProtected; } );
 
-        builder.Advice.IntroduceClass(
-            builder.Target,
+        builder.IntroduceClass(
             "ProtectedInternalType",
             buildType: t => { t.Accessibility = Code.Accessibility.ProtectedInternal; } );
 
-        builder.Advice.IntroduceClass( builder.Target, "InternalType", buildType: t => { t.Accessibility = Code.Accessibility.Internal; } );
-        builder.Advice.IntroduceClass( builder.Target, "PublicType", buildType: t => { t.Accessibility = Code.Accessibility.Public; } );
-        builder.Advice.IntroduceClass( builder.Target, "UndefinedType", buildType: t => { t.Accessibility = Code.Accessibility.Undefined; } );
+        builder.IntroduceClass( "InternalType", buildType: t => { t.Accessibility = Code.Accessibility.Internal; } );
+        builder.IntroduceClass( "PublicType", buildType: t => { t.Accessibility = Code.Accessibility.Public; } );
+        builder.IntroduceClass( "UndefinedType", buildType: t => { t.Accessibility = Code.Accessibility.Undefined; } );
     }
 }
 

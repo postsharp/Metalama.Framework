@@ -12,8 +12,7 @@ public class InitializerAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer(
-            builder.Target,
+        builder.AddInitializer(
             nameof(InitializerTemplate),
             InitializerKind.BeforeInstanceConstructor,
             args: new { property = builder.Target.Properties.Single() } );

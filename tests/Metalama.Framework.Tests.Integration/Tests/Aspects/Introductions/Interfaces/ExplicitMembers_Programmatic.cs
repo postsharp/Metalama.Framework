@@ -3,7 +3,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-#pragma warning disable CS0067 
+#pragma warning disable CS0067
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Interfaces.ExplicitMembers_Programmatic;
 
@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
 
 public interface IInterface
 {
-    int InterfaceMethod(int i);
+    int InterfaceMethod( int i );
 
     event EventHandler Event;
 
@@ -28,17 +28,17 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var explicitImplementation = builder.Advice.ImplementInterface(builder.Target, typeof(IInterface)).ExplicitImplementation;
+        var explicitImplementation = builder.ImplementInterface( typeof(IInterface) ).ExplicitMembers;
 
-        explicitImplementation.IntroduceMethod(nameof(InterfaceMethod));
-        explicitImplementation.IntroduceEvent(nameof(Event));
-        explicitImplementation.IntroduceEvent(nameof(EventField));
-        explicitImplementation.IntroduceProperty(nameof(Property));
-        explicitImplementation.IntroduceProperty(nameof(AutoProperty));
+        explicitImplementation.IntroduceMethod( nameof(InterfaceMethod) );
+        explicitImplementation.IntroduceEvent( nameof(Event) );
+        explicitImplementation.IntroduceEvent( nameof(EventField) );
+        explicitImplementation.IntroduceProperty( nameof(Property) );
+        explicitImplementation.IntroduceProperty( nameof(AutoProperty) );
     }
 
     [Template]
-    public int InterfaceMethod(int i)
+    public int InterfaceMethod( int i )
     {
         Console.WriteLine( "This is introduced interface member." );
 

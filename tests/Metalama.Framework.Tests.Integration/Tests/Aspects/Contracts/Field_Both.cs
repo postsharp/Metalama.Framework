@@ -4,6 +4,7 @@
 # endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618, CS0169

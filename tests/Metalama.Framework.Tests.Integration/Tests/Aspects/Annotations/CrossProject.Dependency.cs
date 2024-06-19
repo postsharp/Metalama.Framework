@@ -2,6 +2,7 @@
 // @Include(_Common.cs)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,7 +12,7 @@ public class AddAnnotationAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddAnnotation( builder.Target, new MyAnnotation( "TheValue" ), true );
+        builder.AddAnnotation( new MyAnnotation( "TheValue" ), true );
     }
 }
 

@@ -1,5 +1,5 @@
 [TheAspect]
-class Target
+internal class Target
 {
   public event global::System.EventHandler Event1
   {

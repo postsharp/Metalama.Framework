@@ -33,5 +33,5 @@ public enum AdviceKind
     OverrideConstructor,
     OverrideConstructorChainCall,
     IntroduceType,
-    IntroduceNamespace,
+    IntroduceNamespace
 }

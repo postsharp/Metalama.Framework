@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryRecordClass_CopyCtor;
@@ -18,7 +19,7 @@ public class OverrideAttribute : TypeAspect
                 continue;
             }
 
-            builder.Advice.Override(constructor, nameof(Template));
+            builder.With( constructor ).Override( nameof(Template) );
         }
     }
 
@@ -31,6 +32,4 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public record class TargetClass(int X, int Y)
-{
-}
+public record class TargetClass( int X, int Y ) { }

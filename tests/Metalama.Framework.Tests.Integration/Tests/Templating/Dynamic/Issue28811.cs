@@ -1,4 +1,5 @@
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
@@ -18,9 +19,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue288
             var clone1 = meta.This;
             var clone2 = meta.This;
             var clone3 = meta.This;
-            field.With((IExpression)clone1).Value = clone1;
-            field.With((IExpression)clone2).Value = field.With((IExpression)meta.This).Value;
-            field.With((IExpression)clone3).Value = field.With((IExpression)meta.This).Value!.Clone();
+            field.With( (IExpression)clone1 ).Value = clone1;
+            field.With( (IExpression)clone2 ).Value = field.With( (IExpression)meta.This ).Value;
+            field.With( (IExpression)clone3 ).Value = field.With( (IExpression)meta.This ).Value!.Clone();
 
             return default;
         }

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -466,7 +467,9 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 var predecessorDeclarationSymbol = predecessor.Instance switch
                 {
                     IAspectInstance predecessorAspect => reflectionMapper.GetTypeSymbol( predecessorAspect.Aspect.GetType() ),
-                    IFabricInstance fabricInstance => reflectionMapper.GetTypeSymbol( fabricInstance.Fabric.GetType() ),
+                    // Can't use fabricInstance.Fabric.GetType() here, because for type fabrics,
+                    // we need the original type (e.g. C.Fabric), not the rewritten type (e.g. C_Fabric).
+                    IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName( ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
                     _ => null
                 };
 
@@ -489,24 +492,15 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         foreach ( var transformation in pipelineResults.Transformations )
         {
             var targetSymbol = transformation.TargetDeclaration.GetSymbol();
+            var primarySyntaxReference = targetSymbol?.GetPrimarySyntaxReference();
 
-            if ( targetSymbol == null )
+            var filePath = primarySyntaxReference?.SyntaxTree.FilePath;
+
+            if ( filePath == null || !resultBuilders.ContainsKey( filePath ) )
             {
-                // Transformations on introduced declarations are not represented at design time at the moment.
-                continue;
+                filePath = inputSyntaxTreeForDetached.FilePath;
             }
 
-            var primarySyntaxReference = targetSymbol.GetPrimarySyntaxReference();
-
-            if ( primarySyntaxReference == null )
-            {
-                // This is a transformation of an implicitly declared declaration that is implicitly declared even after syntax generator is executed.
-                // E.g. appending parameters to implicit constructor of a non-partial type.
-                continue;
-            }
-
-            var syntaxTree = primarySyntaxReference.SyntaxTree;
-            var filePath = syntaxTree.FilePath;
             var builder = resultBuilders[filePath];
             builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 

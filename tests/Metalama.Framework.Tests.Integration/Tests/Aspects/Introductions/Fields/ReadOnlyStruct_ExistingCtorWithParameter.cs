@@ -3,6 +3,7 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Target_ReadOnlyStruct_ExistingCtorWithParameter
@@ -26,8 +27,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Targe
     [Introduction]
     internal readonly struct TargetStruct
     {
-        public TargetStruct(int x)
-        {
-        }
+        public TargetStruct( int x ) { }
     }
 }

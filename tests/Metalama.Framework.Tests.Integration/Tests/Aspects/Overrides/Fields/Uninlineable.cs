@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -10,9 +11,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class OverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Template));
+            builder.Override( nameof(Template) );
         }
 
         [Template]
@@ -20,14 +21,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
                 _ = meta.Proceed();
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Override.");
+                Console.WriteLine( "Override." );
                 meta.Proceed();
                 meta.Proceed();
             }
@@ -51,7 +53,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
         public TargetClass()
         {
-            this.ReadOnlyField = 42;
+            ReadOnlyField = 42;
         }
     }
 }

@@ -1,4 +1,4 @@
-int Method(int a)
+private int Method(int a)
 {
   // Oops 1
   // Oops 2

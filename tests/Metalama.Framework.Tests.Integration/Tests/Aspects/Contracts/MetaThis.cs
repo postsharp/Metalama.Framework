@@ -1,10 +1,11 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.MetaThis;
 
 public class ActionSpeed : ContractAspect
 {
-    public override void Validate(dynamic? value)
+    public override void Validate( dynamic? value )
     {
         if (meta.This is IBuffable)
         {
@@ -14,12 +15,10 @@ public class ActionSpeed : ContractAspect
     }
 }
 
-interface IBuffable
-{
-}
+internal interface IBuffable { }
 
 // <target>
-class Target
+internal class Target
 {
-    int MaybeBuff([ActionSpeed] int speed) => speed;
+    private int MaybeBuff( [ActionSpeed] int speed ) => speed;
 }

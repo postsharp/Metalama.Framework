@@ -1,7 +1,7 @@
-class TargetCode
+internal class TargetCode
 {
   [Aspect]
-  T Method<T, S>(T a, S b)
+  private T Method<T, S>(T a, S b)
   {
     var v = a;
     var v_1 = b;

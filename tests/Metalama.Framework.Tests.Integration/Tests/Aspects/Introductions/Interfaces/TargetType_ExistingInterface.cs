@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -10,15 +11,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
 
     public class IntroduceAspectAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IIntroducedInterface));
+            aspectBuilder.ImplementInterface( typeof(IIntroducedInterface) );
         }
 
         [InterfaceMember]
         public void IntroducedMethod()
         {
-            Console.WriteLine("Introduced interface member.");
+            Console.WriteLine( "Introduced interface member." );
         }
     }
 
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
     {
         public void ExistingMethod()
         {
-            Console.WriteLine("Original interface member.");
+            Console.WriteLine( "Original interface member." );
         }
     }
 }

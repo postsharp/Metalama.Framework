@@ -1,36 +1,37 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.NameClashWithMemberAccess
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var n = meta.Target.Parameters.Count; // build-time
 
             if (n == 1)
             {
                 var WriteLine = 0;
-                Console.WriteLine(WriteLine);
+                Console.WriteLine( WriteLine );
             }
 
             if (n == 1)
             {
                 var WriteLine = 1;
-                Console.WriteLine(WriteLine);
+                Console.WriteLine( WriteLine );
             }
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

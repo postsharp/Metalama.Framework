@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -56,4 +57,15 @@ public static class CompilationExtensions
 
         return ((CSharpParseOptions) tree.Options).LanguageVersion;
     }
+
+    internal static SyntaxTree CreateEmptySyntaxTree( this Compilation compilation, string path )
+        => CSharpSyntaxTree.Create(
+            SyntaxFactory.CompilationUnit(),
+            compilation.SyntaxTrees.FirstOrDefault() switch
+            {
+                { Options: CSharpParseOptions options } => options,
+                _ => CSharpParseOptions.Default,
+            },
+            path,
+            Encoding.UTF8 );
 }

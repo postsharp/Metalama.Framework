@@ -2,6 +2,7 @@
 // @RequiredConstant(NET5_0_OR_GREATER) - Default interface members need to be supported by the runtime.
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 
@@ -15,15 +16,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
 
     internal class OverrideAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd(dynamic value)
+        public override void OverrideAdd( dynamic value )
         {
-            Console.WriteLine("Override.");
+            Console.WriteLine( "Override." );
             meta.Proceed();
         }
 
-        public override void OverrideRemove(dynamic value)
+        public override void OverrideRemove( dynamic value )
         {
-            Console.WriteLine("Override.");
+            Console.WriteLine( "Override." );
             meta.Proceed();
         }
     }

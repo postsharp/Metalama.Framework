@@ -27,7 +27,15 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
         PartiallyBoundTemplateMethod template,
         OverrideStrategy overrideStrategy,
         IObjectReader tags )
-        : base( parameters, null, template.TemplateMember, IntroductionScope.Instance, overrideStrategy, _ => { }, tags, explicitlyImplementedInterfaceType: null )
+        : base(
+            parameters,
+            null,
+            template.TemplateMember,
+            IntroductionScope.Instance,
+            overrideStrategy,
+            _ => { },
+            tags,
+            explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
 

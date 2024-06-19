@@ -1,7 +1,7 @@
-class C
+internal class C
 {
   [Aspect]
-  int M(int i) => 42;
+  private int M(int i) => 42;
   public global::System.Func<global::System.Object?, global::System.Object? [], global::System.Object?> GetMethodInvoker()
   {
     return (global::System.Func<global::System.Object?, global::System.Object? [], global::System.Object?>)Invoke;

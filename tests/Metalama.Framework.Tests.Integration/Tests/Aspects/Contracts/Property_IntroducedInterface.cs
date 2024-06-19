@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_IntroducedInterface;
@@ -13,7 +14,7 @@ public class IntroduceInterfaceAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.ImplementInterface( builder.Target, typeof(I) );
+        builder.ImplementInterface( typeof(I) );
     }
 
     [InterfaceMember( IsExplicit = true )]
@@ -48,7 +49,7 @@ public class NotNullAttribute : TypeAspect
                 continue;
             }
 
-            builder.Advice.AddContract( property, nameof(Validate), ContractDirection.Both );
+            builder.With( property ).AddContract( nameof(Validate), ContractDirection.Both );
         }
     }
 

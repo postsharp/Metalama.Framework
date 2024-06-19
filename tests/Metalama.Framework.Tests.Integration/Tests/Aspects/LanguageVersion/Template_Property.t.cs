@@ -1,5 +1,5 @@
 [TheAspect]
-class Target
+internal class Target
 {
   public global::System.String Property1
   {

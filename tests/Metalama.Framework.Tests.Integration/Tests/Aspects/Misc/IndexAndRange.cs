@@ -4,6 +4,7 @@
 
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -15,37 +16,37 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
     {
         public override dynamic? OverrideMethod()
         {
-            var collection = meta.Target.Method.DeclaringType.BaseType!.TypeArguments.Select(ta => ta.ToDisplayString()).ToArray();
+            var collection = meta.Target.Method.DeclaringType.BaseType!.TypeArguments.Select( ta => ta.ToDisplayString() ).ToArray();
             var compileTimeCollection = collection.AsSpan();
-            var runTimeCollection = meta.RunTime(collection).AsSpan();
+            var runTimeCollection = meta.RunTime( collection ).AsSpan();
 
             var compileTimeCollectionWithCompileTimeIndex = compileTimeCollection[^1];
-            Console.WriteLine(compileTimeCollectionWithCompileTimeIndex);
+            Console.WriteLine( compileTimeCollectionWithCompileTimeIndex );
             var compileTimeCollectionWithCompileTimeRange = compileTimeCollection[..^1].Length;
-            Console.WriteLine(compileTimeCollectionWithCompileTimeRange);
+            Console.WriteLine( compileTimeCollectionWithCompileTimeRange );
 
-            var runTimeCollectionWithRunTimeIndex = runTimeCollection[meta.RunTime(^1)];
-            Console.WriteLine(runTimeCollectionWithRunTimeIndex);
-            var runTimeCollectionWithRunTimeRange = runTimeCollection[meta.RunTime(..^1)].Length;
-            Console.WriteLine(runTimeCollectionWithRunTimeRange);
+            var runTimeCollectionWithRunTimeIndex = runTimeCollection[meta.RunTime( ^1 )];
+            Console.WriteLine( runTimeCollectionWithRunTimeIndex );
+            var runTimeCollectionWithRunTimeRange = runTimeCollection[meta.RunTime( ..^1 )].Length;
+            Console.WriteLine( runTimeCollectionWithRunTimeRange );
 
             return meta.Proceed();
         }
 
         [CompileTime]
-        private void GetDataClassProperties(INamedType baseType)
+        private void GetDataClassProperties( INamedType baseType )
         {
             var secondToLastBaseTypeTypeArgument = (INamedType)baseType.TypeArguments[^1];
             var numberOfbaseTypeTypeArgumentsExceptTheLastOne = baseType.TypeArguments.ToArray().AsSpan()[..^1].Length;
         }
     }
 
-    class GenericType<T1, T2> { }
+    internal class GenericType<T1, T2> { }
 
     internal class TargetCode : GenericType<int, int>
     {
         [UseIndexAndRange]
-        private int Method(int a, int b, int c, int d)
+        private int Method( int a, int b, int c, int d )
         {
             return a;
         }

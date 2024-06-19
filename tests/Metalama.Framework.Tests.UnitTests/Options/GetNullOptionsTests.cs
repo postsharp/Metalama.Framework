@@ -22,7 +22,7 @@ public sealed class GetNullOptionsTests : UnitTestClass
         Assert.NotNull( option );
     }
 
-    private class Options : IHierarchicalOptions<INamedType>
+    private sealed class Options : IHierarchicalOptions<INamedType>
     {
         public object ApplyChanges( object changes, in ApplyChangesContext context ) => changes;
 

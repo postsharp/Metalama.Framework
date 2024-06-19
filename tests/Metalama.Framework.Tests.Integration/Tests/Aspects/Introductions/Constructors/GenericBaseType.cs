@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -5,42 +6,33 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
             buildConstructor: c =>
             {
-                var p = c.AddParameter("p", builder.Target.TypeParameters[0]);
+                var p = c.AddParameter( "p", builder.Target.TypeParameters[0] );
                 c.InitializerKind = ConstructorInitializerKind.Base;
-                c.AddInitializerArgument(p);
-            });
+                c.AddInitializerArgument( p );
+            } );
 
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
-            buildConstructor: c =>
-            {
-                c.IsStatic = true;
-            });
+            buildConstructor: c => { c.IsStatic = true; } );
     }
 
     [Template]
-    public void Template()
-    {
-    }
+    public void Template() { }
 }
 
 internal class BaseClass<T>
 {
     public BaseClass() { }
 
-    public BaseClass(T value) { }
+    public BaseClass( T value ) { }
 }
 
 // <target>
 [Introduction]
-internal class TargetClass<T> : BaseClass<T>
-{ 
-}
+internal class TargetClass<T> : BaseClass<T> { }

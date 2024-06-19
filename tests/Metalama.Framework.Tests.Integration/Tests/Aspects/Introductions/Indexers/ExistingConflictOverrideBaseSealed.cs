@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.ExistingConflictOverrideBaseSealed
@@ -7,8 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
+            builder.IntroduceIndexer(
                 new[] { ( typeof(int), "x" ) },
                 nameof(ExistingIndexer),
                 nameof(ExistingIndexer),

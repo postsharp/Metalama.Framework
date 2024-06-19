@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
         {
             if (!builder.Target.ImplementedInterfaces.Any( i => i.Is( typeof(IDirty) ) ))
             {
-                builder.Advice.ImplementInterface( builder.Target, typeof(IDirty) );
+                builder.ImplementInterface( typeof(IDirty) );
             }
             else
             {
@@ -48,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
             foreach (var fieldOrProperty in fieldsOrProperties)
             {
-                builder.Advice.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
+                builder.With( fieldOrProperty ).OverrideAccessors( null, nameof(OverrideSetter) );
             }
 
             // TODO: This aspect is not complete. We should normally not set DirtyState to Clean after the object has been initialized,

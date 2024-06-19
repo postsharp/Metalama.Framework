@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.TemplateInStaticClass_NotProvider;
@@ -7,19 +8,20 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("regular template");
-        StaticClass.StaticTemplate(1, 2);
+        Console.WriteLine( "regular template" );
+        StaticClass.StaticTemplate( 1, 2 );
+
         return default;
     }
 }
 
 [RunTimeOrCompileTime]
-static class StaticClass
+internal static class StaticClass
 {
     [Template]
-    public static void StaticTemplate(int i, [CompileTime] int j)
+    public static void StaticTemplate( int i, [CompileTime] int j )
     {
-        Console.WriteLine($"static template i={i}, j={j}");
+        Console.WriteLine( $"static template i={i}, j={j}" );
     }
 }
 
@@ -27,7 +29,5 @@ internal class TargetCode
 {
     // <target>
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

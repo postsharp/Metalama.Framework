@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,7 +8,7 @@ internal class NormalizeAttribute : FieldOrPropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
     {
-        builder.Advice.Override( builder.Target, nameof(this.OverrideProperty) );
+        builder.Override( nameof(OverrideProperty) );
     }
 
     [Template]
@@ -20,5 +21,6 @@ internal class NormalizeAttribute : FieldOrPropertyAspect
 // <target>
 internal class Foo
 {
-    [Normalize] public string? Property { get; set; }
+    [Normalize]
+    public string? Property { get; set; }
 }

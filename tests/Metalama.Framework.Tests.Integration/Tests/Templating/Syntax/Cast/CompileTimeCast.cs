@@ -1,36 +1,38 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Cast.CompileTimeCast
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            short c = (short)meta.Target.Parameters.Count;
+            var c = (short)meta.Target.Parameters.Count;
 
             if (c > 0)
             {
-                string text = meta.CompileTime("");
+                var text = meta.CompileTime( "" );
                 object s = meta.Target.Parameters[0].Name;
+
                 if (s is string)
                 {
-                    text = (s as string) + " = ";
+                    text = ( s as string ) + " = ";
                 }
 
-                Console.WriteLine(text + meta.Target.Parameters[0].Value);
+                Console.WriteLine( text + meta.Target.Parameters[0].Value );
             }
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -12,7 +12,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         {
             // Verifies that serializable nested type fabric can be serialized and deserialized.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Fabrics;
 
 public class A

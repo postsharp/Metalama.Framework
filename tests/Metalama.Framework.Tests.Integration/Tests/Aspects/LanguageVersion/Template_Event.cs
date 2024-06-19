@@ -5,6 +5,7 @@
 #if ROSLYN_4_4_0_OR_GREATER
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LanguageVersion.Template_Event;
@@ -16,7 +17,7 @@ public class TheAspect : TypeAspect
     {
         add
         {
-            Console.WriteLine("""add""");
+            Console.WriteLine( """add""" );
         }
         remove { }
     }
@@ -24,19 +25,16 @@ public class TheAspect : TypeAspect
     [Introduce]
     public event EventHandler Event2
     {
-        add { 
-        }
+        add { }
         remove
         {
-            Console.WriteLine("""remove""");
+            Console.WriteLine( """remove""" );
         }
     }
 }
 
 // <target>
 [TheAspect]
-class Target
-{
-}
+internal class Target { }
 
 #endif

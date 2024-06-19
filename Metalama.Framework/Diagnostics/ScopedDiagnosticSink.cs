@@ -93,8 +93,7 @@ public readonly struct ScopedDiagnosticSink
     /// </summary>
     /// <param name="suppression">The suppression definition, which must be defined as a static field or property.</param>
     /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
-    public void Suppress( ISuppression suppression, IDeclaration scope )
-        => this.Sink.Suppress( suppression, scope, this._source );
+    public void Suppress( ISuppression suppression, IDeclaration scope ) => this.Sink.Suppress( suppression, scope, this._source );
 
     /// <summary>
     /// Suggest a code fix without reporting a diagnostic.

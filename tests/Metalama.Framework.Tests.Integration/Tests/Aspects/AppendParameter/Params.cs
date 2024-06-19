@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,26 +10,19 @@ public class MyAspect : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.IntroduceParameter(constructor, "ip1", typeof(int), TypedConstant.Create(13));
-            builder.Advice.IntroduceParameter(constructor, "ip2", typeof(int), TypedConstant.Create(42));
+            builder.With( constructor ).IntroduceParameter( "ip1", typeof(int), TypedConstant.Create( 13 ) );
+            builder.With( constructor ).IntroduceParameter( "ip2", typeof(int), TypedConstant.Create( 42 ) );
         }
     }
 }
 
 // <target>
 [MyAspect]
-public class C 
+public class C
 {
+    public C( params int[] p0 ) { }
 
-    public C(params int[] p0)
-    {
-    }
+    public C( int p0, params string[] p1 ) { }
 
-    public C(int p0, params string[] p1)
-    {
-    }
-
-    public C(int p0, int p1 = 0, params string[] p2)
-    {
-    }
+    public C( int p0, int p1 = 0, params string[] p2 ) { }
 }

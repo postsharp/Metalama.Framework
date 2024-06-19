@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -24,14 +24,14 @@ public class MyAspect : MethodAspect
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
         var attr1 = AttributeConstruction.Create( typeof(MyAttribute), new object[] { "x", 1, 2, 3, 4, 5 } );
-        builder.Advice.IntroduceAttribute( builder.Target, attr1 );
+        builder.IntroduceAttribute( attr1 );
 
         //  Known issue: should pass the 'null' argument, but does not.
         var attr2 = AttributeConstruction.Create( typeof(MyAttribute), new object?[] { "x", null } );
-        builder.Advice.IntroduceAttribute( builder.Target, attr2, whenExists: OverrideStrategy.New );
+        builder.IntroduceAttribute( attr2, whenExists: OverrideStrategy.New );
 
         var attr3 = AttributeConstruction.Create( typeof(YourAttribute), new object?[] { "x", null } );
-        builder.Advice.IntroduceAttribute( builder.Target, attr3, whenExists: OverrideStrategy.New );
+        builder.IntroduceAttribute( attr3, whenExists: OverrideStrategy.New );
     }
 }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,24 +8,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Construct
 
 internal class TestAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         var constructor =
-            builder.Advice.IntroduceConstructor(
-                builder.Target,
-                nameof(ConstructorTemplate),
-                buildConstructor: b =>
-                {
-                    b.AddParameter("p", typeof(object));
-                }).Declaration;
+            builder.IntroduceConstructor(
+                    nameof(ConstructorTemplate),
+                    buildConstructor: b => { b.AddParameter( "p", typeof(object) ); } )
+                .Declaration;
 
-        builder.Advice.AddContract(constructor.Parameters.Single(), nameof(ValidationTemplate));
+        builder.With( constructor.Parameters.Single() ).AddContract( nameof(ValidationTemplate) );
     }
 
     [Template]
-    public void ConstructorTemplate()
-    {
-    }
+    public void ConstructorTemplate() { }
 
     [Template]
     public void ValidationTemplate( dynamic? value )
@@ -38,6 +34,4 @@ internal class TestAttribute : TypeAspect
 
 // <target>
 [Test]
-internal class Target
-{
-}
+internal class Target { }

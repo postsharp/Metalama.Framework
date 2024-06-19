@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
@@ -21,14 +22,14 @@ public sealed class PreviewTests : DesignTimeTestBase
     private const string _mainProjectName = "master";
 
     public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
-    
+
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
         base.ConfigureServices( services );
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
     }
 
-    protected override TestContextOptions GetDefaultTestContextOptions() => new TestContextOptions() { CodeFormattingOptions = CodeFormattingOptions.Formatted };
+    protected override TestContextOptions GetDefaultTestContextOptions() => new() { CodeFormattingOptions = CodeFormattingOptions.Formatted };
 
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
@@ -75,19 +76,20 @@ public sealed class PreviewTests : DesignTimeTestBase
         Assert.Empty( result.ErrorMessages ?? Array.Empty<string>() );
         Assert.True( result.IsSuccessful );
         Assert.NotNull( result.TransformedSyntaxTree );
-        
+
         // In production, the formatting happens in the user process. For tests, we run it separately.
-        var document = workspace.GetDocument( _mainProjectName, previewedSyntaxTreeName );
+        var document = workspace.GetDocumentOrNull( _mainProjectName, previewedSyntaxTreeName )
+            ?? workspace.GetProject( _mainProjectName ).AddDocument( previewedSyntaxTreeName, string.Empty );
 
         var formattedDocument = await UserProcessTransformationPreviewService.FormatOutputAsync( document, result, default );
-        
+
         var text = await formattedDocument.GetTextAsync();
 
         var s = text.ToString();
-        
+
         // Check that the output is formatted.
         Assert.DoesNotContain( "global::", s, StringComparison.Ordinal );
-        
+
         return s;
     }
 
@@ -97,7 +99,8 @@ public sealed class PreviewTests : DesignTimeTestBase
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class MyAspect : TypeAspect
 {
@@ -119,7 +122,8 @@ class MyAspect : TypeAspect
         var masterCode = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Inheritable]
 class MyAspect : TypeAspect
 {
@@ -143,7 +147,8 @@ class MyAspect : TypeAspect
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Fabrics;
 
 class MyAspect : TypeAspect
@@ -175,7 +180,8 @@ class Fabric : ProjectFabric
             ["aspect.cs"] =
                 """
 
-                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects; 
                 using Metalama.Framework.Fabrics;
                 using Metalama.Framework.Code;
 
@@ -203,14 +209,15 @@ class Fabric : ProjectFabric
 
         Assert.Contains( "Field = \"TheValue\"", result, StringComparison.Ordinal );
     }
-    
+
     [Fact]
     public async Task WithTypeFabric()
     {
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class MyAspect : TypeAspect
 {
@@ -248,7 +255,8 @@ class Fabric : TypeFabric
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 namespace Ns;
 
@@ -292,7 +300,8 @@ class C {}"
         var masterCode1 = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Inheritable]
 class MyAspect : TypeAspect
 {
@@ -314,7 +323,8 @@ class MyAspect : TypeAspect
         var masterCode2 = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Inheritable]
 class MyAspect : TypeAspect
 {
@@ -336,7 +346,8 @@ class MyAspect : TypeAspect
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class MyAspect : TypeAspect
 {
@@ -376,5 +387,225 @@ class MyAspect : TypeAspect
             "target.cs" );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task NamespaceIntroductionWithAspect()
+    {
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = """
+                using System;
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Code.DeclarationBuilders;                
+                
+                public class MyAttribute : Attribute;
+
+                public class TypeIntroductionsAttribute : TypeAspect
+                {
+                    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                    {
+                        var ns = builder.Advice.IntroduceNamespace(builder.Target.Compilation.GlobalNamespace, "NS").Declaration;
+
+                        var introducedClass = builder.Advice.IntroduceClass(ns, "Introduced").Declaration;
+
+                        builder.Advice.IntroduceField(introducedClass, "f", typeof(int));
+
+                        builder.Advice.IntroduceAttribute(introducedClass, AttributeConstruction.Create(typeof(MyAttribute)));
+                    }
+                }
+                """,
+            ["target.cs"] = "[TypeIntroductions] class Target;"
+        };
+
+        var result = await this.RunPreviewAsync( code, "NS.Introduced.cs" );
+
+        Assert.Contains( "namespace NS", result, StringComparison.Ordinal );
+        Assert.Contains( "[My]", result, StringComparison.Ordinal );
+        Assert.Contains( "class Introduced", result, StringComparison.Ordinal );
+        Assert.Contains( "int f;", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task NamespaceIntroductionWithFabric()
+    {
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = """
+                using System;
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Code.DeclarationBuilders;                
+                
+                public class MyAttribute : Attribute;
+
+                public class TypeIntroductionsAttribute : CompilationAspect
+                {
+                    public override void BuildAspect(IAspectBuilder<ICompilation> builder)
+                    {
+                        var ns = builder.Advice.IntroduceNamespace(builder.Target.GlobalNamespace, "NS").Declaration;
+
+                        var introducedClass = builder.Advice.IntroduceClass(ns, "Introduced").Declaration;
+
+                        builder.Advice.IntroduceField(introducedClass, "f", typeof(int));
+
+                        builder.Advice.IntroduceAttribute(introducedClass, AttributeConstruction.Create(typeof(MyAttribute)));
+                    }
+                }
+                """,
+            ["fabric.cs"] = """
+                using Metalama.Framework.Fabrics;
+
+                class Fabric : ProjectFabric
+                {
+                    public override void AmendProject(IProjectAmender amender)
+                    {
+                        amender.AddAspect<TypeIntroductionsAttribute>();
+                    }
+                }
+                """
+        };
+
+        var result = await this.RunPreviewAsync( code, "NS.Introduced.cs" );
+
+        Assert.Contains( "namespace NS", result, StringComparison.Ordinal );
+        Assert.Contains( "[My]", result, StringComparison.Ordinal );
+        Assert.Contains( "class Introduced", result, StringComparison.Ordinal );
+        Assert.Contains( "int f;", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task AssemblyAttributeIntroduction()
+    {
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = """
+                using System;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Code.DeclarationBuilders;                
+
+                public class MyAttribute : Attribute;
+
+                public class TypeIntroductionsAttribute : CompilationAspect
+                {
+                    public override void BuildAspect(IAspectBuilder<ICompilation> builder)
+                    {
+                        builder.IntroduceAttribute(AttributeConstruction.Create(typeof(MyAttribute)));
+                    }
+                }
+                """,
+            ["fabric.cs"] = """
+                using Metalama.Framework.Fabrics;
+
+                class Fabric : ProjectFabric
+                {
+                    public override void AmendProject(IProjectAmender amender)
+                    {
+                        amender.AddAspect<TypeIntroductionsAttribute>();
+                    }
+                }
+                """
+        };
+
+        var result = await this.RunPreviewAsync( code, "MetalamaAssemblyAttributes.cs" );
+
+        Assert.Contains( "[assembly: My]", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task OtherTransformationsAreNotExecuted()
+    {
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = """
+                using System;
+                using Metalama.Framework.Aspects;
+
+                class Aspect : OverrideMethodAspect
+                {
+                    public override dynamic? OverrideMethod()
+                    {
+                        if (meta.Target.Method.Name != "M1")
+                        {
+                            // Throw exception at compile-time.
+                            meta.CompileTime(((object)null).ToString());
+                        }
+
+                        Console.WriteLine("from aspect");
+
+                        return meta.Proceed();
+                    }
+                }
+                """,
+            ["target1.cs"] = """
+                class Target1
+                {
+                    [Aspect]
+                    void M1() {}
+                }
+                """,
+            ["target2.cs"] = """
+                class Target2
+                {
+                    [Aspect]
+                    void M2() {}
+                }
+                """
+        };
+
+        var result = await this.RunPreviewAsync( code, "target1.cs" );
+
+        Assert.Contains( """Console.WriteLine("from aspect");""", result, StringComparison.Ordinal );
+
+        var ex = await Assert.ThrowsAsync<EmptyException>( () => this.RunPreviewAsync( code, "target2.cs" ) );
+        Assert.Contains( "error LAMA0041", ex.Message, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task OtherTypeIntroductionsAreNotExecuted()
+    {
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+
+                class Aspect : TypeAspect
+                {
+                    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                    {
+                        var ns = builder.Advice.IntroduceNamespace(builder.Target.Compilation.GlobalNamespace, "NS").Declaration;
+
+                        for (int i = 1; i <= 2; i++)
+                        {
+                            var introducedClass = builder.Advice.IntroduceClass(ns, $"Introduced{i}").Declaration;
+
+                            builder.Advice.IntroduceMethod(introducedClass, nameof(M));
+                        }
+                    }
+
+                    [Template]
+                    void M()
+                    {
+                        if (meta.Target.Type.Name != "Introduced1")
+                        {
+                            // Throw exception at compile-time.
+                            meta.CompileTime(((object)null).ToString());
+                        }
+                    }
+                }                
+                """,
+            ["target.cs"] = "[Aspect] class Target;"
+        };
+
+        var result = await this.RunPreviewAsync( code, "NS.Introduced1.cs" );
+
+        Assert.Contains( "void M()", result, StringComparison.Ordinal );
+
+        var ex = await Assert.ThrowsAsync<EmptyException>( () => this.RunPreviewAsync( code, "NS.Introduced2.cs" ) );
+        Assert.Contains( "error LAMA0041", ex.Message, StringComparison.Ordinal );
     }
 }

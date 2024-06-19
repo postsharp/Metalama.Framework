@@ -9,7 +9,7 @@ internal class Target
       {
         throw new global::System.ArgumentException();
       }
-      System.Console.WriteLine("Original body");
+      Console.WriteLine("Original body");
       return 42;
     }
     set
@@ -18,7 +18,7 @@ internal class Target
       {
         throw new global::System.ArgumentException();
       }
-      System.Console.WriteLine("Original body");
+      Console.WriteLine("Original body");
     }
   }
   public int this[[NotZero] int x, [NotZero] int y]
@@ -33,7 +33,7 @@ internal class Target
       {
         throw new global::System.ArgumentException();
       }
-      System.Console.WriteLine("Original body");
+      Console.WriteLine("Original body");
       return 42;
     }
     set
@@ -46,7 +46,7 @@ internal class Target
       {
         throw new global::System.ArgumentException();
       }
-      System.Console.WriteLine("Original body");
+      Console.WriteLine("Original body");
     }
   }
 }

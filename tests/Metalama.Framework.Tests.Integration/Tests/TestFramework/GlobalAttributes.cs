@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Reflection;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.TestFramework.GlobalAttributes;
@@ -13,4 +14,4 @@ internal class TheAspect : TypeAspect
 
 // <target>
 [TheAspect]
-class C { }
+internal class C { }

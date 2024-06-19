@@ -34,7 +34,7 @@ namespace Metalama.Framework.Aspects
                 this.UseAsyncTemplateForAnyAwaitable,
                 this.UseEnumerableTemplateForAnyEnumerable );
 
-            builder.Advice.Override( builder.Target, templates );
+            builder.Override( templates );
         }
 
 #pragma warning disable SA1623

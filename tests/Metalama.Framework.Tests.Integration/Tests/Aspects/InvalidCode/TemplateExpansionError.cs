@@ -1,14 +1,15 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.TemplateExpansionError
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            meta.CompileTime(this.CompileTimeExceptionMethod());
-            
+            meta.CompileTime( CompileTimeExceptionMethod() );
+
             return default;
         }
 
@@ -18,11 +19,11 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.TemplateEx
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
         // <target>
         [Aspect]
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -28,7 +28,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.UserProfile
                 this.GetUserDiagnosticsFileContent(
                     aspectCode: @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -74,7 +75,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             this.GetUserDiagnosticsFileContent(
                 dependentCode: """
                                using System;
-                               using Metalama.Framework.Aspects;
+                               using Metalama.Framework.Advising;
+                               using Metalama.Framework.Aspects; 
                                using Metalama.Framework.Code;
                                using Metalama.Framework.Diagnostics;
 
@@ -131,7 +133,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             this.GetUserDiagnosticsFileContent(
                 dependentCode: """
                                using System;
-                               using Metalama.Framework.Aspects;
+                               using Metalama.Framework.Advising;
+                               using Metalama.Framework.Aspects; 
                                using Metalama.Framework.Code;
                                using Metalama.Framework.Diagnostics;
 
@@ -187,7 +190,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
                 this.GetUserDiagnosticsFileContent(
                     aspectCode: @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 

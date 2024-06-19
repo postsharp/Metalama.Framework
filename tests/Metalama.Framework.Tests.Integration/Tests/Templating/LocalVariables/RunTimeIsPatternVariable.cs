@@ -1,28 +1,28 @@
 using System.Collections;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.RunTimeIsPatternVariable
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            if ( meta.Target.Parameters[0].Value is IEnumerable a )
+            if (meta.Target.Parameters[0].Value is IEnumerable a)
             {
                 a.GetEnumerator();
             }
-            
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

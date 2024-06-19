@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
@@ -13,9 +14,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
             foreach (var property in builder.Target.Properties)
             {
                 // TODO: IAdviceResult.Declaration should not expose the Builder but the Built thing of the mutable model?
-                
-                var isSpecifiedProperty = builder.Advice.IntroduceProperty(
-                        builder.Target,
+
+                var isSpecifiedProperty = builder.IntroduceProperty(
                         nameof(IsSpecifiedTemplate),
                         buildProperty: p =>
                         {
@@ -24,10 +24,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
                         } )
                     .Declaration;
 
-                builder.Advice.Override(
-                    property,
-                    nameof(OverrideProperty),
-                    tags: new { isSpecifiedProperty = isSpecifiedProperty } );
+                builder.With( property )
+                    .Override(
+                        nameof(OverrideProperty),
+                        tags: new { isSpecifiedProperty = isSpecifiedProperty } );
             }
         }
 
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
             set
             {
                 var isSpecifiedProperty = (IProperty)meta.Tags["isSpecifiedProperty"]!;
-                isSpecifiedProperty.With(InvokerOptions.Final).Value =  true ;
+                isSpecifiedProperty.With( InvokerOptions.Final ).Value = true;
                 meta.Proceed();
             }
         }

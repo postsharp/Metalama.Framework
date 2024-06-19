@@ -1,29 +1,31 @@
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.AssignmentInRunTimeForEach
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var x = meta.CompileTime(0);
+            var x = meta.CompileTime( 0 );
 
-            foreach (var i in meta.RunTime(Enumerable.Range(0, 3)))
+            foreach (var i in meta.RunTime( Enumerable.Range( 0, 3 ) ))
             {
                 x = x + 1;
             }
 
-            meta.InsertComment("x = " + x.ToString());
+            meta.InsertComment( "x = " + x.ToString() );
+
             return null;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }
