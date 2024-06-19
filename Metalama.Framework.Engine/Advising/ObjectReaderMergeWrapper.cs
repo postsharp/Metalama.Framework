@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Advising
         [Memo]
         public object Source
             => this._readers.Where( x => x != null )
-                .Select( x => x.Source )
+                .Select( x => x!.Source )
                 .Where( x => x != null )
                 .ToImmutableArray();
 
