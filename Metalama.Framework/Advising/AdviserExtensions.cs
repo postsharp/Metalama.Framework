@@ -189,7 +189,6 @@ public static class AdviserExtensions
     public static IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
         this IAdviser<INamedType> adviser,
         string template,
-        IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IConstructorBuilder>? buildConstructor = null,
         object? args = null,
@@ -197,7 +196,6 @@ public static class AdviserExtensions
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceConstructor(
             adviser.Target,
             template,
-            scope,
             whenExists,
             buildConstructor,
             args,

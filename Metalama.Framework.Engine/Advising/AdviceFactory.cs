@@ -691,7 +691,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     public IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
         INamedType targetType,
         string defaultTemplate,
-        IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IConstructorBuilder>? buildAction = null,
         object? args = null,
@@ -708,7 +707,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             return new IntroduceConstructorAdvice(
                     this.GetAdviceConstructorParameters( targetType ),
                     template.PartialForIntroduction( this.GetArgsReader( args ) ),
-                    scope,
                     whenExists,
                     buildAction,
                     this.GetTagsReader( tags ) )
