@@ -838,7 +838,7 @@ internal abstract partial class BaseTestRunner
         {
             var fileName = Path.GetFileNameWithoutExtension( testSyntaxTree.FilePath );
 
-            if ( !fileName.StartsWith( testResult.TestInput.TestName ) )
+            if ( !fileName.StartsWith( testResult.TestInput.TestName, StringComparison.Ordinal ) )
             {
                 fileName = testResult.TestInput.TestName + "." + fileName;
             }
