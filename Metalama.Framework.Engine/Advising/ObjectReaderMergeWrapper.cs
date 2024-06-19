@@ -1,20 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class ObjectReaderMergeWrapper : IObjectReader
     {
+        private readonly IObjectReader?[] _readers;
         private readonly ImmutableDictionary<string, object?> _inner;
-
+        
         public ObjectReaderMergeWrapper( params IObjectReader?[] readers )
         {
-            var builder = ImmutableDictionary<string, object?>.Empty.ToBuilder();
-
+            this._readers = readers;
+            var dictionaryBuilder = ImmutableDictionary<string, object?>.Empty.ToBuilder();
+        
             foreach ( var reader in readers )
             {
                 if ( reader == null )
@@ -24,16 +28,21 @@ namespace Metalama.Framework.Engine.Advising
 
                 foreach ( var kvp in reader )
                 {
-                    builder[kvp.Key] = kvp.Value;
+                    dictionaryBuilder[kvp.Key] = kvp.Value;
                 }
             }
 
-            this._inner = builder.ToImmutable();
+            this._inner = dictionaryBuilder.ToImmutable();
         }
 
         public object? this[ string key ] => this._inner[key];
 
-        public object Source => this._inner;
+        [Memo]
+        public object Source
+            => this._readers.Where( x => x != null )
+                .Select( x => x.Source )
+                .Where( x => x != null )
+                .ToImmutableArray();
 
         public IEnumerable<string> Keys => this._inner.Keys;
 
