@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         IAspectBuilder<T1> IAspectBuilder.WithTarget<T1>( T1 newTarget ) => this.With( newTarget );
 
-        public object? AdviceTags
+        public object? Tags
         {
             get => this._aspectBuilderState.Tags;
             set => this._aspectBuilderState.Tags = value;

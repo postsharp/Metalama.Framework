@@ -95,11 +95,11 @@ namespace Metalama.Framework.Aspects
         /// can be consumed from the <c>meta.Tags</c> property.
         /// </summary>
         /// <remarks>
-        /// Advice always receive the <i>last</i> value of the property, when the <see cref="IAspect{T}.BuildAspect"/> exists.
+        /// Advice always receive the <i>last</i> value of the property, when the <see cref="IAspect{T}.BuildAspect"/> exits.
         /// These tags are merged with the ones passed as an argument of the <c>tags</c> parameter of any advise method.
-        /// In case of conflit, the values passed to the advise method wins.
+        /// In case of conflit, the values passed to the advise method win.
         /// </remarks>
-        object? AdviceTags { get; set; }
+        object? Tags { get; set; }
     }
 
     /// <summary>

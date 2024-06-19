@@ -9,12 +9,12 @@ public class TheAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.AdviceTags = new { TheTag = 1 };
+        builder.Tags = new { TheTag = 1 };
         base.BuildAspect( builder );
-        builder.AdviceTags = new { TheTag = 2 };
+        builder.Tags = new { TheTag = 2 };
         builder.IntroduceMethod( nameof(Introduced2) );
         builder.IntroduceMethod( nameof(Introduced3), tags: new { TheTag = 3 } );
-        builder.AdviceTags = new { TheTag = 4 };
+        builder.Tags = new { TheTag = 4 };
 
     }
 
