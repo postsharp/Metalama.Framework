@@ -1,4 +1,4 @@
-[InvokerAspect]
+    [InvokerAspect]
 public class TargetClass
 {
   public int TestProperty
@@ -50,29 +50,17 @@ public class TargetClass
   }
   public void CallFoo()
   {
-    // Invoke this.Property
     this.TestProperty = 42;
-    // Invoke this.Property
     this.TestProperty = 42;
-    // Invoke this.Property
     this.TestProperty = 42;
-    // Invoke this.Property
     this.TestProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedProperty = 42;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedProperty = 42;
   }
 }

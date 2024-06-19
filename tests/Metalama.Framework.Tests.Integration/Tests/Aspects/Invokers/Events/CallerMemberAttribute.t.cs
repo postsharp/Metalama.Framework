@@ -47,29 +47,17 @@ public class TargetClass
   }
   public void CallFoo()
   {
-    // Invoke this.Property
     this.TestEvent += null;
-    // Invoke this.Property
     this.TestEvent += null;
-    // Invoke this.Property
     this.TestEvent += null;
-    // Invoke this.Property
     this.TestEvent += null;
-    // Invoke this.Property
     this.TestOverriddenEvent += null;
-    // Invoke this.Property
     this.TestOverriddenEvent += null;
-    // Invoke this.Property
     this.TestOverriddenEvent += null;
-    // Invoke this.Property
     this.TestOverriddenEvent += null;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedEvent += null;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedEvent += null;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedEvent += null;
-    // Invoke this.Property
     this.TestOverriddenNonInlinedEvent += null;
   }
 }
