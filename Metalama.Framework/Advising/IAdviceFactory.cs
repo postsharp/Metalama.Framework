@@ -139,7 +139,6 @@ namespace Metalama.Framework.Advising
         IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
             INamedType targetType,
             string template,
-            IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IConstructorBuilder>? buildConstructor = null,
             object? args = null,
