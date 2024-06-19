@@ -237,7 +237,7 @@ internal sealed class AspectDriver : IAspectDriver
 
             var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
 
-            adviceFactoryState.AspectBuilder = aspectBuilder;
+            adviceFactoryState.AspectBuilderState = aspectBuilderState;
 
             if ( !userCodeInvoker
                     .TryInvoke(

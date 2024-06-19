@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Advising
     {
         private readonly ImmutableDictionary<string, object?> _inner;
 
-        public ObjectReaderMergeWrapper( IObjectReader?[] readers )
+        public ObjectReaderMergeWrapper( params IObjectReader?[] readers )
         {
             var builder = ImmutableDictionary<string, object?>.Empty.ToBuilder();
 

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -33,7 +32,7 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
 
     public List<ITransformation> Transformations { get; } = new();
 
-    public IAspectBuilder? AspectBuilder { get; set; }
+    public AspectBuilderState? AspectBuilderState { get; set; }
 
     public UserCodeExecutionContext ExecutionContext { get; }
 

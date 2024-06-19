@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Aspects;
 internal sealed class AspectBuilderState
 {
     private readonly AdviceFactoryState _adviceFactoryState;
-
+    
     public ProjectServiceProvider ServiceProvider { get; }
 
     public UserDiagnosticSink Diagnostics { get; }
@@ -34,6 +34,8 @@ internal sealed class AspectBuilderState
     public IAspectInstanceInternal AspectInstance { get; }
 
     public string? Layer { get; }
+    
+    public object? Tags { get; set; }
 
     public AspectBuilderState(
         ProjectServiceProvider serviceProvider,

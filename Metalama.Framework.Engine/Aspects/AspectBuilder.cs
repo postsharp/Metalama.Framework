@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.Aspects
         where T : class, IDeclaration
     {
         private readonly AspectBuilderState _aspectBuilderState;
+        private readonly AdviceFactory<T> _adviceFactory;
 
         public AspectBuilder(
             T target,
@@ -37,7 +38,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this.Target = target;
             this._aspectBuilderState = aspectBuilderState;
-            this.AdviceFactory = adviceFactory;
+            this._adviceFactory = adviceFactory;
             this.AspectPredecessor = aspectPredecessor ?? new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectBuilderState.AspectInstance );
             this.LicenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
         }
@@ -67,12 +68,10 @@ namespace Metalama.Framework.Engine.Aspects
         public ProjectServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
 
         [Obsolete]
-        IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
+        IAdviceFactory IAspectBuilder.Advice => this._adviceFactory;
 
-        IAdviceFactory IAdviserInternal.AdviceFactory => this.AdviceFactory;
-
-        public AdviceFactory<T> AdviceFactory { get; }
-
+        IAdviceFactory IAdviserInternal.AdviceFactory => this._adviceFactory;
+        
         public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
         {
             var oldPredecessor = this.AspectPredecessor;
@@ -145,6 +144,12 @@ namespace Metalama.Framework.Engine.Aspects
 
         IAspectBuilder<T1> IAspectBuilder.WithTarget<T1>( T1 newTarget ) => this.With( newTarget );
 
+        public object? AdviceTags
+        {
+            get => this._aspectBuilderState.Tags;
+            set => this._aspectBuilderState.Tags = value;
+        }
+
         IAspectBuilder<T1> IAspectBuilder<T>.WithTarget<T1>( T1 newTarget ) => this.With( newTarget );
 
         public IAspectBuilder<TNewTarget> With<TNewTarget>( TNewTarget declaration )
@@ -159,7 +164,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return new AspectBuilder<TNewTarget>(
                     declaration,
                     this._aspectBuilderState,
-                    this.AdviceFactory.WithDeclaration( declaration ),
+                    this._adviceFactory.WithDeclaration( declaration ),
                     this.AspectPredecessor );
             }
         }
