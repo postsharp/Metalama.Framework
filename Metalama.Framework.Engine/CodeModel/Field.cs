@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel
             if ( this.IsImplicitlyDeclared )
             {
                 throw new InvalidOperationException(
-                    $"Cannot generate run-time for '{this.ToDisplayString()}' because this is an implicit property-backing field." );
+                    $"Cannot generate run-time syntax for '{this.ToDisplayString()}' because this is an implicit property-backing field." );
             }
         }
 
