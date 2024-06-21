@@ -13,13 +13,10 @@ namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
 internal sealed class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfaceAdviceResult
 {
-    private readonly IRef<INamedType>? _target;
-
     public ImplementInterfaceAdviceResult() { }
 
     public ImplementInterfaceAdviceResult(
         AdviceOutcome outcome,
-        IRef<INamedType>? target,
         ImmutableArray<Diagnostic> diagnostics,
         IReadOnlyCollection<IInterfaceImplementationResult>? interfaces,
         IReadOnlyCollection<IInterfaceMemberImplementationResult>? interfaceMembers )
@@ -28,7 +25,6 @@ internal sealed class ImplementInterfaceAdviceResult : AdviceResult, IImplementI
         this.Outcome = outcome;
         this.InterfaceMembers = interfaceMembers ?? Array.Empty<IInterfaceMemberImplementationResult>();
         this.Interfaces = interfaces ?? Array.Empty<IInterfaceImplementationResult>();
-        this._target = target;
         this.Diagnostics = diagnostics;
     }
 

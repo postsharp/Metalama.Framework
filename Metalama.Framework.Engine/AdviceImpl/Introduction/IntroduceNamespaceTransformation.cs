@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceNamespaceTransformation : BaseTransformation, IIntroduceDeclarationTransformation
 {
-    private NamespaceBuilder _introducedDeclaration;
+    private readonly NamespaceBuilder _introducedDeclaration;
 
     public IntroduceNamespaceTransformation( Advice advice, NamespaceBuilder introducedDeclaration ) : base( advice )
     {
