@@ -12,8 +12,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Names
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var n = builder.With( builder.Target.ContainingNamespace ).IntroduceNamespace( "TestNamespace" );
-            builder.With( n.Declaration ).IntroduceClass( "TestNestedType" );
+            var n = builder.With( builder.Target.ContainingNamespace ).WithChildNamespace( "TestNamespace" );
+            builder.IntroduceClass( "TestNestedType" );
         }
     }
 

@@ -1548,7 +1548,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    public INamespaceIntroductionAdviceResult IntroduceNamespace(
+    public IAdviser<INamespace> WithNamespace(
         INamespace targetNamespace,
         string name )
     {

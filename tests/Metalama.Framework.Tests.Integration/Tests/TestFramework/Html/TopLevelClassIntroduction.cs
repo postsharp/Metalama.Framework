@@ -18,7 +18,7 @@ namespace Metalama.Framework.IntegrationTests.TestFramework.Html.TopLevelClassIn
     {
         public override void BuildAspect( IAspectBuilder<ICompilation> builder )
         {
-            var ns = builder.IntroduceNamespace( "Some.Namespace" );
+            var ns = builder.WithNamespace( "Some.Namespace" );
             ns.IntroduceClass( "SomeClass" );
         }
     }

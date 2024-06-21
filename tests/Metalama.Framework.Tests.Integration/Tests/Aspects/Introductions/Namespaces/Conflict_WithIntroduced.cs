@@ -12,9 +12,9 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( builder.Target.ContainingNamespace ).IntroduceNamespace( "TestNamespace" );
-        var n = builder.With( builder.Target.ContainingNamespace ).IntroduceNamespace( "TestNamespace" );
-        builder.With( n.Declaration ).IntroduceClass( "TestNestedType" );
+        _ = builder.With( builder.Target.ContainingNamespace ).WithChildNamespace( "TestNamespace" );
+        var n = builder.With( builder.Target.ContainingNamespace ).WithChildNamespace( "TestNamespace" );
+        builder.IntroduceClass( "TestNestedType" );
     }
 }
 
