@@ -109,6 +109,4 @@ internal sealed class InjectedMember
     }
 
     public override string ToString() => this.Transformation?.ToString() ?? "(linker auxiliary)";
-
-    internal InjectedMember WithSyntax( MemberDeclarationSyntax newSyntax ) => new( this, newSyntax );
 }

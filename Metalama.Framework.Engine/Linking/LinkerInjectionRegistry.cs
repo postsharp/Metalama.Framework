@@ -28,7 +28,6 @@ internal sealed class LinkerInjectionRegistry
 {
     private readonly TransformationLinkerOrderComparer _comparer;
     private readonly PartialCompilation _intermediateCompilation;
-    private readonly ISet<SyntaxTree> _introducedSyntaxTrees;
     private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
     private readonly IReadOnlyList<InjectedMember> _injectedMembers;
     private readonly IReadOnlyCollection<ISymbol> _overrideTargets;
@@ -45,7 +44,6 @@ internal sealed class LinkerInjectionRegistry
     public LinkerInjectionRegistry(
         TransformationLinkerOrderComparer comparer,
         PartialCompilation intermediateCompilation,
-        ISet<SyntaxTree> introducedSyntaxTrees,
         IEnumerable<SyntaxTreeTransformation> transformations,
         IEnumerable<InjectedMember> injectedMembers,
         IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
@@ -63,7 +61,6 @@ internal sealed class LinkerInjectionRegistry
 
         this._comparer = comparer;
         this._intermediateCompilation = intermediateCompilation;
-        this._introducedSyntaxTrees = introducedSyntaxTrees;
 
         this._transformedSyntaxTreeMap = transformations
             .Where( m => m.Kind == SyntaxTreeTransformationKind.Replace )
