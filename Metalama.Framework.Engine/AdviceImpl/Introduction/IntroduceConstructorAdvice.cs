@@ -26,11 +26,10 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
     public IntroduceConstructorAdvice(
         AdviceConstructorParameters<INamedType> parameters,
         PartiallyBoundTemplateMethod template,
-        IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IConstructorBuilder>? buildAction,
         IObjectReader tags )
-        : base( parameters, null, template.TemplateMember, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null )
+        : base( parameters, null, template.TemplateMember, IntroductionScope.Instance, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
 

@@ -13,9 +13,9 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var outerNamespace = builder.With( builder.Target.Compilation ).IntroduceNamespace( "Outer" );
-        var middleNamespace = outerNamespace.IntroduceNamespace( "Middle" );
-        var innerNamespace = middleNamespace.IntroduceNamespace( "Inner" );
+        var outerNamespace = builder.With( builder.Target.Compilation ).WithNamespace( "Outer" );
+        var middleNamespace = outerNamespace.WithChildNamespace( "Middle" );
+        var innerNamespace = middleNamespace.WithChildNamespace( "Inner" );
         var @class = innerNamespace.IntroduceClass( "Test" );
 
         builder.IntroduceField( "Field", @class.Declaration );

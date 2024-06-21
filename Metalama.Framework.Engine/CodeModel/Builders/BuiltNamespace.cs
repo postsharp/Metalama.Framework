@@ -38,7 +38,22 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
             this,
             this.Compilation.GetNamespaceCollection( this.NamespaceBuilder.ToRef().As<INamespace>() ) );
 
-    public bool IsPartial => throw new System.NotImplementedException();
+    public bool IsPartial
+    {
+        get
+        {
+            var existingNamespace = this.Compilation.GlobalNamespace.GetDescendant( this.FullName );
+
+            if ( existingNamespace != null )
+            {
+                return existingNamespace.IsPartial;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
 
     public INamespace GetDescendant( string ns ) => throw new System.NotImplementedException();
 
