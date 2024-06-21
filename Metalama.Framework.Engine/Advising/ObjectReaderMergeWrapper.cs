@@ -12,14 +12,20 @@ namespace Metalama.Framework.Engine.Advising
     internal sealed class ObjectReaderMergeWrapper : IObjectReader
     {
         private readonly IObjectReader?[] _readers;
-        private readonly ImmutableDictionary<string, object?> _inner;
+        private ImmutableDictionary<string, object?>? _dictionary;
+
+        private ImmutableDictionary<string, object?> Dictionary => this._dictionary ??= this.BuildDictionary();
         
         public ObjectReaderMergeWrapper( params IObjectReader?[] readers )
         {
             this._readers = readers;
+        }
+
+        private ImmutableDictionary<string, object?> BuildDictionary()
+        {
             var dictionaryBuilder = ImmutableDictionary<string, object?>.Empty.ToBuilder();
         
-            foreach ( var reader in readers )
+            foreach ( var reader in this._readers )
             {
                 if ( reader == null )
                 {
@@ -32,10 +38,10 @@ namespace Metalama.Framework.Engine.Advising
                 }
             }
 
-            this._inner = dictionaryBuilder.ToImmutable();
+            return dictionaryBuilder.ToImmutable();
         }
 
-        public object? this[ string key ] => this._inner[key];
+        public object? this[ string key ] => this.Dictionary[key];
 
         [Memo]
         public object Source
@@ -44,18 +50,18 @@ namespace Metalama.Framework.Engine.Advising
                 .Where( x => x != null )
                 .ToImmutableArray();
 
-        public IEnumerable<string> Keys => this._inner.Keys;
+        public IEnumerable<string> Keys => this.Dictionary.Keys;
 
-        public IEnumerable<object?> Values => this._inner.Values;
+        public IEnumerable<object?> Values => this.Dictionary.Values;
 
-        public int Count => this._inner.Count;
+        public int Count => this.Dictionary.Count;
 
-        public bool ContainsKey( string key ) => this._inner.ContainsKey( key );
+        public bool ContainsKey( string key ) => this.Dictionary.ContainsKey( key );
 
-        public IEnumerator<KeyValuePair<string, object?>> GetEnumerator() => this._inner.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, object?>> GetEnumerator() => this.Dictionary.GetEnumerator();
 
-        public bool TryGetValue( string key, out object? value ) => this._inner.TryGetValue( key, out value );
+        public bool TryGetValue( string key, out object? value ) => this.Dictionary.TryGetValue( key, out value );
 
-        IEnumerator IEnumerable.GetEnumerator() => this._inner.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => this.Dictionary.GetEnumerator();
     }
 }

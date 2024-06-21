@@ -13,13 +13,17 @@ namespace Metalama.Framework.Engine.Advising
     /// </summary>
     internal sealed class ObjectReader : IObjectReader
     {
-        private readonly ObjectReaderTypeAdapter _typeAdapter;
+        private readonly ObjectReaderFactory _objectReaderFactory;
+        private ObjectReaderTypeAdapter? _typeAdapter;
+
+        private ObjectReaderTypeAdapter TypeAdapter 
+            => this._typeAdapter ??= this._objectReaderFactory.GetTypeAdapter( this.Source.GetType() );
 
         public static readonly IObjectReader Empty = new ObjectReaderDictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 
-        internal ObjectReader( object instance, ObjectReaderTypeAdapter typeAdapter )
+        internal ObjectReader( object instance, ObjectReaderFactory objectReaderFactory )
         {
-            this._typeAdapter = typeAdapter;
+            this._objectReaderFactory = objectReaderFactory;
             this.Source = instance;
         }
 
@@ -63,20 +67,20 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        public IEnumerable<string> Keys => this._typeAdapter.Properties;
+        public IEnumerable<string> Keys => this.TypeAdapter.Properties;
 
-        public IEnumerable<object?> Values => this._typeAdapter.Properties.Select( p => this[p] );
+        public IEnumerable<object?> Values => this.TypeAdapter.Properties.Select( p => this[p] );
 
-        public bool ContainsKey( string key ) => this._typeAdapter.ContainsProperty( key );
+        public bool ContainsKey( string key ) => this.TypeAdapter.ContainsProperty( key );
 
-        public bool TryGetValue( string key, out object? value ) => this._typeAdapter.TryGetValue( key, this.Source, out value );
+        public bool TryGetValue( string key, out object? value ) => this.TypeAdapter.TryGetValue( key, this.Source, out value );
 
         public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
-            => this._typeAdapter.Properties.Select( p => new KeyValuePair<string, object?>( p, this[p] ) ).GetEnumerator();
+            => this.TypeAdapter.Properties.Select( p => new KeyValuePair<string, object?>( p, this[p] ) ).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public int Count => this._typeAdapter.PropertyCount;
+        public int Count => this.TypeAdapter.PropertyCount;
 
         public object Source { get; }
     }
