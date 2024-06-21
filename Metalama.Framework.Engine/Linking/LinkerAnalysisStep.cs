@@ -589,6 +589,12 @@ namespace Metalama.Framework.Engine.Linking
                     continue;
                 }
 
+                if (!injectionRegistry.IsOverrideTarget(reference.ContainingSemantic.Symbol))
+                {
+                    // References from non-overridden methods are skipped. 
+                    continue;
+                }
+
                 // TODO: This should be cached.
                 if ( !methodSymbol.Parameters.Any( p => p.IsCallerMemberNameParameter() ) )
                 {

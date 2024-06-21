@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, true ) );
                 }
                 else
                 {
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true ) };
                 }
                 else
                 {
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new MemberDeclarationSyntax[]
                 {
-                    this.GetEventBackingField( eventDeclaration, symbol, context ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )
+                    this.GetEventBackingField( eventDeclaration, symbol, context ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true )
                 };
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
@@ -91,20 +91,20 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, false ) };
             }
             else
             {
                 return new[] { eventDeclaration };
             }
 
-            EventDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
+            EventDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isOverrideOrOverrideTarget )
             {
                 var addAccessorDeclaration = (AccessorDeclarationSyntax) symbol.AddMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
                 var removeAccessorDeclaration = (AccessorDeclarationSyntax) symbol.RemoveMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
 
-                var transformedAdd = GetLinkedAccessor( semanticKind, addAccessorDeclaration, symbol.AddMethod.AssertNotNull() );
-                var transformedRemove = GetLinkedAccessor( semanticKind, removeAccessorDeclaration, symbol.RemoveMethod.AssertNotNull() );
+                var transformedAdd = GetLinkedAccessor( semanticKind, addAccessorDeclaration, symbol.AddMethod.AssertNotNull(), isOverrideOrOverrideTarget );
+                var transformedRemove = GetLinkedAccessor( semanticKind, removeAccessorDeclaration, symbol.RemoveMethod.AssertNotNull(), isOverrideOrOverrideTarget );
 
                 var (accessorListLeadingTrivia, accessorStartingTrivia, accessorEndingTrivia, accessorListTrailingTrivia) = eventDeclaration switch
                 {
@@ -127,14 +127,22 @@ namespace Metalama.Framework.Engine.Linking
             AccessorDeclarationSyntax GetLinkedAccessor(
                 IntermediateSymbolSemanticKind semanticKind,
                 AccessorDeclarationSyntax accessorDeclaration,
-                IMethodSymbol methodSymbol )
+                IMethodSymbol methodSymbol,
+                bool isOverrideOrOverrideTarget )
             {
+                if ( !isOverrideOrOverrideTarget && !this.AnalysisRegistry.HasAnySubstitutions( methodSymbol ) )
+                {
+                    return accessorDeclaration;
+                }
+
+                var semantic = methodSymbol.ToSemantic( semanticKind );
+
                 var linkedBody = this.GetSubstitutedBody(
-                    methodSymbol.ToSemantic( semanticKind ),
+                    semantic,
                     new SubstitutionContext(
                         this,
                         context,
-                        new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
+                        new InliningContextIdentifier( semantic ) ) );
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.
