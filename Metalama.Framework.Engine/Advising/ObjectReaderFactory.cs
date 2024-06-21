@@ -24,6 +24,21 @@ internal sealed class ObjectReaderFactory : IProjectService, IDisposable
             _ => new ObjectReader( instance, this.GetTypeAdapter( instance.GetType() ) )
         };
 
+    public IObjectReader GetLazyReader( object? instance1, Func<object?> getInstance2 )
+        => new LazyObjectReader(
+            new Lazy<IObjectReader>(
+                () =>
+                {
+                    var instance2 = getInstance2();
+
+                    return (instance1, instance2) switch
+                    {
+                        (not null, null) => this.GetReader( instance1 ),
+                        (null, not null) => this.GetReader( instance2 ),
+                        _ => new ObjectReaderMergeWrapper( this.GetReader( instance2 ), this.GetReader( instance1 ) )
+                    };
+                } ) );
+
     private ObjectReaderTypeAdapter GetTypeAdapter( Type type ) => this._types.GetOrAdd( type, t => new ObjectReaderTypeAdapter( this._serviceProvider, t ) );
 
     public ObjectReaderFactory( in ProjectServiceProvider serviceProvider )

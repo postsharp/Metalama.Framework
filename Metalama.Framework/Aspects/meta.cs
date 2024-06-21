@@ -212,6 +212,7 @@ namespace Metalama.Framework.Aspects
         /// <returns></returns>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [return: NotNullIfNotNull( nameof(value) )]
         public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).Factory.Cast( type, (object?) value );
 
         /// <summary>

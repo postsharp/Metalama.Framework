@@ -74,7 +74,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
         IEnumerable<AspectExplorerAspectInstance>[] result,
         CancellationToken cancellationToken )
     {
-        var version2Result = new IEnumerable<AspectExplorerAspectInstance2>[1];
+        var version2Result = new IEnumerable<IAspectExplorerAspectInstance>[1];
 
         await this.GetAspectInstancesAsync( compilation, aspectClass, version2Result, cancellationToken );
 

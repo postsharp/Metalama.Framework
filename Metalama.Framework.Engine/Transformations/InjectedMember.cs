@@ -82,7 +82,7 @@ internal sealed class InjectedMember
         semantic,
         declaration ) { }
 
-    protected InjectedMember(
+    private InjectedMember(
         InjectedMember prototype,
         MemberDeclarationSyntax syntax ) : this(
         prototype.Transformation,

@@ -189,7 +189,6 @@ public static class AdviserExtensions
     public static IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
         this IAdviser<INamedType> adviser,
         string template,
-        IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IConstructorBuilder>? buildConstructor = null,
         object? args = null,
@@ -197,7 +196,6 @@ public static class AdviserExtensions
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceConstructor(
             adviser.Target,
             template,
-            scope,
             whenExists,
             buildConstructor,
             args,
@@ -1084,13 +1082,13 @@ public static class AdviserExtensions
             name,
             buildType );
 
-    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<ICompilation> adviser, string name )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
+    public static IAdviser<INamespace> WithNamespace( this IAdviser<ICompilation> adviser, string name )
+        => ((IAdviserInternal) adviser).AdviceFactory.WithNamespace(
             adviser.Target.GlobalNamespace,
             name );
-
-    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<INamespace> adviser, string name )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
+    
+    public static IAdviser<INamespace> WithChildNamespace( this IAdviser<INamespace> adviser, string name )
+        => ((IAdviserInternal) adviser).AdviceFactory.WithNamespace(
             adviser.Target,
             name );
 

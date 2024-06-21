@@ -8,7 +8,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( builder.Target.Compilation.GlobalNamespace ).IntroduceNamespace( "Implementations" );
+        builder.With( builder.Target.Compilation.GlobalNamespace ).WithChildNamespace( "Implementations" );
     }
 }
 
