@@ -35,10 +35,10 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public ReferenceIndexWalker(
         ProjectServiceProvider serviceProvider,
-        CancellationToken cancellationToken,
         ReferenceIndexBuilder referenceIndexBuilder,
         ReferenceIndexerOptions options,
-        SemanticModelProvider? semanticModelProvider )
+        SemanticModelProvider? semanticModelProvider,
+        CancellationToken cancellationToken )
     {
         // This class cannot run concurrently on many threads.
         this._cancellationToken = cancellationToken;

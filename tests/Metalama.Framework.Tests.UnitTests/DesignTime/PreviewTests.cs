@@ -396,7 +396,7 @@ class MyAspect : TypeAspect
         {
             ["aspect.cs"] = """
                             using System;
-                using Metalama.Framework.Advising;
+                            using Metalama.Framework.Advising;
                             using Metalama.Framework.Aspects;
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Code.DeclarationBuilders;
@@ -407,13 +407,13 @@ class MyAspect : TypeAspect
                             {
                                 public override void BuildAspect(IAspectBuilder<INamedType> builder)
                                 {
-                        var ns = builder.With(builder.Target.Compilation).WithNamespace("NS");
+                                    var ns = builder.With(builder.Target.Compilation).WithNamespace("NS");
                             
-                        var introducedClass = ns.IntroduceClass("Introduced");
+                                    var introducedClass = ns.IntroduceClass("Introduced");
                             
-                        introducedClass.IntroduceField("f", typeof(int));
+                                    introducedClass.IntroduceField("f", typeof(int));
                             
-                        introducedClass.IntroduceAttribute(AttributeConstruction.Create(typeof(MyAttribute)));
+                                    introducedClass.IntroduceAttribute(AttributeConstruction.Create(typeof(MyAttribute)));
                                 }
                             }
                             """,
@@ -435,7 +435,7 @@ class MyAspect : TypeAspect
         {
             ["aspect.cs"] = """
                             using System;
-                using Metalama.Framework.Advising;
+                            using Metalama.Framework.Advising;
                             using Metalama.Framework.Aspects;
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Code.DeclarationBuilders;
@@ -446,13 +446,13 @@ class MyAspect : TypeAspect
                             {
                                 public override void BuildAspect(IAspectBuilder<ICompilation> builder)
                                 {
-                        var ns = builder.With(builder.Target.GlobalNamespace).WithChildNamespace("NS");
+                                    var ns = builder.With(builder.Target.GlobalNamespace).WithChildNamespace("NS");
                             
-                        var introducedClass = ns.IntroduceClass("Introduced");
+                                    var introducedClass = ns.IntroduceClass("Introduced");
                             
-                        introducedClass.IntroduceField("f", typeof(int));
+                                    introducedClass.IntroduceField("f", typeof(int));
                             
-                        introducedClass.IntroduceAttribute(AttributeConstruction.Create(typeof(MyAttribute)));
+                                    introducedClass.IntroduceAttribute(AttributeConstruction.Create(typeof(MyAttribute)));
                                 }
                             }
                             """,
@@ -572,7 +572,7 @@ class MyAspect : TypeAspect
         var code = new Dictionary<string, string>
         {
             ["aspect.cs"] = """
-                using Metalama.Framework.Advising;
+                            using Metalama.Framework.Advising;
                             using Metalama.Framework.Aspects;
                             using Metalama.Framework.Code;
 
@@ -580,13 +580,13 @@ class MyAspect : TypeAspect
                             {
                                 public override void BuildAspect(IAspectBuilder<INamedType> builder)
                                 {
-                        var ns = builder.With(builder.Target.Compilation).WithNamespace("NS");
+                                    var ns = builder.With(builder.Target.Compilation).WithNamespace("NS");
                             
                                     for (int i = 1; i <= 2; i++)
                                     {
-                            var introducedClass = ns.IntroduceClass($"Introduced{i}");
+                                        var introducedClass = ns.IntroduceClass($"Introduced{i}");
                             
-                            introducedClass.IntroduceMethod(nameof(M));
+                                        introducedClass.IntroduceMethod(nameof(M));
                                     }
                                 }
                             

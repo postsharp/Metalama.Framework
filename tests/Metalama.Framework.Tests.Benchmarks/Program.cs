@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#pragma warning disable CA1822
+#pragma warning disable CA1822, CA1050
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;

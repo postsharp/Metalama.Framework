@@ -14,6 +14,7 @@ internal interface IConcurrentTaskRunner : IProjectService
     Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull;
 
+    // ReSharper disable once UnusedMember.Global
     Task RunConcurrentlyAsync<TItem, TContext>(
         IEnumerable<TItem> items,
         Action<TItem, TContext> action,

@@ -148,6 +148,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     // Filter out transformations that are not considered observed by the partial compilation.
                     if ( partialCompilation.IsPartial )
                     {
+                        // ReSharper disable once AccessToModifiedClosure
                         transformations = transformations.Where(
                                 t => t is not ISyntaxTreeTransformation syntaxTreeTransformation
                                      || partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) )
