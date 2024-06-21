@@ -21,7 +21,7 @@ internal sealed class ObjectReaderFactory : IProjectService, IDisposable
             null => ObjectReader.Empty,
             IObjectReader objectReader => objectReader,
             IReadOnlyDictionary<string, object?> dictionary => new ObjectReaderDictionaryWrapper( dictionary ),
-            _ => new ObjectReader( instance, this.GetTypeAdapter( instance.GetType() ) )
+            _ => new ObjectReader( instance, this )
         };
 
     public IObjectReader GetLazyReader( object? instance1, Func<object?> getInstance2 )
@@ -39,7 +39,7 @@ internal sealed class ObjectReaderFactory : IProjectService, IDisposable
                     };
                 } ) );
 
-    private ObjectReaderTypeAdapter GetTypeAdapter( Type type ) => this._types.GetOrAdd( type, t => new ObjectReaderTypeAdapter( this._serviceProvider, t ) );
+    internal ObjectReaderTypeAdapter GetTypeAdapter( Type type ) => this._types.GetOrAdd( type, t => new ObjectReaderTypeAdapter( this._serviceProvider, t ) );
 
     public ObjectReaderFactory( in ProjectServiceProvider serviceProvider )
     {
