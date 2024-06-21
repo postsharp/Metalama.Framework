@@ -575,9 +575,4 @@ internal sealed class LinkerInjectionRegistry
 
         return injectedMember?.Transformation?.ParentAdvice.AspectInstance.AspectClass;
     }
-
-    internal bool IsIntroducedSyntaxTree( SyntaxTree syntaxTree )
-    {
-        return this._introducedSyntaxTrees.Contains( syntaxTree );
-    }
 }
