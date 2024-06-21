@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// </summary>
 internal abstract class TypeVisitor<T>
 {
-    public virtual T Visit( IType type )
+    public T Visit( IType type )
         => type switch
         {
             IArrayType arrayType => this.VisitArrayType( arrayType ),
@@ -21,6 +21,8 @@ internal abstract class TypeVisitor<T>
             ITypeParameter typeParameter => this.VisitTypeParameter( typeParameter ),
             IFunctionPointerType or _ => throw new AssertionFailedException( $"Unexpected type: {type.GetType()}" ),
         };
+
+    // ReSharper disable once UnusedParameter.Global
 
     protected abstract T DefaultVisit( IType type );
 

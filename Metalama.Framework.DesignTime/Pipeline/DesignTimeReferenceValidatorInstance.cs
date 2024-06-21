@@ -23,11 +23,11 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
 
     public DeclarationKind ValidatedDeclarationKind { get; }
 
-    public string? ValidatedIdentifier { get; set; }
+    public string? ValidatedIdentifier { get; }
 
     internal ValidatorImplementation Implementation { get; }
 
-    public ReferenceGranularity Granularity { get; }
+    private ReferenceGranularity Granularity { get; }
 
     internal DesignTimeReferenceValidatorInstance(
         ISymbol validatedDeclaration,

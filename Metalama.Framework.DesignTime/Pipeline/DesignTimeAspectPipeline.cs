@@ -85,15 +85,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
-        Compilation compilation ) : this(
-        pipelineFactory,
-        projectOptions,
-        compilation.GetProjectKey(),
-        compilation.References.OfType<PortableExecutableReference>().ToImmutableArray() ) { }
-
-    public DesignTimeAspectPipeline(
-        DesignTimeAspectPipelineFactory pipelineFactory,
-        IProjectOptions projectOptions,
         ProjectKey projectKey,
         ImmutableArray<PortableExecutableReference> metadataReferences )
         : base(

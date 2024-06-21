@@ -3,30 +3,29 @@
 using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Code.Invokers
+namespace Metalama.Framework.Code.Invokers;
+
+/// <summary>
+/// Allows invocation of the constructor.
+/// </summary>
+[CompileTime]
+public interface IConstructorInvoker
 {
     /// <summary>
-    /// Allows invocation of the constructor.
+    /// Generates run-time code that invokes the current constructor with a given list of arguments.
     /// </summary>
-    [CompileTime]
-    public interface IConstructorInvoker
-    {
-        /// <summary>
-        /// Generates run-time code that invokes the current constructor with a given list of arguments.
-        /// </summary>
-        dynamic? Invoke( params dynamic?[] args );
+    dynamic? Invoke( params dynamic?[] args );
 
-        /// <summary>
-        /// Generates run-time code that invokes the current constructor with a given list of argument expressions.
-        /// </summary>
-        dynamic? Invoke( IEnumerable<IExpression> args );
+    /// <summary>
+    /// Generates run-time code that invokes the current constructor with a given list of argument expressions.
+    /// </summary>
+    dynamic? Invoke( IEnumerable<IExpression> args );
 
-        IObjectCreationExpression CreateInvokeExpression();
+    IObjectCreationExpression CreateInvokeExpression();
 
-        IObjectCreationExpression CreateInvokeExpression( params dynamic?[] args );
+    IObjectCreationExpression CreateInvokeExpression( params dynamic?[] args );
 
-        IObjectCreationExpression CreateInvokeExpression( params IExpression[] args );
+    IObjectCreationExpression CreateInvokeExpression( params IExpression[] args );
 
-        IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args );
-    }
+    IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args );
 }

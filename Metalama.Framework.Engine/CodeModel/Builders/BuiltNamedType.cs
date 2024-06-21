@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
-    public NamedTypeBuilder TypeBuilder { get; set; }
+    public NamedTypeBuilder TypeBuilder { get; }
 
     public BuiltNamedType( CompilationModel compilation, NamedTypeBuilder builder ) : base( compilation )
     {

@@ -90,7 +90,7 @@ public partial class DerivedTypeIndex
             }
         }
 
-        public void AnalyzeType( INamedTypeBuilder type )
+        private void AnalyzeType( INamedTypeBuilder type )
         {
             if ( type.GetSymbol() is { } symbol )
             {

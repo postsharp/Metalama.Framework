@@ -133,7 +133,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         SetBuilderExplicitInterfaceImplementation( this.Builder, this._explicitlyImplementedInterfaceType );
     }
 
-    protected override void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    protected override void Validate( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
     {
         this.ValidateBuilder( this.TargetDeclaration.GetTarget( compilation ), diagnosticAdder );
     }

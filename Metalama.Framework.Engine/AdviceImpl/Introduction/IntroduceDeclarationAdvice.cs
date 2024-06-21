@@ -15,7 +15,7 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 {
     protected TBuilder Builder { get; init; }
 
-    public Action<TBuilder>? BuildAction { get; }
+    protected Action<TBuilder>? BuildAction { get; }
 
     protected IntroduceDeclarationAdvice( AdviceConstructorParameters parameters, Action<TBuilder>? buildAction )
         : base( parameters )

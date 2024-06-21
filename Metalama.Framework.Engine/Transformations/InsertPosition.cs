@@ -44,14 +44,7 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
         this.DeclarationBuilder = builder;
         this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
     }
-
-    public InsertPosition( InsertPositionRelation relation, NamespaceBuilder builder )
-    {
-        this.Relation = relation;
-        this.DeclarationBuilder = builder;
-        this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
-    }
-
+    
     public InsertPosition( SyntaxTree introducedSyntaxTree )
     {
         this.Relation = InsertPositionRelation.Root;

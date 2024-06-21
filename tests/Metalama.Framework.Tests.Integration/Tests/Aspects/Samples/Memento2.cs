@@ -9,7 +9,6 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2;
 
-
 public class MementoAttribute : TypeAspect
 {
     [CompileTime]
@@ -61,7 +60,7 @@ public class MementoAttribute : TypeAspect
     {
         var tags = (Tags) meta.Tags.Source!;
 
-        return tags.SnapshopType.Constructors.Single().Invoke( tags.Fields.Select( f=>f.Source ) )!;
+        return tags.SnapshopType.Constructors.Single().Invoke( tags.Fields.SelectAsImmutableArray( f=>f.Source ) )!;
     }
 
     [Introduce]

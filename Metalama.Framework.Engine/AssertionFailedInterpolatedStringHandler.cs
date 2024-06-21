@@ -280,7 +280,7 @@ internal readonly ref struct AssertionFailedInterpolatedStringHandler
         return builder.ToString();
     }
 
-    public sealed class MaskingDepthWalker : SafeSyntaxWalker
+    private sealed class MaskingDepthWalker : SafeSyntaxWalker
     {
         private readonly int _maskingDepthLimit;
         private int _currentMaskingDepth;

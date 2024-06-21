@@ -50,10 +50,6 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 
     string IDiagnosticSource.DiagnosticSourceDescription => $"{this.GetType().Name} supplied by {this.AspectInstance.DiagnosticSourceDescription}'";
 
-    public AdviceResult Execute( IAdviceExecutionContext context ) => this.ExecuteCore( context );
-
-    protected abstract AdviceResult ExecuteCore( IAdviceExecutionContext context );
-
     /// <summary>
     /// Parameter object containing parameters shared by constructors of all advice types.
     /// </summary>

@@ -32,8 +32,6 @@ internal sealed class ImplementInterfaceAdviceResult : AdviceResult, IImplementI
         this.Diagnostics = diagnostics;
     }
 
-    public INamedType Target => this.Resolve( this._target );
-
     public IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; } = Array.Empty<IInterfaceImplementationResult>();
 
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; } = Array.Empty<IInterfaceMemberImplementationResult>();
