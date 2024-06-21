@@ -82,16 +82,6 @@ internal sealed class InjectedMember
         semantic,
         declaration ) { }
 
-    private InjectedMember(
-        InjectedMember prototype,
-        MemberDeclarationSyntax syntax ) : this(
-        prototype.Transformation,
-        prototype.Kind,
-        syntax,
-        prototype.AspectLayerId,
-        prototype.Semantic,
-        prototype.Declaration ) { }
-
     internal InjectedMember(
         ISyntaxTreeTransformation? transformation,
         DeclarationKind kind,
