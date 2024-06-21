@@ -1082,13 +1082,13 @@ public static class AdviserExtensions
             name,
             buildType );
 
-    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<ICompilation> adviser, string name )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
+    public static IAdviser<INamespace> WithNamespace( this IAdviser<ICompilation> adviser, string name )
+        => ((IAdviserInternal) adviser).AdviceFactory.WithNamespace(
             adviser.Target.GlobalNamespace,
             name );
-
-    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<INamespace> adviser, string name )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
+    
+    public static IAdviser<INamespace> WithChildNamespace( this IAdviser<INamespace> adviser, string name )
+        => ((IAdviserInternal) adviser).AdviceFactory.WithNamespace(
             adviser.Target,
             name );
 

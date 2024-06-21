@@ -779,7 +779,7 @@ namespace Metalama.Framework.Advising
             string name,
             Action<INamedTypeBuilder>? buildType = null );
 
-        INamespaceIntroductionAdviceResult IntroduceNamespace(
+        IAdviser<INamespace> WithNamespace(
             INamespace targetNamespace,
             string name );
 
