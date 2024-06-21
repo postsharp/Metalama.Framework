@@ -467,9 +467,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 var predecessorDeclarationSymbol = predecessor.Instance switch
                 {
                     IAspectInstance predecessorAspect => reflectionMapper.GetTypeSymbol( predecessorAspect.Aspect.GetType() ),
+
                     // Can't use fabricInstance.Fabric.GetType() here, because for type fabrics,
                     // we need the original type (e.g. C.Fabric), not the rewritten type (e.g. C_Fabric).
-                    IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName( ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
+                    IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName(
+                        ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
                     _ => null
                 };
 

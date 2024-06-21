@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyConstructorCollection : IConstructorCollection
+internal sealed class EmptyConstructorCollection : IConstructorCollection
 {
     public int Count => 0;
 

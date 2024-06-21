@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Formatting
             return modifiedSolution.GetDocument( document.Id ).AssertNotNull();
         }
 
-        public async ValueTask<Solution> FormatAsync(
+        internal async ValueTask<Solution> FormatAsync(
             Solution solution,
             IReadOnlyCollection<DocumentId> documentIds,
             IReadOnlyCollection<Diagnostic>? diagnostics = null,

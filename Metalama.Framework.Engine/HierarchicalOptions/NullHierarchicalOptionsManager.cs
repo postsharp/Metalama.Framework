@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
-internal class NullHierarchicalOptionsManager : IHierarchicalOptionsManager
+internal sealed class NullHierarchicalOptionsManager : IHierarchicalOptionsManager
 {
     private NullHierarchicalOptionsManager() { }
 

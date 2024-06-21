@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
-internal class AddAttributeAdviceResult : AdviceResult, IIntroductionAdviceResult<IAttribute>
+internal sealed class AddAttributeAdviceResult : AdviceResult, IIntroductionAdviceResult<IAttribute>
 {
     private readonly IRef<IAttribute>? _attribute;
 

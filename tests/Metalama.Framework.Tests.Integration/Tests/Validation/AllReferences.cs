@@ -1,6 +1,9 @@
 #if TEST_OPTIONS
 // @RemoveOutputCode
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 #endif
+
+#if ROSLYN_4_8_0_OR_GREATER
 
 using System;
 using System.Collections.Generic;
@@ -91,7 +94,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     }
 
     [ValidatedClass]
-    internal class ValidatedList : List<int>;
+    internal class ValidatedList : List<int> { }
 
     // <target>
     [ValidatedClass]
@@ -152,6 +155,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
             // Collection expressions.
             var p = new ValidatedClass[] { };
+
             ValidatedClass[] q = [new DerivedClass()]; // array creation
             ValidatedList r = [6];                     // 
 
@@ -235,3 +239,5 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         public int Method( [ValidatedClass] int p ) => p;
     }
 }
+
+#endif

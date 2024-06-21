@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.Validation;
 
-internal class ReferenceIndexObserver : IReferenceIndexObserver
+internal sealed class ReferenceIndexObserver : IReferenceIndexObserver
 {
     private readonly ConcurrentQueue<ISymbol> _resolvedSymbols = new();
     private readonly ConcurrentQueue<SemanticModel> _resolvedSemanticModels = new();

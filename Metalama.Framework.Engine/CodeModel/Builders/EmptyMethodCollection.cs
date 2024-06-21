@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyMethodCollection : IMethodCollection
+internal sealed class EmptyMethodCollection : IMethodCollection
 {
     public int Count => 0;
 

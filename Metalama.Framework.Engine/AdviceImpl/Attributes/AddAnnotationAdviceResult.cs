@@ -4,4 +4,4 @@ using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
-internal class AddAnnotationAdviceResult : AdviceResult { }
+internal class AddAnnotationAdviceResult : AdviceResult;

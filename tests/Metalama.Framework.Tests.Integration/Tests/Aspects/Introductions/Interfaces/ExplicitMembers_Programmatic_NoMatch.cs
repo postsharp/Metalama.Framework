@@ -27,12 +27,13 @@ public class IntroductionAttribute : TypeAspect
     {
         var explicitImplementation = builder.ImplementInterface( typeof(IInterface) ).ExplicitMembers;
 
-        Action[] introductions =
-        [
-            () => explicitImplementation.IntroduceMethod( nameof(Method) ),
-            () => explicitImplementation.IntroduceEvent( nameof(Event) ),
-            () => explicitImplementation.IntroduceProperty( nameof(Property) )
-        ];
+        var introductions =
+            new Action[]
+            {
+                () => explicitImplementation.IntroduceMethod( nameof(Method) ),
+                () => explicitImplementation.IntroduceEvent( nameof(Event) ),
+                () => explicitImplementation.IntroduceProperty( nameof(Property) )
+            };
 
         var exceptions = new List<Exception>();
 

@@ -5,4 +5,4 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Code.SyntaxBuilders;
 
 [CompileTime]
-internal record SwitchStatementSection( SwitchStatementLabel? Label, IExpression? When, IStatementList Statements, bool EndWithBreak );
+internal sealed record SwitchStatementSection( SwitchStatementLabel? Label, IExpression? When, IStatementList Statements, bool EndWithBreak );

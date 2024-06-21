@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyFieldCollection : IFieldCollection
+internal sealed class EmptyFieldCollection : IFieldCollection
 {
     public int Count => 0;
 

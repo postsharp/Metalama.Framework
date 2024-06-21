@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
+internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 {
     public string FullName
         => !this.ContainingNamespace.AssertNotNull().IsGlobalNamespace

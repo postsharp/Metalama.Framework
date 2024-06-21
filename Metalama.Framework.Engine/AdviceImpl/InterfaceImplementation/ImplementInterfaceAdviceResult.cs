@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
-internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfaceAdviceResult
+internal sealed class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfaceAdviceResult
 {
     private readonly IRef<INamedType>? _target;
 

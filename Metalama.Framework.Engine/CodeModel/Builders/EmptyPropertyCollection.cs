@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyPropertyCollection : IPropertyCollection
+internal sealed class EmptyPropertyCollection : IPropertyCollection
 {
     public int Count => 0;
 

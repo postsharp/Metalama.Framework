@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Templating.Statements;
 
-internal class StatementList : IStatementListImpl
+internal sealed class StatementList : IStatementListImpl
 {
     private readonly ImmutableArray<object> _items;
 

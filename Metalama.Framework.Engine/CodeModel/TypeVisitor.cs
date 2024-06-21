@@ -22,17 +22,17 @@ internal abstract class TypeVisitor<T>
             IFunctionPointerType or _ => throw new AssertionFailedException( $"Unexpected type: {type.GetType()}" ),
         };
 
-    public abstract T DefaultVisit( IType type );
+    protected abstract T DefaultVisit( IType type );
 
-    public virtual T VisitArrayType( IArrayType arrayType ) => this.DefaultVisit( arrayType );
+    protected virtual T VisitArrayType( IArrayType arrayType ) => this.DefaultVisit( arrayType );
 
-    public virtual T VisitDynamicType( IDynamicType dynamicType ) => this.DefaultVisit( dynamicType );
+    protected virtual T VisitDynamicType( IDynamicType dynamicType ) => this.DefaultVisit( dynamicType );
 
-    public virtual T VisitNamedType( INamedType namedType ) => this.DefaultVisit( namedType );
+    protected virtual T VisitNamedType( INamedType namedType ) => this.DefaultVisit( namedType );
 
-    public virtual T VisitPointerType( IPointerType pointerType ) => this.DefaultVisit( pointerType );
+    protected virtual T VisitPointerType( IPointerType pointerType ) => this.DefaultVisit( pointerType );
 
-    public virtual T VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => this.DefaultVisit( functionPointerType );
+    protected virtual T VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => this.DefaultVisit( functionPointerType );
 
-    public virtual T VisitTypeParameter( ITypeParameter typeParameter ) => this.DefaultVisit( typeParameter );
+    protected virtual T VisitTypeParameter( ITypeParameter typeParameter ) => this.DefaultVisit( typeParameter );
 }

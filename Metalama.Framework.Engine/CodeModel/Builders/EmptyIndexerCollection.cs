@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyIndexerCollection : IIndexerCollection
+internal sealed class EmptyIndexerCollection : IIndexerCollection
 {
     public int Count => 0;
 

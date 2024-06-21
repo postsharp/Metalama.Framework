@@ -7,7 +7,7 @@ using BenchmarkDotNet.Running;
 
 BenchmarkRunner.Run<Benchmarks>();
 
-public class Benchmarks
+public sealed class Benchmarks
 {
     [Benchmark]
     public void NewObject()

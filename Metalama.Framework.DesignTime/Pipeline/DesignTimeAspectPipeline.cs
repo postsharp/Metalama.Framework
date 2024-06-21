@@ -208,8 +208,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         {
             projectServiceProvider = projectServiceProvider.AddProjectLicenseConsumptionManager(
                 projectOptions.License,
-                projectOptions.IgnoreUserProfileLicense ? LicenseSourceKind.All : LicenseSourceKind.None,
-                null );
+                projectOptions.IgnoreUserProfileLicense ? LicenseSourceKind.All : LicenseSourceKind.None );
         }
 
         return projectServiceProvider;

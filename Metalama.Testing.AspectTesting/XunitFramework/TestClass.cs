@@ -46,6 +46,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             }
             else
             {
+                // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
                 this._name = relativePath?.Replace( Path.DirectorySeparatorChar, '.' ) ?? "Tests";
             }
 

@@ -50,7 +50,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
         CancellationToken cancellationToken )
     {
         IEnumerable<IGrouping<INamedType?, (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>> instancesByType;
-        
+
         lock ( this._aspectInstances )
         {
             var aggregateInstances = this._aspectInstances
@@ -149,8 +149,9 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     if ( partialCompilation.IsPartial )
                     {
                         transformations = transformations.Where(
-                            t => t is not ISyntaxTreeTransformation syntaxTreeTransformation
-                                || partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) ).ToImmutableArray();
+                                t => t is not ISyntaxTreeTransformation syntaxTreeTransformation
+                                     || partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) )
+                            .ToImmutableArray();
                     }
 
                     this.Parent.AddTransformations( transformations );

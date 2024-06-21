@@ -316,6 +316,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Populates the <see cref="IEligibilityBuilder"/> for a field, property or indexer when the <see cref="ContractDirection"/> is known.
         /// </summary>
+        [PublicAPI]
         protected static void BuildEligibilityForDirection( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder, ContractDirection direction )
         {
             builder.AddRule( EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction ) );
@@ -324,6 +325,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Populates the <see cref="IEligibilityBuilder"/> for a parameter when the <see cref="ContractDirection"/> is known.
         /// </summary>
+        [PublicAPI]
         protected static void BuildEligibilityForDirection( IEligibilityBuilder<IParameter> builder, ContractDirection direction )
         {
             builder.AddRule( EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction ) );

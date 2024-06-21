@@ -15,7 +15,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.SyntaxGeneration;
 
-internal partial class SyntaxGeneratorForIType
+internal sealed partial class SyntaxGeneratorForIType
 {
     // Based on Roslyn TypeSyntaxGeneratorVisitor.
     private sealed class TypeSyntaxGeneratorVisitor : TypeVisitor<TypeSyntax>
