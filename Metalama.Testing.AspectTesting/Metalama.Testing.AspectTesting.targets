@@ -19,11 +19,8 @@
         <!-- Fix file nesting for *.Aspect.cs -->
         <Compile Update="$(MSBuildProjectDirectory)/**/*.*.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-        </Compile>
-        <None Update="$(MSBuildProjectDirectory)/**/*.*.cs">
-            <DependentUpon>$([System.String]::Copy('%(Filename)').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
             <SubType>Code</SubType>
-        </None>
+        </Compile>
 
         <ProjectCapability Include="DynamicDependentFile" />
         <ProjectCapability Include="DynamicFileNesting" />
