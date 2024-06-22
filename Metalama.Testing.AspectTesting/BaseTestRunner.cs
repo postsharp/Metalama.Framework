@@ -259,6 +259,12 @@ internal abstract partial class BaseTestRunner
                 string sourceCode,
                 bool acceptFileWithoutMember = false )
             {
+                if ( fileName.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) ||
+                     fileName.EndsWith( FileExtensions.IntroducedCode, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    throw new AssertionFailedException();
+                }
+                
                 // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                 // which is more difficult to test.
                 var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
@@ -565,7 +571,8 @@ internal abstract partial class BaseTestRunner
             {
                 if ( testFileName.Length > 12 )
                 {
-                    testFileName = HashUtilities.HashString( testFileName ).Substring( 0, 4 );
+                    var nameParts = testFileName.Split( '.' );
+                    testFileName = nameParts[^1];
                 }
 
                 testFileName = testInput.TestName + "." + testFileName;

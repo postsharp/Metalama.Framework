@@ -1,26 +1,33 @@
 <Project>
     <ItemGroup>
 
-        <!-- Exclude *.t.cs from the main compilation, display them as text files instead, and fix file nesting -->
+        <!-- Exclude *.t.cs and *.i.cs from the main compilation, display them as text files instead, and fix file nesting -->
         <Compile Remove="$(MSBuildProjectDirectory)/**/*.t.cs" />
         <None Include="$(MSBuildProjectDirectory)/**/*.t.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
             <SubType>Code</SubType>
         </None>
-
-        <None Remove="$(MSBuildProjectDirectory)/obj/**/*.t.cs" />
-
-        <!-- Fix file nesting for *.Aspect.cs -->
-        <Compile Update="$(MSBuildProjectDirectory)/**/*.Aspect.cs">
-            <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Aspect','')).cs</DependentUpon>
+        <Compile Remove="$(MSBuildProjectDirectory)/**/*.i.cs" />
+        <None Include="$(MSBuildProjectDirectory)/**/*.t.cs">
+            <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.i','')).cs</DependentUpon>
             <SubType>Code</SubType>
-        </Compile>
-
-        <!-- Fix file nesting for *.t.txt -->
-        <None Include="$(MSBuildProjectDirectory)/**/*.t.txt" Exclude="$(MSBuildProjectDirectory)/obj/**/*.t.txt">
-            <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
         </None>
 
+        <None Remove="$(MSBuildProjectDirectory)/obj/**/*.t.cs" />
+        <None Remove="$(MSBuildProjectDirectory)/obj/**/*.i.cs" />
+
+        <!-- Fix file nesting for *.Aspect.cs -->
+        <Compile Update="$(MSBuildProjectDirectory)/**/*.*.cs">
+            <DependentUpon>$([System.String]::Copy('%(Filename)').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+        </Compile>
+        <None Update="$(MSBuildProjectDirectory)/**/*.*.cs">
+            <DependentUpon>$([System.String]::Copy('%(Filename)').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+            <SubType>Code</SubType>
+        </None>
+
+        <ProjectCapability Include="DynamicDependentFile" />
+        <ProjectCapability Include="DynamicFileNesting" />
+        
     </ItemGroup>
 
     <Target Name="AddMetalamaTestFrameworkAttributes" DependsOnTargets="AddImplicitDefineConstants"
