@@ -5,7 +5,6 @@
         <Compile Remove="$(MSBuildProjectDirectory)/**/*.t.cs" />
         <None Include="$(MSBuildProjectDirectory)/**/*.t.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
-            <SubType>Code</SubType>
         </None>
         <Compile Remove="$(MSBuildProjectDirectory)/**/*.i.cs" />
         <None Include="$(MSBuildProjectDirectory)/**/*.t.cs">
