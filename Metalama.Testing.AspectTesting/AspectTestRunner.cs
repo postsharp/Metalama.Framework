@@ -536,7 +536,7 @@ internal class AspectTestRunner : BaseTestRunner
         {
             var aspectTestResult = (AspectTestResult) testResult;
 
-            this.AssertTextEqual(
+            this.RunDiffToolIfDifferent(
                 aspectTestResult.ExpectedProgramOutputText!,
                 aspectTestResult.ExpectedProgramOutputPath!,
                 aspectTestResult.ActualProgramOutputText!,

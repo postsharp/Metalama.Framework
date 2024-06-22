@@ -14,6 +14,11 @@ namespace Metalama.Testing.AspectTesting
         /// Transformed C# code (<c>.t.cs</c>).
         /// </summary>
         public const string TransformedCode = ".t.cs";
+        
+        /// <summary>
+        /// Introduced (generated) C# code (<c>.i.cs</c>).
+        /// </summary>
+        public const string IntroducedCode = ".i.cs";
 
         /// <summary>
         /// Program output (<c>.t.txt</c>).

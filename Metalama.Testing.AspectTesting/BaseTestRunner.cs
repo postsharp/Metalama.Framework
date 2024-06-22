@@ -549,123 +549,114 @@ internal abstract partial class BaseTestRunner
 
         var compareWhitespace = testInput.Options.CompareWhitespace ?? false;
 
-        // Compare the "Target" region of the transformed code to the expected output.
-        // If the region is not found then compare the complete transformed code.
-        var sourceAbsolutePath = testInput.FullPath;
+        var sourceDirectory = Path.GetDirectoryName( testInput.FullPath );
 
-        var expectedTransformedPath = Path.Combine(
-            Path.GetDirectoryName( sourceAbsolutePath )!,
-            Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
+        testResult.SetSyntaxTreesForComparison();
 
-        var testOutputs = testResult.GetTestOutputsWithDiagnostics();
-        var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-        var actualTransformedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, true );
-        var actualTransformedSourceTextForStorage = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, false );
-
-        // If the expectation file does not exist, create it with some placeholder content.
-        if ( !this._fileSystem.FileExists( expectedTransformedPath ) )
+        foreach ( var testSyntaxTree in testResult.SyntaxTrees.Where( t => t.OutputRunTimeSyntaxTreeForComparison != null ) )
         {
-            // Coverage: ignore
+            var syntaxTreeForComparison = testSyntaxTree.OutputRunTimeSyntaxTreeForComparison!;
+            var isIntroduced = testSyntaxTree.InputPath == null;
+            var expectedTransformedExtension = isIntroduced ? FileExtensions.IntroducedCode : FileExtensions.TransformedCode;
 
-            this._fileSystem.WriteAllText(
-                expectedTransformedPath,
-                "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
-        }
+            var testFileName = Path.GetFileNameWithoutExtension( syntaxTreeForComparison.FilePath );
 
-        // Read expectations from the file.
-        var expectedSourceText = this._fileSystem.ReadAllText( expectedTransformedPath );
-        var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, compareWhitespace, true );
-
-        // Update the file in obj/transformed if it is different.
-        var actualTransformedPath = Path.Combine(
-            this.ProjectDirectory,
-            "obj",
-            "transformed",
-            testInput.ProjectProperties.TargetFramework,
-            Path.GetDirectoryName( testInput.RelativePath ) ?? "",
-            Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
-
-        this._fileSystem.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
-
-        var storedTransformedSourceText =
-            this._fileSystem.FileExists( actualTransformedPath ) ? this._fileSystem.ReadAllText( actualTransformedPath ) : null;
-
-        // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
-        // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
-        // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.       
-        if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
-        {
-            if ( TestOutputNormalizer.NormalizeEndOfLines( expectedSourceText )
-                 != TestOutputNormalizer.NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
+            if ( testSyntaxTree.Kind is TestSyntaxTreeKind.Introduced )
             {
-                // The test output is correct but it must be formatted.
+                if ( testFileName.Length > 12 )
+                {
+                    testFileName = HashUtilities.HashString( testFileName ).Substring( 0, 4 );
+                }
+
+                testFileName = testInput.TestName + "." + testFileName;
+            }
+
+            var expectedTransformedPath = Path.Combine(
+                sourceDirectory!,
+                testFileName + expectedTransformedExtension );
+
+            var actualTransformedNonNormalizedText = syntaxTreeForComparison.GetRoot().ToFullString();
+
+            var actualTransformedSourceTextForComparison =
+                TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, true );
+
+            var actualTransformedSourceTextForStorage =
+                TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, false );
+
+            // If the expectation file does not exist, create it with some placeholder content.
+            if ( !this._fileSystem.FileExists( expectedTransformedPath ) )
+            {
+                // Coverage: ignore
+
+                this._fileSystem.WriteAllText(
+                    expectedTransformedPath,
+                    "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
+            }
+
+            // Read expectations from the file.
+            var expectedSourceText = this._fileSystem.ReadAllText( expectedTransformedPath );
+            var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, compareWhitespace, true );
+
+            // Update the file in obj/transformed if it is different.
+            var actualTransformedPath = Path.Combine(
+                this.ProjectDirectory,
+                "obj",
+                "transformed",
+                testInput.ProjectProperties.TargetFramework,
+                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+                testFileName + expectedTransformedExtension );
+
+            this._fileSystem.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
+
+            var storedTransformedSourceText =
+                this._fileSystem.FileExists( actualTransformedPath ) ? this._fileSystem.ReadAllText( actualTransformedPath ) : null;
+
+            // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
+            // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
+            // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.       
+            if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
+            {
+                if ( TestOutputNormalizer.NormalizeEndOfLines( expectedSourceText )
+                     != TestOutputNormalizer.NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
+                {
+                    // The test output is correct but it must be formatted.
+                    this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
+                }
+                else if ( expectedSourceText != storedTransformedSourceText )
+                {
+                    // Write the exact expected file to the actual file because the only differences are in EOL.
+                    this._fileSystem.WriteAllText( actualTransformedPath, expectedSourceText );
+                }
+            }
+            else
+            {
                 this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
             }
-            else if ( expectedSourceText != storedTransformedSourceText )
+
+            if ( this.Logger != null )
             {
-                // Write the exact expected file to the actual file because the only differences are in EOL.
-                this._fileSystem.WriteAllText( actualTransformedPath, expectedSourceText );
+                var logger = this.Logger!;
+                logger.WriteLine( "Test principal file: " + testInput.FullPath );
+                logger.WriteLine( "Expected transformed file: " + expectedTransformedPath );
+                logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
+                logger.WriteLine( "" );
+                logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
+                logger.WriteLine( actualTransformedSourceTextForStorage );
+                logger.WriteLine( "=====================" );
+
+                // Write all diagnostics to the logger.
+                foreach ( var diagnostic in testResult.Diagnostics )
+                {
+                    logger.WriteLine( diagnostic.ToString() );
+                }
             }
-        }
-        else
-        {
-            this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
-        }
 
-        if ( this.Logger != null )
-        {
-            var logger = this.Logger!;
-            logger.WriteLine( "Test principal file: " + testInput.FullPath );
-            logger.WriteLine( "Expected transformed file: " + expectedTransformedPath );
-            logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
-            logger.WriteLine( "" );
-            logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
-            logger.WriteLine( actualTransformedSourceTextForStorage );
-            logger.WriteLine( "=====================" );
-
-            // Write all diagnostics to the logger.
-            foreach ( var diagnostic in testResult.Diagnostics )
-            {
-                logger.WriteLine( diagnostic.ToString() );
-            }
-        }
-
-        testResult.SetTransformedSource(
-            expectedSourceTextForComparison,
-            expectedTransformedPath,
-            actualTransformedSourceTextForComparison,
-            actualTransformedSourceTextForStorage,
-            actualTransformedPath );
-
-        static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
-        {
-            switch ( compilationUnits.Count )
-            {
-                case 0:
-                    return "// --- No output compilation units ---";
-
-                case 1:
-                    return compilationUnits[0].GetRoot().ToFullString();
-
-                default:
-                    var sb = new StringBuilder();
-
-                    for ( var index = 0; index < compilationUnits.Count; index++ )
-                    {
-                        var syntaxTree = compilationUnits[index];
-
-                        if ( index > 0 )
-                        {
-                            sb.AppendLine();
-                        }
-
-                        sb.AppendLineInvariant( $"// --- {syntaxTree.FilePath} ---" );
-                        sb.AppendLine();
-                        sb.AppendLine( syntaxTree.GetRoot().ToFullString() );
-                    }
-
-                    return sb.ToString();
-            }
+            testSyntaxTree.SetTransformedSource(
+                expectedSourceTextForComparison,
+                expectedTransformedPath,
+                actualTransformedSourceTextForComparison,
+                actualTransformedSourceTextForStorage,
+                actualTransformedPath );
         }
     }
 
@@ -676,14 +667,33 @@ internal abstract partial class BaseTestRunner
             return;
         }
 
-        this.AssertTextEqual(
-            testResult.ExpectedTransformedSourceText!,
-            testResult.ExpectedTransformedSourcePath!,
-            testResult.ActualTransformedNormalizedSourceText!,
-            testResult.ActualTransformedSourcePath! );
+        // First run the diff tool on all files.
+        var hasDifference = false;
+
+        foreach ( var syntaxTree in testResult.SyntaxTrees )
+        {
+            if ( syntaxTree.ExpectedTransformedSourceText == null )
+            {
+                continue;
+            }
+
+            hasDifference |= this.RunDiffToolIfDifferent(
+                syntaxTree.ExpectedTransformedSourceText!,
+                syntaxTree.ExpectedTransformedSourcePath!,
+                syntaxTree.ActualTransformedNormalizedSourceText!,
+                syntaxTree.ActualTransformedSourcePath! );
+        }
+
+        if ( hasDifference )
+        {
+            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            {
+                Assert.Equal( syntaxTree.ExpectedTransformedSourceText, syntaxTree.ActualTransformedNormalizedSourceText );
+            }
+        }
     }
 
-    protected void AssertTextEqual( string expectedText, string expectedPath, string actualText, string actualPath )
+    protected bool RunDiffToolIfDifferent( string expectedText, string expectedPath, string actualText, string actualPath )
     {
         var useDiff = this._testRunnerOptions.LaunchDiffTool && !DiffRunner.Disabled;
 
@@ -694,7 +704,7 @@ internal abstract partial class BaseTestRunner
                 DiffRunner.Launch( actualPath, expectedPath );
             }
 
-            Assert.Equal( expectedText, actualText );
+            return true;
         }
         else
         {
@@ -702,6 +712,8 @@ internal abstract partial class BaseTestRunner
             {
                 DiffRunner.Kill( actualPath, expectedPath );
             }
+
+            return false;
         }
     }
 
@@ -812,7 +824,10 @@ internal abstract partial class BaseTestRunner
 
             // Add diagnostics to the input tree.
             inputDiagnostics = new List<Diagnostic>();
-            inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.AssertNotNull().FilePath ) );
+
+            inputDiagnostics.AddRange(
+                testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.AssertNotNull().FilePath ) );
+
             var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree.AssertNotNull() );
 
             foreach ( var diagnostic in semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) )

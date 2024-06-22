@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
@@ -142,11 +143,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // Output.
             if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                var expectedOutputHtmlPath = Path.Combine(
-                    Path.GetDirectoryName( testInput.FullPath )!,
-                    Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.TransformedHtml );
+                foreach ( var syntaxTree in testResult.SyntaxTrees )
+                {
+                    var expectedOutputHtmlPath = Path.Combine(
+                        Path.GetDirectoryName( testInput.FullPath )!,
+                        Path.GetFileNameWithoutExtension( syntaxTree.FilePath ) + FileExtensions.TransformedHtml );
 
-                this.CompareHtmlFiles( testResult.SyntaxTrees[0].HtmlOutputPath!, expectedOutputHtmlPath );
+                    this.CompareHtmlFiles( syntaxTree.HtmlOutputPath!, expectedOutputHtmlPath );
+                }
             }
         }
 
@@ -163,7 +167,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var htmlPath = actualHtmlPath;
             var htmlContent = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
 
-            this.AssertTextEqual( expectedHighlightedSource, expectedHtmlPath, htmlContent, htmlPath );
+            this.RunDiffToolIfDifferent( expectedHighlightedSource, expectedHtmlPath, htmlContent, htmlPath );
         }
     }
 }

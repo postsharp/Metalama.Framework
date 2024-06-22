@@ -1,12 +1,10 @@
-[Aspect]
 public partial class TargetCode
 {
-  public TargetCode()
+  public TargetCode(int x)
   {
     global::System.Console.WriteLine("TargetCode: Aspect");
   }
-  private int Method(int a)
+  public void Bar()
   {
-    return a;
   }
 }
