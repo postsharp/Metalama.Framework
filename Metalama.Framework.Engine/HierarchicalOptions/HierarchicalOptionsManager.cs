@@ -29,7 +29,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
-    public bool IsInitialized { get; private set; }
+    private bool IsInitialized { get; set; }
 
     internal HierarchicalOptionsManager( in ProjectServiceProvider serviceProvider )
     {
@@ -180,6 +180,6 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         => this._optionTypes.Where( s => s.Value.Metadata is { InheritedByDerivedTypes: true } or { InheritedByOverridingMembers: true } )
             .SelectMany( s => s.Value.GetInheritableOptions( compilation, withSyntaxTree ) );
 
-    public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
+    internal void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
         => this.GetOptionTypeNode( options.GetType().FullName.AssertNotNull() ).SetAspectOptions( declaration, options );
 }

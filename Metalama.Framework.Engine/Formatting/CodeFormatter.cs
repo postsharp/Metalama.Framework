@@ -17,261 +17,260 @@ using System.Threading;
 using System.Threading.Tasks;
 using RoslynProject = Microsoft.CodeAnalysis.Project;
 
-namespace Metalama.Framework.Engine.Formatting
+namespace Metalama.Framework.Engine.Formatting;
+
+public sealed partial class CodeFormatter : IProjectService
 {
-    public sealed partial class CodeFormatter : IProjectService
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+
+    internal CodeFormatter( ProjectServiceProvider serviceProvider )
     {
-        private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+        this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+    }
 
-        public CodeFormatter( ProjectServiceProvider serviceProvider )
+    // Use this constructor when no ProjectServiceProvider is available.
+    // This happens in tests and at design time for actions that are not project-scoped.
+    public CodeFormatter()
+    {
+        this._concurrentTaskRunner = new ConcurrentTaskRunner();
+    }
+
+    private async Task<Solution> TransformAllAsync(
+        Solution solution,
+        IEnumerable<DocumentId> documentIds,
+        Func<Document, Task<Document>> transformAsync,
+        CancellationToken cancellationToken )
+    {
+        var modifiedDocuments = new ConcurrentQueue<Document>();
+
+        await this._concurrentTaskRunner.RunConcurrentlyAsync( documentIds, ModifyDocumentAsync, cancellationToken );
+
+        async Task ModifyDocumentAsync( DocumentId documentId )
         {
-            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-        }
+            var oldDocument = solution.GetDocument( documentId );
 
-        // Use this constructor when no ProjectServiceProvider is available.
-        // This happens in tests and at design time for actions that are not project-scoped.
-        public CodeFormatter()
-        {
-            this._concurrentTaskRunner = new ConcurrentTaskRunner();
-        }
-
-        private async Task<Solution> TransformAllAsync(
-            Solution solution,
-            IEnumerable<DocumentId> documentIds,
-            Func<Document, Task<Document>> transformAsync,
-            CancellationToken cancellationToken )
-        {
-            var modifiedDocuments = new ConcurrentQueue<Document>();
-
-            await this._concurrentTaskRunner.RunConcurrentlyAsync( documentIds, ModifyDocumentAsync, cancellationToken );
-
-            async Task ModifyDocumentAsync( DocumentId documentId )
+            if ( oldDocument == null )
             {
-                var oldDocument = solution.GetDocument( documentId );
-
-                if ( oldDocument == null )
-                {
-                    return;
-                }
-
-                var newDocument = await transformAsync( oldDocument );
-
-                if ( newDocument != oldDocument )
-                {
-                    modifiedDocuments.Enqueue( newDocument );
-                }
+                return;
             }
 
-            var modifiedSolution = solution;
+            var newDocument = await transformAsync( oldDocument );
 
-            foreach ( var modifiedDocument in modifiedDocuments )
+            if ( newDocument != oldDocument )
             {
-                var modifiedSyntaxRoot = await modifiedDocument.GetSyntaxRootAsync( cancellationToken );
-
-                modifiedSolution = modifiedSolution.GetDocument( modifiedDocument.Id )
-                    .AssertNotNull()
-                    .WithSyntaxRoot( modifiedSyntaxRoot.AssertNotNull() )
-                    .Project.Solution;
+                modifiedDocuments.Enqueue( newDocument );
             }
-
-            return modifiedSolution;
         }
 
-        public async ValueTask<Document> FormatAsync(
-            Document document,
-            IReadOnlyCollection<Diagnostic>? diagnostics = null,
-            bool reformatAll = true,
-            CancellationToken cancellationToken = default )
-        {
-            var modifiedSolution = await this.FormatAsync( document.Project.Solution, [document.Id], diagnostics, reformatAll, cancellationToken );
+        var modifiedSolution = solution;
 
-            return modifiedSolution.GetDocument( document.Id ).AssertNotNull();
+        foreach ( var modifiedDocument in modifiedDocuments )
+        {
+            var modifiedSyntaxRoot = await modifiedDocument.GetSyntaxRootAsync( cancellationToken );
+
+            modifiedSolution = modifiedSolution.GetDocument( modifiedDocument.Id )
+                .AssertNotNull()
+                .WithSyntaxRoot( modifiedSyntaxRoot.AssertNotNull() )
+                .Project.Solution;
         }
 
-        internal async ValueTask<Solution> FormatAsync(
-            Solution solution,
-            IReadOnlyCollection<DocumentId> documentIds,
-            IReadOnlyCollection<Diagnostic>? diagnostics = null,
-            bool reformatAll = true,
-            CancellationToken cancellationToken = default )
+        return modifiedSolution;
+    }
+
+    public async ValueTask<Document> FormatAsync(
+        Document document,
+        IReadOnlyCollection<Diagnostic>? diagnostics = null,
+        bool reformatAll = true,
+        CancellationToken cancellationToken = default )
+    {
+        var modifiedSolution = await this.FormatAsync( document.Project.Solution, [document.Id], diagnostics, reformatAll, cancellationToken );
+
+        return modifiedSolution.GetDocument( document.Id ).AssertNotNull();
+    }
+
+    internal async ValueTask<Solution> FormatAsync(
+        Solution solution,
+        IReadOnlyCollection<DocumentId> documentIds,
+        IReadOnlyCollection<Diagnostic>? diagnostics = null,
+        bool reformatAll = true,
+        CancellationToken cancellationToken = default )
+    {
+        if ( documentIds.Count == 0 )
         {
-            if ( documentIds.Count == 0 )
-            {
-                return solution;
-            }
+            return solution;
+        }
 
-            var modifiedSolution = solution;
+        var modifiedSolution = solution;
 
-            // Add diagnostics as annotations.
-            if ( diagnostics is { Count: > 0 } )
-            {
-                modifiedSolution = await this.TransformAllAsync(
-                    modifiedSolution,
-                    documentIds,
-                    async document => document.WithSyntaxRoot(
-                        FormattedCodeWriter.AddDiagnosticAnnotations(
-                            (await document.GetSyntaxRootAsync( cancellationToken ))!,
-                            document.FilePath,
-                            diagnostics ) ),
-                    cancellationToken );
-            }
-
-            // Run custom simplifications.
+        // Add diagnostics as annotations.
+        if ( diagnostics is { Count: > 0 } )
+        {
             modifiedSolution = await this.TransformAllAsync(
                 modifiedSolution,
                 documentIds,
-                async document =>
-                {
-                    var oldRoot = await document.GetSyntaxRootAsync( cancellationToken );
-
-                    // Try a first time without a semantic mode. 
-                    var rewriterWithoutSemanticModel = new CustomSimplifier( null );
-                    var newRoot = rewriterWithoutSemanticModel.Visit( oldRoot )!;
-
-                    if ( rewriterWithoutSemanticModel.RequiresSemanticModel )
-                    {
-                        // If a semantic model is required, do a second run. We assume this is not likely.
-                        var semanticModel = await document.GetSemanticModelAsync( cancellationToken );
-
-                        if ( semanticModel == null )
-                        {
-                            return document;
-                        }
-
-                        var rewriterWithSemanticModel = new CustomSimplifier( semanticModel );
-                        newRoot = rewriterWithSemanticModel.Visit( oldRoot )!;
-                    }
-
-                    return document.WithSyntaxRoot( newRoot );
-                },
+                async document => document.WithSyntaxRoot(
+                    FormattedCodeWriter.AddDiagnosticAnnotations(
+                        (await document.GetSyntaxRootAsync( cancellationToken ))!,
+                        document.FilePath,
+                        diagnostics ) ),
                 cancellationToken );
+        }
 
-            // Add imports.
-            modifiedSolution = await this.TransformAllAsync(
-                modifiedSolution,
-                documentIds,
-                document => ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
-                cancellationToken );
+        // Run custom simplifications.
+        modifiedSolution = await this.TransformAllAsync(
+            modifiedSolution,
+            documentIds,
+            async document =>
+            {
+                var oldRoot = await document.GetSyntaxRootAsync( cancellationToken );
 
-            // Run the simplifier.
-            modifiedSolution = await this.TransformAllAsync(
-                modifiedSolution,
-                documentIds,
-                async document =>
+                // Try a first time without a semantic mode. 
+                var rewriterWithoutSemanticModel = new CustomSimplifier( null );
+                var newRoot = rewriterWithoutSemanticModel.Visit( oldRoot )!;
+
+                if ( rewriterWithoutSemanticModel.RequiresSemanticModel )
                 {
-                    var simplifiedDocument = await Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
+                    // If a semantic model is required, do a second run. We assume this is not likely.
+                    var semanticModel = await document.GetSemanticModelAsync( cancellationToken );
 
-                    if ( simplifiedDocument == document )
+                    if ( semanticModel == null )
                     {
                         return document;
                     }
 
-                    var simplifiedRoot = await simplifiedDocument.GetSyntaxRootAsync( cancellationToken );
-                    var fixedRoot = new SimplifierFixer().Visit( simplifiedRoot )!;
+                    var rewriterWithSemanticModel = new CustomSimplifier( semanticModel );
+                    newRoot = rewriterWithSemanticModel.Visit( oldRoot )!;
+                }
 
-                    return simplifiedDocument.WithSyntaxRoot( fixedRoot );
-                },
-                cancellationToken );
+                return document.WithSyntaxRoot( newRoot );
+            },
+            cancellationToken );
 
-            // Run the simplifier.
+        // Add imports.
+        modifiedSolution = await this.TransformAllAsync(
+            modifiedSolution,
+            documentIds,
+            document => ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+            cancellationToken );
+
+        // Run the simplifier.
+        modifiedSolution = await this.TransformAllAsync(
+            modifiedSolution,
+            documentIds,
+            async document =>
+            {
+                var simplifiedDocument = await Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
+
+                if ( simplifiedDocument == document )
+                {
+                    return document;
+                }
+
+                var simplifiedRoot = await simplifiedDocument.GetSyntaxRootAsync( cancellationToken );
+                var fixedRoot = new SimplifierFixer().Visit( simplifiedRoot )!;
+
+                return simplifiedDocument.WithSyntaxRoot( fixedRoot );
+            },
+            cancellationToken );
+
+        // Run the simplifier.
+        modifiedSolution = await this.TransformAllAsync(
+            modifiedSolution,
+            documentIds,
+            document => Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+            cancellationToken );
+
+        // Reformat.
+        if ( reformatAll )
+        {
             modifiedSolution = await this.TransformAllAsync(
                 modifiedSolution,
                 documentIds,
-                document => Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+                document => Formatter.FormatAsync( document, cancellationToken: cancellationToken ),
                 cancellationToken );
-
-            // Reformat.
-            if ( reformatAll )
-            {
-                modifiedSolution = await this.TransformAllAsync(
-                    modifiedSolution,
-                    documentIds,
-                    document => Formatter.FormatAsync( document, cancellationToken: cancellationToken ),
-                    cancellationToken );
-            }
-            else
-            {
-                modifiedSolution = await this.TransformAllAsync(
-                    modifiedSolution,
-                    documentIds,
-                    async document =>
-                    {
-                        // Figure out which spans need to be reformatted.
-                        var classifiedTextSpans = new ClassifiedTextSpanCollection( await document.GetTextAsync( cancellationToken ) );
-                        var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
-                        visitor.Visit( await document.GetSyntaxRootAsync( cancellationToken ) );
-                        classifiedTextSpans.Polish();
-                        var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
-
-                        // Run the reformatter.
-                        return await Formatter.FormatAsync(
-                            document,
-                            generatedSpans,
-                            cancellationToken: cancellationToken );
-                    },
-                    cancellationToken );
-            }
-
-            return modifiedSolution;
         }
-
-        internal async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
+        else
         {
-            var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
+                async document =>
+                {
+                    // Figure out which spans need to be reformatted.
+                    var classifiedTextSpans = new ClassifiedTextSpanCollection( await document.GetTextAsync( cancellationToken ) );
+                    var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
+                    visitor.Visit( await document.GetSyntaxRootAsync( cancellationToken ) );
+                    classifiedTextSpans.Polish();
+                    var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
 
-            List<SyntaxTreeTransformation> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
-
-            var formattedSolution = await this.FormatAsync( project.Solution, syntaxTreeMap.Values, null, false, cancellationToken );
-
-            foreach ( var syntaxTreePair in syntaxTreeMap )
-            {
-                var oldSyntaxTree = syntaxTreePair.Key;
-
-                var newSyntaxRoot = (await formattedSolution.GetDocument( syntaxTreePair.Value ).AssertNotNull().GetSyntaxRootAsync( cancellationToken ))
-                    .AssertNotNull();
-
-                var newSyntaxTree = oldSyntaxTree.WithRootAndOptions( newSyntaxRoot, oldSyntaxTree.Options );
-
-                syntaxTreeReplacements.Add( SyntaxTreeTransformation.ReplaceTree( oldSyntaxTree, newSyntaxTree ) );
-            }
-
-            return compilation.Update( syntaxTreeReplacements );
+                    // Run the reformatter.
+                    return await Formatter.FormatAsync(
+                        document,
+                        generatedSpans,
+                        cancellationToken: cancellationToken );
+                },
+                cancellationToken );
         }
 
-        internal async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+        return modifiedSolution;
+    }
+
+    internal async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
+    {
+        var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
+
+        List<SyntaxTreeTransformation> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
+
+        var formattedSolution = await this.FormatAsync( project.Solution, syntaxTreeMap.Values, null, false, cancellationToken );
+
+        foreach ( var syntaxTreePair in syntaxTreeMap )
         {
-            var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );
+            var oldSyntaxTree = syntaxTreePair.Key;
 
-            var formattedSolution = await this.FormatAsync( project.Solution, syntaxTreeMap.Values, null, true, cancellationToken );
+            var newSyntaxRoot = (await formattedSolution.GetDocument( syntaxTreePair.Value ).AssertNotNull().GetSyntaxRootAsync( cancellationToken ))
+                .AssertNotNull();
 
-            return (await formattedSolution.Projects.Single().GetCompilationAsync( cancellationToken )).AssertNotNull();
+            var newSyntaxTree = oldSyntaxTree.WithRootAndOptions( newSyntaxRoot, oldSyntaxTree.Options );
+
+            syntaxTreeReplacements.Add( SyntaxTreeTransformation.ReplaceTree( oldSyntaxTree, newSyntaxTree ) );
         }
 
-        private static async Task<(RoslynProject Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilationAsync(
-            Compilation compilation,
-            CancellationToken cancellationToken )
+        return compilation.Update( syntaxTreeReplacements );
+    }
+
+    internal async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+    {
+        var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );
+
+        var formattedSolution = await this.FormatAsync( project.Solution, syntaxTreeMap.Values, null, true, cancellationToken );
+
+        return (await formattedSolution.Projects.Single().GetCompilationAsync( cancellationToken )).AssertNotNull();
+    }
+
+    private static async Task<(RoslynProject Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilationAsync(
+        Compilation compilation,
+        CancellationToken cancellationToken )
+    {
+        Dictionary<SyntaxTree, DocumentId> syntaxTreeMap = new();
+        var workspace = new AdhocWorkspace();
+
+        var project = workspace.AddProject(
+            ProjectInfo.Create(
+                ProjectId.CreateNewId( compilation.AssemblyName ),
+                VersionStamp.Default,
+                compilation.AssemblyName!,
+                compilation.AssemblyName!,
+                compilation.Language,
+                compilationOptions: compilation.Options,
+                metadataReferences: compilation.References ) );
+
+        foreach ( var syntaxTree in compilation.SyntaxTrees )
         {
-            Dictionary<SyntaxTree, DocumentId> syntaxTreeMap = new();
-            var workspace = new AdhocWorkspace();
-
-            var project = workspace.AddProject(
-                ProjectInfo.Create(
-                    ProjectId.CreateNewId( compilation.AssemblyName ),
-                    VersionStamp.Default,
-                    compilation.AssemblyName!,
-                    compilation.AssemblyName!,
-                    compilation.Language,
-                    compilationOptions: compilation.Options,
-                    metadataReferences: compilation.References ) );
-
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
-            {
-                var document = project.AddDocument( syntaxTree.FilePath, await syntaxTree.GetRootAsync( cancellationToken ) );
-                project = document.Project;
-                syntaxTreeMap.Add( syntaxTree, document.Id );
-            }
-
-            return (project, syntaxTreeMap);
+            var document = project.AddDocument( syntaxTree.FilePath, await syntaxTree.GetRootAsync( cancellationToken ) );
+            project = document.Project;
+            syntaxTreeMap.Add( syntaxTree, document.Id );
         }
+
+        return (project, syntaxTreeMap);
     }
 }

@@ -25,6 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.StructuralDeclarationComparer = declarationEqualityComparer;
         }
 
+        // ReSharper ignore once MemberCanBePrivate.Global
         public StructuralSymbolComparer StructuralSymbolComparer { get; }
 
         public StructuralDeclarationComparer StructuralDeclarationComparer { get; }

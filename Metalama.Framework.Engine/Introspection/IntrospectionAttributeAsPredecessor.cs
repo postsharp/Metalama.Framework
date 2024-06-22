@@ -36,7 +36,7 @@ internal sealed class IntrospectionAttributeAsPredecessor : IIntrospectionAspect
 
     public void AddSuccessor( AspectPredecessor aspectInstance ) => this._successors.Add( aspectInstance );
 
-    public IAttribute Attribute { get; }
+    private IAttribute Attribute { get; }
 
     public override string ToString() => this.Attribute.ToString()!;
 }

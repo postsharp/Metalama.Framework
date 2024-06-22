@@ -41,8 +41,6 @@ internal abstract class Advice<T> : Advice
     /// </summary>    
     protected virtual void Validate( CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) { }
 
-    protected virtual AdviceResult ExecuteCore( IAdviceExecutionContext context ) => this.Execute( context );
-
     public T Execute( IAdviceExecutionContext context )
     {
         List<ITransformation> transformations = new();
