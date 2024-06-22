@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,7 +17,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Represents the test results for a syntax tree in <see cref="TestResult"/>.
     /// </summary>
-    internal sealed class TestSyntaxTree
+    public sealed class TestSyntaxTree
     {
         private readonly TestResult _parent;
 
@@ -28,19 +29,43 @@ namespace Metalama.Testing.AspectTesting
             this.InputSyntaxTree = inputSyntaxTree;
         }
 
-        public static async Task<TestSyntaxTree> CreateAsync( string? inputPath, Document document, TestResult parent )
+        internal static async Task<TestSyntaxTree> CreateAsync( string? inputPath, Document document, TestResult parent )
         {
             var syntaxTree = await document.GetSyntaxTreeAsync();
 
             return new TestSyntaxTree( inputPath, document, parent, syntaxTree.AssertNotNull() );
         }
 
-        public static TestSyntaxTree CreateIntroduced( TestResult parent )
+        internal static TestSyntaxTree CreateIntroduced( TestResult parent )
         {
             return new TestSyntaxTree( null, null, parent, null );
         }
 
-        public bool IsAuxiliary => this.InputPath != null && Path.GetFileName( this.InputPath ).StartsWith( "_", StringComparison.Ordinal );
+        [Memo]
+        public TestSyntaxTreeKind Kind
+        {
+            get
+            {
+                var fileName = Path.GetFileName( this.FilePath );
+
+                if ( fileName.StartsWith( "_", StringComparison.Ordinal ) )
+                {
+                    return TestSyntaxTreeKind.Auxiliary;
+                }
+                else if ( fileName.StartsWith( "@@", StringComparison.Ordinal ) )
+                {
+                    return TestSyntaxTreeKind.Helper;
+                }
+                else if ( this.InputPath == null )
+                {
+                    return TestSyntaxTreeKind.Introduced;
+                }
+                else
+                {
+                    return TestSyntaxTreeKind.Default;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the file path of the syntax tree. For input syntax trees, this is an absolute path of the input document.
@@ -74,6 +99,8 @@ namespace Metalama.Testing.AspectTesting
         /// </summary>
         public CompilationUnitSyntax? OutputRunTimeSyntaxRoot { get; private set; }
 
+        public SyntaxTree? OutputRunTimeSyntaxTreeForComparison { get; internal set; }
+
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
 
         /// <summary>
@@ -100,6 +127,16 @@ namespace Metalama.Testing.AspectTesting
 
         public string? HtmlOutputPath { get; internal set; }
 
+        public string? ExpectedTransformedSourceText { get; private set; }
+
+        public string? ActualTransformedNormalizedSourceText { get; private set; }
+
+        public string? ActualTransformedSourceTextForStorage { get; private set; }
+
+        public string? ActualTransformedSourcePath { get; private set; }
+
+        public string? ExpectedTransformedSourcePath { get; private set; }
+
         internal void SetCompileTimeCode( SyntaxNode? syntaxNode, string transformedTemplatePath )
         {
             if ( syntaxNode != null )
@@ -115,7 +152,7 @@ namespace Metalama.Testing.AspectTesting
             }
         }
 
-        public async Task SetRunTimeCodeAsync( SyntaxNode syntaxNode )
+        internal async Task SetRunTimeCodeAsync( SyntaxNode syntaxNode )
         {
             CompilationUnitSyntax compilationUnit;
 
@@ -174,5 +211,26 @@ namespace Metalama.Testing.AspectTesting
                 this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
         }
+
+        internal void SetTransformedSource(
+            string? expectedTransformedSourceText,
+            string? expectedTransformedSourcePath,
+            string? actualTransformedNormalizedSourceText,
+            string? actualTransformedSourceTextForStorage,
+            string? actualTransformedSourcePath )
+        {
+            if ( this.Kind is not (TestSyntaxTreeKind.Default or TestSyntaxTreeKind.Introduced) )
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.ExpectedTransformedSourceText = expectedTransformedSourceText;
+            this.ExpectedTransformedSourcePath = expectedTransformedSourcePath;
+            this.ActualTransformedNormalizedSourceText = actualTransformedNormalizedSourceText;
+            this.ActualTransformedSourceTextForStorage = actualTransformedSourceTextForStorage;
+            this.ActualTransformedSourcePath = actualTransformedSourcePath;
+        }
+
+        public override string ToString() => this.FilePath;
     }
 }
