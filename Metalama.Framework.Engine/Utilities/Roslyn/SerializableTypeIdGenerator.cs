@@ -22,6 +22,8 @@ public static class SerializableTypeIdGenerator
         return new SerializableTypeId( id );
     }
 
+    // ReSharper disable once MemberCanBeInternal
+
     public static SerializableTypeId GetSerializableTypeId( this IType type, bool bypassSymbols = false )
     {
         var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.Type( type, bypassSymbols ).ToString();

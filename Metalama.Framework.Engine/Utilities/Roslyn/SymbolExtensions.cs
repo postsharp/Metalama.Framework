@@ -317,7 +317,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => symbol.ContainingType
             };
 
-        public static ISymbol? GetClosestContainingMember( this ISymbol symbol )
+        internal static ISymbol? GetClosestContainingMember( this ISymbol symbol )
             => symbol switch
             {
                 INamedTypeSymbol type => type,

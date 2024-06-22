@@ -25,6 +25,8 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
 
     private readonly ConcurrentDictionary<SerializableTypeId, ResolverResult> _cache = new();
 
+    // ReSharper disable once MemberCanBeInternal
+
     public TType ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, TType>? genericArguments = null )
     {
         var result = this.ResolveAndCache( typeId, genericArguments! );
@@ -38,6 +40,8 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
             return result.Type;
         }
     }
+    
+    // ReSharper disable once MemberCanBeInternal
 
     public bool TryResolveId( SerializableTypeId typeId, [NotNullWhen( true )] out TType? type ) => this.TryResolveId( typeId, null, out type );
 

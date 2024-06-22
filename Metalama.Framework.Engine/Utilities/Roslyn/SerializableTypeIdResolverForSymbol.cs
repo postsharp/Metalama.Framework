@@ -25,6 +25,7 @@ public sealed class SerializableTypeIdResolverForSymbol : SerializableTypeIdReso
         this._compilation = compilation;
     }
 
+    // ReSharper disable once MemberCanBeInternal
     public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
     {
         var genericArgumentSymbols = genericArguments?.ToDictionary( kv => kv.Key, kv => kv.Value.GetSymbol() );
