@@ -681,7 +681,7 @@ internal abstract partial class BaseTestRunner
                 syntaxTree.ActualTransformedNormalizedCodeText!,
                 syntaxTree.ActualTransformedCodePath! );
 
-            actuallyWrittenFiles.Add( syntaxTree.ExpectedTransformedCodePath );
+            actuallyWrittenFiles.Add( syntaxTree.ExpectedTransformedCodePath! );
         }
 
         // Throw exceptions.
