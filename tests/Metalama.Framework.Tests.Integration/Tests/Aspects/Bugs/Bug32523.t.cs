@@ -1,1 +1,1 @@
-// --- No output compilation units ---
+// The compilation was successful.

@@ -2,7 +2,6 @@
 // @TestScenario(ApplyLiveTemplate)
 // @LicenseKey(MetalamaUltimateBusiness)
 // @Include(_LiveTemplate.cs);
-// @OutputAllSyntaxTrees
 #endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplateApplicationAllowed

@@ -198,7 +198,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                     }
                 }
 
-                testResult.SetSyntaxTreesForComparison();
+                testResult.BuildSyntaxTreesForComparison();
 
                 var syntaxTreesForComparison = testResult.SyntaxTrees
                     .Where( t => t.OutputRunTimeSyntaxTreeForComparison != null )
