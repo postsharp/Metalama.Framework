@@ -472,13 +472,12 @@ internal class TestResult : IDisposable
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 
             // Individual trees should be formatted, so we don't need to format again.
-              testSyntaxTree.OutputRunTimeSyntaxTreeForComparison =
+            testSyntaxTree.OutputRunTimeSyntaxTreeForComparison =
                 CSharpSyntaxTree.Create(
                     consolidatedCompilationUnit,
                     path: Path.GetFileName(
                         testSyntaxTree.FilePath
                         ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
-        
         }
     }
 
