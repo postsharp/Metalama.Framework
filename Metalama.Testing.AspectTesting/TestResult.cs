@@ -301,10 +301,27 @@ internal class TestResult : IDisposable
             throw new InvalidOperationException();
         }
 
+        bool IsSyntaxTreeIncluded( TestSyntaxTree testSyntaxTree )
+        {
+            switch ( testSyntaxTree.Kind )
+            {
+                case TestSyntaxTreeKind.Introduced:
+                    return true;
+
+                case TestSyntaxTreeKind.Default:
+                    // Include the primary file and any secondary file that includes <target>.
+                    return testSyntaxTree.ShortName == this.TestInput.TestName
+                           || testSyntaxTree.OutputRunTimeSyntaxRoot?.SyntaxTree.GetText().ToString().ContainsOrdinal( "<target>" ) == true;
+
+                default:
+                    return false;
+            }
+        }
+
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.SyntaxTrees
-                .Where( x => x.Kind is TestSyntaxTreeKind.Default or TestSyntaxTreeKind.Introduced )
+                .Where( IsSyntaxTreeIncluded )
                 .OrderBy( x => x.FilePath.Length )
                 .ThenBy( x => x.FilePath, StringComparer.InvariantCultureIgnoreCase )
                 .ToArray();

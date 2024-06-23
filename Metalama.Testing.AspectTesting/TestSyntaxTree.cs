@@ -48,7 +48,7 @@ namespace Metalama.Testing.AspectTesting
             {
                 var fileName = Path.GetFileName( this.FilePath );
 
-                if ( fileName.StartsWith( "_", StringComparison.Ordinal ) )
+                if ( fileName.StartsWith( "_", StringComparison.Ordinal ) || fileName.EndsWith( ".Aspect.cs", StringComparison.Ordinal ) )
                 {
                     return TestSyntaxTreeKind.Auxiliary;
                 }
