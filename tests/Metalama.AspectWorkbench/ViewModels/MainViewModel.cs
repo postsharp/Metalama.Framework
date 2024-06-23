@@ -198,17 +198,29 @@ namespace Metalama.AspectWorkbench.ViewModels
                     }
                 }
 
+                testResult.SetSyntaxTreesForComparison();
+
+                var syntaxTreesForComparison = testResult.SyntaxTrees
+                    .Where( t => t.OutputRunTimeSyntaxTreeForComparison != null )
+                    .ToList();
+
+                
                 // Multi file tests are not supported.
-                var testOutput = testResult.GetTestOutputsWithDiagnostics().SingleOrDefault();
 
-                if ( testOutput == null )
+                switch (syntaxTreesForComparison.Count)
                 {
-                    errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce any output." ) { Foreground = Brushes.Red } ) );
+                    case 0:
+                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce any output." ) { Foreground = Brushes.Red } ) );
 
-                    return;
+                        return;
+
+                    case > 1:
+                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce more than one output." ) { Foreground = Brushes.Red } ) );
+
+                        return;
                 }
 
-                var consolidatedOutputSyntax = await testOutput.GetRootAsync();
+                var consolidatedOutputSyntax = await syntaxTreesForComparison[0].OutputRunTimeSyntaxTreeForComparison!.GetRootAsync();
 
                 if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
                 {

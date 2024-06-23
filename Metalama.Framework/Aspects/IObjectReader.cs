@@ -13,6 +13,11 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets the source object (typically an object of an anonymous type).
         /// </summary>
+        /// <remarks>
+        ///  If there are several source objects (i.e. when both <c>aspectBuilder.Tags</c> and the
+        /// <c>tags</c> method parameter are set), this propertyr returns an <c>ImmutableArray&lt;object&gt;</c>
+        /// with all sources.
+        /// </remarks>
         object? Source { get; }
     }
 }
