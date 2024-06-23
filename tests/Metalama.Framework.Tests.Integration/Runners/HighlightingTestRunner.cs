@@ -145,9 +145,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
             {
                 foreach ( var syntaxTree in testResult.SyntaxTrees )
                 {
+                    var extension = syntaxTree.Kind is TestSyntaxTreeKind.Introduced ? FileExtensions.IntroducedHtml : FileExtensions.TransformedHtml;
+                    
                     var expectedOutputHtmlPath = Path.Combine(
                         Path.GetDirectoryName( testInput.FullPath )!,
-                        Path.GetFileNameWithoutExtension( syntaxTree.FilePath ) + FileExtensions.TransformedHtml );
+                        syntaxTree.ShortName + extension );
 
                     this.CompareHtmlFiles( syntaxTree.HtmlOutputPath!, expectedOutputHtmlPath );
                 }

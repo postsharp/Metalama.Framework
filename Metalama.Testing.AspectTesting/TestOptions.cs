@@ -249,13 +249,6 @@ public class TestOptions
     public string? ExpectedEndOfLine { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether all input syntax trees should be used as a part of test output. 
-    /// If <c>false</c> only the primary syntax tree is processed and used as test output. If <c>true</c>, all syntax trees are processed and used as test output.
-    /// To set this option in a test, add this comment to your test file: <c>// @OutputAllSyntaxTrees</c>.
-    /// </summary>
-    public bool? OutputAllSyntaxTrees { get; set; }
-
-    /// <summary>
     /// Gets or sets the version of the C# language that the test should be compiled with.
     /// To set this option in a test, add this comment to your test file: <c>// @LanguageVersion(version)</c>.
     /// </summary>
@@ -437,8 +430,6 @@ public class TestOptions
         this.DefinedConstants.AddRange( baseOptions.DefinedConstants );
 
         this.DependencyDefinedConstants.AddRange( baseOptions.DependencyDefinedConstants );
-
-        this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
 
         this.LicenseKey ??= baseOptions.LicenseKey;
 
@@ -669,11 +660,6 @@ public class TestOptions
 
                 case "ExpectedEndOfLine":
                     this.ExpectedEndOfLine = optionArg;
-
-                    break;
-
-                case "OutputAllSyntaxTrees":
-                    this.OutputAllSyntaxTrees = true;
 
                     break;
 

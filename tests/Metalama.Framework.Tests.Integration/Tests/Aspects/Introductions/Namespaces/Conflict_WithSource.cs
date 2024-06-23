@@ -1,5 +1,4 @@
 ﻿#if TEST_OPTIONS
-// @OutputAllSyntaxTrees
 # endif
 
 using Metalama.Framework.Advising;

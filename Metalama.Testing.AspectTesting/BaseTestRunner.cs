@@ -264,7 +264,7 @@ internal abstract partial class BaseTestRunner
                 {
                     throw new AssertionFailedException();
                 }
-                
+
                 // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                 // which is more difficult to test.
                 var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
@@ -565,22 +565,11 @@ internal abstract partial class BaseTestRunner
             var isIntroduced = testSyntaxTree.InputPath == null;
             var expectedTransformedExtension = isIntroduced ? FileExtensions.IntroducedCode : FileExtensions.TransformedCode;
 
-            var testFileName = Path.GetFileNameWithoutExtension( syntaxTreeForComparison.FilePath );
-
-            if ( testSyntaxTree.Kind is TestSyntaxTreeKind.Introduced )
-            {
-                if ( testFileName.Length > 12 )
-                {
-                    var nameParts = testFileName.Split( '.' );
-                    testFileName = nameParts[^1];
-                }
-
-                testFileName = testInput.TestName + "." + testFileName;
-            }
+            var testFileName = testSyntaxTree.ShortName + expectedTransformedExtension;
 
             var expectedTransformedPath = Path.Combine(
                 sourceDirectory!,
-                testFileName + expectedTransformedExtension );
+                testFileName );
 
             var actualTransformedNonNormalizedText = syntaxTreeForComparison.GetRoot().ToFullString();
 
@@ -611,7 +600,7 @@ internal abstract partial class BaseTestRunner
                 "transformed",
                 testInput.ProjectProperties.TargetFramework,
                 Path.GetDirectoryName( testInput.RelativePath ) ?? "",
-                testFileName + expectedTransformedExtension );
+                testFileName );
 
             this._fileSystem.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
@@ -674,29 +663,54 @@ internal abstract partial class BaseTestRunner
             return;
         }
 
-        // First run the diff tool on all files.
+        var actuallyWrittenFiles = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+
+        // First run the diff tool on all files so we popupate DiffEngineTray for all files before failing.
         var hasDifference = false;
 
         foreach ( var syntaxTree in testResult.SyntaxTrees )
         {
-            if ( syntaxTree.ExpectedTransformedSourceText == null )
+            if ( syntaxTree.ExpectedTransformedCodeText == null )
             {
                 continue;
             }
 
             hasDifference |= this.RunDiffToolIfDifferent(
-                syntaxTree.ExpectedTransformedSourceText!,
-                syntaxTree.ExpectedTransformedSourcePath!,
-                syntaxTree.ActualTransformedNormalizedSourceText!,
-                syntaxTree.ActualTransformedSourcePath! );
+                syntaxTree.ExpectedTransformedCodeText!,
+                syntaxTree.ExpectedTransformedCodePath!,
+                syntaxTree.ActualTransformedNormalizedCodeText!,
+                syntaxTree.ActualTransformedCodePath! );
+
+            actuallyWrittenFiles.Add( syntaxTree.ExpectedTransformedCodePath );
         }
 
+        // Throw exceptions.
         if ( hasDifference )
         {
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
-                Assert.Equal( syntaxTree.ExpectedTransformedSourceText, syntaxTree.ActualTransformedNormalizedSourceText );
+                Assert.Equal( syntaxTree.ExpectedTransformedCodeText, syntaxTree.ActualTransformedNormalizedCodeText );
             }
+        }
+
+        // Verify that all expected files have been written.
+        var directory = Path.GetDirectoryName( testInput.FullPath )!;
+
+        if ( Directory.Exists( directory ) )
+        {
+            foreach ( var file in Directory.EnumerateFiles( directory, testInput.TestName + ".*.cs" ) )
+            {
+                if ( !(file.EndsWith( ".t.cs", StringComparison.Ordinal ) || file.EndsWith( ".i.cs", StringComparison.Ordinal )) )
+                {
+                    continue;
+                }
+
+                Assert.True( actuallyWrittenFiles.Contains( file ), $"The file '{file}' is expected but was not written." );
+            }
+        }
+        else
+        {
+            // The directory does not exist in some self-tests of the aspect framework.
         }
     }
 

@@ -462,22 +462,23 @@ internal class TestResult : IDisposable
                 {
                     comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
                 }
+                else if ( !consolidatedCompilationUnit.ChildNodes().Any() )
+                {
+                    // This can happen when the test does not want to include the output code.
+                    comments.Add( SyntaxFactory.Comment( $"// The compilation was successful. \n" ) );
+                }
             }
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 
             // Individual trees should be formatted, so we don't need to format again.
-
-            if ( comments.Count > 0 ||
-                 consolidatedCompilationUnit.ChildNodes().Any() )
-            {
-                testSyntaxTree.OutputRunTimeSyntaxTreeForComparison =
-                    CSharpSyntaxTree.Create(
-                        consolidatedCompilationUnit,
-                        path: Path.GetFileName(
-                            testSyntaxTree.FilePath
-                            ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
-            }
+              testSyntaxTree.OutputRunTimeSyntaxTreeForComparison =
+                CSharpSyntaxTree.Create(
+                    consolidatedCompilationUnit,
+                    path: Path.GetFileName(
+                        testSyntaxTree.FilePath
+                        ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
+        
         }
     }
 
@@ -519,19 +520,19 @@ internal class TestResult : IDisposable
     private TestSyntaxTree? PrimaryTestSyntaxTree => this.SyntaxTrees.FirstOrDefault( t => t.Kind is TestSyntaxTreeKind.Default );
 
     [Obsolete( "Use SyntaxTrees[...].ExpectedTransformedSourceText" )]
-    public string? ExpectedTransformedSourceText => this.PrimaryTestSyntaxTree?.ExpectedTransformedSourceText;
+    public string? ExpectedTransformedSourceText => this.PrimaryTestSyntaxTree?.ExpectedTransformedCodeText;
 
     [Obsolete( "Use SyntaxTrees[...].ActualTransformedNormalizedSourceText" )]
-    public string? ActualTransformedNormalizedSourceText => this.PrimaryTestSyntaxTree?.ActualTransformedSourcePath;
+    public string? ActualTransformedNormalizedSourceText => this.PrimaryTestSyntaxTree?.ActualTransformedCodePath;
 
     [Obsolete( "Use SyntaxTrees[...].ActualTransformedSourceTextForStorage" )]
     public string? ActualTransformedSourceTextForStorage => this.PrimaryTestSyntaxTree?.ActualTransformedSourceTextForStorage;
 
     [Obsolete( "Use SyntaxTrees[...].ActualTransformedSourcePath" )]
-    public string? ActualTransformedSourcePath => this.PrimaryTestSyntaxTree?.ActualTransformedSourcePath;
+    public string? ActualTransformedSourcePath => this.PrimaryTestSyntaxTree?.ActualTransformedCodePath;
 
     [Obsolete( "Use SyntaxTrees[...].ExpectedTransformedSourcePath" )]
-    public string? ExpectedTransformedSourcePath => this.PrimaryTestSyntaxTree?.ExpectedTransformedSourcePath;
+    public string? ExpectedTransformedSourcePath => this.PrimaryTestSyntaxTree?.ExpectedTransformedCodePath;
 
     public void Dispose()
     {
