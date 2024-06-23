@@ -10,11 +10,12 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferencedSymbolInfo
+internal sealed class ReferencedSymbolInfo
 {
     private ConcurrentDictionary<ISymbol, ReferencingNodeList>? _explicitReferences;
     private ConcurrentQueue<ReferencedSymbolChild>? _children;
 
+    // ReSharper disable once MemberCanBeInternal
     public ISymbol ReferencedSymbol { get; }
 
     internal ReferencedSymbolInfo( ISymbol referencedSymbol )
@@ -41,6 +42,7 @@ public sealed class ReferencedSymbolInfo
         }
     }
 
+    // ReSharper disable once MemberCanBeInternal
     public IEnumerable<ReferencingSymbolInfo> References
         => this._explicitReferences?.SelectAsReadOnlyCollection( x => new ReferencingSymbolInfo( x.Key, x.Value ) )
            ?? Enumerable.Empty<ReferencingSymbolInfo>();
@@ -50,5 +52,6 @@ public sealed class ReferencedSymbolInfo
 
     private IEnumerable<ReferencedSymbolInfo> DescendantsAndSelf( ChildKinds kinds ) => this.SelectManyRecursiveDistinct( x => x.Children( kinds ) );
 
+    // ReSharper disable once MemberCanBeInternal
     public IEnumerable<ReferencingSymbolInfo> GetAllReferences( ChildKinds kinds ) => this.DescendantsAndSelf( kinds ).SelectMany( x => x.References );
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceIndex
+internal sealed class ReferenceIndex
 {
     private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _explicitReferences;
 

@@ -26,5 +26,6 @@ public abstract class MetalamaStringFormatter : CultureInfo, ICustomFormatter
 
     public abstract string Format( string? format, object? arg, IFormatProvider? formatProvider );
 
+    // ReSharper disable once MemberCanBeInternal
     public string Format( object? arg ) => this.Format( null, arg, null );
 }

@@ -2,7 +2,7 @@
 
 namespace Metalama.Testing.AspectTesting;
 
-public interface ILicenseKeyProvider
+internal interface ILicenseKeyProvider
 {
     bool TryGetLicenseKey( string name, out string? licenseKey );
 }

@@ -353,7 +353,7 @@ internal sealed partial class ContextualSyntaxGenerator
         return this.EnumValueExpression( this.Type( type ), value, member?.Name );
     }
 
-    public ExpressionSyntax EnumValueExpression( INamedType type, object value )
+    private ExpressionSyntax EnumValueExpression( INamedType type, object value )
     {
         if ( type.GetSymbol() is { } symbol )
         {

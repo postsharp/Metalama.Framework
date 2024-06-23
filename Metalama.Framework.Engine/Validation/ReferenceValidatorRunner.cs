@@ -49,7 +49,7 @@ public sealed class ReferenceValidatorRunner
             cancellationToken );
     }
 
-    public async Task RunReferenceValidatorsAsync(
+    internal async Task RunReferenceValidatorsAsync(
         CompilationModel initialCompilation,
         UserDiagnosticSink diagnosticAdder,
         IReferenceValidatorProvider referenceValidatorProvider,

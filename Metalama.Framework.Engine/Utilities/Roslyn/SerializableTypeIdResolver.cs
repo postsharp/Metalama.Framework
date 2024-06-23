@@ -45,6 +45,7 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
 
     public bool TryResolveId( SerializableTypeId typeId, [NotNullWhen( true )] out TType? type ) => this.TryResolveId( typeId, null, out type );
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public bool TryResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, TType>? genericArguments, [NotNullWhen( true )] out TType? type )
     {
         var result = this.ResolveAndCache( typeId, genericArguments! );

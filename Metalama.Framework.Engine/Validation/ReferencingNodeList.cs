@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferencingNodeList : Collection<ReferencingNode>
+internal sealed class ReferencingNodeList : Collection<ReferencingNode>
 {
     public ReferenceKinds ReferenceKinds { get; private set; }
 
