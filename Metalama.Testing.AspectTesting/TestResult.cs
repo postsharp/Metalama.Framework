@@ -309,6 +309,11 @@ internal class TestResult : IDisposable
                 .ThenBy( x => x.FilePath, StringComparer.InvariantCultureIgnoreCase )
                 .ToArray();
 
+        if ( outputSyntaxTrees.Length == 0 )
+        {
+            return;
+        }
+
         var primaryOutputTree = outputSyntaxTrees.Single( x => x.ShortName == this.TestInput.TestName );
 
         var outputTreesByFilePath = outputSyntaxTrees
