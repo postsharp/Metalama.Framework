@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;

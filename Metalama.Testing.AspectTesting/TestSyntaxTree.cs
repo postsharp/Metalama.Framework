@@ -17,6 +17,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Represents the test results for a syntax tree in <see cref="TestResult"/>.
     /// </summary>
+    [PublicAPI]
     public sealed class TestSyntaxTree
     {
         private readonly TestResult _parent;
@@ -106,7 +107,6 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// Gets the root <see cref="SyntaxNode" /> of the output compile-time syntax tree.
         /// </summary>
-        [UsedImplicitly]
         public SyntaxNode? OutputCompileTimeSyntaxRoot { get; private set; }
 
         /// <summary>
@@ -120,7 +120,6 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// Gets the full path of the code for the output compile-time syntax tree.
         /// </summary>
-        [UsedImplicitly]
         public string? OutputCompileTimePath { get; private set; }
 
         public string? HtmlInputPath { get; internal set; }
