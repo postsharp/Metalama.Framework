@@ -1,6 +1,4 @@
-#if TEST_OPTIONS
-// @OutputAllSyntaxTrees
-#endif
+
 
 // This test verifies that there is no error when writing the HTML file for an introduced syntax tree,
 // but it does not test the HTML itself.

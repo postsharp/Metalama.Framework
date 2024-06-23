@@ -4,7 +4,6 @@
 // @DependencyLicenseKey(MetalamaUltimateOpenSourceRedistributionForIntegrationTests)
 // @Include(_CodeFixRedistribution.cs);
 // @Include(_CodeFixRedistribution.Dependency.cs);
-// @OutputAllSyntaxTrees
 #endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixRedistributionApplicationAllowed;

@@ -2,7 +2,6 @@
 // @TestScenario(PreviewCodeFix)
 // @LicenseKey(MetalamaUltimatePersonalProjectBound)
 // @Include(_CodeFixApplyAspect.cs);
-// @OutputAllSyntaxTrees
 #endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixApplyAspectPreviewingAllowedProjectBound;

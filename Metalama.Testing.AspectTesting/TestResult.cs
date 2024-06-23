@@ -124,7 +124,7 @@ internal class TestResult : IDisposable
 
     /// <summary>
     /// Gets or sets a value indicating whether the output run-time code should be included in the result of
-    ///  <see cref="SetSyntaxTreesForComparison"/>.
+    ///  <see cref="BuildSyntaxTreesForComparison"/>.
     /// </summary>
     public bool HasOutputCode { get; set; }
 
@@ -294,22 +294,44 @@ internal class TestResult : IDisposable
     /// Gets the content of the <c>.t.cs</c> file, i.e. the output transformed code with comments
     /// for diagnostics.
     /// </summary>
-    public void SetSyntaxTreesForComparison()
+    public void BuildSyntaxTreesForComparison()
     {
         if ( this.TestInput == null )
         {
             throw new InvalidOperationException();
         }
 
+        bool IsSyntaxTreeIncluded( TestSyntaxTree testSyntaxTree )
+        {
+            switch ( testSyntaxTree.Kind )
+            {
+                case TestSyntaxTreeKind.Introduced:
+                    return true;
+
+                case TestSyntaxTreeKind.Default:
+                    // Include the primary file and any secondary file that includes <target>.
+                    return testSyntaxTree.ShortName == this.TestInput.TestName
+                           || testSyntaxTree.OutputRunTimeSyntaxRoot?.SyntaxTree.GetText().ToString().ContainsOrdinal( "<target>" ) == true;
+
+                default:
+                    return false;
+            }
+        }
+
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.SyntaxTrees
-                .Where( x => x.Kind is TestSyntaxTreeKind.Default or TestSyntaxTreeKind.Introduced )
+                .Where( IsSyntaxTreeIncluded )
                 .OrderBy( x => x.FilePath.Length )
                 .ThenBy( x => x.FilePath, StringComparer.InvariantCultureIgnoreCase )
                 .ToArray();
 
-        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( x => x.Kind is TestSyntaxTreeKind.Default );
+        if ( outputSyntaxTrees.Length == 0 )
+        {
+            return;
+        }
+
+        var primaryOutputTree = outputSyntaxTrees.Single( x => x.ShortName == this.TestInput.TestName );
 
         var outputTreesByFilePath = outputSyntaxTrees
             .ToDictionary( x => x.FilePath, x => x );
@@ -462,22 +484,22 @@ internal class TestResult : IDisposable
                 {
                     comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
                 }
+                else if ( !consolidatedCompilationUnit.ChildNodes().Any() )
+                {
+                    // This can happen when the test does not want to include the output code.
+                    comments.Add( SyntaxFactory.Comment( $"// The compilation was successful.\n" ) );
+                }
             }
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 
             // Individual trees should be formatted, so we don't need to format again.
-
-            if ( comments.Count > 0 ||
-                 consolidatedCompilationUnit.ChildNodes().Any() )
-            {
-                testSyntaxTree.OutputRunTimeSyntaxTreeForComparison =
-                    CSharpSyntaxTree.Create(
-                        consolidatedCompilationUnit,
-                        path: Path.GetFileName(
-                            testSyntaxTree.FilePath
-                            ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
-            }
+            testSyntaxTree.OutputRunTimeSyntaxTreeForComparison =
+                CSharpSyntaxTree.Create(
+                    consolidatedCompilationUnit,
+                    path: Path.GetFileName(
+                        testSyntaxTree.FilePath
+                        ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
         }
     }
 
@@ -519,19 +541,19 @@ internal class TestResult : IDisposable
     private TestSyntaxTree? PrimaryTestSyntaxTree => this.SyntaxTrees.FirstOrDefault( t => t.Kind is TestSyntaxTreeKind.Default );
 
     [Obsolete( "Use SyntaxTrees[...].ExpectedTransformedSourceText" )]
-    public string? ExpectedTransformedSourceText => this.PrimaryTestSyntaxTree?.ExpectedTransformedSourceText;
+    public string? ExpectedTransformedSourceText => this.PrimaryTestSyntaxTree?.ExpectedTransformedCodeText;
 
     [Obsolete( "Use SyntaxTrees[...].ActualTransformedNormalizedSourceText" )]
-    public string? ActualTransformedNormalizedSourceText => this.PrimaryTestSyntaxTree?.ActualTransformedSourcePath;
+    public string? ActualTransformedNormalizedSourceText => this.PrimaryTestSyntaxTree?.ActualTransformedCodePath;
 
     [Obsolete( "Use SyntaxTrees[...].ActualTransformedSourceTextForStorage" )]
     public string? ActualTransformedSourceTextForStorage => this.PrimaryTestSyntaxTree?.ActualTransformedSourceTextForStorage;
 
     [Obsolete( "Use SyntaxTrees[...].ActualTransformedSourcePath" )]
-    public string? ActualTransformedSourcePath => this.PrimaryTestSyntaxTree?.ActualTransformedSourcePath;
+    public string? ActualTransformedSourcePath => this.PrimaryTestSyntaxTree?.ActualTransformedCodePath;
 
     [Obsolete( "Use SyntaxTrees[...].ExpectedTransformedSourcePath" )]
-    public string? ExpectedTransformedSourcePath => this.PrimaryTestSyntaxTree?.ExpectedTransformedSourcePath;
+    public string? ExpectedTransformedSourcePath => this.PrimaryTestSyntaxTree?.ExpectedTransformedCodePath;
 
     public void Dispose()
     {

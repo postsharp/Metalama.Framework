@@ -21,7 +21,7 @@ namespace Metalama.Testing.AspectTesting
     public sealed class TestSyntaxTree
     {
         private readonly TestResult _parent;
-
+        
         private TestSyntaxTree( string? inputPath, Document? inputDocument, TestResult parent, SyntaxTree? inputSyntaxTree )
         {
             this.InputDocument = inputDocument;
@@ -49,7 +49,7 @@ namespace Metalama.Testing.AspectTesting
             {
                 var fileName = Path.GetFileName( this.FilePath );
 
-                if ( fileName.StartsWith( "_", StringComparison.Ordinal ) )
+                if ( fileName.StartsWith( "_", StringComparison.Ordinal ) || fileName.EndsWith( ".Aspect.cs", StringComparison.Ordinal ) )
                 {
                     return TestSyntaxTreeKind.Auxiliary;
                 }
@@ -74,6 +74,28 @@ namespace Metalama.Testing.AspectTesting
         /// </summary>
         public string FilePath
             => this.InputPath ?? this.OutputDocument?.FilePath ?? throw new InvalidOperationException( "The test syntax tree does not have a path." );
+
+        /// <summary>
+        /// Gets the filename without extension of the syntax tree, shortened if its total length exceeds 20 characters. 
+        /// </summary>
+        [Memo]
+        public string ShortName
+        {
+            get
+            {
+                var fileName = Path.GetFileNameWithoutExtension( this.FilePath );
+                
+                if ( this.Kind is TestSyntaxTreeKind.Introduced )
+                {
+                    var nameParts = fileName.Split( '.' );
+                    fileName = nameParts[^1];
+            
+                    return this._parent.TestInput.AssertNotNull().TestName + "." + fileName;
+                }
+
+                return fileName;
+            }
+        }
 
         /// <summary>
         /// Gets the input path from which the syntax tree was loaded. For introduced syntax trees, this is <c>null</c>.
@@ -126,15 +148,15 @@ namespace Metalama.Testing.AspectTesting
 
         public string? HtmlOutputPath { get; internal set; }
 
-        public string? ExpectedTransformedSourceText { get; private set; }
+        public string? ExpectedTransformedCodeText { get; private set; }
 
-        public string? ActualTransformedNormalizedSourceText { get; private set; }
+        public string? ActualTransformedNormalizedCodeText { get; private set; }
 
         public string? ActualTransformedSourceTextForStorage { get; private set; }
 
-        public string? ActualTransformedSourcePath { get; private set; }
+        public string? ActualTransformedCodePath { get; private set; }
 
-        public string? ExpectedTransformedSourcePath { get; private set; }
+        public string? ExpectedTransformedCodePath { get; private set; }
 
         internal void SetCompileTimeCode( SyntaxNode? syntaxNode, string transformedTemplatePath )
         {
@@ -223,11 +245,11 @@ namespace Metalama.Testing.AspectTesting
                 throw new InvalidOperationException();
             }
 
-            this.ExpectedTransformedSourceText = expectedTransformedSourceText;
-            this.ExpectedTransformedSourcePath = expectedTransformedSourcePath;
-            this.ActualTransformedNormalizedSourceText = actualTransformedNormalizedSourceText;
+            this.ExpectedTransformedCodeText = expectedTransformedSourceText;
+            this.ExpectedTransformedCodePath = expectedTransformedSourcePath;
+            this.ActualTransformedNormalizedCodeText = actualTransformedNormalizedSourceText;
             this.ActualTransformedSourceTextForStorage = actualTransformedSourceTextForStorage;
-            this.ActualTransformedSourcePath = actualTransformedSourcePath;
+            this.ActualTransformedCodePath = actualTransformedSourcePath;
         }
 
         public override string ToString() => this.FilePath;

@@ -1,7 +1,3 @@
-#if TEST_OPTIONS
-// @OutputAllSyntaxTrees
-#endif
-
 using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
