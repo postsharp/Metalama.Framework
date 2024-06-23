@@ -557,7 +557,7 @@ internal abstract partial class BaseTestRunner
 
         var sourceDirectory = Path.GetDirectoryName( testInput.FullPath );
 
-        testResult.SetSyntaxTreesForComparison();
+        testResult.BuildSyntaxTreesForComparison();
 
         foreach ( var testSyntaxTree in testResult.SyntaxTrees.Where( t => t.OutputRunTimeSyntaxTreeForComparison != null ) )
         {

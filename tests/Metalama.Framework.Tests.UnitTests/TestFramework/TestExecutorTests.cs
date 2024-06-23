@@ -23,7 +23,7 @@ public sealed class TestExecutorTests : UnitTestClass
         "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestFailed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     [InlineData(
         "/* Empty */",
-        "// --- No output compilation units ---",
+        "// The compilation was successful.",
         "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestPassed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     [InlineData(
         """

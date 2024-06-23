@@ -124,7 +124,7 @@ internal class TestResult : IDisposable
 
     /// <summary>
     /// Gets or sets a value indicating whether the output run-time code should be included in the result of
-    ///  <see cref="SetSyntaxTreesForComparison"/>.
+    ///  <see cref="BuildSyntaxTreesForComparison"/>.
     /// </summary>
     public bool HasOutputCode { get; set; }
 
@@ -294,7 +294,7 @@ internal class TestResult : IDisposable
     /// Gets the content of the <c>.t.cs</c> file, i.e. the output transformed code with comments
     /// for diagnostics.
     /// </summary>
-    public void SetSyntaxTreesForComparison()
+    public void BuildSyntaxTreesForComparison()
     {
         if ( this.TestInput == null )
         {
@@ -309,7 +309,7 @@ internal class TestResult : IDisposable
                 .ThenBy( x => x.FilePath, StringComparer.InvariantCultureIgnoreCase )
                 .ToArray();
 
-        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( x => x.Kind is TestSyntaxTreeKind.Default );
+        var primaryOutputTree = outputSyntaxTrees.Single( x => x.ShortName == this.TestInput.TestName );
 
         var outputTreesByFilePath = outputSyntaxTrees
             .ToDictionary( x => x.FilePath, x => x );
@@ -465,7 +465,7 @@ internal class TestResult : IDisposable
                 else if ( !consolidatedCompilationUnit.ChildNodes().Any() )
                 {
                     // This can happen when the test does not want to include the output code.
-                    comments.Add( SyntaxFactory.Comment( $"// The compilation was successful. \n" ) );
+                    comments.Add( SyntaxFactory.Comment( $"// The compilation was successful.\n" ) );
                 }
             }
 
