@@ -15,7 +15,8 @@ namespace Metalama.Framework.Engine.CompileTime
             switch ( nsName )
             {
                 case "System":
-                    return namedType.Name is nameof(Index) or nameof(Range);
+                    // Syttem.Index, System.Range and types nested in them.
+                    return namedType.GetTopmostContainingType().Name is nameof(Index) or nameof(Range);
 
                 case "System.Runtime.CompilerServices":
                 case "System.Diagnostics.CodeAnalysis":

@@ -678,9 +678,9 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 // Report error when we have compile-time code but no namespace import for fast detection.
-                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
-                                                          && !SystemTypeDetector.IsSystemType(
-                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType! ) )
+                if ( scope != TemplatingScope.RunTimeOnly
+                     && !this._hasCompileTimeCodeFast
+                     && !SystemTypeDetector.IsSystemType( declaredSymbol.GetClosestContainingType()! ) )
                 {
                     var attributeName = scope == TemplatingScope.RunTimeOrCompileTime ? nameof(RunTimeOrCompileTimeAttribute) : nameof(CompileTimeAttribute);
 
