@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers;
 /// <summary>
 /// Compares symbols, possibly from different compilations.
 /// </summary>
-internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, IComparer<ISymbol>
+internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol?>, IComparer<ISymbol?>
 {
     // ReSharper disable UnusedMember.Global
 
