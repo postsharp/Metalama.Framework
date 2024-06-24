@@ -4,6 +4,7 @@ using Metalama.Backstage.Configuration;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
@@ -188,7 +189,10 @@ internal sealed class AspectDriver : IAspectDriver
                 pipelineConfiguration.CodeFixFilter,
                 this._codeFixAvailability );
 
-            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+            // This is used for compilation aspects.
+            // Knowing that the aspect is applied to a compilation is not particularly useful when we want to understand dependencies between source files.
+            var allPredecessors = aspectInstance.Predecessors.Select( p => p.Instance ).SelectManyRecursive( x => x.Predecessors.Select( p => p.Instance ), includeRoot: true );
+            var predecessorTrees = allPredecessors.OfType<IAttributeImpl>().SelectMany( a => a.DeclaringSyntaxReferences ).Select( sr => sr.SyntaxTree ).Distinct().ToImmutableArray();
 
             var buildAspectExecutionContext = new UserCodeExecutionContext(
                 serviceProvider,
@@ -197,7 +201,10 @@ internal sealed class AspectDriver : IAspectDriver
                 new AspectLayerId( this._aspectClass ),
                 initialCompilationRevision,
                 targetDeclaration,
+                predecessorTrees,
                 throwOnUnsupportedDependencies: true );
+
+            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
 
             // Apply options.
             ApplyOptions( aspectInstance, targetDeclaration, diagnosticSink, userCodeInvoker, buildAspectExecutionContext );

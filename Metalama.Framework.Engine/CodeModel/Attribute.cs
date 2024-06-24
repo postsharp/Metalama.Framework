@@ -56,7 +56,8 @@ internal sealed class Attribute : IAttributeImpl
 
     public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
-    public ImmutableArray<SourceReference> Sources => throw new NotImplementedException( "Sources property is not yet implemented for IAttribute." );
+    public ImmutableArray<SourceReference> Sources =>
+        ((IDeclarationImpl) this).DeclaringSyntaxReferences.SelectAsImmutableArray( sr => new SourceReference( sr.GetSyntax(), SourceReferenceImpl.Instance ) );
 
     public ICompilation Compilation => this.Constructor.Compilation;
 
