@@ -41,10 +41,10 @@ namespace Metalama.Framework.Workspaces
 
         internal string Key { get; }
 
-        private ProjectSet _projects;
         private readonly ITaskRunner _taskRunner;
+        private ProjectSet _projects;
         private ImmutableList<WorkspaceDiagnostic> _loadDiagnostics;
-        
+
         static Workspace()
         {
             WorkspaceServices.Initialize();
@@ -107,7 +107,6 @@ namespace Metalama.Framework.Workspaces
         /// <summary>
         /// Reloads all projects in the current workspace.
         /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task<Workspace> ReloadAsync( bool restore = true, CancellationToken cancellationToken = default )
         {
             var result = await LoadProjectSetAsync(
@@ -190,7 +189,7 @@ namespace Metalama.Framework.Workspaces
             // weird things may appear. Currently this case is not covered.
             if ( !MSBuildLocator.IsRegistered )
             {
-                MSBuildInitializer.Initialize( Path.GetDirectoryName( projects[0] ) );
+                MSBuildInitializer.Initialize( Path.GetDirectoryName( projects[0] )! );
             }
 
             // We can call the next method only after MSBuild initialization because it loads MSBuild assemblies.
@@ -209,11 +208,11 @@ namespace Metalama.Framework.Workspaces
         {
             var allProperties = properties
                 .Add( "MSBuildEnableWorkloadResolver", "false" );
-            
-               /* .Add( "MSBuildEnableWorkloadResolver", "false" )
-                .Add( "DOTNET_ROOT_X64", "" )
-                .Add( "MSBUILD_EXE_PATH", "" )
-                .Add( "MSBuildSDKsPath", "" ); */
+
+            /* .Add( "MSBuildEnableWorkloadResolver", "false" )
+             .Add( "DOTNET_ROOT_X64", "" )
+             .Add( "MSBUILD_EXE_PATH", "" )
+             .Add( "MSBuildSDKsPath", "" ); */
 
             var roslynWorkspace = MSBuildWorkspace.Create( allProperties );
 
@@ -280,7 +279,9 @@ namespace Metalama.Framework.Workspaces
                     _logger.Trace?.Log( $"Loaded assembly: '{assembly}' from '{assembly.Location}'." );
                 }
 
-                throw new WorkspaceLoadException( "Cannot load the projects." + Environment.NewLine + string.Join( Environment.NewLine, errors ), errors.SelectAsImmutableArray( e => e.Message ) );
+                throw new WorkspaceLoadException(
+                    "Cannot load the projects." + Environment.NewLine + string.Join( Environment.NewLine, errors ),
+                    errors.SelectAsImmutableArray( e => e.Message ) );
             }
 
             return new LoadProjectSetResult( projectSet, roslynWorkspace.Diagnostics );

@@ -10,11 +10,8 @@ namespace Metalama.Framework.Workspaces;
 public static class DeclarationExtensions
 {
     /// <summary>
-    /// Gets
+    /// Gets incoming declaration references, i.e. the list of declarations that use the given declaration. 
     /// </summary>
-    /// <param name="declaration"></param>
-    /// <param name="childKinds"></param>
-    /// <returns></returns>
     public static IEnumerable<IDeclarationReference> GetIncomingReferences(
         this IDeclaration declaration,
         ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )

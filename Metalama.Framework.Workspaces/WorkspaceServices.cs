@@ -2,8 +2,6 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
-using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Workspaces;
 
@@ -19,15 +17,5 @@ internal static class WorkspaceServices
 
             BackstageServiceFactoryInitializer.Initialize( new BackstageInitializationOptions( new WorkspaceApplicationInfo() ) );
         }
-    }
-}
-
-public sealed class WorkspaceLoadException : Exception
-{
-    public IReadOnlyList<string> Errors { get; }
-
-    public WorkspaceLoadException( string message, IReadOnlyList<string> errors ) : base( message )
-    {
-        this.Errors = errors;
     }
 }
