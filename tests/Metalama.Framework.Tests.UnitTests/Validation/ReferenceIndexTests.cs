@@ -295,7 +295,8 @@ public sealed class ReferenceIndexTests : UnitTestClass
 
         var builder = new ReferenceIndexBuilder(
             testContext.ServiceProvider,
-            new ReferenceIndexerOptions( validators ) );
+            new ReferenceIndexerOptions( validators ),
+            SymbolEqualityComparer.Default );
 
         foreach ( var syntaxTree in compilation.PartialCompilation.SyntaxTrees.Values )
         {

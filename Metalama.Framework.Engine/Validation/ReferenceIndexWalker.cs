@@ -21,7 +21,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     private const ReferenceKinds _memberAccessKind = (ReferenceKinds) 0xf001;
 
     private readonly CancellationToken _cancellationToken;
-    private readonly ISymbolClassificationService _symbolClassifier;
+    private readonly ISymbolClassificationService? _symbolClassifier;
     private readonly ReferenceIndexBuilder _referenceIndexBuilder;
     private readonly ReferenceIndexerOptions _options;
     private readonly SemanticModelProvider? _semanticModelProvider;
@@ -45,7 +45,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this._referenceIndexBuilder = referenceIndexBuilder;
         this._options = options;
         this._semanticModelProvider = semanticModelProvider;
-        this._symbolClassifier = serviceProvider.GetRequiredService<ISymbolClassificationService>();
+        this._symbolClassifier = serviceProvider.GetService<ISymbolClassificationService>(); // May be absent in the introspection scenario.
         this._observer = serviceProvider.GetService<IReferenceIndexObserver>();
     }
 
@@ -69,6 +69,11 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     }
 
     public override void VisitIdentifierName( IdentifierNameSyntax node ) => this.IndexReference( node, node.Identifier );
+
+    public override void VisitPredefinedType( PredefinedTypeSyntax node )
+    {
+        this.IndexReference( node, node, default );
+    }
 
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
@@ -433,17 +438,20 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                 {
                     var symbol = this.SemanticModel.GetDeclaredSymbol( node );
 
-                    this._observer?.OnSymbolResolved( symbol );
-
-                    var baseConstructorSymbol = symbol?.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
-
-                    if ( baseConstructorSymbol != null )
+                    if ( symbol != null )
                     {
-                        this._referenceIndexBuilder.AddReference(
-                            baseConstructorSymbol,
-                            this.CurrentDeclarationSymbol.AssertSymbolNotNull(),
-                            node.Identifier,
-                            ReferenceKinds.BaseConstructor );
+                        this._observer?.OnSymbolResolved( symbol );
+
+                        var baseConstructorSymbol = symbol.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
+
+                        if ( baseConstructorSymbol != null )
+                        {
+                            this._referenceIndexBuilder.AddReference(
+                                baseConstructorSymbol,
+                                this.CurrentDeclarationSymbol.AssertSymbolNotNull(),
+                                node.Identifier,
+                                ReferenceKinds.BaseConstructor );
+                        }
                     }
                 }
             }
@@ -542,13 +550,18 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             var expressionType = this.SemanticModel.GetTypeInfo( node ).ConvertedType;
 
+            if ( expressionType == null )
+            {
+                return;
+            }
+
             this._observer?.OnSymbolResolved( expressionType );
 
             if ( expressionType is IArrayTypeSymbol arrayType )
             {
                 this._referenceIndexBuilder.AddReference( arrayType.ElementType, this.CurrentDeclarationSymbol, node, ReferenceKinds.ArrayCreation );
             }
-            else if ( expressionType != null )
+            else
             {
                 this._referenceIndexBuilder.AddReference( expressionType, this.CurrentDeclarationSymbol, node, ReferenceKinds.ObjectCreation );
             }
@@ -640,9 +653,14 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             var symbol = this.SemanticModel.GetSymbolInfo( nodeForSymbol ).Symbol;
 
+            if ( symbol == null )
+            {
+                return;
+            }
+
             this._observer?.OnSymbolResolved( symbol );
 
-            if ( symbol == null || !this.CanIndexSymbol( symbol ) )
+            if ( !this.CanIndexSymbol( symbol ) )
             {
                 return;
             }
@@ -723,10 +741,8 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             case SymbolKind.NetModule:
             case SymbolKind.NamedType:
             case SymbolKind.Namespace:
-            case SymbolKind.Parameter:
             case SymbolKind.PointerType:
             case SymbolKind.Property:
-            case SymbolKind.TypeParameter:
             case SymbolKind.FunctionPointerType:
                 break;
 
@@ -737,7 +753,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         // Ignore any compile-time type declaration.
         var currentType = this.CurrentDeclarationSymbol?.GetClosestContainingType();
 
-        if ( currentType != null && this._symbolClassifier.GetExecutionScope( currentType ) != ExecutionScope.RunTime )
+        if ( currentType != null && this._symbolClassifier?.GetExecutionScope( currentType ) is not (null or ExecutionScope.RunTime) )
         {
             return false;
         }
@@ -755,7 +771,11 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                 if ( this._currentDeclarationNode != null )
                 {
                     this._currentDeclarationSymbol = this.SemanticModel.GetDeclaredSymbol( this._currentDeclarationNode );
-                    this._observer?.OnSymbolResolved( this._currentDeclarationSymbol );
+
+                    if ( this._observer != null && this._currentDeclarationSymbol != null )
+                    {
+                        this._observer.OnSymbolResolved( this._currentDeclarationSymbol );
+                    }
                 }
                 else
                 {
