@@ -741,10 +741,8 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             case SymbolKind.NetModule:
             case SymbolKind.NamedType:
             case SymbolKind.Namespace:
-            case SymbolKind.Parameter:
             case SymbolKind.PointerType:
             case SymbolKind.Property:
-            case SymbolKind.TypeParameter:
             case SymbolKind.FunctionPointerType:
                 break;
 

@@ -51,6 +51,24 @@ namespace Metalama.Framework.Workspaces
             _logger = BackstageServiceFactory.ServiceProvider.GetLoggerFactory().GetLogger( "Workspace" );
         }
 
+        /// <summary>
+        /// Loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace
+        /// if the method has been previously called with the exact same parameters.
+        /// This method creates the workspace in the default <see cref="WorkspaceCollection"/>.
+        /// </summary>
+        /// <param name="paths">A list of project or solution paths.</param>
+        /// <returns>A <see cref="Workspace"/> where all specified project or solutions, and their dependencies, have been loaded.</returns>
+        public Workspace Load( params string[] paths ) => WorkspaceCollection.Default.Load( paths );
+
+        /// <summary>
+        /// Asynchronously loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace
+        /// if the method has been previously called with the exact same parameters.
+        /// This method creates the workspace in the default <see cref="WorkspaceCollection"/>. 
+        /// </summary>
+        /// <param name="paths">A list of project or solution paths.</param>
+        /// <returns>A <see cref="Workspace"/> where all specified project or solutions, and their dependencies, have been loaded.</returns>
+        public Task<Workspace> LoadAsync( params string[] paths ) => WorkspaceCollection.Default.LoadAsync( paths );
+
         private Workspace(
             GlobalServiceProvider serviceProvider,
             ImmutableArray<string> loadedPaths,

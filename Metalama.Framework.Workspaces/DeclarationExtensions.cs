@@ -10,14 +10,28 @@ namespace Metalama.Framework.Workspaces;
 public static class DeclarationExtensions
 {
     /// <summary>
-    /// Gets incoming declaration references, i.e. the list of declarations that use the given declaration. 
+    /// Gets incoming declaration references, i.e. the list of declarations that use the given declaration,
+    /// in the projects loaded in the current <see cref="Workspace"/>. 
     /// </summary>
     public static IEnumerable<IDeclarationReference> GetIncomingReferences(
         this IDeclaration declaration,
         ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
     {
-        var graph = declaration.Compilation.Project.ServiceProvider.GetRequiredService<WorkspaceIntrospectionService>().GetReferenceGraph();
+        var service = declaration.Compilation.Project.ServiceProvider.GetRequiredService<WorkspaceIntrospectionService>();
+        var graph = service.GetReferenceGraph();
 
         return graph.GetIncomingReferences( declaration, childKinds );
+    }
+
+    /// <summary>
+    /// Get all types derived from a given type within the projects loaded in the current <see cref="Workspace"/>.
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="directOnly">If <c>true</c>, only types directly derived from <paramref name="type"/> are returned.</param>
+    public static IEnumerable<INamedType> GetDerivedTypes( this INamedType type, bool directOnly = false )
+    {
+        var service = type.Compilation.Project.ServiceProvider.GetRequiredService<WorkspaceIntrospectionService>();
+
+        return service.GetDerivedTypes( type, directOnly );
     }
 }

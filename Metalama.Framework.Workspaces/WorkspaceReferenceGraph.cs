@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Metalama.Framework.Workspaces;
 
@@ -22,8 +21,6 @@ internal sealed class WorkspaceReferenceGraph : IReferenceGraph
         ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
     {
         var result = new List<IDeclarationReference>();
-
-        Debugger.Launch();
 
         foreach ( var project in this._workspace.Value.Projects )
         {
