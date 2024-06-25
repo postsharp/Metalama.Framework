@@ -3,10 +3,11 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceIndex
+internal sealed class ReferenceIndex
 {
     private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _explicitReferences;
 
@@ -16,4 +17,7 @@ public sealed class ReferenceIndex
     }
 
     public IEnumerable<ReferencedSymbolInfo> ReferencedSymbols => this._explicitReferences.Values;
+
+    public bool TryGetIncomingReferences( ISymbol referencedSymbol, [NotNullWhen( true )] out ReferencedSymbolInfo? referencedSymbolInfo )
+        => this._explicitReferences.TryGetValue( referencedSymbol, out referencedSymbolInfo );
 }

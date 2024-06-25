@@ -146,6 +146,40 @@ public sealed class ReferenceIndexerOptions
         }
     }
 
+    private ReferenceIndexerOptions(
+        bool mustDescendIntoMembers,
+        ReferenceKinds kindsRequiringDescentIntoBaseTypes,
+        bool mustDescendIntoImplementation,
+        ReferenceKinds kindsRequiringDescentIntoReferencedDeclaringType,
+        ReferenceKinds kindsRequiringDescentIntoReferencedNamespace,
+        ReferenceKinds kindsRequiringDescentIntoReferencedAssembly,
+        ReferenceKinds kindsSupportingIdentifierFiltering,
+        ReferenceKinds allReferenceKinds,
+        ImmutableHashSet<string> filteredIdentifiers )
+    {
+        this._mustDescendIntoMembers = mustDescendIntoMembers;
+        this._kindsRequiringDescentIntoBaseTypes = kindsRequiringDescentIntoBaseTypes;
+        this._mustDescendIntoImplementation = mustDescendIntoImplementation;
+        this._kindsRequiringDescentIntoReferencedDeclaringType = kindsRequiringDescentIntoReferencedDeclaringType;
+        this._kindsRequiringDescentIntoReferencedNamespace = kindsRequiringDescentIntoReferencedNamespace;
+        this._kindsRequiringDescentIntoReferencedAssembly = kindsRequiringDescentIntoReferencedAssembly;
+        this._kindsSupportingIdentifierFiltering = kindsSupportingIdentifierFiltering;
+        this._allReferenceKinds = allReferenceKinds;
+        this._filteredIdentifiers = filteredIdentifiers;
+    }
+
+    internal static ReferenceIndexerOptions All
+        => new(
+            true,
+            ReferenceKinds.All,
+            true,
+            ReferenceKinds.All,
+            ReferenceKinds.All,
+            ReferenceKinds.All,
+            ReferenceKinds.None,
+            ReferenceKinds.All,
+            ImmutableHashSet<string>.Empty );
+
     public static ReferenceIndexerOptions Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
 
     internal bool MustIndexReferenceKind( ReferenceKinds kind ) => (this._allReferenceKinds & kind) != 0;

@@ -14,13 +14,13 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,45 +33,22 @@ namespace Metalama.Framework.Workspaces
     [PublicAPI]
     public sealed class Workspace : IDisposable, IProjectSet, IWorkspaceLoadInfo
     {
+        private static readonly ILogger _logger;
+
         private readonly WorkspaceCollection _collection;
         private readonly CompileTimeDomain _domain;
         private readonly IntrospectionOptionsBox _introspectionOptions;
-        private static ILogger _logger;
 
         internal string Key { get; }
 
         private ProjectSet _projects;
         private readonly ITaskRunner _taskRunner;
-
+        private ImmutableList<WorkspaceDiagnostic> _loadDiagnostics;
+        
         static Workspace()
         {
             WorkspaceServices.Initialize();
             _logger = BackstageServiceFactory.ServiceProvider.GetLoggerFactory().GetLogger( "Workspace" );
-        }
-
-        private static void InitializeMSBuild( string projectDirectory )
-        {
-            if ( !MSBuildLocator.IsRegistered )
-            {
-                _logger.Trace?.Log(
-                    $"Initializing MSBuild with directory '{projectDirectory}' with {RuntimeInformation.FrameworkDescription} running on {RuntimeInformation.RuntimeIdentifier}." );
-
-                var instances = MSBuildLocator.QueryVisualStudioInstances(
-                        new VisualStudioInstanceQueryOptions { DiscoveryTypes = DiscoveryType.DotNetSdk, WorkingDirectory = projectDirectory } )
-                    .OrderByDescending( i => i.Version )
-                    .ToReadOnlyList();
-
-                _logger.Trace?.Log( $"Found {instances.Count} instances: {string.Join( ", ", instances.Select( x => x.Name ) )}" );
-
-                if ( instances.Count == 0 )
-                {
-                    throw new DotNetSdkLoadException(
-                        $"Could not find a .NET SDK for {RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture}. Did you select the right .NET version and processor architecture?" );
-                }
-
-                var instance = instances.First();
-                MSBuildLocator.RegisterInstance( instance );
-            }
         }
 
         private Workspace(
@@ -79,7 +56,7 @@ namespace Metalama.Framework.Workspaces
             ImmutableArray<string> loadedPaths,
             ImmutableDictionary<string, string>? properties,
             string key,
-            ProjectSet projectSet,
+            LoadProjectSetResult projectSet,
             WorkspaceCollection collection,
             CompileTimeDomain domain,
             IntrospectionOptionsBox introspectionOptions )
@@ -87,7 +64,8 @@ namespace Metalama.Framework.Workspaces
             this.Properties = properties ?? ImmutableDictionary<string, string>.Empty;
             this.LoadedPaths = loadedPaths;
             this.Key = key;
-            this._projects = projectSet;
+            this._projects = projectSet.Projects;
+            this._loadDiagnostics = projectSet.LoadDiagnostics;
             this._collection = collection;
             this._domain = domain;
             this._introspectionOptions = introspectionOptions;
@@ -132,14 +110,18 @@ namespace Metalama.Framework.Workspaces
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task<Workspace> ReloadAsync( bool restore = true, CancellationToken cancellationToken = default )
         {
-            this._projects = await LoadProjectSetAsync(
+            var result = await LoadProjectSetAsync(
                 this.LoadedPaths,
                 this.Properties,
                 this._collection,
                 this._domain,
                 this._introspectionOptions,
                 restore,
+                new Future<Workspace>() { Value = this },
                 cancellationToken );
+
+            this._projects = result.Projects;
+            this._loadDiagnostics = result.LoadDiagnostics;
 
             return this;
         }
@@ -162,18 +144,21 @@ namespace Metalama.Framework.Workspaces
         {
             var domain = new UnloadableCompileTimeDomain( serviceProvider );
 
+            var future = new Future<Workspace>();
             var introspectionOptions = new IntrospectionOptionsBox();
-            var projectSet = await LoadProjectSetAsync( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
+            var result = await LoadProjectSetAsync( projects, properties, collection, domain, introspectionOptions, restore, future, cancellationToken );
 
-            return new Workspace(
+            future.Value = new Workspace(
                 serviceProvider,
                 projects,
                 properties,
                 key,
-                projectSet,
+                result,
                 collection,
                 domain,
                 introspectionOptions );
+
+            return future.Value;
         }
 
         private static void DotNetRestore( GlobalServiceProvider serviceProvider, string project )
@@ -182,18 +167,22 @@ namespace Metalama.Framework.Workspaces
             dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( project ) );
         }
 
-        private static Task<ProjectSet> LoadProjectSetAsync(
+        private record LoadProjectSetResult( ProjectSet Projects, ImmutableList<WorkspaceDiagnostic> LoadDiagnostics );
+
+        private static Task<LoadProjectSetResult> LoadProjectSetAsync(
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,
             CompileTimeDomain domain,
             IIntrospectionOptionsProvider introspectionOptions,
             bool restore,
+            Future<Workspace> workspace,
             CancellationToken cancellationToken )
         {
             if ( projects.IsEmpty )
             {
-                return Task.FromResult( new ProjectSet( ImmutableArray<Project>.Empty, "Empty" ) );
+                return Task.FromResult(
+                    new LoadProjectSetResult( new ProjectSet( ImmutableArray<Project>.Empty, "Empty" ), ImmutableList<WorkspaceDiagnostic>.Empty ) );
             }
 
             // We need to initialize MSBuild once per process. The initialization may depend on `global.json`.
@@ -201,27 +190,30 @@ namespace Metalama.Framework.Workspaces
             // weird things may appear. Currently this case is not covered.
             if ( !MSBuildLocator.IsRegistered )
             {
-                InitializeMSBuild( Path.GetDirectoryName( projects[0] ) );
+                MSBuildInitializer.Initialize( Path.GetDirectoryName( projects[0] ) );
             }
 
             // We can call the next method only after MSBuild initialization because it loads MSBuild assemblies.
-            return LoadProjectSetCoreAsync( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
+            return LoadProjectSetCoreAsync( projects, properties, collection, domain, introspectionOptions, restore, workspace, cancellationToken );
         }
 
-        private static async Task<ProjectSet> LoadProjectSetCoreAsync(
+        private static async Task<LoadProjectSetResult> LoadProjectSetCoreAsync(
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,
             CompileTimeDomain domain,
             IIntrospectionOptionsProvider introspectionOptions,
             bool restore,
+            Future<Workspace> workspace,
             CancellationToken cancellationToken )
         {
             var allProperties = properties
-                .Add( "MSBuildEnableWorkloadResolver", "false" )
+                .Add( "MSBuildEnableWorkloadResolver", "false" );
+            
+               /* .Add( "MSBuildEnableWorkloadResolver", "false" )
                 .Add( "DOTNET_ROOT_X64", "" )
                 .Add( "MSBUILD_EXE_PATH", "" )
-                .Add( "MSBuildSDKsPath", "" );
+                .Add( "MSBuildSDKsPath", "" ); */
 
             var roslynWorkspace = MSBuildWorkspace.Create( allProperties );
 
@@ -273,7 +265,25 @@ namespace Metalama.Framework.Workspaces
 
             var projectSet = new ProjectSet( ourProjects, name ?? $"{ourProjects.Length} projects" );
 
-            return projectSet;
+            // Throw an exception upon failure because otherwise it's too difficult to diagnose.
+            var errors = roslynWorkspace.Diagnostics.Where( d => d.Kind == WorkspaceDiagnosticKind.Failure ).ToReadOnlyList();
+
+            if ( errors.Any() )
+            {
+                foreach ( var diagnostic in roslynWorkspace.Diagnostics )
+                {
+                    (diagnostic.Kind == WorkspaceDiagnosticKind.Failure ? _logger.Error : _logger.Warning)?.Log( diagnostic.Message );
+                }
+
+                foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
+                {
+                    _logger.Trace?.Log( $"Loaded assembly: '{assembly}' from '{assembly.Location}'." );
+                }
+
+                throw new WorkspaceLoadException( "Cannot load the projects." + Environment.NewLine + string.Join( Environment.NewLine, errors ), errors.SelectAsImmutableArray( e => e.Message ) );
+            }
+
+            return new LoadProjectSetResult( projectSet, roslynWorkspace.Diagnostics );
 
             async Task<Project> GetOurProjectAsync( Microsoft.CodeAnalysis.Project roslynProject )
             {
@@ -302,8 +312,10 @@ namespace Metalama.Framework.Workspaces
                 // Create a compilation model.
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
-                var projectServiceProvider = collection.ServiceProvider.Underlying.WithService( additionalServiceCollection, true )
-                    .WithProjectScopedServices( projectOptions, compilation );
+                var projectServiceProvider = collection.ServiceProvider.Underlying
+                    .WithService( additionalServiceCollection, true )
+                    .WithProjectScopedServices( projectOptions, compilation )
+                    .WithService( _ => new WorkspaceIntrospectionService( workspace ) );
 
                 var compilationModel = CodeModelFactory.CreateCompilation( compilation, projectServiceProvider );
 
@@ -377,6 +389,9 @@ namespace Metalama.Framework.Workspaces
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
+
+        public ImmutableArray<IIntrospectionDiagnostic> LoadDiagnostics
+            => this._loadDiagnostics.SelectAsImmutableArray( x => (IIntrospectionDiagnostic) new WorkspaceDiagnosticWrapper( x ) );
 
 #pragma warning disable CA1822
 

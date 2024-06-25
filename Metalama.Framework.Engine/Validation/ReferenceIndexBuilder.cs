@@ -6,26 +6,26 @@ using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
 internal sealed class ReferenceIndexBuilder
 {
-    private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _references = new();
+    private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _references;
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly ReferenceIndexerOptions _options;
     private bool _frozen;
 
-    public ReferenceIndexBuilder( ProjectServiceProvider serviceProvider, ReferenceIndexerOptions options )
+    public ReferenceIndexBuilder( ProjectServiceProvider serviceProvider, ReferenceIndexerOptions options, IEqualityComparer<ISymbol> symbolComparer )
     {
         this._serviceProvider = serviceProvider;
         this._options = options;
+        this._references = new ConcurrentDictionary<ISymbol, ReferencedSymbolInfo>( symbolComparer );
     }
 
-    [Conditional( "DEBUG" )]
-    private static void CheckSymbolKind( ISymbol symbol )
+    private static bool CheckSymbolKind( ISymbol symbol )
     {
         switch ( symbol.Kind )
         {
@@ -34,13 +34,15 @@ internal sealed class ReferenceIndexBuilder
             case SymbolKind.Label:
             case SymbolKind.Preprocessing:
             case SymbolKind.DynamicType:
-                throw new ArgumentOutOfRangeException();
+                return false;
         }
 
         if ( symbol is IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
         {
-            throw new ArgumentOutOfRangeException();
+            return false;
         }
+
+        return true;
     }
 
     internal void AddReference( ISymbol? referencedSymbol, ISymbol? referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKind )
@@ -53,8 +55,10 @@ internal sealed class ReferenceIndexBuilder
         referencedSymbol = referencedSymbol.OriginalDefinition;
         referencingSymbol = referencingSymbol.OriginalDefinition;
 
-        CheckSymbolKind( referencedSymbol );
-        CheckSymbolKind( referencingSymbol );
+        if ( !CheckSymbolKind( referencedSymbol ) || !CheckSymbolKind( referencingSymbol ) )
+        {
+            return;
+        }
 
         if ( !this._options.MustIndexReferenceKind( referenceKind ) )
         {
