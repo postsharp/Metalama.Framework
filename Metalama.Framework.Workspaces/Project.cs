@@ -34,7 +34,7 @@ namespace Metalama.Framework.Workspaces
         internal ICompilation Compilation { get; }
 
         [PublicAPI]
-        public string TargetFramework => this._projectOptions.TargetFramework;
+        public string? TargetFramework => this._projectOptions.TargetFramework;
 
         internal Project(
             CompileTimeDomain domain,

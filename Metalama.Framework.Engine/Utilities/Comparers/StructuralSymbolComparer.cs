@@ -841,7 +841,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
                 break;
 
             default:
-                throw new NotImplementedException( $"{symbol.Kind}" );
+                throw new NotImplementedException( $"Not implemented: '{symbol}' of kind {symbol.Kind}." );
         }
 
         if ( options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )
@@ -881,6 +881,12 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
                         {
                             h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralComparerOptions.Type ) );
                         }
+
+                        break;
+
+                    case IFieldSymbol:
+                    case IEventSymbol:
+                        h = HashCode.Combine( h, current.Name );
 
                         break;
 

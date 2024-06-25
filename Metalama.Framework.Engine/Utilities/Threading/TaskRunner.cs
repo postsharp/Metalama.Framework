@@ -20,7 +20,7 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            Task.Factory.StartNew( func, cancellationToken, TaskCreationOptions.None, _scheduler ).Wait( cancellationToken );
+            Task.Factory.StartNew( func, cancellationToken, TaskCreationOptions.None, _scheduler ).Unwrap().Wait( cancellationToken );
         }
         else
         {
@@ -32,7 +32,7 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            Task.Factory.StartNew( func, cancellationToken, TaskCreationOptions.None, _scheduler ).Wait( cancellationToken );
+            Task.Factory.StartNew( () => func().AsTask(), cancellationToken, TaskCreationOptions.None, _scheduler ).Unwrap().Wait( cancellationToken );
         }
         else
         {

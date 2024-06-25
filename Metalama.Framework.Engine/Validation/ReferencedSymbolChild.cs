@@ -2,4 +2,4 @@
 
 namespace Metalama.Framework.Engine.Validation;
 
-public readonly record struct ReferencedSymbolChild( ReferencedSymbolInfo Info, ChildKinds Kind );
+internal readonly record struct ReferencedSymbolChild( ReferencedSymbolInfo Info, ChildKinds Kind );

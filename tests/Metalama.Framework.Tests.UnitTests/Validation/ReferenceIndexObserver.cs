@@ -23,12 +23,9 @@ internal class ReferenceIndexObserver : IReferenceIndexObserver
     public IReadOnlyCollection<string> ResolvedSemanticModelNames
         => this._resolvedSemanticModels.SelectAsReadOnlyCollection( m => m.SyntaxTree.FilePath ).OrderBy( x => x ).ToReadOnlyList();
 
-    public void OnSymbolResolved( ISymbol? symbol )
+    public void OnSymbolResolved( ISymbol symbol )
     {
-        if ( symbol != null )
-        {
-            this._resolvedSymbols.Enqueue( symbol );
-        }
+        this._resolvedSymbols.Enqueue( symbol );
     }
 
     public void OnSemanticModelResolved( SemanticModel semanticModel )
