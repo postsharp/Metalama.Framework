@@ -1,7 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
+using Metalama.Framework.Engine.Introspection.References;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Introspection;
 using Metalama.Testing.UnitTesting;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -12,6 +19,13 @@ namespace Metalama.Framework.Tests.UnitTests.Introspection;
 
 public sealed class IntrospectionTests : UnitTestClass
 {
+    protected override void ConfigureServices( IAdditionalServiceCollection services )
+    {
+        base.ConfigureServices( services );
+
+        services.AddProjectService( s => new ConcurrentTaskRunner() );
+    }
+
     [Fact]
     public async Task Success()
     {

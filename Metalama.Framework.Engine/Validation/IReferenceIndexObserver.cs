@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal interface IReferenceIndexObserver : IProjectService
 {
-    void OnSymbolResolved( ISymbol? symbol );
+    void OnSymbolResolved( ISymbol symbol );
 
     void OnSemanticModelResolved( SemanticModel semanticModel );
 }

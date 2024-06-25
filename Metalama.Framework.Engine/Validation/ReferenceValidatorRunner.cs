@@ -37,7 +37,7 @@ public sealed class ReferenceValidatorRunner
         CancellationToken cancellationToken )
     {
         // Collect all references.
-        var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Options );
+        var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Options, SymbolEqualityComparer.Default );
         referenceIndexBuilder.IndexSemanticModel( semanticModel, cancellationToken );
 
         // Run the validator.
@@ -57,7 +57,7 @@ public sealed class ReferenceValidatorRunner
     {
         // Collect all references.
         var semanticModelProvider = initialCompilation.CompilationContext.SemanticModelProvider;
-        var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Options );
+        var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Options, SymbolEqualityComparer.Default );
 
         await this._concurrentTaskRunner.RunConcurrentlyAsync(
             initialCompilation.PartialCompilation.SyntaxTrees.Values,

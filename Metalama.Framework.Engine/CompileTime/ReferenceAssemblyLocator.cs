@@ -33,6 +33,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal sealed class ReferenceAssemblyLocator
 {
     private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
+    private const string _compilerInterfaceAssemblyName = "Metalama.Compiler.Interface";
     private const string _defaultCompileTimeTargetFrameworks = "netstandard2.0;net6.0;net48";
     private static readonly ImmutableArray<string> _defaultNugetSources = GetDefaultNuGetSources().ToImmutableArray();
 
@@ -67,11 +68,6 @@ internal sealed class ReferenceAssemblyLocator
     private readonly DotNetTool _dotNetTool;
     private readonly int _restoreTimeout;
     private readonly ImmutableArray<string> _targetFrameworks;
-
-    /// <summary>
-    /// Gets the name (without path and extension) of Metalama assemblies.
-    /// </summary>
-    private ImmutableArray<string> MetalamaImplementationAssemblyNames { get; }
 
     /// <summary>
     /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.
@@ -162,35 +158,7 @@ internal sealed class ReferenceAssemblyLocator
         // Force Metalama.Compiler.Interface to be loaded in the AppDomain.
         MetalamaCompilerInfo.EnsureInitialized();
 
-        // Add the Metalama.Compiler.Interface assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
-        // Strangely, there can be many instances of this same assembly.
-
-        // ReSharper disable once SimplifyLinqExpressionUseMinByAndMaxBy
-        var metalamaCompilerInterfaceAssembly = AppDomainUtility
-            .GetLoadedAssemblies( a => a.FullName != null! && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
-            .OrderByDescending( a => a.GetName().Version )
-            .FirstOrDefault();
-
-        if ( metalamaCompilerInterfaceAssembly == null )
-        {
-            this._logger.Error?.Log( "Cannot find the Metalama.Compiler.Interface assembly in the AppDomain." );
-
-            if ( this._logger.Trace != null )
-            {
-                foreach ( var assembly in AppDomainUtility.GetLoadedAssemblies( _ => true ).OrderBy( a => a.ToString() ) )
-                {
-                    this._logger.Trace.Log( "Loaded: " + assembly );
-                }
-            }
-
-            throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
-        }
-
-        metalamaImplementationAssemblies.Add(
-            "Metalama.Compiler.Interface",
-            metalamaCompilerInterfaceAssembly.Location );
-
-        this.MetalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys.ToImmutableArray();
+        var metalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys;
         var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
         // Get system assemblies.
@@ -202,14 +170,15 @@ internal sealed class ReferenceAssemblyLocator
         this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
         // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
-        this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames.Concat( new[] { _compileTimeFrameworkAssemblyName } )
+        this.StandardAssemblyNames = metalamaImplementationAssemblyNames
+            .Concat( [_compileTimeFrameworkAssemblyName, _compilerInterfaceAssemblyName] )
             .Concat( this.SystemReferenceAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
             .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
         // Also provide our embedded assemblies.
 
         var embeddedAssemblies =
-            new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface", "Metalama.SystemTypes" }.SelectAsImmutableArray(
+            new[] { _compileTimeFrameworkAssemblyName, _compilerInterfaceAssemblyName, "Metalama.SystemTypes" }.SelectAsImmutableArray(
                 name => (MetadataReference)
                     MetadataReference.CreateFromStream(
                         this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )

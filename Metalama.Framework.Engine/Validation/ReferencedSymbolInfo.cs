@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferencedSymbolInfo
+internal sealed class ReferencedSymbolInfo
 {
     private ConcurrentDictionary<ISymbol, ReferencingNodeList>? _explicitReferences;
     private ConcurrentQueue<ReferencedSymbolChild>? _children;
@@ -45,10 +45,22 @@ public sealed class ReferencedSymbolInfo
         => this._explicitReferences?.SelectAsReadOnlyCollection( x => new ReferencingSymbolInfo( x.Key, x.Value ) )
            ?? Enumerable.Empty<ReferencingSymbolInfo>();
 
-    private IEnumerable<ReferencedSymbolInfo> Children( ChildKinds kinds )
+    internal IEnumerable<ReferencedSymbolInfo> Children( ChildKinds kinds )
         => this._children?.Where( x => (x.Kind & kinds) != 0 ).Select( x => x.Info ) ?? Enumerable.Empty<ReferencedSymbolInfo>();
 
-    private IEnumerable<ReferencedSymbolInfo> DescendantsAndSelf( ChildKinds kinds ) => this.SelectManyRecursiveDistinct( x => x.Children( kinds ) );
+    internal IEnumerable<ReferencedSymbolInfo> DescendantsAndSelf( ChildKinds kinds )
+    {
+        if ( kinds == ChildKinds.None )
+        {
+            return [this];
+        }
+        else
+        {
+            return this.SelectManyRecursiveDistinct( x => x.Children( kinds ) );
+        }
+    }
 
     public IEnumerable<ReferencingSymbolInfo> GetAllReferences( ChildKinds kinds ) => this.DescendantsAndSelf( kinds ).SelectMany( x => x.References );
+
+    public override string ToString() => $"{{Symbol={this.ReferencedSymbol.ToDisplayString()}, References.Count={this.References.Count()}}}";
 }

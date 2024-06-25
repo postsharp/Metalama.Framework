@@ -50,6 +50,12 @@ namespace Metalama.Framework.Workspaces
         public ServiceBuilder ServiceBuilder { get; } = new();
 
         internal GlobalServiceProvider ServiceProvider { get; }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether project loading errors should be ignored. By default,
+        /// project loading errors cause an exception to be thrown.
+        /// </summary>
+        public bool IgnoreLoadErrors { get; set; }
 
         /// <summary>
         /// Loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace

@@ -23,4 +23,6 @@ internal sealed class LocationWrapper : IDiagnosticLocationImpl
     {
         this.DiagnosticLocation = diagnosticLocation;
     }
+
+    public override string ToString() => this.DiagnosticLocation?.ToString() ?? "<null>";
 }
