@@ -42,8 +42,11 @@ namespace Metalama.Framework.Workspaces
         internal string Key { get; }
 
         private readonly ITaskRunner _taskRunner;
-        private ProjectSet _projects;
+        private ProjectSet _filteredProjects;
+        private ProjectSet _unfilteredProjects;
         private ImmutableList<WorkspaceDiagnostic> _loadDiagnostics;
+        private static readonly Predicate<Project> _defaultProjectFilter = _ => true;
+        private Predicate<Project> _projectFilter = _defaultProjectFilter;
 
         static Workspace()
         {
@@ -58,7 +61,7 @@ namespace Metalama.Framework.Workspaces
         /// </summary>
         /// <param name="paths">A list of project or solution paths.</param>
         /// <returns>A <see cref="Workspace"/> where all specified project or solutions, and their dependencies, have been loaded.</returns>
-        public Workspace Load( params string[] paths ) => WorkspaceCollection.Default.Load( paths );
+        public static Workspace Load( params string[] paths ) => WorkspaceCollection.Default.Load( paths );
 
         /// <summary>
         /// Asynchronously loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace
@@ -67,7 +70,7 @@ namespace Metalama.Framework.Workspaces
         /// </summary>
         /// <param name="paths">A list of project or solution paths.</param>
         /// <returns>A <see cref="Workspace"/> where all specified project or solutions, and their dependencies, have been loaded.</returns>
-        public Task<Workspace> LoadAsync( params string[] paths ) => WorkspaceCollection.Default.LoadAsync( paths );
+        public static Task<Workspace> LoadAsync( params string[] paths ) => WorkspaceCollection.Default.LoadAsync( paths );
 
         private Workspace(
             GlobalServiceProvider serviceProvider,
@@ -82,7 +85,7 @@ namespace Metalama.Framework.Workspaces
             this.Properties = properties ?? ImmutableDictionary<string, string>.Empty;
             this.LoadedPaths = loadedPaths;
             this.Key = key;
-            this._projects = projectSet.Projects;
+            this._filteredProjects = this._unfilteredProjects = projectSet.Projects;
             this._loadDiagnostics = projectSet.LoadDiagnostics;
             this._collection = collection;
             this._domain = domain;
@@ -123,6 +126,28 @@ namespace Metalama.Framework.Workspaces
         }
 
         /// <summary>
+        /// Clear all filters applied by <see cref="ApplyFilter"/>.
+        /// </summary>
+        public void ClearFilters()
+        {
+            this._projectFilter = _defaultProjectFilter;
+            this._filteredProjects = this._unfilteredProjects;
+        }
+
+        /// <summary>
+        /// Filters the <see cref="Projects"/> collection with a given predicate.
+        /// This allows to filter the output of methods such as <see cref="DeclarationExtensions.GetIncomingReferences"/>
+        /// or <see cref="DeclarationExtensions.GetDerivedTypes"/> to the filtered subset.
+        /// </summary>
+        /// <seealso cref="ClearFilters"/>
+        public void ApplyFilter( Predicate<Project> filter )
+        {
+            var oldFilter = this._projectFilter;
+            this._projectFilter = p => oldFilter( p ) && filter( p );
+            this._filteredProjects = this._unfilteredProjects.GetSubset( this._projectFilter );
+        }
+
+        /// <summary>
         /// Reloads all projects in the current workspace.
         /// </summary>
         public async Task<Workspace> ReloadAsync( bool restore = true, CancellationToken cancellationToken = default )
@@ -137,7 +162,8 @@ namespace Metalama.Framework.Workspaces
                 new Future<Workspace>() { Value = this },
                 cancellationToken );
 
-            this._projects = result.Projects;
+            this._unfilteredProjects = result.Projects;
+            this._filteredProjects = this._unfilteredProjects.GetSubset( this._projectFilter );
             this._loadDiagnostics = result.LoadDiagnostics;
 
             return this;
@@ -181,7 +207,7 @@ namespace Metalama.Framework.Workspaces
         private static void DotNetRestore( GlobalServiceProvider serviceProvider, string project )
         {
             var dotNetTool = new DotNetTool( serviceProvider );
-            dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( project ) );
+            dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( Path.GetFullPath( project ) ) );
         }
 
         private record LoadProjectSetResult( ProjectSet Projects, ImmutableList<WorkspaceDiagnostic> LoadDiagnostics );
@@ -207,7 +233,7 @@ namespace Metalama.Framework.Workspaces
             // weird things may appear. Currently this case is not covered.
             if ( !MSBuildLocator.IsRegistered )
             {
-                MSBuildInitializer.Initialize( Path.GetDirectoryName( projects[0] )! );
+                MSBuildInitializer.Initialize( Path.GetDirectoryName( Path.GetFullPath( projects[0] ) )! );
             }
 
             // We can call the next method only after MSBuild initialization because it loads MSBuild assemblies.
@@ -362,10 +388,10 @@ namespace Metalama.Framework.Workspaces
         }
 
         /// <inheritdoc />
-        public ImmutableArray<Project> Projects => this._projects.Projects;
+        public ImmutableArray<Project> Projects => this._filteredProjects.Projects;
 
         /// <inheritdoc />
-        public ICompilationSet SourceCode => this._projects.SourceCode;
+        public ICompilationSet SourceCode => this._filteredProjects.SourceCode;
 
         /// <inheritdoc />
         public ImmutableArray<string> LoadedPaths { get; }
@@ -374,13 +400,13 @@ namespace Metalama.Framework.Workspaces
         public ImmutableDictionary<string, string> Properties { get; }
 
         /// <inheritdoc />
-        public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
+        public IProjectSet GetSubset( Predicate<Project> filter ) => this._filteredProjects.GetSubset( filter );
 
         /// <inheritdoc />
         public IDeclaration GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
-            => this._projects.GetDeclaration( projectName, targetFramework, declarationId, metalamaOutput );
+            => this._filteredProjects.GetDeclaration( projectName, targetFramework, declarationId, metalamaOutput );
 
-        internal ICompilationSetResult CompilationResult => this._projects.CompilationResult;
+        internal ICompilationSetResult CompilationResult => this._filteredProjects.CompilationResult;
 
         /// <inheritdoc />
         public ICompilationSet TransformedCode => this.CompilationResult.TransformedCode;

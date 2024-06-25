@@ -30,7 +30,9 @@ namespace Metalama.Framework.Workspaces
             this.Projects = projects;
         }
 
-        public IProjectSet GetSubset( Predicate<Project> filter )
+        IProjectSet IProjectSet.GetSubset( Predicate<Project> filter ) => this.GetSubset( filter );
+
+        public ProjectSet GetSubset( Predicate<Project> filter )
         {
             var filteredProjects = this.Projects.Where( p => filter( p ) ).OrderBy( p => p.ToString() ).ToImmutableArray();
             var filteredProjectKey = string.Join( "+", filteredProjects );

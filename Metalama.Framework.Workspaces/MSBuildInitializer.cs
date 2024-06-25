@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Microsoft.Build.Locator;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
@@ -26,7 +27,10 @@ internal static class MSBuildInitializer
     {
         if ( !MSBuildLocator.IsRegistered )
         {
-            Environment.CurrentDirectory = projectDirectory;
+            if ( !Path.IsPathFullyQualified( projectDirectory ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(projectDirectory), "The path must be fully qualified." );
+            }
             
             _logger.Trace?.Log(
                 $"Initializing MSBuild with directory '{projectDirectory}' with {RuntimeInformation.FrameworkDescription} running on {RuntimeInformation.RuntimeIdentifier}." );
