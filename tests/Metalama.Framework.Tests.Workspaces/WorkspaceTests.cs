@@ -7,7 +7,7 @@ using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +19,11 @@ namespace Metalama.Framework.Tests.Workspaces
 {
     public sealed class WorkspaceTests : UnitTestClass
     {
+        private static readonly ImmutableDictionary<string, string> _buildProperties = ImmutableDictionary<string, string>.Empty
+            .Add( "DOTNET_ROOT_X64", "" )
+            .Add( "MSBUILD_EXE_PATH", "" )
+            .Add( "MSBuildSDKsPath", "" );
+
         [Fact]
         public async Task LoadProjectSingleTarget()
 
@@ -40,9 +45,9 @@ namespace Metalama.Framework.Tests.Workspaces
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
-            using var workspace = await workspaceCollection.LoadAsync( projectPath );
+            using var workspace = await workspaceCollection.LoadAsync( [projectPath], _buildProperties );
 
             Assert.Single( workspace.Projects );
             Assert.Single( workspace.Projects[0].Types );
@@ -71,7 +76,7 @@ namespace Metalama.Framework.Tests.Workspaces
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -88,9 +93,9 @@ namespace Metalama.Framework.Tests.Workspaces
                 testContext,
                 "using Metalama.Framework.Aspects;  [CompileTime] class MyClass /* Intentional syntax error in compile-time code .*/ " );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
-            using var workspace = await workspaceCollection.LoadAsync( projectPath );
+            using var workspace = await workspaceCollection.LoadAsync( [projectPath], _buildProperties );
 
             Assert.Throws<CompilationFailedException>( () => workspace.AspectInstances );
             Assert.Throws<CompilationFailedException>( () => workspace.AspectClasses );
@@ -167,7 +172,7 @@ class MyAspect : TypeAspect
 [MyAspect]
 class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -199,7 +204,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
             var typeA = workspace.Projects.Single().Types.Single( t => t.Name == "A" );
@@ -234,7 +239,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -281,7 +286,7 @@ class MyClass {}" );
                 "Project2",
                 [projectPath1] );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath1, projectPath2 );
             var typesA = workspace.SourceCode.Types.Where( t => t.Name == "A" ).ToArray();

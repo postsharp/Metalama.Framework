@@ -253,11 +253,6 @@ namespace Metalama.Framework.Workspaces
             var allProperties = properties
                 .Add( "MSBuildEnableWorkloadResolver", "false" );
 
-            /* .Add( "MSBuildEnableWorkloadResolver", "false" )
-             .Add( "DOTNET_ROOT_X64", "" )
-             .Add( "MSBUILD_EXE_PATH", "" )
-             .Add( "MSBuildSDKsPath", "" ); */
-
             var roslynWorkspace = MSBuildWorkspace.Create( allProperties );
 
             string? name = null;
@@ -323,9 +318,12 @@ namespace Metalama.Framework.Workspaces
                     _logger.Trace?.Log( $"Loaded assembly: '{assembly}' from '{assembly.Location}'." );
                 }
 
-                throw new WorkspaceLoadException(
-                    "Cannot load the projects." + Environment.NewLine + string.Join( Environment.NewLine, errors ),
-                    errors.SelectAsImmutableArray( e => e.Message ) );
+                if ( !collection.IgnoreLoadErrors )
+                {
+                    throw new WorkspaceLoadException(
+                        "Cannot load the projects." + Environment.NewLine + string.Join( Environment.NewLine, errors ),
+                        errors.SelectAsImmutableArray( e => e.Message ) );
+                }
             }
 
             return new LoadProjectSetResult( projectSet, roslynWorkspace.Diagnostics );
