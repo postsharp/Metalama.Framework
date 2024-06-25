@@ -47,6 +47,6 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Clear() => this._bag = null;
 
-        public override string ToString() => $"DiagnosticList Count={this.Count}";
+        public override string ToString() => $"DiagnosticBag Count={this.Count}";
     }
 }

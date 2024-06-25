@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 
@@ -66,6 +67,14 @@ internal sealed class CodeFixPipeline : AspectPipeline
         if ( !pipelineResult.IsSuccessful )
         {
             return FallibleResultWithDiagnostics<CodeFixPipelineResult>.Failed( diagnostics.ToImmutableArray() );
+        }
+
+        if ( diagnostics.HasError )
+        {
+            this.Logger.Trace?.Log( $"""
+                Pipeline succeeded with errors:
+                {string.Join( Environment.NewLine, diagnostics )}
+                """ );
         }
 
         var codeFixes = pipelineResult.Value.Diagnostics.CodeFixes;

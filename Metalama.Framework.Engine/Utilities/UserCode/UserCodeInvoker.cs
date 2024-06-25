@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Application;
+using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Infrastructure;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -29,17 +30,21 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     public sealed class UserCodeInvoker : IProjectService, IGlobalService
     {
         private readonly IUserCodeInvokerHook? _hook;
+        private readonly ILogger _logger;
 
         public UserCodeInvoker( GlobalServiceProvider serviceProvider )
         {
             this._hook = serviceProvider.GetService<IUserCodeInvokerHook>();
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "UserCode" );
         }
 
         /// <summary>
         /// Handles an exception and returns a value indicating whether the exception can be ignored.
         /// </summary>
-        private static bool OnException( Exception e, UserCodeExecutionContext context )
+        private bool OnException( Exception e, UserCodeExecutionContext context )
         {
+            this._logger.Trace?.Log( $"Handling exception from {context.Description}: {e}" );
+
             var compileTimeProject = context.ServiceProvider.GetService<CompileTimeProject>();
 
             var userException = e switch
@@ -145,7 +150,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             {
                 // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
                 // and it will be weird.
-                if ( OnException( e, context ) )
+                if ( this.OnException( e, context ) )
                 {
                     result = default;
 
@@ -178,7 +183,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 {
                     // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
                     // and it will be weird.
-                    if ( OnException( e, context ) )
+                    if ( this.OnException( e, context ) )
                     {
                         result = default;
 
@@ -196,7 +201,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             {
                 // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
                 // and it will be weird.
-                if ( OnException( e, context ) )
+                if ( this.OnException( e, context ) )
                 {
                     result = default;
 
@@ -329,7 +334,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 {
                     // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
                     // and it will be weird.
-                    if ( OnException( e, context ) )
+                    if ( this.OnException( e, context ) )
                     {
                         return default;
                     }
