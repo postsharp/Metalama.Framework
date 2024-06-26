@@ -32,14 +32,6 @@ internal sealed class AsyncEvent<T>
 
         public void RegisterHandler( Func<T, Task> handler ) => this._parent._handlers[handler] = handler;
 
-        public void RegisterHandler( Action<T> handler )
-            => this._parent._handlers[handler] = arg =>
-            {
-                handler( arg );
-
-                return Task.CompletedTask;
-            };
-
         public void UnregisterHandler( Func<T, Task> handler )
         {
             this._parent._handlers.TryRemove( handler, out _ );

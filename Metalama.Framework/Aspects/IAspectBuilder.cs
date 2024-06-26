@@ -85,8 +85,8 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         IAspectBuilder<T> With<T>( T declaration )
             where T : class, IDeclaration;
-        
-        [Obsolete("Use the With method.")]
+
+        [Obsolete( "Use the With method." )]
         IAspectBuilder<T> WithTarget<T>( T newTarget )
             where T : class, IDeclaration;
         
@@ -126,11 +126,11 @@ namespace Metalama.Framework.Aspects
         /// Gets an object that allows to add child advice (even to code added by aspects executed after the current one) and to validate code and code references.
         /// </summary>
         IAspectReceiver<TAspectTarget> Outbound { get; }
-        
+
         new IAspectBuilder<T> With<T>( T declaration )
             where T : class, IDeclaration;
-        
-        [Obsolete("Use the With method.")]
+
+        [Obsolete( "Use the With method." )]
         new IAspectBuilder<T> WithTarget<T>( T newTarget )
             where T : class, IDeclaration;
     }

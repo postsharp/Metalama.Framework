@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INamedType, NamedTypeBuilder>
+internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INamedType, NamedTypeBuilder>
 {
     public override AdviceKind AdviceKind => AdviceKind.IntroduceType;
 

@@ -589,7 +589,7 @@ namespace Metalama.Framework.Engine.Linking
                     continue;
                 }
 
-                if (!injectionRegistry.IsOverrideTarget(reference.ContainingSemantic.Symbol))
+                if ( !injectionRegistry.IsOverrideTarget( reference.ContainingSemantic.Symbol ) )
                 {
                     // References from non-overridden methods are skipped. 
                     continue;

@@ -15,6 +15,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration;
 /// </summary>
 internal partial class SyntaxGeneratorForIType
 {
+    // ReSharper disable once MemberCanBePrivate.Global
     public static SyntaxGenerator RoslynSyntaxGenerator { get; }
 
     static SyntaxGeneratorForIType()

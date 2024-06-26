@@ -35,10 +35,10 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public ReferenceIndexWalker(
         ProjectServiceProvider serviceProvider,
-        CancellationToken cancellationToken,
         ReferenceIndexBuilder referenceIndexBuilder,
         ReferenceIndexerOptions options,
-        SemanticModelProvider? semanticModelProvider )
+        SemanticModelProvider? semanticModelProvider,
+        CancellationToken cancellationToken )
     {
         // This class cannot run concurrently on many threads.
         this._cancellationToken = cancellationToken;
@@ -229,14 +229,14 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             this.Visit( node.AttributeLists );
             this.Visit( node.BaseList );
             this.Visit( node.ConstraintClauses );
-            
+
             if ( this._options.MustDescendIntoMembers() )
             {
                 this.VisitMembers( node.Members );
-                
+
 #if ROSLYN_4_8_0_OR_GREATER
                 this.Visit( node.ParameterList );
-#endif            
+#endif
             }
         }
     }
@@ -622,7 +622,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     public override void VisitCastExpression( CastExpressionSyntax node )
     {
         this.VisitTypeReference( node.Type, ReferenceKinds.CastType );
-        
+
         this.Visit( node.Expression );
     }
 
@@ -631,13 +631,13 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         if ( node.IsKind( SyntaxKind.AsExpression ) )
         {
             this.VisitTypeReference( node.Right, ReferenceKinds.CastType );
-        
+
             this.Visit( node.Left );
         }
         else if ( node.IsKind( SyntaxKind.IsExpression ) )
         {
             this.VisitTypeReference( node.Right, ReferenceKinds.IsType );
-        
+
             this.Visit( node.Left );
         }
         else

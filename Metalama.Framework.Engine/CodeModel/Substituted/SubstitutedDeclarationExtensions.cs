@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Substituted;
 internal static class SubstitutedDeclarationExtensions
 {
     [return: NotNullIfNotNull( nameof(typeSymbol) )]
-    public static T? MapSymbol<T>( this ISubstitutedDeclaration declaration, T? typeSymbol )
+    private static T? MapSymbol<T>( this ISubstitutedDeclaration declaration, T? typeSymbol )
         where T : class, ITypeSymbol
         => declaration.GenericMap.Map( typeSymbol );
 

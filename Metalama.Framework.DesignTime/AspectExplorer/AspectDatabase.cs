@@ -161,7 +161,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         if ( aspectTypeSymbol.ContainingAssembly.Name != aspectClassAssembly )
         {
             this._logger.Trace?.Log( $"Assembly mismatch: '{aspectTypeSymbol.ContainingAssembly.Name}' != '{aspectClassAssembly}'." );
-            
+
             return [];
         }
 
@@ -182,7 +182,9 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                                 return new AspectDatabaseAspectTransformation(
                                     GetSerializableIdForOriginalDeclaration( transformation.TargetDeclaration ),
                                     transformation.ToString()!,
-                                    transformedDeclaration.GetClosestNamedType() is { } transformedType ? GetSerializableIdForOriginalDeclaration( transformedType ) : null,
+                                    transformedDeclaration.GetClosestNamedType() is { } transformedType
+                                        ? GetSerializableIdForOriginalDeclaration( transformedType )
+                                        : null,
                                     transformedDeclaration.GetPrimarySyntaxTree()?.FilePath );
                             } )
                         .ToArray() ) );
@@ -217,7 +219,8 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             .Select(
                 aspectInstance => new AspectDatabaseAspectInstance(
                     GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
-                    new[] {
+                    new[]
+                    {
                         new AspectDatabaseAspectTransformation(
                             GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
                             $"Provide the '{aspectInstance.AspectClass}' aspect." )

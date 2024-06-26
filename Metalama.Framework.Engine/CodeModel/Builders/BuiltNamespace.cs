@@ -9,34 +9,34 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 {
-    public NamespaceBuilder NamespaceBuilder { get; }
+    private readonly NamespaceBuilder _namespaceBuilder;
 
     public BuiltNamespace( CompilationModel compilation, NamespaceBuilder builder ) : base( compilation )
     {
-        this.NamespaceBuilder = builder;
+        this._namespaceBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this.NamespaceBuilder;
+    public override DeclarationBuilder Builder => this._namespaceBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.NamespaceBuilder;
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._namespaceBuilder;
 
-    public string FullName => this.NamespaceBuilder.FullName;
+    public string FullName => this._namespaceBuilder.FullName;
 
-    public bool IsGlobalNamespace => this.NamespaceBuilder.IsGlobalNamespace;
+    public bool IsGlobalNamespace => this._namespaceBuilder.IsGlobalNamespace;
 
-    public INamespace? ContainingNamespace => this.NamespaceBuilder.ContainingNamespace;
+    public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
 
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this.NamespaceBuilder.ToRef().As<INamespaceOrNamedType>() ) );
+            this.Compilation.GetNamedTypeCollection( this._namespaceBuilder.ToRef().As<INamespaceOrNamedType>() ) );
 
     public INamespaceCollection Namespaces
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this.NamespaceBuilder.ToRef().As<INamespace>() ) );
+            this.Compilation.GetNamespaceCollection( this._namespaceBuilder.ToRef().As<INamespace>() ) );
 
     public bool IsPartial
     {

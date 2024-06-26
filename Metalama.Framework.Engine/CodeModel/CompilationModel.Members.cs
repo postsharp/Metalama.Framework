@@ -38,7 +38,7 @@ public sealed partial class CompilationModel
 
     internal ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
 
-    internal bool IsMutable { get; }
+    private bool IsMutable { get; }
 
     internal bool Contains( FieldBuilder fieldBuilder )
         => (this._fields.TryGetValue( fieldBuilder.DeclaringType.ToTypedRef(), out var fields ) && fields.Contains( fieldBuilder.ToTypedRef<IField>() ))

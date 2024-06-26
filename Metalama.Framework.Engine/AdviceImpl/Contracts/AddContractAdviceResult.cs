@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
-internal class AddContractAdviceResult<T> : AdviceResult, IAddContractAdviceResult<T>
+internal sealed class AddContractAdviceResult<T> : AdviceResult, IAddContractAdviceResult<T>
     where T : class, IDeclaration
 {
     private readonly IRef<T>? _declaration;

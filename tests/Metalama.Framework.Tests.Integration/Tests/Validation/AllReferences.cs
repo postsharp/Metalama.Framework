@@ -1,6 +1,9 @@
 #if TEST_OPTIONS
 // @RemoveOutputCode
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 #endif
+
+#if ROSLYN_4_8_0_OR_GREATER
 
 using System;
 using System.Collections.Generic;
@@ -91,7 +94,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     }
 
     [ValidatedClass]
-    internal class ValidatedList : List<int>;
+    internal class ValidatedList : List<int> { }
 
     // <target>
     [ValidatedClass]
@@ -152,13 +155,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
             // Collection expressions.
             var p = new ValidatedClass[] { };
+
             ValidatedClass[] q = [new DerivedClass()]; // array creation
-            ValidatedList r = [6];                     
-            
+            ValidatedList r = [6];
+
             // Casts
-            _ = (ValidatedClass) new object()!;
+            _ = (ValidatedClass)new object()!;
             _ = new object() as ValidatedClass;
-            
+
             // Pattern matching
             _ = new object() is ValidatedClass;
             _ = new object() is ValidatedClass { Property: 0 };
@@ -246,6 +250,8 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     internal record SomeRecord( ValidatedClass l );
 
     internal class SomeClass( ValidatedClass l );
-    
+
     internal struct SomeStruct( ValidatedClass l );
 }
+
+#endif

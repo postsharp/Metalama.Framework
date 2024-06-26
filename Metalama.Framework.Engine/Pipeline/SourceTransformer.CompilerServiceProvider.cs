@@ -20,7 +20,6 @@ public sealed partial class SourceTransformer
     private sealed class CompilerServiceProvider : IDisposableServiceProvider
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILoggerFactory _loggerFactory;
         private readonly Dictionary<Type, object> _services = new();
         private readonly IDisposable _scope;
         private readonly IUsageSession? _session;
@@ -31,11 +30,11 @@ public sealed partial class SourceTransformer
 
             var options = MSBuildProjectOptionsFactory.Default.GetProjectOptions( contextAnalyzerConfigOptionsProvider );
 
-            this._loggerFactory = serviceProvider.GetLoggerFactory();
-            this._scope = this._loggerFactory.EnterScope( options.AssemblyName ?? "Unnamed" );
+            var loggerFactory = serviceProvider.GetLoggerFactory();
+            this._scope = loggerFactory.EnterScope( options.AssemblyName ?? "Unnamed" );
 
-            this._services.Add( typeof(ILoggerFactory), this._loggerFactory );
-            this._services.Add( typeof(ILogger), new LoggerAdapter( this._loggerFactory.GetLogger( "Compiler" ) ) );
+            this._services.Add( typeof(ILoggerFactory), loggerFactory );
+            this._services.Add( typeof(ILogger), new LoggerAdapter( loggerFactory.GetLogger( "Compiler" ) ) );
             this._services.Add( typeof(IExceptionReporter), new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() ) );
             
             // Initialize usage reporting.

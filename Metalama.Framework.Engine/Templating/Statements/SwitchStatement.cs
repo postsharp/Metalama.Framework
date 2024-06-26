@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Templating.Statements;
 
-internal class SwitchStatement : IStatementImpl
+internal sealed class SwitchStatement : IStatementImpl
 {
     private readonly IExpression _expression;
     private readonly ImmutableArray<SwitchStatementSection> _sections;

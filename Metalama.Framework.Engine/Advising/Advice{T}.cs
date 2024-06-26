@@ -38,12 +38,10 @@ internal abstract class Advice<T> : Advice
 
     /// <summary>
     /// Validates the advice. Executed only if initialization passed, before implementing the advice.
-    /// </summary>
-    protected virtual void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) { }
+    /// </summary>    
+    protected virtual void Validate( CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) { }
 
-    protected override AdviceResult ExecuteCore( IAdviceExecutionContext context ) => this.Execute( context );
-
-    public new T Execute( IAdviceExecutionContext context )
+    public T Execute( IAdviceExecutionContext context )
     {
         List<ITransformation> transformations = new();
 
@@ -55,7 +53,7 @@ internal abstract class Advice<T> : Advice
         // Validate the advice against the current compilation.
         if ( !initializationDiagnostics.HasError )
         {
-            this.Validate( context.ServiceProvider, context.CurrentCompilation, initializationDiagnostics );
+            this.Validate( context.CurrentCompilation, initializationDiagnostics );
         }
 
         if ( initializationDiagnostics.HasError() )

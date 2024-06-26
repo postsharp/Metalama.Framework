@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Templating.Statements;
 
-internal class TemplateInvocationStatement : IStatementImpl
+internal sealed class TemplateInvocationStatement : IStatementImpl
 {
     private readonly TemplateInvocation _templateInvocation;
     private readonly object? _args;

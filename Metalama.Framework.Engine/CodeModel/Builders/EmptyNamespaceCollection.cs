@@ -8,15 +8,11 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyNamespaceCollection : INamespaceCollection
+internal sealed class EmptyNamespaceCollection : INamespaceCollection
 {
     public int Count => 0;
 
     public INamespace? OfName( string name ) => null;
-
-#pragma warning disable CA1822
-    public IEnumerable<INamespace> OfTypeDefinition( INamedType typeDefinition ) => Array.Empty<INamespace>();
-#pragma warning restore CA1822
 
     public IEnumerator<INamespace> GetEnumerator() => ((IEnumerable<INamespace>) Array.Empty<INamespace>()).GetEnumerator();
 

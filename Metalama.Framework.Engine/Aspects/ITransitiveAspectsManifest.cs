@@ -8,18 +8,17 @@ using Metalama.Framework.Options;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.Aspects
+namespace Metalama.Framework.Engine.Aspects;
+
+public interface ITransitiveAspectsManifest
 {
-    public interface ITransitiveAspectsManifest
-    {
-        IEnumerable<string> InheritableAspectTypes { get; }
+    IEnumerable<string> InheritableAspectTypes { get; }
 
-        IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType );
+    IEnumerable<InheritableAspectInstance> GetInheritableAspects( string aspectType );
 
-        ImmutableArray<TransitiveValidatorInstance> ReferenceValidators { get; }
+    ImmutableArray<TransitiveValidatorInstance> ReferenceValidators { get; }
 
-        ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> InheritableOptions { get; }
+    ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> InheritableOptions { get; }
 
-        ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> Annotations { get; }
-    }
+    ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> Annotations { get; }
 }

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// <summary>
 /// An <see cref="AdviceResult"/> that does not have any property.
 /// </summary>
-internal class OverrideMemberAdviceResult<TMember> : AdviceResult, IOverrideAdviceResult<TMember>
+internal sealed class OverrideMemberAdviceResult<TMember> : AdviceResult, IOverrideAdviceResult<TMember>
     where TMember : class, IMember
 {
     private readonly IRef<TMember>? _declaration;

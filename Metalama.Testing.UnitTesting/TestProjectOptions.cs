@@ -99,8 +99,6 @@ internal sealed class TestProjectOptions : DefaultProjectOptions, IDisposable
 
     public override string? SourceGeneratorTouchFile { get; }
 
-    public string ProjectDirectory => this._projectDirectory.Value;
-
     public override bool IsTest => true;
 
     public override string? BuildTouchFile { get; }

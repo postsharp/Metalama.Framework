@@ -73,7 +73,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     internal string DiagnosticSourceDescription { get; }
 
 #pragma warning disable CS0612 // Type or member is obsolete
-    public ReferenceGranularity Granularity { get; private set; } =
+    internal ReferenceGranularity Granularity { get; private set; } =
         ReferenceGranularity.SyntaxNode; // Default value for backward compatibility with serialized values.
 #pragma warning restore CS0612           // Type or member is obsolete
 

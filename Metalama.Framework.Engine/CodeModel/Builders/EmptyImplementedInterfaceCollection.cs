@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyImplementedInterfaceCollection : IImplementedInterfaceCollection
+internal sealed class EmptyImplementedInterfaceCollection : IImplementedInterfaceCollection
 {
     public int Count => 0;
 

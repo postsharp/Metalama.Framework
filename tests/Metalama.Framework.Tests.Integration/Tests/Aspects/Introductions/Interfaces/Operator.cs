@@ -1,8 +1,9 @@
 ﻿#if TEST_OPTIONS
 // @RequiredConstant(NET6_0_OR_GREATER)
+// @RequiredConstant(ROSLYN4_4_OR_GREATER)
 #endif
 
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && ROSLYN4_4_OR_GREATER
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;

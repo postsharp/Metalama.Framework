@@ -40,6 +40,6 @@ internal abstract class AdviceResult : IAdviceResult
             .Assert( d => d is not IDeclarationBuilder );
     }
 
-    protected InvalidOperationException CreateException( [CallerMemberName] string? caller = null )
+    private InvalidOperationException CreateException( [CallerMemberName] string? caller = null )
         => new( $"Cannot get {caller} when the outcome is {this.Outcome}." );
 }

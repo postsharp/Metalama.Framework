@@ -23,7 +23,9 @@ public struct AspectExplorerAspectInstance
 public interface IAspectExplorerAspectInstance
 {
     public ISymbol TargetDeclaration { get; }
+
     public AspectExplorerDeclarationKind TargetDeclarationKind { get; }
+
     public IAspectExplorerAspectTransformation[] Transformations { get; }
 }
 
@@ -43,9 +45,13 @@ public struct AspectExplorerAspectTransformation
 public interface IAspectExplorerAspectTransformation
 {
     public ISymbol TargetDeclaration { get; }
+
     public AspectExplorerDeclarationKind TargetDeclarationKind { get; }
+
     public string Description { get; }
+
     public ISymbol? TransformedDeclaration { get; }
+
     public string? FilePath { get; }
 }
 

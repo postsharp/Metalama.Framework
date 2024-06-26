@@ -15,7 +15,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.SyntaxGeneration;
 
-internal partial class SyntaxGeneratorForIType
+internal sealed partial class SyntaxGeneratorForIType
 {
     // Based on Roslyn TypeSyntaxGeneratorVisitor.
     private sealed class TypeSyntaxGeneratorVisitor : TypeVisitor<TypeSyntax>
@@ -27,7 +27,7 @@ internal partial class SyntaxGeneratorForIType
             this._syntaxGeneratorForIType = syntaxGeneratorForIType;
         }
 
-        public override TypeSyntax DefaultVisit( IType type ) => throw new AssertionFailedException();
+        protected override TypeSyntax DefaultVisit( IType type ) => throw new AssertionFailedException();
 
         private TTypeSyntax AddInformationTo<TTypeSyntax>( TTypeSyntax syntax, IType type )
             where TTypeSyntax : TypeSyntax
@@ -68,7 +68,7 @@ internal partial class SyntaxGeneratorForIType
 
         private static IdentifierNameSyntax ToIdentifierName( string identifier ) => (IdentifierNameSyntax) RoslynSyntaxGenerator.IdentifierName( identifier );
 
-        public override TypeSyntax VisitArrayType( IArrayType type )
+        protected override TypeSyntax VisitArrayType( IArrayType type )
         {
             IType underlyingType = type;
 
@@ -120,9 +120,9 @@ internal partial class SyntaxGeneratorForIType
             return this.AddInformationTo( arrayTypeSyntax, type );
         }
 
-        public override TypeSyntax VisitDynamicType( IDynamicType type ) => this.AddInformationTo( SyntaxFactory.IdentifierName( "dynamic" ), type );
+        protected override TypeSyntax VisitDynamicType( IDynamicType type ) => this.AddInformationTo( SyntaxFactory.IdentifierName( "dynamic" ), type );
 
-        public override TypeSyntax VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => throw new NotImplementedException();
+        protected override TypeSyntax VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => throw new NotImplementedException();
 
         private TypeSyntax CreateSimpleTypeSyntax( INamedType type )
         {
@@ -187,7 +187,7 @@ internal partial class SyntaxGeneratorForIType
             return null;
         }
 
-        public override TypeSyntax VisitNamedType( INamedType type )
+        protected override TypeSyntax VisitNamedType( INamedType type )
         {
             var typeSyntax = this.CreateSimpleTypeSyntax( type );
 
@@ -274,12 +274,12 @@ internal partial class SyntaxGeneratorForIType
             return this.AddInformationTo( SyntaxFactory.AliasQualifiedName( CreateGlobalIdentifier(), syntax ), ns );
         }
 
-        public override TypeSyntax VisitPointerType( IPointerType type )
+        protected override TypeSyntax VisitPointerType( IPointerType type )
         {
             return this.AddInformationTo( SyntaxFactory.PointerType( this._syntaxGeneratorForIType.TypeExpression( type.PointedAtType ) ), type );
         }
 
-        public override TypeSyntax VisitTypeParameter( ITypeParameter type )
+        protected override TypeSyntax VisitTypeParameter( ITypeParameter type )
         {
             TypeSyntax typeSyntax = this.AddInformationTo( ToIdentifierName( type.Name ), type );
 

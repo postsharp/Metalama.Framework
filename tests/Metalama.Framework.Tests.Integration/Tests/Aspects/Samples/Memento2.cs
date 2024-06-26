@@ -9,7 +9,6 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2;
 
-
 public class MementoAttribute : TypeAspect
 {
     [CompileTime]
@@ -61,7 +60,9 @@ public class MementoAttribute : TypeAspect
     {
         var tags = (Tags) meta.Tags.Source!;
 
+#pragma warning disable CS0618 // Type or member is obsolete
         return tags.SnapshopType.Constructors.Single().Invoke( tags.Fields.Select( f=>f.Source ) )!;
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Introduce]

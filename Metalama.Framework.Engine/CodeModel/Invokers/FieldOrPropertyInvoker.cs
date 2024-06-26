@@ -89,7 +89,7 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
     public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
         => this.Target == target && this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options, target );
 
-    public DelegateUserExpression GetUserExpression()
+    private DelegateUserExpression GetUserExpression()
         => new(
             context => this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor, context ),
             this.Member.Type,

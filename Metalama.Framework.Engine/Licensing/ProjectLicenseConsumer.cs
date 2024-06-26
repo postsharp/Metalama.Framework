@@ -58,6 +58,7 @@ internal sealed class ProjectLicenseConsumer : IProjectLicenseConsumer
 
     public string? LicenseString => this._consumer.LicenseString;
 
+    // ReSharper disable once EventNeverSubscribedTo.Global
     public event Action? Changed;
 
     public ILicenseConsumptionService Service { get; }

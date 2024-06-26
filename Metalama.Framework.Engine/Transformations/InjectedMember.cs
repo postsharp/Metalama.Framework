@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Transformations;
 /// Represents a member to be introduced in a type and encapsulates the information needed by the <see cref="AspectLinker"/>
 /// to perform the linking.
 /// </summary>
-internal class InjectedMember
+internal sealed class InjectedMember
 {
     public DeclarationKind Kind { get; }
 
@@ -82,16 +82,6 @@ internal class InjectedMember
         semantic,
         declaration ) { }
 
-    protected InjectedMember(
-        InjectedMember prototype,
-        MemberDeclarationSyntax syntax ) : this(
-        prototype.Transformation,
-        prototype.Kind,
-        syntax,
-        prototype.AspectLayerId,
-        prototype.Semantic,
-        prototype.Declaration ) { }
-
     internal InjectedMember(
         ISyntaxTreeTransformation? transformation,
         DeclarationKind kind,
@@ -109,6 +99,4 @@ internal class InjectedMember
     }
 
     public override string ToString() => this.Transformation?.ToString() ?? "(linker auxiliary)";
-
-    internal InjectedMember WithSyntax( MemberDeclarationSyntax newSyntax ) => new( this, newSyntax );
 }

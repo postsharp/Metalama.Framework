@@ -74,7 +74,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
         IEnumerable<AspectExplorerAspectInstance>[] result,
         CancellationToken cancellationToken )
     {
-        var version2Result = new IEnumerable<AspectExplorerAspectInstance2>[1];
+        var version2Result = new IEnumerable<IAspectExplorerAspectInstance>[1];
 
         await this.GetAspectInstancesAsync( compilation, aspectClass, version2Result, cancellationToken );
 
@@ -167,12 +167,12 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
         this._userProcessEndpoint.AspectInstancesChanged -= this.OnAspectInstancesChanged;
     }
 
-    private record AspectExplorerAspectInstance2(
+    private sealed record AspectExplorerAspectInstance2(
         ISymbol TargetDeclaration,
         AspectExplorerDeclarationKind TargetDeclarationKind,
         IAspectExplorerAspectTransformation[] Transformations ) : IAspectExplorerAspectInstance;
 
-    private record AspectExplorerAspectTransformation2(
+    private sealed record AspectExplorerAspectTransformation2(
         ISymbol TargetDeclaration,
         AspectExplorerDeclarationKind TargetDeclarationKind,
         string Description,

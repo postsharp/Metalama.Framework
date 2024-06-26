@@ -17,6 +17,7 @@ public static class RefExtensions
         => ((IRefImpl) reference).GetClosestSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
 
     // ReSharper disable once IdentifierTypo
+    // ReSharper disable once UnusedMember.Global
     [return: NotNullIfNotNull( nameof(reference) )]
     internal static IRef<TTo>? As<TFrom, TTo>( this IRef<TFrom>? reference )
         where TFrom : class, ICompilationElement

@@ -5,4 +5,4 @@ using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
-internal class RemoveAttributesAdviceResult : AdviceResult, IRemoveAttributesAdviceResult { }
+internal sealed class RemoveAttributesAdviceResult : AdviceResult, IRemoveAttributesAdviceResult;

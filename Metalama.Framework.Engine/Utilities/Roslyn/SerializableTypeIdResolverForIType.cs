@@ -9,7 +9,8 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public class SerializableTypeIdResolverForIType : SerializableTypeIdResolver<IType, INamespaceOrNamedType>
+// ReSharper disable once MemberCanBeInternal
+public sealed class SerializableTypeIdResolverForIType : SerializableTypeIdResolver<IType, INamespaceOrNamedType>
 {
     private readonly CompilationModel _compilation;
 

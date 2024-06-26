@@ -17,6 +17,8 @@ namespace Metalama.Framework.Engine.Templating;
 internal static class TypeAnnotationMapper
 {
     public const string ExpressionTypeSymbolAnnotationKind = "Metalama.ExpressionType";
+    
+    // ReSharper disable once MemberCanBePrivate.Global
     public const string ExpressionITypeAnnotationKind = "Metalama.ExpressionIType";
 
     private static readonly ConditionalWeakTable<SyntaxAnnotation, WeakReference<ITypeSymbol>> _annotationToSymbolMap = new();

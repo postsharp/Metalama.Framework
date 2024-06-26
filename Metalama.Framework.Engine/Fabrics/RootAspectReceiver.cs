@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Validation;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal class RootAspectReceiver<T> : AspectReceiver<T, int>
+internal sealed class RootAspectReceiver<T> : AspectReceiver<T, int>
     where T : class, IDeclaration
 {
     internal RootAspectReceiver(

@@ -140,7 +140,7 @@ internal sealed class ReferenceIndexBuilder
             throw new InvalidOperationException();
         }
 
-        var visitor = new ReferenceIndexWalker( this._serviceProvider, cancellationToken, this, this._options, null );
+        var visitor = new ReferenceIndexWalker( this._serviceProvider, this, this._options, null, cancellationToken );
         visitor.Visit( semanticModel );
     }
 
@@ -151,7 +151,7 @@ internal sealed class ReferenceIndexBuilder
             throw new InvalidOperationException();
         }
 
-        var visitor = new ReferenceIndexWalker( this._serviceProvider, cancellationToken, this, this._options, semanticModelProvider );
+        var visitor = new ReferenceIndexWalker( this._serviceProvider, this, this._options, semanticModelProvider, cancellationToken );
         visitor.Visit( syntaxTree );
     }
 

@@ -188,14 +188,14 @@ class MyClass {}" );
         {
             const string code = """
                                 class A;
-                                class B : A 
+                                class B : A
                                 {
                                   A f;
-                                } 
-                                class C : System.Collections.Generic.List<int> 
+                                }
+                                class C : System.Collections.Generic.List<int>
                                 {
                                   int f;
-                                } 
+                                }
                                 """;
 
             using var testContext = this.CreateTestContext();
@@ -204,7 +204,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
             var typeA = workspace.Projects.Single().Types.Single( t => t.Name == "A" );
@@ -222,15 +222,15 @@ class MyClass {}" );
         {
             const string code = """
                                 class A { public static void M() {} }
-                                class B : A 
+                                class B : A
                                 {
                                   A f;
                                   void M() => A.M();
-                                } 
-                                class C : System.Collections.Generic.List<int> 
+                                }
+                                class C : System.Collections.Generic.List<int>
                                 {
                                   int f;
-                                } 
+                                }
                                 """;
 
             using var testContext = this.CreateTestContext();
@@ -239,7 +239,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -249,7 +249,7 @@ class MyClass {}" );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
                 => d.GetIncomingReferences()
-                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.References.Select( x => x.Kinds ) ) + "]" )
+                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.References.Select( y => y.Kinds ) ) + "]" )
                     .OrderBy( x => x )
                     .ToArray();
         }
@@ -262,15 +262,15 @@ class MyClass {}" );
                                  """;
 
             const string code2 = """
-                                 class B : A 
+                                 class B : A
                                  {
                                    A f;
                                    void M() => A.M();
-                                 } 
-                                 class C : System.Collections.Generic.List<int> 
+                                 }
+                                 class C : System.Collections.Generic.List<int>
                                  {
                                    int f;
-                                 } 
+                                 }
                                  """;
 
             using var testContext = this.CreateTestContext();

@@ -12,20 +12,20 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceNamespaceTransformation : BaseTransformation, IIntroduceDeclarationTransformation
 {
-    public NamespaceBuilder IntroducedDeclaration { get; }
+    private readonly NamespaceBuilder _introducedDeclaration;
 
     public IntroduceNamespaceTransformation( Advice advice, NamespaceBuilder introducedDeclaration ) : base( advice )
     {
-        this.IntroducedDeclaration = introducedDeclaration.AssertNotNull();
+        this._introducedDeclaration = introducedDeclaration.AssertNotNull();
     }
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
-    IDeclarationBuilder IIntroduceDeclarationTransformation.DeclarationBuilder => this.IntroducedDeclaration;
+    IDeclarationBuilder IIntroduceDeclarationTransformation.DeclarationBuilder => this._introducedDeclaration;
 
-    public override IDeclaration TargetDeclaration => this.IntroducedDeclaration.ContainingDeclaration.AssertNotNull();
+    public override IDeclaration TargetDeclaration => this._introducedDeclaration.ContainingDeclaration.AssertNotNull();
 
     public override TransformationKind TransformationKind => TransformationKind.IntroduceMember;
 
-    public override FormattableString ToDisplayString() => $"Introduce {this.IntroducedDeclaration.DeclarationKind} '{this.IntroducedDeclaration}'.";
+    public override FormattableString ToDisplayString() => $"Introduce {this._introducedDeclaration.DeclarationKind} '{this._introducedDeclaration}'.";
 }

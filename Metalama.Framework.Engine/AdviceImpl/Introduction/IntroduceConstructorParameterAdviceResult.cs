@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal class IntroduceConstructorParameterAdviceResult : AdviceResult, IIntroductionAdviceResult<IParameter>
+internal sealed class IntroduceConstructorParameterAdviceResult : AdviceResult, IIntroductionAdviceResult<IParameter>
 {
     private readonly IRef<IParameter>? _declaration;
 

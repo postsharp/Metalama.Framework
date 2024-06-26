@@ -216,7 +216,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
         if ( !input.CompilationModel.PartialCompilation.SyntaxTrees.ContainsKey( syntaxTreeForGlobalAttributes.FilePath )
-            && input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() ).Any() )
+             && input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() ).Any() )
         {
             transformationCollection.AddIntroducedSyntaxTree( syntaxTreeForGlobalAttributes );
         }
@@ -300,7 +300,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var injectionRegistry = new LinkerInjectionRegistry(
             transformationComparer,
             intermediateCompilation,
-            transformationCollection.IntroducedSyntaxTrees,
             transformations,
             transformationCollection.InjectedMembers,
             transformationCollection.BuilderToTransformationMap,

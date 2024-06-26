@@ -353,7 +353,7 @@ internal sealed partial class ContextualSyntaxGenerator
         return this.EnumValueExpression( this.Type( type ), value, member?.Name );
     }
 
-    public ExpressionSyntax EnumValueExpression( INamedType type, object value )
+    private ExpressionSyntax EnumValueExpression( INamedType type, object value )
     {
         if ( type.GetSymbol() is { } symbol )
         {
@@ -893,18 +893,6 @@ internal sealed partial class ContextualSyntaxGenerator
                         ? s.WithOptionalTrailingLineFeed( this.SyntaxGenerationContext )
                         : s ) ),
             Token( this.SyntaxGenerationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, default ) );
-
-    public PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
-        SyntaxKind disableOrRestoreKind,
-        SeparatedSyntaxList<ExpressionSyntax> errorCodes )
-        => SyntaxFactory.PragmaWarningDirectiveTrivia(
-            Token( this.SyntaxGenerationContext.ElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
-            TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
-            TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
-            TokenWithTrailingSpace( disableOrRestoreKind ),
-            errorCodes,
-            Token( default, SyntaxKind.EndOfDirectiveToken, this.SyntaxGenerationContext.ElasticEndOfLineTriviaList ),
-            true );
 
     public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, IType? operandType )
     {

@@ -71,10 +71,11 @@ internal sealed class CodeFixPipeline : AspectPipeline
 
         if ( diagnostics.HasError )
         {
-            this.Logger.Trace?.Log( $"""
-                Pipeline succeeded with errors:
-                {string.Join( Environment.NewLine, diagnostics )}
-                """ );
+            this.Logger.Trace?.Log(
+                $"""
+                 Pipeline succeeded with errors:
+                 {string.Join( Environment.NewLine, diagnostics )}
+                 """ );
         }
 
         var codeFixes = pipelineResult.Value.Diagnostics.CodeFixes;

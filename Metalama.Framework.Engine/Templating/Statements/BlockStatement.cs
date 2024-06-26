@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.Statements;
 
-internal class BlockStatement : IStatementImpl
+internal sealed class BlockStatement : IStatementImpl
 {
     private readonly IStatementList _statements;
 

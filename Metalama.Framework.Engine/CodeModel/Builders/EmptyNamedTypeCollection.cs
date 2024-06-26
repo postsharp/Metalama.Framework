@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyNamedTypeCollection : INamedTypeCollection
+internal sealed class EmptyNamedTypeCollection : INamedTypeCollection
 {
     public int Count => 0;
 

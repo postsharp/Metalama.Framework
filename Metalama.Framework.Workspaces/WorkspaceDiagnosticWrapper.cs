@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Workspaces;
 
-internal class WorkspaceDiagnosticWrapper : IIntrospectionDiagnostic
+internal sealed class WorkspaceDiagnosticWrapper : IIntrospectionDiagnostic
 {
     private readonly WorkspaceDiagnostic _diagnostic;
 

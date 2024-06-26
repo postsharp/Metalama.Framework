@@ -45,11 +45,11 @@ public sealed class ReferenceValidatorRunner
             initialCompilation,
             diagnosticAdder,
             referenceValidatorProvider,
-            cancellationToken,
-            referenceIndexBuilder.ToReadOnly() );
+            referenceIndexBuilder.ToReadOnly(),
+            cancellationToken );
     }
 
-    public async Task RunReferenceValidatorsAsync(
+    internal async Task RunReferenceValidatorsAsync(
         CompilationModel initialCompilation,
         UserDiagnosticSink diagnosticAdder,
         IReferenceValidatorProvider referenceValidatorProvider,
@@ -72,16 +72,16 @@ public sealed class ReferenceValidatorRunner
             initialCompilation,
             diagnosticAdder,
             referenceValidatorProvider,
-            cancellationToken,
-            referenceIndexBuilder.ToReadOnly() );
+            referenceIndexBuilder.ToReadOnly(),
+            cancellationToken );
     }
 
     private async Task RunValidatorsCoreAsync(
         CompilationModel initialCompilation,
         UserDiagnosticSink diagnosticAdder,
         IReferenceValidatorProvider referenceValidatorProvider,
-        CancellationToken cancellationToken,
-        ReferenceIndex referenceIndex )
+        ReferenceIndex referenceIndex,
+        CancellationToken cancellationToken )
     {
         // Analyze the references.
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: initialCompilation );

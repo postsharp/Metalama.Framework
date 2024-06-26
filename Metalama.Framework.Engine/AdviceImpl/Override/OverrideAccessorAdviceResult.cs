@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
-internal class OverrideAccessorAdviceResult<TOwner> : AdviceResult, IOverrideAdviceResult<IMethod>
+internal sealed class OverrideAccessorAdviceResult<TOwner> : AdviceResult, IOverrideAdviceResult<IMethod>
     where TOwner : class, IMember
 {
     private readonly OverrideMemberAdviceResult<TOwner> _owner;

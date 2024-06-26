@@ -5,4 +5,4 @@ using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
-internal class AddInitializerAdviceResult : AdviceResult, IAddInitializerAdviceResult;
+internal sealed class AddInitializerAdviceResult : AdviceResult, IAddInitializerAdviceResult;

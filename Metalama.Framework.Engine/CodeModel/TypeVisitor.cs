@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// </summary>
 internal abstract class TypeVisitor<T>
 {
-    public virtual T Visit( IType type )
+    public T Visit( IType type )
         => type switch
         {
             IArrayType arrayType => this.VisitArrayType( arrayType ),
@@ -22,17 +22,19 @@ internal abstract class TypeVisitor<T>
             IFunctionPointerType or _ => throw new AssertionFailedException( $"Unexpected type: {type.GetType()}" ),
         };
 
-    public abstract T DefaultVisit( IType type );
+    // ReSharper disable once UnusedParameter.Global
 
-    public virtual T VisitArrayType( IArrayType arrayType ) => this.DefaultVisit( arrayType );
+    protected abstract T DefaultVisit( IType type );
 
-    public virtual T VisitDynamicType( IDynamicType dynamicType ) => this.DefaultVisit( dynamicType );
+    protected virtual T VisitArrayType( IArrayType arrayType ) => this.DefaultVisit( arrayType );
 
-    public virtual T VisitNamedType( INamedType namedType ) => this.DefaultVisit( namedType );
+    protected virtual T VisitDynamicType( IDynamicType dynamicType ) => this.DefaultVisit( dynamicType );
 
-    public virtual T VisitPointerType( IPointerType pointerType ) => this.DefaultVisit( pointerType );
+    protected virtual T VisitNamedType( INamedType namedType ) => this.DefaultVisit( namedType );
 
-    public virtual T VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => this.DefaultVisit( functionPointerType );
+    protected virtual T VisitPointerType( IPointerType pointerType ) => this.DefaultVisit( pointerType );
 
-    public virtual T VisitTypeParameter( ITypeParameter typeParameter ) => this.DefaultVisit( typeParameter );
+    protected virtual T VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => this.DefaultVisit( functionPointerType );
+
+    protected virtual T VisitTypeParameter( ITypeParameter typeParameter ) => this.DefaultVisit( typeParameter );
 }

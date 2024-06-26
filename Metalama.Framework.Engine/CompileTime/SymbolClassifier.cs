@@ -482,7 +482,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
                 // Type parameters.
                 case ITypeParameterSymbol typeParameterSymbol:
-                    var scopeFromAttribute = GetScopeFromAttributes( typeParameterSymbol );
+                    var scopeFromAttribute = GetScopeFromAttributes( tracer, typeParameterSymbol );
 
                     if ( scopeFromAttribute == TemplatingScope.CompileTimeOnly && typeParameterSymbol.ContainingSymbol is IMethodSymbol m
                                                                                && !this.GetTemplateInfo( m ).IsNone )
@@ -674,7 +674,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
                         // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
                         // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
 
-                        var combinedScope = GetScopeFromAttributes( namedType );
+                        var combinedScope = GetScopeFromAttributes( tracer, namedType );
                         TemplatingScope? declaringTypeScope = null;
 
                         // Check the scope of the containing type.
@@ -750,7 +750,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
                 case IParameterSymbol parameter:
                     {
-                        var parameterScope = GetScopeFromAttributes( parameter );
+                        var parameterScope = GetScopeFromAttributes( tracer, parameter );
 
                         if ( parameterScope != null )
                         {
@@ -804,7 +804,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
                             }
                         }
 
-                        var memberScope = GetScopeFromAttributes( symbol );
+                        var memberScope = GetScopeFromAttributes( tracer, symbol );
 
                         // If we have no attribute, look at the associated symbol (property/event).
                         if ( memberScope == null && symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
@@ -926,7 +926,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
             }
         }
 
-        TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
+        static TemplatingScope? GetScopeFromAttributes( SymbolClassifierTracer? tracer, ISymbol symbol )
         {
             // From attributes.
             var scopeFromAttributes = symbol
