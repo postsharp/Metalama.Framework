@@ -82,4 +82,6 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
     public int PredecessorDegree => this._primaryInstance.PredecessorDegree;
 
     public string DiagnosticSourceDescription => this._primaryInstance.DiagnosticSourceDescription;
+
+    ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => this._primaryInstance.PredecessorTreeClosure;
 }

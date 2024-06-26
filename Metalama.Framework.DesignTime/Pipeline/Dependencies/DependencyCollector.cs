@@ -200,4 +200,23 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
 
         this.AddDependency( masterSymbol, [dependentTree] );
     }
+
+    public void AddDependency( SyntaxTree masterTree, SyntaxTree dependentTree )
+    {
+#if DEBUG
+        if ( this.IsReadOnly )
+        {
+            throw new InvalidOperationException();
+        }
+#endif
+
+        if ( dependentTree != masterTree )
+        {
+            this.AddSyntaxTreeDependency(
+                dependentTree.FilePath,
+                this.ProjectVersion.ProjectKey,
+                masterTree.FilePath,
+                0 );
+        }
+    }
 }
