@@ -82,6 +82,8 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
             if ( !isComputingPreview && licenseVerifier != null
                                      && !licenseVerifier.VerifyCanApplyLiveTemplate( serviceProvider, aspectClass, diagnosticAdder ) )
             {
+                licenseVerifier.DetectToastNotifications();
+                
                 diagnosticAdder.Report(
                     LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
                         aspectInstance.TargetDeclaration.GetSymbol( result.Value.LastCompilation.Compilation )

@@ -23,10 +23,12 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 public abstract class CodeFixRunner
 {
     private readonly UserCodeInvoker _userCodeInvoker;
+    private readonly LicenseVerifier? _licenseVerifier;
 
     protected CodeFixRunner( in ProjectServiceProvider serviceProvider )
     {
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+        this._licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
     }
 
     private protected abstract
@@ -101,6 +103,8 @@ public abstract class CodeFixRunner
         }
         else if ( !codeFix.IsLicensed && !isComputingPreview )
         {
+            this._licenseVerifier?.DetectToastNotifications();
+            
             return CodeActionResult.Error(
                 LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic( null, (codeFixTitle, codeFix.Creator) ) );
         }
