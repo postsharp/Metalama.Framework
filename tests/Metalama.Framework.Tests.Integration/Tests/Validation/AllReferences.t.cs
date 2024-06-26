@@ -29,6 +29,11 @@
 // Warning MY001 on `Invoke`: `Reference constraint of type 'Invocation' to type 'ValidatedDelegate' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ArrayElementType' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `[new DerivedClass()]`: `Reference constraint of type 'ArrayCreation' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=CollectionExpression).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'CastType' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'CastType' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'IsType' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'IsType' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `Property`: `Reference constraint of type 'Default' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'MemberType' to type 'ValidatedClass' from property 'DerivedClass.AutomaticProperty' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `Property`: `Reference constraint of type 'OverrideMember' to type 'ValidatedClass' from property 'DerivedClass.Property' (SyntaxKind=PropertyDeclaration).`
 // Warning MY001 on `Property`: `Reference constraint of type 'Default' to type 'ValidatedClass' from method 'DerivedClass.Property.get' (SyntaxKind=IdentifierName).`
@@ -53,3 +58,6 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'AttributeType' to type 'ValidatedClass' from method 'AttributeTargets.Method(int)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'AttributeType' to type 'ValidatedClass' from method 'AttributeTargets.Method(int)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'AttributeType' to type 'ValidatedClass' from parameter 'AttributeTargets.Method(int)/p' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ParameterType' to type 'ValidatedClass' from parameter 'SomeRecord.SomeRecord(ValidatedClass)/l' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ParameterType' to type 'ValidatedClass' from parameter 'SomeClass.SomeClass(ValidatedClass)/l' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ParameterType' to type 'ValidatedClass' from parameter 'SomeStruct.SomeStruct(ValidatedClass)/l' (SyntaxKind=IdentifierName).`

@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences_Derived
         {
             builder
                 .Outbound
-                .ValidateOutboundReferences(
+                .ValidateInboundReferences(
                     Validate,
                     ReferenceGranularity.ParameterOrAttribute,
                     ReferenceKinds.All,

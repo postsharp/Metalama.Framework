@@ -7,7 +7,7 @@ using System;
 namespace Metalama.Framework.Validation;
 
 /// <summary>
-/// Options for validators added by <see cref="IValidatorReceiver.ValidateOutboundReferences(System.Action{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceGranularity,Metalama.Framework.Validation.ReferenceKinds,Metalama.Framework.Validation.ReferenceValidationOptions)"/>
+/// Options for validators added by <see cref="IValidatorReceiver.ValidateInboundReferences(System.Action{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceGranularity,Metalama.Framework.Validation.ReferenceKinds,Metalama.Framework.Validation.ReferenceValidationOptions)"/>
 /// when supplying a delegate.
 /// </summary>
 [Flags]
