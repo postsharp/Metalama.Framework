@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -14,5 +15,7 @@ namespace Metalama.Framework.Engine.Aspects
         Location? GetDiagnosticLocation( Compilation compilation );
 
         int TargetDeclarationDepth { get; }
+
+        ImmutableArray<SyntaxTree> PredecessorTreeClosure { get; }
     }
 }

@@ -56,6 +56,7 @@ internal sealed class Attribute : IAttributeImpl
 
     public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
+    [Memo]
     public ImmutableArray<SourceReference> Sources =>
         ((IDeclarationImpl) this).DeclaringSyntaxReferences.SelectAsImmutableArray( sr => new SourceReference( sr.GetSyntax(), SourceReferenceImpl.Instance ) );
 
@@ -141,4 +142,7 @@ internal sealed class Attribute : IAttributeImpl
     public override int GetHashCode() => this.AttributeData.GetHashCode();
 
     int IAspectPredecessor.PredecessorDegree => 0;
+
+    ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure
+        => this.GetPrimarySyntaxTree() is { } tree ? ImmutableArray.Create( tree ) : ImmutableArray<SyntaxTree>.Empty;
 }

@@ -45,5 +45,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public Location? GetDiagnosticLocation( Compilation compilation ) => this.Driver.DiagnosticLocation;
 
         int IAspectPredecessor.PredecessorDegree => 0;
+
+        ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
     }
 }
