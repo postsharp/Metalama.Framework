@@ -450,8 +450,8 @@ public class ReferencedClass
                     CancellationToken.None,
                     out var compileTimeProject1 ) );
 
-            // After building, getting from cache should succeed.
-            Assert.True(
+            // After building, getting from cache should fail.
+            Assert.False(
                 builder.TryGetCompileTimeProjectFromCompilation(
                     TestCompilationFactory.CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
@@ -459,9 +459,7 @@ public class ReferencedClass
                     diagnosticBag,
                     true,
                     CancellationToken.None,
-                    out var compileTimeProject2 ) );
-
-            Assert.Same( compileTimeProject1, compileTimeProject2 );
+                    out _ ) );
         }
 
         [Fact]

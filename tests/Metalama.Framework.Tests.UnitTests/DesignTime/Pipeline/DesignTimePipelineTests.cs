@@ -1566,4 +1566,46 @@ class D{version}
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
     }
+
+    [Fact]
+    public void AssemblyVersion()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = """
+                using Metalama.Framework.Aspects;
+
+                class MyAspect : MethodAspect
+                {
+                }
+                """,
+            ["target.cs"] = """
+                class Target
+                {
+                    [MyAspect]
+                    void M()
+                    {
+                    }
+                }
+                """
+        };
+
+        var compilation = CreateCSharpCompilation( code, assemblyName: "test" );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+
+        Assert.Empty( result.GetAllDiagnostics() );
+
+        code.Add( "assemblyattribute.cs", """[assembly: System.Reflection.AssemblyVersion("1.2.3.4")]""" );
+
+        var compilation2 = CreateCSharpCompilation( code, assemblyName: "test" );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out var result2 ) );
+
+        Assert.Empty( result2.GetAllDiagnostics() );
+    }
 }
