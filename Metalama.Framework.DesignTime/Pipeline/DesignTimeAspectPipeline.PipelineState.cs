@@ -210,6 +210,12 @@ internal sealed partial class DesignTimeAspectPipeline
                     throw new AssertionFailedException( "Got an incremental compilation change, but _compileTimeSyntaxTrees is null." );
                 }
 
+                // If assembly version changes during loading of VS, we don't want to pause the pipeline.
+                if ( newChanges.AssemblyIdentityChanged )
+                {
+                    OnCompileTimeChange( this._pipeline.Logger, requiresRebuild: false );
+                }
+
                 // If there is a compile-time change in references, signal a compile-time change for the current project but do not pause the pipeline.
                 if ( !newChanges.ReferencedPortableExecutableChanges.IsEmpty ||
                      newChanges.ReferencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange ) )

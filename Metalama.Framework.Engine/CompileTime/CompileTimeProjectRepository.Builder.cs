@@ -441,7 +441,7 @@ internal sealed partial class CompileTimeProjectRepository
 
             // Deserialize the project.
             if ( !this._builder.TryCompileDeserializedProject(
-                    runTimeAssemblyIdentity.Name,
+                    runTimeAssemblyIdentity,
                     manifest,
                     syntaxTrees,
                     referenceProjects,
