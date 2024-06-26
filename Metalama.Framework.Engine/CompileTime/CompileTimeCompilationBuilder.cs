@@ -154,7 +154,11 @@ internal sealed partial class CompileTimeCompilationBuilder
         return digest;
     }
 
-    private ulong ComputeProjectHash( IEnumerable<CompileTimeProject> referencedProjects, ulong sourceHash, string? redistributionLicenseKey )
+    private ulong ComputeProjectHash(
+        AssemblyIdentity assemblyIdentity,
+        IEnumerable<CompileTimeProject> referencedProjects,
+        ulong sourceHash,
+        string? redistributionLicenseKey )
     {
         XXH64 h = new();
 
@@ -164,6 +168,10 @@ internal sealed partial class CompileTimeCompilationBuilder
         // builds, one for each platform.
         h.Update( _buildId );
         this._logger.Trace?.Log( $"ProjectHash: BuildId='{_buildId}'" );
+
+        h.Update( assemblyIdentity.Name );
+        h.Update( assemblyIdentity.Version.ToString() );
+        this._logger.Trace?.Log( $"ProjectHash: AssemblyIdentity='{assemblyIdentity.Name}, {assemblyIdentity.Version}'" );
 
         foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
         {
@@ -1214,9 +1222,10 @@ internal sealed partial class CompileTimeCompilationBuilder
         ProjectLicenseInfo? projectLicenseInfo )
     {
         var targetFramework = runTimeCompilation.GetTargetFramework();
+        var assemblyIdentity = runTimeCompilation.Assembly.Identity;
 
         var sourceHash = this.ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode );
-        var projectHash = this.ComputeProjectHash( referencedProjects, sourceHash, projectLicenseInfo?.RedistributionLicenseKey );
+        var projectHash = this.ComputeProjectHash( assemblyIdentity, referencedProjects, sourceHash, projectLicenseInfo?.RedistributionLicenseKey );
 
         var outputPaths = this._outputPathHelper.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
 
@@ -1227,7 +1236,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     /// Tries to compile (to a binary image) a project given its manifest and syntax trees. 
     /// </summary>
     public bool TryCompileDeserializedProject(
-        string runTimeAssemblyName,
+        AssemblyIdentity runTimeAssemblyIdentity,
         CompileTimeProjectManifest manifest,
         IReadOnlyList<SyntaxTree> syntaxTrees,
         IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -1237,10 +1246,11 @@ internal sealed partial class CompileTimeCompilationBuilder
         out string assemblyPath,
         out string? sourceDirectory )
     {
+        var runTimeAssemblyName = runTimeAssemblyIdentity.Name;
         var targetFramework = string.IsNullOrEmpty( manifest.TargetFramework ) ? null : new FrameworkName( manifest.TargetFramework );
 
         this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-        var projectHash = this.ComputeProjectHash( referencedProjects, manifest.SourceHash, manifest.RedistributionLicenseKey );
+        var projectHash = this.ComputeProjectHash( runTimeAssemblyIdentity, referencedProjects, manifest.SourceHash, manifest.RedistributionLicenseKey );
 
         var outputPaths = this._outputPathHelper.GetOutputPaths( runTimeAssemblyName, targetFramework, projectHash );
 
