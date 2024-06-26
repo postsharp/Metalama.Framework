@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.CompileTimeCodeNotVali
         public override void AmendProject( IProjectAmender amender )
         {
             amender.SelectMany( compilation => compilation.Types )
-                .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
+                .ValidateInboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
 
             // This reference is legal.
             _ = typeof(SomeClass);

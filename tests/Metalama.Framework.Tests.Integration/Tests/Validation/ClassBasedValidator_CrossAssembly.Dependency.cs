@@ -9,7 +9,7 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Validation.ClassBasedValidato_CrossAssembly;
 
-public class TheValidator : OutboundReferenceValidator
+public class TheValidator : InboundReferenceValidator
 {
     private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
         new( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'." );
@@ -28,7 +28,7 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.SelectMany( p => p.Types ).ValidateOutboundReferences( new TheValidator() );
+        amender.SelectMany( p => p.Types ).ValidateInboundReferences( new TheValidator() );
     }
 }
 
