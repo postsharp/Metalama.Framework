@@ -198,5 +198,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         [Memo]
         public string DiagnosticSourceDescription => MetalamaStringFormatter.Format( $"aspect [{this.Aspect}] applied to '{this.TargetDeclaration}'" );
+
+        [Memo]
+        public ImmutableArray<SyntaxTree> PredecessorTreeClosure
+            => this.Predecessors.SelectMany( p => (p.Instance as IAspectPredecessorImpl)?.PredecessorTreeClosure ?? ImmutableArray<SyntaxTree>.Empty ).Distinct().ToImmutableArray();
     }
 }

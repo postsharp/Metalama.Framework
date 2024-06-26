@@ -611,4 +611,47 @@ class MyAspect : TypeAspect
         var ex = await Assert.ThrowsAsync<EmptyException>( () => this.RunPreviewAsync( code, "NS.Introduced2.cs" ) );
         Assert.Contains( "error LAMA0041", ex.Message, StringComparison.Ordinal );
     }
+
+    [Fact]
+    public async Task ExistingAssemblyAttribute()
+    {
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = """
+                using System;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+
+                class IntroduceTypeAttribute : CompilationAspect
+                {
+                    public override void BuildAspect(IAspectBuilder<ICompilation> builder)
+                    {
+                        var ns = builder.Advice.WithNamespace(builder.Target.GlobalNamespace, "MyNamespace");
+                        var c = ns.IntroduceClass("MyClass").Declaration;
+                        builder.Advice.IntroduceMethod(c, nameof(SayHello));
+                    }
+
+                    [Template]
+                    public void SayHello()
+                    {
+                        Console.WriteLine("Hello");
+                    }
+                }
+                """,
+            ["target.cs"] = """
+                using MyNamespace;
+
+                [assembly: IntroduceType]
+
+                Console.WriteLine("Hello, World!");
+
+                new MyClass().SayHello();
+                """
+        };
+
+        var result = await this.RunPreviewAsync( code, "MyNamespace.MyClass.cs" );
+
+        Assert.Contains( """Console.WriteLine("Hello");""", result, StringComparison.Ordinal );
+    }
 }

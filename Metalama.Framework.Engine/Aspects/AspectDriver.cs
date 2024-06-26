@@ -188,7 +188,9 @@ internal sealed class AspectDriver : IAspectDriver
                 pipelineConfiguration.CodeFixFilter,
                 this._codeFixAvailability );
 
-            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+            // This is used for compilation aspects.
+            // Knowing that the aspect is applied to a compilation is not particularly useful when we want to understand dependencies between source files.
+            var predecessorTrees = aspectInstance.PredecessorTreeClosure;
 
             var buildAspectExecutionContext = new UserCodeExecutionContext(
                 serviceProvider,
@@ -197,7 +199,10 @@ internal sealed class AspectDriver : IAspectDriver
                 new AspectLayerId( this._aspectClass ),
                 initialCompilationRevision,
                 targetDeclaration,
+                predecessorTrees,
                 throwOnUnsupportedDependencies: true );
+
+            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
 
             // Apply options.
             ApplyOptions( aspectInstance, targetDeclaration, diagnosticSink, userCodeInvoker, buildAspectExecutionContext );

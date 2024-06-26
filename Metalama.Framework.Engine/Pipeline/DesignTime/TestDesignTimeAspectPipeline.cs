@@ -57,5 +57,7 @@ public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol ) { }
 
         public void AddDependency( INamedTypeSymbol masterSymbol, SyntaxTree dependentTree ) { }
+
+        public void AddDependency( SyntaxTree masterTree, SyntaxTree dependentTree ) { }
     }
 }

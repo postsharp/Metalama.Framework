@@ -370,8 +370,15 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split introductions by original syntax tree.
         foreach ( var introduction in pipelineResults.IntroducedSyntaxTrees )
         {
-            var filePath = introduction.SourceSyntaxTree?.FilePath ?? inputSyntaxTreeForDetached.FilePath;
-            var builder = resultBuilders[filePath];
+            var syntaxTree = introduction.SourceSyntaxTree ?? inputSyntaxTreeForDetached;
+            var filePath = syntaxTree.FilePath;
+
+            if ( !resultBuilders.TryGetValue( filePath, out var builder ) )
+            {
+                // This happens when the source tree is not dirty, so it's not part of the PartialCompilation.
+                builder = resultBuilders[filePath] = new SyntaxTreePipelineResult.Builder( syntaxTree );
+            }
+
             builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
 
             if ( introduction.SourceSyntaxTree == null )
