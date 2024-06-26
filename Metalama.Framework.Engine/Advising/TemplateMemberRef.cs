@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Linq;
@@ -53,7 +54,7 @@ internal readonly struct TemplateMemberRef
         var symbol = type.GetSingleMemberIncludingBase(
             this._templateMember.Name,
             symbol => classifier.IsTemplate( symbol )
-                      && symbol.GetParameters().Select( p => p.Type ).SequenceEqual( parameters.Select( p => p.Type ) ) );
+                      && symbol.GetParameters().Select( p => p.Type ).SequenceEqual( parameters.Select( p => p.Type ), StructuralSymbolComparer.Default ) );
 
         var declaration = templateReflectionContext.GetCompilationModel( compilation ).Factory.GetDeclaration( symbol );
 

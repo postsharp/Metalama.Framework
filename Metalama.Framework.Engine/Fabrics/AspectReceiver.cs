@@ -182,17 +182,17 @@ namespace Metalama.Framework.Engine.Fabrics
             ValidatorDelegate<ReferenceValidationContext> validateMethod,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes )
-            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.SyntaxNode, referenceKinds, includeDerivedTypes );
+            => this.ValidateInboundReferencesCore( validateMethod, ReferenceGranularity.SyntaxNode, referenceKinds, includeDerivedTypes );
 
-        public void ValidateOutboundReferences(
+        public void ValidateInboundReferences(
             Action<ReferenceValidationContext> validateMethod,
             ReferenceGranularity granularity,
             ReferenceKinds referenceKinds,
             ReferenceValidationOptions options )
-            => this.ValidateOutboundReferencesCore( validateMethod, granularity, referenceKinds, options == ReferenceValidationOptions.IncludeDerivedTypes );
+            => this.ValidateInboundReferencesCore( validateMethod, granularity, referenceKinds, options == ReferenceValidationOptions.IncludeDerivedTypes );
 #pragma warning restore CS0612 // Type or member is obsolete
 
-        private void ValidateOutboundReferencesCore(
+        private void ValidateInboundReferencesCore(
             Delegate validateMethod, // Intentionally weakly typed since we accept two signatures.
             ReferenceGranularity granularity,
             ReferenceKinds referenceKinds,
@@ -239,9 +239,9 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         [Obsolete]
-        void IValidatorReceiver.ValidateReferences( ReferenceValidator validator ) => this.ValidateOutboundReferences( validator );
+        void IValidatorReceiver.ValidateReferences( ReferenceValidator validator ) => this.ValidateInboundReferences( validator );
 
-        public void ValidateOutboundReferences( OutboundReferenceValidator validator )
+        public void ValidateInboundReferences( InboundReferenceValidator validator )
         {
             var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
@@ -267,11 +267,11 @@ namespace Metalama.Framework.Engine.Fabrics
                             c ) ) ) );
         }
 
-        void IValidatorReceiver<TDeclaration>.ValidateOutboundReferences<TValidator>( Func<TDeclaration, TValidator> getValidator )
-            => this.ValidateOutboundReferences( ( declaration, _ ) => getValidator( declaration ) );
+        void IValidatorReceiver<TDeclaration>.ValidateInboundReferences<TValidator>( Func<TDeclaration, TValidator> getValidator )
+            => this.ValidateInboundReferences( ( declaration, _ ) => getValidator( declaration ) );
 
-        public void ValidateOutboundReferences<TValidator>( Func<TDeclaration, TTag, TValidator> getValidator )
-            where TValidator : OutboundReferenceValidator
+        public void ValidateInboundReferences<TValidator>( Func<TDeclaration, TTag, TValidator> getValidator )
+            where TValidator : InboundReferenceValidator
         {
             var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
@@ -531,7 +531,7 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         void IValidatorReceiver<TDeclaration>.ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
-            => this.ValidateOutboundReferences( ( declaration, _ ) => validator( declaration ) );
+            => this.ValidateInboundReferences( ( declaration, _ ) => validator( declaration ) );
 
         void IValidatorReceiver<TDeclaration>.ReportDiagnostic( Func<TDeclaration, IDiagnostic> diagnostic )
             => this.ReportDiagnostic( ( declaration, _ ) => diagnostic( declaration ) );

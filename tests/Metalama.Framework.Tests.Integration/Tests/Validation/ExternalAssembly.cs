@@ -19,7 +19,7 @@ public class Fabric : ProjectFabric
     public override void AmendProject( IProjectAmender amender )
     {
         amender.SelectMany( compilation => compilation.ReferencedAssemblies.OfName( typeof(Regex).Assembly.GetName().Name! ) )
-            .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
+            .ValidateInboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
     }
 
     private void Validate( ReferenceValidationContext context )

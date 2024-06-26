@@ -14,7 +14,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
 
-#pragma warning disable CS0168, CS8618, CS0169, CS0219, CS0067
+#pragma warning disable CS0168, CS8618, CS0169, CS0219, CS0067, CS9113
 
 namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 {
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         {
             builder
                 .Outbound
-                .ValidateOutboundReferences( Validate, ReferenceGranularity.Member, ReferenceKinds.All );
+                .ValidateInboundReferences( Validate, ReferenceGranularity.Member, ReferenceKinds.All );
         }
 
         private static void Validate( ReferenceValidationContext context )
@@ -157,7 +157,15 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             var p = new ValidatedClass[] { };
 
             ValidatedClass[] q = [new DerivedClass()]; // array creation
-            ValidatedList r = [6];                     // 
+            ValidatedList r = [6];
+
+            // Casts
+            _ = (ValidatedClass)new object()!;
+            _ = new object() as ValidatedClass;
+
+            // Pattern matching
+            _ = new object() is ValidatedClass;
+            _ = new object() is ValidatedClass { Property: 0 };
 
             return null;
         }
@@ -238,6 +246,12 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         [return: ValidatedClass]
         public int Method( [ValidatedClass] int p ) => p;
     }
+
+    internal record SomeRecord( ValidatedClass l );
+
+    internal class SomeClass( ValidatedClass l );
+
+    internal struct SomeStruct( ValidatedClass l );
 }
 
 #endif

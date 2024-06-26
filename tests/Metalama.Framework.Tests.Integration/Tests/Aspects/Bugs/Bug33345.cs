@@ -69,7 +69,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33345
 
         public void BuildAspect( IAspectBuilder<IDeclaration> builder )
         {
-            builder.Outbound.ValidateOutboundReferences( ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
+            builder.Outbound.ValidateInboundReferences( ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
         public void BuildEligibility( IEligibilityBuilder<IDeclaration> builder ) { }

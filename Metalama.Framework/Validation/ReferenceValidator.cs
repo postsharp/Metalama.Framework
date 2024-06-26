@@ -6,7 +6,7 @@ using System;
 namespace Metalama.Framework.Validation;
 
 [Obsolete( "Use OutboundReferenceValidator." )]
-public abstract class ReferenceValidator : OutboundReferenceValidator
+public abstract class ReferenceValidator : InboundReferenceValidator
 {
     [PublicAPI]
     public abstract void Validate( in ReferenceValidationContext context );

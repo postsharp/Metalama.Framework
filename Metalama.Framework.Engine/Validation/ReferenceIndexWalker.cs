@@ -193,7 +193,15 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             this.Visit( node.AttributeLists );
             this.Visit( node.BaseList );
             this.Visit( node.ConstraintClauses );
-            this.VisitMembers( node.Members );
+
+            if ( this._options.MustDescendIntoMembers() )
+            {
+                this.VisitMembers( node.Members );
+
+#if ROSLYN_4_8_0_OR_GREATER
+                this.Visit( node.ParameterList );
+#endif
+            }
         }
     }
 
@@ -221,7 +229,15 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             this.Visit( node.AttributeLists );
             this.Visit( node.BaseList );
             this.Visit( node.ConstraintClauses );
-            this.VisitMembers( node.Members );
+
+            if ( this._options.MustDescendIntoMembers() )
+            {
+                this.VisitMembers( node.Members );
+
+#if ROSLYN_4_8_0_OR_GREATER
+                this.Visit( node.ParameterList );
+#endif
+            }
         }
     }
 
@@ -603,6 +619,41 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         base.VisitElementAccessExpression( node );
     }
 
+    public override void VisitCastExpression( CastExpressionSyntax node )
+    {
+        this.VisitTypeReference( node.Type, ReferenceKinds.CastType );
+
+        this.Visit( node.Expression );
+    }
+
+    public override void VisitBinaryExpression( BinaryExpressionSyntax node )
+    {
+        if ( node.IsKind( SyntaxKind.AsExpression ) )
+        {
+            this.VisitTypeReference( node.Right, ReferenceKinds.CastType );
+
+            this.Visit( node.Left );
+        }
+        else if ( node.IsKind( SyntaxKind.IsExpression ) )
+        {
+            this.VisitTypeReference( node.Right, ReferenceKinds.IsType );
+
+            this.Visit( node.Left );
+        }
+        else
+        {
+            base.VisitBinaryExpression( node );
+        }
+    }
+
+    public override void VisitRecursivePattern( RecursivePatternSyntax node )
+    {
+        this.VisitTypeReference( node.Type, ReferenceKinds.IsType );
+        this.Visit( node.Designation );
+        this.Visit( node.PositionalPatternClause );
+        this.Visit( node.PropertyPatternClause );
+    }
+
     private void VisitWithReferenceKinds( SyntaxNode? node, ReferenceKinds referenceKind )
     {
 #if DEBUG
@@ -823,7 +874,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
-    private void VisitTypeReference( TypeSyntax? type, ReferenceKinds kind )
+    private void VisitTypeReference( SyntaxNode? type, ReferenceKinds kind )
     {
         if ( type == null )
         {

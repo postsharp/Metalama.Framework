@@ -63,6 +63,8 @@ public static class ReferenceKindsExtension
         ConsiderKind( ReferenceKinds.AttributeType, nameof(ReferenceKinds.AttributeType) );
         ConsiderKind( ReferenceKinds.InterfaceMemberImplementation, nameof(ReferenceKinds.InterfaceMemberImplementation) );
         ConsiderKind( ReferenceKinds.ArrayCreation, nameof(ReferenceKinds.ArrayCreation) );
+        ConsiderKind( ReferenceKinds.CastType, nameof(ReferenceKinds.CastType) );
+        ConsiderKind( ReferenceKinds.IsType, nameof(ReferenceKinds.IsType) );
 
         if ( consideredKinds != kinds )
         {

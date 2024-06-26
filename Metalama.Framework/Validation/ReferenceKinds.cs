@@ -150,6 +150,16 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Creation of an array. The reference points to the type.
         /// </summary>
-        ArrayCreation = 1 << 24
+        ArrayCreation = 1 << 24,
+
+        /// <summary>
+        /// Type of a cast (both <c>(T) x</c> and <c>x as T</c>).
+        /// </summary>
+        CastType = 1 << 25,
+
+        /// <summary>
+        /// <c>is T</c> or <c>is T {}</c> pattern matching.
+        /// </summary>
+        IsType = 1 << 26
     }
 }
