@@ -1,0 +1,79 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Validation;
+using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
+
+namespace Metalama.Framework.Engine.Validation;
+
+internal sealed class OutboundReferenceIndexBuilder : ReferenceIndexBuilder
+{
+    private readonly ConcurrentQueue<OutboundReference> _references = new();
+    private readonly ProjectServiceProvider _serviceProvider;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+    private readonly ITaskRunner _taskRunner;
+    private bool _frozen;
+
+    public OutboundReferenceIndexBuilder( ProjectServiceProvider serviceProvider )
+    {
+        this._serviceProvider = serviceProvider;
+        this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+        this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
+    }
+
+    protected override void AddReferenceCore( ISymbol referencedSymbol, ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKind )
+    {
+        if ( this._frozen )
+        {
+            throw new InvalidOperationException();
+        }
+
+        this._references.Enqueue( new OutboundReference( referencedSymbol, referencingSymbol, node, referenceKind ) );
+    }
+
+    public IReadOnlyCollection<OutboundReference> GetReferences()
+    {
+        this._frozen = true;
+
+        return this._references;
+    }
+
+    public void IndexSyntaxNode( SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken = default )
+    {
+        var walker = new ReferenceIndexWalker( this._serviceProvider, cancellationToken, this, ReferenceIndexerOptions.All, semanticModel );
+        walker.Visit( node );
+    }
+
+    public void IndexDeclaration( IDeclaration declaration, CancellationToken cancellationToken )
+    {
+        var semanticModelProvider = declaration.GetCompilationModel().CompilationContext.SemanticModelProvider;
+
+        var sources = declaration.Sources;
+
+        if ( sources.Length == 0 )
+        {
+            return;
+        }
+        else if ( sources.Length == 1 )
+        {
+            Index( sources[0] );
+        }
+        else
+        {
+            this._taskRunner.RunSynchronously( () => this._concurrentTaskRunner.RunConcurrentlyAsync( sources, Index, cancellationToken ), cancellationToken );
+        }
+
+        void Index( SourceReference source )
+        {
+            var node = source.SyntaxNodeOrToken().AsNode().AssertNotNull();
+            this.IndexSyntaxNode( node, semanticModelProvider.GetSemanticModel( node.SyntaxTree ), cancellationToken );
+        }
+    }
+}

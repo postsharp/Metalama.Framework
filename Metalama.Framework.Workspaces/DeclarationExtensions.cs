@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Metalama.Framework.Workspaces;
 
@@ -15,12 +16,27 @@ public static class DeclarationExtensions
     /// </summary>
     public static IEnumerable<IDeclarationReference> GetInboundReferences(
         this IDeclaration declaration,
-        ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
+        ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration,
+        CancellationToken cancellationToken = default )
     {
         var service = declaration.Compilation.Project.ServiceProvider.GetRequiredService<WorkspaceIntrospectionService>();
         var graph = service.GetReferenceGraph();
 
-        return graph.GetInboundReferences( declaration, childKinds );
+        return graph.GetInboundReferences( declaration, childKinds, cancellationToken );
+    }
+
+    /// <summary>
+    /// Gets inbound declaration references, i.e. the list of declarations that use the given declaration,
+    /// in the projects loaded in the current <see cref="Workspace"/>. 
+    /// </summary>
+    public static IEnumerable<IDeclarationReference> GetOutboundReferences(
+        this IDeclaration declaration,
+        CancellationToken cancellationToken = default )
+    {
+        var service = declaration.Compilation.Project.ServiceProvider.GetRequiredService<IProjectIntrospectionService>();
+        var graph = service.GetReferenceGraph( declaration.Compilation );
+
+        return graph.GetOutboundReferences( declaration, cancellationToken );
     }
 
     /// <summary>

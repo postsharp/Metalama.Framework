@@ -110,7 +110,7 @@ public static class DeclarationExtensions
     internal static Location? GetDiagnosticLocation( this IDeclaration declaration )
         => declaration switch
         {
-            IDiagnosticLocationImpl hasLocation => hasLocation.DiagnosticLocation,
+            ISdkDeclaration hasLocation => hasLocation.DiagnosticLocation,
             _ => null
         };
 

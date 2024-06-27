@@ -184,7 +184,7 @@ class MyClass {}" );
         }
 
         [Fact]
-        public async Task DeclarationReferences()
+        public async Task InboundDeclarationReferences()
         {
             const string code = """
                                 class A;
@@ -204,7 +204,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
             var typeA = workspace.Projects.Single().Types.Single( t => t.Name == "A" );
@@ -218,7 +218,38 @@ class MyClass {}" );
         }
 
         [Fact]
-        public async Task SyntaxReferences()
+        public async Task OutboundDeclarationReferences()
+        {
+            const string code = """
+                                class A;
+                                class B : A 
+                                {
+                                  A f;
+                                  int g;
+                                } 
+                                """;
+
+            using var testContext = this.CreateTestContext();
+
+            var projectPath = await CreateMetalamaEnabledProjectAsync(
+                testContext,
+                code );
+
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+
+            using var workspace = await workspaceCollection.LoadAsync( projectPath );
+            var typeB = workspace.Projects.Single().Types.Single( t => t.Name == "B" );
+
+            var references = GetReferences( typeB );
+
+            Assert.Equal(  ["B -> A", "B.f -> A", "B.g -> int"], references );
+
+            static IEnumerable<string> GetReferences( IDeclaration d )
+                => d.GetOutboundReferences().Select( x => x.ToString() ).OrderBy( x => x );
+        }
+
+        [Fact]
+        public async Task InboundSyntaxReferences()
         {
             const string code = """
                                 class A { public static void M() {} }
@@ -239,7 +270,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -255,7 +286,7 @@ class MyClass {}" );
         }
 
         [Fact]
-        public async Task CrossProjectReferences()
+        public async Task CrossProjectInboundReferences()
         {
             const string code1 = """
                                  public class A { public static void M() {} }
@@ -295,7 +326,7 @@ class MyClass {}" );
 
             var references = GetReferences( typesA.Single() );
 
-            Assert.Equal( ["'B.f' -> 'A'", "'B.M()' -> 'A.M()'", "'B' -> 'A'"], references );
+            Assert.Equal( ["B -> A", "B.f -> A", "B.M() -> A.M()"], references );
 
             static IEnumerable<string> GetReferences( IDeclaration d ) => d.GetInboundReferences().Select( x => x.ToString() ).OrderBy( x => x );
         }

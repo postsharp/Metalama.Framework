@@ -37,7 +37,11 @@ public sealed class ReferenceValidatorRunner
         CancellationToken cancellationToken )
     {
         // Collect all references.
-        var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Options, SymbolEqualityComparer.Default );
+        var referenceIndexBuilder = new InboundReferenceIndexBuilder(
+            this._serviceProvider,
+            referenceValidatorProvider.Options,
+            SymbolEqualityComparer.Default );
+
         referenceIndexBuilder.IndexSemanticModel( semanticModel, cancellationToken );
 
         // Run the validator.
@@ -57,7 +61,11 @@ public sealed class ReferenceValidatorRunner
     {
         // Collect all references.
         var semanticModelProvider = initialCompilation.CompilationContext.SemanticModelProvider;
-        var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Options, SymbolEqualityComparer.Default );
+
+        var referenceIndexBuilder = new InboundReferenceIndexBuilder(
+            this._serviceProvider,
+            referenceValidatorProvider.Options,
+            SymbolEqualityComparer.Default );
 
         await this._concurrentTaskRunner.RunConcurrentlyAsync(
             initialCompilation.PartialCompilation.SyntaxTrees.Values,
@@ -81,7 +89,7 @@ public sealed class ReferenceValidatorRunner
         UserDiagnosticSink diagnosticAdder,
         IReferenceValidatorProvider referenceValidatorProvider,
         CancellationToken cancellationToken,
-        ReferenceIndex referenceIndex )
+        InboundReferenceIndex referenceIndex )
     {
         // Analyze the references.
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: initialCompilation );

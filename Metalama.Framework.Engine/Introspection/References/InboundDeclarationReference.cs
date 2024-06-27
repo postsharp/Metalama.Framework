@@ -12,12 +12,13 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection.References;
 
-internal class DeclarationReference( ISymbol referencedSymbol, ReferencingSymbolInfo referencingSymbolInfo, CompilationModel compilation )
+internal class InboundDeclarationReference( ISymbol referencedSymbol, ReferencingSymbolInfo referencingSymbolInfo, CompilationModel compilation )
     : IDeclarationReference
 {
     [Memo]
     public IDeclaration DestinationDeclaration => compilation.Factory.GetDeclaration( referencedSymbol );
-
+    
+    [Memo]
     public IDeclaration OriginDeclaration => compilation.Factory.GetDeclaration( referencingSymbolInfo.ReferencingSymbol );
 
     public ReferenceKinds Kinds => referencingSymbolInfo.Nodes.ReferenceKinds;
@@ -30,5 +31,5 @@ internal class DeclarationReference( ISymbol referencedSymbol, ReferencingSymbol
                 n.ReferenceKind,
                 new SourceReference( n.Syntax.AsNode() ?? (object) n.Syntax.AsToken(), SourceReferenceImpl.Instance ) ) );
 
-    public override string ToString() => $"'{this.OriginDeclaration}' -> '{this.DestinationDeclaration}'";
+    public override string ToString() => $"{this.OriginDeclaration} -> {this.DestinationDeclaration}";
 }

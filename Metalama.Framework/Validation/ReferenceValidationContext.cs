@@ -83,8 +83,8 @@ namespace Metalama.Framework.Validation
         [Obsolete( "Use References to get all references, then ReferenceInstance.ReferenceKind." )]
         public abstract ReferenceKinds ReferenceKinds { get; }
 
-        [Obsolete( "Use References to get all references, then ReferenceInstance.DiagnosticLocation." )]
-        public IDiagnosticLocation DiagnosticLocation => this.Source.DiagnosticLocation;
+        [Obsolete( "Use References to get all references. The SourceReference implements IDiagnosticLocation." )]
+        public IDiagnosticLocation DiagnosticLocation => this.Source;
 
         [Obsolete( "Use References to get all references, then ReferenceInstance.Source." )]
         public SourceReference Source => this.References.Single().Source;

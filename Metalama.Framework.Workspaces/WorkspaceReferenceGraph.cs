@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Workspaces;
 
@@ -16,19 +18,29 @@ internal sealed class WorkspaceReferenceGraph : IReferenceGraph
         this._workspace = workspace;
     }
 
-    public IReadOnlyCollection<IDeclarationReference> GetInboundReferences(
+    public IEnumerable<IDeclarationReference> GetInboundReferences(
         IDeclaration destination,
-        ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
+        ReferenceGraphChildKinds childKinds,
+        CancellationToken cancellationToken )
     {
-        var result = new List<IDeclarationReference>();
+        return this._workspace.Value.Projects
+            .SelectMany(
+                project =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
 
-        foreach ( var project in this._workspace.Value.Projects )
-        {
-            var service = project.Compilation.Project.ServiceProvider.GetRequiredService<IProjectIntrospectionService>();
-            var graph = service.GetReferenceGraph( project.Compilation );
-            result.AddRange( graph.GetInboundReferences( destination, childKinds ) );
-        }
+                    var service = project.Compilation.Project.ServiceProvider.GetRequiredService<IProjectIntrospectionService>();
+                    var graph = service.GetReferenceGraph( project.Compilation );
 
-        return result;
+                    return graph.GetInboundReferences( destination, childKinds, cancellationToken );
+                } );
+    }
+
+    public IEnumerable<IDeclarationReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
+    {
+        var service = origin.Compilation.Project.ServiceProvider.GetRequiredService<IProjectIntrospectionService>();
+        var graph = service.GetReferenceGraph( origin.Compilation );
+
+        return graph.GetOutboundReferences( origin, cancellationToken );
     }
 }

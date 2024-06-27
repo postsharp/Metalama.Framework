@@ -1,9 +1,10 @@
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Introspection;
 
-public readonly struct Reference
+public readonly struct Reference : IDiagnosticLocation
 {
     public IDeclarationReference DeclarationReference { get; }
 

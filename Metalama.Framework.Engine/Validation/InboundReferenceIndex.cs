@@ -7,11 +7,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal sealed class ReferenceIndex
+internal sealed class InboundReferenceIndex
 {
     private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _explicitReferences;
 
-    internal ReferenceIndex( ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> explicitReferences )
+    internal InboundReferenceIndex( ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> explicitReferences )
     {
         this._explicitReferences = explicitReferences;
     }

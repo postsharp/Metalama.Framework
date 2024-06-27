@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code;
 /// Represents a syntax node in source code. Using <c>Metalama.Framework.Sdk</c> you can use <c>ToSyntaxNodeOrToken</c> to convert it to a Roslyn object.
 /// </summary>
 [CompileTime]
-public readonly struct SourceReference
+public readonly struct SourceReference : IDiagnosticLocation
 {
     private readonly ISourceReferenceImpl _sourceReferenceImpl;
 
@@ -39,13 +39,7 @@ public readonly struct SourceReference
     /// This property evaluates to <c>false</c> only for partial methods without implementation.
     /// </summary>
     public bool IsImplementationPart => this._sourceReferenceImpl.IsImplementationPart( this );
-
-    /// <summary>
-    /// Gets the location where the diagnostic should be reported for the current syntax. Typically this is the identifier of the declaration,
-    /// but the location can be a keyword for nodes that do not have an identifier.
-    /// </summary>
-    public IDiagnosticLocation DiagnosticLocation => this._sourceReferenceImpl.GetDiagnosticLocation( this );
-
+    
     /// <summary>
     /// Gets source file, line and column for the node.
     /// </summary>

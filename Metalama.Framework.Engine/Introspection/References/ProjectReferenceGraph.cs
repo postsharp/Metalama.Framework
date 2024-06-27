@@ -2,25 +2,78 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Introspection;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Introspection.References;
 
-internal sealed class ProjectReferenceGraph( CompilationModel compilation, ReferenceIndex referenceIndex ) : IReferenceGraph
+internal sealed class ProjectReferenceGraph : IReferenceGraph
 {
+    private readonly ProjectServiceProvider _serviceProvider;
+    private readonly CompilationModel _compilation;
+    private readonly object _referenceIndexSync = new();
+    private readonly ITaskRunner _taskRunner;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+
     private WeakCache<IDeclaration, IReadOnlyCollection<IDeclarationReference>>? _includeDerivedTypesCache;
     private WeakCache<IDeclaration, IReadOnlyCollection<IDeclarationReference>>? _includeContainedDeclarationsCache;
     private WeakCache<IDeclaration, IReadOnlyCollection<IDeclarationReference>>? _includeAllCache;
     private WeakCache<IDeclaration, IReadOnlyCollection<IDeclarationReference>>? _includeNoChildrenCache;
+    private volatile InboundReferenceIndex? _referenceIndex;
 
-    public IReadOnlyCollection<IDeclarationReference> GetInboundReferences(
+    public ProjectReferenceGraph( ProjectServiceProvider serviceProvider, CompilationModel compilation )
+    {
+        this._serviceProvider = serviceProvider;
+        this._compilation = compilation;
+        this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
+        this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+    }
+
+    private InboundReferenceIndex GetInboundReferencesIndex()
+    {
+        if ( this._referenceIndex != null )
+        {
+            return this._referenceIndex;
+        }
+
+        lock ( this._referenceIndexSync )
+        {
+            if ( this._referenceIndex != null )
+            {
+                return this._referenceIndex;
+            }
+
+            var compilationModel = this._compilation;
+            var compilationContext = compilationModel.CompilationContext;
+
+            var builder = new InboundReferenceIndexBuilder(
+                compilationModel.Project.ServiceProvider,
+                ReferenceIndexerOptions.All,
+                StructuralSymbolComparer.Default );
+
+            this._taskRunner.RunSynchronously(
+                () => this._concurrentTaskRunner.RunConcurrentlyAsync(
+                    compilationContext.Compilation.SyntaxTrees,
+                    tree => builder.IndexSyntaxTree( tree, compilationContext.SemanticModelProvider ),
+                    CancellationToken.None ) );
+
+            return this._referenceIndex = builder.ToReadOnly();
+        }
+    }
+
+    public IEnumerable<IDeclarationReference> GetInboundReferences(
         IDeclaration destination,
-        ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
+        ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration,
+        CancellationToken cancellationToken = default )
     {
         var cache = childKinds switch
         {
@@ -42,6 +95,33 @@ internal sealed class ProjectReferenceGraph( CompilationModel compilation, Refer
         return cache.GetOrAdd( destination, _ => this.GetInboundReferencesCore( destination, childKinds ) );
     }
 
+    public IEnumerable<IDeclarationReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
+    {
+        var builder = new OutboundReferenceIndexBuilder( this._serviceProvider );
+        builder.IndexDeclaration( origin, cancellationToken );
+
+        return builder.GetReferences()
+            .GroupBy( r => new SymbolPair( r.ReferencedSymbol, r.ReferencingSymbol ) )
+            .Select(
+                group => new OutboundDeclarationReference(
+                    group.Key.Referenced,
+                    group.Key.Referencing,
+                    group,
+                    this._compilation ) );
+    }
+
+    private sealed record SymbolPair( ISymbol Referenced, ISymbol Referencing )
+    {
+        public override int GetHashCode()
+            => HashCode.Combine(
+                SymbolEqualityComparer.Default.GetHashCode( this.Referenced ),
+                SymbolEqualityComparer.Default.GetHashCode( this.Referencing ) );
+
+        public bool Equals( SymbolPair? other )
+            => other != null && SymbolEqualityComparer.Default.Equals( this.Referenced, other.Referenced )
+                             && SymbolEqualityComparer.Default.Equals( this.Referencing, other.Referencing );
+    }
+
     private IReadOnlyCollection<IDeclarationReference> GetInboundReferencesCore( IDeclaration destination, ReferenceGraphChildKinds childKinds )
     {
         var symbol = destination.GetSymbol();
@@ -50,13 +130,13 @@ internal sealed class ProjectReferenceGraph( CompilationModel compilation, Refer
         {
             return [];
         }
-        else if ( referenceIndex.TryGetInboundReferences( symbol, out var referencedSymbolInfo ) )
+        else if ( this.GetInboundReferencesIndex().TryGetInboundReferences( symbol, out var referencedSymbolInfo ) )
         {
             var descendants = referencedSymbolInfo.DescendantsAndSelf( ChildKindHelper.ToChildKinds( childKinds ) );
 
             return descendants
                 .SelectMany( d => d.References.Select( r => (d.ReferencedSymbol, ReferencingSymbolInfo: r) ) )
-                .Select( x => new DeclarationReference( x.ReferencedSymbol, x.ReferencingSymbolInfo, compilation ) )
+                .Select( x => new InboundDeclarationReference( x.ReferencedSymbol, x.ReferencingSymbolInfo, this._compilation ) )
                 .ToReadOnlyList();
         }
         else
