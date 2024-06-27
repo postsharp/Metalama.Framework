@@ -16,7 +16,6 @@ using System.Runtime.Versioning;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -163,8 +162,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return symbol.DeclaringSyntaxReferences.Any(
                 r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
         }
-
-       
 
         internal static bool IsInterfaceMemberImplementation( this ISymbol symbol )
             => symbol switch
