@@ -15,14 +15,7 @@
     <RoslynVersion>4.10.0</RoslynVersion>
     <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
     <xUnitApiVersion>2.4.2</xUnitApiVersion>
-  </PropertyGroup>
-  <PropertyGroup  Condition="'$(TargetFramework)'=='net8.0'">
     <MicrosoftBuildVersion>17.10.4</MicrosoftBuildVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'=='net6.0'">
-    <!-- MSBuild v17.4.0 does not support .NET 6.0 and there seems to be no benefit in referencing a high version. -->
-    <MicrosoftBuildVersion >17.3.2</MicrosoftBuildVersion>
-
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DiffEngine" Version="15.3.0" />
