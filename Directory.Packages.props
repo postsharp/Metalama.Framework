@@ -36,6 +36,7 @@
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Net.Compilers.Toolset" Version="$(RoslynVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(RoslynVersion)"/>
     <!-- This version is also used in Metalama.Framework.Private\Directory.Packages.props. -->
     <!-- The version of Microsoft.VisualStudio.Threading must match the one used by StreamJsonRpc -->
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.8.55" />
