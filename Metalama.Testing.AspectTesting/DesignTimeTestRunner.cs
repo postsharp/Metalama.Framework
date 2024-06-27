@@ -44,7 +44,7 @@ namespace Metalama.Testing.AspectTesting
                     ? SyntaxFactory.CompilationUnit()
                     : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
 
-                await testResult.SyntaxTrees.Single( x =>x.Kind is TestSyntaxTreeKind.Default ).SetRunTimeCodeAsync( introducedSyntaxRoot );
+                await testResult.SyntaxTrees.Single( x => x.Kind is TestSyntaxTreeKind.Default ).SetRunTimeCodeAsync( introducedSyntaxRoot );
                 
                 testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
 

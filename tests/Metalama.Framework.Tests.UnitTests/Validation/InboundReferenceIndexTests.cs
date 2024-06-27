@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Validation;
 
-public class InboundReferenceIndexTests : UnitTestClass
+public sealed class InboundReferenceIndexTests : UnitTestClass
 {
     [Fact]
     public void BaseType()
@@ -314,7 +314,7 @@ public class InboundReferenceIndexTests : UnitTestClass
     }
 }
 
-public static class SymbolFormatter
+internal static class SymbolFormatter
 {
     public static string ToTestName( this ISymbol symbol )
         => symbol switch

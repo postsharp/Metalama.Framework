@@ -50,7 +50,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     private bool IsEmpty
         => this.SyntaxTreeResults.IsEmpty && this.IntroducedSyntaxTrees.IsEmpty && this.ReferenceValidators.IsEmpty && this._inheritableAspects.IsEmpty;
 
-    internal DesignTimeReferenceValidatorCollection ReferenceValidators { get; } = DesignTimeReferenceValidatorCollection.Empty;
+    public DesignTimeReferenceValidatorCollection ReferenceValidators { get; } = DesignTimeReferenceValidatorCollection.Empty;
 
     public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
@@ -370,8 +370,15 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split introductions by original syntax tree.
         foreach ( var introduction in pipelineResults.IntroducedSyntaxTrees )
         {
-            var filePath = introduction.SourceSyntaxTree?.FilePath ?? inputSyntaxTreeForDetached.FilePath;
-            var builder = resultBuilders[filePath];
+            var syntaxTree = introduction.SourceSyntaxTree ?? inputSyntaxTreeForDetached;
+            var filePath = syntaxTree.FilePath;
+
+            if ( !resultBuilders.TryGetValue( filePath, out var builder ) )
+            {
+                // This happens when the source tree is not dirty, so it's not part of the PartialCompilation.
+                builder = resultBuilders[filePath] = new SyntaxTreePipelineResult.Builder( syntaxTree );
+            }
+
             builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
 
             if ( introduction.SourceSyntaxTree == null )
@@ -467,9 +474,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 var predecessorDeclarationSymbol = predecessor.Instance switch
                 {
                     IAspectInstance predecessorAspect => reflectionMapper.GetTypeSymbol( predecessorAspect.Aspect.GetType() ),
+
                     // Can't use fabricInstance.Fabric.GetType() here, because for type fabrics,
                     // we need the original type (e.g. C.Fabric), not the rewritten type (e.g. C_Fabric).
-                    IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName( ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
+                    IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName(
+                        ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
                     _ => null
                 };
 

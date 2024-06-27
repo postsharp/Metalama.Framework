@@ -442,6 +442,7 @@ internal sealed partial class ProjectVersionProvider
                     second.SyntaxTreeChanges,
                     second.ReferencedCompilationChanges,
                     second.ReferencedPortableExecutableChanges,
+                    second.AssemblyIdentityChanged,
                     second.HasCompileTimeCodeChange,
                     second.IsIncremental );
             }
@@ -453,6 +454,7 @@ internal sealed partial class ProjectVersionProvider
                     first.SyntaxTreeChanges,
                     first.ReferencedCompilationChanges,
                     first.ReferencedPortableExecutableChanges,
+                    first.AssemblyIdentityChanged,
                     first.HasCompileTimeCodeChange,
                     first.IsIncremental );
             }
@@ -535,6 +537,7 @@ internal sealed partial class ProjectVersionProvider
                     mergedSyntaxTreeBuilder.ToImmutable(),
                     mergedReferencedCompilationBuilder.ToImmutable(),
                     mergedReferencedPortableExecutablesBuilder.ToImmutable(),
+                    first.AssemblyIdentityChanged | second.AssemblyIdentityChanged,
                     first.HasCompileTimeCodeChange | second.HasCompileTimeCodeChange,
                     first.IsIncremental );
             }

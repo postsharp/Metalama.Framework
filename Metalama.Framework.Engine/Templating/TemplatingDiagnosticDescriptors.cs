@@ -616,13 +616,5 @@ namespace Metalama.Framework.Engine.Templating
                 "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity.",
                 Error,
                 "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity." );
-
-        internal static readonly DiagnosticDefinition AsVoidRequiresCastExpression
-            = new(
-                "LAMA0285",
-                _category,
-                "The argument of meta.AsVoid must be a cast expression. The cast will be ignored in the generated code.",
-                Error,
-                "The argument of meta.AsVoid must be a cast expression. The cast will be ignored in the generated code." );
     }
 }

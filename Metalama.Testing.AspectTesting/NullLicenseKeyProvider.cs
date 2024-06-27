@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Testing.AspectTesting;
 
-internal class NullLicenseKeyProvider : ILicenseKeyProvider
+internal sealed class NullLicenseKeyProvider : ILicenseKeyProvider
 {
     public bool TryGetLicenseKey( string name, out string? licenseKey )
     {

@@ -23,7 +23,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
 
     protected abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default );
 
-    public bool TryGetWorkspace( [NotNullWhen( true )] out Workspace? workspace )
+    internal bool TryGetWorkspace( [NotNullWhen( true )] out Workspace? workspace )
     {
         var task = this.GetWorkspaceAsync();
 
@@ -43,7 +43,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
         }
     }
 
-    public async ValueTask<Microsoft.CodeAnalysis.Project?> GetProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+    internal async ValueTask<Microsoft.CodeAnalysis.Project?> GetProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
         var workspace = await this.GetWorkspaceAsync( cancellationToken );
 

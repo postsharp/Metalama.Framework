@@ -58,6 +58,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<string, ReferenceChangeKind> ReferencedPortableExecutableChanges { get; }
 
+        public bool AssemblyIdentityChanged { get; }
+
         public ProjectKey ProjectKey => this.NewProjectVersion.ProjectKey;
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
             ImmutableDictionary<string, ReferenceChangeKind> referencedPortableExecutableChanges,
+            bool assemblyIdentityChanged,
             bool hasCompileTimeCodeChange,
             bool isIncremental )
         {
@@ -85,6 +88,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.ReferencedCompilationChanges = referencedCompilationChanges;
             this.ReferencedPortableExecutableChanges = referencedPortableExecutableChanges;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
+            this.AssemblyIdentityChanged = assemblyIdentityChanged;
             this.IsIncremental = isIncremental;
         }
 
@@ -98,8 +102,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 ImmutableDictionary<string, SyntaxTreeChange>.Empty,
                 ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
                 ImmutableDictionary<string, ReferenceChangeKind>.Empty,
-                false,
-                oldCompilation != null );
+                assemblyIdentityChanged: false,
+                hasCompileTimeCodeChange: false,
+                isIncremental: oldCompilation != null );
 
         public bool HasChange => this.HasCompileTimeCodeChange || this.SyntaxTreeChanges.Count > 0 || this.ReferencedCompilationChanges.Count > 0;
 
@@ -124,8 +129,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 syntaxTreeChanges,
                 projectReferences,
                 portableExecutableReferences,
-                true,
-                false );
+                assemblyIdentityChanged: true,
+                hasCompileTimeCodeChange: true,
+                isIncremental: false );
         }
 
         public static CompilationChanges Incremental(
@@ -152,7 +158,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             // Change in the assembly identity (and assembly version in particular) should be considered a compile-time change.
             // This is important especially because on start, VS first creates compilations without assembly versions (0.0.0.0)
             // and only afterwards creates compilations with correct versions.
-            hasCompileTimeChange = hasCompileTimeChange || oldProjectVersion.Compilation.Assembly.Identity != newCompilation.Assembly.Identity;
+            var assemblyIdentityChanged = oldProjectVersion.Compilation.Assembly.Identity != newCompilation.Assembly.Identity;
+            hasCompileTimeChange |= assemblyIdentityChanged;
 
             // Process new trees.
             var lastTrees = oldProjectVersion.SyntaxTrees;
@@ -263,8 +270,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 syntaxTreeChanges.ToImmutable(),
                 referenceChanges.ProjectReferenceChanges,
                 referenceChanges.PortableExecutableReferenceChanges,
+                assemblyIdentityChanged,
                 hasCompileTimeChange,
-                true );
+                isIncremental: true );
 
             return compilationChanges;
         }

@@ -5,7 +5,7 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ReferenceValidatorProperties : IReferenceValidatorProperties
+internal sealed class ReferenceValidatorProperties : IReferenceValidatorProperties
 {
     internal ReferenceValidatorProperties(
         IDeclaration validatedDeclaration,

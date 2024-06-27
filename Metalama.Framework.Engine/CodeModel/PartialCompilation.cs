@@ -59,11 +59,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public abstract ImmutableHashSet<INamespaceSymbol> Namespaces { get; }
 
-        [Memo]
-        internal ImmutableHashSet<INamespaceSymbol> ParentNamespaces
-            => this.Namespaces.SelectRecursiveInternal( n => n.IsGlobalNamespace ? null : n.ContainingNamespace )
-                .ToImmutableHashSet();
-
         /// <summary>
         /// Gets a value indicating whether the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
         /// </summary>
@@ -207,7 +202,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
         /// </summary>
-        public static PartialCompilation CreatePartial(
+        internal static PartialCompilation CreatePartial(
             Compilation compilation,
             SyntaxTree syntaxTree,
             ImmutableArray<ManagedResource> resources = default )
@@ -391,7 +386,7 @@ namespace Metalama.Framework.Engine.CodeModel
                    .OrderBy( x => x.FilePath.Length )
                    .ThenBy( x => x.FilePath )
                    .FirstOrDefault()
-                ?? this.Compilation.CreateEmptySyntaxTree( "MetalamaAssemblyAttributes.cs" );
+               ?? this.Compilation.CreateEmptySyntaxTree( "MetalamaAssemblyAttributes.cs" );
 
         private static void Validate( IReadOnlyCollection<SyntaxTreeTransformation>? transformations )
         {

@@ -12,7 +12,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
-internal class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IFieldOrPropertyOrIndexer>
+internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IFieldOrPropertyOrIndexer>
 {
     public FieldOrPropertyOrIndexerContractAdvice(
         AdviceConstructorParameters<IFieldOrPropertyOrIndexer> parameters,

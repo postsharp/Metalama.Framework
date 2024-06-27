@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
-internal class ParameterContractAdvice : ContractAdvice<IParameter>
+internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
 {
     public ParameterContractAdvice(
         AdviceConstructorParameters<IParameter> parameters,

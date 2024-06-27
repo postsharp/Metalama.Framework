@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal class OutboundActionCollectionContext : DeclarationSelectionContext
+internal sealed class OutboundActionCollectionContext : DeclarationSelectionContext
 {
     public OutboundActionCollector Collector { get; }
 

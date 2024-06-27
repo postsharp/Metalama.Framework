@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public class ReferenceValidatorInstance : ValidatorInstance
+public sealed class ReferenceValidatorInstance : ValidatorInstance
 {
     public ReferenceValidatorInstance(
         IDeclaration validatedDeclaration,

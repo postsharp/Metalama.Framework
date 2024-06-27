@@ -8,17 +8,13 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.Validation;
 
-internal class ReferenceIndexObserver : IReferenceIndexObserver
+internal sealed class ReferenceIndexObserver : IReferenceIndexObserver
 {
     private readonly ConcurrentQueue<ISymbol> _resolvedSymbols = new();
     private readonly ConcurrentQueue<SemanticModel> _resolvedSemanticModels = new();
 
-    public IReadOnlyCollection<ISymbol> ResolvedSymbols => this._resolvedSymbols;
-
     public IReadOnlyList<string> ResolvedSymbolNames
         => this._resolvedSymbols.SelectAsReadOnlyCollection( s => s.ToTestName() ).OrderBy( x => x ).Distinct().ToReadOnlyList();
-
-    public IReadOnlyCollection<SemanticModel> ResolvedSemanticModels => this._resolvedSemanticModels;
 
     public IReadOnlyCollection<string> ResolvedSemanticModelNames
         => this._resolvedSemanticModels.SelectAsReadOnlyCollection( m => m.SyntaxTree.FilePath ).OrderBy( x => x ).ToReadOnlyList();

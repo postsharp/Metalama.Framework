@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
+internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
     private Ref<IConstructor> _replacedImplicit;
     private ConstructorInitializerKind _initializerKind;

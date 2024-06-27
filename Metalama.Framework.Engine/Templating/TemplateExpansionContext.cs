@@ -38,7 +38,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
-    internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
+    private static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
            _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
 
@@ -52,7 +52,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();
 
-    internal static SyntaxSerializationContext? CurrentSyntaxSerializationContextOrNull
+    private static SyntaxSerializationContext? CurrentSyntaxSerializationContextOrNull
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
            ?? _currentSyntaxSerializationContext.Value;
 

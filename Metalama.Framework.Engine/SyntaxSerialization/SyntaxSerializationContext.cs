@@ -40,6 +40,7 @@ internal sealed class SyntaxSerializationContext : ISyntaxGenerationContext
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public INamedType? CurrentType { get; }
 
     public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;

@@ -35,7 +35,7 @@ public sealed class ScopedSuppression : IScopedSuppression
         return this.Matches( diagnostic, compilation, codeInvoker, symbolId );
     }
 
-    public bool Matches( Diagnostic diagnostic, Compilation compilation, Func<Func<bool>, bool> codeInvoker, SerializableDeclarationId declarationId )
+    internal bool Matches( Diagnostic diagnostic, Compilation compilation, Func<Func<bool>, bool> codeInvoker, SerializableDeclarationId declarationId )
     {
         var location = diagnostic.Location;
 

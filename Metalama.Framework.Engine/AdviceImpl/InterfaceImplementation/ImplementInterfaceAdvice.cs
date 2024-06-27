@@ -935,7 +935,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
         return new ImplementInterfaceAdviceResult(
             implementedInterfaces.All( i => i.Outcome == InterfaceImplementationOutcome.Ignore ) ? AdviceOutcome.Ignore : AdviceOutcome.Default,
-            targetType.ToTypedRef(),
             diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : ImmutableArray<Diagnostic>.Empty,
             implementedInterfaces,
             implementedInterfaceMembers );

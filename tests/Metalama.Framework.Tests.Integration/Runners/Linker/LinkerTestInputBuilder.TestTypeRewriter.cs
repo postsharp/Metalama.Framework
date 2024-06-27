@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FakeItEasy;
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -176,17 +175,17 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     var newMembers = this.ProcessPseudoAttributeNode( node );
                     var newMemberList = new List<MemberDeclarationSyntax>();
 
-                    foreach ( var newMember in newMembers )
+                    foreach ( var (newNode, isPseudoMember) in newMembers )
                     {
-                        if ( !newMember.IsPseudoMember )
+                        if ( !isPseudoMember )
                         {
-                            var nodeWithId = AssignNodeId( newMember.Node.AssertNotNull() );
+                            var nodeWithId = AssignNodeId( newNode.AssertNotNull() );
                             newMemberList.Add( nodeWithId );
                             this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, nodeWithId );
                         }
                         else
                         {
-                            newMemberList.Add( newMember.Node );
+                            newMemberList.Add( newNode );
                         }
                     }
 
@@ -865,14 +864,15 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 return A.Fake<Advice>(
                     i => i.WithArgumentsForConstructor(
-                    [
-                        new Advice.AdviceConstructorParameters(
-                            fakeAspectInstance,
-                            fakeAspectInstance.TemplateInstances.Values.Single(),
-                            A.Fake<IDeclarationImpl>(),
-                            A.Fake<ICompilation>(),
-                            aspectLayer.LayerName )
-                    ] ) );
+                        new object?[]
+                        {
+                            new Advice.AdviceConstructorParameters(
+                                fakeAspectInstance,
+                                fakeAspectInstance.TemplateInstances.Values.Single(),
+                                A.Fake<IDeclarationImpl>(),
+                                A.Fake<ICompilation>(),
+                                aspectLayer.LayerName )
+                        } ) );
             }
         }
     }

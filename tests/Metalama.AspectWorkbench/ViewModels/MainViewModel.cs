@@ -204,10 +204,8 @@ namespace Metalama.AspectWorkbench.ViewModels
                     .Where( t => t.OutputRunTimeSyntaxTreeForComparison != null )
                     .ToList();
 
-                
                 // Multi file tests are not supported.
-
-                switch (syntaxTreesForComparison.Count)
+                switch ( syntaxTreesForComparison.Count )
                 {
                     case 0:
                         errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce any output." ) { Foreground = Brushes.Red } ) );

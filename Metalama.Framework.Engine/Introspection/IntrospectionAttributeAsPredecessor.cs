@@ -13,17 +13,18 @@ namespace Metalama.Framework.Engine.Introspection;
 internal sealed class IntrospectionAttributeAsPredecessor : IIntrospectionAspectPredecessorInternal
 {
     private readonly IntrospectionFactory _factory;
+    private readonly IAttribute _attribute;
     private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
 
     public IntrospectionAttributeAsPredecessor( IAttribute attribute, IntrospectionFactory factory )
     {
         this._factory = factory;
-        this.Attribute = attribute;
+        this._attribute = attribute;
     }
 
     public int PredecessorDegree => 0;
 
-    public IDeclaration TargetDeclaration => this.Attribute.ContainingDeclaration;
+    public IDeclaration TargetDeclaration => this._attribute.ContainingDeclaration;
 
     public ImmutableArray<IntrospectionAspectRelationship> Predecessors => ImmutableArray<IntrospectionAspectRelationship>.Empty;
 
@@ -36,7 +37,5 @@ internal sealed class IntrospectionAttributeAsPredecessor : IIntrospectionAspect
 
     public void AddSuccessor( AspectPredecessor aspectInstance ) => this._successors.Add( aspectInstance );
 
-    public IAttribute Attribute { get; }
-
-    public override string ToString() => this.Attribute.ToString()!;
+    public override string ToString() => this._attribute.ToString()!;
 }

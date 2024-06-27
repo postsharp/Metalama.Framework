@@ -801,7 +801,7 @@ internal abstract partial class BaseTestRunner
 
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
-                var writeDiff = Path.GetFileName( syntaxTree.FilePath )!.Count( c => c == '.' ) == 1;
+                var writeDiff = Path.GetFileName( syntaxTree.FilePath ).Count( c => c == '.' ) == 1;
 
                 await this.WriteHtmlAsync(
                     compilationWithDesignTimeTrees,

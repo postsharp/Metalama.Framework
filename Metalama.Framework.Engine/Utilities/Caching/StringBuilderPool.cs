@@ -8,7 +8,7 @@ public sealed class StringBuilderPool : ObjectPool<StringBuilder>
 {
     public static StringBuilderPool Default { get; } = new( 128 );
 
-    internal StringBuilderPool( int capacity ) : base( () => new StringBuilder( capacity ) ) { }
+    private StringBuilderPool( int capacity ) : base( () => new StringBuilder( capacity ) ) { }
 
     protected override void CleanUp( StringBuilder obj ) => obj.Clear();
 }

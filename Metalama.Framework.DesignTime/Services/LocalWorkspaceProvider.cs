@@ -25,5 +25,5 @@ public sealed class LocalWorkspaceProvider : WorkspaceProvider
         return this._workspace.Task.WithCancellation( cancellationToken );
     }
 
-    public void TrySetWorkspace( Workspace workspace ) => this._workspace.TrySetResult( workspace );
+    internal void TrySetWorkspace( Workspace workspace ) => this._workspace.TrySetResult( workspace );
 }

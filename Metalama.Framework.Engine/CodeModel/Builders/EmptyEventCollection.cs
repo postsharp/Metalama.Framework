@@ -8,13 +8,11 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class EmptyEventCollection : IEventCollection
+internal sealed class EmptyEventCollection : IEventCollection
 {
     public int Count => 0;
 
     public INamedType DeclaringType { get; }
-
-    public IProperty this[ string name ] => throw new InvalidOperationException();
 
     public EmptyEventCollection( INamedType declaringType )
     {

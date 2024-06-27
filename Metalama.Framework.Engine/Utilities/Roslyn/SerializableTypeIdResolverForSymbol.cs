@@ -10,7 +10,7 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public class SerializableTypeIdResolverForSymbol : SerializableTypeIdResolver<ITypeSymbol, INamespaceOrTypeSymbol>
+public sealed class SerializableTypeIdResolverForSymbol : SerializableTypeIdResolver<ITypeSymbol, INamespaceOrTypeSymbol>
 {
     private readonly Compilation _compilation;
 
@@ -25,6 +25,7 @@ public class SerializableTypeIdResolverForSymbol : SerializableTypeIdResolver<IT
         this._compilation = compilation;
     }
 
+    // ReSharper disable once MemberCanBeInternal
     public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
     {
         var genericArgumentSymbols = genericArguments?.ToDictionary( kv => kv.Key, kv => kv.Value.GetSymbol() );

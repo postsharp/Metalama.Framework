@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.Statements;
 
-internal class UnwrappedBlockStatementList : IStatementListImpl
+internal sealed class UnwrappedBlockStatementList : IStatementListImpl
 {
     private readonly IStatement _statement;
 

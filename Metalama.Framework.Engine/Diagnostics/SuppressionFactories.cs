@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Diagnostics;
 
-public class SuppressionFactories
+public static class SuppressionFactories
 {
     public static SuppressionDescriptor CreateDescriptor( string diagnosticId )
         => new( "Metalama." + diagnosticId, diagnosticId, justification: string.Empty );

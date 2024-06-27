@@ -198,14 +198,14 @@ class MyClass {}" );
         {
             const string code = """
                                 class A;
-                                class B : A 
+                                class B : A
                                 {
                                   A f;
-                                } 
-                                class C : System.Collections.Generic.List<int> 
+                                }
+                                class C : System.Collections.Generic.List<int>
                                 {
                                   int f;
-                                } 
+                                }
                                 """;
 
             using var testContext = this.CreateTestContext();
@@ -268,15 +268,15 @@ class MyClass {}" );
         {
             const string code = """
                                 class A { public static void M() {} }
-                                class B : A 
+                                class B : A
                                 {
                                   A f;
                                   void M() => A.M();
-                                } 
-                                class C : System.Collections.Generic.List<int> 
+                                }
+                                class C : System.Collections.Generic.List<int>
                                 {
                                   int f;
-                                } 
+                                }
                                 """;
 
             using var testContext = this.CreateTestContext();
@@ -285,7 +285,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -296,8 +296,8 @@ class MyClass {}" );
             Assert.Equal( ["B.f[MemberType]", "B.M()[Invocation]", "B[BaseType]"], GetReferences( typeA ) );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
-                => d.GetInboundReferences()
-                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.Details.Select( d => d.Kinds ) ) + "]" )
+                => d.GetIncomingReferences()
+                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.References.Select( x => x.Kinds ) ) + "]" )
                     .OrderBy( x => x )
                     .ToArray();
         }
@@ -310,15 +310,15 @@ class MyClass {}" );
                                  """;
 
             const string code2 = """
-                                 class B : A 
+                                 class B : A
                                  {
                                    A f;
                                    void M() => A.M();
-                                 } 
-                                 class C : System.Collections.Generic.List<int> 
+                                 }
+                                 class C : System.Collections.Generic.List<int>
                                  {
                                    int f;
-                                 } 
+                                 }
                                  """;
 
             using var testContext = this.CreateTestContext();

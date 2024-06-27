@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public readonly struct ReferencingSymbolInfo
+internal readonly struct ReferencingSymbolInfo
 {
     internal ReferencingSymbolInfo( ISymbol referencingSymbol, ReferencingNodeList nodes )
     {

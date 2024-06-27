@@ -18,6 +18,7 @@ using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 
 namespace Metalama.Framework.Engine.Utilities.UserCode;
@@ -33,6 +34,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     private readonly bool _throwOnUnsupportedDependencies;
     private readonly IDependencyCollector? _dependencyCollector;
     private readonly INamedType? _targetType;
+    private readonly ImmutableArray<SyntaxTree>? _sourceTrees;
     private readonly ISyntaxBuilderImpl? _syntaxBuilder;
     private readonly CompilationContext? _compilationServices;
     private bool _collectDependencyDisabled;
@@ -146,6 +148,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         AspectLayerId? aspectAspectLayerId = null,
         CompilationModel? compilationModel = null,
         IDeclaration? targetDeclaration = null,
+        ImmutableArray<SyntaxTree>? sourceTrees = null,
         bool throwOnUnsupportedDependencies = false,
         ISyntaxBuilderImpl? syntaxBuilder = null,
         MetaApi? metaApi = null,
@@ -158,6 +161,8 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
         this.Description = description;
         this.TargetDeclaration = targetDeclaration;
+        this._sourceTrees = sourceTrees;
+
         this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
         this._targetType = targetDeclaration?.GetTopmostNamedType();
 
@@ -176,6 +181,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this._throwOnUnsupportedDependencies = prototype._throwOnUnsupportedDependencies;
         this.Description = prototype.Description;
         this.TargetDeclaration = prototype.TargetDeclaration;
+        this._sourceTrees = prototype._sourceTrees;
         this._dependencyCollector = prototype._dependencyCollector;
         this._targetType = prototype._targetType;
         this._compilationServices = prototype._compilationServices;
@@ -234,6 +240,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             this.AspectLayerId,
             this.Compilation,
             this.TargetDeclaration,
+            this._sourceTrees,
             this._throwOnUnsupportedDependencies,
             this._syntaxBuilder,
             this.MetaApi );
@@ -252,6 +259,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             this.AspectLayerId,
             compilation,
             this.TargetDeclaration,
+            this._sourceTrees,
             this._throwOnUnsupportedDependencies,
             GetSyntaxBuilder( compilation, null, this.ServiceProvider, null ),
             this.MetaApi );
@@ -291,11 +299,21 @@ public class UserCodeExecutionContext : IExecutionContextInternal
 
     internal void AddDependencyTo( SyntaxTree syntaxTree )
     {
-        if ( this._dependencyCollector != null && this._targetType != null )
+        if ( this._dependencyCollector != null )
         {
-            this._dependencyCollector.AddDependency(
-                this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
-                syntaxTree );
+            if ( this._targetType != null )
+            {
+                this._dependencyCollector.AddDependency(
+                    this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
+                    syntaxTree );
+            }
+            else if ( this._sourceTrees is { } sourceTrees )
+            {
+                foreach ( var sourceTree in sourceTrees )
+                {
+                    this._dependencyCollector.AddDependency( sourceTree, syntaxTree );
+                }
+            }
         }
     }
 

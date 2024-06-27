@@ -1,14 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
-using Metalama.Framework.Engine.Introspection.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Introspection;
 using Metalama.Testing.UnitTesting;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -23,7 +18,7 @@ public sealed class IntrospectionTests : UnitTestClass
     {
         base.ConfigureServices( services );
 
-        services.AddProjectService( s => new ConcurrentTaskRunner() );
+        services.AddProjectService( _ => new ConcurrentTaskRunner() );
     }
 
     [Fact]
@@ -177,9 +172,9 @@ class MyClass
     public async Task Options()
     {
         const string code = """
-                            using Metalama.Framework.Advising; 
                             using Metalama.Framework.Advising;
-                            using Metalama.Framework.Aspects; 
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects;
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Code.DeclarationBuilders;
                             using Metalama.Framework.Options;
