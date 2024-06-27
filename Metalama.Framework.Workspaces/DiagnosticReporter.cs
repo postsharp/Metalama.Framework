@@ -13,7 +13,7 @@ namespace Metalama.Framework.Workspaces;
 
 /// <summary>
 /// A utility class that makes it easy to report diagnostics from object queries in different environments.
-/// The default implementation writes messages to the console. The action can be changed by setting the <see cref="Reported"/>
+/// The default implementation writes messages to the console. The action can be changed by setting the <see cref="ReportAction"/>
 /// property.
 /// </summary>
 public static class DiagnosticReporter
@@ -27,7 +27,7 @@ public static class DiagnosticReporter
         ReportedWarnings = ReportedErrors = 0;
     }
 
-    public static Action<IIntrospectionDiagnostic>? Reported { get; set; } = d =>
+    public static Action<IIntrospectionDiagnostic>? ReportAction { get; set; } = d =>
     {
         if ( d.Severity > Severity.Hidden )
         {
@@ -75,7 +75,7 @@ public static class DiagnosticReporter
                 location.Declaration,
                 location.Details );
 
-            Reported?.Invoke( diagnostic );
+            ReportAction?.Invoke( diagnostic );
 
             yield return diagnostic;
         }
@@ -103,9 +103,9 @@ public static class DiagnosticReporter
         {
             IncrementCounters( diagnostic.Severity );
 
-            if ( Reported != null )
+            if ( ReportAction != null )
             {
-                Reported( diagnostic );
+                ReportAction( diagnostic );
             }
 
             yield return diagnostic;

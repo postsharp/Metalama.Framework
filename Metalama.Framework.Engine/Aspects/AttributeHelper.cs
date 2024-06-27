@@ -55,7 +55,7 @@ public static class AttributeHelper
 
         foreach ( var argument in attributeData.ConstructorArguments )
         {
-            if ( !IsValid( argument ) )
+            if ( !IsTypedConstantValid( argument ) )
             {
                 return false;
             }
@@ -63,7 +63,7 @@ public static class AttributeHelper
 
         foreach ( var namedArgument in attributeData.NamedArguments )
         {
-            if ( !IsValid( namedArgument.Value ) )
+            if ( !IsTypedConstantValid( namedArgument.Value ) )
             {
                 return false;
             }
@@ -71,7 +71,7 @@ public static class AttributeHelper
 
         return true;
 
-        static bool IsValid( TypedConstant typedConstant )
+        static bool IsTypedConstantValid( TypedConstant typedConstant )
         {
             switch ( typedConstant.Kind )
             {
@@ -80,11 +80,11 @@ public static class AttributeHelper
 
                     return false;
 
-                case TypedConstantKind.Array:
+                case TypedConstantKind.Array when !typedConstant.IsNull:
                     {
                         foreach ( var item in typedConstant.Values )
                         {
-                            if ( !IsValid( item ) )
+                            if ( !IsTypedConstantValid( item ) )
                             {
                                 return false;
                             }
