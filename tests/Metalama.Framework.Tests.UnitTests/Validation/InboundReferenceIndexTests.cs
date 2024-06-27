@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Validation;
 
-public sealed class ReferenceIndexTests : UnitTestClass
+public sealed class InboundReferenceIndexTests : UnitTestClass
 {
     [Fact]
     public void BaseType()
@@ -273,7 +273,7 @@ public sealed class ReferenceIndexTests : UnitTestClass
 
     // TODO: other reference kinds.
 
-    private (ReferenceIndex Index, ReferenceIndexObserver Observer, IReadOnlyCollection<string> ReferencingSymbols ) BuildIndex(
+    private (InboundReferenceIndex Index, ReferenceIndexObserver Observer, IReadOnlyCollection<string> ReferencingSymbols ) BuildIndex(
         Dictionary<string, string> code,
         Func<ICompilation, IEnumerable<IDeclaration>> getDeclarations,
         ReferenceKinds referenceKinds,
@@ -293,7 +293,7 @@ public sealed class ReferenceIndexTests : UnitTestClass
             validators.Add( new ReferenceValidatorProperties( declaration, referenceKinds, includeDerivedTypes ) );
         }
 
-        var builder = new ReferenceIndexBuilder(
+        var builder = new InboundReferenceIndexBuilder(
             testContext.ServiceProvider,
             new ReferenceIndexerOptions( validators ),
             SymbolEqualityComparer.Default );

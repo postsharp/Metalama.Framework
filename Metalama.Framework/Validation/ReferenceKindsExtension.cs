@@ -79,4 +79,15 @@ public static class ReferenceKindsExtension
     /// Determines if a <see cref="ReferenceKinds"/> contains all required flags.
     /// </summary>
     public static bool IsDefined( this ReferenceKinds kinds, ReferenceKinds requiredKinds ) => (kinds & requiredKinds) == requiredKinds;
+
+    public static ReferenceKinds Union( this IEnumerable<ReferenceKinds> kinds )
+    {
+        var union = ReferenceKinds.None;
+        foreach ( var kind in kinds )
+        {
+            union |= kind;
+        }
+
+        return union;
+    }
 }

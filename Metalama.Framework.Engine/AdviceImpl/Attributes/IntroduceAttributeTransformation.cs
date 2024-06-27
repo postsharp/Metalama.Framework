@@ -25,7 +25,7 @@ internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransform
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
-    public override TransformationKind TransformationKind => TransformationKind.IntroduceAttribute;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceAttribute;
 
     public IDeclarationBuilder DeclarationBuilder => this.AttributeBuilder;
 

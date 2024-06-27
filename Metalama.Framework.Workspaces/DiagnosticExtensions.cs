@@ -13,9 +13,9 @@ public static class DiagnosticExtensions
         => diagnostic switch
         {
             { FilePath: not null, Line: null }
-                => $"{diagnostic.FilePath}: {diagnostic.Severity.ToString().ToLowerInvariant()}: {diagnostic.Message}",
+                => $"{diagnostic.FilePath}: {diagnostic.Severity.ToString().ToLowerInvariant()} {diagnostic.Id}: {diagnostic.Message}",
             { FilePath: not null, Line: not null }
-                => $"{diagnostic.FilePath}({diagnostic.Line}): {diagnostic.Severity.ToString().ToLowerInvariant()}: {diagnostic.Message}",
-            _ => $"{diagnostic.Severity.ToString().ToLowerInvariant()}: {diagnostic.Message}"
+                => $"{diagnostic.FilePath}({diagnostic.Line}): {diagnostic.Severity.ToString().ToLowerInvariant()} {diagnostic.Id}: {diagnostic.Message}",
+            _ => $"{diagnostic.Severity.ToString().ToLowerInvariant()} {diagnostic.Id}: {diagnostic.Message}"
         };
 }

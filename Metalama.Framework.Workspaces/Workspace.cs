@@ -136,7 +136,7 @@ namespace Metalama.Framework.Workspaces
 
         /// <summary>
         /// Filters the <see cref="Projects"/> collection with a given predicate.
-        /// This allows to filter the output of methods such as <see cref="DeclarationExtensions.GetIncomingReferences"/>
+        /// This allows to filter the output of methods such as <see cref="DeclarationExtensions.GetInboundReferences"/>
         /// or <see cref="DeclarationExtensions.GetDerivedTypes"/> to the filtered subset.
         /// </summary>
         /// <seealso cref="ClearFilters"/>
@@ -360,14 +360,12 @@ namespace Metalama.Framework.Workspaces
                     .WithProjectScopedServices( projectOptions, compilation )
                     .WithService( _ => new WorkspaceIntrospectionService( workspace ) );
 
-                var compilationModel = CodeModelFactory.CreateCompilation( compilation, projectServiceProvider );
-
                 // Create our workspace project.
                 var ourProject = new Project(
                     domain,
                     projectServiceProvider,
                     roslynProject.FilePath!,
-                    compilationModel,
+                    compilation,
                     projectOptions,
                     introspectionOptions );
 
@@ -433,7 +431,7 @@ namespace Metalama.Framework.Workspaces
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
 
-        public ImmutableArray<IIntrospectionDiagnostic> LoadDiagnostics
+        public ImmutableArray<IIntrospectionDiagnostic> WorkspaceDiagnostics
             => this._loadDiagnostics.SelectAsImmutableArray( x => (IIntrospectionDiagnostic) new WorkspaceDiagnosticWrapper( x ) );
 
 #pragma warning disable CA1822

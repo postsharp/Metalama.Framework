@@ -14,7 +14,7 @@ public interface IIntrospectionTransformation : IComparable<IIntrospectionTransf
     /// <summary>
     /// Gets the transformation kind.
     /// </summary>
-    TransformationKind TransformationKind { get; }
+    IntrospectionTransformationKind TransformationKind { get; }
 
     /// <summary>
     /// Gets the declaration being transformed.

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -43,7 +44,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
 
                 foreach ( var attribute in attributes )
                 {
-                    if ( !SymbolValidator.Instance.VisitAttribute( attribute ) )
+                    if ( !attribute.IsValid() )
                     {
                         continue;
                     }

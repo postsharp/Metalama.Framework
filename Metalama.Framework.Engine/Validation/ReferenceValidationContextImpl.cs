@@ -33,26 +33,26 @@ internal sealed class ReferenceValidationContextImpl : ReferenceValidationContex
     }
 
     [Memo]
-    public override IEnumerable<ReferenceInstance> References
+    public override IEnumerable<ReferenceDetail> Details
         => this._references.SelectMany(
                 r => r.Nodes
                     .Where( n => (n.ReferenceKind & this._parent.Properties.ReferenceKinds) != 0 )
-                    .Select( n => new ReferenceInstance( this, (object?) n.Syntax.AsNode() ?? n.Syntax.AsToken(), r.ReferencingSymbol, n.ReferenceKind ) ) )
+                    .Select( n => new ReferenceDetail( this, (object?) n.Syntax.AsNode() ?? n.Syntax.AsToken(), r.ReferencingSymbol, n.ReferenceKind ) ) )
             .Cache();
 
     internal override IDiagnosticSource DiagnosticSource => this._parent;
 
     [Memo]
     [Obsolete]
-    public override ReferenceKinds ReferenceKinds => this.References.First().ReferenceKind;
+    public override ReferenceKinds ReferenceKinds => this.Details.First().ReferenceKind;
 
     internal override ISourceReferenceImpl SourceReferenceImpl => CodeModel.SourceReferenceImpl.Instance;
 
-    internal override IDeclaration ResolveDeclaration( ReferenceInstance referenceInstance )
-        => this.Compilation.GetCompilationModel().Factory.GetDeclaration( (ISymbol) referenceInstance.Symbol );
+    internal override IDeclaration ResolveDeclaration( ReferenceDetail referenceDetail )
+        => this.Compilation.GetCompilationModel().Factory.GetDeclaration( (ISymbol) referenceDetail.Symbol );
 
-    internal override IDiagnosticLocation? ResolveLocation( ReferenceInstance referenceInstance )
-        => referenceInstance.NodeOrToken switch
+    internal override IDiagnosticLocation? ResolveLocation( ReferenceDetail referenceDetail )
+        => referenceDetail.NodeOrToken switch
         {
             SyntaxNode node => node.GetDiagnosticLocation().ToDiagnosticLocation(),
             SyntaxToken token => token.GetLocation().ToDiagnosticLocation(),

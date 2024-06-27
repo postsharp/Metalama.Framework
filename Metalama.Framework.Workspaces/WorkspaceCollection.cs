@@ -50,7 +50,7 @@ namespace Metalama.Framework.Workspaces
         public ServiceBuilder ServiceBuilder { get; } = new();
 
         internal GlobalServiceProvider ServiceProvider { get; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether project loading errors should be ignored. By default,
         /// project loading errors cause an exception to be thrown.
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Workspaces
                 .Select(
                     w => w.IsCompleted
                         ? (Project: w.Result.Projects.FirstOrDefault(
-                               p => p.Compilation.GetRoslynCompilation() == compilation
+                               p => p.RoslynCompilation == compilation
                                     || (p.IsMetalamaOutputEvaluated && p.CompilationResult.TransformedCode.GetRoslynCompilation() == compilation) ),
                            Workspace: w.Result)
                         : (null, null) )
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Workspaces
             {
                 workspace = found.Workspace!;
                 project = found.Project;
-                isMetalamaOutput = project.Compilation.GetRoslynCompilation() != compilation;
+                isMetalamaOutput = project.RoslynCompilation != compilation;
 
                 return true;
             }

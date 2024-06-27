@@ -16,7 +16,6 @@ using System.Runtime.Versioning;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -163,64 +162,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return symbol.DeclaringSyntaxReferences.Any(
                 r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
         }
-
-        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
-        {
-            if ( symbol == null )
-            {
-                return null;
-            }
-
-            static SyntaxReference? GetReferenceOfShortestPath( ISymbol s, Func<SyntaxReference, bool>? filter = null )
-            {
-                if ( s.DeclaringSyntaxReferences.IsDefaultOrEmpty )
-                {
-                    return null;
-                }
-                else
-                {
-                    // Find the lowest value.
-
-                    SyntaxReference? min = null;
-                    int? minLength = null;
-
-                    foreach ( var reference in s.DeclaringSyntaxReferences )
-                    {
-                        if ( filter != null && !filter( reference ) )
-                        {
-                            continue;
-                        }
-
-                        var length = reference.SyntaxTree.FilePath.Length;
-
-                        if ( min == null || length < minLength )
-                        {
-                            min = reference;
-                            minLength = length;
-                        }
-                    }
-
-                    return min;
-                }
-            }
-
-            switch ( symbol )
-            {
-                case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
-                    return GetReferenceOfShortestPath( symbol ) ?? GetReferenceOfShortestPath( methodSymbol.AssociatedSymbol );
-
-                case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: { } partialDefinitionSymbol }:
-                    return GetReferenceOfShortestPath( partialDefinitionSymbol );
-
-                case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: null }:
-                    return GetReferenceOfShortestPath( symbol );
-
-                default:
-                    return GetReferenceOfShortestPath( symbol );
-            }
-        }
-
-        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
 
         internal static bool IsInterfaceMemberImplementation( this ISymbol symbol )
             => symbol switch

@@ -4,16 +4,16 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
+   
     /// <summary>
     /// Helper methods to work with diagnostics.
     /// </summary>
     public static class DiagnosticLocationHelper
     {
-        internal static Location? GetDiagnosticLocation( this IDiagnosticLocation location ) => ((IDiagnosticLocationImpl) location).DiagnosticLocation;
-
         /// <summary>
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
         /// a given <see cref="ISymbol"/> (typically the identifier).
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             if ( depth > 8 )
             {
-                throw new AssertionFailedException( $"Infinite recursion in getting the location for symbol '{symbol}'." );
+                throw new InvalidOperationException( $"Infinite recursion in getting the location for symbol '{symbol}'." );
             }
 
             var bestDeclaration = symbol.GetPrimarySyntaxReference();

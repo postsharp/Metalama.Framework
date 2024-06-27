@@ -23,7 +23,7 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
         this.Advice = advice;
     }
 
-    public TransformationKind TransformationKind => this._transformation.TransformationKind;
+    public IntrospectionTransformationKind TransformationKind => this._transformation.TransformationKind;
 
     [Memo]
     public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.Translate( this._compilation );

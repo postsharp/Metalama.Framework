@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Workspace = Metalama.Framework.Workspaces.Workspace;
 
 #pragma warning disable VSTHRD200
 
@@ -19,6 +20,8 @@ namespace Metalama.Framework.Tests.Workspaces
 {
     public sealed class WorkspaceTests : UnitTestClass
     {
+        private const bool _ignoreLoadErrors = false;
+
         private static readonly ImmutableDictionary<string, string> _buildProperties = ImmutableDictionary<string, string>.Empty
             .Add( "DOTNET_ROOT_X64", "" )
             .Add( "MSBUILD_EXE_PATH", "" )
@@ -38,16 +41,18 @@ namespace Metalama.Framework.Tests.Workspaces
                 @"
 <Project Sdk=""Microsoft.NET.Sdk"">
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 </Project>
 " );
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
 
             using var workspace = await workspaceCollection.LoadAsync( [projectPath], _buildProperties );
+
+            CheckWorkspace( workspace );
 
             Assert.Single( workspace.Projects );
             Assert.Single( workspace.Projects[0].Types );
@@ -69,16 +74,18 @@ namespace Metalama.Framework.Tests.Workspaces
                 @"
 <Project Sdk=""Microsoft.NET.Sdk"">
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 </Project>
 " );
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
+
+            CheckWorkspace( workspace );
 
             Assert.Equal( 2, workspace.Projects.Length );
             Assert.Equal( 2, workspace.SourceCode.Types.Length );
@@ -93,7 +100,7 @@ namespace Metalama.Framework.Tests.Workspaces
                 testContext,
                 "using Metalama.Framework.Aspects;  [CompileTime] class MyClass /* Intentional syntax error in compile-time code .*/ " );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
 
             using var workspace = await workspaceCollection.LoadAsync( [projectPath], _buildProperties );
 
@@ -124,6 +131,7 @@ namespace Metalama.Framework.Tests.Workspaces
             var compilationForReferences = TestCompilationFactory.CreateCSharpCompilation( "" );
 
             var libraryReferences = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
+                .Where( r => Path.GetFileName( r.FilePath ).StartsWith( "Metalama", StringComparison.Ordinal ) )
                 .Select( r => $"<Reference Include=\"{r.FilePath}\" />" );
 
             var projectReferences = dependentProjectPaths.Select( r => $"<ProjectReference Include=\"{r}\" />" );
@@ -138,7 +146,7 @@ namespace Metalama.Framework.Tests.Workspaces
                 $@"
 <Project Sdk=""Microsoft.NET.Sdk"">
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <DefineConstants>METALAMA</DefineConstants>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -172,19 +180,21 @@ class MyAspect : TypeAspect
 [MyAspect]
 class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
+
+            CheckWorkspace( workspace );
 
             Assert.True( workspace.IsMetalamaEnabled );
             Assert.Equal( 3, workspace.AspectClasses.Length );
             Assert.Single( workspace.AspectInstances );
             var targetFramework = Assert.Single( workspace.SourceCode.TargetFrameworks );
-            Assert.Equal( "netstandard2.0", targetFramework );
+            Assert.Equal( "net8.0", targetFramework );
         }
 
         [Fact]
-        public async Task DeclarationReferences()
+        public async Task InboundDeclarationReferences()
         {
             const string code = """
                                 class A;
@@ -204,9 +214,12 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
+
+            CheckWorkspace( workspace );
+
             var typeA = workspace.Projects.Single().Types.Single( t => t.Name == "A" );
 
             var references = GetReferences( typeA );
@@ -214,11 +227,44 @@ class MyClass {}" );
             Assert.Equal( ["B", "B.f"], references );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
-                => d.GetIncomingReferences().Select( x => x.OriginDeclaration.ToDisplayString() ).OrderBy( x => x );
+                => d.GetInboundReferences().Select( x => x.OriginDeclaration.ToDisplayString() ).OrderBy( x => x );
         }
 
         [Fact]
-        public async Task SyntaxReferences()
+        public async Task OutboundDeclarationReferences()
+        {
+            const string code = """
+                                class A;
+                                class B : A 
+                                {
+                                  A f;
+                                  int g;
+                                } 
+                                """;
+
+            using var testContext = this.CreateTestContext();
+
+            var projectPath = await CreateMetalamaEnabledProjectAsync(
+                testContext,
+                code );
+
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+
+            using var workspace = await workspaceCollection.LoadAsync( projectPath );
+
+            CheckWorkspace( workspace );
+
+            var typeB = workspace.Projects.Single().Types.Single( t => t.Name == "B" );
+
+            var references = GetReferences( typeB );
+
+            Assert.Equal( ["B -> A", "B.f -> A", "B.g -> int"], references );
+
+            static IEnumerable<string> GetReferences( IDeclaration d ) => d.GetOutboundReferences().Select( x => x.ToString() ).OrderBy( x => x );
+        }
+
+        [Fact]
+        public async Task InboundSyntaxReferences()
         {
             const string code = """
                                 class A { public static void M() {} }
@@ -243,19 +289,21 @@ class MyClass {}" );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
+            CheckWorkspace( workspace );
+
             var typeA = workspace.Projects.Single().Types.Single( t => t.Name == "A" );
 
             Assert.Equal( ["B.f[MemberType]", "B.M()[Invocation]", "B[BaseType]"], GetReferences( typeA ) );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
-                => d.GetIncomingReferences()
-                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.References.Select( y => y.Kinds ) ) + "]" )
+                => d.GetInboundReferences()
+                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.Details.Select( x => x.Kinds ) ) + "]" )
                     .OrderBy( x => x )
                     .ToArray();
         }
 
         [Fact]
-        public async Task CrossProjectReferences()
+        public async Task CrossProjectInboundReferences()
         {
             const string code1 = """
                                  public class A { public static void M() {} }
@@ -286,18 +334,27 @@ class MyClass {}" );
                 "Project2",
                 [projectPath1] );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath1, projectPath2 );
+
+            CheckWorkspace( workspace );
+
             var typesA = workspace.SourceCode.Types.Where( t => t.Name == "A" ).ToArray();
 
             Assert.Single( typesA );
 
             var references = GetReferences( typesA.Single() );
 
-            Assert.Equal( ["'B.f' -> 'A'", "'B.M()' -> 'A.M()'", "'B' -> 'A'"], references );
+            Assert.Equal( ["B -> A", "B.f -> A", "B.M() -> A.M()"], references );
 
-            static IEnumerable<string> GetReferences( IDeclaration d ) => d.GetIncomingReferences().Select( x => x.ToString() ).OrderBy( x => x );
+            static IEnumerable<string> GetReferences( IDeclaration d ) => d.GetInboundReferences().Select( x => x.ToString() ).OrderBy( x => x );
+        }
+
+        private static void CheckWorkspace( Workspace workspace )
+        {
+            Assert.Empty( workspace.WorkspaceDiagnostics );
+            Assert.Empty( workspace.Projects.SelectMany( c => c.RoslynCompilation.GetDiagnostics().Where( d => d.Severity == DiagnosticSeverity.Error ) ) );
         }
     }
 }

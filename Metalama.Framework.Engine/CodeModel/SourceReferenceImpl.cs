@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,14 +14,6 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
     public static SourceReferenceImpl Instance { get; } = new();
 
     private SourceReferenceImpl() { }
-
-    IDiagnosticLocation ISourceReferenceImpl.GetDiagnosticLocation( in SourceReference sourceReference )
-        => sourceReference.NodeOrTokenInternal switch
-        {
-            SyntaxNode node => node.GetDiagnosticLocation().ToDiagnosticLocation(),
-            SyntaxToken token => token.GetLocation().ToDiagnosticLocation(),
-            _ => throw new AssertionFailedException( $"Unexpected type {sourceReference.NodeOrTokenInternal.GetType()}." )
-        };
 
     string ISourceReferenceImpl.GetKind( in SourceReference sourceReference )
         => sourceReference.NodeOrTokenInternal switch

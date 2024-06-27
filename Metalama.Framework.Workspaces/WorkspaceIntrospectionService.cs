@@ -12,7 +12,7 @@ internal sealed class WorkspaceIntrospectionService( Future<Workspace> workspace
 {
     private readonly WorkspaceReferenceGraph _referenceGraph = new( workspace );
 
-    public IReferenceGraph GetReferenceGraph() => this._referenceGraph;
+    public IIntrospectionReferenceGraph GetReferenceGraph() => this._referenceGraph;
 
     public IEnumerable<INamedType> GetDerivedTypes( INamedType type, bool directOnly )
         => workspace.Value.Projects.SelectMany(

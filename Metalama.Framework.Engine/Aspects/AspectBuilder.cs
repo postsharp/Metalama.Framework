@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Aspects
         IAdviceFactory IAspectBuilder.Advice => this._adviceFactory;
 
         IAdviceFactory IAdviserInternal.AdviceFactory => this._adviceFactory;
-        
+
         public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
         {
             var oldPredecessor = this.AspectPredecessor;

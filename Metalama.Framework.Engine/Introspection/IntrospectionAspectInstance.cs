@@ -65,7 +65,7 @@ internal sealed class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
         return result.Diagnostics.ReportedDiagnostics.ToIntrospectionDiagnostics(
             this.Compilation,
-            DiagnosticSource.Metalama );
+            IntrospectionDiagnosticSource.Metalama );
     }
 
     public int PredecessorDegree => this._aspectInstance.PredecessorDegree;

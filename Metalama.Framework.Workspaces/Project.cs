@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
@@ -23,15 +24,19 @@ namespace Metalama.Framework.Workspaces
     {
         private readonly CompileTimeDomain _domain;
         private readonly ProjectServiceProvider _serviceProvider;
+
+        public Compilation RoslynCompilation { get; }
+
         private readonly WorkspaceProjectOptions _projectOptions;
         private readonly IIntrospectionOptionsProvider? _options;
+        private readonly Lazy<ICompilation> _compilationModel;
 
         internal bool IsMetalamaOutputEvaluated { get; private set; }
 
         [PublicAPI]
         public string Path { get; }
 
-        internal ICompilation Compilation { get; }
+        internal ICompilation Compilation => this._compilationModel.Value;
 
         [PublicAPI]
         public string? TargetFramework => this._projectOptions.TargetFramework;
@@ -40,15 +45,16 @@ namespace Metalama.Framework.Workspaces
             CompileTimeDomain domain,
             ProjectServiceProvider serviceProvider,
             string path,
-            ICompilation compilation,
+            Compilation compilation,
             WorkspaceProjectOptions projectOptions,
             IIntrospectionOptionsProvider? options )
         {
             this._domain = domain;
             this._serviceProvider = serviceProvider;
+            this.RoslynCompilation = compilation;
             this._projectOptions = projectOptions;
             this.Path = path;
-            this.Compilation = compilation;
+            this._compilationModel = new Lazy<ICompilation>( () => CodeModelFactory.CreateCompilation( this.RoslynCompilation, this._serviceProvider ) );
             this._options = options;
         }
 
@@ -56,7 +62,7 @@ namespace Metalama.Framework.Workspaces
         /// Gets the set of types defined in the project, including nested types.
         /// </summary>
         [Memo]
-        public ImmutableArray<INamedType> Types => this.Compilation.Types.SelectManyRecursive( t => t.Types, includeRoot: true ).ToImmutableArray();
+        public ImmutableArray<INamedType> Types => [..this.Compilation.Types.SelectManyRecursive( t => t.Types, includeRoot: true )];
 
         /// <summary>
         /// Gets the output of Metalama for this project.
@@ -67,13 +73,13 @@ namespace Metalama.Framework.Workspaces
         private IIntrospectionCompilationResult GetCompilationResultsCore()
         {
             if ( !this._serviceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>()
-                    .TryGetMetalamaVersion( this.Compilation.GetRoslynCompilation(), out _ ) )
+                    .TryGetMetalamaVersion( this.RoslynCompilation, out _ ) )
             {
                 // Metalama is not enabled.
                 return new NoMetalamaIntrospectionCompilationResult(
                     true,
                     this.Compilation,
-                    this.Compilation.GetRoslynCompilation().GetDiagnostics().ToIntrospectionDiagnostics( this.Compilation, DiagnosticSource.CSharp ) );
+                    this.RoslynCompilation.GetDiagnostics().ToIntrospectionDiagnostics( this.Compilation, IntrospectionDiagnosticSource.CSharp ) );
             }
             else
             {
@@ -134,15 +140,14 @@ namespace Metalama.Framework.Workspaces
 
         /// <inheritdoc />
         [Memo]
-        public ICompilationSet TransformedCode
-            => new CompilationSet( $"{this.DisplayName}: transformed code", ImmutableArray.Create( this.CompilationResult.TransformedCode ) );
+        public ICompilationSet TransformedCode => new CompilationSet( $"{this.DisplayName}: transformed code", [this.CompilationResult.TransformedCode] );
 
         /// <inheritdoc />
-        ImmutableArray<Project> IProjectSet.Projects => ImmutableArray.Create( this );
+        ImmutableArray<Project> IProjectSet.Projects => [this];
 
         /// <inheritdoc />
         [Memo]
-        public ICompilationSet SourceCode => new CompilationSet( $"{this.DisplayName}: source code", ImmutableArray.Create( this.Compilation ) );
+        public ICompilationSet SourceCode => new CompilationSet( $"{this.DisplayName}: source code", [this.Compilation] );
 
         /// <inheritdoc />
         public IProjectSet GetSubset( Predicate<Project> filter ) => throw new NotSupportedException();

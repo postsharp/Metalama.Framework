@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Introspection
 
         public ICompilation Compilation { get; }
 
-        public IntrospectionDiagnostic( Diagnostic diagnostic, ICompilation compilation, DiagnosticSource source )
+        public IntrospectionDiagnostic( Diagnostic diagnostic, ICompilation compilation, IntrospectionDiagnosticSource source )
         {
             this._diagnostic = diagnostic;
             this.Compilation = compilation;
@@ -37,7 +37,9 @@ namespace Metalama.Framework.Engine.Introspection
 
         public Severity Severity => this._diagnostic.Severity.ToOurSeverity();
 
-        public DiagnosticSource Source { get; }
+        public IntrospectionDiagnosticSource Source { get; }
+
+        object? IIntrospectionDiagnostic.Details => null;
 
         private IDeclaration? GetDeclaration()
         {

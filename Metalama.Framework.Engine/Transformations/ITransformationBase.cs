@@ -13,7 +13,7 @@ public interface ITransformationBase
 
     IDeclaration TargetDeclaration { get; }
 
-    TransformationKind TransformationKind { get; }
+    IntrospectionTransformationKind TransformationKind { get; }
 
     FormattableString ToDisplayString();
 }

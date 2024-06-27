@@ -98,5 +98,5 @@ public readonly struct SourceSpan
     /// <returns>The source code of the current syntax node.</returns>
     public string GetText() => this._text ?? this._sourceReferenceImpl!.GetText( this );
 
-    public override string ToString() => $"{this.FilePath}";
+    public override string ToString() => $"{this.FilePath}({this.StartLine + 1})";
 }

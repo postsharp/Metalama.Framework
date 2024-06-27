@@ -8,10 +8,10 @@ using Metalama.Framework.Diagnostics;
 namespace Metalama.Framework.Validation;
 
 /// <summary>
-/// Represents a single reference in a <see cref="ReferenceValidationContext"/>. This class is exposed by the <see cref="ReferenceValidationContext.References"/> property.
+/// Represents a single reference in a <see cref="ReferenceValidationContext"/>. This class is exposed by the <see cref="ReferenceValidationContext.Details"/> property.
 /// </summary>
 [CompileTime]
-public readonly struct ReferenceInstance
+public readonly struct ReferenceDetail
 {
     private readonly ReferenceValidationContext _context;
 
@@ -19,7 +19,7 @@ public readonly struct ReferenceInstance
 
     internal object Symbol { get; }
 
-    internal ReferenceInstance( ReferenceValidationContext context, object nodeOrToken, object symbol, ReferenceKinds referenceKind )
+    internal ReferenceDetail( ReferenceValidationContext context, object nodeOrToken, object symbol, ReferenceKinds referenceKind )
     {
         this._context = context;
         this.NodeOrToken = nodeOrToken;

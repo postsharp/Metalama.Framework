@@ -8,13 +8,13 @@ namespace Metalama.Framework.Engine.Introspection.References;
 
 internal static class ChildKindHelper
 {
-    public static ChildKinds ToChildKinds( ReferenceGraphChildKinds kind )
+    public static ChildKinds ToChildKinds( IntrospectionChildKinds kind )
         => kind switch
         {
-            ReferenceGraphChildKinds.All => ChildKinds.All,
-            ReferenceGraphChildKinds.None => ChildKinds.None,
-            ReferenceGraphChildKinds.ContainingDeclaration => ChildKinds.ContainingDeclaration,
-            ReferenceGraphChildKinds.DerivedType => ChildKinds.DerivedType,
+            IntrospectionChildKinds.All => ChildKinds.All,
+            IntrospectionChildKinds.None => ChildKinds.None,
+            IntrospectionChildKinds.ContainingDeclaration => ChildKinds.ContainingDeclaration,
+            IntrospectionChildKinds.DerivedType => ChildKinds.DerivedType,
             _ => throw new ArgumentOutOfRangeException()
         };
 }

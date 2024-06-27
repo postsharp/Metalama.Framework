@@ -37,6 +37,20 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         ProjectServiceProvider serviceProvider,
         ReferenceIndexBuilder referenceIndexBuilder,
         ReferenceIndexerOptions options,
+        CancellationToken cancellationToken )
+    {
+        // This class cannot run concurrently on many threads.
+        this._cancellationToken = cancellationToken;
+        this._referenceIndexBuilder = referenceIndexBuilder;
+        this._options = options;
+        this._symbolClassifier = serviceProvider.GetService<ISymbolClassificationService>(); // May be absent in the introspection scenario.
+        this._observer = serviceProvider.GetService<IReferenceIndexObserver>();
+    }
+
+    public ReferenceIndexWalker(
+        ProjectServiceProvider serviceProvider,
+        ReferenceIndexBuilder referenceIndexBuilder,
+        ReferenceIndexerOptions options,
         SemanticModelProvider? semanticModelProvider,
         CancellationToken cancellationToken )
     {
@@ -45,6 +59,23 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this._referenceIndexBuilder = referenceIndexBuilder;
         this._options = options;
         this._semanticModelProvider = semanticModelProvider;
+        this._symbolClassifier = serviceProvider.GetService<ISymbolClassificationService>(); // May be absent in the introspection scenario.
+        this._observer = serviceProvider.GetService<IReferenceIndexObserver>();
+    }
+
+    public ReferenceIndexWalker(
+        ProjectServiceProvider serviceProvider,
+        CancellationToken cancellationToken,
+        ReferenceIndexBuilder referenceIndexBuilder,
+        ReferenceIndexerOptions options,
+        SemanticModel semanticModel )
+    {
+        // This class cannot run concurrently on many threads.
+        this._cancellationToken = cancellationToken;
+        this._referenceIndexBuilder = referenceIndexBuilder;
+        this._options = options;
+        this._semanticModel = semanticModel;
+        this._syntaxTree = semanticModel.SyntaxTree;
         this._symbolClassifier = serviceProvider.GetService<ISymbolClassificationService>(); // May be absent in the introspection scenario.
         this._observer = serviceProvider.GetService<IReferenceIndexObserver>();
     }

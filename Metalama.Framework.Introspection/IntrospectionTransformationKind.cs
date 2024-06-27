@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 namespace Metalama.Framework.Introspection;
 
 [PublicAPI]
-public enum TransformationKind
+public enum IntrospectionTransformationKind
 {
     OverrideMember,
     InsertStatement,

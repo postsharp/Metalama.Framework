@@ -31,7 +31,7 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
 
     public override IDeclaration TargetDeclaration => this.IntroducedDeclaration.ContainingDeclaration.AssertNotNull();
 
-    public override TransformationKind TransformationKind => TransformationKind.IntroduceMember;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceMember;
 
     public override FormattableString ToDisplayString() => $"Introduce {this.IntroducedDeclaration.DeclarationKind} '{this.IntroducedDeclaration}'.";
 }

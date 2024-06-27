@@ -49,7 +49,7 @@ internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransform
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
-    public override TransformationKind TransformationKind => TransformationKind.ImplementInterface;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.ImplementInterface;
 
     public override FormattableString ToDisplayString() => $"Make the type '{this.TargetType}' implement the interface '{this.InterfaceType}'.";
 }

@@ -15,6 +15,7 @@
         <InternalsVisibleTo Include="Metalama.Framework.CompileTime" />
         <InternalsVisibleTo Include="Metalama.Framework.Sdk" />
         <InternalsVisibleTo Include="Metalama.Framework.Introspection" />
+        <InternalsVisibleTo Include="Metalama.Framework.Workspaces" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.Analyzers" />
 
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.0.1" />

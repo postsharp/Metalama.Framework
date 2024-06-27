@@ -20,7 +20,7 @@ internal sealed class AddAnnotationTransformation : BaseTransformation
 
     public override IDeclaration TargetDeclaration { get; }
 
-    public override TransformationKind TransformationKind => TransformationKind.AddAnnotation;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.AddAnnotation;
 
     public override FormattableString ToDisplayString() => $"Adding annotation '{this.AnnotationInstance}' to '{this.TargetDeclaration}'.";
 

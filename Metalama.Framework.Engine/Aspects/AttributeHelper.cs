@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -38,5 +39,63 @@ public static class AttributeHelper
         }
 
         shortName = typeName.TrimSuffix( "Attribute" );
+    }
+
+    public static bool IsValid( this AttributeData attributeData )
+    {
+        if ( attributeData.AttributeConstructor == null )
+        {
+            return false;
+        }
+
+        if ( attributeData.AttributeClass == null || attributeData.AttributeClass.TypeKind == TypeKind.Error )
+        {
+            return false;
+        }
+
+        foreach ( var argument in attributeData.ConstructorArguments )
+        {
+            if ( !IsTypedConstantValid( argument ) )
+            {
+                return false;
+            }
+        }
+
+        foreach ( var namedArgument in attributeData.NamedArguments )
+        {
+            if ( !IsTypedConstantValid( namedArgument.Value ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+
+        static bool IsTypedConstantValid( TypedConstant typedConstant )
+        {
+            switch ( typedConstant.Kind )
+            {
+                case TypedConstantKind.Error:
+                case TypedConstantKind.Type when typedConstant.Value is IErrorTypeSymbol:
+
+                    return false;
+
+                case TypedConstantKind.Array when !typedConstant.IsNull:
+                    {
+                        foreach ( var item in typedConstant.Values )
+                        {
+                            if ( !IsTypedConstantValid( item ) )
+                            {
+                                return false;
+                            }
+                        }
+                    }
+
+                    return true;
+
+                default:
+                    return true;
+            }
+        }
     }
 }

@@ -5,13 +5,6 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal enum CompilationModelVersion
-{
-    Initial,
-    Current,
-    Final
-}
-
 internal interface IValidatorSource
 {
     Task CollectValidatorsAsync(

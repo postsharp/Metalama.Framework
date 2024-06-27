@@ -46,6 +46,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public override Assembly LoadAssembly( string path )
         {
+            if ( this._disposeStatus != 0 )
+            {
+                throw new ObjectDisposedException( nameof(UnloadableCompileTimeDomain) );
+            }
+            
             // When using LoadFromAssemblyPath, the file is locked and the lock is not disposed when the AssemblyLoadContext is unloaded.
             // Therefore, we're loading from bytes.
 
