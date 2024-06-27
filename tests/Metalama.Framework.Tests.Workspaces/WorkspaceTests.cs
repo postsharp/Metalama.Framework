@@ -285,7 +285,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ){ IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -296,8 +296,8 @@ class MyClass {}" );
             Assert.Equal( ["B.f[MemberType]", "B.M()[Invocation]", "B[BaseType]"], GetReferences( typeA ) );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
-                => d.GetIncomingReferences()
-                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.References.Select( x => x.Kinds ) ) + "]" )
+                => d.GetInboundReferences()
+                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.Details.Select( x => x.Kinds ) ) + "]" )
                     .OrderBy( x => x )
                     .ToArray();
         }

@@ -88,7 +88,7 @@ public sealed class ReferenceValidatorRunner
         CompilationModel initialCompilation,
         UserDiagnosticSink diagnosticAdder,
         IReferenceValidatorProvider referenceValidatorProvider,
-        ReferenceIndex referenceIndex,
+        InboundReferenceIndex referenceIndex,
         CancellationToken cancellationToken )
     {
         // Analyze the references.
