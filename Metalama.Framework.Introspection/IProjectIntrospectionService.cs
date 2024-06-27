@@ -7,5 +7,5 @@ namespace Metalama.Framework.Introspection;
 
 public interface IProjectIntrospectionService : IProjectService
 {
-    IReferenceGraph GetReferenceGraph( ICompilation compilation );
+    IIntrospectionReferenceGraph GetReferenceGraph( ICompilation compilation );
 }

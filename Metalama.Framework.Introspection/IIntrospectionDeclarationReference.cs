@@ -5,7 +5,7 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Introspection;
 
-public interface IDeclarationReference
+public interface IIntrospectionDeclarationReference
 {
     IDeclaration DestinationDeclaration { get; }
 
@@ -13,5 +13,5 @@ public interface IDeclarationReference
 
     ReferenceKinds Kinds { get; }
 
-    IReadOnlyList<Reference> References { get; }
+    IReadOnlyList<IntrospectionReferenceDetail> Details { get; }
 }

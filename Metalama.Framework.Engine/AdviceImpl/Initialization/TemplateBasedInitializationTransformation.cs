@@ -88,7 +88,7 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
-    public override TransformationKind TransformationKind => TransformationKind.InsertStatement;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
 
     public override FormattableString ToDisplayString() => $"Add a statement to '{this._targetConstructor}'.";
 }

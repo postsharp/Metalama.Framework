@@ -1,6 +1,6 @@
 namespace Metalama.Framework.Introspection;
 
-public enum ReferenceGraphChildKinds
+public enum IntrospectionChildKinds
 {
     None,
     DerivedType = 1,

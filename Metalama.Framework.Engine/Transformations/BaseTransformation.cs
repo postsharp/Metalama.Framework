@@ -32,7 +32,7 @@ internal abstract class BaseTransformation : ITransformation
 
     public abstract TransformationObservability Observability { get; }
 
-    public abstract TransformationKind TransformationKind { get; }
+    public abstract IntrospectionTransformationKind TransformationKind { get; }
 
     public abstract FormattableString ToDisplayString();
 }

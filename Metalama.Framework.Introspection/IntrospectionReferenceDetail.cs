@@ -4,15 +4,15 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Introspection;
 
-public readonly struct Reference : IDiagnosticLocation
+public readonly struct IntrospectionReferenceDetail : IDiagnosticLocation
 {
-    public IDeclarationReference DeclarationReference { get; }
+    public IIntrospectionDeclarationReference DeclarationReference { get; }
 
     public ReferenceKinds Kinds { get; }
 
     public SourceReference Source { get; }
 
-    internal Reference( IDeclarationReference declarationReference, ReferenceKinds kinds, SourceReference source )
+    internal IntrospectionReferenceDetail( IIntrospectionDeclarationReference declarationReference, ReferenceKinds kinds, SourceReference source )
     {
         this.DeclarationReference = declarationReference;
         this.Kinds = kinds;

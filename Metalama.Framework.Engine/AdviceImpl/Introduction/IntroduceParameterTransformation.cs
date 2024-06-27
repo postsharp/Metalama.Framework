@@ -52,7 +52,7 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
-    public override TransformationKind TransformationKind => TransformationKind.IntroduceParameter;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceParameter;
 
     public override FormattableString ToDisplayString() => $"Introduce the parameter '{this.Parameter}'.";
 }

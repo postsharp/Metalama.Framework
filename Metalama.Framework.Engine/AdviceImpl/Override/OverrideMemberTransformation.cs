@@ -44,5 +44,5 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 
     public override FormattableString ToDisplayString() => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration}'";
 
-    public override TransformationKind TransformationKind => TransformationKind.OverrideMember;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.OverrideMember;
 }

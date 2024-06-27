@@ -20,7 +20,7 @@ internal sealed class ProjectIntrospectionService : IProjectIntrospectionService
         this._serviceProvider = serviceProvider;
     }
 
-    public IReferenceGraph GetReferenceGraph( ICompilation compilation )
+    public IIntrospectionReferenceGraph GetReferenceGraph( ICompilation compilation )
     {
         // Lock to prevent concurrent evaluation.
         lock ( this._cache )

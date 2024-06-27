@@ -13,7 +13,7 @@ using System.Linq;
 namespace Metalama.Framework.Engine.Introspection.References;
 
 internal class InboundDeclarationReference( ISymbol referencedSymbol, ReferencingSymbolInfo referencingSymbolInfo, CompilationModel compilation )
-    : IDeclarationReference
+    : IIntrospectionDeclarationReference
 {
     [Memo]
     public IDeclaration DestinationDeclaration => compilation.Factory.GetDeclaration( referencedSymbol );
@@ -24,9 +24,9 @@ internal class InboundDeclarationReference( ISymbol referencedSymbol, Referencin
     public ReferenceKinds Kinds => referencingSymbolInfo.Nodes.ReferenceKinds;
 
     [Memo]
-    public IReadOnlyList<Reference> References
+    public IReadOnlyList<IntrospectionReferenceDetail> Details
         => referencingSymbolInfo.Nodes.SelectAsReadOnlyList(
-            n => new Reference(
+            n => new IntrospectionReferenceDetail(
                 this,
                 n.ReferenceKind,
                 new SourceReference( n.Syntax.AsNode() ?? (object) n.Syntax.AsToken(), SourceReferenceImpl.Instance ) ) );

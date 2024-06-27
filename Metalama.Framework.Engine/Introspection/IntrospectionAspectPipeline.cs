@@ -32,7 +32,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
 
     private static ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics( DiagnosticBag diagnostics, CompilationModel compilation )
         => diagnostics
-            .SelectAsImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) );
+            .SelectAsImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, IntrospectionDiagnosticSource.Metalama ) );
 
     internal Task<IIntrospectionCompilationResult> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
     {

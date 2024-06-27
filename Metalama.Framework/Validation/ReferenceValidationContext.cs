@@ -30,7 +30,7 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets the list of individual references that are being collectively analyzed and grouped by granularity.
         /// </summary>
-        public abstract IEnumerable<ReferenceInstance> References { get; }
+        public abstract IEnumerable<ReferenceDetail> Details { get; }
 
         internal abstract IDiagnosticSource DiagnosticSource { get; }
 
@@ -80,16 +80,16 @@ namespace Metalama.Framework.Validation
         [Obsolete( "Use the Origin property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
         public INamedType ReferencingType => this.Origin.Type;
 
-        [Obsolete( "Use References to get all references, then ReferenceInstance.ReferenceKind." )]
+        [Obsolete( "Use Details to get all references, then ReferenceInstance.ReferenceKind." )]
         public abstract ReferenceKinds ReferenceKinds { get; }
 
-        [Obsolete( "Use References to get all references. The SourceReference implements IDiagnosticLocation." )]
+        [Obsolete( "Use Details to get all references. The SourceReference implements IDiagnosticLocation." )]
         public IDiagnosticLocation DiagnosticLocation => this.Source;
 
-        [Obsolete( "Use References to get all references, then ReferenceInstance.Source." )]
-        public SourceReference Source => this.References.Single().Source;
+        [Obsolete( "Use Details to get all references, then ReferenceInstance.Source." )]
+        public SourceReference Source => this.Details.Single().Source;
 
-        [Obsolete( "Use References to get all references, then ReferenceInstance.Source." )]
+        [Obsolete( "Use Details to get all references, then ReferenceInstance.Source." )]
         public SourceReference Syntax => this.Source;
 
         /// <summary>
@@ -125,8 +125,8 @@ namespace Metalama.Framework.Validation
                 _ => throw new ArgumentOutOfRangeException( nameof(kind), $"Unexpected kind: '{kind}'" )
             };
 
-        internal abstract IDeclaration ResolveDeclaration( ReferenceInstance referenceInstance );
+        internal abstract IDeclaration ResolveDeclaration( ReferenceDetail referenceDetail );
 
-        internal abstract IDiagnosticLocation? ResolveLocation( ReferenceInstance referenceInstance );
+        internal abstract IDiagnosticLocation? ResolveLocation( ReferenceDetail referenceDetail );
     }
 }

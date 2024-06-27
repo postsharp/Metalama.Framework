@@ -14,9 +14,9 @@ public static class DeclarationExtensions
     /// Gets inbound declaration references, i.e. the list of declarations that use the given declaration,
     /// in the projects loaded in the current <see cref="Workspace"/>. 
     /// </summary>
-    public static IEnumerable<IDeclarationReference> GetInboundReferences(
+    public static IEnumerable<IIntrospectionDeclarationReference> GetInboundReferences(
         this IDeclaration declaration,
-        ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration,
+        IntrospectionChildKinds childKinds = IntrospectionChildKinds.ContainingDeclaration,
         CancellationToken cancellationToken = default )
     {
         var service = declaration.Compilation.Project.ServiceProvider.GetRequiredService<WorkspaceIntrospectionService>();
@@ -29,7 +29,7 @@ public static class DeclarationExtensions
     /// Gets inbound declaration references, i.e. the list of declarations that use the given declaration,
     /// in the projects loaded in the current <see cref="Workspace"/>. 
     /// </summary>
-    public static IEnumerable<IDeclarationReference> GetOutboundReferences(
+    public static IEnumerable<IIntrospectionDeclarationReference> GetOutboundReferences(
         this IDeclaration declaration,
         CancellationToken cancellationToken = default )
     {

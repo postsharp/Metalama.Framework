@@ -39,7 +39,7 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
-    public override TransformationKind TransformationKind => TransformationKind.InsertConstructorInitializerArgument;
+    public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertConstructorInitializerArgument;
 
     public override FormattableString ToDisplayString() => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
 }

@@ -73,7 +73,7 @@ namespace Metalama.Framework.Workspaces
                 return new NoMetalamaIntrospectionCompilationResult(
                     true,
                     this.Compilation,
-                    this.Compilation.GetRoslynCompilation().GetDiagnostics().ToIntrospectionDiagnostics( this.Compilation, DiagnosticSource.CSharp ) );
+                    this.Compilation.GetRoslynCompilation().GetDiagnostics().ToIntrospectionDiagnostics( this.Compilation, IntrospectionDiagnosticSource.CSharp ) );
             }
             else
             {

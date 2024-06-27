@@ -17,7 +17,7 @@ internal class OutboundDeclarationReference(
     ISymbol referencingSymbol,
     IEnumerable<OutboundReference> references,
     CompilationModel compilation )
-    : IDeclarationReference
+    : IIntrospectionDeclarationReference
 {
     [Memo]
     public IDeclaration DestinationDeclaration => compilation.Factory.GetDeclaration( referencedSymbol );
@@ -29,8 +29,8 @@ internal class OutboundDeclarationReference(
     public ReferenceKinds Kinds => references.Select( r => r.ReferenceKind ).Union();
 
     [Memo]
-    public IReadOnlyList<Reference> References
-        => references.Select( r => new Reference( this, r.ReferenceKind, new SourceReference( r.Node.AsNode() ?? (object) r.Node.AsToken(), SourceReferenceImpl.Instance ) ) ).ToReadOnlyList();
+    public IReadOnlyList<IntrospectionReferenceDetail> Details
+        => references.Select( r => new IntrospectionReferenceDetail( this, r.ReferenceKind, new SourceReference( r.Node.AsNode() ?? (object) r.Node.AsToken(), SourceReferenceImpl.Instance ) ) ).ToReadOnlyList();
 
     public override string ToString() => $"{this.OriginDeclaration} -> {this.DestinationDeclaration}";
 }

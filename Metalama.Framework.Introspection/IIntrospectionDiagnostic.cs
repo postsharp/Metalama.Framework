@@ -48,9 +48,9 @@ namespace Metalama.Framework.Introspection
         Severity Severity { get; }
 
         /// <summary>
-        /// Gets the source (<see cref="DiagnosticSource.Metalama"/> or <see cref="DiagnosticSource.CSharp"/>)
+        /// Gets the source (<see cref="IntrospectionDiagnosticSource.Metalama"/> or <see cref="IntrospectionDiagnosticSource.CSharp"/>)
         /// of the diagnostic.
         /// </summary>
-        DiagnosticSource Source { get; }
+        IntrospectionDiagnosticSource Source { get; }
     }
 }

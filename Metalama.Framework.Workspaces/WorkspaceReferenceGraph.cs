@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Workspaces;
 
-internal sealed class WorkspaceReferenceGraph : IReferenceGraph
+internal sealed class WorkspaceReferenceGraph : IIntrospectionReferenceGraph
 {
     private readonly Future<Workspace> _workspace;
 
@@ -18,9 +18,9 @@ internal sealed class WorkspaceReferenceGraph : IReferenceGraph
         this._workspace = workspace;
     }
 
-    public IEnumerable<IDeclarationReference> GetInboundReferences(
+    public IEnumerable<IIntrospectionDeclarationReference> GetInboundReferences(
         IDeclaration destination,
-        ReferenceGraphChildKinds childKinds,
+        IntrospectionChildKinds childKinds,
         CancellationToken cancellationToken )
     {
         return this._workspace.Value.Projects
@@ -36,7 +36,7 @@ internal sealed class WorkspaceReferenceGraph : IReferenceGraph
                 } );
     }
 
-    public IEnumerable<IDeclarationReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
+    public IEnumerable<IIntrospectionDeclarationReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
     {
         var service = origin.Compilation.Project.ServiceProvider.GetRequiredService<IProjectIntrospectionService>();
         var graph = service.GetReferenceGraph( origin.Compilation );

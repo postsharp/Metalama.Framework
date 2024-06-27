@@ -37,5 +37,5 @@ internal class WorkspaceDiagnosticWrapper : IIntrospectionDiagnostic
             _ => throw new ArgumentOutOfRangeException()
         };
 
-    public DiagnosticSource Source { get; set; }
+    public IntrospectionDiagnosticSource Source { get; set; }
 }

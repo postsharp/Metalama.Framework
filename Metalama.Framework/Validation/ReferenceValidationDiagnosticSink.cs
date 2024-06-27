@@ -35,7 +35,7 @@ public readonly struct ReferenceValidationDiagnosticSink
     /// </summary>
     public void Report( IDiagnostic diagnostic )
     {
-        foreach ( var scope in this._context.References )
+        foreach ( var scope in this._context.Details )
         {
             this.Sink.Report( diagnostic, this._context.ResolveLocation( scope ), this._context.DiagnosticSource );
         }
@@ -46,9 +46,9 @@ public readonly struct ReferenceValidationDiagnosticSink
     /// </summary>
     /// <param name="getDiagnostic">A delegate returning a diagnostic or <c>null</c> if no diagnostic should be reported for the given reference.</param>
     /// <param name="getLocation">An optional delegate returning the location of the diagnostic. If <c>null</c>, the default location is used.</param>
-    public void Report( Func<ReferenceInstance, IDiagnostic?> getDiagnostic, Func<ReferenceInstance, IDiagnosticLocation?>? getLocation = null )
+    public void Report( Func<ReferenceDetail, IDiagnostic?> getDiagnostic, Func<ReferenceDetail, IDiagnosticLocation?>? getLocation = null )
     {
-        foreach ( var scope in this._context.References )
+        foreach ( var scope in this._context.Details )
         {
             var diagnostic = getDiagnostic( scope );
 
@@ -74,7 +74,7 @@ public readonly struct ReferenceValidationDiagnosticSink
     /// </summary>
     public void Suppress( ISuppression suppression )
     {
-        foreach ( var scope in this._context.References )
+        foreach ( var scope in this._context.Details )
         {
             this.Sink.Suppress( suppression, this._context.ResolveDeclaration( scope ), this._context.DiagnosticSource );
         }
@@ -86,7 +86,7 @@ public readonly struct ReferenceValidationDiagnosticSink
     /// <param name="codeFix">The <see cref="CodeFix"/>.</param>
     public void Suggest( CodeFix codeFix )
     {
-        foreach ( var scope in this._context.References )
+        foreach ( var scope in this._context.Details )
         {
             this.Sink.Suggest(
                 codeFix,

@@ -5,7 +5,7 @@ namespace Metalama.Framework.Introspection;
 /// <summary>
 /// Enumerates the possible sources (or originators) of an <see cref="IIntrospectionDiagnostic"/>.
 /// </summary>
-public enum DiagnosticSource
+public enum IntrospectionDiagnosticSource
 {
     /// <summary>
     /// The diagnostic is produced by Metalama.
