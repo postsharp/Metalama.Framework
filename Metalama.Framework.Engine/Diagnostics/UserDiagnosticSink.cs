@@ -222,7 +222,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public override string ToString()
             => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
-        
+
         private void ValidateUserReport( IDiagnosticDefinition definition )
         {
             if ( this._diagnosticManifest != null && !this._diagnosticManifest.DefinesDiagnostic( definition.Id ) )
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             this.ValidateUserReport( diagnostic.Definition );
 
-            var resolvedLocation = location.ToLocation();
+            var resolvedLocation = location.GetDiagnosticLocation();
             var codeFixTitles = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
 
             this.Report( diagnostic.Definition.CreateRoslynDiagnosticNonGeneric( resolvedLocation, diagnostic.Arguments, source, codeFixes: codeFixTitles ) );
@@ -260,7 +260,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         void IDiagnosticSink.Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source )
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
-            var resolvedLocation = location.ToLocation();
+            var resolvedLocation = location.GetDiagnosticLocation();
             var codeFixes = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
 
             this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixes.Value!, source, codeFixes: codeFixes ) );

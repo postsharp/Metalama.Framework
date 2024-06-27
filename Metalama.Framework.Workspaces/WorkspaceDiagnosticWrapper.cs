@@ -38,4 +38,6 @@ internal class WorkspaceDiagnosticWrapper : IIntrospectionDiagnostic
         };
 
     public IntrospectionDiagnosticSource Source { get; set; }
+
+    object? IIntrospectionDiagnostic.Details => null;
 }

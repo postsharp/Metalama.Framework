@@ -55,5 +55,5 @@ public readonly struct SourceReference : IDiagnosticLocation
     /// <summary>
     /// Gets the content of the node or token (without trivia).
     /// </summary>
-    public override string ToString() => this.NodeOrTokenInternal?.ToString() ?? "null";
+    public override string ToString() => this.Span.ToString();
 }

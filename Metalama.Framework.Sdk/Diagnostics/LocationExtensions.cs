@@ -14,7 +14,7 @@ public static class LocationExtensions
 {
     public static IDiagnosticLocation ToDiagnosticLocation( this Location? location ) => new LocationWrapper( location );
 
-    public static Location? ToLocation( this IDiagnosticLocation? location )
+    public static Location? GetDiagnosticLocation( this IDiagnosticLocation? location )
         => location switch
         {
             ISdkDeclaration sdkDeclaration => sdkDeclaration.DiagnosticLocation,

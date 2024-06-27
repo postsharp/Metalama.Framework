@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( this._disposeStatus != 0 )
             {
-                throw new ObjectDisposedException( null );
+                throw new ObjectDisposedException( nameof(UnloadableCompileTimeDomain) );
             }
             
             // When using LoadFromAssemblyPath, the file is locked and the lock is not disposed when the AssemblyLoadContext is unloaded.

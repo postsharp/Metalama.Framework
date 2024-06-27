@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Aspects
         IAdviceFactory IAspectBuilder.Advice => this._adviceFactory;
 
         IAdviceFactory IAdviserInternal.AdviceFactory => this._adviceFactory;
-        
+
         public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
         {
             var oldPredecessor = this.AspectPredecessor;
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                         this._aspectBuilderState.Diagnostics.Report(
                             GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
-                                this.Diagnostics.DefaultTargetLocation?.ToLocation(),
+                                this.Diagnostics.DefaultTargetLocation?.GetDiagnosticLocation(),
                                 (this.AspectInstance.AspectClass.ShortName, this.Target.DeclarationKind, this.Target, justification!),
                                 this ) );
 

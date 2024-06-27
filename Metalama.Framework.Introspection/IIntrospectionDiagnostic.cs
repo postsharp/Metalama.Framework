@@ -15,7 +15,7 @@ namespace Metalama.Framework.Introspection
         /// <summary>
         /// Gets the compilation in which the diagnostic was reported. 
         /// </summary>
-        ICompilation Compilation { get; }
+        ICompilation? Compilation { get; }
 
         /// <summary>
         /// Gets the diagnostic id (e.g. <c>CS0123</c>).
@@ -52,5 +52,7 @@ namespace Metalama.Framework.Introspection
         /// of the diagnostic.
         /// </summary>
         IntrospectionDiagnosticSource Source { get; }
+
+        object? Details { get; }
     }
 }

@@ -39,6 +39,8 @@ namespace Metalama.Framework.Engine.Introspection
 
         public IntrospectionDiagnosticSource Source { get; }
 
+        object? IIntrospectionDiagnostic.Details => null;
+
         private IDeclaration? GetDeclaration()
         {
             // Find the node reporting the error.

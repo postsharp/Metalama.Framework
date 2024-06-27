@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
@@ -30,7 +29,12 @@ internal class OutboundReference(
 
     [Memo]
     public IReadOnlyList<IntrospectionReferenceDetail> Details
-        => references.Select( r => new IntrospectionReferenceDetail( this, r.ReferenceKind, new SourceReference( r.Node.AsNode() ?? (object) r.Node.AsToken(), SourceReferenceImpl.Instance ) ) ).ToReadOnlyList();
+        => references.Select(
+                r => new IntrospectionReferenceDetail(
+                    this,
+                    r.ReferenceKind,
+                    new SourceReference( r.Node.AsNode() ?? (object) r.Node.AsToken(), SourceReferenceImpl.Instance ) ) )
+            .ToReadOnlyList();
 
     public override string ToString() => $"{this.OriginDeclaration} -> {this.DestinationDeclaration}";
 }

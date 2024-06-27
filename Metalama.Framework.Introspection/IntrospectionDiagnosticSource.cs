@@ -13,5 +13,8 @@ public enum IntrospectionDiagnosticSource
     Metalama,
 
     // Resharper disable UnusedMember.Global
-    CSharp
+    CSharp,
+
+    // Reported by the user using an API
+    User
 }

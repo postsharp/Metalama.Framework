@@ -31,7 +31,7 @@ public sealed class PreviewTests : DesignTimeTestBase
 
     protected override TestContextOptions GetDefaultTestContextOptions() => new() { CodeFormattingOptions = CodeFormattingOptions.Formatted };
 
-    private Task<string> RunPreviewAsync(
+    private async Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
         string previewedSyntaxTreeName,
         Dictionary<string, string>? dependencyCode = null )
@@ -39,7 +39,7 @@ public sealed class PreviewTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        return RunPreviewAsync(
+        return await RunPreviewAsync(
             testContext,
             testContext.ServiceProvider.Global.WithService( pipelineFactory ),
             code,

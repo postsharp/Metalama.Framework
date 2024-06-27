@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -38,5 +39,64 @@ public static class AttributeHelper
         }
 
         shortName = typeName.TrimSuffix( "Attribute" );
+    }
+
+    public static bool IsValid( this AttributeData attributeData )
+    {
+        if ( attributeData.AttributeConstructor == null )
+        {
+            return false;
+        }
+
+        if ( attributeData.AttributeClass == null || attributeData.AttributeClass.TypeKind == TypeKind.Error )
+        {
+            return false;
+        }
+
+        foreach ( var argument in attributeData.ConstructorArguments )
+        {
+            if ( !IsValid( argument ) )
+            {
+                return false;
+            }
+        }
+
+        foreach ( var namedArgument in attributeData.NamedArguments )
+        {
+            if ( !IsValid( namedArgument.Value ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+
+        static bool IsValid( TypedConstant typedConstant )
+        {
+            switch ( typedConstant.Kind )
+            {
+                case TypedConstantKind.Error:
+                case TypedConstantKind.Type when typedConstant.Value is IErrorTypeSymbol:
+
+                    return false;
+                case TypedConstantKind.Array:
+                    {
+                        foreach ( var item in typedConstant.Values )
+                        {
+                            if ( !IsValid( item ) )
+                            {
+                                return false;
+                            }
+                        }
+
+                    }
+
+                    return true;
+
+                default:
+                    return true;
+
+            }
+        }
     }
 }

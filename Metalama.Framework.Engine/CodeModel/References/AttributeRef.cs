@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -152,6 +153,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     }
 
                 case AttributeData attributeData:
+                    if ( !attributeData.IsValid() )
+                    {
+                        // Only return fully valid attributes.
+                        attribute = null;
+                        return false;
+                    }
+
                     attribute = new Attribute( attributeData, compilation, this._declaringDeclaration.GetTarget( compilation ) );
 
                     return true;
