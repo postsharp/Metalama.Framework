@@ -79,6 +79,7 @@ public static class AttributeHelper
                 case TypedConstantKind.Type when typedConstant.Value is IErrorTypeSymbol:
 
                     return false;
+
                 case TypedConstantKind.Array:
                     {
                         foreach ( var item in typedConstant.Values )
@@ -88,14 +89,12 @@ public static class AttributeHelper
                                 return false;
                             }
                         }
-
                     }
 
                     return true;
 
                 default:
                     return true;
-
             }
         }
     }
