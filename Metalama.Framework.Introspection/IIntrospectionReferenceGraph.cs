@@ -6,10 +6,10 @@ namespace Metalama.Framework.Introspection;
 
 public interface IIntrospectionReferenceGraph
 {
-    IEnumerable<IIntrospectionDeclarationReference> GetInboundReferences(
+    IEnumerable<IIntrospectionReference> GetInboundReferences(
         IDeclaration destination,
         IntrospectionChildKinds childKinds = IntrospectionChildKinds.ContainingDeclaration,
         CancellationToken cancellationToken = default );
 
-    IEnumerable<IIntrospectionDeclarationReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default );
+    IEnumerable<IIntrospectionReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default );
 }

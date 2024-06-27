@@ -24,10 +24,10 @@ internal sealed class ProjectReferenceGraph : IIntrospectionReferenceGraph
     private readonly ITaskRunner _taskRunner;
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
-    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>? _includeDerivedTypesCache;
-    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>? _includeContainedDeclarationsCache;
-    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>? _includeAllCache;
-    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>? _includeNoChildrenCache;
+    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>? _includeDerivedTypesCache;
+    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>? _includeContainedDeclarationsCache;
+    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>? _includeAllCache;
+    private WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>? _includeNoChildrenCache;
     private volatile InboundReferenceIndex? _referenceIndex;
 
     public ProjectReferenceGraph( ProjectServiceProvider serviceProvider, CompilationModel compilation )
@@ -70,19 +70,19 @@ internal sealed class ProjectReferenceGraph : IIntrospectionReferenceGraph
         }
     }
 
-    public IEnumerable<IIntrospectionDeclarationReference> GetInboundReferences(
+    public IEnumerable<IIntrospectionReference> GetInboundReferences(
         IDeclaration destination,
         IntrospectionChildKinds childKinds = IntrospectionChildKinds.ContainingDeclaration,
         CancellationToken cancellationToken = default )
     {
         var cache = childKinds switch
         {
-            IntrospectionChildKinds.None => this._includeNoChildrenCache ??= new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>(),
+            IntrospectionChildKinds.None => this._includeNoChildrenCache ??= new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>(),
             IntrospectionChildKinds.DerivedType => this._includeDerivedTypesCache ??=
-                new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>(),
+                new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>(),
             IntrospectionChildKinds.ContainingDeclaration => this._includeContainedDeclarationsCache ??=
-                new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>(),
-            IntrospectionChildKinds.All => this._includeAllCache ??= new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionDeclarationReference>>(),
+                new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>(),
+            IntrospectionChildKinds.All => this._includeAllCache ??= new WeakCache<IDeclaration, IReadOnlyCollection<IIntrospectionReference>>(),
             _ => throw new ArgumentOutOfRangeException( nameof(childKinds), childKinds, null )
         };
 
@@ -95,7 +95,7 @@ internal sealed class ProjectReferenceGraph : IIntrospectionReferenceGraph
         return cache.GetOrAdd( destination, _ => this.GetInboundReferencesCore( destination, childKinds ) );
     }
 
-    public IEnumerable<IIntrospectionDeclarationReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
+    public IEnumerable<IIntrospectionReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
     {
         var builder = new OutboundReferenceIndexBuilder( this._serviceProvider );
         builder.IndexDeclaration( origin, cancellationToken );
@@ -103,7 +103,7 @@ internal sealed class ProjectReferenceGraph : IIntrospectionReferenceGraph
         return builder.GetReferences()
             .GroupBy( r => new SymbolPair( r.ReferencedSymbol, r.ReferencingSymbol ) )
             .Select(
-                group => new OutboundDeclarationReference(
+                group => new OutboundReference(
                     group.Key.Referenced,
                     group.Key.Referencing,
                     group,
@@ -122,7 +122,7 @@ internal sealed class ProjectReferenceGraph : IIntrospectionReferenceGraph
                              && SymbolEqualityComparer.Default.Equals( this.Referencing, other.Referencing );
     }
 
-    private IReadOnlyCollection<IIntrospectionDeclarationReference> GetInboundReferencesCore( IDeclaration destination, IntrospectionChildKinds childKinds )
+    private IReadOnlyCollection<IIntrospectionReference> GetInboundReferencesCore( IDeclaration destination, IntrospectionChildKinds childKinds )
     {
         var symbol = destination.GetSymbol();
 
@@ -136,7 +136,7 @@ internal sealed class ProjectReferenceGraph : IIntrospectionReferenceGraph
 
             return descendants
                 .SelectMany( d => d.References.Select( r => (d.ReferencedSymbol, ReferencingSymbolInfo: r) ) )
-                .Select( x => new InboundDeclarationReference( x.ReferencedSymbol, x.ReferencingSymbolInfo, this._compilation ) )
+                .Select( x => new InboundReference( x.ReferencedSymbol, x.ReferencingSymbolInfo, this._compilation ) )
                 .ToReadOnlyList();
         }
         else

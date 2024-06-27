@@ -14,7 +14,7 @@ public static class DeclarationExtensions
     /// Gets inbound declaration references, i.e. the list of declarations that use the given declaration,
     /// in the projects loaded in the current <see cref="Workspace"/>. 
     /// </summary>
-    public static IEnumerable<IIntrospectionDeclarationReference> GetInboundReferences(
+    public static IEnumerable<IIntrospectionReference> GetInboundReferences(
         this IDeclaration declaration,
         IntrospectionChildKinds childKinds = IntrospectionChildKinds.ContainingDeclaration,
         CancellationToken cancellationToken = default )
@@ -29,7 +29,7 @@ public static class DeclarationExtensions
     /// Gets inbound declaration references, i.e. the list of declarations that use the given declaration,
     /// in the projects loaded in the current <see cref="Workspace"/>. 
     /// </summary>
-    public static IEnumerable<IIntrospectionDeclarationReference> GetOutboundReferences(
+    public static IEnumerable<IIntrospectionReference> GetOutboundReferences(
         this IDeclaration declaration,
         CancellationToken cancellationToken = default )
     {

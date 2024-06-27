@@ -18,7 +18,7 @@ internal sealed class WorkspaceReferenceGraph : IIntrospectionReferenceGraph
         this._workspace = workspace;
     }
 
-    public IEnumerable<IIntrospectionDeclarationReference> GetInboundReferences(
+    public IEnumerable<IIntrospectionReference> GetInboundReferences(
         IDeclaration destination,
         IntrospectionChildKinds childKinds,
         CancellationToken cancellationToken )
@@ -36,7 +36,7 @@ internal sealed class WorkspaceReferenceGraph : IIntrospectionReferenceGraph
                 } );
     }
 
-    public IEnumerable<IIntrospectionDeclarationReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
+    public IEnumerable<IIntrospectionReference> GetOutboundReferences( IDeclaration origin, CancellationToken cancellationToken = default )
     {
         var service = origin.Compilation.Project.ServiceProvider.GetRequiredService<IProjectIntrospectionService>();
         var graph = service.GetReferenceGraph( origin.Compilation );

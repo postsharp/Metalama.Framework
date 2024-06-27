@@ -12,24 +12,25 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection.References;
 
-internal class InboundDeclarationReference( ISymbol referencedSymbol, ReferencingSymbolInfo referencingSymbolInfo, CompilationModel compilation )
-    : IIntrospectionDeclarationReference
+internal class OutboundReference(
+    ISymbol referencedSymbol,
+    ISymbol referencingSymbol,
+    IEnumerable<Validation.OutboundReference> references,
+    CompilationModel compilation )
+    : IIntrospectionReference
 {
     [Memo]
     public IDeclaration DestinationDeclaration => compilation.Factory.GetDeclaration( referencedSymbol );
-    
-    [Memo]
-    public IDeclaration OriginDeclaration => compilation.Factory.GetDeclaration( referencingSymbolInfo.ReferencingSymbol );
 
-    public ReferenceKinds Kinds => referencingSymbolInfo.Nodes.ReferenceKinds;
+    [Memo]
+    public IDeclaration OriginDeclaration => compilation.Factory.GetDeclaration( referencingSymbol );
+
+    [Memo]
+    public ReferenceKinds Kinds => references.Select( r => r.ReferenceKind ).Union();
 
     [Memo]
     public IReadOnlyList<IntrospectionReferenceDetail> Details
-        => referencingSymbolInfo.Nodes.SelectAsReadOnlyList(
-            n => new IntrospectionReferenceDetail(
-                this,
-                n.ReferenceKind,
-                new SourceReference( n.Syntax.AsNode() ?? (object) n.Syntax.AsToken(), SourceReferenceImpl.Instance ) ) );
+        => references.Select( r => new IntrospectionReferenceDetail( this, r.ReferenceKind, new SourceReference( r.Node.AsNode() ?? (object) r.Node.AsToken(), SourceReferenceImpl.Instance ) ) ).ToReadOnlyList();
 
     public override string ToString() => $"{this.OriginDeclaration} -> {this.DestinationDeclaration}";
 }

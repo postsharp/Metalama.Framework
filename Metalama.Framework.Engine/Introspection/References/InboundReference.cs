@@ -12,25 +12,24 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection.References;
 
-internal class OutboundDeclarationReference(
-    ISymbol referencedSymbol,
-    ISymbol referencingSymbol,
-    IEnumerable<OutboundReference> references,
-    CompilationModel compilation )
-    : IIntrospectionDeclarationReference
+internal class InboundReference( ISymbol referencedSymbol, ReferencingSymbolInfo referencingSymbolInfo, CompilationModel compilation )
+    : IIntrospectionReference
 {
     [Memo]
     public IDeclaration DestinationDeclaration => compilation.Factory.GetDeclaration( referencedSymbol );
-
+    
     [Memo]
-    public IDeclaration OriginDeclaration => compilation.Factory.GetDeclaration( referencingSymbol );
+    public IDeclaration OriginDeclaration => compilation.Factory.GetDeclaration( referencingSymbolInfo.ReferencingSymbol );
 
-    [Memo]
-    public ReferenceKinds Kinds => references.Select( r => r.ReferenceKind ).Union();
+    public ReferenceKinds Kinds => referencingSymbolInfo.Nodes.ReferenceKinds;
 
     [Memo]
     public IReadOnlyList<IntrospectionReferenceDetail> Details
-        => references.Select( r => new IntrospectionReferenceDetail( this, r.ReferenceKind, new SourceReference( r.Node.AsNode() ?? (object) r.Node.AsToken(), SourceReferenceImpl.Instance ) ) ).ToReadOnlyList();
+        => referencingSymbolInfo.Nodes.SelectAsReadOnlyList(
+            n => new IntrospectionReferenceDetail(
+                this,
+                n.ReferenceKind,
+                new SourceReference( n.Syntax.AsNode() ?? (object) n.Syntax.AsToken(), SourceReferenceImpl.Instance ) ) );
 
     public override string ToString() => $"{this.OriginDeclaration} -> {this.DestinationDeclaration}";
 }
