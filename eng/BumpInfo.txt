@@ -1,1 +1,1 @@
-{"Dependencies":{"Metalama.Backstage":"2024.1.17","Metalama.Compiler":"2024.1.11","Metalama.Framework.RunTime":"2024.1.5"}}
+{"Dependencies":{"Metalama.Backstage":"2024.1.18","Metalama.Compiler":"2024.1.11","Metalama.Framework.RunTime":"2024.1.5"}}
