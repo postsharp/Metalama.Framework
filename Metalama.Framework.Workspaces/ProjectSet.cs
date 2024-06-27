@@ -65,7 +65,7 @@ namespace Metalama.Framework.Workspaces
 
         [Memo]
         internal ICompilationSetResult CompilationResult
-            => new CompilationSetResult( this.Projects.AsParallel().Select( x => x.CompilationResult ).ToImmutableArray(), this.ToString() );
+            => new CompilationSetResult( [..this.Projects.AsParallel().Select( x => x.CompilationResult )], this.ToString() );
 
         public override string ToString() => this._sourceCode.ToString();
 

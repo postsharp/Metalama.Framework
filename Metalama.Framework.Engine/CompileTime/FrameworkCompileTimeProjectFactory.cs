@@ -102,14 +102,15 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
     {
         var assembly = compilation.SourceModule.ReferencedAssemblySymbols.First( x => x.Name == "Metalama.Framework" );
 
-        var tfm = assembly.GetAttributes()
-            .Single( attribute => attribute.AttributeClass?.Name == nameof(TargetFrameworkAttribute) )
-            .ConstructorArguments
-            .Single()
-            .Value
-            .AssertCast<string>()
-            .AssertNotNull();
-
+        if ( assembly.GetAttributes()
+                .SingleOrDefault( attribute => attribute.AttributeClass?.Name == nameof(TargetFrameworkAttribute) )
+                ?.ConstructorArguments
+                .SingleOrDefault()
+                .Value is not string tfm )
+        {
+            throw new AssertionFailedException( $"Cannot read the TargetFrameworkAttribute from assembly '{assembly.Identity}'." );
+        }
+            
         var manifest = this._frameworkProjectManifestDictionary.GetOrAdd(
             tfm,
             static ( _, a ) => new CompileTimeProjectManifest(
