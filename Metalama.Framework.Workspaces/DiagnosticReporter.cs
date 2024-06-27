@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
@@ -16,6 +17,7 @@ namespace Metalama.Framework.Workspaces;
 /// The default implementation writes messages to the console. The action can be changed by setting the <see cref="ReportAction"/>
 /// property.
 /// </summary>
+[PublicAPI]
 public static class DiagnosticReporter
 {
     public static int ReportedWarnings { get; private set; }
@@ -27,11 +29,14 @@ public static class DiagnosticReporter
         ReportedWarnings = ReportedErrors = 0;
     }
 
-    public static Action<IIntrospectionDiagnostic>? ReportAction { get; set; } = d =>
+    public static Action<IReadOnlyList<IIntrospectionDiagnostic>>? ReportAction { get; set; } = diagnostics =>
     {
-        if ( d.Severity > Severity.Hidden )
+        foreach ( var d in diagnostics )
         {
-            Console.WriteLine( d.FormatAsBuildDiagnostic() );
+            if ( d.Severity > Severity.Hidden )
+            {
+                Console.WriteLine( d.FormatAsBuildDiagnostic() );
+            }
         }
     };
 
@@ -62,10 +67,10 @@ public static class DiagnosticReporter
 
     private static IEnumerable<IIntrospectionDiagnostic> Report( this IEnumerable<DiagnosticTarget> targets, Severity severity, string id, string message )
     {
+        var diagnostics = new List<IIntrospectionDiagnostic>();
+        
         foreach ( var location in targets )
         {
-            IncrementCounters( severity );
-
             var diagnostic = new UserDiagnostic(
                 severity,
                 id,
@@ -75,10 +80,10 @@ public static class DiagnosticReporter
                 location.Declaration,
                 location.Details );
 
-            ReportAction?.Invoke( diagnostic );
-
-            yield return diagnostic;
+            diagnostics.Add( diagnostic );
         }
+
+        return diagnostics.Report();
     }
 
     private static void IncrementCounters( Severity severity )
@@ -99,16 +104,16 @@ public static class DiagnosticReporter
 
     public static IEnumerable<IIntrospectionDiagnostic> Report( this IEnumerable<IIntrospectionDiagnostic> diagnostics )
     {
+        var copy = new List<IIntrospectionDiagnostic>();
+
         foreach ( var diagnostic in diagnostics )
         {
             IncrementCounters( diagnostic.Severity );
-
-            if ( ReportAction != null )
-            {
-                ReportAction( diagnostic );
-            }
-
-            yield return diagnostic;
+            copy.Add( diagnostic );
         }
+        
+        ReportAction?.Invoke( copy );
+
+        return copy;
     }
 }
