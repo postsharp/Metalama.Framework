@@ -214,7 +214,7 @@ class MyClass {}" );
             Assert.Equal( ["B", "B.f"], references );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
-                => d.GetIncomingReferences().Select( x => x.OriginDeclaration.ToDisplayString() ).OrderBy( x => x );
+                => d.GetInboundReferences().Select( x => x.OriginDeclaration.ToDisplayString() ).OrderBy( x => x );
         }
 
         [Fact]
@@ -248,7 +248,7 @@ class MyClass {}" );
             Assert.Equal( ["B.f[MemberType]", "B.M()[Invocation]", "B[BaseType]"], GetReferences( typeA ) );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
-                => d.GetIncomingReferences()
+                => d.GetInboundReferences()
                     .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.References.Select( x => x.Kinds ) ) + "]" )
                     .OrderBy( x => x )
                     .ToArray();
@@ -297,7 +297,7 @@ class MyClass {}" );
 
             Assert.Equal( ["'B.f' -> 'A'", "'B.M()' -> 'A.M()'", "'B' -> 'A'"], references );
 
-            static IEnumerable<string> GetReferences( IDeclaration d ) => d.GetIncomingReferences().Select( x => x.ToString() ).OrderBy( x => x );
+            static IEnumerable<string> GetReferences( IDeclaration d ) => d.GetInboundReferences().Select( x => x.ToString() ).OrderBy( x => x );
         }
     }
 }

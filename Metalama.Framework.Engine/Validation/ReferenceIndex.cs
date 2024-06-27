@@ -18,6 +18,6 @@ internal sealed class ReferenceIndex
 
     public IEnumerable<ReferencedSymbolInfo> ReferencedSymbols => this._explicitReferences.Values;
 
-    public bool TryGetIncomingReferences( ISymbol referencedSymbol, [NotNullWhen( true )] out ReferencedSymbolInfo? referencedSymbolInfo )
+    public bool TryGetInboundReferences( ISymbol referencedSymbol, [NotNullWhen( true )] out ReferencedSymbolInfo? referencedSymbolInfo )
         => this._explicitReferences.TryGetValue( referencedSymbol, out referencedSymbolInfo );
 }

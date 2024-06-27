@@ -10,17 +10,17 @@ namespace Metalama.Framework.Workspaces;
 public static class DeclarationExtensions
 {
     /// <summary>
-    /// Gets incoming declaration references, i.e. the list of declarations that use the given declaration,
+    /// Gets inbound declaration references, i.e. the list of declarations that use the given declaration,
     /// in the projects loaded in the current <see cref="Workspace"/>. 
     /// </summary>
-    public static IEnumerable<IDeclarationReference> GetIncomingReferences(
+    public static IEnumerable<IDeclarationReference> GetInboundReferences(
         this IDeclaration declaration,
         ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
     {
         var service = declaration.Compilation.Project.ServiceProvider.GetRequiredService<WorkspaceIntrospectionService>();
         var graph = service.GetReferenceGraph();
 
-        return graph.GetIncomingReferences( declaration, childKinds );
+        return graph.GetInboundReferences( declaration, childKinds );
     }
 
     /// <summary>

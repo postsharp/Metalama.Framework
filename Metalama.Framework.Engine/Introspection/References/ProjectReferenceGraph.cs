@@ -18,7 +18,7 @@ internal sealed class ProjectReferenceGraph( CompilationModel compilation, Refer
     private WeakCache<IDeclaration, IReadOnlyCollection<IDeclarationReference>>? _includeAllCache;
     private WeakCache<IDeclaration, IReadOnlyCollection<IDeclarationReference>>? _includeNoChildrenCache;
 
-    public IReadOnlyCollection<IDeclarationReference> GetIncomingReferences(
+    public IReadOnlyCollection<IDeclarationReference> GetInboundReferences(
         IDeclaration destination,
         ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
     {
@@ -39,10 +39,10 @@ internal sealed class ProjectReferenceGraph( CompilationModel compilation, Refer
             return result;
         }
 
-        return cache.GetOrAdd( destination, _ => this.GetIncomingReferencesCore( destination, childKinds ) );
+        return cache.GetOrAdd( destination, _ => this.GetInboundReferencesCore( destination, childKinds ) );
     }
 
-    private IReadOnlyCollection<IDeclarationReference> GetIncomingReferencesCore( IDeclaration destination, ReferenceGraphChildKinds childKinds )
+    private IReadOnlyCollection<IDeclarationReference> GetInboundReferencesCore( IDeclaration destination, ReferenceGraphChildKinds childKinds )
     {
         var symbol = destination.GetSymbol();
 
@@ -50,7 +50,7 @@ internal sealed class ProjectReferenceGraph( CompilationModel compilation, Refer
         {
             return [];
         }
-        else if ( referenceIndex.TryGetIncomingReferences( symbol, out var referencedSymbolInfo ) )
+        else if ( referenceIndex.TryGetInboundReferences( symbol, out var referencedSymbolInfo ) )
         {
             var descendants = referencedSymbolInfo.DescendantsAndSelf( ChildKindHelper.ToChildKinds( childKinds ) );
 

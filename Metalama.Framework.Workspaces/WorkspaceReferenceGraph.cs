@@ -16,7 +16,7 @@ internal sealed class WorkspaceReferenceGraph : IReferenceGraph
         this._workspace = workspace;
     }
 
-    public IReadOnlyCollection<IDeclarationReference> GetIncomingReferences(
+    public IReadOnlyCollection<IDeclarationReference> GetInboundReferences(
         IDeclaration destination,
         ReferenceGraphChildKinds childKinds = ReferenceGraphChildKinds.ContainingDeclaration )
     {
@@ -26,7 +26,7 @@ internal sealed class WorkspaceReferenceGraph : IReferenceGraph
         {
             var service = project.Compilation.Project.ServiceProvider.GetRequiredService<IProjectIntrospectionService>();
             var graph = service.GetReferenceGraph( project.Compilation );
-            result.AddRange( graph.GetIncomingReferences( destination, childKinds ) );
+            result.AddRange( graph.GetInboundReferences( destination, childKinds ) );
         }
 
         return result;

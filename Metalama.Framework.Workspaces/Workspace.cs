@@ -136,7 +136,7 @@ namespace Metalama.Framework.Workspaces
 
         /// <summary>
         /// Filters the <see cref="Projects"/> collection with a given predicate.
-        /// This allows to filter the output of methods such as <see cref="DeclarationExtensions.GetIncomingReferences"/>
+        /// This allows to filter the output of methods such as <see cref="DeclarationExtensions.GetInboundReferences"/>
         /// or <see cref="DeclarationExtensions.GetDerivedTypes"/> to the filtered subset.
         /// </summary>
         /// <seealso cref="ClearFilters"/>
