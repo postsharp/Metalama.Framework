@@ -8,7 +8,7 @@ if ( args.Length != 1 )
 
 var workspace = Workspace.Load(args[0]);
 
-var references = workspace.SourceCode.Types.SelectMany( t => t.GetIncomingReferences() );
+var references = workspace.SourceCode.Types.SelectMany( t => t.GetInboundReferences() );
 
 Console.WriteLine($"{references.Count()} references found.");
 
