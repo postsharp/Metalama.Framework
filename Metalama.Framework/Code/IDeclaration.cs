@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Metrics;
+using Metalama.Framework.Utilities;
 using System;
 using System.Collections.Immutable;
 
@@ -75,6 +76,7 @@ namespace Metalama.Framework.Code
         /// than the declaration in which it is contained. A type has always a greater depths than the base it derives from or the interfaces
         /// it implements.
         /// </summary>
+        [Hidden]
         int Depth { get; }
 
         /// <summary>

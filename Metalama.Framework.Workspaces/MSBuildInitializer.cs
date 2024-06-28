@@ -25,46 +25,57 @@ internal static class MSBuildInitializer
 
     public static void Initialize( string projectDirectory )
     {
-        if ( !MSBuildLocator.IsRegistered )
+        if ( MSBuildLocator.IsRegistered )
         {
-            if ( !Path.IsPathFullyQualified( projectDirectory ) )
-            {
-                throw new ArgumentOutOfRangeException( nameof(projectDirectory), "The path must be fully qualified." );
-            }
+            _logger.Trace?.Log( $"MSBuildLocator is already initialized." );
             
-            _logger.Trace?.Log(
-                $"Initializing MSBuild with directory '{projectDirectory}' with {RuntimeInformation.FrameworkDescription} running on {RuntimeInformation.RuntimeIdentifier}." );
+            return;
+        }
+        else if ( !MSBuildLocator.CanRegister )
+        {
+            _logger.Warning?.Log( $"MSBuildLocator cannot be initialized." );
 
-            foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
-            {
-                _logger.Trace?.Log( $"Loaded assembly: '{assembly}' from '{assembly.Location}'." );
-            }
+            return;
+        }
 
-            var instances = MSBuildLocator.QueryVisualStudioInstances(
-                    new VisualStudioInstanceQueryOptions { DiscoveryTypes = DiscoveryType.DotNetSdk, WorkingDirectory = projectDirectory } )
-                .OrderByDescending( i => i.Version )
-                .ToReadOnlyList();
+        if ( !Path.IsPathFullyQualified( projectDirectory ) )
+        {
+            throw new ArgumentOutOfRangeException( nameof(projectDirectory), "The path must be fully qualified." );
+        }
+            
+        _logger.Trace?.Log(
+            $"Initializing MSBuild with directory '{projectDirectory}' with {RuntimeInformation.FrameworkDescription} running on {RuntimeInformation.RuntimeIdentifier}." );
 
-            _logger.Trace?.Log(
-                $"Found {instances.Count} instances: {string.Join( ", ", instances.Select( x => $"{x.Name} {x.Version} at '{x.MSBuildPath}'" ) )}" );
+        foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
+        {
+            _logger.Trace?.Log( $"Loaded assembly: '{assembly}' from '{assembly.Location}'." );
+        }
 
-            if ( instances.Count == 0 )
-            {
-                throw new DotNetSdkLoadException(
-                    $"Could not find a .NET SDK for {RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture}. Did you select the right .NET version and processor architecture?" );
-            }
+        var instances = MSBuildLocator.QueryVisualStudioInstances(
+                new VisualStudioInstanceQueryOptions { DiscoveryTypes = DiscoveryType.DotNetSdk, WorkingDirectory = projectDirectory } )
+            .OrderByDescending( i => i.Version )
+            .ToReadOnlyList();
 
-            _visualStudioInstance = instances.First();
+        _logger.Trace?.Log(
+            $"Found {instances.Count} instances: {string.Join( ", ", instances.Select( x => $"{x.Name} {x.Version} at '{x.MSBuildPath}'" ) )}" );
 
-            _logger.Trace?.Log( $"Registering MSBuild instance {_visualStudioInstance.Name} {_visualStudioInstance.Version}." );
+        if ( instances.Count == 0 )
+        {
+            throw new DotNetSdkLoadException(
+                $"Could not find a .NET SDK for {RuntimeInformation.RuntimeIdentifier} {RuntimeInformation.ProcessArchitecture}. Did you select the right .NET version and processor architecture?" );
+        }
 
-            MSBuildLocator.RegisterInstance( _visualStudioInstance );
+        _visualStudioInstance = instances.First();
 
-            AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
-            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
-            AppDomain.CurrentDomain.FirstChanceException += OnFirstChanceException;
+        _logger.Trace?.Log( $"Registering MSBuild instance {_visualStudioInstance.Name} {_visualStudioInstance.Version}." );
 
-            /*
+        MSBuildLocator.RegisterInstance( _visualStudioInstance );
+
+        AppDomain.CurrentDomain.AssemblyLoad += OnAssemblyLoad;
+        AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
+        AppDomain.CurrentDomain.FirstChanceException += OnFirstChanceException;
+
+        /*
             var assemblyLoadContext = AssemblyLoadContext.GetLoadContext( typeof(Workspace).Assembly );
 
             if ( assemblyLoadContext != null )
@@ -75,7 +86,6 @@ internal static class MSBuildInitializer
                     assemblyLoadContext.LoadFromAssemblyPath( file );
                 }
             }*/
-        }
     }
 
     private static void OnFirstChanceException( object? sender, FirstChanceExceptionEventArgs e )

@@ -14,8 +14,8 @@ namespace Metalama.Framework.Workspaces;
 
 /// <summary>
 /// A utility class that makes it easy to report diagnostics from object queries in different environments.
-/// The default implementation writes messages to the console. The action can be changed by setting the <see cref="ReportAction"/>
-/// property.
+/// The default implementation writes messages to the console using the <see cref="ReportToConsole"/> method.
+/// The action can be changed by setting the <see cref="ReportAction"/> property.
 /// </summary>
 [PublicAPI]
 public static class DiagnosticReporter
@@ -29,16 +29,37 @@ public static class DiagnosticReporter
         ReportedWarnings = ReportedErrors = 0;
     }
 
-    public static Action<IReadOnlyList<IIntrospectionDiagnostic>>? ReportAction { get; set; } = diagnostics =>
+    public static Action<IReadOnlyList<IIntrospectionDiagnostic>>? ReportAction { get; set; } = ReportToConsole;
+
+    public static void ReportToConsole( IReadOnlyList<IIntrospectionDiagnostic> diagnostics )
     {
         foreach ( var d in diagnostics )
         {
-            if ( d.Severity > Severity.Hidden )
+            var colorBefore = Console.ForegroundColor;
+
+            switch ( d.Severity )
             {
-                Console.WriteLine( d.FormatAsBuildDiagnostic() );
+                case Severity.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine( d.FormatAsBuildDiagnostic() );
+
+                    break;
+
+                case Severity.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine( d.FormatAsBuildDiagnostic() );
+
+                    break;
+
+                case Severity.Info:
+                    Console.WriteLine( d.FormatAsBuildDiagnostic() );
+
+                    break;
             }
+
+            Console.ForegroundColor = colorBefore;
         }
-    };
+    }
 
     public static IEnumerable<IIntrospectionDiagnostic> Report(
         this IEnumerable<IIntrospectionReference> references,
@@ -68,7 +89,7 @@ public static class DiagnosticReporter
     private static IEnumerable<IIntrospectionDiagnostic> Report( this IEnumerable<DiagnosticTarget> targets, Severity severity, string id, string message )
     {
         var diagnostics = new List<IIntrospectionDiagnostic>();
-        
+
         foreach ( var location in targets )
         {
             var diagnostic = new UserDiagnostic(
@@ -111,7 +132,7 @@ public static class DiagnosticReporter
             IncrementCounters( diagnostic.Severity );
             copy.Add( diagnostic );
         }
-        
+
         ReportAction?.Invoke( copy );
 
         return copy;

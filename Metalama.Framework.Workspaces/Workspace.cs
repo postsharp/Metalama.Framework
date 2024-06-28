@@ -207,7 +207,7 @@ namespace Metalama.Framework.Workspaces
         private static void DotNetRestore( GlobalServiceProvider serviceProvider, string project )
         {
             var dotNetTool = new DotNetTool( serviceProvider );
-            dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( Path.GetFullPath( project ) ) );
+            dotNetTool.Execute( $"restore \"{Path.GetFileName( project )}\"", Path.GetDirectoryName( Path.GetFullPath( project ) ) );
         }
 
         private record LoadProjectSetResult( ProjectSet Projects, ImmutableList<WorkspaceDiagnostic> LoadDiagnostics );
