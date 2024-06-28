@@ -20,6 +20,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -174,7 +175,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     private bool TryGetPipeline(
         ProjectKey projectKey,
         IProjectOptions projectOptions,
-        ImmutableArray<PortableExecutableReference> referencesArray,
+        ImmutableArray<PortableExecutableReference> references,
         out DesignTimeAspectPipeline? pipeline )
     {
         if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
@@ -198,12 +199,29 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             }
 
             if ( ProjectOptionsEqualityComparer.Equals( projectOptions, pipelineOptions )
-                 && ReferencesAreEqual( referencesArray, pipeline.MetadataReferences ) )
+                 && ReferencesAreEqual( references, pipeline.MetadataReferences ) )
             {
                 return true;
             }
             else
             {
+                if ( this._logger.Trace is { } trace )
+                {
+                    // Recreating the pipeline over and over is a performance issue, so we log the reason.
+                    if ( !ProjectOptionsEqualityComparer.Equals( projectOptions, pipelineOptions ) )
+                    {
+                        var jsonSettings = new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+                        trace.Log(
+                            $"Recreating pipeline because project options were not equal. Old: {JsonConvert.SerializeObject( pipelineOptions, jsonSettings )}. New: {JsonConvert.SerializeObject( projectOptions, jsonSettings )}." );
+                    }
+                    else
+                    {
+                        static string Format( ImmutableArray<PortableExecutableReference> references ) => string.Join( ", ", references.Select( r => r.FilePath ) );
+
+                        trace.Log( $"Recreating pipeline because references were not equal. Old: {Format( pipeline.MetadataReferences )}. New: {Format( references )}" );
+                    }
+                }
+
                 this._pipelinesByProjectKey.TryRemove( projectKey, out _ );
                 pipeline = null;
 
