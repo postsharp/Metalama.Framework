@@ -218,7 +218,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 
             var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
-            Assert.Equal( "AssemblyInfo.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+            Assert.Equal( "MetalamaAssemblyAttributes.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
 
         [Fact]
@@ -232,7 +232,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 
             var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
-            Assert.Equal( "AssemblyInfo1.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+            Assert.Equal( "MetalamaAssemblyAttributes.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
 
         [Fact]

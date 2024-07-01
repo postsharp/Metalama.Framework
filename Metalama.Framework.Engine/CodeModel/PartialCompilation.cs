@@ -378,15 +378,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets the <see cref="SyntaxTree"/> that can be used to add new assembly- or module-level attributes.
         /// </summary>
         [Memo]
-        internal SyntaxTree SyntaxTreeForCompilationLevelAttributes
-            => this.Compilation.Assembly.GetAttributes()
-                   .Select( a => a.ApplicationSyntaxReference )
-                   .WhereNotNull()
-                   .Select( a => a.SyntaxTree )
-                   .OrderBy( x => x.FilePath.Length )
-                   .ThenBy( x => x.FilePath )
-                   .FirstOrDefault()
-               ?? this.Compilation.CreateEmptySyntaxTree( "MetalamaAssemblyAttributes.cs" );
+        internal SyntaxTree SyntaxTreeForCompilationLevelAttributes => this.Compilation.CreateEmptySyntaxTree( "MetalamaAssemblyAttributes.cs" );
 
         private static void Validate( IReadOnlyCollection<SyntaxTreeTransformation>? transformations )
         {
