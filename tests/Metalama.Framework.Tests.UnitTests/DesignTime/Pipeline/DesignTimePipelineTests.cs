@@ -1722,4 +1722,59 @@ class D{version}
 
         Assert.Empty( result2.GetAllDiagnostics() );
     }
+
+    [Fact]
+    public void SuppressionOnDeclarativeAdviceFromAnotherProject()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var libraryCode = new Dictionary<string, string>
+        {
+            ["introduceDependency.cs"] = """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Diagnostics;
+
+                public class IntroduceDependencyAttribute : DeclarativeAdviceAttribute
+                {
+                    internal static readonly SuppressionDefinition NonNullableFieldMustContainValue = new( "CS8618" );
+
+                    public sealed override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+                    {
+                        builder.Diagnostics.Suppress( NonNullableFieldMustContainValue, templateMember );
+                    }
+                }
+                """,
+            ["aspect.cs"] = """
+                using Metalama.Framework.Aspects;
+
+                public interface ILogger;
+
+                public class LogAttribute : MethodAspect
+                {
+                    [IntroduceDependency]
+                    private readonly ILogger _logger;
+                }
+                """
+        };
+
+        var targetCode = new Dictionary<string, string>
+        {
+            ["target.cs"] = """
+                class C
+                {
+                    [Log]
+                    void M() {}
+                }
+                """
+        };
+
+        var libraryCompilation = CreateCSharpCompilation( libraryCode );
+
+        var targetCompilation = CreateCSharpCompilation( targetCode, additionalReferences: [libraryCompilation.ToMetadataReference()] );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var result ) );
+    }
 }

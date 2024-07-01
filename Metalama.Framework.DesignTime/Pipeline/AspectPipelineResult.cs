@@ -339,9 +339,15 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             {
                 if ( !string.IsNullOrEmpty( path ) )
                 {
-                    var builder = resultBuilders[path];
-                    builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
-                    builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
+                    if ( resultBuilders.TryGetValue( path, out var builder ) )
+                    {
+                        builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
+                        builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
+                    }
+                    else
+                    {
+                        // This can happen when a suppression is applied to an aspect that is in a different compilation, e.g. with [IntroduceDependency].
+                    }
                 }
             }
 
