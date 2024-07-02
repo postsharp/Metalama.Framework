@@ -11,8 +11,8 @@
     <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. -->
     <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
     <RoslynApiMaxVersion>4.8.0</RoslynApiMaxVersion>
-    <!-- RoslynVersion is the version of Roslyn from which Metalama is forked.  -->
-    <RoslynVersion>4.10.0</RoslynVersion>
+    <!-- RoslynVersion is the version of Roslyn from which Metalama is forked.  It is imported from the Metalama.Compiler repo.-->
+    <!--<RoslynVersion>IMPORTED!</RoslynVersion>-->
     <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
     <xUnitApiVersion>2.4.2</xUnitApiVersion>
     <MicrosoftBuildVersion>17.10.4</MicrosoftBuildVersion>
