@@ -322,7 +322,8 @@ internal sealed partial class SymbolTranslator
 
         public override ISymbol? VisitAssembly( IAssemblySymbol symbol )
         {
-            return this._parent._targetCompilationContext.Compilation.GetAssembly( symbol.Identity );
+            // Can't use symbol.Identity here: the two assemblies can have different versions, if one of them is missing a file containing AssemblyVersion.
+            return this._parent._targetCompilationContext.Compilation.GetAssembly( symbol.Name );
         }
 
         public override ISymbol? VisitModule( IModuleSymbol symbol )
