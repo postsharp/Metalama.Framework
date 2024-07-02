@@ -103,6 +103,7 @@ public static class TestCompilationFactory
         _ = typeof(Console).Assembly;
 #if NETFRAMEWORK
         _ = Assembly.Load( "System.Reflection, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" );
+        _ = Assembly.Load( "System.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" );
 #endif
 
         var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
