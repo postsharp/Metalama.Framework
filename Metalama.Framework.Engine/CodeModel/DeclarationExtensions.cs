@@ -559,7 +559,9 @@ public static class DeclarationExtensions
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"Unsupported declaration: {declaration}" );
+                    hiddenDeclaration = null;
+
+                    return false;
             }
 
             currentType = currentType.BaseType;
