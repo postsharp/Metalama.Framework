@@ -297,7 +297,7 @@ class MyClass {}" );
 
             static IEnumerable<string> GetReferences( IDeclaration d )
                 => d.GetInboundReferences()
-                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.Details.Select( x => x.Kinds ) ) + "]" )
+                    .Select( x => x.OriginDeclaration.ToDisplayString() + "[" + string.Join( ",", x.Details.Select( y => y.Kinds ) ) + "]" )
                     .OrderBy( x => x )
                     .ToArray();
         }

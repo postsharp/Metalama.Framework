@@ -28,7 +28,7 @@ public sealed partial class SourceTransformer
         {
             this._serviceProvider = serviceProvider;
 
-            var options = MSBuildProjectOptionsFactory.Default.GetProjectOptions( contextAnalyzerConfigOptionsProvider );
+            var options = new MSBuildProjectOptions( contextAnalyzerConfigOptionsProvider.GlobalOptions );
 
             var loggerFactory = serviceProvider.GetLoggerFactory();
             this._scope = loggerFactory.EnterScope( options.AssemblyName ?? "Unnamed" );

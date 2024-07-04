@@ -1775,6 +1775,6 @@ class D{version}
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
-        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var result ) );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out _ ) );
     }
 }
