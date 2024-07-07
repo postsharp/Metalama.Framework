@@ -47,7 +47,7 @@ public abstract class DesignTimeServiceProviderFactory
 
     protected virtual ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
         => serviceProvider
-            .WithServiceConditional<IProjectOptionsFactory>( _ => MSBuildProjectOptionsFactory.Default )
+            .WithServiceConditional<IProjectOptionsFactory>( _ => new MSBuildProjectOptionsFactory() )
             .WithServiceConditional<IUserDiagnosticRegistrationService>( sp => new UserDiagnosticRegistrationService( sp ) );
 
     protected virtual CompilerServiceProvider CreateCompilerServiceProvider() => new();

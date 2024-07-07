@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -34,6 +35,7 @@ namespace Metalama.Framework.DesignTime
     public class TheDiagnosticAnalyzer : DefinitionOnlyDiagnosticAnalyzer
     {
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+        private readonly IProjectOptionsFactory _projectOptionsFactory;
         private readonly ILogger _logger;
 
 #if DEBUG
@@ -47,6 +49,7 @@ namespace Metalama.Framework.DesignTime
         public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+            this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         }
 
@@ -68,7 +71,7 @@ namespace Metalama.Framework.DesignTime
         }
 
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
-            => this.AnalyzeSemanticModel( new SemanticModelAnalysisContextAdapter( context ) );
+            => this.AnalyzeSemanticModel( new SemanticModelAnalysisContextAdapter( context, this._projectOptionsFactory ) );
 
         internal void AnalyzeSemanticModel( ISemanticModelAnalysisContext context )
         {

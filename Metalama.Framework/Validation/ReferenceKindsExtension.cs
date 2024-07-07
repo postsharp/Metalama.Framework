@@ -83,6 +83,7 @@ public static class ReferenceKindsExtension
     public static ReferenceKinds Union( this IEnumerable<ReferenceKinds> kinds )
     {
         var union = ReferenceKinds.None;
+
         foreach ( var kind in kinds )
         {
             union |= kind;

@@ -9,17 +9,19 @@ namespace Metalama.Framework.DesignTime;
 internal sealed class SemanticModelAnalysisContextAdapter : ISemanticModelAnalysisContext
 {
     private readonly SemanticModelAnalysisContext _context;
+    private readonly IProjectOptionsFactory _projectOptionsFactory;
 
-    public SemanticModelAnalysisContextAdapter( SemanticModelAnalysisContext context )
+    public SemanticModelAnalysisContextAdapter( SemanticModelAnalysisContext context, IProjectOptionsFactory projectOptionsFactory )
     {
         this._context = context;
+        this._projectOptionsFactory = projectOptionsFactory;
     }
 
     public SemanticModel SemanticModel => this._context.SemanticModel;
 
     public CancellationToken CancellationToken => this._context.CancellationToken;
 
-    public IProjectOptions ProjectOptions => MSBuildProjectOptionsFactory.Default.GetProjectOptions( this._context.Options.AnalyzerConfigOptionsProvider );
+    public IProjectOptions ProjectOptions => this._projectOptionsFactory.GetProjectOptions( this._context.Options.AnalyzerConfigOptionsProvider );
 
     // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
     public void ReportDiagnostic( Diagnostic diagnostic ) => this._context.ReportDiagnostic( diagnostic );

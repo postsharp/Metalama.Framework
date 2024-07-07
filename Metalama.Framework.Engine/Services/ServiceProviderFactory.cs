@@ -72,7 +72,8 @@ public static class ServiceProviderFactory
             .WithServiceConditional( sp => new UserCodeInvoker( sp ) )
             .WithServiceConditional( _ => new ReferenceAssemblyLocatorProvider() )
             .WithServiceConditional( _ => new FrameworkCompileTimeProjectFactory() )
-            .WithServiceConditional( _ => new AttributeClassificationService() );
+            .WithServiceConditional( _ => new AttributeClassificationService() )
+            .WithServiceConditional<IProjectOptionsFactory>( _ => new MSBuildProjectOptionsFactory() );
 
         return serviceProvider;
     }

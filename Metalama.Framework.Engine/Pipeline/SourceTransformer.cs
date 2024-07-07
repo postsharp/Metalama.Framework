@@ -96,12 +96,9 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
                 globalServices = globalServices.WithService( new CompileTimeExceptionHandler( globalServices ) );
             }
 
-            // Try.Metalama ships its own project options using the async-local service provider.
-            var projectOptions = (IProjectOptions?) globalServices.GetService( typeof(IProjectOptions) );
-
-            projectOptions ??= MSBuildProjectOptionsFactory.Default.GetProjectOptions(
-                context.AnalyzerConfigOptionsProvider,
-                context.Options );
+            // Try.Metalama ships its own project options factory using the async-local service provider.
+            var projectOptionsFactory = globalServices.GetRequiredService<IProjectOptionsFactory>();
+            var projectOptions = projectOptionsFactory.GetProjectOptions( context.AnalyzerConfigOptionsProvider, context.Options );
             
             var projectServiceProvider = globalServices
                 .WithProjectScopedServices( projectOptions, context.Compilation )

@@ -13,8 +13,8 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsF
 {
     private readonly TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions> _cache;
 
-    public static MSBuildProjectOptionsFactory Default { get; } = new( MSBuildPropertyNames.All );
-
+    public MSBuildProjectOptionsFactory() : this( MSBuildPropertyNames.All ) { }
+    
     public MSBuildProjectOptionsFactory( IEnumerable<string> relevantProperties )
     {
         this._cache = new TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions>(
@@ -22,12 +22,7 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsF
             new AnalyzerConfigOptionsComparer( relevantProperties ) );
     }
 
-    public MSBuildProjectOptions GetProjectOptions(
-        AnalyzerConfigOptionsProvider options,
-        TransformerOptions? transformerOptions = null )
-        => this.GetProjectOptions( options.GlobalOptions, transformerOptions );
-
-    private MSBuildProjectOptions GetProjectOptions(
+    public IProjectOptions GetProjectOptions(
         AnalyzerConfigOptions options,
         TransformerOptions? transformerOptions = null )
     {
@@ -42,14 +37,6 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsF
             return this._cache.GetOrAdd( options, o => new MSBuildProjectOptions( o ) );
         }
     }
-
-    public MSBuildProjectOptions GetProjectOptions(
-        Microsoft.CodeAnalysis.Project project,
-        TransformerOptions? transformerOptions = null )
-        => this.GetProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions, transformerOptions );
-
+    
     public void Dispose() => this._cache.Dispose();
-
-    IProjectOptions IProjectOptionsFactory.GetProjectOptions( Microsoft.CodeAnalysis.Project project )
-        => this.GetProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 }
