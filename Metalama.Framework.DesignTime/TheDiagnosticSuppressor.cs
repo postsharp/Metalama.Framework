@@ -11,6 +11,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -38,6 +39,7 @@ namespace Metalama.Framework.DesignTime
 
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+        private readonly IProjectOptionsFactory _projectOptionsFactory;
         private readonly UserCodeInvoker _userCodeInvoker;
 
         static TheDiagnosticSuppressor()
@@ -56,6 +58,7 @@ namespace Metalama.Framework.DesignTime
                 this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
                 this._designTimeDiagnosticDefinitions = serviceProvider.GetRequiredService<IUserDiagnosticRegistrationService>().DiagnosticDefinitions;
                 this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+                this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
                 this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
@@ -68,7 +71,7 @@ namespace Metalama.Framework.DesignTime
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
             => this.ReportSuppressions(
-                new SuppressionAnalysisContextAdapter( context ),
+                new SuppressionAnalysisContextAdapter( context, this._projectOptionsFactory ),
                 this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors );
 
         internal void ReportSuppressions(

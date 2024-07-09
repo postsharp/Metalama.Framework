@@ -57,8 +57,9 @@ internal sealed class Attribute : IAttributeImpl
     public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
     [Memo]
-    public ImmutableArray<SourceReference> Sources =>
-        ((IDeclarationImpl) this).DeclaringSyntaxReferences.SelectAsImmutableArray( sr => new SourceReference( sr.GetSyntax(), SourceReferenceImpl.Instance ) );
+    public ImmutableArray<SourceReference> Sources
+        => ((IDeclarationImpl) this).DeclaringSyntaxReferences.SelectAsImmutableArray(
+            sr => new SourceReference( sr.GetSyntax(), SourceReferenceImpl.Instance ) );
 
     public ICompilation Compilation => this.Constructor.Compilation;
 

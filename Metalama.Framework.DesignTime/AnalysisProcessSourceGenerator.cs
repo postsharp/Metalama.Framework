@@ -22,7 +22,7 @@ public class AnalysisProcessSourceGenerator : BaseSourceGenerator
 
     protected override void OnGeneratedSourceRequested(
         Compilation compilation,
-        MSBuildProjectOptions options,
+        IProjectOptions options,
         TestableCancellationToken cancellationToken )
     {
         // If there is a cached compilation result, this will schedule a background computation of the compilation even if the TouchId is unchanged.

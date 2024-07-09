@@ -1,7 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
-using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Metalama.Testing.UnitTesting
 {
@@ -14,6 +15,6 @@ namespace Metalama.Testing.UnitTesting
             this._projectOptions = projectOptions;
         }
 
-        public IProjectOptions GetProjectOptions( Project project ) => this._projectOptions;
+        public IProjectOptions GetProjectOptions( AnalyzerConfigOptions options, TransformerOptions? transformerOptions = null ) => this._projectOptions;
     }
 }

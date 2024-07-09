@@ -17,7 +17,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
 {
     private readonly ServiceProvider<IGlobalService> _serviceProvider;
     private readonly IMetalamaProjectClassifier _projectClassifier;
-    private readonly WeakCache<MSBuildProjectOptions, ClassificationService> _projectClassificationServices = new();
+    private readonly WeakCache<IProjectOptions, ClassificationService> _projectClassificationServices = new();
 
     private readonly MSBuildProjectOptionsFactory _msBuildProjectOptionsFactory = new( new[] { MSBuildPropertyNames.MetalamaCompileTimePackages } );
 
@@ -48,7 +48,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
         return new DesignTimeClassifiedTextSpansCollection( classificationService.GetClassifiedTextSpans( semanticModel, cancellationToken ) );
     }
 
-    private ClassificationService CreateClassificationService( MSBuildProjectOptions options )
+    private ClassificationService CreateClassificationService( IProjectOptions options )
     {
         return new ClassificationService( this._serviceProvider.WithProjectScopedServices( options, Array.Empty<PortableExecutableReference>() ) );
     }

@@ -18,11 +18,13 @@ public class VsAnalysisProcessDiagnosticAnalyzer : TheDiagnosticAnalyzer
     public VsAnalysisProcessDiagnosticAnalyzer( ServiceProvider<IGlobalService> serviceProvider ) : base( serviceProvider )
     {
         this._projectHandlerFactory = serviceProvider.GetRequiredService<VsAnalysisProcessProjectHandlerFactory>();
+        this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
     }
 
     public VsAnalysisProcessDiagnosticAnalyzer() : this( VsServiceProviderFactory.GetServiceProvider() ) { }
 
     private readonly VsAnalysisProcessProjectHandlerFactory _projectHandlerFactory;
+    private readonly IProjectOptionsFactory _projectOptionsFactory;
 
     public override void Initialize( AnalysisContext context )
     {
@@ -35,7 +37,7 @@ public class VsAnalysisProcessDiagnosticAnalyzer : TheDiagnosticAnalyzer
         context.RegisterCompilationAction(
             compilationContext =>
             {
-                var options = MSBuildProjectOptionsFactory.Default.GetProjectOptions( compilationContext.Options.AnalyzerConfigOptionsProvider );
+                var options = this._projectOptionsFactory.GetProjectOptions( compilationContext.Options.AnalyzerConfigOptionsProvider );
 
                 if ( options is { IsFrameworkEnabled: true, IsDesignTimeEnabled: true } )
                 {

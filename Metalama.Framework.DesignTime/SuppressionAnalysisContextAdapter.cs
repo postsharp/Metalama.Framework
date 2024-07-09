@@ -10,15 +10,17 @@ namespace Metalama.Framework.DesignTime;
 internal sealed class SuppressionAnalysisContextAdapter : ISuppressionAnalysisContext
 {
     private readonly SuppressionAnalysisContext _context;
+    private readonly IProjectOptionsFactory _projectOptionsFactory;
 
-    public SuppressionAnalysisContextAdapter( SuppressionAnalysisContext context )
+    public SuppressionAnalysisContextAdapter( SuppressionAnalysisContext context, IProjectOptionsFactory projectOptionsFactory )
     {
         this._context = context;
+        this._projectOptionsFactory = projectOptionsFactory;
     }
 
     public Compilation Compilation => this._context.Compilation;
 
-    public IProjectOptions ProjectOptions => MSBuildProjectOptionsFactory.Default.GetProjectOptions( this._context.Options.AnalyzerConfigOptionsProvider );
+    public IProjectOptions ProjectOptions => this._projectOptionsFactory.GetProjectOptions( this._context.Options.AnalyzerConfigOptionsProvider );
 
     public CancellationToken CancellationToken => this._context.CancellationToken;
 

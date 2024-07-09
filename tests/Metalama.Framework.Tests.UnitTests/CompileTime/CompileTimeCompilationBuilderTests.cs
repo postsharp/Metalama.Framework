@@ -463,7 +463,7 @@ public class ReferencedClass
                     diagnosticBag,
                     false,
                     CancellationToken.None,
-                    out var compileTimeProject1 ) );
+                    out _ ) );
 
             // After building, getting from cache should fail.
             Assert.False(

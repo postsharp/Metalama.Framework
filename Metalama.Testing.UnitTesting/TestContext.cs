@@ -130,13 +130,13 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
         typedAdditionalServices.GlobalServices.Add( sp => sp.WithServiceConditional<IGlobalOptions>( _ => new TestGlobalOptions() ) );
+        typedAdditionalServices.GlobalServices.Add( sp => sp.WithService<IProjectOptionsFactory>( _ => new TestProjectOptionsFactory( this.ProjectOptions ) ) );
 
         backstageServices = typedAdditionalServices.BackstageServices.Build( backstageServices );
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
 
         serviceProvider = serviceProvider
-            .WithService( new TestProjectOptionsFactory( this.ProjectOptions ) )
             .WithService( this.ProjectOptions.DomainObserver );
 
         this.ServiceProvider = serviceProvider
