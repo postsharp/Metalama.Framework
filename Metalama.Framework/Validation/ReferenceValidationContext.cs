@@ -125,8 +125,10 @@ namespace Metalama.Framework.Validation
                 _ => throw new ArgumentOutOfRangeException( nameof(kind), $"Unexpected kind: '{kind}'" )
             };
 
-        internal abstract IDeclaration ResolveDeclaration( ReferenceDetail referenceDetail );
+        internal abstract IDeclaration ResolveOriginDeclaration( ReferenceDetail referenceDetail );
 
-        internal abstract IDiagnosticLocation? ResolveLocation( ReferenceDetail referenceDetail );
+        internal abstract IDeclaration ResolveDestinationDeclaration( ReferenceDetail referenceDetail );
+
+        internal abstract IDiagnosticLocation? ResolveDiagnosticLocation( ReferenceDetail referenceDetail );
     }
 }

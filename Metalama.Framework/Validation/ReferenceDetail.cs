@@ -17,26 +17,39 @@ public readonly struct ReferenceDetail
 
     internal object NodeOrToken { get; }
 
-    internal object Symbol { get; }
+    internal object DestinationSymbol { get; }
 
-    internal ReferenceDetail( ReferenceValidationContext context, object nodeOrToken, object symbol, ReferenceKinds referenceKind )
+    internal object OriginSymbol { get; }
+
+    internal ReferenceDetail(
+        ReferenceValidationContext context,
+        object nodeOrToken,
+        object destinationSymbol,
+        object originSymbol,
+        ReferenceKinds referenceKind )
     {
         this._context = context;
         this.NodeOrToken = nodeOrToken;
-        this.Symbol = symbol;
+        this.DestinationSymbol = destinationSymbol;
+        this.OriginSymbol = originSymbol;
         this.ReferenceKind = referenceKind;
     }
 
     /// <summary>
-    /// Gets the referencing declaration (i.e. the one containing the reference).
+    /// Gets the origin declaration of the reference (i.e. the <i>referencing</i> declaration).
     /// </summary>
-    public IDeclaration ReferencingDeclaration => this._context.ResolveDeclaration( this );
+    public IDeclaration OriginDeclaration => this._context.ResolveOriginDeclaration( this );
+
+    /// <summary>
+    /// Gets the destination declaration (i.e. the <i>referenced</i> declaration).
+    /// </summary>
+    public IDeclaration DestinationDeclaration => this._context.ResolveDestinationDeclaration( this );
 
     /// <summary>
     /// Gets the location where diagnostics should be reported.
     /// </summary>
     [PublicAPI]
-    public IDiagnosticLocation? DiagnosticLocation => this._context.ResolveLocation( this );
+    public IDiagnosticLocation? DiagnosticLocation => this._context.ResolveDiagnosticLocation( this );
 
     /// <summary>
     /// Gets a reference of the source code of this reference.
@@ -52,5 +65,5 @@ public readonly struct ReferenceDetail
     /// Gets an object allowing to report diagnostics on this reference instance.
     /// </summary>
     public ScopedDiagnosticSink Diagnostics
-        => new( this._context.Diagnostics.Sink, this._context.DiagnosticSource, this.DiagnosticLocation, this.ReferencingDeclaration );
+        => new( this._context.Diagnostics.Sink, this._context.DiagnosticSource, this.DiagnosticLocation, this.OriginDeclaration );
 }

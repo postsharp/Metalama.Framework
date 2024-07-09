@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
 
         private static void Validate( ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( r => _warning.WithArguments( ( r.ReferenceKind, r.ReferencingDeclaration ) ) );
+            context.Diagnostics.Report( r => _warning.WithArguments( ( r.ReferenceKind, r.OriginDeclaration ) ) );
         }
     }
 

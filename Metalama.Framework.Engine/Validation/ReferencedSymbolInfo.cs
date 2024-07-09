@@ -44,11 +44,10 @@ internal sealed class ReferencedSymbolInfo
 
     // ReSharper disable once MemberCanBeInternal
     public IEnumerable<ReferencingSymbolInfo> References
-        => this._explicitReferences?.SelectAsReadOnlyCollection( x => new ReferencingSymbolInfo( x.Key, x.Value ) )
+        => this._explicitReferences?.SelectAsReadOnlyCollection( x => new ReferencingSymbolInfo( x.Key, this.ReferencedSymbol, x.Value ) )
            ?? Enumerable.Empty<ReferencingSymbolInfo>();
 
-    internal IEnumerable<ReferencedSymbolInfo> Children( ChildKinds kinds )
-        => this._children?.Where( x => (x.Kind & kinds) != 0 ).Select( x => x.Info ) ?? Enumerable.Empty<ReferencedSymbolInfo>();
+    internal IEnumerable<ReferencedSymbolInfo> Children( ChildKinds kinds ) => this._children?.Where( x => (x.Kind & kinds) != 0 ).Select( x => x.Info ) ?? [];
 
     internal IEnumerable<ReferencedSymbolInfo> DescendantsAndSelf( ChildKinds kinds )
     {
