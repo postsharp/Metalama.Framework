@@ -6,13 +6,16 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal readonly struct ReferencingSymbolInfo
 {
-    internal ReferencingSymbolInfo( ISymbol referencingSymbol, ReferencingNodeList nodes )
+    internal ReferencingSymbolInfo( ISymbol referencingSymbol, ISymbol referencedSymbol, ReferencingNodeList nodes )
     {
         this.ReferencingSymbol = referencingSymbol;
+        this.ReferencedSymbol = referencedSymbol;
         this.Nodes = nodes;
     }
 
     public ISymbol ReferencingSymbol { get; }
+
+    public ISymbol ReferencedSymbol { get; }
 
     public ReferencingNodeList Nodes { get; }
 }

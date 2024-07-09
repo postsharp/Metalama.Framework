@@ -156,7 +156,7 @@ public sealed class ReferenceValidatorRunner
                             .SelectMany<IGrouping<ISymbol?, ReferencingSymbolInfo>, (ISymbol?, ReferencingSymbolInfo)>(
                                 g => g.SelectMany<ReferencingSymbolInfo, (ISymbol?, ReferencingSymbolInfo)>(
                                     x => x.Nodes.SelectAsReadOnlyCollection<ReferencingNode, (ISymbol?, ReferencingSymbolInfo)>(
-                                        n => (g.Key, new ReferencingSymbolInfo( g.Key!, [n] )) ) ) );
+                                        n => (g.Key, new ReferencingSymbolInfo( g.Key!, x.ReferencedSymbol, [n] )) ) ) );
 
                         // Run the validation concurrently.
                         await this._concurrentTaskRunner.RunConcurrentlyAsync(

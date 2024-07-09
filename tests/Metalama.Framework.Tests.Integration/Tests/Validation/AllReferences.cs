@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             context.Diagnostics.Report(
                 x =>
                     _warning.WithArguments(
-                        ( x.ReferenceKind, x.ReferencingDeclaration.DeclarationKind, x.ReferencingDeclaration,
+                        ( x.ReferenceKind, x.OriginDeclaration.DeclarationKind, x.OriginDeclaration,
                           context.Destination.Declaration.DeclarationKind, context.Destination.Declaration, x.Source.Kind ) ) );
         }
     }

@@ -37,7 +37,7 @@ public readonly struct ReferenceValidationDiagnosticSink
     {
         foreach ( var scope in this._context.Details )
         {
-            this.Sink.Report( diagnostic, this._context.ResolveLocation( scope ), this._context.DiagnosticSource );
+            this.Sink.Report( diagnostic, this._context.ResolveDiagnosticLocation( scope ), this._context.DiagnosticSource );
         }
     }
 
@@ -57,7 +57,7 @@ public readonly struct ReferenceValidationDiagnosticSink
                 continue;
             }
 
-            var location = getLocation?.Invoke( scope ) ?? this._context.ResolveLocation( scope );
+            var location = getLocation?.Invoke( scope ) ?? this._context.ResolveDiagnosticLocation( scope );
 
             this.Sink.Report( diagnostic, location, this._context.DiagnosticSource );
         }
@@ -76,7 +76,7 @@ public readonly struct ReferenceValidationDiagnosticSink
     {
         foreach ( var scope in this._context.Details )
         {
-            this.Sink.Suppress( suppression, this._context.ResolveDeclaration( scope ), this._context.DiagnosticSource );
+            this.Sink.Suppress( suppression, this._context.ResolveOriginDeclaration( scope ), this._context.DiagnosticSource );
         }
     }
 
@@ -90,7 +90,7 @@ public readonly struct ReferenceValidationDiagnosticSink
         {
             this.Sink.Suggest(
                 codeFix,
-                this._context.ResolveDeclaration( scope ),
+                this._context.ResolveOriginDeclaration( scope ),
                 this._context.DiagnosticSource );
         }
     }
