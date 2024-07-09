@@ -84,4 +84,6 @@ public sealed record TestContextOptions
     public string? ProjectName { get; init; }
 
     public bool IgnoreUserProfileLicenses { get; init; }
+    
+    public int? BasePathLength { get; init; }
 }

@@ -50,6 +50,24 @@ internal sealed class TestProjectOptions : DefaultProjectOptions, IDisposable
 
         // We don't use the backstage TempFileManager because it would generate paths that are too long.
         var baseDirectory = Path.Combine( MetalamaPathUtilities.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
+
+        if ( contextOptions.BasePathLength.HasValue )
+        {
+            var currentLenght = baseDirectory.Length;
+            var remainingLength = contextOptions.BasePathLength.Value - currentLenght - 1;
+
+            switch ( remainingLength )
+            {
+                case < 0:
+                    throw new InvalidOperationException( "The base path is too short." );
+
+                case > 0:
+                    baseDirectory += '_' + new string( 'x', remainingLength );
+
+                    break;
+            }
+        }
+        
         this._baseDirectory = CreateDirectoryLazy( baseDirectory );
 
         var projectDirectory = Path.Combine( baseDirectory, "Project" );
