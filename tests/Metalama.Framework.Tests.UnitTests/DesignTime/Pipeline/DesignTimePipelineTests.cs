@@ -1777,4 +1777,31 @@ class D{version}
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out _ ) );
     }
+
+    [Fact]
+    public void OldPipelineDoesntLeak()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>();
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var targetCompilation = CreateCSharpCompilation( code, "test" );
+
+        var targetPipeline1 = CreatePipeline( testContext.ProjectOptions );
+
+        var targetPipeline2 = CreatePipeline( new TestProjectOptions( testContext.ProjectOptions, Engine.Formatting.CodeFormattingOptions.None ) );
+
+        GC.Collect();
+
+        Assert.False( targetPipeline1.TryGetTarget( out _ ) );
+
+        WeakReference<DesignTimeAspectPipeline> CreatePipeline( TestProjectOptions options )
+        {
+            var pipeline = factory.GetOrCreatePipeline( options, targetCompilation );
+
+            return new( pipeline );
+        }
+    }
 }

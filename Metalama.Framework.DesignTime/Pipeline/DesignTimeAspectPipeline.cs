@@ -98,7 +98,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._projectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
         this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
         this._eventHub = this.ServiceProvider.Global.GetRequiredService<AnalysisProcessEventHub>();
-        this._eventHub.CompilationResultChanged += this.OnOtherPipelineCompilationResultChanged;
+        this._eventHub.CompilationResultChangedEvent.RegisterHandler( this.OnOtherPipelineCompilationResultChanged );
         this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
         this._taskRunner = this.ServiceProvider.Global.GetRequiredService<ITaskRunner>();
         this._userDiagnosticsRegistrationService = this.ServiceProvider.Global.GetService<IUserDiagnosticRegistrationService>();
@@ -393,7 +393,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._fileSystemWatcher?.Dispose();
         this._sync.Dispose();
         this._eventHub.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChangedAsync );
-        this._eventHub.CompilationResultChanged -= this.OnOtherPipelineCompilationResultChanged;
+        this._eventHub.CompilationResultChangedEvent.UnregisterHandler( this.OnOtherPipelineCompilationResultChanged );
     }
 
     private async ValueTask<ProjectVersion> InvalidateCacheAsync(

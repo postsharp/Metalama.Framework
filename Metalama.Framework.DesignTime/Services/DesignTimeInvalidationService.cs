@@ -19,7 +19,7 @@ internal sealed class DesignTimeInvalidationService : IGlobalService
         this._workspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
 
         var hub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
-        hub.CompilationResultChanged += this.OnCompilationResultChanged;
+        hub.CompilationResultChangedEvent.RegisterHandler( this.OnCompilationResultChanged );
     }
 
     private void OnCompilationResultChanged( CompilationResultChangedEventArgs args )

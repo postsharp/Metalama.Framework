@@ -20,7 +20,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
         JsonSerializationBinderFactory.Instance )
     {
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
-        this._eventHub.CompilationResultChanged += this.OnCompilationResultChanged;
+        this._eventHub.CompilationResultChangedEvent.RegisterHandler( this.OnCompilationResultChanged );
     }
 
 #pragma warning disable VSTHRD100
@@ -112,6 +112,6 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
     protected override void Dispose( bool disposing )
     {
         base.Dispose( disposing );
-        this._eventHub.CompilationResultChanged -= this.OnCompilationResultChanged;
+        this._eventHub.CompilationResultChangedEvent.UnregisterHandler( this.OnCompilationResultChanged );
     }
 }
