@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -29,7 +30,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly IProjectHandlerObserver? _observer;
-    private readonly string _sourceGeneratorTouchFile;
     private readonly ITestableCancellationTokenSourceFactory _testableCancellationTokenSourceFactory;
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly QuietPeriodTimer _dirtyProjectQuietPeriodTimer;
@@ -37,6 +37,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     private volatile bool _disposed;
     private volatile TestableCancellationTokenSource? _currentCancellationSource;
+    private string? _sourceGeneratorTouchFile;
 
     protected SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
@@ -46,11 +47,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         projectKey )
     {
         var options = serviceProvider.GetRequiredService<IGlobalOptions>();
-
-        this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile.AssertNotNull();
-        Invariant.AssertNot( string.IsNullOrEmpty( this._sourceGeneratorTouchFile ) );
-
-        RetryHelper.Retry( () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
 
         this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
         this._dirtyProjectQuietPeriodTimer = new QuietPeriodTimer( options.QuietPeriodTimerDelay, this.Logger );
@@ -248,16 +244,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             await this.PublishGeneratedSourcesAsync( this.ProjectKey, CancellationToken.None );
 
             // Notify Roslyn that we have changes.
-            if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
-            {
-                this.Logger.Error?.Log( $"Property {MSBuildPropertyNames.MetalamaSourceGeneratorTouchFile} is undefined for project '{this.ProjectKey}'." );
-            }
-            else
-            {
-                // Note that we cannot cancel here. If we have published the source code, we must also touch the file.
+            // Note that we cannot cancel here. If we have published the source code, we must also touch the file.
 
-                this.UpdateTouchFile();
-            }
+            this.UpdateTouchFile();
 
             this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}'): completed." );
         }
@@ -271,16 +260,47 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     protected void UpdateTouchFile()
     {
+        if ( !this.TryGetTouchFilePath( out var touchFile ) )
+        {
+            this.Logger.Error?.Log( "Cannot get the source generator touch file." );
+
+            return;
+        }
+
         var newGuid = Guid.NewGuid().ToString();
 
-        this.Logger.Trace?.Log( $"Touching '{this._sourceGeneratorTouchFile}' with value '{newGuid}'." );
+        this.Logger.Trace?.Log( $"Touching '{touchFile}' with value '{newGuid}'." );
 
-        using ( MutexHelper.WithGlobalLock( this._sourceGeneratorTouchFile, this.Logger ) )
+        using ( MutexHelper.WithGlobalLock( touchFile, this.Logger ) )
         {
-            RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile, newGuid ) );
+            RetryHelper.Retry( () => File.WriteAllText( touchFile, newGuid ) );
         }
 
         this._observer?.OnTouchFileWritten( this.ProjectKey, newGuid );
+    }
+
+    private bool TryGetTouchFilePath( [NotNullWhen( true )] out string? path )
+    {
+        if ( string.IsNullOrEmpty( this._sourceGeneratorTouchFile ) )
+        {
+            this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile;
+            Invariant.AssertNot( string.IsNullOrEmpty( this._sourceGeneratorTouchFile ) );
+
+            if ( !string.IsNullOrEmpty( this._sourceGeneratorTouchFile ) )
+            {
+                RetryHelper.Retry( () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
+            }
+            else
+            {
+                path = null;
+
+                return false;
+            }
+        }
+
+        path = this._sourceGeneratorTouchFile!;
+
+        return true;
     }
 
     /// <summary>
