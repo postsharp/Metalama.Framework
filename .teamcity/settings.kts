@@ -56,6 +56,14 @@ object DebugBuild : BuildType({
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "test --configuration Debug --buildNumber %build.number% --buildType %system.teamcity.buildType.id% %BuildArguments%")
         }
+        powerShell {
+            name = "Kill background processes before next build"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools kill")
+        }
     }
 
     failureConditions {
@@ -159,6 +167,14 @@ object ReleaseBuild : BuildType({
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "test --configuration Release --buildNumber %build.number% --buildType %system.teamcity.buildType.id% %BuildArguments%")
         }
+        powerShell {
+            name = "Kill background processes before next build"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools kill")
+        }
     }
 
     failureConditions {
@@ -261,6 +277,14 @@ object PublicBuild : BuildType({
             }
             noProfile = false
             param("jetbrains_powershell_scriptArguments", "test --configuration Public --buildNumber %build.number% --buildType %system.teamcity.buildType.id% %BuildArguments%")
+        }
+        powerShell {
+            name = "Kill background processes before next build"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools kill")
         }
     }
 
