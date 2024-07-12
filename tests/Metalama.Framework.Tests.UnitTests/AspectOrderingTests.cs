@@ -14,6 +14,11 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
+#if NET8_0_OR_GREATER
+using System;
+using System.Text;
+#endif
+
 namespace Metalama.Framework.Tests.UnitTests
 {
     public sealed class AspectOrderingTests : UnitTestClass
@@ -329,5 +334,47 @@ class Aspect3 : TypeAspect { }
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2", "Aspect3" }, diagnostics, out _ ) );
             Assert.Single( diagnostics.SelectAsReadOnlyCollection( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
+
+#if NET8_0_OR_GREATER
+#pragma warning disable CA1305 // Specify IFormatProvider
+        [Fact]
+        public void ManyAspects()
+        {
+            // This test is carefully crafted to trigger the (now fixed) bug.
+            // If the implementation of AspectLayerSorter, Array.Sort (used in AspectLayerSorter) or Random changes,
+            // it might stop checking the problematic situation.
+
+            var random = new Random( 45 );
+
+            var stringBuilder = new StringBuilder( """
+                using Metalama.Framework.Aspects;
+
+                """ );
+
+            const int n = 17;
+
+            var aspects = Enumerable.Range( 1, n ).ToArray();
+            random.Shuffle( aspects );
+
+            var aspectOrder = string.Join( ", ", aspects.Reverse().Select( a => $"typeof(Aspect{a})" ) );
+
+            stringBuilder.AppendLine( $"[assembly: AspectOrder( {aspectOrder} ) ]" );
+            stringBuilder.AppendLine();
+
+            for ( var j = 1; j <= n; j++ )
+            {
+                stringBuilder.AppendLine( $"class Aspect{j} : TypeAspect {{ }}" );
+            }
+
+            var code = stringBuilder.ToString();
+
+            var ordered = this.GetOrderedAspectLayers( code, Enumerable.Range( 1, n ).Select( a => $"Aspect{a}" ).ToArray() );
+
+            var expected = string.Join( ", ", aspects.Select( ( a, i ) => $"Aspect{a} => {i}" ) );
+
+            Assert.Equal( expected, ordered );
+        }
+#pragma warning restore CA1305
+#endif
     }
 }
