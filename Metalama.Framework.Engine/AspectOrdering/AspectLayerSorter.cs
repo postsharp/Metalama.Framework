@@ -235,6 +235,11 @@ internal static class AspectLayerSorter
             sortedIndexes,
             ( i, j ) =>
             {
+                if ( i == j )
+                {
+                    return 0;
+                }
+
                 var compareDistance = distances[i].CompareTo( distances[j] );
 
                 if ( compareDistance != 0 )
