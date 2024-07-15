@@ -22,6 +22,7 @@ internal sealed partial class ProjectVersionProvider
         private readonly DiffStrategy _metalamaDiffStrategy;
         private readonly DiffStrategy _nonMetalamaDiffStrategy;
         private readonly IMetalamaProjectClassifier _metalamaProjectClassifier;
+        private readonly IServiceProvider _serviceProvider;
 
         public Implementation( GlobalServiceProvider serviceProvider, bool isTest )
         {
@@ -29,6 +30,7 @@ internal sealed partial class ProjectVersionProvider
             this._metalamaDiffStrategy = new DiffStrategy( isTest, true, true, observer );
             this._nonMetalamaDiffStrategy = new DiffStrategy( isTest, false, true, observer );
             this._metalamaProjectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
+            this._serviceProvider = serviceProvider.Underlying;
         }
 
         /// <summary>
@@ -272,6 +274,7 @@ internal sealed partial class ProjectVersionProvider
                         GetDiffStrategy(),
                         referencedCompilationChanges.NewProjectReferences,
                         referencedCompilationChanges.NewPortableExecutableReferences,
+                        this._serviceProvider,
                         cancellationToken );
 
                     newList = new ChangeList( compilationVersion );
@@ -384,6 +387,7 @@ internal sealed partial class ProjectVersionProvider
                                 GetDiffStrategy(),
                                 oldReferences.NewProjectReferences,
                                 oldReferences.NewPortableExecutableReferences,
+                                this._serviceProvider,
                                 cancellationToken );
 
                             changeLinkedListFromOldCompilation = new ChangeList( oldProjectVersion );

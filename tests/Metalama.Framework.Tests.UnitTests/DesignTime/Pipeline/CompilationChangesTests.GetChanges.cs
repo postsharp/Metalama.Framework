@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -253,5 +254,16 @@ public sealed partial class CompilationChangesTests
         Assert.True( changes.IsIncremental );
         Assert.Single( changes.SyntaxTreeChanges );
         Assert.Equal( CompileTimeChangeKind.NoLongerCompileTime, changes.SyntaxTreeChanges.Single().Value.CompileTimeChangeKind );
+    }
+
+    [Fact]
+    public void DuplicateTrees()
+    {
+        var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null )
+            .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( "class C;", path: "C.cs" ), SyntaxFactory.ParseSyntaxTree( "internal class C;", path: "C.cs" ) );
+
+        var changes = this.CompareSyntaxTrees( compilation, compilation );
+
+        Assert.False( changes.HasChange );
     }
 }
