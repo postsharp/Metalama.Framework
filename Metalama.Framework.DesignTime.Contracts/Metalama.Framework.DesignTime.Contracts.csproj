@@ -1,9 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!-- We need to target .NET Standard 2.0 and .NET 6.0 separately because of NullableAttributes.cs. We don't want these
-           types to be in a .NET 6 build, otherwise it would conflict with the types in System.Runtime. -->
-        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+        <TargetFrameworks>net472;net6.0</TargetFrameworks>
         <RootNamespace>Metalama.Framework.DesignTime.Contracts</RootNamespace>
     </PropertyGroup>
 
