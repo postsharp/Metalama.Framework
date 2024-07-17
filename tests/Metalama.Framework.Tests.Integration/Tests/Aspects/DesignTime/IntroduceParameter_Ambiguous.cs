@@ -1,6 +1,5 @@
 #if TEST_OPTIONS
 // @DesignTime
-// @Skipped(#34802)
 #endif
 
 using Metalama.Framework.Advising;

@@ -211,6 +211,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
                     if ( !ProjectOptionsEqualityComparer.Equals( projectOptions, pipelineOptions ) )
                     {
                         var jsonSettings = new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+                        
                         trace.Log(
                             $"Recreating pipeline because project options were not equal. Old: {JsonConvert.SerializeObject( pipelineOptions, jsonSettings )}. New: {JsonConvert.SerializeObject( projectOptions, jsonSettings )}." );
                     }

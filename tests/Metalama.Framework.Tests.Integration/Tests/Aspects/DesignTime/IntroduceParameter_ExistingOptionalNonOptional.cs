@@ -9,7 +9,7 @@ using Metalama.Framework.Code;
 
 /*
  * Tests that when a parameter is appended to a constructor with optional parameter and a "deambiguing" constructor (a constructor with only mandatory parameters)
- * the design-time pipeline does not generate another "deambiguing" constructor.
+ * already exists, the design-time pipeline does not generate another "deambiguing" constructor.
  */
 
 namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ExistingOptionalNonOptional
