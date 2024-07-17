@@ -296,7 +296,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
     }
 
-    DateTime IDateTimeProvider.Now => DateTime.Now;
+    DateTime IDateTimeProvider.UtcNow => DateTime.UtcNow;
 
     protected virtual void Dispose( bool disposing )
     {
