@@ -9,7 +9,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 {
     private sealed class TransformedPathGenerator
     {
-        private static int NameMaxLength => OutputPathHelper.MaxOutputFilenameLength + 1 /* backslash */ + 1 /* - */ + 8 /* hash */ - 3 /* .cs */;
+        private static int NameMaxLength => OutputPathHelper.MaxOutputFilenameLength - 1 /* backslash */ - 1 /* - */ - 8 /* hash */ - 3 /* .cs */;
 
         private readonly HashSet<string> _generatedNames = new( StringComparer.OrdinalIgnoreCase );
 
