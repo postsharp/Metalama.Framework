@@ -14,6 +14,9 @@ internal sealed class OutputPathHelper
 
     public const int MaxOutputFilenameLength = 24;
 
+    private static int SuffixAndPrefixLength
+        => CompileTimeCompilationBuilder.CompileTimeAssemblyPrefix.Length + 1 /* _ */ + 16 /* hash */ + 4 /* .dll */ - 1 /* backslash */;
+
     public OutputPathHelper( ITempFileManager tempFileManager )
     {
         this._tempFileManager = tempFileManager;
@@ -92,33 +95,37 @@ internal sealed class OutputPathHelper
             CleanUpStrategy.WhenUnused );
 
         // Make sure that the base path is short enough. There should be 16 characters left.
-        var remainingPathLength = 256 - directory.Length;
+        const int maxPathLength = 255;
+        var remainingPathLength = maxPathLength - directory.Length;
 
-        if ( remainingPathLength < MaxOutputFilenameLength )
+        var minRemainingPathLength = MaxOutputFilenameLength + SuffixAndPrefixLength;
+
+        if ( remainingPathLength < minRemainingPathLength )
         {
-            throw new InvalidOperationException( $"The temporary path '{directory}' is too long." );
+            throw new PathTooLongException(
+                $"The temporary path '{directory}' is too long. It has {directory.Length} characters but must have max {maxPathLength - minRemainingPathLength}." );
         }
 
         var baseCompileTimeAssemblyName = $"{CompileTimeCompilationBuilder.CompileTimeAssemblyPrefix}{runTimeAssemblyName}";
-        var maxLength = remainingPathLength - 16 /* hash */ - 1 /* _ */ - 4 /* .dll */ - 1 /* backslash */ - 1 /* end of string */;
+        var maxCompileTimeAssemblyNameLength = remainingPathLength - SuffixAndPrefixLength;
 
-        if ( baseCompileTimeAssemblyName.Length > maxLength )
+        if ( baseCompileTimeAssemblyName.Length > maxCompileTimeAssemblyNameLength )
         {
-            baseCompileTimeAssemblyName = baseCompileTimeAssemblyName.Substring( 0, maxLength );
+            baseCompileTimeAssemblyName = baseCompileTimeAssemblyName.Substring( 0, maxCompileTimeAssemblyNameLength );
         }
 
         var compileTimeAssemblyName = baseCompileTimeAssemblyName + "_" + hash;
 
         var outputPaths = new OutputPaths( directory, compileTimeAssemblyName, null );
 
-        if ( outputPaths.Pe.Length > 255 )
+        if ( outputPaths.Pe.Length > maxPathLength )
         {
-            throw new AssertionFailedException( $"The path '{outputPaths.Pe}' is too long: {outputPaths.Pe.Length} characters." );
+            throw new AssertionFailedException( $"The generated path '{outputPaths.Pe}' is too long: {outputPaths.Pe.Length} characters." );
         }
 
-        if ( outputPaths.Manifest.Length > 255 )
+        if ( outputPaths.Manifest.Length > maxPathLength )
         {
-            throw new AssertionFailedException( $"The path '{outputPaths.Manifest}' is too long: {outputPaths.Manifest.Length} characters." );
+            throw new AssertionFailedException( $"The generated path '{outputPaths.Manifest}' is too long: {outputPaths.Manifest.Length} characters." );
         }
 
         return outputPaths;

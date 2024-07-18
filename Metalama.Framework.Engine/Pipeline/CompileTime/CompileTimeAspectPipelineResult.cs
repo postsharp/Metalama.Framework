@@ -13,5 +13,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         ImmutableArray<SyntaxTreeTransformation> SyntaxTreeTransformations,
         ImmutableArray<ManagedResource> AdditionalResources,
         IPartialCompilation ResultingCompilation,
-        ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles );
+        ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles,
+        AspectPipelineConfiguration? Configuration );
 }

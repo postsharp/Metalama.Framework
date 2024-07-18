@@ -137,8 +137,7 @@ internal abstract partial class BaseTestRunner
                 var transformedOptions = this.GetContextOptions( testContextOptions )
                     with
                     {
-                        ProjectName = testInput.Options.ProjectName ?? testInput.TestName,
-                        BasePathLength = testInput.Options.BasePathLength
+                        ProjectName = testInput.Options.ProjectName ?? testInput.TestName
                     };
 
                 using var testContext = new TestContext( transformedOptions );

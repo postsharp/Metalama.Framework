@@ -25,9 +25,9 @@ internal sealed class CompileTimeCompileTimeSerializationBinder : CompileTimeSer
             assemblyName = _systemAssemblyName;
         }
 
-        if ( CompileTimeCompilationBuilder.TryParseCompileTimeAssemblyName( assemblyName, out var runTimeAssemblyName ) )
+        if ( CompileTimeCompilationBuilder.IsCompileTimeAssemblyName( assemblyName ) )
         {
-            return this._project.GetType( typeName, runTimeAssemblyName );
+            return this._project.GetType( typeName, assemblyName );
         }
         else
         {

@@ -367,8 +367,6 @@ public class TestOptions
     public bool? IgnoreUserProfileLicenses { get; set; }
 
     public bool? TestUnformattedOutput { get; set; }
-    
-    public int? BasePathLength { get; set; }
 
     /// <summary>
     /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -466,8 +464,6 @@ public class TestOptions
         this.IgnoreUserProfileLicenses ??= baseOptions.IgnoreUserProfileLicenses;
 
         this.TestUnformattedOutput ??= baseOptions.TestUnformattedOutput;
-        
-        this.BasePathLength ??= baseOptions.BasePathLength;
     }
 
     public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -816,11 +812,6 @@ public class TestOptions
 
                 case "TestUnformattedOutput":
                     this.TestUnformattedOutput = true;
-
-                    break;
-                    
-                case "BasePathLength":
-                    this.BasePathLength = int.Parse( optionArg );
 
                     break;
 

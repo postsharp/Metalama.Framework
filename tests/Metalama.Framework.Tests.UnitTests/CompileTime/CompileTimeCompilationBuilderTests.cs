@@ -23,6 +23,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public sealed class CompileTimeCompilationBuilderTests : UnitTestClass
@@ -158,7 +160,9 @@ class ReferencingClass
 ";
 
             var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
-            var referencedCompilationModified = referencedCompilation.WithOptions( referencedCompilation.Options.WithAllowUnsafe( !referencedCompilation.Options.AllowUnsafe ) );
+
+            var referencedCompilationModified =
+                referencedCompilation.WithOptions( referencedCompilation.Options.WithAllowUnsafe( !referencedCompilation.Options.AllowUnsafe ) );
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation(
                 referencingCode,
@@ -704,46 +708,46 @@ public class ReferencedClass
         public void RewriteTypeOf()
         {
             const string code = """
-                using System;
-                using Metalama.Framework.Aspects;
+                                using System;
+                                using Metalama.Framework.Aspects;
 
-                [CompileTime]
-                public class CompileTimeOnlyClass
-                {
-                   static Type Type1 = typeof(RunTimeOnlyClass);
-                   static Type Type2 = typeof(CompileTimeOnlyClass);
-                   static string Name1 = nameof(RunTimeOnlyClass);
-                   static string Name2 = nameof(CompileTimeOnlyClass);
+                                [CompileTime]
+                                public class CompileTimeOnlyClass
+                                {
+                                   static Type Type1 = typeof(RunTimeOnlyClass);
+                                   static Type Type2 = typeof(CompileTimeOnlyClass);
+                                   static string Name1 = nameof(RunTimeOnlyClass);
+                                   static string Name2 = nameof(CompileTimeOnlyClass);
+                                
+                                   void Method() { var t = typeof(RunTimeOnlyClass); }
+                                   string Property => nameof(RunTimeOnlyClass);
+                                }
 
-                   void Method() { var t = typeof(RunTimeOnlyClass); }
-                   string Property => nameof(RunTimeOnlyClass);
-                }
+                                public class RunTimeOnlyClass
+                                {
+                                   static Type Type1 = typeof(RunTimeOnlyClass);
+                                   static Type Type3 = typeof(CompileTimeOnlyClass);
 
-                public class RunTimeOnlyClass
-                {
-                   static Type Type1 = typeof(RunTimeOnlyClass);
-                   static Type Type3 = typeof(CompileTimeOnlyClass);
-
-                }
-                """;
+                                }
+                                """;
 
             const string expected = """
-                using global::System;
-                using global::Metalama.Framework.Aspects;
+                                    using global::System;
+                                    using global::Metalama.Framework.Aspects;
 
-                [CompileTime]
-                public class CompileTimeOnlyClass
-                {
-                   static global::System.Type Type1 = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass");
-                   static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
-                   static string Name1 = "RunTimeOnlyClass";
-                   static string Name2 = "CompileTimeOnlyClass";
+                                    [CompileTime]
+                                    public class CompileTimeOnlyClass
+                                    {
+                                       static global::System.Type Type1 = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass");
+                                       static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
+                                       static string Name1 = "RunTimeOnlyClass";
+                                       static string Name2 = "CompileTimeOnlyClass";
+                                    
+                                       void Method() { var t = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass"); }
+                                       string Property => "RunTimeOnlyClass";
+                                    }
 
-                   void Method() { var t = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve("typeof(global::RunTimeOnlyClass)",((string?)null),"RunTimeOnlyClass","RunTimeOnlyClass","RunTimeOnlyClass"); }
-                   string Property => "RunTimeOnlyClass";
-                }
-
-                """;
+                                    """;
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 
@@ -1311,43 +1315,43 @@ namespace RemainingNamespace
         public void Manifest()
         {
             const string code = """
-using System;
-using Metalama.Framework.Aspects;
+                                using System;
+                                using Metalama.Framework.Aspects;
 
-namespace Ns
-{
-    namespace Ns2
-    {
-        class Aspect1 : OverrideMethodAspect
-        {
-            public override dynamic? OverrideMethod() { return meta.Proceed(); }
-        }
+                                namespace Ns
+                                {
+                                    namespace Ns2
+                                    {
+                                        class Aspect1 : OverrideMethodAspect
+                                        {
+                                            public override dynamic? OverrideMethod() { return meta.Proceed(); }
+                                        }
+                                
+                                        class Aspect2 : OverrideFieldOrPropertyAspect
+                                        {
+                                            public override dynamic? OverrideProperty
+                                            {
+                                                get => null!;
+                                                set {}
+                                            }
+                                        }
+                                
+                                        class RunTimeOnlyClass {}
+                                
+                                        [CompileTime]
+                                        class CompileTimeOnlyClass {}
+                                
+                                        class Aspect3 : TypeAspect 
+                                        {
+                                            [Template]
+                                            void TemplateMethod<T1, [CompileTime] T2>( int runTimeParameter, [CompileTime] int compileTimeParameter ) {}
+                                        }
+                                    }
 
-        class Aspect2 : OverrideFieldOrPropertyAspect
-        {
-            public override dynamic? OverrideProperty
-            {
-                get => null!;
-                set {}
-            }
-        }
-
-        class RunTimeOnlyClass {}
-
-        [CompileTime]
-        class CompileTimeOnlyClass {}
-
-        class Aspect3 : TypeAspect 
-        {
-            [Template]
-            void TemplateMethod<T1, [CompileTime] T2>( int runTimeParameter, [CompileTime] int compileTimeParameter ) {}
-        }
-    }
-
-}
+                                }
 
 
-""";
+                                """;
 
             using var testContext = this.CreateTestContext();
 
@@ -1399,21 +1403,21 @@ namespace Ns
         public void DiagnosticsAreCached()
         {
             var code = $$"""
-                using Metalama.Framework.Aspects;
-                using Metalama.Framework.Code;
+                         using Metalama.Framework.Aspects;
+                         using Metalama.Framework.Code;
 
-                namespace NS_{{Guid.NewGuid():N}};
+                         namespace NS_{{Guid.NewGuid():N}};
 
-                [CompileTime]
-                class C
-                {
-                    [Template]
-                    void Template(IField field)
-                    {
-                        field.Value.M();
-                    }
-                }
-                """;
+                         [CompileTime]
+                         class C
+                         {
+                             [Template]
+                             void Template(IField field)
+                             {
+                                 field.Value.M();
+                             }
+                         }
+                         """;
 
             using var testContext = this.CreateTestContext();
 
@@ -1452,21 +1456,21 @@ namespace Ns
         private static (CompileTimeProject Project, WeakReference WeakRef) CreateCompileTimeProject( TestContext testContext, CompileTimeDomain domain )
         {
             var code = $$"""
-                using Metalama.Framework.Aspects;
-                using Metalama.Framework.Code;
+                         using Metalama.Framework.Aspects;
+                         using Metalama.Framework.Code;
 
-                namespace NS_{{Guid.NewGuid():N}};
+                         namespace NS_{{Guid.NewGuid():N}};
 
-                [CompileTime]
-                class C
-                {
-                    [Template]
-                    void Template(IField field)
-                    {
-                        field.Value.M();
-                    }
-                }
-                """;
+                         [CompileTime]
+                         class C
+                         {
+                             [Template]
+                             void Template(IField field)
+                             {
+                                 field.Value.M();
+                             }
+                         }
+                         """;
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( new ProjectModel( roslynCompilation, testContext.ServiceProvider ), roslynCompilation );
@@ -1478,6 +1482,47 @@ namespace Ns
                 .RootProject;
 
             return (project, new WeakReference( compilation ));
+        }
+
+        [Fact]
+        public async Task AssemblyNameTruncated()
+        {
+            using var testContext = this.CreateTestContext( new TestContextOptions() { TempPathLength = 133 } );
+
+            const string dependencyCode = """
+                                          using Metalama.Framework.Aspects;
+                                          using System;
+
+                                          [Inheritable]
+                                          [AttributeUsage( AttributeTargets.Class )]
+                                          public class Aspect1 : TypeAspect { }
+
+                                          [Aspect1]
+                                          public class BaseClass { }
+                                          """;
+
+            const string mainCode = """
+                                    public class TargetClass : BaseClass
+                                    {
+                                    }
+                                    """;
+
+            const string dependencyAssemblyName = "VeryVeryVeryLongNameThatShouldBeTrimmed";
+            var dependencyCompilation = TestCompilationFactory.CreateCSharpCompilation( dependencyCode, name: dependencyAssemblyName );
+
+            var mainCompilation = TestCompilationFactory.CreateCSharpCompilation(
+                mainCode,
+                additionalReferences: [dependencyCompilation.ToMetadataReference()] );
+
+            var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, testContext.Domain );
+            var result = await pipeline.ExecuteAsync( ThrowingDiagnosticAdder.Instance, mainCompilation, ImmutableArray<ManagedResource>.Empty );
+            Assert.True( result.IsSuccessful );
+
+            var dependencyProject =
+                result.Value.Configuration.CompileTimeProject.ClosureProjects.Single( p => p.RunTimeIdentity.Name == dependencyAssemblyName );
+
+            // The name must have been trimmed, otherwise the test is worthless.
+            Assert.DoesNotContain( dependencyAssemblyName, dependencyProject.CompileTimeIdentity.Name, StringComparison.Ordinal );
         }
     }
 }

@@ -39,7 +39,8 @@ internal sealed class CompileTimeProject : IProjectService
 
     internal string? CompiledAssemblyPath { get; }
 
-    private readonly AssemblyIdentity _compileTimeIdentity;
+    public AssemblyIdentity CompileTimeIdentity { get; }
+
     private readonly ITextMapFileProvider? _mapFileProvider;
     private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
 
@@ -187,7 +188,7 @@ internal sealed class CompileTimeProject : IProjectService
         this._cacheableTemplateDiscoveryContextProvider = cacheableTemplateDiscoveryContextProvider;
         this.Manifest = manifest;
         this.RunTimeIdentity = runTimeIdentity;
-        this._compileTimeIdentity = compileTimeIdentity;
+        this.CompileTimeIdentity = compileTimeIdentity;
         this.References = references;
 
         this._assembly = assembly;
@@ -461,13 +462,14 @@ internal sealed class CompileTimeProject : IProjectService
         }
     }
 
-    public Type GetType( string reflectionName, string runTimeAssemblyName )
+    public Type GetType( string reflectionName, string compileTimeAssemblyName )
     {
-        var project = this.ClosureProjects.FirstOrDefault( p => p.RunTimeIdentity.Name == runTimeAssemblyName );
+        var project = this.ClosureProjects.FirstOrDefault( p => p.CompileTimeIdentity.Name == compileTimeAssemblyName );
 
         if ( project == null )
         {
-            throw new InvalidOperationException( $"Cannot find the compile-time assembly 'P{runTimeAssemblyName}'." );
+            throw new InvalidOperationException(
+                $"Cannot find the compile-time project for '{compileTimeAssemblyName}'. The following projects are available: {string.Join( ", ", this.ClosureProjects.SelectAsReadOnlyCollection( p => $"'{p.CompileTimeIdentity.Name}'" ) )}" );
         }
 
         return project.GetType( reflectionName );
@@ -476,7 +478,7 @@ internal sealed class CompileTimeProject : IProjectService
     public Type GetType( string reflectionName )
         => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
             nameof(reflectionName),
-            $"Cannot find a type named '{reflectionName}' in the compile-time project '{this._compileTimeIdentity}'." );
+            $"Cannot find a type named '{reflectionName}' in the compile-time project '{this.CompileTimeIdentity}'." );
 
     internal (CompileTimeFileManifest? File, CompileTimeProject? Project) FindCodeFileFromTransformedPath( string transformedCodePath )
         => this.ClosureCodeFiles[Path.GetFileName( transformedCodePath )]
@@ -499,7 +501,7 @@ internal sealed class CompileTimeProject : IProjectService
                 }
             }
 
-            this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity, this.CompiledAssemblyPath! );
+            this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity, this.CompiledAssemblyPath! );
         }
     }
 
