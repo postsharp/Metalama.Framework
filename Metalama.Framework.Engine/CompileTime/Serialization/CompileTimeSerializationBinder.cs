@@ -19,7 +19,7 @@ internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializat
     {
         var typeAssemblyName = type.Assembly.GetName().Name;
 
-        if ( CompileTimeCompilationBuilder.IsCompileTimeAssemblyName( typeAssemblyName ) )
+        if ( typeAssemblyName != null && CompileTimeCompilationBuilder.IsCompileTimeAssemblyName( typeAssemblyName ) )
         {
             // When we have a compile-time, we need to store the run-time name of its assembly because the compile-time name
             // can change according to random factors like the max path or the framework name, which would not be safe accross
