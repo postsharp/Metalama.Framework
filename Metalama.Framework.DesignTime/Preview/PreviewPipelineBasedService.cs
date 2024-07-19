@@ -43,14 +43,14 @@ public abstract class PreviewPipelineBasedService
 
         if ( project == null )
         {
-            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null);
+            return (false, ["The project has not been fully loaded yet."], null, null, null);
         }
 
         var compilation = await project.GetCompilationAsync( cancellationToken );
 
         if ( compilation == null )
         {
-            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null);
+            return (false, ["The project has not been fully loaded yet."], null, null, null);
         }
 
         // Get the pipeline for the compilation.
@@ -58,7 +58,7 @@ public abstract class PreviewPipelineBasedService
 
         if ( pipeline == null )
         {
-            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null);
+            return (false, ["The project has not been fully loaded yet."], null, null, null);
         }
 
         // Get a compilation _without_ generated code, and map the target symbol.
@@ -96,8 +96,7 @@ public abstract class PreviewPipelineBasedService
 
         if ( !getConfigurationResult.IsSuccessful )
         {
-            return (false, getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray(),
-                    null, null, null);
+            return (false, FormatErrors( getConfigurationResult.Diagnostics ), null, null, null);
         }
 
         var designTimeConfiguration = getConfigurationResult.Value;
@@ -107,7 +106,7 @@ public abstract class PreviewPipelineBasedService
 
         if ( !transitiveAspectManifest.IsSuccessful )
         {
-            return (false, transitiveAspectManifest.Diagnostics.Select( x => x.ToString() ).ToArray(), null, null, null);
+            return (false, FormatErrors( transitiveAspectManifest.Diagnostics ), null, null, null);
         }
 
         // For preview, we need to override a few options, especially to enable code formatting. We do this by replacing only the options
@@ -121,4 +120,7 @@ public abstract class PreviewPipelineBasedService
 
         return (true, null, previewServiceProvider, previewConfiguration, partialCompilation);
     }
+
+    protected static string[] FormatErrors( IEnumerable<Diagnostic> diagnostics )
+        => diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray();
 }
