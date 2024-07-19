@@ -61,7 +61,7 @@ internal sealed class TestProjectOptions : DefaultProjectOptions, IDisposable
                 case < 0:
                     throw new InvalidOperationException( "The base path is too short." );
 
-                case > 0:
+                case >= 0:
                     baseDirectory += '_' + new string( 'x', remainingLength );
 
                     break;

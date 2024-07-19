@@ -1434,7 +1434,8 @@ namespace RemainingNamespace
         public void DiagnosticsAreCached()
         {
             var code = $$"""
-                         using Metalama.Framework.Advising;using Metalama.Framework.Aspects;
+                         using Metalama.Framework.Advising;
+                         using Metalama.Framework.Aspects;
                          using Metalama.Framework.Code;
 
                          namespace NS_{{Guid.NewGuid():N}};
