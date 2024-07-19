@@ -57,7 +57,12 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
                     {
                         if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
                         {
-                            manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider, compilation );
+                            manifest = TransitiveAspectsManifest.Deserialize(
+                                new MemoryStream( bytes ),
+                                serviceProvider,
+                                compilation,
+                                filePath );
+
                             assemblyIdentity = metadataInfo.AssemblyIdentity;
                         }
                     }

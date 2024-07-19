@@ -615,7 +615,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         var manifest = TransitiveAspectsManifest.Deserialize(
                             new MemoryStream( result.Manifest! ),
                             configuration.Value.ServiceProvider,
-                            compilation );
+                            compilation,
+                            reference.Compilation.AssemblyName );
 
                         compilationReferences.Add(
                             new DesignTimeProjectReference(

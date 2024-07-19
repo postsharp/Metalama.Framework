@@ -93,6 +93,20 @@ internal sealed class CompileTimeProject : IProjectService
 
     public IReadOnlyList<CompileTimeProject> ClosureProjects { get; }
 
+    [Memo]
+    private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByRunTimeAssemblyName
+        => this.ClosureProjects.ToDictionary( p => p.RunTimeIdentity.Name, p => p );
+
+    [Memo]
+    private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByCompileTimeAssemblyName
+        => this.ClosureProjects.ToDictionary( p => p.CompileTimeIdentity.Name, p => p );
+
+    public bool TryGetProjectByRunTimeAssemblyName( string runTimeName, [NotNullWhen( true )] out CompileTimeProject? project )
+        => this.ClosureProjectsByRunTimeAssemblyName.TryGetValue( runTimeName, out project );
+
+    public bool TryGetProjectByCompileTimeAssemblyName( string runTimeName, [NotNullWhen( true )] out CompileTimeProject? project )
+        => this.ClosureProjectsByCompileTimeAssemblyName.TryGetValue( runTimeName, out project );
+
     /// <summary>
     /// Gets the list of transformed code files in the current project. 
     /// </summary>
@@ -462,17 +476,18 @@ internal sealed class CompileTimeProject : IProjectService
         }
     }
 
-    public Type GetType( string reflectionName, string compileTimeAssemblyName )
+    public bool TryGetType( string reflectionName, string runTimeAssemblyName, out Type? type )
     {
-        var project = this.ClosureProjects.FirstOrDefault( p => p.CompileTimeIdentity.Name == compileTimeAssemblyName );
-
-        if ( project == null )
+        if ( !this.TryGetProjectByRunTimeAssemblyName( runTimeAssemblyName, out var project ) )
         {
-            throw new InvalidOperationException(
-                $"Cannot find the compile-time project for '{compileTimeAssemblyName}'. The following projects are available: {string.Join( ", ", this.ClosureProjects.SelectAsReadOnlyCollection( p => $"'{p.CompileTimeIdentity.Name}'" ) )}" );
+            type = null;
+
+            return false;
         }
 
-        return project.GetType( reflectionName );
+        type = project.GetTypeOrNull( reflectionName );
+
+        return type != null;
     }
 
     public Type GetType( string reflectionName )
