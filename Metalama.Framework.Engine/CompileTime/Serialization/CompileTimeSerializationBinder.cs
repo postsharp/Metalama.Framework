@@ -1,107 +1,63 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization;
 
-/// <summary>
-/// Binds types to names and names to types. Used by the <see cref="CompileTimeSerializer"/>.
-/// </summary>
-internal class CompileTimeSerializationBinder
+internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializationBinder
 {
-    private static readonly ImmutableDictionary<string, string> _ourAssemblyVersions;
-    private static readonly AssemblyName _engineAssemblyName = typeof(CompileTimeSerializationBinder).Assembly.GetName();
+    private readonly CompileTimeProject _project;
+    private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();
 
-    private readonly ILogger _logger;
-
-    static CompileTimeSerializationBinder()
+    public CompileTimeSerializationBinder( in ProjectServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
     {
-        var assemblyNames = typeof(CompileTimeSerializationBinder).Assembly.GetReferencedAssemblies()
-            .Concat( _engineAssemblyName );
-
-        // The AppDomain may contain several versions of Metalama, so we need to be careful when choosing the assembly version to which we bind.
-        // Instead of looking at the AppDomain, we look at the assemblies that the current specific version references. This should work for Metalama
-        // and system assemblies. User assemblies are covered by CompileTimeLamaSerializationBinder. 
-        _ourAssemblyVersions = assemblyNames.GroupBy( a => a.Name.AssertNotNull() )
-            .ToImmutableDictionary( x => x.Key, x => x.OrderByDescending( a => a.Version ).First().ToString() );
+        this._project = project;
     }
 
-    public CompileTimeSerializationBinder( in ProjectServiceProvider serviceProvider )
+    public override void BindToName( Type type, out string typeName, out string assemblyName )
     {
-        this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Serialization" );
-    }
+        var typeAssemblyName = type.Assembly.GetName().Name;
 
-    /// <summary>
-    /// Gets a <see cref="Type"/> given a type name and an assembly name.
-    /// </summary>
-    /// <param name="typeName">The type name.</param>
-    /// <param name="assemblyName">The assembly name.</param>
-    /// <returns>The required <see cref="Type"/>.</returns>
-    public virtual Type? BindToType( string typeName, string assemblyName )
-    {
-        // Redirect to the current assembly if the type is from an older version.
-        if ( assemblyName.StartsWith( "Metalama.Framework.Engine.", StringComparison.Ordinal ) )
+        if ( typeAssemblyName != null && CompileTimeCompilationBuilder.IsCompileTimeAssemblyName( typeAssemblyName ) )
         {
-            assemblyName = _engineAssemblyName.Name.AssertNotNull();
-        }
+            // When we have a compile-time, we need to store the run-time name of its assembly because the compile-time name
+            // can change according to random factors like the max path or the framework name, which would not be safe accross
+            // versions, machines and frameworks.
 
-        if ( !_ourAssemblyVersions.TryGetValue( assemblyName, out var ourAssemblyVersion ) )
-        {
-            if ( !assemblyName.StartsWith( "mscorlib, ", StringComparison.Ordinal ) )
+            if ( this._project.TryGetProjectByCompileTimeAssemblyName( typeAssemblyName, out var project ) )
             {
-                this._logger.Warning?.Log( $"'{assemblyName}' is not a known assembly name." );
+                typeName = type.FullName.AssertNotNull();
+                assemblyName = project.RunTimeIdentity.Name;
             }
+            else
+            {
+                throw new AssertionFailedException( $"'{typeAssemblyName}' is a compile-time assembly but it is not a part of the current project." );
+            }
+        }
+        else
+        {
+            base.BindToName( type, out typeName, out assemblyName );
+        }
+    }
 
-            ourAssemblyVersion = assemblyName;
+    public override Type? BindToType( string typeName, string assemblyName )
+    {
+        if ( assemblyName.Equals( "mscorlib", StringComparison.Ordinal )
+             || assemblyName.Equals( "System.Private.CoreLib", StringComparison.Ordinal ) )
+        {
+            // We have a reference to a system assembly, which is different under .NET Framework and .NET Core.
+            // Replace by the current system assembly.
+            assemblyName = _systemAssemblyName;
         }
 
-        return Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, ourAssemblyVersion ) );
-    }
-
-#pragma warning disable CA1822 // Can be static
-
-    // ReSharper disable once MemberCanBeMadeStatic.Global
-
-    /// <summary>
-    /// Gets the name and the assembly name of a given <see cref="Type"/>.
-    /// </summary>
-    /// <param name="type">The <see cref="Type"/>.</param>
-    /// <param name="typeName">At output, the name of <paramref name="type"/>.</param>
-    /// <param name="assemblyName">At output, the name of the assembly containing the <paramref name="type"/>.</param>
-    public void BindToName( Type type, out string typeName, out string assemblyName )
-    {
-        typeName = type.FullName!;
-
-        // #31016
-        // We don't use the full name because it may happen that the graph is serialized in a process that higher
-        // assembly versions than the deserializing processes and we don't want, and don't need, to bother with versioning.
-        // Versioning and version update, if necessary, should be taken care of upstream, and not by the formatter.
-        // When deserializing, we will assume that a compatible assembly version has been loaded in the AppDomain.
-
-        assemblyName = type.Assembly.GetName().Name.AssertNotNull();
-    }
-
-    // ReSharper disable once MemberCanBeMadeStatic.Global
-
-    /// <summary>
-    /// Gets the name and the assembly name of a given <see cref="ITypeSymbol"/>.
-    /// </summary>
-    /// <param name="typeSymbol">The <see cref="ITypeSymbol"/>.</param>
-    /// <param name="typeName">At output, the name of <paramref name="typeSymbol"/>.</param>
-    /// <param name="assemblyName">At output, the name of the assembly containing the <paramref name="typeSymbol"/>.</param>
-    public void BindToName( ITypeSymbol typeSymbol, out string typeName, out string assemblyName )
-    {
-        typeName = typeSymbol.GetReflectionFullName().AssertNotNull();
-
-        assemblyName = typeSymbol.ContainingAssembly.Name;
+        if ( this._project.TryGetType( typeName, assemblyName, out var type ) )
+        {
+            return type;
+        }
+        else
+        {
+            return base.BindToType( typeName, assemblyName );
+        }
     }
 }
-
-#pragma warning restore CA1822 // Can be static    

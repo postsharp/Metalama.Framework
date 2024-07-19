@@ -12,5 +12,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         public readonly string TypeName;
         public readonly string AssemblyName;
+
+        public override string ToString() => $"{this.TypeName}, {this.AssemblyName}";
     }
 }

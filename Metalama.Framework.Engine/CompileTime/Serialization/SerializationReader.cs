@@ -17,12 +17,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization;
 
 internal sealed class SerializationReader
 {
-    private const byte _version = 1;
-
     private readonly Dictionary<int, SerializationQueueItem<ObjRef>> _referenceTypeInstances = new();
 
     private readonly CompileTimeSerializer _formatter;
     private readonly bool _shouldReportExceptionCause;
+    private readonly string _assemblyName;
     private readonly SerializationBinaryReader _binaryReader;
     private readonly CompileTimeTypeFactory? _compileTimeTypeFactory;
 
@@ -30,10 +29,12 @@ internal sealed class SerializationReader
         in ProjectServiceProvider serviceProvider,
         Stream stream,
         CompileTimeSerializer formatter,
-        bool shouldReportExceptionCause )
+        bool shouldReportExceptionCause,
+        string assemblyName )
     {
         this._formatter = formatter;
         this._shouldReportExceptionCause = shouldReportExceptionCause;
+        this._assemblyName = assemblyName;
         this._binaryReader = new SerializationBinaryReader( new BinaryReader( stream ) );
         this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
     }
@@ -42,9 +43,9 @@ internal sealed class SerializationReader
     {
         int v = this._binaryReader.ReadCompressedInteger();
 
-        if ( v > _version )
+        if ( v > SerializationWriter.Version )
         {
-            throw new NotSupportedException( "Unsupported formatter version!" );
+            throw new NotSupportedException( $"The assembly '{this._assemblyName}' was compiled with an old version of Metalama and must be recompiled." );
         }
 
         var instanceId = 1;

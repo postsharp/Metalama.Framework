@@ -16,9 +16,9 @@ internal sealed class CompileTimeSerializer
     private readonly ProjectServiceProvider _serviceProvider;
 
     /// <summary>
-    /// Gets the <see cref="CompileTimeSerializationBinder"/> used by the current <see cref="CompileTimeSerializer"/> to bind types to/from type names.
+    /// Gets the <see cref="BaseCompileTimeSerializationBinder"/> used by the current <see cref="CompileTimeSerializer"/> to bind types to/from type names.
     /// </summary>
-    internal CompileTimeSerializationBinder Binder { get; }
+    internal BaseCompileTimeSerializationBinder Binder { get; }
 
     internal Compilation? Compilation { get; }
 
@@ -28,27 +28,24 @@ internal sealed class CompileTimeSerializer
     /// Initializes a new instance of the <see cref="CompileTimeSerializer"/> class.
     /// </summary>
     private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, Compilation? compilation = null )
-        : this( serviceProvider, new CompileTimeSerializationBinder( serviceProvider ), compilation ) { }
+        : this( serviceProvider, new BaseCompileTimeSerializationBinder( serviceProvider ), compilation ) { }
 
     private CompileTimeSerializer( CompileTimeProject project, in ProjectServiceProvider serviceProvider, Compilation compilation ) : this(
         serviceProvider,
-        new CompileTimeCompileTimeSerializationBinder( serviceProvider, project ),
+        new CompileTimeSerializationBinder( serviceProvider, project ),
         compilation ) { }
 
     public static CompileTimeSerializer CreateTestInstance( in ProjectServiceProvider serviceProvider ) => new( serviceProvider );
 
-    public static CompileTimeSerializer CreateSerializingInstance( in ProjectServiceProvider serviceProvider, Compilation compilation )
-        => new( serviceProvider, compilation );
-
-    public static CompileTimeSerializer CreateDeserializingInstance( in ProjectServiceProvider serviceProvider, Compilation compilation )
+    public static CompileTimeSerializer CreateInstance( in ProjectServiceProvider serviceProvider, Compilation compilation )
         => new( serviceProvider.GetRequiredService<CompileTimeProject>(), serviceProvider, compilation );
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CompileTimeSerializer"/> class.
     /// </summary>
     /// <param name="serviceProvider"></param>
-    /// <param name="binder">A <see cref="CompileTimeSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
-    private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, CompileTimeSerializationBinder binder, Compilation? compilation )
+    /// <param name="binder">A <see cref="BaseCompileTimeSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
+    private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, BaseCompileTimeSerializationBinder binder, Compilation? compilation )
     {
         this._serviceProvider = serviceProvider;
         this.Binder = binder;
@@ -80,11 +77,13 @@ internal sealed class CompileTimeSerializer
     /// </summary>
     /// <param name="stream">A <see cref="Stream"/> containing a serialized object graph.</param>
     /// <returns>The root object of the object graph serialized in <paramref name="stream"/>.</returns>
-    public object? Deserialize( Stream stream )
+    public object? Deserialize( Stream stream, string? assemblyName = null )
     {
+        assemblyName ??= "unknown";
+        
         try
         {
-            var serializationReader = new SerializationReader( this._serviceProvider, stream, this, false );
+            var serializationReader = new SerializationReader( this._serviceProvider, stream, this, false, assemblyName );
 
             return serializationReader.Deserialize();
         }
@@ -92,7 +91,7 @@ internal sealed class CompileTimeSerializer
         {
             stream.Seek( 0, SeekOrigin.Begin );
 
-            var serializationReader = new SerializationReader( this._serviceProvider, stream, this, true );
+            var serializationReader = new SerializationReader( this._serviceProvider, stream, this, true, assemblyName );
 
             return serializationReader.Deserialize();
         }

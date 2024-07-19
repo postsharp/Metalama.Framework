@@ -70,7 +70,7 @@ public sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
     private void Serialize( Stream stream, in ProjectServiceProvider serviceProvider, Compilation compilation )
     {
         using var deflate = new DeflateStream( stream, CompressionLevel.Optimal, true );
-        var formatter = CompileTimeSerializer.CreateSerializingInstance( serviceProvider, compilation );
+        var formatter = CompileTimeSerializer.CreateInstance( serviceProvider, compilation );
         formatter.Serialize( this, deflate );
         deflate.Flush();
         stream.Flush();
@@ -94,13 +94,17 @@ public sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
             true );
     }
 
-    public static TransitiveAspectsManifest Deserialize( Stream stream, in ProjectServiceProvider serviceProvider, Compilation compilation )
+    public static TransitiveAspectsManifest Deserialize(
+        Stream stream,
+        in ProjectServiceProvider serviceProvider,
+        Compilation compilation,
+        string? assemblyName )
     {
         using var deflate = new DeflateStream( stream, CompressionMode.Decompress );
 
-        var formatter = CompileTimeSerializer.CreateDeserializingInstance( serviceProvider, compilation );
+        var formatter = CompileTimeSerializer.CreateInstance( serviceProvider, compilation );
 
-        return (TransitiveAspectsManifest) formatter.Deserialize( deflate ).AssertNotNull();
+        return (TransitiveAspectsManifest) formatter.Deserialize( deflate, assemblyName ).AssertNotNull();
     }
 
     public IEnumerable<string> InheritableAspectTypes => this.InheritableAspects.Keys;

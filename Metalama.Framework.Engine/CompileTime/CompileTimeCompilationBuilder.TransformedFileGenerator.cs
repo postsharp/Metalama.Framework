@@ -9,7 +9,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 {
     private sealed class TransformedPathGenerator
     {
-        private const int _nameMaxLength = OutputPathHelper.MaxOutputFilenameLength - 1 /* backslash */ - 1 /* - */ - 8 /* hash */ - 3 /* .cs */;
+        private static int NameMaxLength => OutputPathHelper.MaxOutputFilenameLength - 1 /* backslash */ - 1 /* - */ - 8 /* hash */ - 3 /* .cs */;
 
         private readonly HashSet<string> _generatedNames = new( StringComparer.OrdinalIgnoreCase );
 
@@ -21,9 +21,9 @@ internal sealed partial class CompileTimeCompilationBuilder
 
             var transformedFileName = fileName;
 
-            if ( transformedFileName.Length > _nameMaxLength )
+            if ( transformedFileName.Length > NameMaxLength )
             {
-                transformedFileName = transformedFileName.Substring( 0, _nameMaxLength );
+                transformedFileName = transformedFileName.Substring( 0, NameMaxLength );
             }
 
             string fileNameWithHash;
