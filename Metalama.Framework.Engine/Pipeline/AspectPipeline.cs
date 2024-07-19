@@ -401,6 +401,10 @@ public abstract class AspectPipeline : IDisposable
             }
         }
 
+        // We need to overridde execution scenario in this service provider as well.
+        var executionScenario = this.ServiceProvider.GetRequiredService<ExecutionScenario>();
+        pipelineConfiguration = pipelineConfiguration.WithServiceProvider( pipelineConfiguration.ServiceProvider.WithService( executionScenario, allowOverride: true ) );
+
         // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
         // we need to substitute the code fix filter.
         pipelineConfiguration = pipelineConfiguration.WithCodeFixFilter( this.CodeFixFilter );
@@ -480,8 +484,6 @@ public abstract class AspectPipeline : IDisposable
         }
 
         // Enforce licensing. Design-time licensing is handled elsewhere. (See usages of LicenseVerifier's methods.)
-        var executionScenario = pipelineConfiguration.ServiceProvider.GetRequiredService<ExecutionScenario>();
-
         if ( !executionScenario.IsDesignTime )
         {
             var licenseVerifier = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();

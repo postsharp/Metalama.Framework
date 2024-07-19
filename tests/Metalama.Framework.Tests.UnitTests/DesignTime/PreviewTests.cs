@@ -654,4 +654,39 @@ class MyAspect : TypeAspect
 
         Assert.Contains( """Console.WriteLine("Hello");""", result, StringComparison.Ordinal );
     }
+
+    [Fact]
+    public async Task ExecutionScenario()
+    {
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Project;
+
+                public class Aspect : TypeAspect
+                {
+                    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                    {
+                        var executionScenario = MetalamaExecutionContext.Current.ExecutionScenario;
+                        string scenarioDetails = $"scenario: {executionScenario.Name}, captures non-observable: {executionScenario.CapturesNonObservableTransformations}";
+
+                        builder.IntroduceField("scenario", typeof(string), buildField: fieldBuilder => fieldBuilder.InitializerExpression = TypedConstant.Create(scenarioDetails));
+                    }
+                }
+                """,
+            ["target.cs"] = """
+                [Aspect]
+                class Target
+                {
+                }
+                """
+        };
+
+        var result = await this.RunPreviewAsync( code, "target.cs" );
+
+        Assert.Contains( "scenario: Preview, captures non-observable: True", result, StringComparison.Ordinal );
+    }
 }

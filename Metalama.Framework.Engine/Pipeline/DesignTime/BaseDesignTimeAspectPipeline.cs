@@ -10,10 +10,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 public abstract class BaseDesignTimeAspectPipeline : AspectPipeline
 {
-    protected BaseDesignTimeAspectPipeline( ServiceProvider<IProjectService> serviceProvider, CompileTimeDomain? domain ) : base(
-        serviceProvider,
-        ExecutionScenario.DesignTime,
-        domain ) { }
+    protected BaseDesignTimeAspectPipeline( ServiceProvider<IProjectService> serviceProvider, CompileTimeDomain? domain )
+        : base( serviceProvider, ExecutionScenario.DesignTime, domain ) { }
 
     protected sealed override SyntaxGenerationOptions GetSyntaxGenerationOptions() => SyntaxGenerationOptions.Formatted;
 
