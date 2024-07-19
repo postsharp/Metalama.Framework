@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Services;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
@@ -94,6 +95,8 @@ public interface IProjectOptions : IProjectService
 
     bool TryGetProperty( string name, out string? value );
 
+    IEnumerable<string> PropertyNames { get; }
+
     /// <summary>
     /// Gets a value indicating whether the compile-time-only code should be removed from the main compiled assembly.
     /// </summary>
@@ -179,6 +182,4 @@ public interface IProjectOptions : IProjectService
     bool? WriteTransformedFiles { get; }
 
     bool IsTest { get; }
-
-    // Note: when adding a new property, also update ProjectOptionsEqualityComparer.
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
@@ -51,6 +52,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public virtual IProjectOptions Apply( IProjectOptions options ) => this.Wrapped.Apply( options );
 
     public virtual bool TryGetProperty( string name, out string? value ) => this.Wrapped.TryGetProperty( name, out value );
+
+    public virtual IEnumerable<string> PropertyNames => this.Wrapped.PropertyNames;
 
     public virtual bool RemoveCompileTimeOnlyCode => this.Wrapped.RemoveCompileTimeOnlyCode;
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 
@@ -60,6 +61,8 @@ public class DefaultProjectOptions : IProjectOptions
 
         return false;
     }
+
+    public virtual IEnumerable<string> PropertyNames => [];
 
     public virtual bool RemoveCompileTimeOnlyCode => true;
 

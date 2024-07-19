@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Options
 {
@@ -13,9 +14,11 @@ namespace Metalama.Framework.Engine.Options
         /// <summary>
         /// Gets a configuration value.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
         bool TryGetValue( string name, out string? value );
+
+        /// <summary>
+        /// Gets a collection of all known configuration names.
+        /// </summary>
+        public IEnumerable<string> PropertyNames { get; }
     }
 }

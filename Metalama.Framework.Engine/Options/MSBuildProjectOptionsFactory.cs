@@ -13,9 +13,9 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsF
 {
     private readonly TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions> _cache;
 
-    public MSBuildProjectOptionsFactory() : this( MSBuildPropertyNames.All ) { }
+    public MSBuildProjectOptionsFactory() : this( null ) { }
     
-    public MSBuildProjectOptionsFactory( IEnumerable<string> relevantProperties )
+    public MSBuildProjectOptionsFactory( IEnumerable<string>? relevantProperties )
     {
         this._cache = new TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions>(
             TimeSpan.FromMinutes( 10 ),

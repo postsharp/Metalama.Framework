@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Workspaces;
@@ -78,5 +79,7 @@ internal sealed class WorkspaceProjectOptions : MSBuildProjectOptions
 
             return true;
         }
+
+        public IEnumerable<string> PropertyNames => this._msbuildProject.Properties.Select( p => p.Name );
     }
 }

@@ -10,12 +10,17 @@ namespace Metalama.Framework.Engine.Options;
 
 internal sealed class AnalyzerConfigOptionsComparer : IEqualityComparer<AnalyzerConfigOptions>
 {
-    private readonly ImmutableArray<string> _allProperties;
+    private readonly ImmutableArray<string>? _allProperties;
 
-    public AnalyzerConfigOptionsComparer( IEnumerable<string> msbuildProperties )
+    public AnalyzerConfigOptionsComparer( IEnumerable<string>? msbuildProperties )
     {
-        this._allProperties = msbuildProperties.Select( n => $"build_property.{n}" ).ToImmutableArray();
+#if !ROSLYN_4_4_0_OR_GREATER
+        msbuildProperties ??= MSBuildPropertyNames.All;
+#endif
+        this._allProperties = msbuildProperties?.Select( n => $"build_property.{n}" ).ToImmutableArray();
     }
+
+    private static bool IsBuildProperty( string propertyName ) => propertyName.StartsWith( "build_property.", StringComparison.Ordinal );
 
     public bool Equals( AnalyzerConfigOptions? x, AnalyzerConfigOptions? y )
     {
@@ -29,7 +34,13 @@ internal sealed class AnalyzerConfigOptionsComparer : IEqualityComparer<Analyzer
             return false;
         }
 
-        foreach ( var propertyName in this._allProperties )
+#if ROSLYN_4_4_0_OR_GREATER
+        var allProperties = this._allProperties ?? x.Keys.Union( y.Keys ).Where( IsBuildProperty );
+#else
+        var allProperties = this._allProperties.Value;
+#endif
+
+        foreach ( var propertyName in allProperties )
         {
             if ( x.TryGetValue( propertyName, out var xProperty ) != y.TryGetValue( propertyName, out var yProperty ) )
             {
@@ -48,7 +59,13 @@ internal sealed class AnalyzerConfigOptionsComparer : IEqualityComparer<Analyzer
     {
         HashCode hashCode = default;
 
-        foreach ( var propertyName in this._allProperties )
+#if ROSLYN_4_4_0_OR_GREATER
+        var allProperties = this._allProperties ?? obj.Keys.Where( IsBuildProperty );
+#else
+        var allProperties = this._allProperties.Value;
+#endif
+
+        foreach ( var propertyName in allProperties )
         {
             if ( obj.TryGetValue( propertyName, out var propertyValue ) )
             {

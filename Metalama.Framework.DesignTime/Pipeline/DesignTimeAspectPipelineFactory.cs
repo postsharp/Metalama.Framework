@@ -100,16 +100,9 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             return null;
         }
 
-        if ( this.TryGetPipeline( projectKey, out var pipeline ) )
-        {
-            return pipeline;
-        }
-        else
-        {
-            var options = this._projectOptionsFactory.GetProjectOptions( project );
+        var options = this._projectOptionsFactory.GetProjectOptions( project );
 
-            return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences.OfType<PortableExecutableReference>(), cancellationToken );
-        }
+        return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences.OfType<PortableExecutableReference>(), cancellationToken );
     }
 
     /// <summary>
