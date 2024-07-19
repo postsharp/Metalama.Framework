@@ -77,8 +77,10 @@ internal sealed class CompileTimeSerializer
     /// </summary>
     /// <param name="stream">A <see cref="Stream"/> containing a serialized object graph.</param>
     /// <returns>The root object of the object graph serialized in <paramref name="stream"/>.</returns>
-    public object? Deserialize( Stream stream, string assemblyName = "unknown" )
+    public object? Deserialize( Stream stream, string? assemblyName = null )
     {
+        assemblyName ??= "unknown";
+        
         try
         {
             var serializationReader = new SerializationReader( this._serviceProvider, stream, this, false, assemblyName );
