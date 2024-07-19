@@ -30,10 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Implementation = new NamedTypeImpl( this, typeSymbol, compilation );
         }
 
-        protected override void OnUsingDeclaration()
-        {
-            UserCodeExecutionContext.CurrentOrNull?.AddDependency( this );
-        }
+        protected override void OnUsingDeclaration() => UserCodeExecutionContext.CurrentOrNull?.AddDependencyFrom( this );
 
         public override bool CanBeInherited
         {
@@ -225,15 +222,19 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public INamespace Namespace
+        INamespace INamedType.Namespace => this.ContainingNamespace;
+
+        public INamespace ContainingNamespace
         {
             get
             {
                 this.OnUsingDeclaration();
 
-                return this.Implementation.Namespace;
+                return this.Implementation.ContainingNamespace;
             }
         }
+
+        INamedTypeCollection INamedType.NestedTypes => this.Types;
 
         public string FullName
         {
@@ -245,13 +246,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public INamedTypeCollection NestedTypes
+        public INamedTypeCollection Types
         {
             get
             {
                 this.OnUsingDeclaration();
 
-                return this.Implementation.NestedTypes;
+                return this.Implementation.Types;
             }
         }
 
@@ -502,7 +503,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             for ( var i = 0; i < types.Length; i++ )
             {
-                typeArgumentSymbols[i] = types[i].GetSymbol();
+                typeArgumentSymbols[i] = types[i].GetSymbol().AssertSymbolNotNull();
             }
 
             var symbol = ((INamedTypeSymbol) this.TypeSymbol.OriginalDefinition).Construct( typeArgumentSymbols );

@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880;
@@ -7,7 +8,8 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880;
 
 // This checks that throw expressions in expression bodies work properly.
 
-[assembly: AspectOrder( typeof(TestMethodAspect), typeof(TestPropertyAspect), typeof(TestPropertyAspect2), typeof(TestEventAspect) )]
+[assembly:
+    AspectOrder( AspectOrderDirection.RunTime, typeof(TestMethodAspect), typeof(TestPropertyAspect), typeof(TestPropertyAspect2), typeof(TestEventAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880
 {
@@ -32,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28880
 
         public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideProperty) );
+            builder.Override( nameof(OverrideProperty) );
         }
     }
 

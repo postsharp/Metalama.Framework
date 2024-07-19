@@ -50,11 +50,14 @@ public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<T
         return this.Clone( builder.ToImmutable(), this.NextProvider );
     }
 
-    public ServiceProvider<TBase> WithUntypedService( Type interfaceType, object implementation )
+    public ServiceProvider<TBase> WithUntypedService( Type interfaceType, object implementation, bool allowOverride = false )
     {
         var serviceNode = new ServiceNode( interfaceType, implementation );
 
-        return this.Clone( this._services.Add( interfaceType, serviceNode ), this.NextProvider );
+        var newServices =
+            allowOverride ? this._services.SetItem( interfaceType, serviceNode ) : this._services.Add( interfaceType, serviceNode );
+
+        return this.Clone( newServices, this.NextProvider );
     }
 
     private void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder, bool allowOverride )

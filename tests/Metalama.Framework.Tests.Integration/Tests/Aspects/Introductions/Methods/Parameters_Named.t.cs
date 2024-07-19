@@ -1,5 +1,5 @@
 [Aspect]
-class TargetCode
+internal class TargetCode
 {
   private void M1()
   {

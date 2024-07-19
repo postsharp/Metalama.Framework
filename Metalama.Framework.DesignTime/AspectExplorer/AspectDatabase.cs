@@ -161,7 +161,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         if ( aspectTypeSymbol.ContainingAssembly.Name != aspectClassAssembly )
         {
             this._logger.Trace?.Log( $"Assembly mismatch: '{aspectTypeSymbol.ContainingAssembly.Name}' != '{aspectClassAssembly}'." );
-            
+
             return [];
         }
 
@@ -175,9 +175,18 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                     aspectInstance.Advice
                         .SelectMany( advice => advice.Transformations )
                         .Select(
-                            transformation => new AspectDatabaseAspectTransformation(
-                                GetSerializableIdForOriginalDeclaration( transformation.TargetDeclaration ),
-                                transformation.ToString()! ) )
+                            transformation =>
+                            {
+                                var transformedDeclaration = transformation.IntroducedDeclaration ?? transformation.TargetDeclaration;
+
+                                return new AspectDatabaseAspectTransformation(
+                                    GetSerializableIdForOriginalDeclaration( transformation.TargetDeclaration ),
+                                    transformation.ToString()!,
+                                    transformedDeclaration.GetClosestNamedType() is { } transformedType
+                                        ? GetSerializableIdForOriginalDeclaration( transformedType )
+                                        : null,
+                                    transformedDeclaration.GetPrimarySyntaxTree()?.FilePath );
+                            } )
                         .ToArray() ) );
 
         static string GetSerializableIdForOriginalDeclaration( IDeclaration declaration )
@@ -204,6 +213,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             };
         }
 
+#pragma warning disable IDE0300 // Don't use collection literal, since <>z__ReadOnlyArray`1 can't be deserialized here.
         var predecessorAspectInstances = aspectInstances
             .Where( aspectInstance => aspectInstance.Predecessors.Any( predecessor => GetPredecessorFullName( predecessor.Instance ) == aspectClassFullName ) )
             .Select(
@@ -215,6 +225,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                             GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
                             $"Provide the '{aspectInstance.AspectClass}' aspect." )
                     } ) );
+#pragma warning restore IDE0300
 
         return transformationAspectInstances.Concat( predecessorAspectInstances ).ToArray();
     }

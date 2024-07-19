@@ -12,90 +12,107 @@ using System;
 using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal static class CodeModelInternalExtensions
 {
-    internal static class CodeModelInternalExtensions
+    public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
+
+    // Resharper disable UnusedMember.Global
+    [Obsolete( "Redundant call" )]
+    public static CompilationModel GetCompilationModel( this CompilationModel compilation ) => compilation;
+
+    public static AttributeData GetAttributeData( this IAttribute attribute )
     {
-        public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
-
-        // Resharper disable UnusedMember.Global
-        [Obsolete( "Redundant call" )]
-        public static CompilationModel GetCompilationModel( this CompilationModel compilation ) => compilation;
-
-        public static AttributeData GetAttributeData( this IAttribute attribute )
+        if ( attribute is Attribute attributeModel )
         {
-            if ( attribute is Attribute attributeModel )
-            {
-                return attributeModel.AttributeData;
-            }
-
-            throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
+            return attributeModel.AttributeData;
         }
 
-        public static bool IsAccessor( this IMethod method )
-            => method.MethodKind switch
-            {
-                MethodKind.PropertyGet => true,
-                MethodKind.PropertySet => true,
-                MethodKind.EventAdd => true,
-                MethodKind.EventRemove => true,
-                MethodKind.EventRaise => true,
-                _ => false
-            };
+        throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
+    }
 
-        public static InsertPosition ToInsertPosition( this IDeclaration declaration )
+    public static bool IsAccessor( this IMethod method )
+        => method.MethodKind switch
         {
-            switch ( declaration )
-            {
-                case BuiltDeclaration builtDeclaration:
-                    return builtDeclaration.Builder.ToInsertPosition();
+            MethodKind.PropertyGet => true,
+            MethodKind.PropertySet => true,
+            MethodKind.EventAdd => true,
+            MethodKind.EventRemove => true,
+            MethodKind.EventRaise => true,
+            _ => false
+        };
 
-                // TODO: This is a hack (since splitting transformations and builders).
-                // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
-                case PromotedField promotedField:
-                    return promotedField.Field.ToInsertPosition();
+    public static InsertPosition ToInsertPosition( this IDeclaration declaration )
+    {
+        switch ( declaration )
+        {
+            case BuiltDeclaration builtDeclaration:
+                return builtDeclaration.Builder.ToInsertPosition();
 
-                case IMemberOrNamedTypeBuilder { DeclaringType: { } declaringType }:
-                    return new InsertPosition(
-                        InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+            // TODO: This is a hack (since splitting transformations and builders).
+            // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
+            case PromotedField promotedField:
+                return promotedField.Field.ToInsertPosition();
 
-                case SymbolBasedDeclaration baseDeclaration:
-                    var symbol = baseDeclaration.Symbol;
-                    var primaryDeclaration = symbol.GetPrimaryDeclaration();
+            case NamedTypeBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
+                return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
 
-                    if ( primaryDeclaration != null )
+            case NamedTypeBuilder { DeclaringType: BuiltNamedType builtNamedType }:
+                return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
+
+            case NamedTypeBuilder { DeclaringType: { } declaringType }:
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+            case NamedTypeBuilder topLevelType:
+                return new InsertPosition(
+                    topLevelType.PrimarySyntaxTree );
+
+            case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
+                return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
+
+            case IMemberBuilder { DeclaringType: BuiltNamedType builtNamedType }:
+                return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
+
+            case IMemberBuilder { DeclaringType: { } declaringType }:
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+            case SymbolBasedDeclaration baseDeclaration:
+                var symbol = baseDeclaration.Symbol;
+                var primaryDeclaration = symbol.GetPrimaryDeclaration();
+
+                if ( primaryDeclaration != null )
+                {
+                    var memberDeclaration = primaryDeclaration.FindMemberDeclaration();
+
+                    if ( memberDeclaration is BaseTypeDeclarationSyntax )
                     {
-                        var memberDeclaration = primaryDeclaration.FindMemberDeclaration();
-
-                        if ( memberDeclaration is BaseTypeDeclarationSyntax )
-                        {
-                            return new InsertPosition( InsertPositionRelation.Within, memberDeclaration );
-                        }
-                        else
-                        {
-                            return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
-                        }
+                        return new InsertPosition( InsertPositionRelation.Within, memberDeclaration );
                     }
                     else
                     {
-                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
-
-                        return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
+                        return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
                     }
+                }
+                else
+                {
+                    var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
 
-                default:
-                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
-            }
-        }
+                    return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
+                }
 
-        internal static SyntaxToken GetCleanName( this IMember member )
-        {
-            return
-                SyntaxFactory.Identifier(
-                    member.IsExplicitInterfaceImplementation
-                        ? member.Name.Split( '.' ).Last()
-                        : member.Name );
+            default:
+                throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
         }
     }
+
+    internal static SyntaxToken GetCleanName( this IMember member )
+        => SyntaxFactory.Identifier(
+            member.IsExplicitInterfaceImplementation
+                ? member.Name.Split( '.' ).Last()
+                : member.Name );
 }

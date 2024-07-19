@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -11,7 +12,7 @@ public class MyAspect : Aspect, IAspect<IDeclaration>
 
     public void BuildAspect( IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advice.RemoveAttributes( builder.Target, GetType() );
+        builder.RemoveAttributes( GetType() );
     }
 }
 

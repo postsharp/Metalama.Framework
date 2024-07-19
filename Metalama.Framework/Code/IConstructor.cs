@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Invokers;
 using System.Reflection;
 
 namespace Metalama.Framework.Code
@@ -7,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents an instance constructor or a static constructor.
     /// </summary>
-    public interface IConstructor : IMethodBase
+    public interface IConstructor : IMethodBase, IConstructorInvoker
     {
         /// <summary>
         /// Gets a value indicating whether this constructor is the primary constructor of the type.

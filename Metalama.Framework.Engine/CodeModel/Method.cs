@@ -71,6 +71,10 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
 
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new MethodInvoker( this ).CreateInvokeExpression( args );
+
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
@@ -79,7 +83,8 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectAsArray( a => a.GetSymbol() ) );
+        var symbolWithGenericArguments = this.MethodSymbol.Construct(
+            typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
 
         return new Method( symbolWithGenericArguments, this.Compilation );
     }
@@ -114,7 +119,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) )
+        => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( this.Compilation.Factory.GetMethod )
             .ToReadOnlyList();
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );

@@ -1,4 +1,5 @@
 #if TEST_OPTIONS
+// @Skipped(Weird under docker)
 // @RequiredConstant(NET5_0_OR_GREATER) - Return type covariance not supported in .NET Framework
 // @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 #endif

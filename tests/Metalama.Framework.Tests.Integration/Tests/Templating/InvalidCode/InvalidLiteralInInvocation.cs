@@ -1,9 +1,9 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.InvalidCode.InvalidLiteralInInvocation
 {
-   
     public class EnrichExceptionAttribute : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.InvalidCode.Inva
             // The next line has an intentional syntax error.
             methodSignatureBuilder.AddText(""(');
 #endif
-            
+
             return meta.Proceed();
         }
     }

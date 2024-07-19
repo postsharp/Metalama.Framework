@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Statements;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -15,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
+using System.Collections.Immutable;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -28,19 +30,21 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     private readonly CompilationModel _compilation;
     private readonly SyntaxGenerationContext _syntaxGenerationContext;
+    private readonly INamedType? _currentType;
 
     public ICompilation Compilation => this._compilation;
 
     private ContextualSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
 
-    protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
+    protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext, INamedType? currentType )
     {
         this._compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
+        this._currentType = currentType;
     }
 
-    public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationOptions syntaxGenerationOptions )
-        : this( compilation, compilation.CompilationContext.GetSyntaxGenerationContext( syntaxGenerationOptions ) ) { }
+    public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationOptions syntaxGenerationOptions, INamedType? currentType )
+        : this( compilation, compilation.CompilationContext.GetSyntaxGenerationContext( syntaxGenerationOptions ), currentType ) { }
 
     public IProject Project => this.Compilation.Project;
 
@@ -67,8 +71,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IStatement CreateExpressionStatement( IExpression expression )
         => new UserStatement(
-            SyntaxFactory.ExpressionStatement(
-                ((UserExpression) expression).ToExpressionSyntax( new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) ) ) );
+            SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this.CreateSyntaxSerializationContext() ) ) );
+
+    private SyntaxSerializationContext CreateSyntaxSerializationContext() => new( this._compilation, this._syntaxGenerationContext, this._currentType );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -132,7 +137,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendTypeName( IType type, StringBuilder stringBuilder )
     {
-        var code = this.SyntaxGenerator.Type( type.GetSymbol().AssertNotNull() ).ToString();
+        var code = this.SyntaxGenerator.Type( type ).ToString();
         stringBuilder.Append( code );
     }
 
@@ -143,7 +148,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
-            expression.ToExpressionSyntax( new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
+            expression.ToExpressionSyntax( this.CreateSyntaxSerializationContext() )
                 .NormalizeWhitespace()
                 .ToFullString() );
 
@@ -151,7 +156,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
+                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, this.CreateSyntaxSerializationContext() )
                     .NormalizeWhitespace()
                     .ToFullString() );
 
@@ -175,4 +180,17 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     }
 
     public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );
+
+    public IExpression WithType( IExpression expression, IType type ) => new OverrideTypeUserExpression( expression, type );
+
+    public IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, object? args )
+        => new TemplateInvocationStatement( templateInvocation, args );
+
+    public IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases ) => new SwitchStatement( expression, cases );
+
+    public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
+
+    public IStatementList UnwrapBlock( IStatement statement ) => new UnwrappedBlockStatementList( statement );
+
+    public IStatementList CreateStatementList( ImmutableArray<object> items ) => new StatementList( items );
 }

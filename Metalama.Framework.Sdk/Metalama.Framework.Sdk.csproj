@@ -31,13 +31,13 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynApiMinVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" />
 
-        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="Analyzers;Build;BuildTransitive" />
+        <ProjectReference Include="../Metalama.Framework/Metalama.Framework.csproj" PrivateAssets="Analyzers;Build;BuildTransitive" />
 
     </ItemGroup>
 
     <!-- Packaging -->
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
 </Project>

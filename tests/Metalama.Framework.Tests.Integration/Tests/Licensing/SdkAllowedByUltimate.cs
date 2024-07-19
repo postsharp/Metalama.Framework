@@ -1,6 +1,7 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaUltimateBusiness)
+﻿#if TEST_OPTIONS
+// @LicenseKey(MetalamaUltimateBusiness)
 // @Include(_AspectWeaver.cs);
-// @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.SdkAllowedByUltimate;
 

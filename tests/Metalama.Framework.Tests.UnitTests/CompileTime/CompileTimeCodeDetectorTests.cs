@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         public void InvalidFile()
         {
             var compilation = TestCompilationFactory.CreateCSharpCompilation(
-                @"using Metalama.Framework.Aspects; namespace X class Y {} ",
+                @"using Metalama.Framework.Aspects;  namespace X class Y {} ",
                 ignoreErrors: true );
 
             Assert.True( CompileTimeCodeFastDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
@@ -43,7 +43,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void TopLevelUsingMetalamaFrameworkAspects()
         {
-            var compilation = TestCompilationFactory.CreateCSharpCompilation( @"using Metalama.Framework.Aspects; namespace X {class Y {} }" );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
+                @"using Metalama.Framework.Aspects;  namespace X {class Y {} }" );
+
             Assert.True( CompileTimeCodeFastDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
 
@@ -57,14 +59,20 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void Level1NamespaceUsing()
         {
-            var compilation = TestCompilationFactory.CreateCSharpCompilation( @"namespace X { using Metalama.Framework.Aspects; class Y {} }" );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
+                @"namespace X { using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects;  class Y {} }" );
+
             Assert.True( CompileTimeCodeFastDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
 
         [Fact]
         public void Level2NamespaceUsing()
         {
-            var compilation = TestCompilationFactory.CreateCSharpCompilation( @"namespace X { namespace Y { using Metalama.Framework.Aspects; } }" );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
+                @"namespace X { namespace Y { using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects;  } }" );
+
             Assert.True( CompileTimeCodeFastDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
     }

@@ -59,7 +59,7 @@ namespace Foo
 
             var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() )!.ToFullString();
 
-            Assert.Equal( expected, actual );
+            AssertEx.EolInvariantEqual( expected, actual );
         }
 
         [Fact]
@@ -67,7 +67,8 @@ namespace Foo
         {
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Fabrics;
 
 [assembly: A(42, new[] { E.A }, new[] { typeof(C<int[]>.N<string>), typeof(C<>.N<>) }, P = 13)]
@@ -114,7 +115,8 @@ class A : Attribute
             // This tests that we can create compile-time assemblies that have reference projects in the same solution with compile-time code.
 
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -123,7 +125,8 @@ public class ReferencedClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -142,7 +145,8 @@ class ReferencingClass
         public void CompilationDuplicateMetadataReference()
         {
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -151,7 +155,8 @@ public class ReferencedClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -179,7 +184,8 @@ class ReferencingClass
             // This tests that we can create compile-time assemblies that have reference compiled assemblies (out of the solution) with compile-time code.
 
             const string indirectlyReferencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -187,7 +193,8 @@ public class ReferencedClass
 ";
 
             const string directlyReferencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class MiddleClass
 {
@@ -197,7 +204,8 @@ public class MiddleClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -267,7 +275,8 @@ class ReferencingClass
 
             string GenerateVersionedCode( int version )
                 => @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class VersionedClass
 {
@@ -277,7 +286,8 @@ public class VersionedClass
 
             const string classA = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class A
 {
@@ -287,7 +297,8 @@ class A
 
             const string classB = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class B
 {
@@ -375,7 +386,8 @@ class C
         public void CacheWithSameLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -430,7 +442,8 @@ public class ReferencedClass
         public void CacheWithDifferentIdentityButSameCodeSameLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -452,7 +465,7 @@ public class ReferencedClass
                     diagnosticBag,
                     false,
                     CancellationToken.None,
-                    out var compileTimeProject1 ) );
+                    out _ ) );
 
             // After building, getting from cache should fail.
             Assert.False(
@@ -470,7 +483,8 @@ public class ReferencedClass
         public void CacheWithDifferentIdentityButSameCodeDifferentLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -512,7 +526,8 @@ public class ReferencedClass
         public void CacheWithDifferentLoader()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -574,7 +589,8 @@ public class ReferencedClass
         public void CleanCacheAndDeserialize()
         {
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -583,7 +599,8 @@ public class ReferencedClass
 
             const string referencingCode = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 class ReferencingClass
 {
@@ -654,7 +671,8 @@ class ReferencingClass
             var loader = new CompileTimeProjectRepository.Builder( domain, testContext.ServiceProvider );
 
             const string referencedCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 public class ReferencedClass
 {
@@ -709,7 +727,7 @@ public class ReferencedClass
         {
             const string code = """
                                 using System;
-                                using Metalama.Framework.Aspects;
+                                using Metalama.Framework.Aspects; 
 
                                 [CompileTime]
                                 public class CompileTimeOnlyClass
@@ -770,7 +788,7 @@ public class ReferencedClass
 
             var transformed = File.ReadAllText( Path.Combine( compileTimeProject!.Directory!, compileTimeProject.CodeFiles[0].TransformedPath ) );
 
-            Assert.Equal( expected, transformed );
+            AssertEx.EolInvariantEqual( expected, transformed );
 
             // We are not testing the rewriting of typeof in a template because this is done by the template compiler and covered by template tests.
         }
@@ -785,7 +803,8 @@ public class ReferencedClass
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public class Anything
@@ -818,7 +837,8 @@ public class Anything
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 public class SomeRunTimeClass
 {
@@ -853,7 +873,8 @@ public class SomeRunTimeClass
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 public class MyAspect : OverrideMethodAspect
 {
@@ -943,7 +964,8 @@ public class MyAspect : OverrideMethodAspect
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 Method();
 
@@ -958,13 +980,14 @@ class CompileTimeClass { }
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 class CompileTimeClass { }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1069,7 +1092,7 @@ namespace SomeNamespace
 }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1079,7 +1102,8 @@ namespace SomeNamespace
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }
 
@@ -1112,7 +1136,8 @@ public delegate void SomeDelegate();
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public class SomeClass
@@ -1139,7 +1164,7 @@ public record SomeRecord(int P);
 public delegate void SomeDelegate();
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1149,7 +1174,8 @@ public delegate void SomeDelegate();
 
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public interface SomeInterface
@@ -1162,7 +1188,8 @@ public interface SomeInterface
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 public interface SomeInterface
@@ -1171,7 +1198,7 @@ public interface SomeInterface
 }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1181,7 +1208,8 @@ public interface SomeInterface
             using var testContext1 = this.CreateTestContext();
 
             const string code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: CompileTime]
 #if SYMBOL
 public class ReferencedClass
@@ -1251,7 +1279,8 @@ Intentional syntax error.
             const string code = @"
 #region Namespaces
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using StrippedNamespace;
 #endregion
 
@@ -1299,7 +1328,8 @@ class C {
 
             const string expected = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 namespace RemainingNamespace
 {
@@ -1308,7 +1338,7 @@ namespace RemainingNamespace
 }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1316,7 +1346,8 @@ namespace RemainingNamespace
         {
             const string code = """
                                 using System;
-                                using Metalama.Framework.Aspects;
+                                using Metalama.Framework.Advising;
+                                using Metalama.Framework.Aspects; 
 
                                 namespace Ns
                                 {
@@ -1403,7 +1434,7 @@ namespace RemainingNamespace
         public void DiagnosticsAreCached()
         {
             var code = $$"""
-                         using Metalama.Framework.Aspects;
+                         using Metalama.Framework.Advising;using Metalama.Framework.Aspects;
                          using Metalama.Framework.Code;
 
                          namespace NS_{{Guid.NewGuid():N}};
@@ -1456,7 +1487,7 @@ namespace RemainingNamespace
         private static (CompileTimeProject Project, WeakReference WeakRef) CreateCompileTimeProject( TestContext testContext, CompileTimeDomain domain )
         {
             var code = $$"""
-                         using Metalama.Framework.Aspects;
+                         using Metalama.Framework.Advising;using Metalama.Framework.Aspects;
                          using Metalama.Framework.Code;
 
                          namespace NS_{{Guid.NewGuid():N}};

@@ -4,9 +4,8 @@ using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing.Consumption;
-using Metalama.Backstage.Telemetry;
+using Metalama.Backstage.Licensing.Consumption.Sources;
 using Metalama.Compiler;
-using Metalama.Compiler.Services;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
@@ -14,17 +13,18 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using IExceptionReporter = Metalama.Backstage.Telemetry.IExceptionReporter;
-using ILogger = Metalama.Compiler.Services.ILogger;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
@@ -33,101 +33,27 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// </summary>
 [ExcludeFromCodeCoverage]
 [UsedImplicitly]
-public sealed class SourceTransformer : ISourceTransformerWithServices
+public sealed partial class SourceTransformer : ISourceTransformerWithServices
 {
     public IServiceProvider InitializeServices( InitializeServicesContext context )
     {
-        var dotNetSdkDirectory = GetDotNetSdkDirectory( context.AnalyzerConfigOptionsProvider );
-
-        var licenseOptions = GetLicensingOptions( context.AnalyzerConfigOptionsProvider );
-
-        var applicationInfo = new SourceTransformerApplicationInfo(
-            context.Options.IsLongRunningProcess,
-            licenseOptions.IgnoreUnattendedProcessLicense );
-
-        var projectName = context.Compilation.AssemblyName;
-
-        var backstageOptions = new BackstageInitializationOptions( applicationInfo, projectName )
+        if ( !BackstageServiceFactoryInitializer.IsInitialized )
         {
-            AddLicensing = true,
-            AddUserInterface = true,
-            AddSupportServices = true,
-            LicensingOptions = licenseOptions,
-            DotNetSdkDirectory = dotNetSdkDirectory
-        };
+            var dotNetSdkDirectory = GetDotNetSdkDirectory( context.AnalyzerConfigOptionsProvider );
 
-        // We don't use BackstageServiceFactory.ServiceProvider here, because it's lifetime goes over the lifetime of a source transformer,
-        // and we manage disposal of services at the end of the source transformer's lifetime.
-        var serviceProvider = BackstageServiceFactoryInitializer.CreateInitialized( backstageOptions );
+            var applicationInfo = new SourceTransformerApplicationInfo( context.Options.IsLongRunningProcess );
 
-        return new CompilerServiceProvider( serviceProvider, projectName );
-    }
-
-    private sealed class CompilerServiceProvider : IDisposableServiceProvider
-    {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly LoggerAdapter _logger;
-        private readonly ExceptionReporterAdapter _exceptionReporter;
-        private readonly IUsageSession? _usageReportingSession;
-
-        public CompilerServiceProvider( IServiceProvider serviceProvider, string? projectName )
-        {
-            this._serviceProvider = serviceProvider;
-            this._logger = new LoggerAdapter( serviceProvider.GetLoggerFactory().GetLogger( "Compiler" ) );
-            this._exceptionReporter = new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() );
-            
-            // Initialize usage reporting.
-            try
+            var backstageOptions = new BackstageInitializationOptions( applicationInfo )
             {
-                if ( serviceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && projectName != null
-                                                                                                && usageReporter.ShouldReportSession( projectName ) )
-                {
-                    this._usageReportingSession = usageReporter.StartSession( "TransformerUsage" );
-                }
-            }
-            catch ( Exception e )
-            {
-                ReportException( e, serviceProvider, false );
+                AddLicensing = true, AddUserInterface = true, AddSupportServices = true, DotNetSdkDirectory = dotNetSdkDirectory
+            };
 
-                // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
-            }
+            BackstageServiceFactoryInitializer.Initialize( backstageOptions );
         }
 
-        public object? GetService( Type serviceType )
-            => serviceType == typeof(ILogger) ? this._logger
-                : serviceType == typeof(Compiler.Services.IExceptionReporter) ? this._exceptionReporter
-                : null;
+        var backstageServiceProvider = BackstageServiceFactory.ServiceProvider;
 
-        public void DisposeServices( Action<Diagnostic> reportDiagnostic )
-        {
-            // Write all licensing messages that may have been emitted during the compilation.
-            if ( this._serviceProvider.GetBackstageService<ILicenseConsumptionService>() is { } licenseManager )
-            {
-                foreach ( var licensingMessage in licenseManager.Messages )
-                {
-                    var diagnosticDefinition = licensingMessage.IsError
-                        ? LicensingDiagnosticDescriptors.LicensingError
-                        : LicensingDiagnosticDescriptors.LicensingWarning;
-
-                    reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( null, licensingMessage.Text ) );
-                }
-            }
-
-            // Report usage.
-            try
-            {
-                this._usageReportingSession?.Dispose();
-            }
-            catch ( Exception e )
-            {
-                ReportException( e, this._serviceProvider, false );
-
-                // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
-            }
-
-            // Close logs.
-            this._serviceProvider.GetLoggerFactory().Dispose();
-        }
+        return new CompilerServiceProvider( backstageServiceProvider, context.AnalyzerConfigOptionsProvider );
     }
 
     private static string? GetDotNetSdkDirectory( AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider )
@@ -139,28 +65,6 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
         }
 
         return Path.GetFullPath( Path.GetDirectoryName( propsFilePath )! );
-    }
-
-    private static LicensingInitializationOptions GetLicensingOptions( AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider )
-    {
-        // Load license keys from build options.
-        string? projectLicense = null;
-
-        if ( analyzerConfigOptionsProvider.GlobalOptions.TryGetValue( "build_property.MetalamaLicense", out var licenseProperty ) )
-        {
-            projectLicense = licenseProperty.Trim();
-        }
-
-        if ( !(analyzerConfigOptionsProvider.GlobalOptions.TryGetValue( "build_property.MetalamaIgnoreUserLicenses", out var ignoreUserLicensesProperty )
-               && bool.TryParse( ignoreUserLicensesProperty, out var ignoreUserLicenses )) )
-        {
-            ignoreUserLicenses = false;
-        }
-
-        return new LicensingInitializationOptions
-        {
-            ProjectLicense = projectLicense, IgnoreUserProfileLicenses = ignoreUserLicenses, IgnoreUnattendedProcessLicense = ignoreUserLicenses
-        };
     }
 
     private static void ReportException( Exception e, IServiceProvider serviceProvider, bool throwReporterExceptions )
@@ -181,31 +85,33 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
 
     public void Execute( TransformerContext context )
     {
-        var serviceProvider = ServiceProviderFactory.GetServiceProvider();
+        var globalServices = ServiceProviderFactory.GetServiceProvider();
 
         try
         {
             // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier
             // is not possible, because it needs access to IExceptionReporter service, which comes from the TransformerContext.
-            if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )
+            if ( globalServices.GetService<ICompileTimeExceptionHandler>() == null )
             {
-                serviceProvider = serviceProvider.WithService( new CompileTimeExceptionHandler( serviceProvider ) );
+                globalServices = globalServices.WithService( new CompileTimeExceptionHandler( globalServices ) );
             }
 
-            // Try.Metalama ships its own project options using the async-local service provider.
-            var projectOptions = (IProjectOptions?) serviceProvider.GetService( typeof(IProjectOptions) );
-
-            projectOptions ??= MSBuildProjectOptionsFactory.Default.GetProjectOptions(
-                context.AnalyzerConfigOptionsProvider,
-                context.Options );
-
-            var projectServiceProvider = serviceProvider
+            // Try.Metalama ships its own project options factory using the async-local service provider.
+            var projectOptionsFactory = globalServices.GetRequiredService<IProjectOptionsFactory>();
+            var projectOptions = projectOptionsFactory.GetProjectOptions( context.AnalyzerConfigOptionsProvider, context.Options );
+            
+            var projectServiceProvider = globalServices
                 .WithProjectScopedServices( projectOptions, context.Compilation )
-                .WithService<IProjectLicenseConsumptionService>( sp => new ProjectLicenseConsumptionService( sp ) );
+                .WithService<IProjectLicenseConsumer>(
+                    sp => ProjectLicenseConsumer.Create(
+                        sp.GetRequiredBackstageService<ILicenseConsumptionService>(),
+                        projectOptions.License,
+                        projectOptions.IgnoreUserProfileLicense ? LicenseSourceKind.UserProfile : LicenseSourceKind.None,
+                        context.ReportDiagnostic ) );
 
             using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );
 
-            var taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
+            var taskRunner = globalServices.GetRequiredService<ITaskRunner>();
 
             // ReSharper disable once AccessToDisposedClosure
             var pipelineResult =
@@ -221,13 +127,14 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
                 context.AddResources( pipelineResult.Value.AdditionalResources );
                 context.AddSyntaxTreeTransformations( pipelineResult.Value.SyntaxTreeTransformations );
                 HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult.Value );
+                HandleSuppressions( context, projectServiceProvider, pipelineResult.Value.DiagnosticSuppressions );
             }
         }
         catch ( Exception e )
         {
             var isHandled = false;
 
-            serviceProvider
+            globalServices
                 .GetService<ICompileTimeExceptionHandler>()
                 ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
 
@@ -238,7 +145,7 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
         }
         finally
         {
-            serviceProvider.GetLoggerFactory().Flush();
+            globalServices.GetLoggerFactory().Flush();
         }
     }
 
@@ -293,6 +200,42 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
         catch
         {
             // TODO: Warn.
+        }
+    }
+
+    private static void HandleSuppressions(
+        TransformerContext context,
+        ProjectServiceProvider projectServiceProvider,
+        ImmutableArray<ScopedSuppression> diagnosticSuppressions )
+    {
+        var userCodeInvoker = projectServiceProvider.GetRequiredService<UserCodeInvoker>();
+
+        foreach ( var suppression in diagnosticSuppressions )
+        {
+            var declarationId = suppression.Declaration.GetSerializableId();
+
+            UserCodeExecutionContext? executionContext = null;
+
+            if ( suppression.Suppression.Filter != null )
+            {
+                executionContext = new UserCodeExecutionContext(
+                    projectServiceProvider,
+                    UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Suppression.Definition, suppression.Declaration ) );
+            }
+
+            context.RegisterDiagnosticFilter(
+                SuppressionFactories.CreateDescriptor( suppression.Suppression.Definition.SuppressedDiagnosticId ),
+                request =>
+                {
+                    if ( suppression.Matches(
+                            request.Diagnostic,
+                            request.Compilation,
+                            filter => userCodeInvoker.Invoke( filter, executionContext! ),
+                            declarationId ) )
+                    {
+                        request.Suppress();
+                    }
+                } );
         }
     }
 }

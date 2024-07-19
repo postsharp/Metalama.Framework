@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -8,23 +9,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Final
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceFinalizer(builder.Target, nameof(Finalizer), whenExists: OverrideStrategy.Fail);
+            var result = builder.IntroduceFinalizer( nameof(Finalizer), whenExists: OverrideStrategy.Fail );
 
-            if (result.Outcome != Advising.AdviceOutcome.Error)
+            if (result.Outcome != AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Ignored." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceFinalizer)
+            if (result.AdviceKind != AdviceKind.IntroduceFinalizer)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceFinalizer.");
-            }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceFinalizer." );
             }
 
             // TODO: #33060
@@ -45,8 +41,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Final
     [TestAspect]
     public class TargetClass
     {
-        ~TargetClass()
-        {
-        }
+        ~TargetClass() { }
     }
 }

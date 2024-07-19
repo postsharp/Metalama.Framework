@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize
             {
                 foreach (var ignoredValue in _ignoredValues)
                 {
-                    if (value == meta.Cast(meta.Target.FieldOrProperty.Type, meta.RunTime(ignoredValue)))
+                    if (value == meta.Cast( meta.Target.FieldOrProperty.Type, meta.RunTime( ignoredValue ) ))
                     {
                         return;
                     }

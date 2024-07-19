@@ -1,192 +1,193 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictNew
 {
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int BaseClassProperty_Static
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int HiddenBaseClassProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int HiddenBaseClassProperty_Static
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int HiddenBaseClassVirtualProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int HiddenVirtualBaseClassVirtualProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassVirtualProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassVirtualSealedProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassVirtualOverridenProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassAbstractProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int BaseClassAbstractSealedProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int DerivedClassProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int DerivedClassProperty_Static
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int DerivedClassVirtualProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int DerivedClassVirtualSealedProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int NonExistentProperty
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int NonExistentProperty_Static
         {
             get
             {
-                Console.WriteLine("This is introduced property.");
+                Console.WriteLine( "This is introduced property." );
 
                 return meta.Proceed();
             }
@@ -310,7 +311,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.E
 
     // <target>
     [Introduction]
-    internal class TargetClass : DerivedClass
-    {
-    }
+    internal class TargetClass : DerivedClass { }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,12 +10,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Enhancements.HasAsp
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            if (!builder.Target.Enhancements().GetAspects<Aspect>().Any())
+            var targetEnhancements = builder.Target.Enhancements();
+
+            if (!targetEnhancements.HasAspect<Aspect>())
             {
                 throw new Exception();
             }
 
-            if (builder.Target.DeclaringType.Methods.OfName( "NoAspect" ).Single().Enhancements().GetAspects<Aspect>().Any())
+            if (!targetEnhancements.HasAspect<OverrideMethodAspect>())
+            {
+                throw new Exception();
+            }
+
+            var noAspectEnhancements = builder.Target.DeclaringType.Methods.OfName( "NoAspect" ).Single().Enhancements();
+
+            if (noAspectEnhancements.HasAspect<Aspect>())
+            {
+                throw new Exception();
+            }
+
+            if (noAspectEnhancements.HasAspect<OverrideMethodAspect>())
             {
                 throw new Exception();
             }

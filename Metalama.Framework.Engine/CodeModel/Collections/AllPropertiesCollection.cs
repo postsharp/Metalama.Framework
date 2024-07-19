@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal sealed class AllPropertiesCollection : AllMembersCollection<IProperty>, IPropertyCollection
 {
-    public AllPropertiesCollection( NamedType declaringType ) : base( declaringType ) { }
+    public AllPropertiesCollection( INamedTypeImpl declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IProperty> GetMembers( INamedType namedType ) => namedType.Properties;
 

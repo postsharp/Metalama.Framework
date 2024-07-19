@@ -2,6 +2,7 @@
 // @ClearIgnoredDiagnostics to verify nullability warnings
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -12,18 +13,18 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        var nn = TypedConstant.Create("foo");
+        var nn = TypedConstant.Create( "foo" );
 
-        Console.WriteLine(nn.Value?.ToString());
-        Console.WriteLine(nn.Value!.ToString());
+        Console.WriteLine( nn.Value?.ToString() );
+        Console.WriteLine( nn.Value!.ToString() );
 
         return null!;
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
     // <target>
     [Aspect]
-    void M() { }
+    private void M() { }
 }

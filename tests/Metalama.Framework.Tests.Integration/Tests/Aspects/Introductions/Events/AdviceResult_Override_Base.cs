@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -9,30 +10,25 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceEvent(builder.Target, nameof(Event), whenExists: OverrideStrategy.Override);
+            var result = builder.IntroduceEvent( nameof(Event), whenExists: OverrideStrategy.Override );
 
-            if (result.Outcome != Advising.AdviceOutcome.Override)
+            if (result.Outcome != AdviceOutcome.Override)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Override.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Override." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceEvent)
+            if (result.AdviceKind != AdviceKind.IntroduceEvent)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceEvent.");
-            }
-
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceEvent." );
             }
 
             if (!builder.Advice.MutableCompilation.Comparers.Default.Equals(
-                    result.Declaration.ForCompilation(builder.Advice.MutableCompilation), 
-                    builder.Target.ForCompilation(builder.Advice.MutableCompilation).Events.Single()))
+                    result.Declaration.ForCompilation( builder.Advice.MutableCompilation ),
+                    builder.Target.ForCompilation( builder.Advice.MutableCompilation ).Events.Single() ))
             {
-                throw new InvalidOperationException($"Declaration was not correct.");
+                throw new InvalidOperationException( $"Declaration was not correct." );
             }
         }
 
@@ -41,12 +37,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
         {
             add
             {
-                Console.WriteLine("Aspect code.");
+                Console.WriteLine( "Aspect code." );
                 meta.Proceed();
             }
             remove
             {
-                Console.WriteLine("Aspect code.");
+                Console.WriteLine( "Aspect code." );
                 meta.Proceed();
             }
         }
@@ -63,7 +59,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Event
 
     // <target>
     [TestAspect]
-    public class TargetClass : BaseClass
-    {
-    }
+    public class TargetClass : BaseClass { }
 }

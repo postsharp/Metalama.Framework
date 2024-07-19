@@ -1,21 +1,31 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
     internal sealed class ObjectReaderMergeWrapper : IObjectReader
     {
-        private readonly ImmutableDictionary<string, object?> _inner;
+        private readonly IObjectReader?[] _readers;
+        private ImmutableDictionary<string, object?>? _dictionary;
 
-        public ObjectReaderMergeWrapper( IObjectReader?[] readers )
+        private ImmutableDictionary<string, object?> Dictionary => this._dictionary ??= this.BuildDictionary();
+        
+        public ObjectReaderMergeWrapper( params IObjectReader?[] readers )
         {
-            var builder = ImmutableDictionary<string, object?>.Empty.ToBuilder();
+            this._readers = readers;
+        }
 
-            foreach ( var reader in readers )
+        private ImmutableDictionary<string, object?> BuildDictionary()
+        {
+            var dictionaryBuilder = ImmutableDictionary<string, object?>.Empty.ToBuilder();
+        
+            foreach ( var reader in this._readers )
             {
                 if ( reader == null )
                 {
@@ -24,29 +34,34 @@ namespace Metalama.Framework.Engine.Advising
 
                 foreach ( var kvp in reader )
                 {
-                    builder[kvp.Key] = kvp.Value;
+                    dictionaryBuilder[kvp.Key] = kvp.Value;
                 }
             }
 
-            this._inner = builder.ToImmutable();
+            return dictionaryBuilder.ToImmutable();
         }
 
-        public object? this[ string key ] => this._inner[key];
+        public object? this[ string key ] => this.Dictionary[key];
 
-        public object Source => this._inner;
+        [Memo]
+        public object Source
+            => this._readers.Where( x => x != null )
+                .Select( x => x!.Source )
+                .Where( x => x != null )
+                .ToImmutableArray();
 
-        public IEnumerable<string> Keys => this._inner.Keys;
+        public IEnumerable<string> Keys => this.Dictionary.Keys;
 
-        public IEnumerable<object?> Values => this._inner.Values;
+        public IEnumerable<object?> Values => this.Dictionary.Values;
 
-        public int Count => this._inner.Count;
+        public int Count => this.Dictionary.Count;
 
-        public bool ContainsKey( string key ) => this._inner.ContainsKey( key );
+        public bool ContainsKey( string key ) => this.Dictionary.ContainsKey( key );
 
-        public IEnumerator<KeyValuePair<string, object?>> GetEnumerator() => this._inner.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, object?>> GetEnumerator() => this.Dictionary.GetEnumerator();
 
-        public bool TryGetValue( string key, out object? value ) => this._inner.TryGetValue( key, out value );
+        public bool TryGetValue( string key, out object? value ) => this.Dictionary.TryGetValue( key, out value );
 
-        IEnumerator IEnumerable.GetEnumerator() => this._inner.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => this.Dictionary.GetEnumerator();
     }
 }

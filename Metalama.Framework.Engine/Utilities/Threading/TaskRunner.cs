@@ -10,6 +10,9 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal sealed class TaskRunner : ITaskRunner
 {
+    // We used a shared scheduler to limit concurrency in the whole process.
+    private static readonly TaskScheduler _scheduler = TaskSchedulerProvider.TaskScheduler;
+
     private static bool MustRunNewTask()
         => !Thread.CurrentThread.IsBackground || TaskScheduler.Current != TaskScheduler.Default || SynchronizationContext.Current != null;
 
@@ -17,7 +20,7 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            Task.Run( func, cancellationToken ).Wait( cancellationToken );
+            Task.Factory.StartNew( func, cancellationToken, TaskCreationOptions.None, _scheduler ).Unwrap().Wait( cancellationToken );
         }
         else
         {
@@ -29,7 +32,7 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            Task.Run( func, cancellationToken ).Wait( cancellationToken );
+            Task.Factory.StartNew( () => func().AsTask(), cancellationToken, TaskCreationOptions.None, _scheduler ).Unwrap().Wait( cancellationToken );
         }
         else
         {
@@ -46,7 +49,7 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            var task = Task.Run( func, cancellationToken );
+            var task = Task.Factory.StartNew( func, cancellationToken, TaskCreationOptions.None, _scheduler ).Unwrap();
             task.Wait( cancellationToken );
 
             return task.Result;
@@ -68,7 +71,7 @@ internal sealed class TaskRunner : ITaskRunner
     {
         if ( MustRunNewTask() )
         {
-            var task = Task.Run( () => func().AsTask(), cancellationToken );
+            var task = Task.Factory.StartNew( () => func().AsTask(), cancellationToken, TaskCreationOptions.None, _scheduler ).Unwrap();
 
             task.Wait( cancellationToken );
 

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,14 +9,13 @@ public class MyAspect : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // Default
-        builder.Advice.IntroduceAutomaticProperty( builder.Target, "P1", typeof(int) );
+        builder.IntroduceAutomaticProperty( "P1", typeof(int) );
 
         // Change property visibility.
-        builder.Advice.IntroduceAutomaticProperty( builder.Target, "P2", typeof(int), buildProperty: p => { p.Accessibility = Accessibility.Protected; } );
+        builder.IntroduceAutomaticProperty( "P2", typeof(int), buildProperty: p => { p.Accessibility = Accessibility.Protected; } );
 
         // Change accessor visibility.
-        builder.Advice.IntroduceAutomaticProperty(
-            builder.Target,
+        builder.IntroduceAutomaticProperty(
             "P3",
             typeof(int),
             buildProperty: p =>

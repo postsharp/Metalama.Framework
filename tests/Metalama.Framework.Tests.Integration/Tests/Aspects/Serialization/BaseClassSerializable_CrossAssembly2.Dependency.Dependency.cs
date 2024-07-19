@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.BaseClassSerializable_CrossAssembly2;
 
@@ -7,8 +8,8 @@ public class MiddleType : BaseType
 {
     public int MiddleValue { get; }
 
-    public MiddleType(int baseValue, int middleValue) : base(baseValue)
+    public MiddleType( int baseValue, int middleValue ) : base( baseValue )
     {
-        this.MiddleValue = middleValue;
+        MiddleValue = middleValue;
     }
 }

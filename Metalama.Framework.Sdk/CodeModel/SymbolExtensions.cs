@@ -24,13 +24,11 @@ namespace Metalama.Framework.Engine.CodeModel
             where T : ISymbol
             => (T?) ((ISdkDeclaration) declaration).Symbol;
 
-        public static ITypeSymbol GetSymbol( this IType type )
-            => ((ISdkType) type).TypeSymbol ?? throw new InvalidOperationException(
-                "Assertion failed: until type introductions are supported, all types are assumed to have a Roslyn symbol." );
+        public static ITypeSymbol? GetSymbol( this IType type ) => ((ISdkType) type).TypeSymbol;
 
-        public static INamedTypeSymbol GetSymbol( this INamedType namedType )
-            => namedType.GetSymbol<INamedTypeSymbol>() ?? throw new InvalidOperationException(
-                "Assertion failed: until type introductions are supported, all types are assumed to have a Roslyn symbol." );
+        public static INamedTypeSymbol? GetSymbol( this INamedType namedType ) => namedType.GetSymbol<INamedTypeSymbol>();
+
+        public static ITypeParameterSymbol? GetSymbol( this ITypeParameter typeParameter ) => typeParameter.GetSymbol<ITypeParameterSymbol>();
 
         public static IMethodSymbol? GetSymbol( this IMethodBase method ) => method.GetSymbol<IMethodSymbol>();
 
@@ -41,6 +39,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public static IFieldSymbol? GetSymbol( this IField field ) => field.GetSymbol<IFieldSymbol>();
 
         public static IParameterSymbol? GetSymbol( this IParameter parameter ) => parameter.GetSymbol<IParameterSymbol>();
+
+        public static IAssemblySymbol GetSymbol( this IAssembly assembly ) => assembly.GetSymbol<IAssemblySymbol>();
 
         public static ISymbol? GetOverriddenMember( this ISymbol? symbol )
             => symbol switch

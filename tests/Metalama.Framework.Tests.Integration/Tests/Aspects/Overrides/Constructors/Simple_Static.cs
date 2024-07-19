@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,7 +13,7 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.StaticConstructor, nameof(Template));
+        builder.With( builder.Target.StaticConstructor! ).Override( nameof(Template) );
     }
 
     [Template]
@@ -29,6 +30,6 @@ public class TargetClass
 {
     static TargetClass()
     {
-        Console.WriteLine("This is the original static constructor.");
+        Console.WriteLine( "This is the original static constructor." );
     }
 }

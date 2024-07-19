@@ -20,7 +20,7 @@ public class VsUserProcessSourceGenerator : BaseSourceGenerator
     protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey )
         => new VsUserProcessProjectHandler( this.ServiceProvider, projectOptions, projectKey );
 
-    protected override void OnGeneratedSourceRequested( Compilation compilation, MSBuildProjectOptions options, TestableCancellationToken cancellationToken )
+    protected override void OnGeneratedSourceRequested( Compilation compilation, IProjectOptions options, TestableCancellationToken cancellationToken )
     {
         // In the DevEnv process, we always serve from cache because the initiator of the source generator pipeline is always a change in the touch file
         // done by the analysis process, and this change is done after the devenv process receives the generated code from the named pipe.

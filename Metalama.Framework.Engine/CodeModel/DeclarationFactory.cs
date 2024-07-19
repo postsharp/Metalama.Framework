@@ -80,15 +80,16 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
         => (INamespace) this._defaultCache.GetOrAdd(
             namespaceSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( l, c ) => new Namespace( (INamespaceSymbol) l.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( l, c ) => new Namespace( (INamespaceSymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
         => (IAssembly) this._defaultCache.GetOrAdd(
             assemblySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( l, c ) => !((IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertNotNull()).Identity.Equals( c.RoslynCompilation.Assembly.Identity )
-                ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c )
-                : c,
+            static ( l, c )
+                => !((IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull()).Identity.Equals( c.RoslynCompilation.Assembly.Identity )
+                    ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c )
+                    : c,
             this._compilationModel );
 
     public IType GetIType( ITypeSymbol typeSymbol )
@@ -140,9 +141,9 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-        => (TypeParameter) this._defaultCache.GetOrAdd(
-            typeParameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( tp, c ) => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+        => (TypeParameter) this._typeCache.GetOrAdd(
+            typeParameterSymbol,
+            static ( tp, c ) => new TypeParameter( (ITypeParameterSymbol) tp, c ),
             this._compilationModel );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
@@ -152,26 +153,26 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IMethod) this._defaultCache.GetOrAdd(
             methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
     }
 
     public IProperty GetProperty( IPropertySymbol propertySymbol )
         => (IProperty) this._defaultCache.GetOrAdd(
             propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Property( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Property( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IIndexer GetIndexer( IPropertySymbol propertySymbol )
         => (IIndexer) this._defaultCache.GetOrAdd(
             propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Indexer( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Indexer( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IField GetField( IFieldSymbol fieldSymbol )
         => (IField) this._defaultCache.GetOrAdd(
             fieldSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Field( (IFieldSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Field( (IFieldSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IConstructor GetConstructor( IMethodSymbol methodSymbol, bool translateToCurrentCompilation = false )
@@ -183,26 +184,26 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IConstructor) this._defaultCache.GetOrAdd(
             methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Constructor( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Constructor( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
     }
 
     public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
         => (IMethod) this._defaultCache.GetOrAdd(
             finalizerSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IParameter GetParameter( IParameterSymbol parameterSymbol )
         => (IParameter) this._defaultCache.GetOrAdd(
             parameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Parameter( (IParameterSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Parameter( (IParameterSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IEvent GetEvent( IEventSymbol @event )
         => (IEvent) this._defaultCache.GetOrAdd(
             @event.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Event( (IEventSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Event( (IEventSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
@@ -216,7 +217,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         => this.GetCompilationElement( symbol, kind ) as IDeclaration;
 
-    public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetSymbolId().Resolve( this.Compilation ).AssertNotNull() );
+    public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetSymbolId().Resolve( this.Compilation ).AssertSymbolNotNull() );
 
     public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, DeclarationRefTargetKind.Default );
 
@@ -354,10 +355,15 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     IArrayType IDeclarationFactory.ConstructArrayType( IType elementType, int rank )
-        => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ISdkType) elementType).TypeSymbol.AssertNotNull(), rank ) );
+        => (IArrayType) this.GetIType(
+            this.RoslynCompilation.CreateArrayTypeSymbol(
+                ((ISdkType) elementType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ),
+                rank ) );
 
     IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
-        => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ISdkType) pointedType).TypeSymbol.AssertNotNull() ) );
+        => (IPointerType) this.GetIType(
+            this.RoslynCompilation.CreatePointerTypeSymbol(
+                ((ISdkType) pointedType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
 
     public IType ConstructNullable( IType type, bool isNullable )
     {
@@ -366,12 +372,12 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             return type;
         }
 
-        var typeSymbol = ((ISdkType) type).TypeSymbol;
+        var typeSymbol = ((ISdkType) type).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes );
         ITypeSymbol newTypeSymbol;
 
         if ( type.IsReferenceType ?? true )
         {
-            newTypeSymbol = typeSymbol.AssertNotNull()
+            newTypeSymbol = typeSymbol
                 .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
         }
         else
@@ -433,18 +439,16 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
     {
-        var declaration = declarationId.ResolveToDeclaration( this._compilationModel );
-
-        if ( declaration == null )
-        {
-            throw new InvalidOperationException(
+        var declaration =
+            declarationId.ResolveToDeclaration( this._compilationModel )
+            ?? throw new InvalidOperationException(
                 $"Cannot find the symbol '{declarationId}' in compilation '{this._compilationModel.RoslynCompilation.Assembly.Name}'." );
-        }
 
         return declaration;
     }
 
-    public ICompilationElement? Translate( ICompilationElement compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+    public T? Translate<T>( T compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+        where T : class, ICompilationElement
     {
         if ( ReferenceEquals( compilationElement.Compilation, this._compilationModel ) )
         {
@@ -455,17 +459,18 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             switch ( compilationElement )
             {
                 case IDeclaration declaration:
-                    return declaration.ToTypedRef().GetTargetOrNull( this._compilationModel, options );
+                    return (T?) declaration.ToTypedRef().GetTargetOrNull( this._compilationModel, options );
 
                 case IType type:
-                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate( type.GetSymbol() );
+                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate(
+                        type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
                     if ( translatedSymbol == null )
                     {
                         return null;
                     }
 
-                    return this._compilationModel.Factory.GetIType( translatedSymbol );
+                    return (T) this._compilationModel.Factory.GetIType( translatedSymbol );
 
                 default:
                     throw new AssertionFailedException( $"Cannot translate a '{compilationElement.GetType().Name}'." );
@@ -474,11 +479,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
-    {
-        var symbol = this._compilationModel.CompilationContext.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
-
-        return this.GetIType( symbol );
-    }
+        => this._compilationModel.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
 
     internal IAttribute GetAttribute( AttributeBuilder attributeBuilder, ReferenceResolutionOptions options )
         => (IAttribute) this._defaultCache.GetOrAdd(
@@ -489,11 +490,18 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
         => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
 
-    private IParameter GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
+    private IParameter? GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
         {
-            throw CreateBuilderNotExists( parameterBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( parameterBuilder );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         return (IParameter) this._defaultCache.GetOrAdd(
@@ -508,16 +516,23 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             static ( l, c ) => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, c ),
             this._compilationModel );
 
-    internal IMethod GetMethod( MethodBuilder methodBuilder, ReferenceResolutionOptions options )
+    internal IMethod? GetMethod( MethodBuilder methodBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
         {
-            throw CreateBuilderNotExists( methodBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( methodBuilder );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         return (IMethod) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltMethod( (MethodBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltMethod( c, (MethodBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -532,7 +547,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                     original.SourceMethod,
                     Ref.FromSymbol( original.SubstitutedType, original.GetCompilationModel().CompilationContext )
                         .GetSymbol( c.RoslynCompilation )
-                        .AssertNotNull()
+                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes )
                         .AssertCast<INamedTypeSymbol>() );
             },
             this._compilationModel );
@@ -548,33 +563,47 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             },
             (me: this, options) );
 
-    internal IConstructor GetConstructor( ConstructorBuilder constructorBuilder, ReferenceResolutionOptions options )
+    internal IConstructor? GetConstructor( ConstructorBuilder constructorBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( constructorBuilder ) )
         {
-            throw CreateBuilderNotExists( constructorBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( constructorBuilder );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         return (IConstructor) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( constructorBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltConstructor( (ConstructorBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltConstructor( c, (ConstructorBuilder) l.Target! ),
             this._compilationModel );
     }
 
-    internal IField GetField( FieldBuilder fieldBuilder, ReferenceResolutionOptions options )
+    internal IField? GetField( FieldBuilder fieldBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( fieldBuilder ) )
         {
-            throw CreateBuilderNotExists( fieldBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( fieldBuilder );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         return (IField) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltField( (FieldBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltField( c, (FieldBuilder) l.Target! ),
             this._compilationModel );
     }
 
-    internal IFieldOrProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
+    internal IFieldOrProperty? GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         /*
         if ( propertyBuilder is PromotedField promotedField )
@@ -595,54 +624,117 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
         {
-            throw CreateBuilderNotExists( propertyBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( propertyBuilder );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         return (IProperty) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltProperty( (PropertyBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltProperty( c, (PropertyBuilder) l.Target! ),
             this._compilationModel );
     }
 
-    internal IIndexer GetIndexer( IndexerBuilder indexerBuilder, ReferenceResolutionOptions options )
+    internal IIndexer? GetIndexer( IndexerBuilder indexerBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( indexerBuilder ) )
         {
-            throw CreateBuilderNotExists( indexerBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( indexerBuilder );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         return (IIndexer) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( indexerBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltIndexer( (IndexerBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltIndexer( c, (IndexerBuilder) l.Target! ),
             this._compilationModel );
     }
 
-    internal IEvent GetEvent( EventBuilder propertyBuilder, ReferenceResolutionOptions options )
+    internal IEvent? GetEvent( EventBuilder eventBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
+        if ( options.MustExist() && !this._compilationModel.Contains( eventBuilder ) )
         {
-            throw CreateBuilderNotExists( propertyBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( eventBuilder );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         return (IEvent) this._defaultCache.GetOrAdd(
-            Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltEvent( (EventBuilder) l.Target!, c ),
+            Ref.FromBuilder( eventBuilder ).As<ICompilationElement>(),
+            static ( l, c ) => new BuiltEvent( c, (EventBuilder) l.Target! ),
             this._compilationModel );
     }
 
-    internal IDeclaration GetDeclaration( IDeclarationBuilder builder, ReferenceResolutionOptions options = default )
+    internal INamedType? GetNamedType( NamedTypeBuilder namedTypeBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
+    {
+        if ( options.MustExist() && !this._compilationModel.Contains( namedTypeBuilder ) )
+        {
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( namedTypeBuilder );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return (INamedType) this._defaultCache.GetOrAdd(
+            Ref.FromBuilder( namedTypeBuilder ).As<ICompilationElement>(),
+            static ( l, c ) => new BuiltNamedType( c, (NamedTypeBuilder) l.Target! ),
+            this._compilationModel );
+    }
+
+    internal INamespace? GetNamespace( NamespaceBuilder namespaceBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
+    {
+        if ( options.MustExist() && !this._compilationModel.Contains( namespaceBuilder ) )
+        {
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( namespaceBuilder );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return (INamespace) this._defaultCache.GetOrAdd(
+            Ref.FromBuilder( namespaceBuilder ).As<ICompilationElement>(),
+            static ( l, c ) => new BuiltNamespace( c, (NamespaceBuilder) l.Target! ),
+            this._compilationModel );
+    }
+
+    internal IDeclaration? GetDeclaration( IDeclarationBuilder builder, ReferenceResolutionOptions options = default, bool throwIfMissing = true )
         => builder switch
         {
-            MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options ),
-            FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
-            PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options ),
-            IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, options ),
-            EventBuilder eventBuilder => this.GetEvent( eventBuilder, options ),
-            BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
+            MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options, throwIfMissing ),
+            FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options, throwIfMissing ),
+            PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options, throwIfMissing ),
+            IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, options, throwIfMissing ),
+            EventBuilder eventBuilder => this.GetEvent( eventBuilder, options, throwIfMissing ),
+            BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options, throwIfMissing ),
             AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options ),
             TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options ),
             AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
-            ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options ),
+            ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options, throwIfMissing ),
+            NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options, throwIfMissing ),
+            NamespaceBuilder namespaceBuilder => this.GetNamespace( namespaceBuilder, options, throwIfMissing ),
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global
@@ -667,11 +759,11 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         if ( type is ITypeImpl typeInternal )
         {
-            return this.GetIType( typeInternal.TypeSymbol.AssertNotNull() );
+            return this.GetIType( typeInternal.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
         }
 
         // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
-        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertNotNull() );
+        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
     }
 
     [return: NotNullIfNotNull( "declaration" )]
@@ -689,7 +781,6 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         }
         else if ( declaration is NamedType namedType )
         {
-            // TODO: This would not work after type introductions, but that would require more changes.
             return (T) this.GetNamedType( (INamedTypeSymbol) namedType.Symbol );
         }
         else

@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -16,20 +17,20 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template));
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template) );
     }
 
     [Template]
     public void Template()
     {
-        Console.WriteLine("This is the overridden constructor.");
+        Console.WriteLine( "This is the overridden constructor." );
     }
 }
 
 [AttributeUsage( AttributeTargets.Constructor )]
 public class ConstructorOnlyAttribute : Attribute { }
 
-[AttributeUsage( AttributeTargets.Constructor)]
+[AttributeUsage( AttributeTargets.Constructor )]
 public class ExplicitConstructorOnlyAttribute : Attribute { }
 
 [AttributeUsage( AttributeTargets.Parameter )]
@@ -41,7 +42,5 @@ internal class TargetClass
 {
     [ConstructorOnly]
     [method: ExplicitConstructorOnly]
-    public TargetClass([ParamOnly] int x)
-    {
-    }
+    public TargetClass( [ParamOnly] int x ) { }
 }

@@ -35,15 +35,15 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this._event?.Invoke(this, new EventArgs());
+    _event?.Invoke(this, new EventArgs());
   }
   ~TargetClass()
   {
-    this._event?.Invoke(this, new EventArgs());
+    _event?.Invoke(this, new EventArgs());
   }
   public void Foo()
   {
-    this._event?.Invoke(this, new EventArgs());
+    _event?.Invoke(this, new EventArgs());
   }
   public static void Bar()
   {
@@ -53,23 +53,23 @@ internal class TargetClass
   {
     get
     {
-      this._event?.Invoke(this, new EventArgs());
+      _event?.Invoke(this, new EventArgs());
       return 0;
     }
     init
     {
-      this._event?.Invoke(this, new EventArgs());
+      _event?.Invoke(this, new EventArgs());
     }
   }
   public event EventHandler? Quz
   {
     add
     {
-      this._event?.Invoke(this, new EventArgs());
+      _event?.Invoke(this, new EventArgs());
     }
     remove
     {
-      this._event?.Invoke(this, new EventArgs());
+      _event?.Invoke(this, new EventArgs());
     }
   }
   public static explicit operator int (TargetClass targetClass)
@@ -86,12 +86,12 @@ internal class TargetClass
   {
     get
     {
-      this._event?.Invoke(this, new EventArgs());
+      _event?.Invoke(this, new EventArgs());
       return 0;
     }
     set
     {
-      this._event?.Invoke(this, new EventArgs());
+      _event?.Invoke(this, new EventArgs());
     }
   }
 }

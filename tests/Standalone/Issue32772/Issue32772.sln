@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Issue32772Library", "Issue32772Library\Issue32772Library.csproj", "{00BCDB19-3AB8-4CDA-BBDC-1CFDB805893B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Issue32772Library", "Issue32772Library/Issue32772Library.csproj", "{00BCDB19-3AB8-4CDA-BBDC-1CFDB805893B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Issue32772SdkLibrary", "Issue32772SdkLibrary\Issue32772SdkLibrary.csproj", "{E6E54B4A-9D2C-4DEE-B92A-CF05947A34C5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Issue32772SdkLibrary", "Issue32772SdkLibrary/Issue32772SdkLibrary.csproj", "{E6E54B4A-9D2C-4DEE-B92A-CF05947A34C5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

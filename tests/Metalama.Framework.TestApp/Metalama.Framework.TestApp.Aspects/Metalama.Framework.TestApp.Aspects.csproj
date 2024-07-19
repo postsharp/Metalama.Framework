@@ -9,16 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Annotations\**" />
-    <Compile Remove="Validation\**" />
-    <EmbeddedResource Remove="Annotations\**" />
-    <EmbeddedResource Remove="Validation\**" />
-    <None Remove="Annotations\**" />
-    <None Remove="Validation\**" />
+    <Compile Remove="Annotations/**" />
+    <Compile Remove="Validation/**" />
+    <EmbeddedResource Remove="Annotations/**" />
+    <EmbeddedResource Remove="Validation/**" />
+    <None Remove="Annotations/**" />
+    <None Remove="Validation/**" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Metalama.Framework.TestApp.Library\Metalama.Framework.TestApp.Library.csproj" />
+    <ProjectReference Include="../Metalama.Framework.TestApp.Library/Metalama.Framework.TestApp.Library.csproj" />
     <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
 

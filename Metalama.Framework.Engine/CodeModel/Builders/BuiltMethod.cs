@@ -17,14 +17,18 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 {
     private readonly MethodBuilder _methodBuilder;
 
-    public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( builder, compilation )
+    public BuiltMethod( CompilationModel compilation, MethodBuilder builder ) : base( compilation )
     {
         this._methodBuilder = builder;
     }
 
-    protected override MemberBuilder MemberBuilder => this._methodBuilder;
+    public override DeclarationBuilder Builder => this._methodBuilder;
+
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._methodBuilder;
 
     protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._methodBuilder;
+
+    protected override MemberBuilder MemberBuilder => this._methodBuilder;
 
     protected override MethodBaseBuilder MethodBaseBuilder => this._methodBuilder;
 
@@ -57,7 +61,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
             this,
             this._methodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter> ).ToReadOnlyList() );
 
-    public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
+    public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
     public bool IsGeneric => this._methodBuilder.IsGeneric;
 
@@ -77,6 +81,10 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     public IMethodInvoker With( InvokerOptions options ) => this._methodBuilder.With( options );
 
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
+
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this._methodBuilder.CreateInvokeExpression( args );
 
     public object? Invoke( params object?[] args ) => this._methodBuilder.Invoke( args );
 

@@ -6,8 +6,8 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
@@ -29,11 +29,11 @@ internal sealed class CompilationHelpers : ICompilationHelpers
 
     public AsyncInfo GetAsyncInfo( IType type ) => type.GetAsyncInfoImpl();
 
-    public string GetMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionName();
+    public string GetMetadataName( INamedType type ) => type.GetReflectionName();
 
-    public string GetFullMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionFullName();
+    public string GetFullMetadataName( INamedType type ) => type.GetReflectionFullName();
 
-    public SerializableTypeId GetSerializableId( IType type ) => type.GetSymbol().GetSerializableTypeId();
+    public SerializableTypeId GetSerializableId( IType type ) => type.GetSerializableTypeId();
 
     public IExpression ToTypeOfExpression( IType type ) => new TypeOfUserExpression( type );
 

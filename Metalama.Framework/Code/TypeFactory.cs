@@ -72,16 +72,15 @@ public static class TypeFactory
     /// Creates a nullable type from the current <see cref="IType"/>. If the current type is already nullable, returns the current type.
     /// If the type is a value type, returns a <see cref="Nullable{T}"/> of this type.
     /// </summary>
-    public static IType ToNullableType( this IType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
-    
+    public static IType ToNullableType( this IType type ) => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
+
     /// <summary>
     /// Creates a nullable type from the current <see cref="INamedType"/>. If the current type is already nullable, returns the current type.
     /// If the type is a value type, returns a <see cref="Nullable{T}"/> of this type.
     /// </summary>
     public static INamedType ToNullableType( this INamedType type )
         => (INamedType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
-    
+
     /// <summary>
     /// Creates a nullable type from the current <see cref="IArrayType"/>. If the current type is already nullable, returns the current type.
     /// </summary>
@@ -98,32 +97,40 @@ public static class TypeFactory
     /// Returns the non-nullable type from the current <see cref="IType"/>. If the current type is a non-nullable reference type, returns the current type.
     /// If the current type is a <see cref="Nullable{T}"/>, i.e. a nullable value type, returns the underlying type.
     /// </summary>
-    public static IType ToNonNullableType( this IType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
-    
+    /// <remarks>
+    /// Note that for non-value type type parameters, this method strips the nullable annotation, if any,
+    /// which means it returns a type whose <see cref="IType.IsNullable"/> property returns <see langword="null" />.
+    /// This is because C# has no way to express non-nullability for type parameters.
+    /// </remarks>
+    public static IType ToNonNullableType( this IType type ) => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
+
     /// <summary>
     /// Returns the non-nullable type from the current <see cref="ITypeParameter"/>. If the current type is a non-nullable reference type, returns the current type.
     /// </summary>
+    /// <remarks>
+    /// Note that for non-value type type parameters, this method strips the nullable annotation, if any,
+    /// which means it returns a type whose <see cref="IType.IsNullable"/> property returns <see langword="null" />.
+    /// This is because C# has no way to express non-nullability for type parameters.
+    /// </remarks>
     public static ITypeParameter ToNonNullableType( this ITypeParameter type )
         => (ITypeParameter) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
-    
+
     /// <summary>
     /// Returns the non-nullable type from the current <see cref="IArrayType"/>. If the current type is non-nullable, returns the current type.
     /// </summary>
     public static IArrayType ToNonNullableType( this IArrayType type )
         => (IArrayType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
-    
+
     /// <summary>
     /// Returns the non-nullable type from the current <see cref="IDynamicType"/>. If the current type is non-nullable, returns the current type.
     /// </summary>
     public static IDynamicType ToNonNullableType( this IDynamicType type )
         => (IDynamicType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
-    
+
     /// <summary>
-    /// Returns the non-nullable type from the current <see cref="IDynamicType"/>. If the current type is a non-nullable reference type, returns the current type.
+    /// Returns the non-nullable type from the current <see cref="INamedType"/>. If the current type is a non-nullable reference type, returns the current type.
     /// If current type represents a <see cref="Nullable{T}"/> where <c>T</c> is a value-type type parameter, this method returns <see cref="ITypeParameter"/>.
     /// Otherwise, it returns an <see cref="INamedType"/>.
     /// </summary>
-    public static IType ToNonNullableType( this INamedType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
+    public static IType ToNonNullableType( this INamedType type ) => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
 }

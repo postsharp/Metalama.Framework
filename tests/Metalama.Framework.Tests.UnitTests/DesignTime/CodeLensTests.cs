@@ -33,7 +33,8 @@ public sealed class CodeLensTests : DesignTimeTestBase
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
                             using System;
                             using System.IO;
@@ -54,7 +55,7 @@ public sealed class CodeLensTests : DesignTimeTestBase
                             {
                                 public override void BuildAspect(IAspectBuilder<INamedType> builder)
                                 {
-                                    builder.Advice.IntroduceMethod(builder.Target, nameof(Get));
+                                    builder.IntroduceMethod( nameof(Get));
                             
                                     builder.Outbound.SelectMany(type => type.Methods)
                                         .AddAspectIfEligible<InjectedLoggerAttribute>();
@@ -106,52 +107,53 @@ public sealed class CodeLensTests : DesignTimeTestBase
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Diagnostics;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Diagnostics;
 
-            [assembly: AspectOrder(typeof(MyChildAspect), typeof(MyAspect))]
+                            [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(MyChildAspect), typeof(MyAspect))]
 
-            class MyChildAspect : TypeAspect
-            {
-                [Introduce]
-                int child;
-            }
+                            class MyChildAspect : TypeAspect
+                            {
+                                [Introduce]
+                                int child;
+                            }
 
-            public class MyAspect : TypeAspect
-            {
-                public MyAspect(bool skip)
-                {
-                    this.skip = skip;
-                }
+                            public class MyAspect : TypeAspect
+                            {
+                                public MyAspect(bool skip)
+                                {
+                                    this.skip = skip;
+                                }
+                            
+                                private readonly bool skip;
+                            
+                                [Introduce]
+                                int i;
+                            
+                                public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                                {
+                                    if (skip)
+                                    {
+                                        builder.SkipAspect();
+                                    }
+                            
+                                    builder.Outbound.AddAspect<MyChildAspect>();
+                            
+                                    builder.IntroduceMethod( nameof(Template));
+                                }
+                            
+                                [Template]
+                                void Template() { }
+                            }
 
-                private readonly bool skip;
+                            [MyAspect(skip: false)]
+                            class C1;
 
-                [Introduce]
-                int i;
-
-                public override void BuildAspect(IAspectBuilder<INamedType> builder)
-                {
-                    if (skip)
-                    {
-                        builder.SkipAspect();
-                    }
-
-                    builder.Outbound.AddAspect<MyChildAspect>();
-
-                    builder.Advice.IntroduceMethod(builder.Target, nameof(Template));
-                }
-
-                [Template]
-                void Template() { }
-            }
-
-            [MyAspect(skip: false)]
-            class C1;
-
-            [MyAspect(skip: true)]
-            class C2;
-            """;
+                            [MyAspect(skip: true)]
+                            class C2;
+                            """;
 
         var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
         var projectKey = workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );

@@ -4,6 +4,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplate.NonAsyncMethod_NoInlining
@@ -25,30 +26,31 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplat
     internal class TargetCode
     {
         [Aspect]
-        public Task<int> TaskReturningNonAsync(int a)
+        public Task<int> TaskReturningNonAsync( int a )
         {
-            return Task.FromResult(a);
+            return Task.FromResult( a );
         }
 
         [Aspect]
-        public ValueTask<int> ValueTaskReturningNonAsync(int a)
+        public ValueTask<int> ValueTaskReturningNonAsync( int a )
         {
-            return new ValueTask<int>(0);
+            return new ValueTask<int>( 0 );
         }
 
         [Aspect]
-        public Task<TResult?> GenericTaskReturningNonAsync<TResult, TInput>(TInput x)
+        public Task<TResult?> GenericTaskReturningNonAsync<TResult, TInput>( TInput x )
         {
-            return Task.FromResult(default(TResult));
+            return Task.FromResult( default(TResult) );
         }
 
         [Aspect]
-        public Task<TResult?> GenericConstraintsTaskReturningNonAsync<TResult, TInput>(TInput x)
+        public Task<TResult?> GenericConstraintsTaskReturningNonAsync<TResult, TInput>( TInput x )
             where TResult : IDisposable
             where TInput : IDisposable
         {
             x.Dispose();
-            return Task.FromResult(default(TResult));
+
+            return Task.FromResult( default(TResult) );
         }
     }
 }

@@ -1,11 +1,13 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.SyntaxOrder;
 
 [assembly:
     AspectOrder(
+        AspectOrderDirection.RunTime,
         typeof(Override4Attribute),
         typeof(Override3Attribute),
         typeof(Override2Attribute),
@@ -30,7 +32,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Methods.OfName( "Foo" ).Single(), nameof(Template) );
+            builder.With( builder.Target.Methods.OfName( "Foo" ).Single() ).Override( nameof(Template) );
         }
 
         [Template]
@@ -57,7 +59,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Methods.OfName( "Foo" ).Single(), nameof(Template) );
+            builder.With( builder.Target.Methods.OfName( "Foo" ).Single() ).Override( nameof(Template) );
         }
 
         [Template]
@@ -73,7 +75,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Methods.OfName( "Bar" ).Single(), nameof(Template) );
+            builder.With( builder.Target.Methods.OfName( "Bar" ).Single() ).Override( nameof(Template) );
         }
 
         [Template]
@@ -89,7 +91,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Methods.OfName( "Foo" ).Single(), nameof(Template) );
+            builder.With( builder.Target.Methods.OfName( "Foo" ).Single() ).Override( nameof(Template) );
         }
 
         [Template]

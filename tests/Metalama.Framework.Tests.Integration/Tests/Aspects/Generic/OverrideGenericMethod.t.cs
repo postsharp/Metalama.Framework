@@ -1,7 +1,7 @@
-class TargetCode
+internal class TargetCode
 {
   [Aspect]
-  T Method<T>(T a)
+  private T Method<T>(T a)
   {
     return a;
   }

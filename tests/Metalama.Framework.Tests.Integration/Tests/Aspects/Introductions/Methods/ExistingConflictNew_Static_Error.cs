@@ -1,14 +1,15 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew_Static_Error
 {
     public class IntroductionAttribute : TypeAspect
     {
-
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public static int ExistingMethod()
         {
-            meta.InsertComment("No new keyword, return a constant.");
+            meta.InsertComment( "No new keyword, return a constant." );
+
             return meta.Proceed();
         }
     }

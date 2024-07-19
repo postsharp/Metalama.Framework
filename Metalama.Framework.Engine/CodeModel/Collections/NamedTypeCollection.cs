@@ -9,14 +9,14 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
-        public NamedTypeCollection( NamedType declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
+        public NamedTypeCollection( INamedType declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
             base( declaringType, sourceItems ) { }
 
-        public NamedTypeCollection( ICompilation declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
-            base( declaringType, sourceItems ) { }
+        public NamedTypeCollection( ICompilation declaringCompilation, UpdatableMemberCollection<INamedType> sourceItems ) :
+            base( declaringCompilation, sourceItems ) { }
 
-        public NamedTypeCollection( INamespace declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
-            base( declaringType, sourceItems ) { }
+        public NamedTypeCollection( INamespace declaringNamespace, UpdatableMemberCollection<INamedType> sourceItems ) :
+            base( declaringNamespace, sourceItems ) { }
 
         public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
         {

@@ -4,7 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -101,62 +103,68 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
 
     public object? Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
 
-    private object InvokeDefaultMethod( object?[] args )
+    private DelegateUserExpression InvokeDefaultMethod( object?[] args )
     {
-        SimpleNameSyntax name;
-
-        var receiverInfo = this.GetReceiverInfo();
-
-        if ( this.Member.IsGeneric )
-        {
-            name = GenericName(
-                Identifier( this.GetCleanTargetMemberName() ),
-                TypeArgumentList(
-                    SeparatedList(
-                        this.Member.TypeArguments.SelectAsImmutableArray( t => CurrentGenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
-        }
-        else
-        {
-            name = IdentifierName( this.GetCleanTargetMemberName() );
-        }
-
-        var arguments = this.Member.GetArguments(
-            this.Member.Parameters,
-            TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ),
-            CurrentGenerationContext );
-
-        if ( this.Member.MethodKind == MethodKind.LocalFunction )
-        {
-            if ( receiverInfo.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
+        return new DelegateUserExpression(
+            context =>
             {
-                throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this.Member );
-            }
+                SimpleNameSyntax name;
 
-            return this.CreateInvocationExpression( receiverInfo.ToReceiverExpressionSyntax(), name, arguments, AspectReferenceTargetKind.Self );
-        }
-        else
-        {
-            var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext ) );
+                var receiverInfo = this.GetReceiverInfo( context );
 
-            return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
-        }
+                if ( this.Member.IsGeneric )
+                {
+                    name = GenericName(
+                        Identifier( this.GetCleanTargetMemberName() ),
+                        TypeArgumentList(
+                            SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => context.SyntaxGenerator.Type( t ) ) ) ) );
+                }
+                else
+                {
+                    name = IdentifierName( this.GetCleanTargetMemberName() );
+                }
+
+                var arguments = this.Member.GetArguments(
+                    this.Member.Parameters,
+                    TypedExpressionSyntaxImpl.FromValues( args, context ),
+                    context.SyntaxGenerationContext );
+
+                if ( this.Member.MethodKind == MethodKind.LocalFunction )
+                {
+                    if ( receiverInfo.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
+                    {
+                        throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this.Member );
+                    }
+
+                    return this.CreateInvocationExpression(
+                        receiverInfo.ToReceiverExpressionSyntax(),
+                        name,
+                        arguments,
+                        AspectReferenceTargetKind.Self,
+                        context );
+                }
+                else
+                {
+                    var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context ) );
+
+                    return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self, context );
+                }
+            },
+            (this.Options & InvokerOptions.NullConditional) != 0 ? this.Member.ReturnType.ToNullableType() : this.Member.ReturnType );
     }
 
-    private SyntaxUserExpression CreateInvocationExpression(
+    private ExpressionSyntax CreateInvocationExpression(
         ReceiverExpressionSyntax receiverTypedExpressionSyntax,
         SimpleNameSyntax name,
         ArgumentSyntax[]? arguments,
-        AspectReferenceTargetKind targetKind )
+        AspectReferenceTargetKind targetKind,
+        SyntaxSerializationContext context )
     {
-        ExpressionSyntax expression;
-        IType returnType;
-
         if ( !receiverTypedExpressionSyntax.RequiresNullConditionalAccessMember )
         {
-            returnType = this.Member.ReturnType;
-
             ExpressionSyntax memberAccessExpression =
-                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name );
+                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name )
+                    .WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
 
             // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
             if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
@@ -166,7 +174,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                         receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );
             }
 
-            expression =
+            return
                 arguments != null
                     ? InvocationExpression(
                         memberAccessExpression,
@@ -175,9 +183,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
         }
         else
         {
-            returnType = this.Member.ReturnType.ToNullableType();
-
-            expression =
+            var expression =
                 arguments != null
                     ? ConditionalAccessExpression(
                         receiverTypedExpressionSyntax.Syntax,
@@ -194,13 +200,17 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                 expression = expression.WithAspectReferenceAnnotation(
                     receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );
             }
-        }
 
-        return new SyntaxUserExpression( expression, returnType );
+            return expression;
+        }
     }
 
     public IMethodInvoker With( InvokerOptions options ) => this.Options == options ? this : new MethodInvoker( this.Member, options );
 
     public IMethodInvoker With( object? target, InvokerOptions options = default )
         => this.Target == target && this.Options == options ? this : new MethodInvoker( this.Member, options, target );
+
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this.Member, options, target );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this.InvokeDefaultMethod( args.ToArray<object>() );
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
@@ -10,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Aspects
 {
-    /// <summary>ad
+    /// <summary>
     /// A base aspect that can validate or change the value of fields, properties, indexers, and parameters.
     /// </summary>
     /// <remarks>
@@ -29,6 +30,7 @@ namespace Metalama.Framework.Aspects
     /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
     [Layers( BuildLayer )]
+    [Inheritable]
     public abstract partial class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
         // Build after the default null-named layer so that other aspects can first inspect applications of ContractAspect-derived aspects
@@ -77,6 +79,9 @@ namespace Metalama.Framework.Aspects
 
         private ContractDirection GetEffectiveDirection( IAspectBuilder aspectBuilder )
         {
+            var predecessors = aspectBuilder.AspectInstance.Predecessors;
+            var isInherited = !predecessors.IsDefaultOrEmpty && predecessors[0].Kind == AspectPredecessorKind.Inherited;
+
             var direction = this.GetDefinedDirection( aspectBuilder );
 
             if ( direction == ContractDirection.Default )
@@ -87,10 +92,8 @@ namespace Metalama.Framework.Aspects
                 // have an implicit setter, and this would change the interpretation of the default behavior.
 
                 IDeclaration baseDeclaration;
-                var predecessors = aspectBuilder.AspectInstance.Predecessors;
 
-                if ( aspectBuilder.Target.DeclarationKind is DeclarationKind.Property &&
-                     !predecessors.IsDefaultOrEmpty && predecessors[0].Kind == AspectPredecessorKind.Inherited )
+                if ( aspectBuilder.Target.DeclarationKind is DeclarationKind.Property or DeclarationKind.Indexer && isInherited )
                 {
                     baseDeclaration = predecessors[0].Instance.TargetDeclaration.GetTarget( aspectBuilder.Target.Compilation );
                 }
@@ -100,6 +103,14 @@ namespace Metalama.Framework.Aspects
                 }
 
                 direction = ContractAspectHelper.GetEffectiveDirection( direction, baseDeclaration );
+            }
+
+            // We then need to restrict the direction based on the target declaration.
+            // For example, a read-write base property with a read-only override needs to have the input direction removed.
+            // But do this only for inherited contracts, so that invalid direction is still an error otherwise.
+            if ( isInherited )
+            {
+                direction = direction.Restrict( ContractAspectHelper.GetPossibleDirection( aspectBuilder.Target ) );
             }
 
             // Combine secondary instances if any.
@@ -202,7 +213,7 @@ namespace Metalama.Framework.Aspects
                     // TODO: Use AssertNotNull() extension method instead of `throw` if it can be made accessible.
 
                     this.BuildAspect(
-                        builder.WithTarget(
+                        ((IAspectBuilder) builder).With(
                             parameter.ForCompilation( builder.Target.Compilation ) ?? throw new InvalidOperationException( "Assertion failed." ) ) );
                 }
             }
@@ -232,7 +243,7 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            builder.Advice.AddContract( builder.Target, nameof(this.Validate), direction );
+            builder.AddContract( nameof(this.Validate), direction );
         }
 
         void IAspect<IParameter>.BuildAspect( IAspectBuilder<IParameter> builder )
@@ -250,7 +261,7 @@ namespace Metalama.Framework.Aspects
             {
                 foreach ( var parameter in redirectToParameters )
                 {
-                    this.BuildAspect( builder.WithTarget( parameter ) );
+                    this.BuildAspect( builder.With( parameter ) );
                 }
             }
             else
@@ -296,11 +307,16 @@ namespace Metalama.Framework.Aspects
             }
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder ) { }
+        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
+        {
+            // We don't know the actual direction yet, but we can apply common eligibility rules.
+            BuildEligibilityForDirection( builder, ContractDirection.Default );
+        }
 
         /// <summary>
         /// Populates the <see cref="IEligibilityBuilder"/> for a field, property or indexer when the <see cref="ContractDirection"/> is known.
         /// </summary>
+        [PublicAPI]
         protected static void BuildEligibilityForDirection( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder, ContractDirection direction )
         {
             builder.AddRule( EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction ) );
@@ -309,12 +325,17 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Populates the <see cref="IEligibilityBuilder"/> for a parameter when the <see cref="ContractDirection"/> is known.
         /// </summary>
+        [PublicAPI]
         protected static void BuildEligibilityForDirection( IEligibilityBuilder<IParameter> builder, ContractDirection direction )
         {
             builder.AddRule( EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction ) );
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
+        public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder )
+        {
+            // We don't know the actual direction yet, but we can apply common eligibility rules.
+            BuildEligibilityForDirection( builder, ContractDirection.Default );
+        }
 
         [Template]
         public abstract void Validate( dynamic? value );

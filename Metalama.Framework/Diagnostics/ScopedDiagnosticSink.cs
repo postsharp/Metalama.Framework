@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using System;
+using System.ComponentModel;
 
 namespace Metalama.Framework.Diagnostics;
 
@@ -45,14 +46,18 @@ public readonly struct ScopedDiagnosticSink
     /// <summary>
     /// Reports a diagnostic to the default location of the current <see cref="ScopedDiagnosticSink"/>..
     /// </summary>
-    /// <param name="diagnostic"></param>
     public void Report( IDiagnostic diagnostic ) => this.Sink.Report( diagnostic, this.DefaultTargetLocation, this._source );
 
     /// <summary>
     /// Suppresses a diagnostic from the default declaration of the current <see cref="ScopedDiagnosticSink"/>.
     /// </summary>
-    /// <param name="suppression"></param>
-    public void Suppress( SuppressionDefinition suppression )
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    public void Suppress( SuppressionDefinition suppression ) => this.Suppress( (ISuppression) suppression );
+
+    /// <summary>
+    /// Suppresses a diagnostic from the default declaration of the current <see cref="ScopedDiagnosticSink"/>.
+    /// </summary>
+    public void Suppress( ISuppression suppression )
     {
         this.Sink.Suppress(
             suppression,
@@ -80,7 +85,15 @@ public readonly struct ScopedDiagnosticSink
     /// </summary>
     /// <param name="suppression">The suppression definition, which must be defined as a static field or property.</param>
     /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
-    public void Suppress( SuppressionDefinition suppression, IDeclaration scope ) => this.Sink.Suppress( suppression, scope, this._source );
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    public void Suppress( SuppressionDefinition suppression, IDeclaration scope ) => this.Suppress( (ISuppression) suppression, scope );
+
+    /// <summary>
+    /// Suppresses a diagnostic by specifying the declaration in which the suppression must be effective.
+    /// </summary>
+    /// <param name="suppression">The suppression definition, which must be defined as a static field or property.</param>
+    /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
+    public void Suppress( ISuppression suppression, IDeclaration scope ) => this.Sink.Suppress( suppression, scope, this._source );
 
     /// <summary>
     /// Suggest a code fix without reporting a diagnostic.

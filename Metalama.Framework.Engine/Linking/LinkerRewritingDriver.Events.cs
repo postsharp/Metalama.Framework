@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
-            var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, eventDeclaration );
+            var context = this.IntermediateCompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, eventDeclaration );
 
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
@@ -29,17 +29,16 @@ namespace Metalama.Framework.Engine.Linking
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
-                    members.Add( this.GetEventBackingField( eventDeclaration, symbol, generationContext ) );
+                    members.Add( this.GetEventBackingField( eventDeclaration, symbol, context ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, true ) );
                 }
                 else
                 {
-                    members.Add(
-                        this.GetTrampolineForEvent( eventDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ), generationContext ) );
+                    members.Add( this.GetTrampolineForEvent( eventDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ), context ) );
                 }
 
                 if ( !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
@@ -47,14 +46,14 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && this.ShouldGenerateSourceMember( symbol ) )
                 {
-                    members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext ) );
+                    members.Add( this.GetOriginalImplEvent( eventDeclaration, symbol, context ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && this.ShouldGenerateEmptyMember( symbol ) )
                 {
-                    members.Add( this.GetEmptyImplEvent( eventDeclaration, symbol, generationContext ) );
+                    members.Add( this.GetEmptyImplEvent( eventDeclaration, symbol, context ) );
                 }
 
                 return members;
@@ -64,7 +63,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true ) };
                 }
                 else
                 {
@@ -77,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new MemberDeclarationSyntax[]
                 {
-                    this.GetEventBackingField( eventDeclaration, symbol, generationContext ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )
+                    this.GetEventBackingField( eventDeclaration, symbol, context ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true )
                 };
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
@@ -86,26 +85,26 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[]
                 {
-                    this.GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
-                    this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext )
+                    this.GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), context ),
+                    this.GetOriginalImplEvent( eventDeclaration, symbol, context )
                 };
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, false ) };
             }
             else
             {
                 return new[] { eventDeclaration };
             }
 
-            EventDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
+            EventDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isOverrideOrOverrideTarget )
             {
                 var addAccessorDeclaration = (AccessorDeclarationSyntax) symbol.AddMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
                 var removeAccessorDeclaration = (AccessorDeclarationSyntax) symbol.RemoveMethod.AssertNotNull().GetPrimaryDeclaration().AssertNotNull();
 
-                var transformedAdd = GetLinkedAccessor( semanticKind, addAccessorDeclaration, symbol.AddMethod.AssertNotNull() );
-                var transformedRemove = GetLinkedAccessor( semanticKind, removeAccessorDeclaration, symbol.RemoveMethod.AssertNotNull() );
+                var transformedAdd = GetLinkedAccessor( semanticKind, addAccessorDeclaration, symbol.AddMethod.AssertNotNull(), isOverrideOrOverrideTarget );
+                var transformedRemove = GetLinkedAccessor( semanticKind, removeAccessorDeclaration, symbol.RemoveMethod.AssertNotNull(), isOverrideOrOverrideTarget );
 
                 var (accessorListLeadingTrivia, accessorStartingTrivia, accessorEndingTrivia, accessorListTrailingTrivia) = eventDeclaration switch
                 {
@@ -114,7 +113,7 @@ namespace Metalama.Framework.Engine.Linking
                         accessorList.OpenBraceToken.TrailingTrivia,
                         accessorList.CloseBraceToken.LeadingTrivia,
                         accessorList.CloseBraceToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException( $"Invalid accessor list at '{eventDeclaration.GetLocation()}'." )
+                    _ => throw new AssertionFailedException( $"Invalid accessor list at '{eventDeclaration}'." )
                 };
 
                 return eventDeclaration
@@ -128,14 +127,22 @@ namespace Metalama.Framework.Engine.Linking
             AccessorDeclarationSyntax GetLinkedAccessor(
                 IntermediateSymbolSemanticKind semanticKind,
                 AccessorDeclarationSyntax accessorDeclaration,
-                IMethodSymbol methodSymbol )
+                IMethodSymbol methodSymbol,
+                bool isOverrideOrOverrideTarget )
             {
+                if ( !isOverrideOrOverrideTarget && !this.AnalysisRegistry.HasAnySubstitutions( methodSymbol ) )
+                {
+                    return accessorDeclaration;
+                }
+
+                var semantic = methodSymbol.ToSemantic( semanticKind );
+
                 var linkedBody = this.GetSubstitutedBody(
-                    methodSymbol.ToSemantic( semanticKind ),
+                    semantic,
                     new SubstitutionContext(
                         this,
-                        generationContext,
-                        new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
+                        context,
+                        new InliningContextIdentifier( semantic ) ) );
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.
@@ -149,10 +156,10 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
-                             arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
-                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
+                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( context ),
+                             arrowToken.TrailingTrivia.AddOptionalLineFeed( context ),
+                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( context ), semicolonToken.TrailingTrivia),
+                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration: {accessorDeclaration}" )
                     };
 
                 return accessorDeclaration.PartialUpdate(
@@ -167,33 +174,35 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => generationContext.SyntaxGenerator.FormattedBlock(
+        private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext context )
+            => context.SyntaxGenerator.FormattedBlock(
                 ExpressionStatement(
                     AssignmentExpression(
                         SyntaxKind.AddAssignmentExpression,
                         MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            symbol.IsStatic
-                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                : ThisExpression(),
-                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                symbol.IsStatic
+                                    ? context.SyntaxGenerator.Type( symbol.ContainingType )
+                                    : ThisExpression(),
+                                IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) )
+                            .WithSimplifierAnnotationIfNecessary( context ),
                         IdentifierName( "value" ) ),
-                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( generationContext.ElasticEndOfLineTrivia ) ) ) );
+                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( context.ElasticEndOfLineTrivia ) ) ) );
 
-        private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => generationContext.SyntaxGenerator.FormattedBlock(
+        private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext context )
+            => context.SyntaxGenerator.FormattedBlock(
                 ExpressionStatement(
                     AssignmentExpression(
                         SyntaxKind.SubtractAssignmentExpression,
                         MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            symbol.IsStatic
-                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                : ThisExpression(),
-                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                symbol.IsStatic
+                                    ? context.SyntaxGenerator.Type( symbol.ContainingType )
+                                    : ThisExpression(),
+                                IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) )
+                            .WithSimplifierAnnotationIfNecessary( context ),
                         IdentifierName( "value" ) ),
-                    Token( default, SyntaxKind.SemicolonToken, generationContext.ElasticEndOfLineTriviaList ) ) );
+                    Token( default, SyntaxKind.SemicolonToken, context.ElasticEndOfLineTriviaList ) ) );
 
         private EventFieldDeclarationSyntax GetEventBackingField(
             EventDeclarationSyntax eventDeclaration,
@@ -280,7 +289,7 @@ namespace Metalama.Framework.Engine.Linking
         private MemberDeclarationSyntax GetOriginalImplEvent(
             EventDeclarationSyntax @event,
             IEventSymbol symbol,
-            SyntaxGenerationContext generationContext )
+            SyntaxGenerationContext context )
         {
             var existingAccessorList = @event.AccessorList.AssertNotNull();
 
@@ -296,7 +305,7 @@ namespace Metalama.Framework.Engine.Linking
                                         {
                                             SyntaxKind.AddAccessorDeclaration => symbol.AddMethod.AssertNotNull(),
                                             SyntaxKind.RemoveAccessorDeclaration => symbol.RemoveMethod.AssertNotNull(),
-                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
+                                            _ => throw new AssertionFailedException( $"Unexpected kind: {a}" )
                                         } ) ) ) )
                     .WithSourceCodeAnnotation();
 
@@ -305,16 +314,16 @@ namespace Metalama.Framework.Engine.Linking
                 transformedAccessorList.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ),
-                generationContext );
+                context );
 
             AccessorDeclarationSyntax TransformAccessor( AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol accessorSymbol )
             {
                 var semantic = accessorSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-                var context = new InliningContextIdentifier( semantic );
+                var inliningContext = new InliningContextIdentifier( semantic );
 
                 var substitutedBody =
                     accessorDeclaration.Body != null
-                        ? (BlockSyntax) RewriteBody( accessorDeclaration.Body, accessorSymbol, new SubstitutionContext( this, generationContext, context ) )
+                        ? (BlockSyntax) RewriteBody( accessorDeclaration.Body, accessorSymbol, new SubstitutionContext( this, context, inliningContext ) )
                         : null;
 
                 var substitutedExpressionBody =
@@ -322,7 +331,7 @@ namespace Metalama.Framework.Engine.Linking
                         ? (ArrowExpressionClauseSyntax) RewriteBody(
                             accessorDeclaration.ExpressionBody,
                             accessorSymbol,
-                            new SubstitutionContext( this, generationContext, context ) )
+                            new SubstitutionContext( this, context, inliningContext ) )
                         : null;
 
                 return accessorDeclaration.PartialUpdate( body: substitutedBody, expressionBody: substitutedExpressionBody );
@@ -350,7 +359,7 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     SyntaxKind.AddAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.AddMethod.AssertNotNull(), a ),
                                     SyntaxKind.RemoveAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.RemoveMethod.AssertNotNull(), a ),
-                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" )
+                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a}" )
                                 } ) ) );
 
             return
@@ -422,7 +431,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() );
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() )
+                        .WithSimplifierAnnotationIfNecessary( context );
                 }
             }
 

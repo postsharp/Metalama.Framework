@@ -24,13 +24,14 @@ internal struct RecursionGuard
 #endif
 
     private int _recursionDepth;
-    private ConcurrentStack<int>? _threadIdStack;
+
 #if DEBUG
+    private ConcurrentStack<int>? _threadIdStack;
     private volatile bool _failed;
 #endif
 
-    // InsufficientExecutionStackException can be observed in SafeSyntaxWalker when this is > 900, so set it to a value that is significantly smaller than that, to be safe.
-    private const int _maxRecursionDepth = 750;
+    // InsufficientExecutionStackException can be observed in SafeSyntaxWalker when this is 750, so set it to a value that is smaller than that.
+    private const int _maxRecursionDepth = 700;
     private const int _maxTasks = 4;
 
     public RecursionGuard( object owner )

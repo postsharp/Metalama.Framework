@@ -1,6 +1,6 @@
-class TargetCode
+internal class TargetCode
 {
-  class Nullable
+  private class Nullable
   {
     private global::System.String? _field = null;
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicParameterContract.Aspect]
@@ -45,7 +45,7 @@ class TargetCode
       }
     }
     [return: Aspect]
-    string? Method([Aspect] string? arg)
+    private string? Method([Aspect] string? arg)
     {
       arg?.ToString();
       arg!.ToString();
@@ -56,7 +56,7 @@ class TargetCode
       return returnValue;
     }
   }
-  class NotNullable
+  private class NotNullable
   {
     private global::System.String _field = null !;
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicParameterContract.Aspect]
@@ -101,7 +101,7 @@ class TargetCode
       }
     }
     [return: Aspect]
-    string Method([Aspect] string arg)
+    private string Method([Aspect] string arg)
     {
       arg.ToString();
       arg.ToString();
@@ -113,7 +113,7 @@ class TargetCode
     }
   }
 #nullable disable
-  class Oblivious
+  private class Oblivious
   {
     private global::System.String _field = null;
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicParameterContract.Aspect]
@@ -158,7 +158,7 @@ class TargetCode
       }
     }
     [return: Aspect]
-    string Method([Aspect] string arg)
+    private string Method([Aspect] string arg)
     {
       arg?.ToString();
       arg.ToString();

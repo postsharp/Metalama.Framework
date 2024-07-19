@@ -29,7 +29,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             // Initial compilation.
             const string code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Validation;
 using Metalama.Framework.Code;
 
@@ -65,7 +66,8 @@ public class C {}
             using var testContext = this.CreateTestContext();
 
             const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Validation;
 using Metalama.Framework.Code;
 
@@ -153,7 +155,8 @@ public class Aspect2 : TypeAspect
             using var factory = new TestDesignTimeAspectPipelineFactory( domain, options );
 
             var code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 public class Aspect : TypeAspect, IInheritedAspect
 {
@@ -239,7 +242,8 @@ public interface I {}
         private static string GetAspectRepositoryValidatorCode( string suffix )
             => $$"""
                  using System;
-                 using Metalama.Framework.Aspects;
+                 using Metalama.Framework.Advising;
+                 using Metalama.Framework.Aspects; 
                  using Metalama.Framework.Code;
                  using Metalama.Framework.Validation;
 
@@ -284,7 +288,7 @@ public interface I {}
                                           static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
                                           public override void AmendProject( IProjectAmender amender )
                                           {
-                                              amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                              amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
                                           }
                                       
                                           private void ValidateReference( in ReferenceValidationContext context )
@@ -394,7 +398,8 @@ public interface I {}
 
             const string aspectCode = """
                                       using System;
-                                      using Metalama.Framework.Aspects;
+                                      using Metalama.Framework.Advising;
+                                      using Metalama.Framework.Aspects; 
                                       using Metalama.Framework.Code;
                                       using Metalama.Framework.Validation;
                                       using Metalama.Framework.Diagnostics;
@@ -479,7 +484,8 @@ public interface I {}
 
             const string aspectCode = """
                                       using System;
-                                      using Metalama.Framework.Aspects;
+                                      using Metalama.Framework.Advising;
+                                      using Metalama.Framework.Aspects; 
                                       using Metalama.Framework.Code;
                                       using Metalama.Framework.Validation;
                                       using Metalama.Framework.Diagnostics;
@@ -573,7 +579,7 @@ public interface I {}
                                              static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
                                              public override void AmendProject( IProjectAmender amender )
                                              {
-                                                 amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                                 amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
                                              }
                                          
                                              private void ValidateReference( in ReferenceValidationContext context )
@@ -641,7 +647,7 @@ public interface I {}
                                              static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
                                              public override void AmendProject( IProjectAmender amender )
                                              {
-                                                 amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                                 amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
                                              }
                                          
                                              private void ValidateReference( in ReferenceValidationContext context )

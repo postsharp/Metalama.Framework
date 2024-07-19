@@ -1,11 +1,11 @@
 [MyInheritableAspectWhichIntroducesAMethod]
-class Foo<T>
+internal class Foo<T>
 {
   public void M()
   {
   }
 }
-class Bar : Foo<int>
+internal class Bar : Foo<int>
 {
   private void CallM()
   {

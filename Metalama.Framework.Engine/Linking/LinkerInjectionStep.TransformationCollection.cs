@@ -2,12 +2,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
@@ -28,11 +28,13 @@ internal sealed partial class LinkerInjectionStep
     private sealed class TransformationCollection
     {
         private readonly TransformationLinkerOrderComparer _comparer;
-        private readonly ConcurrentBag<InjectedMember> _injectedMembers;
+        private readonly ConcurrentQueue<InjectedMember> _injectedMembers;
         private readonly ConcurrentDictionary<InsertPosition, List<InjectedMember>> _injectedMembersByInsertPosition;
         private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeDeclaration;
+        private readonly ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeBuilder;
         private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
+        private readonly HashSet<IPropertyBuilder> _autoPropertyWithSynthesizedSetterBuilders;
         private readonly ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
         private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
@@ -48,6 +50,8 @@ internal sealed partial class LinkerInjectionStep
 
         private readonly HashSet<ITransformation> _transformationsCausingAuxiliaryOverrides;
 
+        private readonly HashSet<SyntaxTree> _introducedSyntaxTrees;
+
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
 
         public IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> BuilderToTransformationMap => this._builderToTransformationMap;
@@ -60,14 +64,19 @@ internal sealed partial class LinkerInjectionStep
         // ReSharper disable once InconsistentlySynchronizedField
         public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
 
+        // ReSharper disable once InconsistentlySynchronizedField
+        public ISet<SyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees;
+
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
-            this._injectedMembers = new ConcurrentBag<InjectedMember>();
+            this._injectedMembers = new ConcurrentQueue<InjectedMember>();
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
             this._injectedInterfacesByTargetTypeDeclaration = new ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>>();
+            this._injectedInterfacesByTargetTypeBuilder = new ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>>();
             this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
             this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
+            this._autoPropertyWithSynthesizedSetterBuilders = new HashSet<IPropertyBuilder>();
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>>();
             this._nodesWithModifiedAttributes = new HashSet<SyntaxNode>();
             this._symbolMemberLevelTransformations = new ConcurrentDictionary<SyntaxNode, MemberLevelTransformations>();
@@ -84,6 +93,7 @@ internal sealed partial class LinkerInjectionStep
 
             this._lateTypeLevelTransformations = new ConcurrentDictionary<INamedType, LateTypeLevelTransformations>( finalCompilationModel.Comparers.Default );
             this._transformationsCausingAuxiliaryOverrides = new HashSet<ITransformation>();
+            this._introducedSyntaxTrees = new HashSet<SyntaxTree>();
         }
 
         public void AddInjectedMember( InjectedMember injectedMember )
@@ -102,7 +112,7 @@ internal sealed partial class LinkerInjectionStep
             // Injected member should always be root type member (not an accessor).
             Invariant.Assert( injectedMember.Declaration is not { ContainingDeclaration: IMember } );
 
-            this._injectedMembers.Add( injectedMember );
+            this._injectedMembers.Enqueue( injectedMember );
 
             var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => new List<InjectedMember>() );
 
@@ -120,21 +130,29 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInjectedInterface( IInjectInterfaceTransformation injectInterfaceTransformation, BaseTypeSyntax injectedInterface )
+        public void AddInjectedInterface( BaseTypeDeclarationSyntax targetType, LinkerInjectedInterface injectedInterface )
         {
-            var targetTypeSymbol = ((INamedType) injectInterfaceTransformation.TargetDeclaration).GetSymbol();
-
-            // Heuristic: select the file with the shortest path.
-            var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();
-
             var interfaceList =
                 this._injectedInterfacesByTargetTypeDeclaration.GetOrAdd(
-                    targetTypeDecl,
+                    targetType,
                     _ => new List<LinkerInjectedInterface>() );
 
             lock ( interfaceList )
             {
-                interfaceList.Add( new LinkerInjectedInterface( injectInterfaceTransformation, injectedInterface ) );
+                interfaceList.Add( injectedInterface );
+            }
+        }
+
+        public void AddInjectedInterface( INamedTypeBuilder targetTypeBuilder, LinkerInjectedInterface injectedInterface )
+        {
+            var interfaceList =
+                this._injectedInterfacesByTargetTypeBuilder.GetOrAdd(
+                    targetTypeBuilder,
+                    _ => new List<LinkerInjectedInterface>() );
+
+            lock ( interfaceList )
+            {
+                interfaceList.Add( injectedInterface );
             }
         }
 
@@ -145,6 +163,16 @@ internal sealed partial class LinkerInjectionStep
             lock ( this._autoPropertyWithSynthesizedSetterSyntax )
             {
                 this._autoPropertyWithSynthesizedSetterSyntax.Add( declaration );
+            }
+        }
+
+        public void AddAutoPropertyWithSynthesizedSetter( IPropertyBuilder property )
+        {
+            Invariant.Assert( property is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } );
+
+            lock ( this._autoPropertyWithSynthesizedSetterBuilders )
+            {
+                this._autoPropertyWithSynthesizedSetterBuilders.Add( property );
             }
         }
 
@@ -159,7 +187,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInsertedStatements( IMethodBase targetMethod, IReadOnlyList<InsertedStatement> statements )
+        public void AddInsertedStatements( IMethodBase targetMethod, IEnumerable<InsertedStatement> statements )
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
@@ -184,7 +212,7 @@ internal sealed partial class LinkerInjectionStep
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"{removedSyntax.Kind()} is not supported removed syntax." );
+                    throw new AssertionFailedException( $"Not supported removed syntax: {removedSyntax}" );
             }
         }
 
@@ -216,9 +244,13 @@ internal sealed partial class LinkerInjectionStep
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
 
         // ReSharper disable once InconsistentlySynchronizedField
+        public bool IsAutoPropertyWithSynthesizedSetter( IPropertyBuilder propertyBuilder )
+            => this._autoPropertyWithSynthesizedSetterBuilders.Contains( propertyBuilder );
+
+        // ReSharper disable once InconsistentlySynchronizedField
         public bool IsNodeWithModifiedAttributes( SyntaxNode node ) => this._nodesWithModifiedAttributes.Contains( node );
 
-        public IReadOnlyList<InjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
+        public IEnumerable<InjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
         {
             if ( this._injectedMembersByInsertPosition.TryGetValue( position, out var injectedMembers ) )
             {
@@ -234,6 +266,18 @@ internal sealed partial class LinkerInjectionStep
         public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )
         {
             if ( this._injectedInterfacesByTargetTypeDeclaration.TryGetValue( typeDeclaration, out var interfaceList ) )
+            {
+                interfaceList.Sort( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
+
+                return interfaceList;
+            }
+
+            return Array.Empty<LinkerInjectedInterface>();
+        }
+
+        public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeBuilder( INamedTypeBuilder typeBuilder )
+        {
+            if ( this._injectedInterfacesByTargetTypeBuilder.TryGetValue( typeBuilder, out var interfaceList ) )
             {
                 interfaceList.Sort( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
 
@@ -272,12 +316,12 @@ internal sealed partial class LinkerInjectionStep
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
-            await concurrentTaskRunner.RunInParallelAsync(
+            await concurrentTaskRunner.RunConcurrentlyAsync(
                 this._introductionMemberLevelTransformations.Values,
                 t => t.Sort(),
                 cancellationToken );
 
-            await concurrentTaskRunner.RunInParallelAsync(
+            await concurrentTaskRunner.RunConcurrentlyAsync(
                 this._symbolMemberLevelTransformations.Values,
                 t => t.Sort(),
                 cancellationToken );
@@ -546,5 +590,13 @@ internal sealed partial class LinkerInjectionStep
                     transformation.OrderWithinPipelineStepAndType,
                     transformation.OrderWithinPipelineStepAndTypeAndAspectInstance )
                 : new MemberLayerIndex( 0, 0, 0 );
+
+        public void AddIntroducedSyntaxTree( SyntaxTree transformedSyntaxTree )
+        {
+            lock ( this._introducedSyntaxTrees )
+            {
+                this._introducedSyntaxTrees.Add( transformedSyntaxTree );
+            }
+        }
     }
 }

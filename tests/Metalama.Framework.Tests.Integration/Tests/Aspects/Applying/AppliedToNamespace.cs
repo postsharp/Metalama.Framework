@@ -1,10 +1,11 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Applying.AppliedToNamespace;
 
-[assembly: AspectOrder( typeof(MyTypeAspect), typeof(MyNamespaceAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(MyTypeAspect), typeof(MyNamespaceAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Applying.AppliedToNamespace;
 
@@ -12,7 +13,7 @@ public class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Outbound.AddAspect<MyNamespaceAspect>();
+        amender.AddAspect<MyNamespaceAspect>();
     }
 }
 

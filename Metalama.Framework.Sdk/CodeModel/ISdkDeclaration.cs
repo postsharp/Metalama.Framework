@@ -17,5 +17,10 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Roslyn compilation than the one provided to the aspect weaver.
         /// </summary>
         ISymbol? Symbol { get; }
+        
+        /// <summary>
+        /// Gets the Roslyn <see cref="Location"/> of the declaration, to emit diagnostics.
+        /// </summary>
+        Location? DiagnosticLocation { get; }
     }
 }

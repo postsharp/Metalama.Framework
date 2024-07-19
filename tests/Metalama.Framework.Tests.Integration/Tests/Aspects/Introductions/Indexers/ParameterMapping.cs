@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.ParameterMapping
@@ -11,21 +12,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Par
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
-                new[] {(typeof(string), "y"), (typeof(int), "x")},
+            builder.IntroduceIndexer(
+                new[] { ( typeof(string), "y" ), ( typeof(int), "x" ) },
                 nameof(GetTemplate),
                 nameof(SetTemplate) );
         }
 
         [Template]
-        public int GetTemplate(string x, int y)
+        public int GetTemplate( string x, int y )
         {
             return x.Length + y;
         }
 
         [Template]
-        public void SetTemplate(string x, int y, int z)
+        public void SetTemplate( string x, int y, int z )
         {
             var q = x.Length + y + z;
         }

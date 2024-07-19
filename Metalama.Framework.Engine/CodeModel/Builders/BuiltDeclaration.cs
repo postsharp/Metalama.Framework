@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
@@ -18,10 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// </summary>
 internal abstract class BuiltDeclaration : BaseDeclaration
 {
-    protected BuiltDeclaration( CompilationModel compilation, IDeclarationBuilder builder )
+    protected BuiltDeclaration( CompilationModel compilation )
     {
         this.Compilation = compilation;
-        _ = builder;
     }
 
     public override CompilationModel Compilation { get; }
@@ -40,7 +38,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     public override IDeclaration? ContainingDeclaration
         => this.Compilation.Factory.GetDeclaration( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
 
-    public override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
+    public sealed override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
 
     [Memo]
     public override IAttributeCollection Attributes
@@ -60,7 +58,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
     public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
-    public sealed override bool IsImplicitlyDeclared => false;
+    public override bool IsImplicitlyDeclared => false;
 
     public override bool Equals( IDeclaration? other )
     {

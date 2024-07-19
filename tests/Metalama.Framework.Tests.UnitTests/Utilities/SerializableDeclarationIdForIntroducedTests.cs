@@ -16,7 +16,8 @@ public sealed class SerializableDeclarationIdForIntroducedTests : UnitTestClass
     public void TestAllDeclarations()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             """ +
 #if !ROSLYN_4_4_0_OR_GREATER
                             """
@@ -40,7 +41,7 @@ public sealed class SerializableDeclarationIdForIntroducedTests : UnitTestClass
                               [Introduce]
                               ~Aspect() {}
                             }
-                            
+
                             """ +
 #if !ROSLYN_4_4_0_OR_GREATER
                             """

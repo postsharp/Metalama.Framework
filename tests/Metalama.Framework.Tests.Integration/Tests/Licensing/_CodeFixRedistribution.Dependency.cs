@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
@@ -8,13 +9,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixRedistribu
 
 public class SuggestMyAttributeRedistributableAttribute : MethodAspect
 {
-    private static DiagnosticDefinition _diag = new("MY001", Severity.Warning, "Add some attribute");
+    private static DiagnosticDefinition _diag = new( "MY001", Severity.Warning, "Add some attribute" );
 
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Diagnostics.Report(_diag.WithCodeFixes(CodeFixFactory.AddAttribute(builder.Target, typeof(MyAttribute))));
+        builder.Diagnostics.Report( _diag.WithCodeFixes( CodeFixFactory.AddAttribute( builder.Target, typeof(MyAttribute) ) ) );
     }
 }
 

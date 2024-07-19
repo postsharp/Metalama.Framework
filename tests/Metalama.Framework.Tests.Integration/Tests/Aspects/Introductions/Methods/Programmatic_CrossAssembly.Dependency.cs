@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,53 +7,48 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
 {
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(Template),
                 buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_Parameters";
-                    introduced.AddParameter("x", typeof(int));
-                    introduced.AddParameter("y", typeof(int));
-                });
+                    introduced.AddParameter( "x", typeof(int) );
+                    introduced.AddParameter( "y", typeof(int) );
+                } );
 
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(Template),
                 buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_ReturnType";
-                    introduced.ReturnType = TypeFactory.GetType(typeof(int));
-                });
+                    introduced.ReturnType = TypeFactory.GetType( typeof(int) );
+                } );
 
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(Template),
                 buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_Accessibility";
                     introduced.Accessibility = Accessibility.Private;
-                });
+                } );
 
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(Template),
                 buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_IsStatic";
                     introduced.IsStatic = true;
-                });
+                } );
 
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(Template),
                 buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_IsVirtual";
                     introduced.IsVirtual = true;
-                });
+                } );
 
             // TODO: Other members.
         }
@@ -60,7 +56,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
 
             return meta.Proceed();
         }

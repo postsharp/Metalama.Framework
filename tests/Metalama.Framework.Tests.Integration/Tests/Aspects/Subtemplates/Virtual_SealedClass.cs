@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtual_SealedClass;
@@ -10,16 +11,16 @@ internal sealed class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("virtual method");
+        Console.WriteLine( "virtual method" );
 
         return meta.Proceed();
     }
 
     public override async Task<dynamic?> OverrideAsyncMethod()
     {
-        Console.WriteLine("normal template");
+        Console.WriteLine( "normal template" );
 
-        meta.InvokeTemplate(nameof(OverrideMethod));
+        meta.InvokeTemplate( nameof(OverrideMethod) );
 
         throw new Exception();
     }

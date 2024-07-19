@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Properties.IntroduceManyIntoDeclaringType_Override
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Introductions.Properties.
     {
         [Aspect]
         private void M() { }
-        
+
         [Aspect]
         private void M2() { }
     }

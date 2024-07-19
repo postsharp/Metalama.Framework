@@ -1,10 +1,11 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.ExistingConflictIgnore
-{ 
+{
     public class IntroductionAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Ignore)]
+        [Introduce( WhenExists = OverrideStrategy.Ignore )]
         public int ExistingField;
     }
 
@@ -15,7 +16,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Exist
 
     // <target>
     [Introduction]
-    internal class TargetClass : BaseClass
-    {
-    }
+    internal class TargetClass : BaseClass { }
 }

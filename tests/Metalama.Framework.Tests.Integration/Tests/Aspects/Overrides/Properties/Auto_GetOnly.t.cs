@@ -150,12 +150,12 @@ internal class TargetClass : BaseClass
   }
   public TargetClass()
   {
-    this.Property = 27;
-    this.InitializerProperty = 27;
-    this.AbstractBaseProperty_Override = 27;
-    this.AbstractBaseInitializerProperty_Override = 27;
-    this.VirtualBaseProperty_Override = 27;
-    this.VirtualBaseInitializerProperty_Override = 27;
+    Property = 27;
+    InitializerProperty = 27;
+    AbstractBaseProperty_Override = 27;
+    AbstractBaseInitializerProperty_Override = 27;
+    VirtualBaseProperty_Override = 27;
+    VirtualBaseInitializerProperty_Override = 27;
   }
   static TargetClass()
   {

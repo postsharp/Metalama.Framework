@@ -13,9 +13,11 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
-    internal sealed class FabricInstance : IFabricInstance, IAspectPredecessorImpl
+    internal sealed class FabricInstance : IFabricInstanceInternal, IAspectPredecessorImpl
     {
         public FabricDriver Driver { get; }
+
+        public string FabricTypeFullName => this.Driver.FabricTypeFullName;
 
         public ValidatorDriverFactory ValidatorDriverFactory { get; }
 
@@ -43,5 +45,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public Location? GetDiagnosticLocation( Compilation compilation ) => this.Driver.DiagnosticLocation;
 
         int IAspectPredecessor.PredecessorDegree => 0;
+
+        ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
     }
 }

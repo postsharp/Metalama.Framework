@@ -1,5 +1,7 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaFreePersonal)
+﻿#if TEST_OPTIONS
+// @LicenseKey(MetalamaFreePersonal)
 // @Include(_AspectWeaver.cs);
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.SdkDisallowedByFree;
 

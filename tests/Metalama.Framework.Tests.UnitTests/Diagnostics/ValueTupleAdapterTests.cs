@@ -10,7 +10,13 @@ namespace Metalama.Framework.Tests.UnitTests.Diagnostics
         [Fact]
         public void TestValueTupleAdapter()
         {
-            Assert.Equal( new object[] { 1, "2" }, ValueTupleAdapter.ToArray( (1, "2") ) );
+            Assert.Equal( [1, "2"], ValueTupleAdapter.ToArray( (1, "2") ) );
+
+            Assert.Equal( [1, "2", 3, 4, 5, 6, 7, 8, 9, 10], ValueTupleAdapter.ToArray( (1, "2", 3, 4, 5, 6, 7, 8, 9, 10) ) );
+
+            Assert.Equal(
+                [1, "2", 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
+                ValueTupleAdapter.ToArray( (1, "2", 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17) ) );
         }
     }
 }

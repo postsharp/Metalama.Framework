@@ -26,6 +26,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -98,12 +99,12 @@ internal sealed class AspectDriver : IAspectDriver
 
             foreach ( var options in optionList )
             {
-                declaration.GetCompilationModel().HierarchicalOptionsManager.SetAspectOptions( declaration, options );
+                declaration.GetCompilationModel().HierarchicalOptionsManager.AssertNotNull().SetAspectOptions( declaration, options );
             }
         }
     }
 
-    public AspectInstanceResult ExecuteAspect(
+    public Task<AspectInstanceResult> ExecuteAspectAsync(
         IAspectInstanceInternal aspectInstance,
         string? layer,
         CompilationModel initialCompilationRevision,
@@ -131,7 +132,7 @@ internal sealed class AspectDriver : IAspectDriver
             _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
         };
 
-        AspectInstanceResult EvaluateAspectImpl<T>( T targetDeclaration )
+        async Task<AspectInstanceResult> EvaluateAspectImpl<T>( T targetDeclaration )
             where T : class, IDeclaration
         {
             if ( aspectInstance.IsSkipped )
@@ -187,7 +188,9 @@ internal sealed class AspectDriver : IAspectDriver
                 pipelineConfiguration.CodeFixFilter,
                 this._codeFixAvailability );
 
-            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+            // This is used for compilation aspects.
+            // Knowing that the aspect is applied to a compilation is not particularly useful when we want to understand dependencies between source files.
+            var predecessorTrees = aspectInstance.PredecessorTreeClosure;
 
             var buildAspectExecutionContext = new UserCodeExecutionContext(
                 serviceProvider,
@@ -196,7 +199,10 @@ internal sealed class AspectDriver : IAspectDriver
                 new AspectLayerId( this._aspectClass ),
                 initialCompilationRevision,
                 targetDeclaration,
+                predecessorTrees,
                 throwOnUnsupportedDependencies: true );
+
+            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
 
             // Apply options.
             ApplyOptions( aspectInstance, targetDeclaration, diagnosticSink, userCodeInvoker, buildAspectExecutionContext );
@@ -212,10 +218,12 @@ internal sealed class AspectDriver : IAspectDriver
                 pipelineStepIndex,
                 indexWithinType );
 
-            var adviceFactory = new AdviceFactory(
+            var adviceFactory = new AdviceFactory<T>(
+                targetDeclaration,
                 adviceFactoryState,
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                layer );
+                layer,
+                explicitlyImplementedInterfaceType: null );
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
@@ -234,7 +242,7 @@ internal sealed class AspectDriver : IAspectDriver
 
             var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
 
-            adviceFactoryState.AspectBuilder = aspectBuilder;
+            adviceFactoryState.AspectBuilderState = aspectBuilderState;
 
             if ( !userCodeInvoker
                     .TryInvoke(
@@ -284,7 +292,12 @@ internal sealed class AspectDriver : IAspectDriver
                     diagnosticSink.Reset();
 
                     var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources );
-                    validationRunner.RunDeclarationValidators( initialCompilationRevision, CompilationModelVersion.Current, diagnosticSink );
+
+                    await validationRunner.RunDeclarationValidatorsAsync(
+                        initialCompilationRevision,
+                        CompilationModelVersion.Current,
+                        diagnosticSink,
+                        cancellationToken );
 
                     if ( !diagnosticSink.IsEmpty )
                     {

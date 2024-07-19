@@ -29,14 +29,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [Template]
         public void WitnessTemplate(
             [CompileTime] IReadOnlyCollection<IInterfaceImplementationResult> types,
-            [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult> members )
+            [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult>? members )
         {
             foreach (var type in types)
             {
                 Console.WriteLine( $"InterfaceType: {type.InterfaceType}, Action: {type.Outcome}" );
             }
 
-            foreach (var member in members)
+            foreach (var member in members ?? Array.Empty<IInterfaceMemberImplementationResult>())
             {
                 Console.WriteLine( $"Member: {member.InterfaceMember}, Action: {member.Outcome}, Target: {member.TargetMember}" );
             }

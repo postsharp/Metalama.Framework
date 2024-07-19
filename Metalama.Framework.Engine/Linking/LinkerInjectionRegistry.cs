@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
@@ -51,7 +52,7 @@ internal sealed class LinkerInjectionRegistry
         IConcurrentTaskRunner concurrentTaskRunner,
         CancellationToken cancellationToken )
     {
-        ConcurrentBag<ISymbol> overrideTargets;
+        ConcurrentQueue<ISymbol> overrideTargets;
         ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
         ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
         ConcurrentDictionary<ISymbol, InjectedMember> symbolToInjectedMemberMap;
@@ -69,7 +70,7 @@ internal sealed class LinkerInjectionRegistry
         this._builderToTransformationMap = builderToTransformationMap;
         this._introducedParametersByTargetDeclaration = introducedParametersByTargetDeclaration;
 
-        this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
+        this._overrideTargets = overrideTargets = new ConcurrentQueue<ISymbol>();
 
         var auxiliarySourceMemberMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
 
@@ -170,7 +171,7 @@ internal sealed class LinkerInjectionRegistry
         }
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-        concurrentTaskRunner.RunInParallelAsync( this._injectedMembers, ProcessInjectedMember, cancellationToken ).Wait( cancellationToken );
+        concurrentTaskRunner.RunConcurrentlyAsync( this._injectedMembers, ProcessInjectedMember, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
         void ProcessOverride( KeyValuePair<IDeclaration, List<ISymbol>> value )
@@ -185,7 +186,7 @@ internal sealed class LinkerInjectionRegistry
 
             overrides.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
 
-            overrideTargets.Add( overrideTargetSymbol );
+            overrideTargets.Enqueue( overrideTargetSymbol );
             overrideMap.TryAdd( overrideTargetSymbol, overrides );
 
             foreach ( var overrideSymbol in overrides )
@@ -195,7 +196,7 @@ internal sealed class LinkerInjectionRegistry
         }
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-        concurrentTaskRunner.RunInParallelAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
+        concurrentTaskRunner.RunConcurrentlyAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
         ISymbol GetCanonicalSymbolForInjectedMember( InjectedMember injectedMember )
@@ -569,6 +570,6 @@ internal sealed class LinkerInjectionRegistry
 
         var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
-        return injectedMember?.Transformation?.ParentAdvice.Aspect.AspectClass;
+        return injectedMember?.Transformation?.ParentAdvice.AspectInstance.AspectClass;
     }
 }

@@ -81,6 +81,7 @@ public sealed class SyntaxGenerationContext
     public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
 
     // used for debug assert
+    // ReSharper disable once UnusedMember.Global
     internal bool Equals( SyntaxGenerationContext? other )
         => other != null &&
            this.CompilationContext == other.CompilationContext &&

@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -16,50 +16,43 @@ public sealed class TestAspect : TypeAspect
     public string ErrorMessage { get; set; }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
-            AttributeConstruction.Create(
-                ((INamedType)TypeFactory.GetType(typeof(TestAttribute))).Constructors.Single()),
-            OverrideStrategy.Override);
+        builder.IntroduceAttribute(
+            AttributeConstruction.Create( ( (INamedType)TypeFactory.GetType( typeof(TestAttribute) ) ).Constructors.Single() ),
+            OverrideStrategy.Override );
 
         foreach (var property in builder.Target.FieldsAndProperties)
         {
-            builder.Advice.IntroduceAttribute(
-                property,
-                AttributeConstruction.Create(
-                    ((INamedType)TypeFactory.GetType(typeof(TestAttribute))).Constructors.Single() ),
-                OverrideStrategy.Override);
+            builder.With( property )
+                .IntroduceAttribute(
+                    AttributeConstruction.Create( ( (INamedType)TypeFactory.GetType( typeof(TestAttribute) ) ).Constructors.Single() ),
+                    OverrideStrategy.Override );
         }
     }
 }
 
-public class ExistingAttribute : Attribute
-{
-}
+public class ExistingAttribute : Attribute { }
 
-public class TestAttribute : Attribute
-{
-}
+public class TestAttribute : Attribute { }
 
-partial class TestTypes
+internal partial class TestTypes
 {
     private class MyFabric : TypeFabric
     {
-        public override void AmendType(ITypeAmender amender)
+        public override void AmendType( ITypeAmender amender )
         {
-            amender.Outbound.SelectMany(t => t.NestedTypes).AddAspect<TestAspect>();
+            amender.SelectMany( t => t.Types ).AddAspect<TestAspect>();
         }
     }
 }
 
 // <target>
-partial class TestTypes
+internal partial class TestTypes
 {
     /// <summary>
     /// </summary>
-    class C
+    private class C
     {
         /// <summary>
         /// </summary>
@@ -104,7 +97,7 @@ partial class TestTypes
 
     /// <summary>
     /// </summary>
-    enum E
+    private enum E
     {
         /// <summary>
         /// </summary>
@@ -124,6 +117,6 @@ partial class TestTypes
         /// </summary>
         [Existing]
         [Test]
-        Value4,
+        Value4
     }
 }

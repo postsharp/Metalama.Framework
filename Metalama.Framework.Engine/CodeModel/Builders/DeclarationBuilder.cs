@@ -38,9 +38,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     protected T Translate<T>( T compilationElement )
         where T : class, ICompilationElement
-        => compilationElement.ForCompilation( this.Compilation );
+        => compilationElement.ForCompilation( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
 
-    // TODO: implement
     protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
     public Advice ParentAdvice { get; }
@@ -107,6 +106,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
     public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 

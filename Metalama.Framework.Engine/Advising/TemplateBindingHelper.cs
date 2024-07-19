@@ -66,7 +66,7 @@ internal static class TemplateBindingHelper
                 var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
                 var parameter = targetMethod.Parameters[i];
                 ExpressionSyntax parameterSyntax = IdentifierName( parameter.Name );
-                parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type.GetSymbol() );
+                parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type );
                 mappingBuilder.Add( templateParameter.Name, parameterSyntax );
             }
 
@@ -102,6 +102,40 @@ internal static class TemplateBindingHelper
 
             return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
+    }
+
+    /// <summary>
+    /// Binds a partially bound template to a target declaration and finished validation.
+    /// </summary>
+    [return: NotNullIfNotNull( nameof(targetConstructor) )]
+    public static BoundTemplateMethod? ForIntroduction(
+        this PartiallyBoundTemplateMethod template,
+        IConstructor? targetConstructor )
+    {
+        if ( targetConstructor == null )
+        {
+            return null;
+        }
+
+        ImmutableDictionary<string, ExpressionSyntax> CreateParameterMapping()
+        {
+            var mappingBuilder = ImmutableDictionary.CreateBuilder<string, ExpressionSyntax>();
+
+            for ( var i = 0; i < template.TemplateMember.TemplateClassMember.RunTimeParameters.Length; i++ )
+            {
+                var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
+                var parameter = targetConstructor.Parameters[i];
+                ExpressionSyntax parameterSyntax = IdentifierName( parameter.Name );
+                parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type );
+                mappingBuilder.Add( templateParameter.Name, parameterSyntax );
+            }
+
+            return mappingBuilder.ToImmutable();
+        }
+
+        var templateArguments = GetTemplateArguments( template, CreateParameterMapping() );
+
+        return new BoundTemplateMethod( template.TemplateMember, templateArguments );
     }
 
     /// <summary>
@@ -200,7 +234,7 @@ internal static class TemplateBindingHelper
         {
             ExpressionSyntax parameterSyntax = IdentifierName( methodParameter.Name );
 
-            parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type.GetSymbol() );
+            parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type );
 
             parameterMapping.Add( templateParameter.Name, parameterSyntax );
         }
@@ -260,7 +294,7 @@ internal static class TemplateBindingHelper
         {
             ExpressionSyntax parameterSyntax = IdentifierName( methodParameter.Name );
 
-            parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type.GetSymbol() );
+            parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type );
 
             parameterMapping.Add( templateParameter.Name, parameterSyntax );
         }
@@ -654,13 +688,7 @@ internal static class TemplateBindingHelper
         // Check that all provided properties map to a compile-time parameter.
         foreach ( var name in compileTimeArguments.Keys )
         {
-            if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) )
-            {
-                throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format( $"There is no parameter '{name}' in template '{template.Declaration}'." ) );
-            }
-
-            if ( !parameter.IsCompileTime )
+            if ( template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) && !parameter.IsCompileTime )
             {
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format( $"The parameter '{name}' of template '{template.Declaration}' is not compile-time." ) );

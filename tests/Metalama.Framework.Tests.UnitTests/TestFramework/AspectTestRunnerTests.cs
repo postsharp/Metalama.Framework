@@ -119,7 +119,7 @@ public class Program
         {
             using var testContext = this.CreateTestContext();
             var fileSystem = new TestFileSystem( testContext.ServiceProvider.Underlying );
-            const string directory = "C:\\test";
+            var directory = Path.Combine( Environment.CurrentDirectory, "tests" );
 
             fileSystem.CreateDirectory( directory );
             fileSystem.WriteAllText( Path.Combine( directory, "Test.cs" ), source );
@@ -133,9 +133,12 @@ public class Program
             var testOutputHelper = new OutputHelper( messageSink );
             var metadataReferences = TestCompilationFactory.GetMetadataReferences();
             var testProjectReferences = new TestProjectReferences( metadataReferences.ToImmutableArray(), null );
-            var testProjectProperties = new TestProjectProperties( assemblyName: null, directory, directory, ImmutableArray<string>.Empty, "net6.0", ImmutableArray<string>.Empty );
+
+            var testProjectProperties =
+                new TestProjectProperties( assemblyName: null, directory, directory, ImmutableArray<string>.Empty, "net6.0", ImmutableArray<string>.Empty );
+
             var testDirectoryOptionsReader = new TestDirectoryOptionsReader( serviceProvider, directory );
-            
+
             var testRunner = new AspectTestRunner( serviceProvider, directory, testProjectReferences, testOutputHelper );
             var testInput = new TestInput.Factory( serviceProvider ).FromFile( testProjectProperties, testDirectoryOptionsReader, "Test.cs" );
             var testContextOptions = testInput.Options.ApplyToTestContextOptions( new TestContextOptions() );

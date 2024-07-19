@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
@@ -109,7 +108,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 return typeParameter.Name;
             }
 
-            var sb = new StringBuilder();
+            using var stringBuilderHandle = StringBuilderPool.Default.Allocate();
+
+            var sb = stringBuilderHandle.Value;
 
             Append( s );
 

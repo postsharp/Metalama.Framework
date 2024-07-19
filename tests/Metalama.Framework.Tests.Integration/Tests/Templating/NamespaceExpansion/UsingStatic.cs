@@ -1,5 +1,5 @@
 using System;
-
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 using static System.Math;
@@ -9,21 +9,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
     namespace UsingStatic
     {
         [CompileTime]
-        class Aspect
+        internal class Aspect
         {
             [TestTemplate]
-            dynamic? Template()
+            private dynamic? Template()
             {
-                Console.Write(PI);
-                Console.Write(Max(0, 1));
+                Console.Write( PI );
+                Console.Write( Max( 0, 1 ) );
 
                 return meta.Proceed();
             }
         }
 
-        class TargetCode
+        internal class TargetCode
         {
-            int Method(int a)
+            private int Method( int a )
             {
                 return a;
             }

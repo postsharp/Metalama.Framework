@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -27,7 +28,7 @@ internal sealed class TypeFabricDriver : FabricDriver
 
     private TypeFabricDriver( CreationData creationData, INamedTypeSymbol targetType ) : base( creationData )
     {
-        this._targetTypeFullName = targetType.AssertNotNull().GetFullName().AssertNotNull();
+        this._targetTypeFullName = targetType.AssertSymbolNotNull().GetFullName().AssertNotNull();
     }
 
     public static IEnumerable<TypeFabricDriver> Create(
@@ -47,7 +48,9 @@ internal sealed class TypeFabricDriver : FabricDriver
         {
             foreach ( var derivedType in compilation.GetDerivedTypes( compilation.Factory.GetNamedType( creationData.FabricType.ContainingType ) ) )
             {
-                yield return new TypeFabricDriver( creationData, derivedType.GetSymbol() );
+                yield return new TypeFabricDriver(
+                    creationData,
+                    derivedType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DerivedFabricsOnIntroducedTypes ) );
             }
         }
     }
@@ -125,12 +128,14 @@ internal sealed class TypeFabricDriver : FabricDriver
         {
             this._aspectBuilder = aspectBuilder;
             this.Type = namedType;
-            this.Advice = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
+            this.Advice = ((IAdviceFactoryImpl) aspectBuilder.AdviceFactory).WithTemplateClassInstance( templateClassInstance );
         }
 
         public INamedType Type { get; }
 
         public IAdviceFactory Advice { get; }
+
+        public override string Namespace => this.Type.ContainingNamespace.FullName;
 
         public override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 

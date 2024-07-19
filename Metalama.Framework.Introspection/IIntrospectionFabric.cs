@@ -5,7 +5,7 @@ namespace Metalama.Framework.Introspection;
 /// <summary>
 /// Represents a fabric.
 /// </summary>
-public interface IIntrospectionFabric : IIntrospectionAspectPredecessorInternal
+public interface IIntrospectionFabric : IIntrospectionAspectPredecessor
 {
     /// <summary>
     /// Gets the full name of the fabric type.

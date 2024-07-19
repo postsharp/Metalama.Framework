@@ -39,7 +39,7 @@ internal static class SymbolExtensions
                 return default;
 
             default:
-                throw new AssertionFailedException( $"Unexpected declaration syntax for '{symbol}'." );
+                throw new AssertionFailedException( $"Unexpected declaration syntax for '{symbol}': {declaration}" );
         }
     }
 
@@ -134,4 +134,12 @@ internal static class SymbolExtensions
 
         return member ?? type.BaseType.AssertNotNull().GetSingleMemberIncludingBase( name, condition );
     }
+
+    /// <summary>
+    /// For most methods, directly returns their kind. For explicitly implemented methods, returns the kind of the implemented method.
+    /// </summary>
+    public static MethodKind GetImplementedMethodKind( this IMethodSymbol method )
+        => method.MethodKind != MethodKind.ExplicitInterfaceImplementation
+            ? method.MethodKind
+            : method.ExplicitInterfaceImplementations.Single().MethodKind;
 }

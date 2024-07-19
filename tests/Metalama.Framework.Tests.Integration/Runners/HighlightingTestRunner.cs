@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
@@ -106,9 +105,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options )
             => new( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue );
 
-        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
-            base.ExecuteAssertions( testInput, testResult, state );
+            base.ExecuteAssertions( testInput, testResult );
 
             Assert.NotNull( testInput.ProjectDirectory );
             Assert.NotNull( testInput.RelativePath );
@@ -125,6 +124,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 {
                     var sourceAbsolutePath = syntaxTree.InputPath;
 
+                    // Skip introduced trees.
+                    if ( sourceAbsolutePath == null )
+                    {
+                        continue;
+                    }
+
                     // Input.
                     var expectedInputHtmlPath = Path.Combine(
                         Path.GetDirectoryName( sourceAbsolutePath )!,
@@ -137,11 +142,16 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // Output.
             if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
-                var expectedOutputHtmlPath = Path.Combine(
-                    Path.GetDirectoryName( testInput.FullPath )!,
-                    Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.TransformedHtml );
+                foreach ( var syntaxTree in testResult.SyntaxTrees )
+                {
+                    var extension = syntaxTree.Kind is TestSyntaxTreeKind.Introduced ? FileExtensions.IntroducedHtml : FileExtensions.TransformedHtml;
+                    
+                    var expectedOutputHtmlPath = Path.Combine(
+                        Path.GetDirectoryName( testInput.FullPath )!,
+                        syntaxTree.ShortName + extension );
 
-                this.CompareHtmlFiles( testResult.SyntaxTrees[0].HtmlOutputPath!, expectedOutputHtmlPath );
+                    this.CompareHtmlFiles( syntaxTree.HtmlOutputPath!, expectedOutputHtmlPath );
+                }
             }
         }
 
@@ -158,7 +168,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var htmlPath = actualHtmlPath;
             var htmlContent = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
 
-            Assert.Equal( expectedHighlightedSource, htmlContent );
+            this.RunDiffToolIfDifferent( expectedHighlightedSource, expectedHtmlPath, htmlContent, htmlPath );
         }
     }
 }

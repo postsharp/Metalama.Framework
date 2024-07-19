@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.MultipleTemplateAttributesAccessors;
@@ -5,7 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValid
 public class Aspect : TypeAspect
 {
     [Template]
-    int P
+    private int P
     {
         [Template]
         get => 42;

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -29,12 +30,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
             // Find the parent declaration.
-            var resolved =
+            var (attributes, symbol) =
                 this._declaringDeclaration.GetAttributeData( compilation );
 
             // In the parent, find the AttributeData corresponding to the current item.
 
-            var attributeData = resolved.Attributes.SingleOrDefault(
+            var attributeData = attributes.SingleOrDefault(
                 a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span
                                                           && a.ApplicationSyntaxReference.SyntaxTree == attributeSyntax.SyntaxTree );
 
@@ -46,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             // Save the resolved AttributeData.
             this.Target = attributeData;
 
-            return (attributeData, resolved.Symbol);
+            return (attributeData, symbol);
         }
 
         public AttributeRef( AttributeData attributeData, Ref<IDeclaration> declaringDeclaration, CompilationContext compilationContext )
@@ -57,7 +58,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.Target = this._originalTarget = attributeData;
 
             this.AttributeType = Ref.FromSymbol<INamedType>(
-                attributeData.AttributeClass.AssertNotNull().TranslateIfNecessary( compilationContext ),
+                attributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes )
+                    .TranslateIfNecessary( compilationContext ),
                 compilationContext );
 
             this._declaringDeclaration = declaringDeclaration;
@@ -79,7 +81,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
-            this._declaringDeclaration = Ref.FromSymbol( declaration, compilationContext );
+            this._declaringDeclaration = Ref.FromSymbol<IDeclaration>( declaration, compilationContext );
         }
 
         public AttributeRef( AttributeBuilder builder )
@@ -151,6 +153,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     }
 
                 case AttributeData attributeData:
+                    if ( !attributeData.IsValid() )
+                    {
+                        // Only return fully valid attributes.
+                        attribute = null;
+                        return false;
+                    }
+
                     attribute = new Attribute( attributeData, compilation, this._declaringDeclaration.GetTarget( compilation ) );
 
                     return true;

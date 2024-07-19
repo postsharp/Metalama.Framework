@@ -15,7 +15,7 @@ namespace Metalama.Framework.Code.Collections
     public interface INamespaceCollection : IReadOnlyCollection<INamespace>
     {
         /// <summary>
-        /// Gets a child <see cref="INamespace"/> by name (not by <see cref="INamespace.FullName"/>).
+        /// Gets a child <see cref="INamespace"/> by name (not by <see cref="INamespaceOrNamedType.FullName"/>).
         /// </summary>
         INamespace? OfName( string name );
     }

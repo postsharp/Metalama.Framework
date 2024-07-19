@@ -5,6 +5,7 @@
 // In .NET Framework we get: Target runtime doesn't support covariant return types in overrides. Return type must be 'Targets.AutomaticallyCloneable'
 // to match overridden member 'Targets.AutomaticallyCloneable.Clone()'`
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -19,8 +20,7 @@ public class DeepCloneAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(CloneImpl),
             whenExists: OverrideStrategy.Override,
             buildMethod: t =>
@@ -29,8 +29,7 @@ public class DeepCloneAttribute : TypeAspect
                 t.ReturnType = builder.Target;
             } );
 
-        builder.Advice.ImplementInterface(
-            builder.Target,
+        builder.ImplementInterface(
             typeof(ICloneable),
             whenExists: OverrideStrategy.Ignore );
     }

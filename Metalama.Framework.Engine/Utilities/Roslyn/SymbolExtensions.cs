@@ -9,13 +9,13 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -35,6 +35,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 RoslynSpecialType.System_UInt32 => SpecialType.UInt32,
                 RoslynSpecialType.System_UInt64 => SpecialType.UInt64,
                 RoslynSpecialType.System_String => SpecialType.String,
+                RoslynSpecialType.System_Char => SpecialType.Char,
                 RoslynSpecialType.System_Decimal => SpecialType.Decimal,
                 RoslynSpecialType.System_Single => SpecialType.Single,
                 RoslynSpecialType.System_Double => SpecialType.Double,
@@ -60,6 +61,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 SpecialType.UInt32 => RoslynSpecialType.System_UInt32,
                 SpecialType.UInt64 => RoslynSpecialType.System_UInt64,
                 SpecialType.String => RoslynSpecialType.System_String,
+                SpecialType.Char => RoslynSpecialType.System_Char,
                 SpecialType.Decimal => RoslynSpecialType.System_Decimal,
                 SpecialType.Single => RoslynSpecialType.System_Single,
                 SpecialType.Double => RoslynSpecialType.System_Double,
@@ -134,10 +136,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();
 
         private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol namespaceSymbol )
-            => namespaceSymbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeRoot: true ).SelectMany( ns => ns.GetTypeMembers() );
+            => namespaceSymbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), true ).SelectMany( ns => ns.GetTypeMembers() );
 
         private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol namespaceSymbol )
-            => namespaceSymbol.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), includeRoot: true ) );
+            => namespaceSymbol.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), true ) );
 
         internal static bool IsAccessor( this IMethodSymbol method )
             => method.MethodKind switch
@@ -161,64 +163,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
         }
 
-        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
-        {
-            if ( symbol == null )
-            {
-                return null;
-            }
-
-            static SyntaxReference? GetReferenceOfShortestPath( ISymbol s, Func<SyntaxReference, bool>? filter = null )
-            {
-                if ( s.DeclaringSyntaxReferences.IsDefaultOrEmpty )
-                {
-                    return null;
-                }
-                else
-                {
-                    // Find the lowest value.
-
-                    SyntaxReference? min = null;
-                    int? minLength = null;
-
-                    foreach ( var reference in s.DeclaringSyntaxReferences )
-                    {
-                        if ( filter != null && !filter( reference ) )
-                        {
-                            continue;
-                        }
-
-                        var length = reference.SyntaxTree.FilePath.Length;
-
-                        if ( min == null || length < minLength )
-                        {
-                            min = reference;
-                            minLength = length;
-                        }
-                    }
-
-                    return min;
-                }
-            }
-
-            switch ( symbol )
-            {
-                case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
-                    return GetReferenceOfShortestPath( symbol ) ?? GetReferenceOfShortestPath( methodSymbol.AssociatedSymbol );
-
-                case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: { } partialDefinitionSymbol }:
-                    return GetReferenceOfShortestPath( partialDefinitionSymbol );
-
-                case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: null }:
-                    return GetReferenceOfShortestPath( symbol );
-
-                default:
-                    return GetReferenceOfShortestPath( symbol );
-            }
-        }
-
-        public static SyntaxNode? GetPrimaryDeclaration( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
-
         internal static bool IsInterfaceMemberImplementation( this ISymbol symbol )
             => symbol switch
             {
@@ -238,6 +182,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
             => null;
 
+        internal static ImmutableArray<IParameterSymbol> GetParameters( this ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol method => method.Parameters,
+                IPropertySymbol property => property.Parameters,
+                _ => ImmutableArray<IParameterSymbol>.Empty
+            };
+
         internal static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
 
         internal static bool HasDefaultConstructor( this INamedTypeSymbol type )
@@ -246,21 +198,19 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 type.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         internal static bool IsVisibleTo( this ISymbol symbol, Compilation compilation, ISymbol otherSymbol )
-        {
-            return compilation.IsSymbolAccessibleWithin(
+            => compilation.IsSymbolAccessibleWithin(
                 symbol,
                 otherSymbol switch
                 {
                     INamedTypeSymbol type => type,
                     _ => otherSymbol.ContainingType
                 } );
-        }
 
         internal static bool IsPrimaryConstructor( this IMethodSymbol constructorSymbol )
         {
             var declarationSyntax = constructorSymbol.GetPrimaryDeclaration();
-#if ROSLYN_4_8_0_OR_GREATER
 
+#if ROSLYN_4_8_0_OR_GREATER
             return
                 constructorSymbol is { MethodKind: MethodKind.Constructor }
                 && declarationSyntax is TypeDeclarationSyntax { ParameterList: not null };
@@ -291,9 +241,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         }
 
         internal static bool IsCompilerGenerated( this ISymbol declaration )
-        {
-            return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) );
-        }
+            => declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) );
 
         /// <summary>
         /// Gets the kind of operator based represented by the method.
@@ -310,6 +258,18 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => symbol.ContainingType
             };
 
+        internal static ISymbol? GetClosestContainingMember( this ISymbol symbol )
+            => symbol switch
+            {
+                INamedTypeSymbol type => type,
+                IMethodSymbol method => method,
+                IFieldSymbol field => field,
+                IPropertySymbol property => property,
+                IEventSymbol @event => @event,
+                INamespaceSymbol => null,
+                _ => symbol.ContainingSymbol?.GetClosestContainingMember()
+            };
+
         internal static bool IsTaskConfigureAwait( this ISymbol? symbol )
             => symbol is IMethodSymbol
             {
@@ -318,15 +278,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             } && containingType.ConstructedFrom.GetReflectionFullName() is "System.Threading.Tasks.Task" or "System.Threading.Tasks.Task`1";
 
         internal static bool IsExplicitInterfaceMemberImplementation( this ISymbol? symbol )
-        {
-            return symbol switch
+            => symbol switch
             {
                 IMethodSymbol method => method.ExplicitInterfaceImplementations.Length > 0,
                 IPropertySymbol property => property.ExplicitInterfaceImplementations.Length > 0,
                 IEventSymbol @event => @event.ExplicitInterfaceImplementations.Length > 0,
                 _ => false
             };
-        }
 
         /// <summary>
         /// Translate a symbol to a different <see cref="CompilationContext"/> if necessary, but only in
@@ -338,7 +296,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 #if DEBUG
             if ( symbol.BelongsToCompilation( compilation ) == false )
             {
-                return (T) SymbolId.Create( symbol ).Resolve( compilation.Compilation ).AssertNotNull();
+                return (T) SymbolId.Create( symbol ).Resolve( compilation.Compilation ).AssertSymbolNotNull();
             }
 #endif
             return symbol;

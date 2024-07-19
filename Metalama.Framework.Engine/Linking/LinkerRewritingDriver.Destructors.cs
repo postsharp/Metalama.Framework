@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.Linking
                             (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
                              arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
                              semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
+                        _ => throw new AssertionFailedException( $"Unexpected destructor declaration {destructorDeclaration}" )
                     };
 
                 var ret = destructorDeclaration.PartialUpdate(
@@ -187,7 +187,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var invocation =
                     InvocationExpression(
-                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) )
+                            .WithSimplifierAnnotationIfNecessary( context ),
                         ArgumentList() );
 
                 return context.SyntaxGenerator.FormattedBlock(

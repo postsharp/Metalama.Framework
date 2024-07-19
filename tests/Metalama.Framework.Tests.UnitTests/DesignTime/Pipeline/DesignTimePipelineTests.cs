@@ -108,7 +108,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         foreach ( var suppression in syntaxTreeResult.Suppressions )
         {
-            stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.DeclarationId}" );
+            stringBuilder.AppendLineInvariant( $"   {suppression}" );
         }
 
         // Introductions
@@ -200,14 +200,14 @@ F1.cs:
 0 introductions(s):
 ";
 
-        Assert.Equal( expectedResult.Trim(), dumpedResults );
+        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults );
 
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
         // Second execution. The result should be the same, and the number of executions should not change.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2 );
-        Assert.Equal( expectedResult.Trim(), dumpedResults2 );
+        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults2 );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
     }
 
@@ -217,7 +217,7 @@ F1.cs:
         using var testContext = this.CreateTestContext();
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects; 
 
                             public class Aspect : OverrideMethodAspect
                             {
@@ -252,7 +252,7 @@ F1.cs:
         var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
         const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -306,14 +306,14 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
         var dumpedResults = DumpResults( results );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2 );
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
@@ -332,7 +332,7 @@ Target.cs:
 
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
 
         // Forth execution, with modified aspect but not target code. This should pause the pipeline. We don't resume the pipeline, so we should get the old result.
         var compilation4 = TestCompilationFactory.CreateCSharpCompilation(
@@ -352,7 +352,7 @@ Target.cs:
 
         var dumpedResults4 = DumpResults( results4 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
@@ -380,7 +380,7 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results5 ) );
         var dumpedResults5 = DumpResults( results5 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
@@ -400,7 +400,7 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results6 ) );
         var dumpedResults6 = DumpResults( results6 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
         Assert.Equal( 3, pipeline.PipelineExecutionCount );
         Assert.Equal( 2, pipeline.PipelineInitializationCount );
         Assert.False( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
@@ -421,7 +421,7 @@ Target.cs:
         var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
 
         const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -473,13 +473,13 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results ) );
         var dumpedResults = DumpResults( results );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2 );
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
         // Third execution, with modified aspect but not target code. This should pause the pipeline. We don't resume the pipeline, so we should get the old result.
@@ -503,7 +503,7 @@ Target.cs:
 
         var dumpedResults3 = DumpResults( results3 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults3 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults3 );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
         Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
 
@@ -519,7 +519,7 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, default, out var results6 ) );
         var dumpedResults6 = DumpResults( results6 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
         await targetProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         await aspectProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         Assert.Equal( 2, targetProjectPipeline.PipelineExecutionCount );
@@ -533,7 +533,7 @@ Target.cs:
         var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
         const string aspectCode = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -606,7 +606,7 @@ partial class C
 
         // The main compilation must have a compile-time syntax tree.
         var compilation = context.CreateCompilationModel(
-            "using Metalama.Framework.Aspects; class A : TypeAspect {}",
+            "using Metalama.Framework.Aspects;  class A : TypeAspect {}",
             additionalReferences: new[] { dependency.ToMetadataReference() } );
 
         Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, default, out _ ) );
@@ -624,7 +624,7 @@ partial class C
         var dependentCode = new Dictionary<string, string>()
         {
             ["dependent.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -721,7 +721,7 @@ class C : BaseClass
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         const string code1 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 class MyAspect : TypeAspect
@@ -737,7 +737,7 @@ class MyAspect : TypeAspect
         Assert.False( result1.IsSuccessful );
 
         const string code2 = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 class MyAspect : TypeAspect
@@ -764,7 +764,7 @@ class MyAspect : TypeAspect
         var code = new Dictionary<string, string>()
         {
             ["dependent.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -890,7 +890,7 @@ class C
         var masterCode = new Dictionary<string, string>()
         {
             ["aspect.cs"] = $@"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -944,7 +944,8 @@ class D{version}
     public void OverrideMethodWithMultipleTargetFrameworks()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
 
                             class Aspect : OverrideMethodAspect
                             {
@@ -998,7 +999,8 @@ class D{version}
             {
                 ["Aspect.cs"] =
                     $$"""
-                      using Metalama.Framework.Aspects;
+                      using Metalama.Framework.Advising;
+                      using Metalama.Framework.Aspects; 
                       using System;
 
                       public class Aspect : OverrideMethodAspect
@@ -1033,7 +1035,7 @@ class D{version}
         Assert.True( pipeline.TryExecute( compilation2, default, out var compilationResult ) );
 
         // Note that LAMA0118 is no longer reported by the pipeline but by the analyzer.
-        Assert.Empty( compilationResult.GetAllDiagnostics( "Aspect.cs" ) );
+        Assert.Empty( compilationResult.GetDiagnosticsOnSyntaxTree( "Aspect.cs" ) );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
@@ -1065,7 +1067,8 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
 
                             public class RepositoryAspect : TypeAspect
@@ -1149,7 +1152,7 @@ class D{version}
                             {
                                 public override void AmendProject( IProjectAmender amender )
                                 {
-                                    amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                    amender.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
                                 }
                             }
                             """,
@@ -1181,7 +1184,7 @@ class D{version}
                                   {
                                       public override void AmendProject( IProjectAmender amender )
                                       {
-                                          amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                          amender.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
                                       }
                                   }
                                   """;
@@ -1258,7 +1261,8 @@ class D{version}
                 """,
             ["aspect.cs"] =
                 """
-                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects; 
                 using Metalama.Framework.Code;
                 public class AddAnnotation : TypeAspect
                 {
@@ -1271,7 +1275,7 @@ class D{version}
                     
                     public override void BuildAspect( IAspectBuilder<INamedType> builder )
                     {
-                        builder.Advice.AddAnnotation( builder.Target, new TheAnnotation(this.Value), true );
+                        builder.AddAnnotation( new TheAnnotation(this.Value), true );
                     }
                 }
                 """,
@@ -1286,7 +1290,8 @@ class D{version}
         {
             ["aspect.cs"] =
                 """
-                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects; 
                 using Metalama.Framework.Code;
                 using Metalama.Framework.Diagnostics;
                 using Metalama.Framework.Eligibility;
@@ -1365,7 +1370,7 @@ class D{version}
             """;
 
         var options = compilation.SyntaxTrees[0].Options;
-        
+
         compilation = compilation.AddSyntaxTrees(
             SyntaxFactory.ParseSyntaxTree( firstFileCode, options, "C.cs" ),
             SyntaxFactory.ParseSyntaxTree( secondFileCode, options, "C.cs" ) );
@@ -1399,7 +1404,7 @@ class D{version}
 
         var assemblyLocator1 = pipeline1.ServiceProvider.GetRequiredService<IAssemblyLocator>();
 
-        Assert.False( assemblyLocator1.TryFindAssembly( new( "dependency" ), out _ ) );
+        Assert.False( assemblyLocator1.TryFindAssembly( new AssemblyIdentity( "dependency" ), out _ ) );
 
         var dependencyReference = MetadataReference.CreateFromFile( dependencyPath );
         compilation = compilation.AddReferences( dependencyReference );
@@ -1408,24 +1413,25 @@ class D{version}
 
         var assemblyLocator2 = pipeline3.ServiceProvider.GetRequiredService<IAssemblyLocator>();
 
-        Assert.True( assemblyLocator2.TryFindAssembly( new( "dependency" ), out var foundReference ) );
+        Assert.True( assemblyLocator2.TryFindAssembly( new AssemblyIdentity( "dependency" ), out var foundReference ) );
         Assert.Same( dependencyReference, foundReference );
     }
-    
+
     // Tests that introductions work without a license key.
     [Fact]
     public void WorksWithoutLicense()
     {
         var services = new AdditionalServiceCollection();
-        
-        services.AddProjectService( 
-            serviceProvider => new ProjectLicenseConsumptionService( 
+
+        services.AddProjectService(
+            serviceProvider => ProjectLicenseConsumer.Create(
                 BackstageServiceFactory.CreateTestLicenseConsumptionService( serviceProvider.Underlying, null ) ) );
-        
+
         using var testContext = this.CreateTestContext();
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
 
                             public class RepositoryAspect : TypeAspect
@@ -1470,72 +1476,73 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Fabrics;
-            using System;
-            using System.Linq;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Fabrics;
+                            using System;
+                            using System.Linq;
 
-            [assembly: AspectOrder(typeof(UninlineableOverrideAspect), typeof(OverridePropertyAttribute))]
+                            [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(UninlineableOverrideAspect), typeof(OverridePropertyAttribute))]
 
-            class FieldsFabric : ProjectFabric
-            {
-                public override void AmendProject(IProjectAmender amender)
-                {
-                    amender.Outbound
-                        .SelectMany(p => p.Types)
-                        .SelectMany(t => t.Fields)
-                        .AddAspect<OverridePropertyAttribute>();
+                            class FieldsFabric : ProjectFabric
+                            {
+                                public override void AmendProject(IProjectAmender amender)
+                                {
+                                    amender
+                                        .SelectMany(p => p.Types)
+                                        .SelectMany(t => t.Fields)
+                                        .AddAspect<OverridePropertyAttribute>();
+                            
+                                    amender
+                                        .SelectMany(p => p.Types)
+                                        .SelectMany(t => t.Properties)
+                                        .SelectMany(p => new[] { p.GetMethod!, p.SetMethod! })
+                                        .Where(m => m != null)
+                                        .AddAspect<UninlineableOverrideAspect>();
+                                }
+                            }
 
-                    amender.Outbound
-                        .SelectMany(p => p.Types)
-                        .SelectMany(t => t.Properties)
-                        .SelectMany(p => new[] { p.GetMethod!, p.SetMethod! })
-                        .Where(m => m != null)
-                        .AddAspect<UninlineableOverrideAspect>();
-                }
-            }
+                            class OverridePropertyAttribute : OverrideFieldOrPropertyAspect
+                            {
+                                public override dynamic? OverrideProperty
+                                {
+                                    get
+                                    {
+                                        Console.WriteLine("This is the overridden getter.");
+                                        return meta.Proceed();
+                                    }
+                            
+                                    set
+                                    {
+                                        Console.WriteLine($"This is the overridden setter.");
+                                        meta.Proceed();
+                                    }
+                                }
+                            }
 
-            class OverridePropertyAttribute : OverrideFieldOrPropertyAspect
-            {
-                public override dynamic? OverrideProperty
-                {
-                    get
-                    {
-                        Console.WriteLine("This is the overridden getter.");
-                        return meta.Proceed();
-                    }
+                            class UninlineableOverrideAspect : OverrideMethodAspect
+                            {
+                                public override dynamic? OverrideMethod()
+                                {
+                                    if (new Random().Next() == 0)
+                                    {
+                                        Console.WriteLine($"Uninlineable: randomly");
+                                        return meta.Proceed();
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Uninlineable: normally");
+                                        return meta.Proceed();
+                                    }
+                                }
+                            }
 
-                    set
-                    {
-                        Console.WriteLine($"This is the overridden setter.");
-                        meta.Proceed();
-                    }
-                }
-            }
-
-            class UninlineableOverrideAspect : OverrideMethodAspect
-            {
-                public override dynamic? OverrideMethod()
-                {
-                    if (new Random().Next() == 0)
-                    {
-                        Console.WriteLine($"Uninlineable: randomly");
-                        return meta.Proceed();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Uninlineable: normally");
-                        return meta.Proceed();
-                    }
-                }
-            }
-
-            class TargetClass
-            {
-                int i;
-            }
-            """;
+                            class TargetClass
+                            {
+                                int i;
+                            }
+                            """;
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
 
@@ -1550,17 +1557,124 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using Metalama.Framework.Fabrics;
+                            using Metalama.Framework.Fabrics;
 
-            public class TargetClass
+                            public class TargetClass
+                            {
+                                class Fabric : TypeFabric
+                                {
+                                }
+                            }
+                            """;
+
+        var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
+    }
+
+    [Fact]
+    public void HasAspectInEligibility()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            using System;
+            using System.Linq;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Eligibility;
+
+            class Aspect1 : OverrideMethodAspect
             {
-                class Fabric : TypeFabric
+                public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
                 {
+                    builder.MustSatisfy(method => !method.Enhancements().HasAspect<Aspect2>(), _ => $"");
                 }
+            
+                public override dynamic? OverrideMethod()
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            class Aspect2 : MethodAspect
+            {
+                public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+                {
+                    builder.MustSatisfy(method => !method.Enhancements().HasAspect<OverrideMethodAspect>(), _ => $"");
+                }
+            }
+
+            class TargetCode
+            {
+                private void NoAspectMethod() {}
+            
+                [Aspect1]
+                private int Aspect1Method(int a)
+                {
+                    return a;
+                }
+            
+                [Aspect2]
+                private void Aspect2Method() { }
             }
             """;
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation );
+
+        Assert.True( pipeline.TryExecute( compilation, default, out _ ) );
+
+        var noAspectMethod = compilation.GetSymbolsWithName( "NoAspectMethod" ).OfType<IMethodSymbol>().Single();
+        var aspect1Method = compilation.GetSymbolsWithName( "Aspect1Method" ).OfType<IMethodSymbol>().Single();
+        var aspect2Method = compilation.GetSymbolsWithName( "Aspect2Method" ).OfType<IMethodSymbol>().Single();
+
+        Assert.Equal(
+            ["Aspect1", "Aspect2"],
+            pipeline.GetEligibleAspects( compilation, noAspectMethod, default ).SelectAsArray( a => a.FullName ).OrderBy( a => a ) );
+
+        Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect1Method, default ) );
+        Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect2Method, default ) );
+    }
+
+    [Fact]
+    public void TypeFabric()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = """
+                using Metalama.Framework.Aspects;
+
+                class MyAspect : TypeAspect
+                {
+                   [Introduce]
+                   void IntroducedMethod() {}
+                }
+                """,
+            ["target.cs"] = """
+                using Metalama.Framework.Fabrics;
+
+                class C
+                {
+                    class Fabric : TypeFabric
+                    {
+                        public override void AmendType( ITypeAmender amender )
+                            => amender.AddAspect<MyAspect>();
+                    } 
+                }
+                """
+        };
+
+        var compilation = CreateCSharpCompilation( code );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
@@ -1607,5 +1721,87 @@ class D{version}
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out var result2 ) );
 
         Assert.Empty( result2.GetAllDiagnostics() );
+    }
+
+    [Fact]
+    public void SuppressionOnDeclarativeAdviceFromAnotherProject()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var libraryCode = new Dictionary<string, string>
+        {
+            ["introduceDependency.cs"] = """
+                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Code;
+                using Metalama.Framework.Diagnostics;
+
+                public class IntroduceDependencyAttribute : DeclarativeAdviceAttribute
+                {
+                    internal static readonly SuppressionDefinition NonNullableFieldMustContainValue = new( "CS8618" );
+
+                    public sealed override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+                    {
+                        builder.Diagnostics.Suppress( NonNullableFieldMustContainValue, templateMember );
+                    }
+                }
+                """,
+            ["aspect.cs"] = """
+                using Metalama.Framework.Aspects;
+
+                public interface ILogger;
+
+                public class LogAttribute : MethodAspect
+                {
+                    [IntroduceDependency]
+                    private readonly ILogger _logger;
+                }
+                """
+        };
+
+        var targetCode = new Dictionary<string, string>
+        {
+            ["target.cs"] = """
+                class C
+                {
+                    [Log]
+                    void M() {}
+                }
+                """
+        };
+
+        var libraryCompilation = CreateCSharpCompilation( libraryCode );
+
+        var targetCompilation = CreateCSharpCompilation( targetCode, additionalReferences: [libraryCompilation.ToMetadataReference()] );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out _ ) );
+    }
+
+    [Fact]
+    public void OldPipelineDoesntLeak()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>();
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var targetCompilation = CreateCSharpCompilation( code, "test" );
+
+        var targetPipeline1 = CreatePipeline( testContext.ProjectOptions );
+
+        var targetPipeline2 = CreatePipeline( new TestProjectOptions( testContext.ProjectOptions, Engine.Formatting.CodeFormattingOptions.None ) );
+
+        GC.Collect();
+
+        Assert.False( targetPipeline1.TryGetTarget( out _ ) );
+
+        WeakReference<DesignTimeAspectPipeline> CreatePipeline( TestProjectOptions options )
+        {
+            var pipeline = factory.GetOrCreatePipeline( options, targetCompilation );
+
+            return new( pipeline );
+        }
     }
 }

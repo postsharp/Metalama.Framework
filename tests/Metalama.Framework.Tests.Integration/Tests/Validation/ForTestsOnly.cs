@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -16,14 +17,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
 
         public void BuildAspect( IAspectBuilder<IDeclaration> builder )
         {
-            builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+            builder.Outbound.ValidateInboundReferences( ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
-        private void ValidateReference( in ReferenceValidationContext context )
+        private void ValidateReference( ReferenceValidationContext context )
         {
-            if (!context.ReferencingType.Namespace.Name.EndsWith( ".Tests" ))
+            if (!context.Origin.Namespace.Name.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report( _error.WithArguments( context.ReferencedDeclaration ) );
+                context.Diagnostics.Report( _error.WithArguments( context.Destination.Declaration ) );
             }
         }
 

@@ -67,7 +67,7 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.ReadOnlyField = 42;
+    ReadOnlyField = 42;
   }
   private global::System.Int32 _introducedField;
   public global::System.Int32 IntroducedField

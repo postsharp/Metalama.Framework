@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.PartialAspectClass
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.PartialAspectC
         {
             foreach (var m in builder.Target.Methods)
             {
-                builder.Advice.Override( m, nameof(MethodTemplate) );
+                builder.With( m ).Override( nameof(MethodTemplate) );
             }
         }
     }

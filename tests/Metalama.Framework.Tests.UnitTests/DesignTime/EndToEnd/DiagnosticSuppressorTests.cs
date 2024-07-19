@@ -49,7 +49,9 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
     public async Task SuppressVariableLevelWarning()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising; 
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
@@ -87,14 +89,14 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
 
         var suppression = Assert.Single( suppressions );
 
-        Assert.Equal( "code.cs(23,17): warning CS0219: The variable 'x' is assigned but its value is never used", suppression.SuppressedDiagnostic.ToString() );
+        Assert.Equal( "code.cs(25,17): warning CS0219: The variable 'x' is assigned but its value is never used", suppression.SuppressedDiagnostic.ToString() );
     }
 
     [Fact]
     public async Task SuppressFieldLevelWarning()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
@@ -124,5 +126,86 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
         var suppression = Assert.Single( suppressions );
 
         Assert.Equal( "code.cs(21,13): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
+    }
+
+    [Fact]
+    public async Task ParametricSuppression()
+    {
+        const string code = """
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Diagnostics;
+                            using System.Linq;
+
+                            class SuppressWarningAttribute : ConstructorAspect
+                            {
+                                private static readonly SuppressionDefinition _suppression = new("CS8618");
+                            
+                                public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+                                {
+                                    builder.Diagnostics.Suppress(
+                                        _suppression.WithFilter(static diag => diag.Arguments.Any(arg => arg is string s && s == "o1")), builder.Target);
+                                }
+                            }
+
+                            class TargetClass
+                            {
+                                object o1;
+                                object o2;
+                            
+                                [SuppressWarning]
+                                public TargetClass() { }
+                            }
+
+                            class AnotherClass
+                            {
+                                object o1;
+                                object o2;
+                            
+                                public AnotherClass() { }
+                            }
+                            """;
+
+        var suppressions = await this.ExecuteSuppressorAsync( code, "CS8618" );
+
+        var suppression = Assert.Single( suppressions );
+
+        Assert.Equal(
+            "code.cs(24,12): warning CS8618: Non-nullable field 'o1' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.",
+            suppression.SuppressedDiagnostic.ToString() );
+    }
+
+    [Fact]
+    public async Task SuppressOuterScope()
+    {
+        const string code = """
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Diagnostics;
+
+                            public class SuppressWarningAttribute : TypeAspect
+                            {
+                                private static readonly SuppressionDefinition _suppression1 = new( "CS0169" );
+                            
+                                public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                                {
+                                    builder.Diagnostics.Suppress( _suppression1, builder.Target );
+                                }
+                            }
+
+                            [SuppressWarning]
+                            internal class TargetClass
+                            {
+                                int _field;
+                            }
+                            """;
+
+        var suppressions = await this.ExecuteSuppressorAsync( code, "CS0169" );
+
+        var suppression = Assert.Single( suppressions );
+
+        Assert.Equal( "code.cs(19,9): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
     }
 }

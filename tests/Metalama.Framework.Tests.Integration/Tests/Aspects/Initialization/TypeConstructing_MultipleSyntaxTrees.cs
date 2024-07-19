@@ -1,6 +1,4 @@
-#if TEST_OPTIONS
-// @OutputAllSyntaxTrees
-#endif
+
 
 using System;
 using Metalama.Framework.Advising;
@@ -13,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeTypeConstructor );
+            builder.AddInitializer( nameof(Template), InitializerKind.BeforeTypeConstructor );
         }
 
         [Template]

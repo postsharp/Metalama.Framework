@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstructing_TwoAspects_ImplicitConstructor;
 
-[assembly: AspectOrder(typeof(SecondAspect), typeof(FirstAspect))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(SecondAspect), typeof(FirstAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstructing_TwoAspects_ImplicitConstructor
 {
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeTypeConstructor);
+            builder.AddInitializer( nameof(Template), InitializerKind.BeforeTypeConstructor );
         }
 
         [Template]
@@ -21,17 +21,18 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
             Console.WriteLine( $"{meta.Target.Type.Name}: {meta.AspectInstance.AspectClass.ShortName} First" );
         }
     }
+
     public class SecondAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer(builder.Target, nameof(Template), InitializerKind.BeforeTypeConstructor);
+            builder.AddInitializer( nameof(Template), InitializerKind.BeforeTypeConstructor );
         }
 
         [Template]
         public void Template()
         {
-            Console.WriteLine($"{meta.Target.Type.Name}: {meta.AspectInstance.AspectClass.ShortName} Second");
+            Console.WriteLine( $"{meta.Target.Type.Name}: {meta.AspectInstance.AspectClass.ShortName} Second" );
         }
     }
 

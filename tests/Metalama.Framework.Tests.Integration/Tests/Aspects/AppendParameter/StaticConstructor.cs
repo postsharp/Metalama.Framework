@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,7 +8,7 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceParameter( builder.Target.StaticConstructor!, "p", typeof(int), TypedConstant.Create( 15 ) );
+        builder.With( builder.Target.StaticConstructor! ).IntroduceParameter( "p", typeof(int), TypedConstant.Create( 15 ) );
     }
 }
 

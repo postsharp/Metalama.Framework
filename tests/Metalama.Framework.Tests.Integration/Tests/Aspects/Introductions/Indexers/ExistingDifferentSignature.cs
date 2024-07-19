@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,24 +7,21 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
 {
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
-                new[] { (typeof(int), "x"), (typeof(int), "y") },
+            builder.IntroduceIndexer(
+                new[] { ( typeof(int), "x" ), ( typeof(int), "y" ) },
                 nameof(ExistingIndexer),
                 nameof(ExistingIndexer),
                 whenExists: OverrideStrategy.Override,
-                buildIndexer: i =>
-                {
-                    i.Type = TypeFactory.GetType(typeof(int));
-                });
+                buildIndexer: i => { i.Type = TypeFactory.GetType( typeof(int) ); } );
         }
 
         [Template]
         public dynamic? ExistingIndexer()
         {
-            Console.WriteLine($"This is introduced indexer {meta.Target.Indexer.Parameters[0].Value} {meta.Target.Indexer.Parameters[1].Value}.");
+            Console.WriteLine( $"This is introduced indexer {meta.Target.Indexer.Parameters[0].Value} {meta.Target.Indexer.Parameters[1].Value}." );
+
             return meta.Proceed();
         }
     }
@@ -32,16 +30,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
     [Introduction]
     internal class TargetClass
     {
-        public virtual int this[int x]
+        public virtual int this[ int x ]
         {
             get
             {
                 return 13;
             }
 
-            set
-            {
-            }
+            set { }
         }
     }
 }

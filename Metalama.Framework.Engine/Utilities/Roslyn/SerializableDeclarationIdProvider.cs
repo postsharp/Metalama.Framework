@@ -74,6 +74,13 @@ public static class SerializableDeclarationIdProvider
                     return true;
                 }
 
+            case IModuleSymbol:
+                {
+                    id = default;
+
+                    return false;
+                }
+
             default:
                 var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
 
@@ -157,7 +164,18 @@ public static class SerializableDeclarationIdProvider
                 return TryGetSerializableId( eventRaisePseudoAccessor.DeclaringMember, DeclarationRefTargetKind.EventRaise, out id );
 
             default:
-                var documentationId = DeclarationDocumentationCommentId.CreateDeclarationId( declaration );
+                string documentationId;
+
+                try
+                {
+                    documentationId = DeclarationDocumentationCommentId.CreateDeclarationId( declaration );
+                }
+                catch ( InvalidOperationException exception )
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot get a DeclarationDocumentationCommentId for '{declaration}' ({declaration.DeclarationKind}).",
+                        exception );
+                }
 
                 if ( targetKind == DeclarationRefTargetKind.Default )
                 {
@@ -171,6 +189,11 @@ public static class SerializableDeclarationIdProvider
                 return true;
         }
     }
+
+    /// <summary>Gets the <see cref="SerializableDeclarationId"/> for the declaration as it appears in the unmodified source code.</summary>
+    /// <remarks>This is relevant in the case of constructor parameter introduction, which alter the serializable ID of the constructor.</remarks>
+    public static SerializableDeclarationId GetSourceSerializableId( this IDeclaration declaration )
+        => declaration.GetSymbol()?.GetSerializableId() ?? declaration.ToSerializableId();
 
     [PublicAPI]
     public static ISymbol ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
@@ -248,6 +271,12 @@ public static class SerializableDeclarationIdProvider
         }
         else
         {
+            // Special case for the global namespace that's not handled by GetFirstSymbolForDeclarationId, see https://github.com/dotnet/roslyn/issues/66976.
+            if ( id.Id == "N:" )
+            {
+                return compilation.Assembly.GlobalNamespace;
+            }
+
             return DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );
         }
     }

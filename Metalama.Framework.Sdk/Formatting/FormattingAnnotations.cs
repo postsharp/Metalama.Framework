@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Formatting
         /// </summary>
         internal static string GeneratedCodeAnnotationKind => MetalamaCompilerAnnotations.GeneratedCodeAnnotationKind;
 
-        private static SyntaxAnnotation? _simplifier;
+        private static SyntaxAnnotation[]? _simplifier;
 
         /// <summary>
         /// Gets an annotation that means that the syntax stems from source code. This can be added to a child node of a node annotated
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Formatting
         internal static void Initialize( SyntaxAnnotation value )
         {
             // This property must be set by the engine assembly because we don't want a dependency on workspaces here.
-            _simplifier = value;
+            _simplifier = [value];
         }
 
         public static T WithSimplifierAnnotation<T>( this T node ) where T : SyntaxNode => node.WithAdditionalAnnotations( _simplifier );

@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -8,23 +9,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Field
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceField(builder.Target, nameof(Field), whenExists: OverrideStrategy.Fail);
+            var result = builder.IntroduceField( nameof(Field), whenExists: OverrideStrategy.Fail );
 
-            if (result.Outcome != Advising.AdviceOutcome.Error)
+            if (result.Outcome != AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Ignored." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceField)
+            if (result.AdviceKind != AdviceKind.IntroduceField)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceField.");
-            }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceField." );
             }
 
             // TODO: #33060

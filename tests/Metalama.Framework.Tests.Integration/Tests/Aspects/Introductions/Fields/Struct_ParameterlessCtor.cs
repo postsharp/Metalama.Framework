@@ -2,6 +2,7 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 # endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct_ParameterlessCtor
@@ -25,9 +26,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct
     [Introduction]
     internal struct TargetStruct
     {
-        public TargetStruct()
-        {
-        }
+        public TargetStruct() { }
 
         public int ExistingField = 42;
 

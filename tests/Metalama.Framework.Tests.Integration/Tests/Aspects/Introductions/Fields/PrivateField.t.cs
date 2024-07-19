@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.PrivateField;

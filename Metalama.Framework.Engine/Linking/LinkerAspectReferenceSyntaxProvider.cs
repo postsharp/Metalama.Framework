@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -46,7 +47,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                 SingletonSeparatedList(
                     Argument(
                         ObjectCreationExpression(
-                            syntaxGenerator.Type( overriddenConstructor.DeclaringType.GetSymbol() ),
+                            syntaxGenerator.Type( overriddenConstructor.DeclaringType ),
                             ArgumentList( SeparatedList( overriddenConstructor.Parameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ),
                             null ) ) ) ) );
 
@@ -132,7 +133,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
             expression =
                 ParenthesizedExpression(
                     syntaxGenerator.SafeCastExpression(
-                        syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                        syntaxGenerator.Type( implementedInterfaceMember.DeclaringType ),
                         ThisExpression() ) );
         }
         else
@@ -174,28 +175,31 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                 var implementedInterfaceMember = targetDeclaration.GetExplicitInterfaceImplementation();
 
                 expression = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ParenthesizedExpression(
-                        syntaxGenerator.SafeCastExpression(
-                            syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
-                            ThisExpression() ) ),
-                    memberName );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ParenthesizedExpression(
+                            syntaxGenerator.SafeCastExpression(
+                                syntaxGenerator.Type( implementedInterfaceMember.DeclaringType ),
+                                ThisExpression() ) ),
+                        memberName )
+                    .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
             }
             else
             {
                 expression = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    memberName );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        memberName )
+                    .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
             }
         }
         else
         {
             expression =
                 MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    syntaxGenerator.Type( targetDeclaration.DeclaringType.GetSymbol() ),
-                    memberName );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        syntaxGenerator.Type( targetDeclaration.DeclaringType ),
+                        memberName )
+                    .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
         }
 
         return expression;

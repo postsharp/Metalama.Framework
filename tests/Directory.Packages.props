@@ -2,6 +2,7 @@
   <!-- Imports Directory.Packages.props of the upper directory. Use this code in any non-root Directory.Build.* even if the file does not exit. -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" Condition="Exists('$([MSBuild]::GetPathOfFileAbove(`Directory.Packages.props`, `$(MSBuildThisFileDirectory)../`))')" />
   <ItemGroup>
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageVersion Include="ComparerExtensions" Version="1.1.0" />
     <PackageVersion Include="coverlet.collector" Version="3.1.2" />
     <PackageVersion Include="coverlet.msbuild" Version="3.1.2" />
@@ -9,6 +10,7 @@
     <PackageVersion Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
     <PackageVersion Include="Metalama.Backstage.Testing" Version="$(MetalamaBackstageVersion)" />
     <PackageVersion Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageVersion Include="Metalama.Framework.Workspaces" Version="$(MetalamaVersion)" />
     <PackageVersion Include="Metalama.Framework.Sdk" Version="$(MetalamaVersion)" />
     <PackageVersion Include="Metalama.Testing.AspectTesting" Version="$(MetalamaVersion)" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="1.9.0" />

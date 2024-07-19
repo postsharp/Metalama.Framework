@@ -1,8 +1,9 @@
+#if TEST_OPTIONS
 // @TestScenario(ApplyCodeFix)
-// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaUltimatePersonalProjectBound)
+// @LicenseKey(MetalamaUltimatePersonalProjectBound)
 // @Include(_CodeFixApplyAspect.cs);
 // @ProjectName(ProjectBoundTestsProject)
-// @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixApplyAspectApplicationAllowedProjectBound;
 

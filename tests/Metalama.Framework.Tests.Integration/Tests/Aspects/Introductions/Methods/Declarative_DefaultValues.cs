@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Declarative_DefaultValues;
@@ -6,41 +7,41 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
 public class IntroductionAttribute : TypeAspect
 {
     [Introduce]
-    public int IntroducedMethod_StringLiteral(string x = "a")
+    public int IntroducedMethod_StringLiteral( string x = "a" )
     {
-        Console.WriteLine($"This is introduced method, x = {x}.");
+        Console.WriteLine( $"This is introduced method, x = {x}." );
 
         return meta.Proceed();
     }
 
     [Introduce]
-    public int IntroducedMethod_StringNullLiteral(string? x = null)
+    public int IntroducedMethod_StringNullLiteral( string? x = null )
     {
-        Console.WriteLine($"This is introduced method, x = {x}.");
+        Console.WriteLine( $"This is introduced method, x = {x}." );
 
         return meta.Proceed();
     }
 
     [Introduce]
-    public int IntroducedMethod_IntLiteral(int x = 27)
+    public int IntroducedMethod_IntLiteral( int x = 27 )
     {
-        Console.WriteLine($"This is introduced method, x = {x}.");
+        Console.WriteLine( $"This is introduced method, x = {x}." );
 
         return meta.Proceed();
     }
 
     [Introduce]
-    public int IntroducedMethod_DefaultLiteral(int x = default)
+    public int IntroducedMethod_DefaultLiteral( int x = default )
     {
-        Console.WriteLine($"This is introduced method, x = {x}.");
+        Console.WriteLine( $"This is introduced method, x = {x}." );
 
         return meta.Proceed();
     }
 
     [Introduce]
-    public int IntroducedMethod_DecimalLiteral(decimal x = 3.14m)
+    public int IntroducedMethod_DecimalLiteral( decimal x = 3.14m )
     {
-        Console.WriteLine($"This is introduced method, x = {x}.");
+        Console.WriteLine( $"This is introduced method, x = {x}." );
 
         return meta.Proceed();
     }

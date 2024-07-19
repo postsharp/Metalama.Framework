@@ -8,10 +8,14 @@ using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -35,6 +39,8 @@ namespace Metalama.Framework.DesignTime
 
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+        private readonly IProjectOptionsFactory _projectOptionsFactory;
+        private readonly UserCodeInvoker _userCodeInvoker;
 
         static TheDiagnosticSuppressor()
         {
@@ -52,6 +58,8 @@ namespace Metalama.Framework.DesignTime
                 this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
                 this._designTimeDiagnosticDefinitions = serviceProvider.GetRequiredService<IUserDiagnosticRegistrationService>().DiagnosticDefinitions;
                 this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+                this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
+                this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
@@ -63,15 +71,14 @@ namespace Metalama.Framework.DesignTime
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
             => this.ReportSuppressions(
-                new SuppressionAnalysisContextAdapter( context ),
+                new SuppressionAnalysisContextAdapter( context, this._projectOptionsFactory ),
                 this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors );
 
         internal void ReportSuppressions(
             ISuppressionAnalysisContext context,
             ImmutableDictionary<string, SuppressionDescriptor> supportedSuppressionDescriptors )
         {
-            if ( MetalamaCompilerInfo.IsActive ||
-                 context.Compilation is not CSharpCompilation compilation )
+            if ( MetalamaCompilerInfo.IsActive || context.Compilation is not CSharpCompilation compilation )
             {
                 return;
             }
@@ -100,9 +107,9 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                // Execute the pipeline.
                 var pipelineResult = pipeline.Execute( compilation, cancellationToken );
 
-                // Execute the pipeline.
                 if ( !pipelineResult.IsSuccessful )
                 {
                     this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
@@ -122,9 +129,9 @@ namespace Metalama.Framework.DesignTime
                 {
                     var syntaxTree = diagnosticGroup.Key;
 
-                    var suppressions = pipelineResult.Value.GetDiagnosticsOnSyntaxTree( syntaxTree.FilePath ).Suppressions;
+                    var suppressions = pipelineResult.Value.GetSuppressionsOnSyntaxTree( syntaxTree.FilePath );
 
-                    var designTimeSuppressions = suppressions.Where( s => supportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) )
+                    var designTimeSuppressions = suppressions.Where( s => supportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) )
                         .ToReadOnlyList();
 
                     if ( designTimeSuppressions.Count == 0 )
@@ -135,48 +142,57 @@ namespace Metalama.Framework.DesignTime
                     var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
 
                     var suppressionsBySymbol =
-                        ImmutableDictionaryOfArray<SerializableDeclarationId, CacheableScopedSuppression>.Create(
+                        ImmutableDictionaryOfArray<SerializableDeclarationId, ISuppression>.Create(
                             designTimeSuppressions,
-                            s => s.DeclarationId );
+                            s => s.DeclarationId,
+                            s => s.Suppression );
 
                     foreach ( var diagnostic in diagnosticGroup )
                     {
-                        var diagnosticNode = syntaxTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                        var diagnosticNode = syntaxTree.GetRoot().FindNode( diagnostic.Location.SourceSpan, getInnermostNodeForTie: true );
 
-                        // Get the node that declares the ISymbol.
                         var memberNode = diagnosticNode.FindSymbolDeclaringNode();
 
-                        if ( memberNode == null )
+                        for ( var node = memberNode; node != null; node = node.Parent )
                         {
-                            continue;
-                        }
+                            var symbol = semanticModel.GetDeclaredSymbol( node );
 
-                        var symbol = semanticModel.GetDeclaredSymbol( memberNode );
-
-                        if ( symbol == null )
-                        {
-                            continue;
-                        }
-
-                        if ( !symbol.TryGetSerializableId( out var symbolId ) )
-                        {
-                            continue;
-                        }
-
-                        foreach ( var suppression in suppressionsBySymbol[symbolId]
-                                     .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
-                        {
-                            suppressionsCount++;
-
-                            if ( supportedSuppressionDescriptors.TryGetValue(
-                                    suppression.Definition.SuppressedDiagnosticId,
-                                    out var suppressionDescriptor ) )
+                            if ( symbol == null || !symbol.TryGetSerializableId( out var symbolId ) )
                             {
-                                context.ReportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
+                                continue;
                             }
-                            else
+
+                            foreach ( var suppression in suppressionsBySymbol[symbolId]
+                                         .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                             {
-                                // We can't report a warning here, but DesignTimeAnalyzer does it.
+                                if ( suppression.Filter is { } filter )
+                                {
+                                    var executionContext = new UserCodeExecutionContext(
+                                        pipeline.ServiceProvider,
+                                        UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ) );
+
+                                    var filterPassed = this._userCodeInvoker.Invoke(
+                                        () => filter( SuppressionFactories.CreateDiagnostic( diagnostic ) ),
+                                        executionContext );
+
+                                    if ( !filterPassed )
+                                    {
+                                        continue;
+                                    }
+                                }
+
+                                suppressionsCount++;
+
+                                if ( supportedSuppressionDescriptors.TryGetValue(
+                                        suppression.Definition.SuppressedDiagnosticId,
+                                        out var suppressionDescriptor ) )
+                                {
+                                    context.ReportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
+                                }
+                                else
+                                {
+                                    // We can't report a warning here, but our design-time analyzer does it.
+                                }
                             }
                         }
                     }

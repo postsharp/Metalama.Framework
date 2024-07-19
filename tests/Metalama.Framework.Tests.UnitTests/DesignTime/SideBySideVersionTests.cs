@@ -41,7 +41,9 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
 
         const string masterCode = """
                                   using System;
-                                  using Metalama.Framework.Aspects;
+                                  using Metalama.Framework.Advising; 
+                                  using Metalama.Framework.Advising;
+                                  using Metalama.Framework.Aspects; 
 
                                   [Inheritable]
                                   public class TheAspect : TypeAspect

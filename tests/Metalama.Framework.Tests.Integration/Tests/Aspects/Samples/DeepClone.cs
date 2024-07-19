@@ -7,6 +7,7 @@
 
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -20,8 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override,
                 args: new { T = builder.Target },
@@ -31,8 +31,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
                     m.ReturnType = builder.Target;
                 } );
 
-            builder.Advice.ImplementInterface(
-                builder.Target,
+            builder.ImplementInterface(
                 typeof(ICloneable),
                 whenExists: OverrideStrategy.Ignore );
         }
@@ -63,7 +62,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
                     f => f.IsAutoPropertyOrField.GetValueOrDefault() &&
                          !f.IsImplicitlyDeclared &&
                          ( ( f.Type.Is( typeof(ICloneable) ) && f.Type.SpecialType != SpecialType.String ) ||
-                           ( f.Type is INamedType {  BelongsToCurrentProject: true } fieldNamedType && fieldNamedType.Enhancements().HasAspect<DeepCloneAttribute>() ) ) );
+                           ( f.Type is INamedType { BelongsToCurrentProject: true } fieldNamedType
+                             && fieldNamedType.Enhancements().HasAspect<DeepCloneAttribute>() ) ) );
 
             foreach (var field in clonableFields)
             {

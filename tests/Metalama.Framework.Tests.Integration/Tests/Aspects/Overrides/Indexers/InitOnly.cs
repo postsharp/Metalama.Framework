@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly;
 
-[assembly: AspectOrder( typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly
 {
@@ -14,12 +15,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), null );
+                builder.With( indexer ).OverrideAccessors( nameof(GetIndexer), null );
             }
 
             foreach (var indexer in builder.Target.Properties)
             {
-                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), null );
+                builder.With( indexer ).OverrideAccessors( nameof(GetIndexer), null );
             }
         }
 
@@ -38,7 +39,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnl
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.OverrideAccessors( property, nameof(GetProperty), nameof(SetProperty) );
+                builder.With( property ).OverrideAccessors( nameof(GetProperty), nameof(SetProperty) );
             }
         }
 

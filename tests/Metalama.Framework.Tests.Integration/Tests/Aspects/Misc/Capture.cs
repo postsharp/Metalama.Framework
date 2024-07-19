@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 
@@ -9,7 +10,7 @@ public class TheAspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         var expression = ExpressionFactory.Capture( DateTime.Now );
-        Console.WriteLine($"Expression type = {expression.Type}");
+        Console.WriteLine( $"Expression type = {expression.Type}" );
 
         return meta.Proceed();
     }

@@ -229,11 +229,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> CannotUseProceedOutOfTemplate
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol, string? Explanation)> CannotUseTemplateOnlyOutOfTemplate
             = new(
                 "LAMA0233",
-                "Cannot use the 'meta.Proceed' method out of a template.",
-                "Cannot use the 'meta.Proceed' method in '{0}' because it is not a template.",
+                "Cannot use a template-only method out of a template.",
+                "Cannot use '{1}' in '{0}' because it is only allowed inside a template.{2}",
                 _category,
                 Error );
 
@@ -450,8 +450,8 @@ namespace Metalama.Framework.Engine.Templating
         internal static readonly DiagnosticDefinition<None> DynamicInLambdaUnsupported
             = new(
                 "LAMA0263",
-                "Dynamic expressions in lambdas are not supported.",
-                "Using a dynamic expression in a lambda is not supported, unless it is casted to IExpression.",
+                "Lambdas or anonymous functions returning a dynamic type are not supported. Consider casting the result to IExpression. For void expressions, use a lambda statement.",
+                "Lambdas or anonymous functions returning a dynamic type are not supported except. Consider casting the result to IExpression.  For void expressions, use a lambda statement.",
                 _category,
                 Error );
 
@@ -527,7 +527,7 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> TemplatesHaveToBeInTemplateProvider
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaredSymbol, INamedTypeSymbol ContainingType)> TemplatesHaveToBeInTemplateProvider
             = new(
                 "LAMA0274",
                 "Templates have to be contained in an aspect, fabric, or a type implementing ITemplateProvider.",
@@ -608,5 +608,13 @@ namespace Metalama.Framework.Engine.Templating
                 "You should remove the parameter list from the type and use explicitly defined constructors instead.",
                 Error,
                 "Non-record primary constructors are not currently supported in compile-time code." );
+
+        internal static readonly DiagnosticDefinition UnknownScopedAnonymousMethod
+            = new(
+                "LAMA0284",
+                _category,
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity.",
+                Error,
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity." );
     }
 }

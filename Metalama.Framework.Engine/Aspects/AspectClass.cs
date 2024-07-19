@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
@@ -11,6 +12,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -37,6 +39,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 {
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
+    private readonly List<AspectClass> _childAspectClasses = new();
     private IAspectDriver? _aspectDriver;
     private ValidatorDriverFactory? _validatorDriverFactory;
     private EligibilityHelper? _eligibilityHelper;
@@ -114,6 +117,8 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this._prototypeAspectInstance = prototype;
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
         this.GeneratedCodeAnnotation = MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( $"aspect '{this.ShortName}'" );
+
+        baseClass?._childAspectClasses.Add( this );
 
         List<string?> layers = new();
 
@@ -398,6 +403,13 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     {
         return this._eligibilityHelper?.GetEligibility( obj, isInheritable ) ?? EligibleScenarios.All;
     }
+
+    [Memo]
+    private IReadOnlyCollection<IAspectClassImpl> DescendantClassesAndSelfImpl => this.SelectManyRecursive( x => x._childAspectClasses, includeRoot: true );
+
+    public IReadOnlyCollection<IAspectClass> DescendantClassesAndSelf => this.DescendantClassesAndSelfImpl;
+
+    IReadOnlyCollection<IAspectClassImpl> IAspectClassImpl.DescendantClassesAndSelf => this.DescendantClassesAndSelfImpl;
 
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
         => this._eligibilityHelper.AssertNotNull().GetIneligibilityJustification( requestedEligibility, describedObject );

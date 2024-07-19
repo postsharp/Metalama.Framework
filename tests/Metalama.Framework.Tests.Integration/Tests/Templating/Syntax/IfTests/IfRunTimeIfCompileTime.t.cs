@@ -1,4 +1,4 @@
-void Method(object a)
+private void Method(object a)
 {
   if (a == null)
   {

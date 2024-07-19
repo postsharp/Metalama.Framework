@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -10,8 +11,8 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer( builder.Target.PrimaryConstructor, StatementFactory.Parse("x = 13;") );
-        builder.Advice.AddInitializer(builder.Target.PrimaryConstructor, StatementFactory.Parse("Y = 27;"));
+        builder.With( builder.Target.PrimaryConstructor! ).AddInitializer( StatementFactory.Parse( "x = 13;" ) );
+        builder.With( builder.Target.PrimaryConstructor! ).AddInitializer( StatementFactory.Parse( "Y = 27;" ) );
     }
 }
 

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -11,22 +12,25 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParamete
 
 internal class Aspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(PropertyBody), args: new { property = builder.Target });
+        builder.With( builder.Target.DeclaringType ).IntroduceMethod( nameof(PropertyBody), args: new { property = builder.Target } );
     }
 
     [Template]
-    string? PropertyBody(IProperty property)
+    private string? PropertyBody( IProperty property )
     {
         var methodBody = property.GetSymbol()
             ?.DeclaringSyntaxReferences
-            .Select(r => r.GetSyntax())
+            .Select( r => r.GetSyntax() )
             .Cast<PropertyDeclarationSyntax>()
-            .Select(SyntaxNode? (p) => p.ExpressionBody ??
-                (p.AccessorList?.Accessors.SingleOrDefault(a => a.Keyword.IsKind(SyntaxKind.GetKeyword)) is var getter ? ((SyntaxNode?)getter?.ExpressionBody ?? getter?.Body) : null))
+            .Select(
+                SyntaxNode? ( p ) => p.ExpressionBody ??
+                                     ( p.AccessorList?.Accessors.SingleOrDefault( a => a.Keyword.IsKind( SyntaxKind.GetKeyword ) ) is var getter
+                                         ? ( (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body )
+                                         : null ) )
             .WhereNotNull()
             .FirstOrDefault();
 
@@ -38,5 +42,8 @@ internal class Aspect : PropertyAspect
 internal class TargetCode
 {
     [Aspect]
-    public int P { get => 42; }
+    public int P
+    {
+        get => 42;
+    }
 }

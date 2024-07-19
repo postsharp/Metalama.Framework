@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 using System;
 
@@ -12,14 +13,16 @@ public record struct SerializableStruct : ICompileTimeSerializable
 
     public class Serializer_Custom : ValueTypeSerializer<SerializableStruct>
     {
-        public override SerializableStruct DeserializeObject( IArgumentsReader initializationArguments)
+        public override SerializableStruct DeserializeObject( IArgumentsReader initializationArguments )
         {
             SerializableStruct s = default;
-            s.Foo = initializationArguments.GetValue<int>("Foo");
+            s.Foo = initializationArguments.GetValue<int>( "Foo" );
+
             return s;
         }
 
-        public override void SerializeObject(SerializableStruct obj, IArgumentsWriter arguments) => arguments.SetValue("Foo", ((SerializableStruct)obj).Foo);
+        public override void SerializeObject( SerializableStruct obj, IArgumentsWriter arguments )
+            => arguments.SetValue( "Foo", ( (SerializableStruct)obj ).Foo );
     }
 }
 
@@ -28,23 +31,21 @@ public class TestAspect : OverrideMethodAspect
 {
     public SerializableStruct SerializedValue;
 
-    public TestAspect(int x)
+    public TestAspect( int x )
     {
         SerializedValue = new SerializableStruct() { Foo = 42 };
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.Foo));
+        Console.WriteLine( meta.CompileTime( SerializedValue.Foo ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 42 )]
+    public virtual void Foo() { }
 }

@@ -1,15 +1,15 @@
-class Target
+internal class Target
 {
   [Test1]
   public MemoryStream M1()
   {
-    _ = (global::System.IO.MemoryStream)(new());
+    _ = (global::System.IO.MemoryStream)new MemoryStream();
     return default;
   }
   [Test2]
   public MemoryStream M2()
   {
-    _ = (global::System.IO.MemoryStream)(new());
+    _ = (global::System.IO.MemoryStream)new MemoryStream();
     return default;
   }
   [Test1]

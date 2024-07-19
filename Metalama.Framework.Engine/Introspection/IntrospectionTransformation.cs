@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
@@ -22,7 +23,7 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
         this.Advice = advice;
     }
 
-    public TransformationKind TransformationKind => this._transformation.TransformationKind;
+    public IntrospectionTransformationKind TransformationKind => this._transformation.TransformationKind;
 
     [Memo]
     public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.Translate( this._compilation );

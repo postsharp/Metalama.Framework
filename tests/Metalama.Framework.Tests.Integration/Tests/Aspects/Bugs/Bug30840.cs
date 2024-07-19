@@ -2,6 +2,7 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30840
         {
             foreach (var fieldOrProperty in builder.Target.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ))
             {
-                builder.Advice.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
+                builder.With( fieldOrProperty ).OverrideAccessors( null, nameof(OverrideSetter) );
             }
         }
 

@@ -30,7 +30,6 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Adds a fixed text to the interpolated string.
         /// </summary>
-        /// <param name="text"></param>
         public void AddText( string? text )
         {
             if ( !string.IsNullOrEmpty( text ) )
@@ -42,9 +41,14 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Adds an expression to the interpolated string.
         /// </summary>
-        /// <param name="expression"></param>
         public void AddExpression( dynamic? expression, int? alignment = null, string? format = null )
             => this._items.Add( new Token( (object?) expression, alignment, format ) );
+
+        /// <summary>
+        /// Adds an expression to the interpolated string.
+        /// </summary>
+        public void AddExpression( IExpression? expression, int? alignment = null, string? format = null )
+            => this._items.Add( new Token( expression, alignment, format ) );
 
         /// <summary>
         /// Creates a compile-time <see cref="IExpression"/> from the current <see cref="ExpressionBuilder"/>.

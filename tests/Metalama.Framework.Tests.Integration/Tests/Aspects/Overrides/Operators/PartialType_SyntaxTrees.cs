@@ -1,8 +1,7 @@
-﻿#if TEST_OPTIONS
-// @OutputAllSyntaxTrees
-#endif
+﻿
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -18,7 +17,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Partia
         {
             foreach (var method in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
-                builder.Advice.Override( method, nameof(Template), tags: new { name = method.Name } );
+                builder.With( method ).Override( nameof(Template), tags: new { name = method.Name } );
             }
         }
 
@@ -35,9 +34,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Partia
     [Override]
     internal partial class TargetClass
     {
-        public static TargetClass operator +(TargetClass a, TargetClass b)
+        public static TargetClass operator +( TargetClass a, TargetClass b )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }

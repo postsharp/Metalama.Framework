@@ -84,7 +84,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
             namedArguments ??= ImmutableArray<KeyValuePair<string, object?>>.Empty;
 
             // Translate provided IType - typed parameters to System.Type to get the correct constructor.
-            // Also translate CompileTimeType to System.Type, since CompileTimeType can't be transalted to a symbol in the run-time assembly.
+            // Also translate CompileTimeType to System.Type, since CompileTimeType can't be translated to a symbol in the run-time assembly.
             var constructorArgumentTypes =
                 constructorArguments
                     .Select( x => x?.GetType() )

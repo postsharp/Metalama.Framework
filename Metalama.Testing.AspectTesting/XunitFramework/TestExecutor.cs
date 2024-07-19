@@ -7,6 +7,7 @@ using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -25,13 +26,14 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
         private readonly GlobalServiceProvider _serviceProvider;
         private readonly ITaskRunner _taskRunner;
         private readonly ITestAssemblyMetadataReader _metadataReader;
+        private readonly TestDiscoverer _discoverer;
 
         public TestExecutor( GlobalServiceProvider serviceProvider, AssemblyName assemblyName )
         {
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
-            TestDiscoverer discoverer = new( serviceProvider, assemblyInfo );
-            var projectProperties = discoverer.GetTestProjectProperties();
+            this._discoverer = new TestDiscoverer( serviceProvider, assemblyInfo );
+            var projectProperties = this._discoverer.GetTestProjectProperties();
 
             this._factory = new TestFactory(
                 serviceProvider,
@@ -50,6 +52,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this._serviceProvider = serviceProvider;
             this._taskRunner = this._serviceProvider.GetRequiredService<ITaskRunner>();
             this._metadataReader = this._serviceProvider.GetRequiredService<ITestAssemblyMetadataReader>();
+            this._discoverer = new TestDiscoverer( serviceProvider, factory.AssemblyInfo );
         }
 
         void IDisposable.Dispose() { }
@@ -64,7 +67,8 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestFrameworkExecutionOptions executionOptions )
         {
-            throw new NotImplementedException();
+            var testCases = this._discoverer.Discover( "", ImmutableHashSet<string>.Empty );
+            this.RunTests( testCases, executionMessageSink, executionOptions );
         }
 
         public void RunTests(
@@ -72,52 +76,42 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             IMessageSink executionMessageSink,
             ITestFrameworkExecutionOptions executionOptions )
         {
+            var testCasesList = testCases.ToList();
             var hasLaunchedDebugger = false;
             var directoryOptionsReader = new TestDirectoryOptionsReader( this._serviceProvider, this._factory.ProjectProperties.SourceDirectory );
 
-            var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
+            var collections = testCasesList.GroupBy( t => t.TestMethod.TestClass.TestCollection );
 
             var tasks = new ConcurrentDictionary<Task, Task>();
-            var semaphore = new SemaphoreSlim( executionOptions.MaxParallelThreadsOrDefault() * 2 );
+
+            // Increasing the concurrency seems detrimental to performance and to responsiveness of the test runner in case of cancellation.
+            var semaphore = new SemaphoreSlim( Environment.ProcessorCount * 2 );
             var eventLock = new object();
+
+            var assemblyMetrics = new Metrics( eventLock );
+
+            executionMessageSink.OnMessage(
+                new TestAssemblyStarting(
+                    testCasesList,
+                    this._factory.TestAssembly,
+                    DateTime.Now,
+                    "CompileTime",
+                    "CompileTime" ) );
 
             foreach ( var collection in collections )
             {
-                var collectionMetrics = new Metrics( eventLock );
+                var collectionMetrics = new Metrics( assemblyMetrics );
 
-                collectionMetrics.Started += () =>
-                {
-                    executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
+                collectionMetrics.Started += () => executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
 
-                    executionMessageSink.OnMessage(
-                        new TestAssemblyStarting(
-                            collection,
-                            collection.Key.TestAssembly,
-                            DateTime.Now,
-                            "CompileTime",
-                            "CompileTime" ) );
-                };
-
-                collectionMetrics.Finished += () =>
-                {
-                    executionMessageSink.OnMessage(
-                        new TestAssemblyFinished(
-                            collection,
-                            collection.Key.TestAssembly,
-                            collectionMetrics.ExecutionTime,
-                            collectionMetrics.TestsRun,
-                            collectionMetrics.TestFailed,
-                            collectionMetrics.TestSkipped ) );
-
-                    executionMessageSink.OnMessage(
-                        new TestCollectionFinished(
-                            collection,
-                            collection.Key,
-                            collectionMetrics.ExecutionTime,
-                            collectionMetrics.TestsRun,
-                            collectionMetrics.TestFailed,
-                            collectionMetrics.TestSkipped ) );
-                };
+                collectionMetrics.Finished += () => executionMessageSink.OnMessage(
+                    new TestCollectionFinished(
+                        collection,
+                        collection.Key,
+                        collectionMetrics.ExecutionTime,
+                        collectionMetrics.TestsRun,
+                        collectionMetrics.TestFailed,
+                        collectionMetrics.TestSkipped ) );
 
                 var projectMetadata = this._metadataReader.GetMetadata( collection.Key.TestAssembly.Assembly );
 
@@ -225,6 +219,15 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 #pragma warning disable VSTHRD002
             Task.WhenAll( tasks.Keys ).Wait();
 #pragma warning restore VSTHRD002
+
+            executionMessageSink.OnMessage(
+                new TestAssemblyFinished(
+                    testCasesList,
+                    this._factory.TestAssembly,
+                    assemblyMetrics.ExecutionTime,
+                    assemblyMetrics.TestsRun,
+                    assemblyMetrics.TestFailed,
+                    assemblyMetrics.TestSkipped ) );
         }
 
         private async Task RunTestAsync(

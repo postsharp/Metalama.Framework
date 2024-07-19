@@ -1,22 +1,24 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Array.Array_Error
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             // Error: cannot mix build-time and run-time.
             var a = new object[] { meta.Target.Compilation, meta.This };
+
             return default;
         }
     }
-    
-    class TargetCode
+
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

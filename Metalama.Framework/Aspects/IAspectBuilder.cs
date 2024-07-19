@@ -6,6 +6,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
+using System;
 using System.Threading;
 
 namespace Metalama.Framework.Aspects
@@ -82,15 +83,30 @@ namespace Metalama.Framework.Aspects
         /// Returns a copy of the current <see cref="IAspectBuilder"/>, for use in the current execution context,
         /// but for a different <see cref="Target"/> declaration.
         /// </summary>
+        IAspectBuilder<T> With<T>( T declaration )
+            where T : class, IDeclaration;
+
+        [Obsolete( "Use the With method." )]
         IAspectBuilder<T> WithTarget<T>( T newTarget )
             where T : class, IDeclaration;
+        
+        /// <summary>
+        /// Gets or sets the tags passed to all advice added by the current <see cref="IAspect{T}.BuildAspect"/> method. These tags
+        /// can be consumed from the <c>meta.Tags</c> property.
+        /// </summary>
+        /// <remarks>
+        /// Advice always receive the <i>last</i> value of the property, when the <see cref="IAspect{T}.BuildAspect"/> exits.
+        /// These tags are merged with the ones passed as an argument of the <c>tags</c> parameter of any advise method.
+        /// In case of conflit, the values passed to the advise method win.
+        /// </remarks>
+        object? Tags { get; set; }
     }
 
     /// <summary>
     /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advice, child
     /// aspects and validators, or report diagnostics. This is a strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
-    public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder, IAspectReceiverSelector<TAspectTarget>
+    public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder, IAdviser<TAspectTarget>
         where TAspectTarget : class, IDeclaration
     {
         /// <summary>
@@ -110,5 +126,12 @@ namespace Metalama.Framework.Aspects
         /// Gets an object that allows to add child advice (even to code added by aspects executed after the current one) and to validate code and code references.
         /// </summary>
         IAspectReceiver<TAspectTarget> Outbound { get; }
+
+        new IAspectBuilder<T> With<T>( T declaration )
+            where T : class, IDeclaration;
+
+        [Obsolete( "Use the With method." )]
+        new IAspectBuilder<T> WithTarget<T>( T newTarget )
+            where T : class, IDeclaration;
     }
 }

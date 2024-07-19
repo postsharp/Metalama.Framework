@@ -67,4 +67,6 @@ public sealed partial class InheritableAspectInstance : IAspectInstance, IAspect
     Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => null;
 
     public int TargetDeclarationDepth { get; }
+
+    ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
 }

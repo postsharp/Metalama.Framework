@@ -1,31 +1,35 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.While.BreakInRunTimeWhile
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            int i = 0;
+            var i = 0;
+
             while (i < meta.Target.Parameters.Count)
             {
                 i++;
+
                 break;
             }
 
-            Console.WriteLine("Test result = " + i);
+            Console.WriteLine( "Test result = " + i );
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

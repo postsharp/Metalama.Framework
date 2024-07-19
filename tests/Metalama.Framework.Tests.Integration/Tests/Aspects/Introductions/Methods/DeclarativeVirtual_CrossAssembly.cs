@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 
@@ -10,7 +11,7 @@ public class InheritedIntroductionAttribute : IntroductionAttribute
 {
     public override void VirtualOverriddenIntroduction()
     {
-        Console.WriteLine("Override template (expected).");
+        Console.WriteLine( "Override template (expected)." );
     }
 }
 

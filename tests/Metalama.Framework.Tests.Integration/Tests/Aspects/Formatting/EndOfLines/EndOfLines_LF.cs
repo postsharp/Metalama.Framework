@@ -7,7 +7,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLines_LF;
 
-[assembly: AspectOrder( typeof(TestAspect1), typeof(TestAspect2) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(TestAspect1), typeof(TestAspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLines_LF
 {

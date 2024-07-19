@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -13,6 +14,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     public interface IInterface
     {
         void Foo();
+
         void Bar();
     }
 
@@ -20,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.WithTemplateProvider(new TemplateProvider()).ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.Advice.WithTemplateProvider( new TemplateProvider() ).ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
     }
 
@@ -29,16 +31,16 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [InterfaceMember]
         public void Foo()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 
     public class TemplateProvider : TemplateProviderBase
-    { 
+    {
         [InterfaceMember]
         public void Bar()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 

@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -16,24 +18,31 @@ namespace Metalama.Framework.Engine.AspectOrdering;
 internal static class AspectLayerSorter
 {
     public static bool TrySort(
-        ImmutableArray<AspectLayer> unsortedAspectLayers,
+        IReadOnlyCollection<IAspectClassImpl> aspectClasses,
         IReadOnlyList<IAspectOrderingSource> aspectOrderingSources,
         IDiagnosticAdder diagnosticAdder,
         out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
         => TrySort(
-            unsortedAspectLayers,
+            aspectClasses,
             aspectOrderingSources.SelectMany( s => s.GetAspectOrderSpecification( diagnosticAdder ) ).ToImmutableArray(),
             diagnosticAdder,
             out sortedAspectLayers );
 
     private static bool TrySort(
-        ImmutableArray<AspectLayer> unsortedAspectLayers,
+        IReadOnlyCollection<IAspectClassImpl> aspectClasses,
         IReadOnlyList<AspectOrderSpecification> relationships,
         IDiagnosticAdder diagnosticAdder,
         out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
     {
+        var unsortedAspectLayers = aspectClasses
+            .Where( t => !t.IsAbstract )
+            .SelectMany( at => at.Layers )
+            .ToReadOnlyList();
+
+        var aspectsByName = aspectClasses.ToDictionary( a => a.FullName, a => a );
+
         // Build a graph of dependencies between unordered transformations.
-        var n = unsortedAspectLayers.Length;
+        var n = unsortedAspectLayers.Count;
 
         var partNameToIndexMapping =
             unsortedAspectLayers
@@ -56,28 +65,58 @@ internal static class AspectLayerSorter
 
             foreach ( var matchExpression in relationship.OrderedLayers )
             {
-                // Map the part string to a set of indices. We don't require the match to exist because it is a normal case
-                // to specify ordering for aspects that exist but are not necessarily a part of the current compilation.
-                ImmutableArray<int> currentIndices;
+                var indexOfColon = matchExpression.IndexOfOrdinal( ':' );
 
-                if ( matchExpression.EndsWith( ":*", StringComparison.Ordinal ) )
+                string aspectName;
+                string? layerName;
+
+                if ( indexOfColon < 0 )
                 {
-                    var aspectName = matchExpression.Substring( 0, matchExpression.Length - 2 );
-                    currentIndices = aspectNameToIndicesMapping[aspectName];
+                    aspectName = matchExpression;
+                    layerName = null;
+                }
+                else if ( indexOfColon == 0 )
+                {
+                    throw new AssertionFailedException();
                 }
                 else
                 {
-                    if ( partNameToIndexMapping.TryGetValue( matchExpression, out var currentIndex ) )
+                    aspectName = matchExpression.Substring( 0, indexOfColon );
+                    layerName = matchExpression.Substring( indexOfColon + 1 );
+                }
+
+                if ( !aspectsByName.TryGetValue( aspectName, out var aspect ) )
+                {
+                    continue;
+                }
+
+                var currentIndices = ImmutableArray.CreateBuilder<int>();
+
+                var affectedAspects = relationship.ApplyToDerivedTypes 
+                    ? aspect.DescendantClassesAndSelf.Where( c => !c.IsAbstract ) 
+                    : [aspect];
+
+                foreach ( var descendant in affectedAspects )
+                {
+                    // Map the part string to a set of indices. We don't require the match to exist because it is a normal case
+                    // to specify ordering for aspects that exist but are not necessarily a part of the current compilation.
+
+                    if ( layerName == "*" )
                     {
-                        currentIndices = ImmutableArray.Create( currentIndex );
+                        currentIndices.AddRange( aspectNameToIndicesMapping[descendant.FullName] );
                     }
                     else
                     {
-                        currentIndices = ImmutableArray<int>.Empty;
+                        var descendentLayer = layerName != null ? descendant.FullName + ":" + layerName : descendant.FullName;
+
+                        if ( partNameToIndexMapping.TryGetValue( descendentLayer, out var currentIndex ) )
+                        {
+                            currentIndices.Add( currentIndex );
+                        }
                     }
                 }
 
-                if ( !currentIndices.IsEmpty )
+                if ( currentIndices.Count > 0 )
                 {
                     if ( !previousIndices.IsEmpty )
                     {
@@ -98,7 +137,7 @@ internal static class AspectLayerSorter
                         }
                     }
 
-                    previousIndices = currentIndices;
+                    previousIndices = currentIndices.ToImmutable();
                 }
             }
         }
@@ -144,7 +183,7 @@ internal static class AspectLayerSorter
         if ( cycle >= 0 )
         {
             // Build a string containing the unITransformations of the cycle.
-            Stack<int> cycleStack = new( unsortedAspectLayers.Length );
+            Stack<int> cycleStack = new( unsortedAspectLayers.Count );
 
             var cursor = cycle;
 
@@ -217,7 +256,7 @@ internal static class AspectLayerSorter
                 }
 
                 // At this stage, all aspects should be ordered.
-                throw new AssertionFailedException( $"Nodes '{unsortedAspectLayers[i]}' and 'unsortedAspectLayers[j]' are not sorted." );
+                throw new AssertionFailedException( $"Nodes '{unsortedAspectLayers[i]}' and '{unsortedAspectLayers[j]}' are not sorted." );
             } );
 
         // Build the ordered list of aspects and assign the distance.

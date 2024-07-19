@@ -13,7 +13,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
             // Verifies that custom serializer (with constructor phase) defined in the base type is correctly consumed by the generated serializer in the derived type.
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -92,7 +93,8 @@ public class B : A
             // Verifies that custom serializer (without constructor phase) defined in the base type is correctly consumed by the generated serializer in the derived type.
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -162,7 +164,8 @@ public class B : A
             // Verifies that custom serializer defined in the base type is correctly consumed by the generated serializer in the derived type.
             const string code = @"
 using System;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable

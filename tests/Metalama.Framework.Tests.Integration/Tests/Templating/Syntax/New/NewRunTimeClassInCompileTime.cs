@@ -1,24 +1,25 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.New.NewRunTimeClassInCompileTime
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var o = meta.CompileTime(new TargetCode());
-            Console.WriteLine(o.GetType().ToString());
+            var o = meta.CompileTime( new TargetCode() );
+            Console.WriteLine( o.GetType().ToString() );
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

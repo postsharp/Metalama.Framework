@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -54,8 +56,11 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             DiffStrategy strategy,
             ImmutableDictionary<ProjectKey, IProjectVersion>? referencedCompilations = null, // Can be null for test scenarios.
             ImmutableHashSet<string>? referencesPortableExecutables = null,
+            IServiceProvider? serviceProvider = null,
             CancellationToken cancellationToken = default )
         {
+            ILogger? logger = null;
+
             referencedCompilations ??= ImmutableDictionary<ProjectKey, IProjectVersion>.Empty;
             referencesPortableExecutables ??= ImmutableHashSet<string>.Empty;
 
@@ -72,6 +77,32 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 if ( SourceGeneratorHelper.IsGeneratedFile( syntaxTree ) )
                 {
                     generatedSyntaxTrees.Add( syntaxTree );
+
+                    continue;
+                }
+
+                if ( syntaxTreesBuilder.TryGetValue( syntaxTree.FilePath, out var existingTreeVersion ) )
+                {
+                    logger ??= serviceProvider?.GetLoggerFactory().GetLogger( nameof(ProjectVersion) );
+
+                    if ( logger?.Warning is { } warningLogger )
+                    {
+                        if ( existingTreeVersion.SyntaxTree.GetRoot( cancellationToken ).IsEquivalentTo( syntaxTree.GetRoot( cancellationToken ) ) )
+                        {
+                            warningLogger.Log( $"Two trees with the path '{syntaxTree.FilePath}' and the same code are included in the compilation; ignoring the second one." );
+                        }
+                        else
+                        {
+                            warningLogger.Log(
+                                $"""
+                                Two trees with the path '{syntaxTree.FilePath}' and different code are included in the compilation; ignoring the second one.
+                                Tree 1:
+                                {existingTreeVersion.SyntaxTree}
+                                Tree 2:
+                                {syntaxTree}
+                                """ );
+                        }
+                    }
 
                     continue;
                 }

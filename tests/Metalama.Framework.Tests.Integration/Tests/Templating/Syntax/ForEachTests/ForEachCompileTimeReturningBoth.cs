@@ -2,23 +2,23 @@
 
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEach.CompileTimeReturningBoth
 {
-
     [CompileTime]
-    class CompileTimeClass
+    internal class CompileTimeClass
     {
         public IEnumerable<int> compileTimeEnumerable = new[] { 1, 2, 3 };
     }
 
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var compileTimeObject = new CompileTimeClass();
 
@@ -26,19 +26,18 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEach.Compile
             {
                 Console.WriteLine( x.ToString() );
             }
-            
-            foreach (var x in meta.RunTime( compileTimeObject.compileTimeEnumerable) )
+
+            foreach (var x in meta.RunTime( compileTimeObject.compileTimeEnumerable ))
             {
                 Console.WriteLine( x.ToString() );
             }
 
-
             return meta.Proceed();
         }
     }
-    
-    class TargetCode
+
+    internal class TargetCode
     {
-        void Method() {}
+        private void Method() { }
     }
 }

@@ -15,14 +15,15 @@ public class Aspect1 : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse($"Property = 13;"), InitializerKind.BeforeInstanceConstructor);
+        builder.AddInitializer( StatementFactory.Parse( $"Property = 13;" ), InitializerKind.BeforeInstanceConstructor );
     }
 }
+
 public class Aspect2 : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse($"Property = 42;"), InitializerKind.BeforeInstanceConstructor);
+        builder.AddInitializer( StatementFactory.Parse( $"Property = 42;" ), InitializerKind.BeforeInstanceConstructor );
     }
 }
 
@@ -31,7 +32,7 @@ public class Aspect2 : TypeAspect
 // <target>
 [Aspect1]
 [Aspect2]
-abstract class TargetCode()
+internal abstract class TargetCode()
 {
     public int Property { get; }
 }

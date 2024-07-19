@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAssembly;
@@ -5,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAssembly
 {
@@ -53,7 +54,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAss
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(Template) );
+                builder.With( method ).Override( nameof(Template) );
             }
         }
 

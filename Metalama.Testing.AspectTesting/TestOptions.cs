@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
@@ -63,6 +62,12 @@ public class TestOptions
     /// You can only define this option in the <c>metalamaTests.json</c> file of a directory. This setting is for Metalama internal use only.
     /// </summary>
     public string? TestRunnerFactoryType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the type implementing the <see cref="ILicenseKeyProvider"/>. This property is required when
+    /// <see cref="LicenseKey"/> or <see cref="DependencyLicenseKey"/> is specified.
+    /// </summary>
+    public string? LicenseKeyProviderType { get; set; }
 
     /// <summary>
     /// Gets the list of assembly names that should be included in the compilation.
@@ -244,13 +249,6 @@ public class TestOptions
     public string? ExpectedEndOfLine { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether all input syntax trees should be used as a part of test output. 
-    /// If <c>false</c> only the primary syntax tree is processed and used as test output. If <c>true</c>, all syntax trees are processed and used as test output.
-    /// To set this option in a test, add this comment to your test file: <c>// @OutputAllSyntaxTrees</c>.
-    /// </summary>
-    public bool? OutputAllSyntaxTrees { get; set; }
-
-    /// <summary>
     /// Gets or sets the version of the C# language that the test should be compiled with.
     /// To set this option in a test, add this comment to your test file: <c>// @LanguageVersion(version)</c>.
     /// </summary>
@@ -269,20 +267,16 @@ public class TestOptions
     public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
 
     /// <summary>
-    /// Gets or sets the name of a file in the project directory containing the license key.
-    /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
+    /// Gets or sets the name of the license key used to compile the test input. The <see cref="LicenseKeyProviderType"/> property must be specified.
+    /// To set this option in a test, add this comment to your test file: <c>// @LicenseKey(name)</c>. 
     /// </summary>
-    public string? LicenseFile { get; set; }
-
-    public string? LicenseExpression { get; set; }
+    public string? LicenseKey { get; set; }
 
     /// <summary>
-    /// Gets or sets the name of a file in the project directory containing the license key to be used to compile the dependency.
-    /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
+    /// Gets or sets the name of the license key used to compile the test dependency. The <see cref="LicenseKeyProviderType"/> property must be specified.
+    /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseKey(name)</c>. 
     /// </summary>
-    public string? DependencyLicenseFile { get; set; }
-
-    public string? DependencyLicenseExpression { get; set; }
+    public string? DependencyLicenseKey { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether an error should be reported if the compilation uses aspects that
@@ -368,6 +362,14 @@ public class TestOptions
 
     public bool? TestUnformattedOutput { get; set; }
 
+    internal void SetFullPaths( string directory )
+    {
+        for ( var i = 0; i < this.IncludedFiles.Count; i++ )
+        {
+            this.IncludedFiles[i] = Path.GetFullPath( Path.Combine( directory, this.IncludedFiles[i] ) );
+        }
+    }
+
     /// <summary>
     /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
     /// that is not defined in the current object but defined in the argument.
@@ -383,6 +385,8 @@ public class TestOptions
         this.IncludeAllSeverities ??= baseOptions.IncludeAllSeverities;
 
         this.TestRunnerFactoryType ??= baseOptions.TestRunnerFactoryType;
+
+        this.LicenseKeyProviderType ??= baseOptions.LicenseKeyProviderType;
 
         this.WriteInputHtml ??= baseOptions.WriteInputHtml;
 
@@ -427,15 +431,9 @@ public class TestOptions
 
         this.DependencyDefinedConstants.AddRange( baseOptions.DependencyDefinedConstants );
 
-        this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
+        this.LicenseKey ??= baseOptions.LicenseKey;
 
-        this.LicenseFile ??= baseOptions.LicenseFile;
-
-        this.LicenseExpression ??= baseOptions.LicenseExpression;
-
-        this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
-
-        this.DependencyLicenseExpression ??= baseOptions.DependencyLicenseExpression;
+        this.DependencyLicenseKey ??= baseOptions.DependencyLicenseKey;
 
         this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
 
@@ -471,9 +469,12 @@ public class TestOptions
     /// <summary>
     /// Parses <c>// @</c> directives from source code and apply them to the current object. 
     /// </summary>
-    internal void ApplySourceDirectives( string sourceCode )
+    internal void ApplySourceDirectives( string sourceCode, string? path )
     {
-        foreach ( Match? option in _optionRegex.Matches( sourceCode ) )
+        var options = _optionRegex.Matches( sourceCode );
+        var ifDirectiveIndex = sourceCode.IndexOf( "#if", StringComparison.InvariantCulture );
+
+        foreach ( Match? option in options )
         {
             if ( option == null )
             {
@@ -482,6 +483,11 @@ public class TestOptions
 
             var optionName = option.Groups["name"].Value;
             var optionArg = option.Groups["arg"].Value;
+
+            if ( ifDirectiveIndex < 0 || option.Index < ifDirectiveIndex )
+            {
+                throw new InvalidTestOptionException( $"The '@{optionName}' option must be in an #if block in '{path}'." );
+            }
 
             switch ( optionName )
             {
@@ -517,7 +523,7 @@ public class TestOptions
 
                 case "DesignTime":
                     this.TestRunnerFactoryType =
-                        "Metalama.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory";
+                        "Metalama.Testing.AspectTesting.DesignTimeTestRunnerFactory, Metalama.Testing.AspectTesting";
 
                     break;
 
@@ -543,8 +549,8 @@ public class TestOptions
                     }
                     else
                     {
-                        throw new InvalidOperationException(
-                            $"'{optionArg} is not a TestScenario value. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
+                        throw new InvalidTestOptionException(
+                            $"'{optionArg} is not a TestScenario value in '{path}'. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
                     }
 
                     break;
@@ -627,7 +633,7 @@ public class TestOptions
                     }
                     else
                     {
-                        throw new InvalidOperationException( $"'{optionArg} is not a valid code fix index number." );
+                        throw new InvalidTestOptionException( $"'{optionArg} is not a valid code fix index number in '{path}'." );
                     }
 
                     break;
@@ -657,11 +663,6 @@ public class TestOptions
 
                     break;
 
-                case "OutputAllSyntaxTrees":
-                    this.OutputAllSyntaxTrees = true;
-
-                    break;
-
                 case "AssemblyReference":
                     this.References.Add( new TestAssemblyReference { Name = optionArg } );
 
@@ -682,7 +683,7 @@ public class TestOptions
                         else
                         {
                             // Throwing here may kill test discovery. 
-                            throw new InvalidOperationException( $"@LanguageVersion '{optionArg}' is not a valid language version." );
+                            throw new InvalidTestOptionException( $"@LanguageVersion '{optionArg}' is not a valid language version in '{path}'." );
                         }
                     }
 
@@ -703,7 +704,7 @@ public class TestOptions
                         else
                         {
                             // Throwing here may kill test discovery. 
-                            throw new InvalidOperationException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version." );
+                            throw new InvalidTestOptionException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version in '{path}'." );
                         }
                     }
 
@@ -725,27 +726,15 @@ public class TestOptions
 
                     break;
 
-                case "LicenseFile":
+                case "LicenseKey":
 
-                    this.LicenseFile = optionArg;
-
-                    break;
-
-                case "LicenseExpression":
-
-                    this.LicenseExpression = optionArg;
+                    this.LicenseKey = optionArg;
 
                     break;
 
-                case "DependencyLicenseFile":
+                case "DependencyLicenseKey":
 
-                    this.DependencyLicenseFile = optionArg;
-
-                    break;
-
-                case "DependencyLicenseExpression":
-
-                    this.DependencyLicenseExpression = optionArg;
+                    this.DependencyLicenseKey = optionArg;
 
                     break;
 
@@ -828,18 +817,8 @@ public class TestOptions
     /// </summary>
     internal void ApplyOptions( string sourceCode, string path, TestDirectoryOptionsReader optionsReader )
     {
-        this.ApplySourceDirectives( sourceCode );
+        this.ApplySourceDirectives( sourceCode, path );
         this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
-    }
-
-    internal static string ReadLicenseExpression( string licenseExpression )
-    {
-        if ( licenseExpression.Split( ';' ) is not [var type, var property] )
-        {
-            throw new InvalidOperationException( $"Could not parse license expression '{licenseExpression}'." );
-        }
-
-        return Type.GetType( type ).AssertNotNull().GetProperty( property ).AssertNotNull().GetValue( null ).AssertNotNull().AssertCast<string>();
     }
 
     internal TestContextOptions ApplyToTestContextOptions( TestContextOptions testContextOptions )

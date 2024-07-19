@@ -9,10 +9,11 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using RoslynProject = Microsoft.CodeAnalysis.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 {
-    internal sealed class UserProcessTransformationPreviewService : ITransformationPreviewService
+    internal sealed class UserProcessTransformationPreviewService : ITransformationPreviewService2
     {
         private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
@@ -51,7 +52,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 
             if ( !unformattedResult.IsSuccessful )
             {
-                result[0] = PreviewTransformationResult.Failure( unformattedResult.ErrorMessages ?? Array.Empty<string>() );
+                result[0] = PreviewTransformationResult.Failure( unformattedResult.ErrorMessages ?? [] );
 
                 return;
             }
@@ -59,6 +60,17 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var formattedSyntaxTree = await FormatOutputAsync( document, unformattedResult, cancellationToken );
 
             result[0] = PreviewTransformationResult.Success( formattedSyntaxTree.AssertNotNull(), unformattedResult.ErrorMessages );
+        }
+
+        public Task PreviewGeneratedFileAsync(
+            RoslynProject project,
+            string filePath,
+            IPreviewTransformationResult[] result,
+            CancellationToken cancellationToken )
+        {
+            var emptyDocument = project.AddDocument( Path.GetFileName( filePath ), SyntaxFactory.CompilationUnit(), filePath: filePath );
+
+            return this.PreviewTransformationAsync( emptyDocument, result, cancellationToken );
         }
 
         internal static async Task<SyntaxTree?> FormatOutputAsync(
@@ -82,8 +94,8 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var newProject = newDocument.Project.WithAnalyzerReferences( [] );
             newDocument = newProject.GetDocument( document.Id )!;
 
-            var formattedDocument = await OutputCodeFormatter.FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
-            var formattedSyntaxTree = await formattedDocument.Document.GetSyntaxTreeAsync( cancellationToken );
+            var formattedDocument = await new CodeFormatter().FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
+            var formattedSyntaxTree = await formattedDocument.GetSyntaxTreeAsync( cancellationToken );
 
             return formattedSyntaxTree;
         }

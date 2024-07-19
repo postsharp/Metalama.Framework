@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 using System;
 
@@ -15,10 +16,10 @@ public class BaseType : ICompileTimeSerializable
 
     public ValueContainer BaseContainer { get; }
 
-    public BaseType(int baseValue)
+    public BaseType( int baseValue )
     {
-        this.BaseValue = baseValue;
-        this.BaseContainer = new ValueContainer(baseValue);
+        BaseValue = baseValue;
+        BaseContainer = new ValueContainer( baseValue );
     }
 }
 
@@ -27,26 +28,22 @@ public class ValueContainer : ICompileTimeSerializable
 {
     public int Value { get; }
 
-    public ValueContainer(int value)
+    public ValueContainer( int value )
     {
-        this.Value = value;
+        Value = value;
     }
 }
 
 [RunTimeOrCompileTime]
 public class MiddleType : BaseType
 {
-    public MiddleType(int baseValue) : base(baseValue)
-    {
-    }
+    public MiddleType( int baseValue ) : base( baseValue ) { }
 }
 
 [RunTimeOrCompileTime]
 public class DerivedType : MiddleType
 {
-    public DerivedType(int baseValue) : base( baseValue)
-    {
-    }
+    public DerivedType( int baseValue ) : base( baseValue ) { }
 }
 
 [Inheritable]
@@ -54,24 +51,22 @@ public class TestAspect : OverrideMethodAspect
 {
     public DerivedType SerializedValue;
 
-    public TestAspect(int x)
+    public TestAspect( int x )
     {
-        SerializedValue = new DerivedType(x);
+        SerializedValue = new DerivedType( x );
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.BaseValue));
-        Console.WriteLine(meta.CompileTime(SerializedValue.BaseContainer.Value));
+        Console.WriteLine( meta.CompileTime( SerializedValue.BaseValue ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.BaseContainer.Value ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 42 )]
+    public virtual void Foo() { }
 }

@@ -5,19 +5,20 @@
   </PropertyGroup>
   <!-- Set versions of dependencies that need special treatment or consist of multiple packages of the same version. -->
   <PropertyGroup>
-    <!-- MSBuild v17.4.0 does not support .NET 6.0 and there seems to be no benefit in referencing a high version. -->
-    <MicrosoftBuildVersion>17.3.2</MicrosoftBuildVersion>
     <PostSharpEngineeringVersion Condition="'$(PostSharpEngineeringVersion)'==''">2023.2.111</PostSharpEngineeringVersion>
     <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
     <PostSharpPackageVersion>2024.1.4</PostSharpPackageVersion>
-    <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
+    <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. -->
     <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
     <RoslynApiMaxVersion>4.8.0</RoslynApiMaxVersion>
-    <RoslynVersion>4.8.0</RoslynVersion>
+    <!-- RoslynVersion is the version of Roslyn from which Metalama is forked.  It is imported from the Metalama.Compiler repo.-->
+    <!--<RoslynVersion>IMPORTED!</RoslynVersion>-->
     <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
     <xUnitApiVersion>2.4.2</xUnitApiVersion>
+    <MicrosoftBuildVersion>17.10.4</MicrosoftBuildVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="DiffEngine" Version="15.3.0" />
     <PackageVersion Include="DiffPlex" Version="1.7.2" />
     <PackageVersion Include="JetBrains.Annotations" Version="2024.2.0" />
     <PackageVersion Include="K4os.Hash.xxHash" Version="1.0.8" />
@@ -31,10 +32,11 @@
     <PackageVersion Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
     <PackageVersion Include="Microsoft.Build" Version="$(MicrosoftBuildVersion)" />
     <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
-    <PackageVersion Include="Microsoft.Build.Locator" Version="1.5.6" />
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.7.8" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Net.Compilers.Toolset" Version="$(RoslynVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(RoslynVersion)"/>
     <!-- This version is also used in Metalama.Framework.Private\Directory.Packages.props. -->
     <!-- The version of Microsoft.VisualStudio.Threading must match the one used by StreamJsonRpc -->
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.8.55" />

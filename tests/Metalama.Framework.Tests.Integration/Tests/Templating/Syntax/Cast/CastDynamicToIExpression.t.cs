@@ -1,4 +1,4 @@
-string Method(string a)
+private string Method(string a)
 {
-  return a;
+  return (global::System.String)a;
 }

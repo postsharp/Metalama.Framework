@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( fieldTemplate != null )
             {
-                var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
 
                 if ( fieldTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
@@ -124,7 +124,8 @@ namespace Metalama.Framework.Engine.Advising
             if ( eventFieldTemplate != null )
             {
                 // Initializer template is compiled into a template for event.
-                var templateName = TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
+                var templateName =
+                    TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
 
                 if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
@@ -149,7 +150,7 @@ namespace Metalama.Framework.Engine.Advising
             if ( propertyTemplate != null )
             {
                 // Initializer template is compiled into a template for property.
-                var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
 
                 if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {

@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @Skipped (#31074)
+// @ClearIgnoredDiagnostics
 #endif
 
 #if !TESTRUNNER
@@ -8,6 +8,7 @@
 #pragma warning disable CS0219
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
         // CS0219 expected 
         private void M1( string m )
         {
-            var x = 0;
+            var y = 0;
         }
     }
 }

@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Linking
             void Process( KeyValuePair<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> pair )
             {
                 // Aspect references originating in non-reachable semantics should be ignored.
-                var bag = new ConcurrentBag<ResolvedAspectReference>();
+                var bag = new ConcurrentQueue<ResolvedAspectReference>();
 
                 foreach ( var reference in pair.Value )
                 {
@@ -288,17 +288,17 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( reachableSemantics.Contains( reference.ContainingSemantic ) )
                     {
-                        bag.Add( reference );
+                        bag.Enqueue( reference );
 
-                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesBySource.GetOrAdd(
+                        ((ConcurrentQueue<ResolvedAspectReference>) reachableReferencesBySource.GetOrAdd(
                             reference.ContainingSemantic,
-                            _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
+                            _ => new ConcurrentQueue<ResolvedAspectReference>() )).Enqueue( reference );
 
                         var target = reference.ResolvedSemantic.ToAspectReferenceTarget( reference.TargetKind );
 
-                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesByTarget.GetOrAdd(
+                        ((ConcurrentQueue<ResolvedAspectReference>) reachableReferencesByTarget.GetOrAdd(
                             target,
-                            _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
+                            _ => new ConcurrentQueue<ResolvedAspectReference>() )).Enqueue( reference );
                     }
                 }
 
@@ -308,7 +308,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            await concurrentTaskRunner.RunInParallelAsync( resolvedReferencesBySource, Process, cancellationToken );
+            await concurrentTaskRunner.RunConcurrentlyAsync( resolvedReferencesBySource, Process, cancellationToken );
         }
 
         private static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> GetNonInlinedReferences(
@@ -571,7 +571,7 @@ namespace Metalama.Framework.Engine.Linking
                                             IEventSymbol => null,
                                             IFieldSymbol => null,
                                             INamedTypeSymbol => null,
-                                            _ => throw new AssertionFailedException( $"Symbol not supported: {member.Kind}." )
+                                            _ => throw new AssertionFailedException( $"Symbol not supported: {member}." )
                                         } )
                                 .OfType<IMethodSymbol>() )
                     .Where( m => !injectionRegistry.IsOverride( m ) );
@@ -586,6 +586,12 @@ namespace Metalama.Framework.Engine.Linking
                      || injectionRegistry.IsOverride( reference.TargetSemantic.Symbol ) )
                 {
                     // References to non-methods or non-source semantics are skipped.
+                    continue;
+                }
+
+                if ( !injectionRegistry.IsOverrideTarget( reference.ContainingSemantic.Symbol ) )
+                {
+                    // References from non-overridden methods are skipped. 
                     continue;
                 }
 

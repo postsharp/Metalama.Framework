@@ -1,34 +1,35 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.RunTimeDeclaratorInCompileTimeBlock
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             if (meta.Target.Parameters.Count > 0)
             {
                 var x = 0;
-                Console.WriteLine(x);
+                Console.WriteLine( x );
             }
 
             foreach (var p in meta.Target.Parameters)
             {
                 var y = 0;
-                Console.WriteLine(y);
+                Console.WriteLine( y );
             }
 
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

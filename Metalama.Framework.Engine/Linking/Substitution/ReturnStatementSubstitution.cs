@@ -161,7 +161,7 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                 }
 
             default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
 
         StatementSyntax CreateAssignmentStatement( ExpressionSyntax expression )

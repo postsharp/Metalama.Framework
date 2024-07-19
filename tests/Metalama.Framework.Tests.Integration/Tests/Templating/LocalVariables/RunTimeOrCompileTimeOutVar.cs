@@ -1,31 +1,32 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.RunTimeOrCompileTimeOutVar;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
         if (meta.Target.Parameters.Single().Value > 0)
         {
-            var s = meta.CompileTime("0");
-            int.TryParse(s, out var i);
+            var s = meta.CompileTime( "0" );
+            int.TryParse( s, out var i );
             i++;
-            Console.WriteLine($"i={i}");
+            Console.WriteLine( $"i={i}" );
         }
 
         return meta.Proceed();
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

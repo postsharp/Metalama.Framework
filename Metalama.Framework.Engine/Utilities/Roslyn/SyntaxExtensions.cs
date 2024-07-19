@@ -38,8 +38,6 @@ public static class SyntaxExtensions
     /// <summary>
     /// Find the parent node that declares an <see cref="ISymbol"/>, but not a local variable or a function.
     /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
     public static SyntaxNode? FindSymbolDeclaringNode( this SyntaxNode node )
     {
         var current = node;
@@ -279,16 +277,9 @@ public static class SyntaxExtensions
         return node.WithTrailingTrivia( trailingTrivia );
     }
 
-    internal static TNode WithRequiredTrailingTrivia<TNode>( this TNode node, IList<SyntaxTrivia> trailingTrivia )
-        where TNode : SyntaxNode
-        => node.WithTrailingTrivia( TriviaList( trailingTrivia ) );
-
     internal static TNode WithRequiredTrailingTrivia<TNode>( this TNode node, SyntaxTriviaList trailingTrivia )
         where TNode : SyntaxNode
         => node.WithTrailingTrivia( trailingTrivia );
-
-    internal static SyntaxToken WithRequiredTrailingTrivia( this SyntaxToken token, IList<SyntaxTrivia> trailingTrivia )
-        => token.WithTrailingTrivia( TriviaList( trailingTrivia ) );
 
     internal static SyntaxToken WithRequiredTrailingTrivia( this SyntaxToken token, SyntaxTriviaList trailingTrivia )
         => token.WithTrailingTrivia( trailingTrivia );

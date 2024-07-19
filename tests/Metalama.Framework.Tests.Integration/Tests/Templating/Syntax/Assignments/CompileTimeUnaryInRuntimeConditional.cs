@@ -1,33 +1,33 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.InRuntimeConditional
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var x = meta.CompileTime(0);
+            var x = meta.CompileTime( 0 );
 
-            if (meta.RunTime(true))
+            if (meta.RunTime( true ))
             {
-                x ++;
-                x --;
-                ++ x;
-                -- x;
+                x++;
+                x--;
+                ++x;
+                --x;
             }
-            
-            
-            
+
             meta.InsertComment( "x = " + x.ToString() );
+
             return null;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

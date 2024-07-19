@@ -3,11 +3,13 @@ internal class TargetCode
 {
   public TargetCode()
   {
-    var members = (object[])this.GetType().GetField("members", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(this)!;
-    for (int i = 0; i < members.Length; i++)
+    var members = (object[])GetType().GetField("members", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(this)!;
+    for (var i = 0; i < members.Length; i++)
     {
       if (members[i] == null)
+      {
         throw new Exception($"Member at index {i} was not resolved correctly.");
+      }
     }
   }
   private global::System.Object[] members = new global::System.Object[]

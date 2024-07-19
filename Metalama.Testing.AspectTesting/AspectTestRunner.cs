@@ -12,13 +12,13 @@ using Metalama.Testing.AspectTesting.Licensing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
@@ -44,8 +44,9 @@ internal class AspectTestRunner : BaseTestRunner
         GlobalServiceProvider serviceProvider,
         string? projectDirectory,
         TestProjectReferences references,
-        ITestOutputHelper? logger )
-        : base( serviceProvider, projectDirectory, references, logger ) { }
+        ITestOutputHelper? logger = null,
+        ILicenseKeyProvider? licenseKeyProvider = null )
+        : base( serviceProvider, projectDirectory, references, logger, licenseKeyProvider ) { }
 
     // We don't want the base class to report errors in the input compilation because the pipeline does.
 
@@ -58,8 +59,7 @@ internal class AspectTestRunner : BaseTestRunner
     protected override async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        TestContext testContext,
-        Dictionary<string, object?> state )
+        TestContext testContext )
     {
         if ( this._runCount > 0 )
         {
@@ -71,7 +71,7 @@ internal class AspectTestRunner : BaseTestRunner
             this._runCount++;
         }
 
-        await base.RunAsync( testInput, testResult, testContext, state );
+        await base.RunAsync( testInput, testResult, testContext );
 
         if ( testResult.InputCompilation == null )
         {
@@ -85,7 +85,7 @@ internal class AspectTestRunner : BaseTestRunner
             .WithService( new Observer( testContext.ServiceProvider, testResult ) );
 
         var serviceProviderForThisTestWithLicensing = serviceProviderForThisTestWithoutLicensing
-            .AddLicenseConsumptionManagerForTest( testInput );
+            .AddLicenseConsumptionManagerForTest( testInput, this.LicenseKeyProvider );
 
         var testScenario = testInput.Options.TestScenario ?? TestScenario.Default;
 
@@ -208,24 +208,9 @@ internal class AspectTestRunner : BaseTestRunner
         var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
         testResult.OutputCompilation = resultCompilation;
         testResult.HasOutputCode = true;
-
-        var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+        testResult.DiagnosticSuppressions = pipelineResult.DiagnosticSuppressions;
 
         await testResult.SetOutputCompilationAsync( resultCompilation );
-
-        // Emit binary and report diagnostics.
-        bool MustBeReported( Diagnostic d )
-        {
-            if ( d.Id == "CS1701" )
-            {
-                // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
-                // This warning is ignored by MSBuild anyway.
-                return false;
-            }
-
-            return d.Severity >= minimalVerbosity
-                   && !testInput.ShouldIgnoreDiagnostic( d.Id );
-        }
 
         if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
         {
@@ -235,13 +220,14 @@ internal class AspectTestRunner : BaseTestRunner
             return false;
         }
 
+        // Emit binary and report diagnostics.
         if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
         {
             // We don't build the PDB because the syntax trees were not written to disk anyway.
             var peStream = new MemoryStream();
             var emitResult = resultCompilation.Emit( peStream );
 
-            testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+            testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics );
 
             if ( !emitResult.Success )
             {
@@ -266,7 +252,7 @@ internal class AspectTestRunner : BaseTestRunner
         }
         else
         {
-            testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
+            testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics() );
         }
 
         return true;
@@ -473,9 +459,9 @@ internal class AspectTestRunner : BaseTestRunner
     }
 #endif
 
-    private protected override void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    private protected override void SaveResults( TestInput testInput, TestResult testResult )
     {
-        base.SaveResults( testInput, testResult, state );
+        base.SaveResults( testInput, testResult );
 
         var expectedProgramOutputPath = Path.Combine(
             Path.GetDirectoryName( testInput.FullPath )!,
@@ -537,19 +523,24 @@ internal class AspectTestRunner : BaseTestRunner
             }
         }
 
-        state["actualProgramOutput"] = actualProgramOutput;
-        state["expectedProgramOutput"] = expectedProgramOutput;
+        var aspectTestResult = (AspectTestResult) testResult;
+
+        aspectTestResult.SetProgramOutput( actualProgramOutput, actualProgramOutputPath, expectedProgramOutput, expectedProgramOutputPath );
     }
 
-    protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    protected override void ExecuteAssertions( TestInput testInput, TestResult testResult )
     {
-        base.ExecuteAssertions( testInput, testResult, state );
+        base.ExecuteAssertions( testInput, testResult );
 
         if ( testInput.Options.CompareProgramOutput ?? true )
         {
-            var expectedOutput = (string) state["expectedProgramOutput"]!;
-            var actualOutput = (string) state["actualProgramOutput"]!;
-            Assert.Equal( expectedOutput, actualOutput );
+            var aspectTestResult = (AspectTestResult) testResult;
+
+            this.RunDiffToolIfDifferent(
+                aspectTestResult.ExpectedProgramOutputText!,
+                aspectTestResult.ExpectedProgramOutputPath!,
+                aspectTestResult.ActualProgramOutputText!,
+                aspectTestResult.ActualProgramOutputPath! );
         }
 
 #if DEBUG
@@ -573,5 +564,30 @@ internal class AspectTestRunner : BaseTestRunner
             */
         }
 #endif
+    }
+
+    protected override TestResult CreateTestResult() => new AspectTestResult();
+
+    private sealed class AspectTestResult : TestResult
+    {
+        public string? ActualProgramOutputText { get; private set; }
+
+        public string? ActualProgramOutputPath { get; private set; }
+
+        public string? ExpectedProgramOutputText { get; private set; }
+
+        public string? ExpectedProgramOutputPath { get; private set; }
+
+        public void SetProgramOutput(
+            string actualProgramOutputText,
+            string actualProgramOutputPath,
+            string expectedProgramOutputText,
+            string expectedProgramOutputPath )
+        {
+            this.ActualProgramOutputText = actualProgramOutputText;
+            this.ActualProgramOutputPath = actualProgramOutputPath;
+            this.ExpectedProgramOutputText = expectedProgramOutputText;
+            this.ExpectedProgramOutputPath = expectedProgramOutputPath;
+        }
     }
 }

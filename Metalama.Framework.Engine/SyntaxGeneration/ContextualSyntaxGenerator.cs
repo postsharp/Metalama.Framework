@@ -39,14 +39,18 @@ internal sealed partial class ContextualSyntaxGenerator
         _roslynSyntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
     }
 
-    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache = new( SymbolEqualityComparer.IncludeNullability );
-    private readonly SyntaxGenerationContext _context;
+    private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
+    private readonly ConcurrentDictionary<Ref<IType>, TypeSyntax> _typeSyntaxCache;
 
     public bool IsNullAware { get; }
 
+    public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
     internal ContextualSyntaxGenerator( SyntaxGenerationContext context, bool nullAware )
     {
-        this._context = context;
+        this.SyntaxGenerationContext = context;
+        this._syntaxGeneratorForIType = new SyntaxGeneratorForIType( context.Options );
+        this._typeSyntaxCache = new ConcurrentDictionary<Ref<IType>, TypeSyntax>( RefEqualityComparer<IType>.IncludeNullability );
         this.IsNullAware = nullAware;
     }
 
@@ -69,7 +73,7 @@ internal sealed partial class ContextualSyntaxGenerator
         if ( !keepNullableAnnotations )
         {
             // In regular typeof, we must remove ? annotations of nullable types.
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriterForSymbol( type ).Visit( typeSyntax )!;
         }
 
         var dynamicToVarRewriter = new DynamicToVarRewriter();
@@ -80,7 +84,56 @@ internal sealed partial class ContextualSyntaxGenerator
         SafeSyntaxRewriter rewriter = type switch
         {
             INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => new RemoveTypeArgumentsRewriter(),
-            INamedTypeSymbol { IsGenericType: true } => new RemoveReferenceNullableAnnotationsRewriter( type ),
+            INamedTypeSymbol { IsGenericType: true } => new RemoveReferenceNullableAnnotationsRewriterForSymbol( type ),
+            _ => dynamicToVarRewriter
+        };
+
+        var rewrittenTypeSyntax = rewriter.Visit( typeSyntax ).AssertNotNull();
+
+        // Substitute type arguments.
+        if ( substitutions is { Count: > 0 } )
+        {
+            var substitutionRewriter = new SubstitutionRewriter( substitutions );
+            rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax ).AssertNotNull();
+        }
+
+        return (TypeOfExpressionSyntax) _roslynSyntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
+    }
+
+    public TypeOfExpressionSyntax TypeOfExpression(
+        IType type,
+        IReadOnlyDictionary<string, TypeSyntax>? substitutions = null,
+        bool keepNullableAnnotations = false,
+        bool bypassSymbols = false )
+    {
+        if ( type.GetSymbol() is { } symbol && !bypassSymbols )
+        {
+            return this.TypeOfExpression( symbol, substitutions, keepNullableAnnotations );
+        }
+
+        var typeSyntax = this.Type( type );
+
+        if ( type is INamedType { TypeParameters.Count: > 0, IsCanonicalGenericInstance: true } )
+        {
+            // In generic definitions, we must remove type arguments.
+            typeSyntax = (TypeSyntax) new RemoveTypeArgumentsRewriter().Visit( typeSyntax ).AssertNotNull();
+        }
+
+        if ( !keepNullableAnnotations )
+        {
+            // In regular typeof, we must remove ? annotations of nullable types.
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
+        }
+
+        var dynamicToVarRewriter = new DynamicToVarRewriter();
+
+        // In any typeof, we must change dynamic to object.
+        typeSyntax = (TypeSyntax) dynamicToVarRewriter.Visit( typeSyntax ).AssertNotNull();
+
+        SafeSyntaxRewriter rewriter = type switch
+        {
+            INamedType { TypeParameters.Count: > 0, IsCanonicalGenericInstance: true } => new RemoveTypeArgumentsRewriter(),
+            INamedType { TypeParameters.Count: > 0 } => new RemoveReferenceNullableAnnotationsRewriter( type ),
             _ => dynamicToVarRewriter
         };
 
@@ -110,23 +163,25 @@ internal sealed partial class ContextualSyntaxGenerator
 #pragma warning restore LAMA0830
     }
 
-    public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
-        => SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
-            .WithSimplifierAnnotationIfNecessary( this._context );
+    public DefaultExpressionSyntax DefaultExpression( IType type )
+        => SyntaxFactory.DefaultExpression( this.Type( type ) )
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
     public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax elementType, IEnumerable<SyntaxNode> elements )
     {
         var array = (ArrayCreationExpressionSyntax) _roslynSyntaxGenerator.ArrayCreationExpression( elementType, elements );
 
-        return array.WithType( array.Type.WithSimplifierAnnotationIfNecessary( this._context ) )
-            .NormalizeWhitespaceIfNecessary( this._context );
+        return array.WithType( array.Type.WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ) )
+            .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationContext );
     }
 
     public TypeSyntax Type( SpecialType specialType )
         => (TypeSyntax) _roslynSyntaxGenerator.TypeExpression( specialType )
-            .WithSimplifierAnnotationIfNecessary( this._context );
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
-    public CastExpressionSyntax CastExpression( ITypeSymbol targetTypeSymbol, ExpressionSyntax expression )
+    public CastExpressionSyntax CastExpression( IType targetType, ExpressionSyntax expression ) => this.CastExpression( this.Type( targetType ), expression );
+
+    private CastExpressionSyntax CastExpression( TypeSyntax targetType, ExpressionSyntax expression )
     {
         switch ( expression )
         {
@@ -139,7 +194,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 break;
         }
 
-        return this.SafeCastExpression( this.Type( targetTypeSymbol ), expression );
+        return this.SafeCastExpression( targetType, expression );
     }
 
     public TypeSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
@@ -160,7 +215,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 throw new AssertionFailedException( $"Unexpected symbol kind: {symbol.Kind}." );
         }
 
-        return expression.WithSimplifierAnnotationIfNecessary( this._context );
+        return expression.WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
     }
 
     // ReSharper disable once MemberCanBeMadeStatic.Global
@@ -171,20 +226,21 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public TypeSyntax ArrayTypeExpression( TypeSyntax type )
     {
-        var arrayType = (ArrayTypeSyntax) _roslynSyntaxGenerator.ArrayTypeExpression( type ).WithSimplifierAnnotationIfNecessary( this._context );
+        var arrayType = (ArrayTypeSyntax) _roslynSyntaxGenerator.ArrayTypeExpression( type )
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
         // Roslyn does not specify the rank properly so it needs to be fixed up.
 
         return arrayType.WithRankSpecifiers( SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
     }
 
-    public TypeSyntax ReturnType( IMethod method ) => this.Type( method.ReturnType.GetSymbol() );
+    public TypeSyntax ReturnType( IMethod method ) => this.Type( method.ReturnType );
 
-    public TypeSyntax PropertyType( IProperty property ) => this.Type( property.Type.GetSymbol() );
+    public TypeSyntax PropertyType( IProperty property ) => this.Type( property.Type );
 
-    public TypeSyntax IndexerType( IIndexer indexer ) => this.Type( indexer.Type.GetSymbol() );
+    public TypeSyntax IndexerType( IIndexer indexer ) => this.Type( indexer.Type );
 
-    public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
+    public TypeSyntax EventType( IEvent property ) => this.Type( property.Type );
 
     // ReSharper disable once MemberCanBeMadeStatic.Global
 
@@ -256,7 +312,7 @@ internal sealed partial class ContextualSyntaxGenerator
             {
                 constraints ??= new List<TypeParameterConstraintSyntax>();
 
-                constraints.Add( TypeConstraint( this.Type( typeConstraint.GetSymbol() ) ) );
+                constraints.Add( TypeConstraint( this.Type( typeConstraint ) ) );
             }
 
             if ( genericParameter.HasDefaultConstructorConstraint )
@@ -292,15 +348,38 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         var member = type.GetMembers()
             .OfType<IFieldSymbol>()
-            .FirstOrDefault( f => f is { IsConst: true, ConstantValue: { } } && f.ConstantValue.Equals( value ) );
+            .FirstOrDefault( f => f is { IsConst: true, ConstantValue: not null } && f.ConstantValue.Equals( value ) );
 
-        if ( member == null )
+        return this.EnumValueExpression( this.Type( type ), value, member?.Name );
+    }
+
+    private ExpressionSyntax EnumValueExpression( INamedType type, object value )
+    {
+        if ( type.GetSymbol() is { } symbol )
+        {
+            return this.EnumValueExpression( symbol, value );
+        }
+
+        var member = type.Fields
+            .FirstOrDefault( f => f is { Writeability: Writeability.None, ConstantValue.Value: { } constantValue } && constantValue.Equals( value ) );
+
+        return this.EnumValueExpression( this.Type( type ), value, member?.Name );
+    }
+
+    private ExpressionSyntax EnumValueExpression( TypeSyntax type, object value, string? memberName )
+    {
+        if ( memberName == null )
         {
             return this.CastExpression( type, LiteralExpression( value ) );
         }
         else
         {
-            return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( type ), this.IdentifierName( member.Name ) );
+            return
+                MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        type,
+                        this.IdentifierName( memberName ) )
+                    .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
         }
     }
 
@@ -308,18 +387,18 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         if ( typedConstant.IsNullOrDefault )
         {
-            return this.DefaultExpression( typedConstant.Type.GetSymbol() );
+            return this.DefaultExpression( typedConstant.Type );
         }
         else if ( typedConstant.Type is INamedType { TypeKind: TypeKind.Enum } enumType )
         {
-            return this.EnumValueExpression( enumType.GetSymbol(), typedConstant.Value! );
+            return this.EnumValueExpression( enumType, typedConstant.Value! );
         }
         else if ( typedConstant.Value is ImmutableArray<TypedConstant> immutableArray )
         {
             var elementType = typedConstant.Type.AssertCast<IArrayType>().ElementType;
 
             return this.ArrayCreationExpression(
-                this.Type( elementType.GetSymbol() ),
+                this.Type( elementType ),
                 immutableArray.SelectAsReadOnlyList( item => this.TypedConstant( item ) ) );
         }
         else
@@ -374,11 +453,35 @@ internal sealed partial class ContextualSyntaxGenerator
         return interpolatedString.WithContents( List( contents ) );
     }
 
+    public TypeSyntax Type( IType type, bool bypassSymbols = false )
+    {
+        if ( type.GetSymbol() is { } symbol && !bypassSymbols )
+        {
+            return this.Type( symbol );
+        }
+
+        if ( this.SyntaxGenerationContext.HasCompilationContext && type.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
+        {
+            return this._typeSyntaxCache.AssertNotNull()
+                .GetOrAdd(
+                    type.ToTypedRef(),
+                    static ( _, x ) => x.This.TypeCore( x.Type ),
+                    (This: this, Type: type) );
+        }
+        else
+        {
+            return this.TypeCore( type );
+        }
+    }
+
     public TypeSyntax Type( ITypeSymbol symbol )
     {
-        if ( this._context.HasCompilationContext && symbol.BelongsToCompilation( this._context.CompilationContext ) == true )
+        if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
-            return this._typeSyntaxCache.GetOrAdd( symbol, static ( s, x ) => x.TypeCore( s ), this );
+            return this._typeSyntaxCache.GetOrAdd(
+                symbol.ToTypedRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
+                static ( _, x ) => x.This.TypeCore( x.Type ),
+                (This: this, Type: symbol) );
         }
         else
         {
@@ -386,26 +489,60 @@ internal sealed partial class ContextualSyntaxGenerator
         }
     }
 
-    private TypeSyntax TypeCore( ITypeSymbol symbol )
+    private TypeSyntax TypeCore( IType type )
     {
-        var typeSyntax = (TypeSyntax) _roslynSyntaxGenerator.TypeExpression( symbol ).WithSimplifierAnnotationIfNecessary( this._context );
+        var typeSyntax = this._syntaxGeneratorForIType.TypeExpression( type ).WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
         if ( !this.IsNullAware )
         {
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax ).AssertNotNull();
         }
 
-        // We always need to normalize whitespace in tuples to workaround a Roslyn bug.
-        typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this._context.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
+        if ( this.Options.TriviaMatters )
+        {
+            // Just calling NormalizeWhitespaceIfNecessary here produces ugly whitespace, e.g. "typeof(global::System.Int32[, ])".
+            typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this.SyntaxGenerationContext.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
+        }
 
         return typeSyntax;
     }
 
-    private SyntaxGenerationOptions Options => this._context.Options;
+    private TypeSyntax TypeCore( ITypeSymbol symbol )
+    {
+        var typeSyntax = (TypeSyntax) _roslynSyntaxGenerator.TypeExpression( symbol ).WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
+
+        if ( !this.IsNullAware )
+        {
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriterForSymbol( symbol ).Visit( typeSyntax ).AssertNotNull();
+        }
+
+        // We always need to normalize whitespace in tuples to workaround a Roslyn bug.
+        typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this.SyntaxGenerationContext.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
+
+        return typeSyntax;
+    }
+
+    private SyntaxGenerationOptions Options => this.SyntaxGenerationContext.Options;
 
     public AttributeSyntax Attribute( IAttributeData attribute )
     {
-        var constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
+        var lastParameter = attribute.Constructor.Parameters.LastOrDefault();
+
+        IEnumerable<AttributeArgumentSyntax> constructorArguments;
+
+        if ( lastParameter is { IsParams: true } )
+        {
+            // Use the more compact syntax.
+            var constructorArgumentValues = attribute.ConstructorArguments.ToMutableList();
+            var lastArray = constructorArgumentValues[^1];
+            constructorArgumentValues.RemoveAt( constructorArgumentValues.Count - 1 );
+            constructorArgumentValues.AddRange( lastArray.Values );
+            constructorArguments = constructorArgumentValues.SelectAsReadOnlyCollection( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
+        }
+        else
+        {
+            constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
+        }
 
         var namedArguments = attribute.NamedArguments.SelectAsImmutableArray(
             a => AttributeArgument(
@@ -413,7 +550,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 null,
                 this.AttributeValueExpression( a.Value ) ) );
 
-        var attributeSyntax = SyntaxFactory.Attribute( (NameSyntax) this.Type( attribute.Type.GetSymbol() ) );
+        var attributeSyntax = SyntaxFactory.Attribute( (NameSyntax) this.Type( attribute.Type ) );
 
         var argumentList = AttributeArgumentList( SeparatedList( constructorArguments.Concat( namedArguments ) ) );
 
@@ -465,14 +602,14 @@ internal sealed partial class ContextualSyntaxGenerator
     public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute )
     {
         var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute ) ) )
-            .WithOptionalLeadingTrivia( oldNode.GetLeadingTrivia(), this._context.Options )
-            .WithOptionalTrailingLineFeed( this._context );
+            .WithOptionalLeadingTrivia( oldNode.GetLeadingTrivia(), this.SyntaxGenerationContext.Options )
+            .WithOptionalTrailingLineFeed( this.SyntaxGenerationContext );
 
-        oldNode = oldNode.WithOptionalLeadingTrivia( default(SyntaxTriviaList), this._context.Options );
+        oldNode = oldNode.WithOptionalLeadingTrivia( default(SyntaxTriviaList), this.SyntaxGenerationContext.Options );
 
         if ( attributeList.GetLeadingTrivia().LastOrDefault() is { RawKind: (int) SyntaxKind.WhitespaceTrivia } indentationTrivia )
         {
-            oldNode = oldNode.WithOptionalLeadingTrivia( indentationTrivia, this._context.Options );
+            oldNode = oldNode.WithOptionalLeadingTrivia( indentationTrivia, this.SyntaxGenerationContext.Options );
         }
 
         return oldNode.Kind() switch
@@ -505,7 +642,7 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         if ( typedConstant.IsNullOrDefault )
         {
-            return this.DefaultExpression( typedConstant.Type.GetSymbol() );
+            return this.DefaultExpression( typedConstant.Type );
         }
 
         ExpressionSyntax GetValue( object? value, IType type )
@@ -522,22 +659,22 @@ internal sealed partial class ContextualSyntaxGenerator
 
             switch ( type )
             {
-                case INamedType { TypeKind: TypeKind.Enum }:
-                    return this.EnumValueExpression( (INamedTypeSymbol) type.GetSymbol(), value );
+                case INamedType { TypeKind: TypeKind.Enum } enumType:
+                    return this.EnumValueExpression( enumType, value );
 
                 case IArrayType arrayType:
                     return this.ArrayCreationExpression(
-                        this.Type( arrayType.ElementType.GetSymbol() ),
+                        this.Type( arrayType.ElementType ),
                         ((ImmutableArray<TypedConstant>) value).Select( x => GetValue( x.Value, x.Type ) ) );
 
                 default:
                     switch ( value )
                     {
                         case IType typeValue:
-                            return this.TypeOfExpression( typeValue.GetSymbol() );
+                            return this.TypeOfExpression( typeValue );
 
                         case Type systemTypeValue:
-                            return this.TypeOfExpression( this._context.ReflectionMapper.GetTypeSymbol( systemTypeValue ) );
+                            return this.TypeOfExpression( this.SyntaxGenerationContext.ReflectionMapper.GetTypeSymbol( systemTypeValue ) );
 
                         default:
                             {
@@ -619,7 +756,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 p => Parameter(
                     this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                     p.GetSyntaxModifierList(),
-                    this.Type( p.Type.GetSymbol() ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
+                    this.Type( p.Type ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
                     Identifier( p.Name ),
                     removeDefaultValues || p.DefaultValue == null
                         ? null
@@ -646,15 +783,11 @@ internal sealed partial class ContextualSyntaxGenerator
             }
             else if ( parameter.HasReferenceTypeConstraint )
             {
-                if ( parameter.ReferenceTypeConstraintNullableAnnotation != NullableAnnotation.Annotated )
-                {
-                    constraints = constraints.Add( ClassOrStructConstraint( SyntaxKind.ClassConstraint ) );
-                }
-                else
-                {
-                    constraints = constraints.Add(
-                        ClassOrStructConstraint( SyntaxKind.ClassConstraint ).WithQuestionToken( Token( SyntaxKind.QuestionToken ) ) );
-                }
+                constraints =
+                    constraints.Add(
+                        parameter.ReferenceTypeConstraintNullableAnnotation != NullableAnnotation.Annotated
+                            ? ClassOrStructConstraint( SyntaxKind.ClassConstraint )
+                            : ClassOrStructConstraint( SyntaxKind.ClassConstraint ).WithQuestionToken( Token( SyntaxKind.QuestionToken ) ) );
             }
             else if ( parameter.HasValueTypeConstraint )
             {
@@ -688,7 +821,10 @@ internal sealed partial class ContextualSyntaxGenerator
 
             if ( constraints.Count > 0 )
             {
-                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespaceIfNecessary( this._context );
+                var clause = TypeParameterConstraintClause( parameter.Name )
+                    .WithConstraints( constraints )
+                    .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationContext );
+
                 list = list.Add( clause );
             }
         }
@@ -730,7 +866,7 @@ internal sealed partial class ContextualSyntaxGenerator
         if ( requiresParenthesis )
         {
             return SyntaxFactory.CastExpression( type, ParenthesizedExpression( syntax ).WithAdditionalAnnotations( Simplifier.Annotation ) )
-                .WithSimplifierAnnotationIfNecessary( this._context );
+                .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
         }
         else
         {
@@ -750,23 +886,40 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
         => Block(
-            Token( default, SyntaxKind.OpenBraceToken, this._context.ElasticEndOfLineTriviaList ),
+            Token( default, SyntaxKind.OpenBraceToken, this.SyntaxGenerationContext.ElasticEndOfLineTriviaList ),
             List(
                 statements.Select(
                     s => NeedsLineFeed( s )
-                        ? s.WithOptionalTrailingLineFeed( this._context )
+                        ? s.WithOptionalTrailingLineFeed( this.SyntaxGenerationContext )
                         : s ) ),
-            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, default ) );
+            Token( this.SyntaxGenerationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, default ) );
 
-    public PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
-        SyntaxKind disableOrRestoreKind,
-        SeparatedSyntaxList<ExpressionSyntax> errorCodes )
-        => SyntaxFactory.PragmaWarningDirectiveTrivia(
-            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
-            TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
-            TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
-            TokenWithTrailingSpace( disableOrRestoreKind ),
-            errorCodes,
-            Token( default, SyntaxKind.EndOfDirectiveToken, this._context.ElasticEndOfLineTriviaList ),
-            isActive: true );
+    public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, IType? operandType )
+    {
+        var suppressNullableWarning = false;
+
+        if ( this.IsNullAware )
+        {
+            suppressNullableWarning = true;
+
+            if ( operandType != null )
+            {
+                // Value types, including nullable value types don't need suppression.
+                if ( operandType.IsReferenceType == false )
+                {
+                    suppressNullableWarning = false;
+                }
+
+                // Non-nullable types don't need suppression.
+                if ( operandType.IsNullable == false )
+                {
+                    suppressNullableWarning = false;
+                }
+            }
+        }
+
+        return suppressNullableWarning
+            ? PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand )
+            : operand;
+    }
 }

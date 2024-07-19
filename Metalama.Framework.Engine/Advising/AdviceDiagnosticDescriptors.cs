@@ -95,15 +95,6 @@ namespace Metalama.Framework.Engine.Advising
 
         // Sub-range 510-519: Interface implementation diagnostics.
 
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
-            MissingDeclarativeInterfaceMember = new(
-                "LAMA0510",
-                "Declarative interface member is missing.",
-                "The aspect '{0}' cannot implicitly implement interface '{2}' in the type '{1}' because the aspect type" +
-                " does not contain a member marked with [InterfaceMember] attribute corresponding to the interface member '{3}'.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction,
                 IMember InterfaceMember)>
             DeclarativeInterfaceMemberDoesNotMatch = new(
@@ -258,6 +249,14 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0530",
                 "Cannot parameter when a parameter with the same name already exists.",
                 "The aspect '{0}' cannot introduce parameter '{1}' to '{2}' because the target declaration already has a parameter '{3}'.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Type, INamespaceOrNamedType TargetNamespaceOrType)>
+            CannotIntroduceNewTypeWhenItAlreadyExists = new(
+                "LAMA0531",
+                "Cannot introduce a new type because a type with the same name and type parameters already exists.",
+                "The aspect '{0}' cannot introduce type '{1}' into '{2}' because the type already exists.",
                 _category,
                 Error );
     }

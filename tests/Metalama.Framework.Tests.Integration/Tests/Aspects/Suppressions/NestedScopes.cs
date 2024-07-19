@@ -1,7 +1,8 @@
 #if TEST_OPTIONS
-// @Skipped (#31074)
-#endif
+// @ClearIgnoredDiagnostics
+# endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(Override) );
+            builder.Override( nameof(Override) );
             builder.Diagnostics.Suppress( _suppression, builder.Target );
         }
     }
@@ -39,20 +40,20 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         private void M2( string m )
         {
 #pragma warning disable CS0219
-            var x = 0;
+            var b = 0;
 #pragma warning restore CS0219
 
 #if !TESTRUNNER // Disable the warning in the main build, not during tests. (1)
 #pragma warning disable CS0219
 #endif
 
-            var y = 0;
+            var c = 0;
         }
 
         private void M1( string m )
         {
 #pragma warning disable CS0219
-            var x = 0;
+            var d = 0;
 #pragma warning restore CS0219
 
 #if !TESTRUNNER // Disable the warning in the main build, not during tests. (2)
@@ -60,7 +61,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 #endif
 
             // CS0219 expected 
-            var y = 0;
+            var e = 0;
         }
     }
 }

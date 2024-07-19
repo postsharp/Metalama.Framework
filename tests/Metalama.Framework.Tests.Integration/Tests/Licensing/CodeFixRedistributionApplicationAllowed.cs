@@ -1,9 +1,10 @@
+#if TEST_OPTIONS
 // @TestScenario(ApplyCodeFix)
-// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaFreePersonal)
-// @DependencyLicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaUltimateOpenSourceRedistributionForIntegrationTests)
+// @LicenseKey(MetalamaFreePersonal)
+// @DependencyLicenseKey(MetalamaUltimateOpenSourceRedistributionForIntegrationTests)
 // @Include(_CodeFixRedistribution.cs);
 // @Include(_CodeFixRedistribution.Dependency.cs);
-// @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixRedistributionApplicationAllowed;
 

@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceOverride
@@ -21,10 +22,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceOverri
     [Introduction]
     internal class TargetClass
     {
-
         public void M()
         {
-            Console.WriteLine("Source");
+            Console.WriteLine( "Source" );
         }
     }
 }

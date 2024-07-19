@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
-        public static Ref<IDeclaration> FromSymbol( ISymbol symbol, CompilationContext compilationContext ) => new( symbol, compilationContext );
+        public static Ref<ICompilationElement> FromSymbol( ISymbol symbol, CompilationContext compilationContext ) => new( symbol, compilationContext );
 
         public static Ref<IDeclaration> PseudoAccessor( IMethod accessor )
         {
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
 
             return new Ref<IDeclaration>(
-                declaringMember.GetSymbol().AssertNotNull(),
+                declaringMember.GetSymbol().AssertSymbolNotNull(),
                 declaringMember.GetCompilationModel().CompilationContext,
                 accessor.MethodKind.ToDeclarationRefTargetKind() );
         }
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
 
             return new Ref<IDeclaration>(
-                declaringMember.GetSymbol().AssertNotNull(),
+                declaringMember.GetSymbol().AssertSymbolNotNull(),
                 declaringMember.GetCompilationModel().CompilationContext,
                 accessor.MethodKind switch
                 {
@@ -138,6 +138,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
     {
         // The compilation for which the symbol (stored in Target) is valid.
         private readonly CompilationContext? _compilationContext;
+
+        static Ref()
+        {
+            if ( !typeof(T).IsInterface )
+            {
+                throw new ArgumentException( "The type argument must be an interface." );
+            }
+        }
 
         internal Ref( ISymbol symbol, CompilationContext compilationContext, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
@@ -216,11 +224,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return symbol.GetSerializableId( this.TargetKind );
         }
 
-        private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolver.Prefix[0];
+        private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolverForSymbol.Prefix[0];
 
         private static bool IsTypeId( string id )
-            => id.StartsWith( SerializableTypeIdResolver.LegacyPrefix, StringComparison.Ordinal )
-               || id.StartsWith( SerializableTypeIdResolver.Prefix, StringComparison.Ordinal );
+            => id.StartsWith( SerializableTypeIdResolverForSymbol.LegacyPrefix, StringComparison.Ordinal )
+               || id.StartsWith( SerializableTypeIdResolverForSymbol.Prefix, StringComparison.Ordinal );
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this.GetTargetImpl( compilation, options, true )!;
 
@@ -286,7 +294,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     containingDeclaration = containingBuilder.ContainingDeclaration;
                 }
 
-                return containingDeclaration.AssertNotNull().GetSymbol( compilationContext ).AssertNotNull();
+                return containingDeclaration.AssertNotNull().GetSymbol( compilationContext ).AssertSymbolNotNull();
             }
 
             return this.GetSymbolIgnoringKind( compilationContext );
@@ -306,7 +314,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     throw new AssertionFailedException( "The reference target is null." );
 
                 case ISymbol symbol:
-                    return compilationContext.SymbolTranslator.Translate( symbol ).AssertNotNull();
+                    return compilationContext.SymbolTranslator.Translate( symbol ).AssertSymbolNotNull();
 
                 case string id:
                     {
@@ -346,24 +354,23 @@ namespace Metalama.Framework.Engine.CodeModel.References
         }
 
         private ISymbol GetSymbolWithKind( ISymbol symbol )
-        {
-            return this.TargetKind switch
+            => this.TargetKind switch
             {
                 DeclarationRefTargetKind.Assembly when symbol is IAssemblySymbol => symbol,
                 DeclarationRefTargetKind.Module when symbol is IModuleSymbol => symbol,
+                DeclarationRefTargetKind.NamedType when symbol is INamedTypeSymbol => symbol,
                 DeclarationRefTargetKind.Default => symbol,
                 DeclarationRefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
-                DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertNotNull(),
+                DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertSymbolNotNull(),
                 DeclarationRefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException(
                     "Cannot get the underlying field of an event." ),
-                DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertNotNull().Parameters[0],
+                DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertSymbolNotNull().Parameters[0],
                 DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method => method.Parameters[0],
                 DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter => parameter.ContainingType.GetMembers( symbol.Name )
                     .OfType<IPropertySymbol>()
                     .Single(),
                 _ => throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." )
             };
-        }
 
         private static ISymbol GetSymbolOfNode( CompilationContext compilationContext, SyntaxNode node )
         {
@@ -384,8 +391,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
             ReferenceResolutionOptions options,
             bool throwIfMissing )
         {
-            T Convert( ICompilationElement compilationElement )
+            T? Convert( ICompilationElement? compilationElement )
             {
+                if ( compilationElement == null )
+                {
+                    return null;
+                }
+
                 if ( compilationElement is not T safeCast )
                 {
                     // Throw an exception with a better exception message for better troubleshooting.
@@ -433,7 +445,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             .AssertNotNull() );
 
                 case IDeclarationBuilder builder:
-                    return Convert( compilation.Factory.GetDeclaration( builder, options ) );
+                    return Convert( compilation.Factory.GetDeclaration( builder, options, throwIfMissing ) );
 
                 case ISubstitutedDeclaration substitutedDeclaration:
                     return Convert( compilation.Factory.GetDeclaration( substitutedDeclaration ) );

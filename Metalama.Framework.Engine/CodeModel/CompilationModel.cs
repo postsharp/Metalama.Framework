@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -79,14 +81,14 @@ namespace Metalama.Framework.Engine.CodeModel
             Compilation compilation,
             CompilationModelOptions options,
             string? debugLabel )
-            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, null, options: options, debugLabel: debugLabel );
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, null, options, debugLabel );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> _allMemberAttributesByType;
 
         internal AspectRepository AspectRepository { get; }
 
-        public HierarchicalOptionsManager HierarchicalOptionsManager { get; }
+        public HierarchicalOptionsManager? HierarchicalOptionsManager { get; }
 
         internal IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
 
@@ -111,20 +113,20 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var builder = new ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder();
 
-            foreach ( var annotation in this.Annotations
+            foreach ( var (declarationId, annotation) in this.Annotations
                          .SelectMany(
                              group => group
                                  .Where( i => i.Export )
                                  .Select( i => (DeclarationId: group.Key.ToSerializableId(), i.Annotation) ) ) )
             {
-                builder.Add( annotation.DeclarationId, annotation.Annotation );
+                builder.Add( declarationId, annotation );
             }
 
             return builder.ToImmutable();
         }
 
         IHierarchicalOptionsManager ICompilationInternal.HierarchicalOptionsManager
-            => this.HierarchicalOptionsManager.AssertNotNull( $"The {nameof(this.HierarchicalOptionsManager)} has not been supplied." );
+            => this.HierarchicalOptionsManager ?? NullHierarchicalOptionsManager.Instance;
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
@@ -153,6 +155,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModelOptions Options { get; }
 
+        internal SerializableTypeIdResolverForIType SerializableTypeIdResolver { get; }
+
         private readonly string? _debugLabel;
 
         private CompilationModel(
@@ -173,13 +177,13 @@ namespace Metalama.Framework.Engine.CodeModel
             this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
 
             this._staticConstructors =
-                ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+                ImmutableDictionary<Ref<INamedType>, IConstructorBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
-            this._finalizers = ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+            this._finalizers = ImmutableDictionary<Ref<INamedType>, IMethodBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
             this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
 
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
-            this.HierarchicalOptionsManager = hierarchicalOptionsManager ?? new HierarchicalOptionsManager( project.ServiceProvider );
+            this.HierarchicalOptionsManager = hierarchicalOptionsManager;
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
@@ -190,9 +194,11 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
-            void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
-                => dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
-                    .WithComparers( this.CompilationContext.SymbolComparer );
+            static void InitializeDictionary<T>( out ImmutableDictionary<Ref<INamedType>, T> dictionary )
+            {
+                dictionary = ImmutableDictionary.Create<Ref<INamedType>, T>()
+                    .WithComparers( RefEqualityComparer<INamedType>.Default );
+            }
 
             InitializeDictionary( out this._fields );
             InitializeDictionary( out this._methods );
@@ -203,6 +209,12 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
+            this._namedTypes = ImmutableDictionary.Create<Ref<INamespaceOrNamedType>, TypeUpdatableCollection>()
+                .WithComparers( RefEqualityComparer<INamespaceOrNamedType>.Default );
+
+            this._namespaces = ImmutableDictionary.Create<Ref<INamespace>, NamespaceUpdatableCollection>()
+                .WithComparers( RefEqualityComparer<INamespace>.Default );
+
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
                 .WithComparers( RefEqualityComparer<IHasParameters>.Default );
 
@@ -210,6 +222,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection>.Empty.WithComparers( RefEqualityComparer<IDeclaration>.Default );
 
             this.Factory = new DeclarationFactory( this );
+
+            this.SerializableTypeIdResolver = new SerializableTypeIdResolverForIType( this );
 
             // Discover custom attributes.
             AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
@@ -233,8 +247,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationModel"/> class that is based on a prototype instance but appends transformations.
         /// </summary>
-        /// <param name="prototype"></param>
-        /// <param name="observableTransformations"></param>
         private CompilationModel(
             CompilationModel prototype,
             IReadOnlyCollection<ITransformation>? observableTransformations,
@@ -270,12 +282,12 @@ namespace Metalama.Framework.Engine.CodeModel
                 // TODO: this cache may need to be smartly invalidated when we have interface introductions.
                 this._allMemberAttributesByType = prototype._allMemberAttributesByType.AddRange( allAttributes, a => a.AttributeType );
 
-                var attributeTypes = this._allMemberAttributesByType.Keys.Select( x => (INamedTypeSymbol?) x.GetSymbol( this.RoslynCompilation ) )
-                    .WhereNotNull();
+                var attributeTypes = this._allMemberAttributesByType.Keys.Select( x => x.GetTarget( this ) );
 
                 this._derivedTypes = new Lazy<DerivedTypeIndex>(
                     () => prototype._derivedTypes.Value
                         .WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() )
+                        .WithIntroducedTypes( observableTransformations.OfType<IntroduceNamedTypeTransformation>() )
                         .WithAdditionalAnalyzedTypes( attributeTypes ) );
             }
 
@@ -310,8 +322,11 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Annotations = prototype.Annotations;
             this._parameters = prototype._parameters;
             this._attributes = prototype._attributes;
+            this._namedTypes = prototype._namedTypes;
+            this._namespaces = prototype._namespaces;
 
             this.Factory = new DeclarationFactory( this );
+            this.SerializableTypeIdResolver = new SerializableTypeIdResolverForIType( this );
             this._depthsCache = prototype._depthsCache;
             this._redirections = prototype._redirections;
             this._allMemberAttributesByType = prototype._allMemberAttributesByType;
@@ -319,6 +334,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.HierarchicalOptionsManager = prototype.HierarchicalOptionsManager;
             this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
+            this.SerializableTypeIdResolver = prototype.SerializableTypeIdResolver;
         }
 
         private CompilationModel( CompilationModel prototype, AspectRepository aspectRepository, string? debugLabel ) : this( prototype, false, debugLabel )
@@ -349,12 +365,18 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamedTypeCollection Types
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace, false ) );
+                new CompilationTypeUpdatableCollection(
+                    this,
+                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
+                    false ) );
 
         public INamedTypeCollection AllTypes
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace, true ) );
+                new CompilationTypeUpdatableCollection(
+                    this,
+                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
+                    true ) );
 
         [Memo]
         public override IAttributeCollection Attributes
@@ -386,7 +408,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
-            return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
+            return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType, options );
         }
 
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default )
@@ -409,20 +431,18 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type, bool includeDerivedTypes = false )
         {
-            var typeSymbol = type.GetSymbol().AssertNotNull();
-
             if ( includeDerivedTypes )
             {
-                return this._derivedTypes.Value.GetDerivedTypes( typeSymbol ).SelectMany( GetAllAttributesOfExactType );
+                return this._derivedTypes.Value.GetDerivedTypes( type ).SelectMany( GetAllAttributesOfExactType );
             }
             else
             {
-                return GetAllAttributesOfExactType( typeSymbol );
+                return GetAllAttributesOfExactType( type );
             }
 
-            IEnumerable<IAttribute> GetAllAttributesOfExactType( INamedTypeSymbol t )
+            IEnumerable<IAttribute> GetAllAttributesOfExactType( INamedType t )
             {
-                return this._allMemberAttributesByType[Ref.FromSymbol<INamedType>( t, this.CompilationContext )]
+                return this._allMemberAttributesByType[t.ToTypedRef()]
                     .Select(
                         a =>
                         {
@@ -502,7 +522,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return depth;
             }
 
-            depth = this.GetDepth( namedType.Namespace );
+            depth = this.GetDepth( namedType.ContainingNamespace );
 
             if ( namedType.BaseType is { DeclaringAssembly.IsExternal: false } baseType )
             {
@@ -599,8 +619,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModel CreateImmutableClone( string? debugLabel = null ) => new( this, false, debugLabel, this.Options );
 
-        public bool AreInternalsVisibleFrom( IAssembly assembly )
-            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
+        public bool AreInternalsVisibleFrom( IAssembly assembly ) => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( assembly.GetSymbol() );
 
         [Memo]
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );

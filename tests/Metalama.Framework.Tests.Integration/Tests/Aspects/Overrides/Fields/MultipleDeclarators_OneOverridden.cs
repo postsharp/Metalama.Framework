@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,7 +10,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.MultipleD
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Fields.OfName( "B" ).Single(), nameof(PropertyTemplate) );
+            builder.With( builder.Target.Fields.OfName( "B" ).Single() ).Override( nameof(PropertyTemplate) );
         }
 
         [Template]

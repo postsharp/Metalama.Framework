@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="c:\src\Metalama\Metalama.Import.props"/>
+  <Import Project="c:/src/Metalama/Metalama.Import.props"/>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Version1\Version1.csproj"/>
+    <ProjectReference Include="../Version1/Version1.csproj"/>
     <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
 

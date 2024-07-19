@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicGeneric
         private dynamic? Template()
         {
             List<dynamic> forbidden1;
-            var forbidden2 = new Dictionary<dynamic,string>();
+            var forbidden2 = new Dictionary<dynamic, string>();
 
             return default;
         }

@@ -9,11 +9,20 @@ namespace Metalama.Framework.Engine.CodeModel.Substituted;
 internal static class SubstitutedDeclarationExtensions
 {
     [return: NotNullIfNotNull( nameof(typeSymbol) )]
-    public static T? MapSymbol<T>( this ISubstitutedDeclaration declaration, T? typeSymbol )
+    private static T? MapSymbol<T>( this ISubstitutedDeclaration declaration, T? typeSymbol )
         where T : class, ITypeSymbol
         => declaration.GenericMap.Map( typeSymbol );
 
-    public static T MapIType<T>( this ISubstitutedDeclaration declaration, T type )
-        where T : IType
-        => (T) declaration.GetCompilationModel().Factory.GetIType( declaration.MapSymbol( type.GetSymbol() ) );
+    [return: NotNullIfNotNull( nameof(type) )]
+    public static T? MapIType<T>( this ISubstitutedDeclaration declaration, T? type )
+        where T : class, IType
+    {
+        if ( type == null )
+        {
+            return null;
+        }
+
+        return (T) declaration.GetCompilationModel()
+            .Factory.GetIType( declaration.MapSymbol( type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
+    }
 }

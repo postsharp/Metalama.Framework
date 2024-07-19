@@ -3,7 +3,7 @@ internal class TargetClass
 {
   private int _p;
   [Override]
-  int P
+  private int P
   {
     get
     {

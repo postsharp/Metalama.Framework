@@ -1,9 +1,10 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossAssembly;
 using System;
 
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossAssembly
 {
@@ -11,23 +12,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossA
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceUnaryOperator(
-                builder.Target,
+            builder.IntroduceUnaryOperator(
                 nameof(UnaryOperatorTemplate),
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ),
                 OperatorKind.UnaryNegation );
 
-            builder.Advice.IntroduceBinaryOperator(
-                builder.Target,
+            builder.IntroduceBinaryOperator(
                 nameof(BinaryOperatorTemplate),
                 builder.Target,
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ),
                 OperatorKind.Addition );
 
-            builder.Advice.IntroduceConversionOperator(
-                builder.Target,
+            builder.IntroduceConversionOperator(
                 nameof(ConversionOperatorTemplate),
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ) );
@@ -64,7 +62,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossA
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(Template) );
+                builder.With( method ).Override( nameof(Template) );
             }
         }
 

@@ -240,7 +240,7 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
                 return false;
             }
 
-            if ( type.NestedTypes.OfName( name ).Any() )
+            if ( type.Types.OfName( name ).Any() )
             {
                 return false;
             }

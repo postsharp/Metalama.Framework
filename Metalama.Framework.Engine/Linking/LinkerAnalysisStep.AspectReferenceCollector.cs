@@ -50,7 +50,7 @@ internal sealed partial class LinkerAnalysisStep
 
             // Add implicit references going from final semantic to the last override.
             var overriddenMembers = this._injectionRegistry.GetOverriddenMembers();
-            await this._concurrentTaskRunner.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
 
             void ProcessOverriddenMember( ISymbol overriddenMember )
             {
@@ -158,7 +158,7 @@ internal sealed partial class LinkerAnalysisStep
 
             // Analyze introduced method bodies.
             var injectedMembers = this._injectionRegistry.GetInjectedMembers();
-            await this._concurrentTaskRunner.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
 
             void ProcessInjectedMember( InjectedMember injectedMember )
             {
@@ -194,9 +194,17 @@ internal sealed partial class LinkerAnalysisStep
                         // NOP.
                         break;
 
+                    case INamedTypeSymbol:
+                        // NOP.
+                        break;
+
+                    case INamespaceSymbol:
+                        // NOP.
+                        break;
+
                     default:
                         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                        throw new AssertionFailedException( $"Don't know how to process ' {symbol?.Kind.ToString() ?? "(null)"}'." );
+                        throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
                 }
             }
 

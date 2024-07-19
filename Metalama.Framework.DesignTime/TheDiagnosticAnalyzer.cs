@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -16,6 +17,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable UnusedType.Global
@@ -33,7 +35,12 @@ namespace Metalama.Framework.DesignTime
     public class TheDiagnosticAnalyzer : DefinitionOnlyDiagnosticAnalyzer
     {
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+        private readonly IProjectOptionsFactory _projectOptionsFactory;
         private readonly ILogger _logger;
+
+#if DEBUG
+        private readonly ConcurrentDictionary<string, object> _locks = new();
+#endif
 
         [UsedImplicitly]
         public TheDiagnosticAnalyzer() : this(
@@ -42,6 +49,7 @@ namespace Metalama.Framework.DesignTime
         public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+            this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         }
 
@@ -63,15 +71,22 @@ namespace Metalama.Framework.DesignTime
         }
 
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
-            => this.AnalyzeSemanticModel( new SemanticModelAnalysisContextAdapter( context ) );
+            => this.AnalyzeSemanticModel( new SemanticModelAnalysisContextAdapter( context, this._projectOptionsFactory ) );
 
         internal void AnalyzeSemanticModel( ISemanticModelAnalysisContext context )
         {
+            var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
+#if DEBUG
+
+            // In the debug build we prevent concurrent analysis of the same tree because it makes it difficult to debug.
+            var @lock = this._locks.GetOrAdd( syntaxTreeFilePath, _ => new object() );
+            var lockTaken = false;
+            Monitor.Enter( @lock, ref lockTaken );
+#endif
+
             try
             {
                 var compilation = context.SemanticModel.Compilation;
-
-                var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
 
                 this._logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
@@ -134,8 +149,8 @@ namespace Metalama.Framework.DesignTime
                 }
                 else
                 {
-                    diagnostics = pipelineResult.Value.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
-                    suppressions = pipelineResult.Value.GetSuppressionOnSyntaxTree( syntaxTreeFilePath );
+                    diagnostics = pipelineResult.Value.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
+                    suppressions = pipelineResult.Value.GetSuppressionsOnSyntaxTree( syntaxTreeFilePath );
                 }
 
                 // Execute the analyses that are not performed in the pipeline.
@@ -170,7 +185,7 @@ namespace Metalama.Framework.DesignTime
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in suppressions.Where(
-                             s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
+                             s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) ) )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -185,7 +200,7 @@ namespace Metalama.Framework.DesignTime
                             ReportDiagnostic(
                                 DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateRoslynDiagnostic(
                                     location,
-                                    (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
+                                    (Id: suppression.Suppression.Definition.SuppressedDiagnosticId, symbol) ) );
                         }
                     }
                 }
@@ -196,6 +211,16 @@ namespace Metalama.Framework.DesignTime
             catch ( Exception e )
             {
                 DesignTimeExceptionHandler.ReportException( e );
+            }
+            finally
+            {
+#if DEBUG
+                if ( lockTaken )
+                {
+                    Monitor.Exit( @lock );
+                }
+
+#endif
             }
         }
 

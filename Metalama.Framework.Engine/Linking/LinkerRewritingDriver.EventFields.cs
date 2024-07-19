@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
-                throw new AssertionFailedException( "Event field cannot be an override." );
+                throw new AssertionFailedException( $"Event field cannot be an override: {symbol}" );
             }
             else
             {
@@ -218,7 +218,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) )
+                        .WithSimplifierAnnotationIfNecessary( context );
                 }
             }
         }

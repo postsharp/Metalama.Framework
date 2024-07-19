@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Diagnostics;
 /// <summary>
 /// Wraps a Roslyn <see cref="Location"/> as an <see cref="IDiagnosticLocation"/>.
 /// </summary>
-internal sealed class LocationWrapper : IDiagnosticLocationImpl
+internal sealed class LocationWrapper : IDiagnosticLocation
 {
     /// <summary>
     /// Gets the location.
@@ -23,4 +23,6 @@ internal sealed class LocationWrapper : IDiagnosticLocationImpl
     {
         this.DiagnosticLocation = diagnosticLocation;
     }
+
+    public override string ToString() => this.DiagnosticLocation?.ToString() ?? "<null>";
 }

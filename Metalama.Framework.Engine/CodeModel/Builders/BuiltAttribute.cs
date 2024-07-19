@@ -14,7 +14,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 {
     private readonly AttributeBuilder _attributeBuilder;
 
-    public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation )
     {
         this._attributeBuilder = builder;
     }

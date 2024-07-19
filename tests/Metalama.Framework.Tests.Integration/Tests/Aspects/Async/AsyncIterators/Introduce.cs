@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncIterator
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod( builder.Target, nameof(ProgrammaticallyMethodAsync) );
+            builder.IntroduceMethod( nameof(ProgrammaticallyMethodAsync) );
         }
 
         [Introduce]

@@ -93,7 +93,7 @@ public sealed partial class DependencyCollectorTests
 'Interface2.cs'->'Interface3.cs'
 'Interface3.cs'->'Class4.cs'";
 
-        Assert.Equal( expectedDependencies, actualDependencies );
+        AssertEx.EolInvariantEqual( expectedDependencies, actualDependencies );
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed partial class DependencyCollectorTests
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
 
         var actualDependencies = string.Join(
-            Environment.NewLine,
+            "\r\n",
             dependencyCollector.EnumerateSyntaxTreeDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
         const string expectedDependencies = @"'Class2.cs'->'Class3.cs'

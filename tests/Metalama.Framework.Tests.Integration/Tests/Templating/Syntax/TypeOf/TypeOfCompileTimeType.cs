@@ -1,27 +1,24 @@
 #pragma warning disable CS8600, CS8603
 using System;
 using Metalama.Framework.Code;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfCompileTimeType
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-            var rt = meta.RunTime(typeof(string));
+            var rt = meta.RunTime( typeof(string) );
             var ct = typeof(string);
-            Console.WriteLine("rt=" + rt);
-            Console.WriteLine("ct=" + ct);
+            Console.WriteLine( "rt=" + rt );
+            Console.WriteLine( "ct=" + ct );
 
-            if (( (IParameter)meta.Target.Parameters[0] ).Type.Is(typeof(string)))
-            {
-            
-            }
-
+            if (( (IParameter)meta.Target.Parameters[0] ).Type.Is( typeof(string) )) { }
 
             return meta.Proceed();
         }
@@ -30,9 +27,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
     [CompileTime]
     public class MyClass1 { }
 
-    class TargetCode
+    internal class TargetCode
     {
-        string Method(string a)
+        private string Method( string a )
         {
             return a;
         }

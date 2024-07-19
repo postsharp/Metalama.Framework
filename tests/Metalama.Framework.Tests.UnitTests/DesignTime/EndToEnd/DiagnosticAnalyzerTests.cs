@@ -52,7 +52,8 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
     public async Task CSharpErrorIsNotReported()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
 
                             class TheAspect : TypeAspect
                             {
@@ -71,7 +72,8 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
     public async Task CompileTimeMetalamaDiagnosticsAreReported()
     {
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
 
                             class TheAspect : OverrideMethodAspect
                             {
@@ -97,7 +99,8 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
         const string code = """
                             using System;
                             using Metalama.Framework;
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
 
                             class TheAspect : OverrideMethodAspect
                             {
@@ -126,7 +129,8 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
     {
         static string GetCode( string extraCode )
             => $$"""
-                 using Metalama.Framework.Aspects;
+                 using Metalama.Framework.Advising;
+                 using Metalama.Framework.Aspects; 
                  using Metalama.Framework.Code;
                  using Metalama.Framework.Diagnostics;
 
@@ -214,7 +218,7 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
                                 static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
                                 public override void AmendProject( IProjectAmender amender )
                                 {
-                                    amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                    amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
                                 }
                             
                                 private void ValidateReference( in ReferenceValidationContext context )

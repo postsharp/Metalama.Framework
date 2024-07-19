@@ -1,4 +1,4 @@
-int Method(int a)
+private int Method(int a)
 {
   var x = default(global::System.Int32);
   x = this.Method(a);

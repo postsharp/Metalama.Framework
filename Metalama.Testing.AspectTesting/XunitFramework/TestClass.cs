@@ -46,6 +46,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             }
             else
             {
+                // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
                 this._name = relativePath?.Replace( Path.DirectorySeparatorChar, '.' ) ?? "Tests";
             }
 
@@ -84,6 +85,6 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         ITypeInfo ITestClass.Class => this;
 
-        ITestCollection ITestClass.TestCollection => this._testFactory.Collection;
+        ITestCollection ITestClass.TestCollection => this._testFactory.TestCollection;
     }
 }

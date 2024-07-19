@@ -22,19 +22,19 @@ internal class TargetClass
   {
     add
     {
-      this.MethodWithCallerMemberName(42, name1: "OverriddenEvent", name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, y: 27, name1: "OverriddenEvent", name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42, name1: "OverriddenEvent", name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, y: 27, name1: "OverriddenEvent", name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
     }
     remove
     {
-      this.MethodWithCallerMemberName(42, name1: "OverriddenEvent", name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, y: 27, name1: "OverriddenEvent", name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenEvent");
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42, name1: "OverriddenEvent", name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, y: 27, name1: "OverriddenEvent", name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenEvent");
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
     }
   }
   public void MethodWithCallerMemberName(int x, [CallerMemberName] string name1 = "", int y = 0, [CallerMemberName] string name2 = "")

@@ -33,7 +33,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
     public sealed class CodeModelTests : UnitTestClass
     {
         protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Formatted );
-        
+
         [Fact]
         public void ObjectIdentity()
         {
@@ -80,7 +80,7 @@ class E<T> {}
             Assert.Equal( "C", c1.FullName );
             Assert.IsAssignableFrom<ICompilation>( c1.ContainingDeclaration );
 
-            var d = c1.NestedTypes.Single();
+            var d = c1.Types.Single();
             Assert.Equal( "D", d.Name );
             Assert.Equal( "C.D", d.FullName );
             Assert.Same( c1, d.ContainingDeclaration );
@@ -837,7 +837,7 @@ class Parent<TParent>
             // Find the different types and check the IsGeneric and IsOpenGeneric properties.
             var openParentType = Assert.Single( compilation.Types );
 
-            var genericNestedTypeOnOpenGenericParent = openParentType.NestedTypes.OfName( "NestedGeneric" ).Single();
+            var genericNestedTypeOnOpenGenericParent = openParentType.Types.OfName( "NestedGeneric" ).Single();
             var genericMethodOnOpenGenericNestedType = genericNestedTypeOnOpenGenericParent.Methods.OfName( "GenericMethod" ).Single();
             Assert.True( genericMethodOnOpenGenericNestedType.IsGeneric );
             var nonGenericMethodOnOpenGenericNestedType = genericNestedTypeOnOpenGenericParent.Methods.OfName( "NonGenericMethod" ).Single();
@@ -850,7 +850,7 @@ class Parent<TParent>
 
             // Creating a closed nested type.
             var closedParentType = openParentType.WithTypeArguments( typeof(string) );
-            var closedGenericNestedType = closedParentType.NestedTypes.OfName( "NestedGeneric" ).Single().WithTypeArguments( typeof(int) );
+            var closedGenericNestedType = closedParentType.Types.OfName( "NestedGeneric" ).Single().WithTypeArguments( typeof(int) );
             Assert.Equal( "int", closedGenericNestedType.TypeArguments.ElementAt( 0 ).ToString() );
 
             // Open method of closed nested type.
@@ -982,7 +982,7 @@ namespace Ns1
             Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "J" ).Single() ) );
             Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "K" ).Single() ) );
             Assert.Equal( 5, compilation.GetDepth( compilation.Types.OfName( "L" ).Single() ) );
-            Assert.Equal( 6, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
+            Assert.Equal( 6, compilation.GetDepth( type.Types.OfName( "D" ).Single() ) );
 
             var ns1 = compilation.GlobalNamespace.GetDescendant( "Ns1" ).AssertNotNull();
             var ns2 = compilation.GlobalNamespace.GetDescendant( "Ns1.Ns2" ).AssertNotNull();
@@ -999,7 +999,8 @@ namespace Ns1
             using var testContext = this.CreateTestContext( testServices );
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 class C { }
@@ -1014,7 +1015,7 @@ class D
 
             var compilation = testContext.CreateCompilationModel( code );
             Assert.Single( compilation.Types );
-            Assert.Empty( compilation.Types.Single().NestedTypes );
+            Assert.Empty( compilation.Types.Single().Types );
         }
 
         [Fact]
@@ -1026,12 +1027,12 @@ class D
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var systemText = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(StringBuilder) )).Namespace;
+            var systemText = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(StringBuilder) )).ContainingNamespace;
             Assert.Equal( "System.Text", systemText.FullName );
             Assert.Equal( "Text", systemText.Name );
             Assert.NotEmpty( systemText.Types );
 
-            var system = systemText.ParentNamespace.AssertNotNull();
+            var system = systemText.ContainingNamespace.AssertNotNull();
             Assert.Equal( "System", system.FullName );
             Assert.Equal( "System", system.Name );
             Assert.True( systemText.IsDescendantOf( system ) );
@@ -1041,7 +1042,7 @@ class D
             Assert.NotNull( system.Namespaces.OfName( "Collections" ) );
 
             Assert.False( system.BelongsToCurrentProject );
-            Assert.Same( system.DeclaringAssembly, system.ParentNamespace?.ContainingDeclaration );
+            Assert.Same( system.DeclaringAssembly, system.ContainingNamespace?.ContainingDeclaration );
         }
 
         [Fact]
@@ -1081,11 +1082,11 @@ namespace System { class MySystemClass {} }
             Assert.Equal( "Ns1, Ns1.Ns2, Ns1.Ns2.Ns4, Ns1.Ns3, System", descendants );
             Assert.Equal( "", compilation.GlobalNamespace.Name );
             Assert.Equal( "", compilation.GlobalNamespace.FullName );
-            Assert.Null( compilation.GlobalNamespace.ParentNamespace );
+            Assert.Null( compilation.GlobalNamespace.ContainingNamespace );
             Assert.Same( compilation, compilation.GlobalNamespace.ContainingDeclaration );
 
             var t2 = compilation.GlobalNamespace.Types.Single();
-            Assert.Same( compilation.GlobalNamespace, t2.Namespace );
+            Assert.Same( compilation.GlobalNamespace, t2.ContainingNamespace );
 
             var ns1 = compilation.GlobalNamespace.Namespaces.OfName( "Ns1" ).AssertNotNull();
             Assert.Equal( "Ns1", ns1.Name );
@@ -1100,14 +1101,14 @@ namespace System { class MySystemClass {} }
             var ns2 = ns1.Namespaces.OfName( "Ns2" ).AssertNotNull();
             Assert.Equal( "Ns2", ns2.Name );
             Assert.Equal( "Ns1.Ns2", ns2.FullName );
-            Assert.Same( ns1, ns2.ParentNamespace );
+            Assert.Same( ns1, ns2.ContainingNamespace );
             Assert.True( ns2.IsDescendantOf( compilation.GlobalNamespace ) );
             Assert.True( ns2.IsDescendantOf( ns1 ) );
             Assert.True( compilation.GlobalNamespace.IsAncestorOf( ns2 ) );
             Assert.True( ns1.IsAncestorOf( ns2 ) );
 
             var t1 = ns2.Types.Single();
-            Assert.Same( ns2, t1.Namespace );
+            Assert.Same( ns2, t1.ContainingNamespace );
 
             Assert.Same( ns2, compilation.GlobalNamespace.GetDescendant( "Ns1.Ns2" ) );
             Assert.Same( compilation.GlobalNamespace, compilation.GlobalNamespace.GetDescendant( "" ) );
@@ -1212,7 +1213,7 @@ public class PublicClass
             Assert.Single( type.Fields.Where( f => !f.IsImplicitlyDeclared ) );
             Assert.Single( type.Methods );
             Assert.Single( type.Properties );
-            Assert.Single( type.NestedTypes );
+            Assert.Single( type.Types );
         }
 
         [Fact]
@@ -1288,13 +1289,13 @@ class F { class G {} }
             var compilation = testContext.CreateCompilationModel( code );
             var c = compilation.Types.OfName( "C" ).Single();
             Assert.Equal( "C`1", c.GetFullMetadataName() );
-            var d = c.NestedTypes.OfName( "D" ).Single();
+            var d = c.Types.OfName( "D" ).Single();
             Assert.Equal( "C`1+D`2", d.GetFullMetadataName() );
-            var e = c.NestedTypes.OfName( "E" ).Single();
+            var e = c.Types.OfName( "E" ).Single();
             Assert.Equal( "C`1+E", e.GetFullMetadataName() );
             var f = compilation.Types.OfName( "F" ).Single();
             Assert.Equal( "F", f.GetFullMetadataName() );
-            var g = f.NestedTypes.OfName( "G" ).Single();
+            var g = f.Types.OfName( "G" ).Single();
             Assert.Equal( "F+G", g.GetFullMetadataName() );
         }
 
@@ -1745,24 +1746,100 @@ public partial class C
             Assert.IsAssignableFrom<ITypeParameter>( parameterType1 );
             Assert.Equal( parameterType1, parameterType1.ToNonNullableType().ToNullableType() );
             Assert.Equal( SpecialType.None, parameterType1.SpecialType );
-            
+
             var parameterType2 = method.Parameters[1].Type;
             Assert.True( parameterType2.IsNullable );
             var parameterType2AsNamedType = Assert.IsAssignableFrom<INamedType>( parameterType2 );
             Assert.Same( parameterType2AsNamedType.UnderlyingType, parameterType2AsNamedType );
             Assert.Equal( parameterType2, parameterType2.ToNonNullableType().ToNullableType() );
             Assert.Equal( SpecialType.None, parameterType2.SpecialType );
-            
+
             var parameterType3 = method.Parameters[2].Type;
             Assert.True( parameterType3.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType3 );
             Assert.Equal( parameterType3, parameterType3.ToNonNullableType().ToNullableType() );
             Assert.Equal( SpecialType.None, parameterType3.SpecialType );
-            
+
             var parameterType4 = method.Parameters[3].Type;
             Assert.False( parameterType4.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType4 );
             Assert.Equal( SpecialType.None, parameterType4.SpecialType );
+        }
+
+        [Fact]
+        public void NullableGenericTypeParameter()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code =
+                """
+                using System;
+
+                class C<T1,T2,T3>
+                    where T2 : class?
+                    where T3 : IDisposable?
+                {
+                    public void M(T1? n1, T2? n2, T3? n3, T1 nn1, T2 nn2, T3 nn3) {}
+                }
+                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var method = type.Methods.Single();
+
+            var typeParameter1 = type.TypeParameters[0];
+            Assert.Null( typeParameter1.IsNullable );
+            Assert.True( typeParameter1.ToNullableType().IsNullable );
+            Assert.Null( typeParameter1.ToNonNullableType().IsNullable );
+            Assert.True( method.Parameters["n1"].Type.IsNullable );
+            Assert.Null( method.Parameters["nn1"].Type.IsNullable );
+
+            var typeParameter2 = type.TypeParameters[1];
+            Assert.Null( typeParameter2.IsNullable );
+            Assert.True( typeParameter2.ToNullableType().IsNullable );
+            Assert.Null( typeParameter2.ToNonNullableType().IsNullable );
+            Assert.True( method.Parameters["n2"].Type.IsNullable );
+            Assert.Null( method.Parameters["nn2"].Type.IsNullable );
+
+            var typeParameter3 = type.TypeParameters[2];
+            Assert.Null( typeParameter3.IsNullable );
+            Assert.True( typeParameter3.ToNullableType().IsNullable );
+            Assert.Null( typeParameter3.ToNonNullableType().IsNullable );
+            Assert.True( method.Parameters["n3"].Type.IsNullable );
+            Assert.Null( method.Parameters["nn3"].Type.IsNullable );
+        }
+
+        [Fact]
+        public void TypeParameterEquality()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = "class C<T>;";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var typeParameterSymbol = type.TypeParameters.Single().GetSymbol();
+
+            var factory = compilation.Factory;
+
+            var asType = factory.GetIType( typeParameterSymbol );
+            var asTypeParameter = factory.GetGenericParameter( typeParameterSymbol );
+
+            var nullableAsType = factory.GetIType( typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+
+            var nullableAsTypeParameter =
+                factory.GetGenericParameter( (ITypeParameterSymbol) typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+
+            var nullableFromIType = asType.ToNullableType();
+
+            Assert.Same( asType, asTypeParameter );
+
+            // Additional expectations (try not to break it when implementing constructed ITypes from built types).
+            Assert.Same( nullableAsType, nullableAsTypeParameter );
+            Assert.NotSame( asType, nullableAsType );
+            Assert.True( compilation.Comparers.Default.Equals( asType, nullableAsType ) );
+            Assert.False( compilation.Comparers.IncludeNullability.Equals( asType, nullableAsType ) );
+            Assert.Same( nullableAsType, nullableFromIType );
         }
 
         [Fact]
@@ -1771,16 +1848,16 @@ public partial class C
             using var testContext = this.CreateTestContext();
 
             const string code = """
-                class Base
-                {
-                    public virtual int P { get; set; }
-                }
+                                class Base
+                                {
+                                    public virtual int P { get; set; }
+                                }
 
-                class Derived : Base
-                {
-                    public override int P { get => 42; }
-                }
-                """;
+                                class Derived : Base
+                                {
+                                    public override int P { get => 42; }
+                                }
+                                """;
 
             var compilation = testContext.CreateCompilationModel( code );
             var derived = compilation.Types.OfName( "Derived" ).Single();

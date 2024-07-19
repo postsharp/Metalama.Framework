@@ -7,12 +7,12 @@ using System;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Custom attribute that applied to a member of an aspect class and means that this aspect member is a template implementing a member of an interface implemented by
+    /// Custom attribute that, when applied to a member of an aspect class, means that this aspect member is a template implementing a member of an interface implemented by
     /// <see cref="IAdviceFactory.ImplementInterface(Code.INamedType,Code.INamedType,OverrideStrategy,object?)"/>.
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     [PublicAPI]
-    public sealed class InterfaceMemberAttribute : TemplateAttribute
+    public sealed class InterfaceMemberAttribute : TemplateAttribute, IInterfaceMemberAttribute
     {
         /// <summary>
         /// Gets or sets a value indicating whether the interface member should be introduced explicitly.

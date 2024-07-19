@@ -18,7 +18,8 @@ public sealed class FormatSensitiveTests : AspectTestBase
         const string code = @"
 using System;
 using System.Linq;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 
@@ -96,6 +97,6 @@ public string Prop132
     }
 }";
 
-        Assert.Equal( expectedTransformedProperty.Trim(), transformedProperty.Trim() );
+        AssertEx.EolInvariantEqual( expectedTransformedProperty.Trim(), transformedProperty.Trim() );
     }
 }

@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,23 +23,29 @@ internal sealed class EvaluateAspectSourcesPipelineStep : PipelineStep
         new PipelineStepId( aspectLayer.AspectLayerId, -1, -1, -1 ),
         aspectLayer ) { }
 
-    public override Task<CompilationModel> ExecuteAsync(
+    public override async Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
+        IUserDiagnosticSink diagnostics,
         int stepIndex,
         CancellationToken cancellationToken )
     {
         var aspectClass = this.AspectLayer.AspectClass;
 
-        var concreteAspectInstances = this.Parent.ExecuteAspectSource( compilation, aspectClass, this._aspectSources, cancellationToken );
+        var concreteAspectInstances = await this.Parent.ExecuteAspectSourceAsync(
+            compilation,
+            aspectClass,
+            this._aspectSources,
+            diagnostics,
+            cancellationToken );
 
         if ( concreteAspectInstances.IsDefaultOrEmpty )
         {
-            return Task.FromResult( compilation );
+            return compilation;
         }
         else
         {
-            return Task.FromResult(
-                compilation.WithTransformationsAndAspectInstances( null, concreteAspectInstances, $"EvaluateAspectSource:{this.AspectLayer.AspectName}" ) );
+            return
+                compilation.WithTransformationsAndAspectInstances( null, concreteAspectInstances, $"EvaluateAspectSource:{this.AspectLayer.AspectName}" );
         }
     }
 

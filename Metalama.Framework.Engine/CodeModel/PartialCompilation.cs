@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -44,6 +43,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
         /// <summary>
+        /// Returns whether the given path is of interest to the current <see cref="PartialCompilation"/>.
+        /// This is used to avoid processing of transformations that affect currently irrelevant syntax trees.
+        /// </summary>
+        public abstract bool IsSyntaxTreeObserved( string syntaxTreePath );
+
+        /// <summary>
         /// Gets the types declared in the current subset.
         /// </summary>
         public abstract ImmutableHashSet<INamedTypeSymbol> Types { get; }
@@ -52,11 +57,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets the namespaces that contain types.
         /// </summary>
         public abstract ImmutableHashSet<INamespaceSymbol> Namespaces { get; }
-
-        [Memo]
-        internal ImmutableHashSet<INamespaceSymbol> ParentNamespaces
-            => this.Namespaces.SelectRecursiveInternal( n => n.IsGlobalNamespace ? null : n.ContainingNamespace )
-                .ToImmutableHashSet();
 
         /// <summary>
         /// Gets a value indicating whether the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
@@ -201,7 +201,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
         /// </summary>
-        public static PartialCompilation CreatePartial(
+        internal static PartialCompilation CreatePartial(
             Compilation compilation,
             SyntaxTree syntaxTree,
             ImmutableArray<ManagedResource> resources = default )
@@ -213,6 +213,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return new PartialImpl(
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
+                observedSyntaxTreePaths: null,
                 closure.DeclaredTypes,
                 new Lazy<DerivedTypeIndex>( () => closure.DerivedTypeIndex ),
                 resources );
@@ -221,9 +222,13 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a given subset of syntax trees and its closure.
         /// </summary>
+        /// <param name="compilation">The complete compilation.</param>
+        /// <param name="syntaxTrees">The trees to include in the partial compilation.</param>
+        /// <param name="observedSyntaxTreePaths">List of paths that should return <see langword="true"/> from <see cref="IsSyntaxTreeObserved(string)"/>, or <see langword="null" /> if all paths should be considered observed.</param>
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
+            ImmutableHashSet<string>? observedSyntaxTreePaths = null,
             ImmutableArray<ManagedResource> resources = default )
         {
             var compilationContext = CompilationContextFactory.GetInstance( compilation );
@@ -232,6 +237,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return new PartialImpl(
                 compilationContext,
                 closure.Trees.ToImmutableDictionary( t => t.FilePath, t => t ),
+                observedSyntaxTreePaths,
                 closure.DeclaredTypes.ToImmutableHashSet(),
                 new Lazy<DerivedTypeIndex>( () => closure.DerivedTypeIndex ),
                 resources );
@@ -371,19 +377,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets the <see cref="SyntaxTree"/> that can be used to add new assembly- or module-level attributes.
         /// </summary>
         [Memo]
-        internal SyntaxTree SyntaxTreeForCompilationLevelAttributes
-            => this.Compilation.Assembly.GetAttributes()
-                   .Select( a => a.ApplicationSyntaxReference )
-                   .WhereNotNull()
-                   .Select( a => a.SyntaxTree )
-                   .OrderBy( x => x.FilePath.Length )
-                   .ThenBy( x => x.FilePath )
-                   .FirstOrDefault()
-               ?? this.SyntaxTrees
-                   .OrderBy( t => t.Key.Length )
-                   .ThenBy( t => t.Key )
-                   .First()
-                   .Value;
+        internal SyntaxTree SyntaxTreeForCompilationLevelAttributes => this.Compilation.CreateEmptySyntaxTree( "MetalamaAssemblyAttributes.cs" );
 
         private static void Validate( IReadOnlyCollection<SyntaxTreeTransformation>? transformations )
         {

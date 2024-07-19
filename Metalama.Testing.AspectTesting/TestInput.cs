@@ -48,7 +48,7 @@ namespace Metalama.Testing.AspectTesting
             }
             else
             {
-                this.Options.ApplySourceDirectives( sourceCode );
+                this.Options.ApplySourceDirectives( sourceCode, fullPath );
             }
 
             if ( fullPath != null )
@@ -58,7 +58,8 @@ namespace Metalama.Testing.AspectTesting
 
                 foreach ( var companionFile in fileSystem.EnumerateFiles( directory, Path.GetFileNameWithoutExtension( fullPath ) + ".*.cs" ) )
                 {
-                    if ( !companionFile.EndsWith( ".t.cs", StringComparison.OrdinalIgnoreCase ) )
+                    if ( !companionFile.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) &&
+                         !companionFile.EndsWith( FileExtensions.IntroducedCode, StringComparison.OrdinalIgnoreCase ) )
                     {
                         this.Options.IncludedFiles.Add( fileSystem.GetRelativePath( directory, companionFile ) );
                     }

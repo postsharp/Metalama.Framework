@@ -48,6 +48,7 @@ public sealed class AdditionalServiceCollection : IAdditionalServiceCollection
 
                     break;
 
+                // ReSharper disable once SuspiciousTypeConversion.Global
                 case IBackstageService backstageService:
                     this.BackstageServices.Add( backstageService );
 

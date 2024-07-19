@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         private static bool TryGetAsyncInfo( IType awaitableType, out IType? awaitableResultType, out bool hasMethodBuilder )
         {
-            var returnType = awaitableType.GetSymbol();
+            var returnType = awaitableType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeStateMachines );
 
             if ( !TryGetAsyncInfo( returnType, out var resultTypeSymbol, out hasMethodBuilder ) )
             {

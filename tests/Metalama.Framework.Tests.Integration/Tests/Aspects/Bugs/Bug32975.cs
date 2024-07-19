@@ -11,7 +11,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 
-[assembly: AspectOrder( typeof(TrackChangesAttribute), typeof(NotifyPropertyChangedAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(TrackChangesAttribute), typeof(NotifyPropertyChangedAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 
@@ -56,13 +56,13 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
+        builder.ImplementInterface( typeof(INotifyPropertyChanged), OverrideStrategy.Ignore );
 
         foreach (var property in builder.Target.Properties.Where(
                      p =>
                          !p.IsAbstract && p.Writeability == Writeability.All ))
         {
-            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.With( property ).OverrideAccessors( null, nameof(OverridePropertySetter) );
         }
     }
 
@@ -100,7 +100,7 @@ public class TrackChangesAttribute : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // Implement the IChangeTracking interface.         
-        var implementInterfaceResult = builder.Advice.ImplementInterface( builder.Target, typeof(IChangeTracking), OverrideStrategy.Ignore );
+        var implementInterfaceResult = builder.ImplementInterface( typeof(IChangeTracking), OverrideStrategy.Ignore );
 
         // If the type already implements IChangeTracking, it must have a protected method called OnChanged, without parameters, otherwise
         // this is a contract violation, so we report an error.
@@ -128,7 +128,7 @@ public class TrackChangesAttribute : TypeAspect
 
             foreach (var fieldOrProperty in fieldsOrProperties)
             {
-                builder.Advice.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
+                builder.With( fieldOrProperty ).OverrideAccessors( null, nameof(OverrideSetter) );
             }
         }
     }

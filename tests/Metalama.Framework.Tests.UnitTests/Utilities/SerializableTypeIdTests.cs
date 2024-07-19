@@ -15,15 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
 public sealed class SerializableTypeIdTests : UnitTestClass
 {
-    public SerializableTypeIdTests( ITestOutputHelper? testOutputHelper ) : base( testOutputHelper )
-    {
-        var compilation = TestCompilationFactory.CreateCSharpCompilation( "" );
-        this._resolver = new SerializableTypeIdResolver( compilation );
-        this._reflectionMapper = new ReflectionMapper( compilation );
-    }
-
-    private readonly SerializableTypeIdResolver _resolver;
-    private readonly ReflectionMapper _reflectionMapper;
+    public SerializableTypeIdTests( ITestOutputHelper? testOutputHelper ) : base( testOutputHelper ) { }
 
     [Theory]
     [InlineData( typeof(int) )]
@@ -41,11 +33,22 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     [InlineData( typeof(Dictionary<List<string>, List<int>>) )]
     public void TestTypeOf( Type type )
     {
-        var symbol = this._reflectionMapper.GetTypeSymbol( type );
-        var id = symbol.GetSerializableTypeId();
-        this.TestOutput.WriteLine( id.Id );
-        var roundTripType = this._resolver.ResolveId( id );
-        Assert.True( SymbolEqualityComparer.Default.Equals( symbol, roundTripType ) );
+        using var testContext = this.CreateTestContext();
+        var compilation = testContext.CreateCompilationModel( "" );
+
+        var iType = compilation.Factory.GetTypeByReflectionType( type );
+
+        foreach ( var bypassSymbols in new[] { false, true } )
+        {
+            var id = iType.GetSerializableTypeId( bypassSymbols );
+            this.TestOutput.WriteLine( id.Id );
+
+            var roundTripSymbol = compilation.CompilationContext.SerializableTypeIdResolver.ResolveId( id );
+            Assert.Equal( iType.GetSymbol(), roundTripSymbol, SymbolEqualityComparer.Default );
+
+            var roundTripType = compilation.SerializableTypeIdResolver.ResolveId( id );
+            Assert.Same( iType, roundTripType );
+        }
     }
 
     [Theory]
@@ -60,11 +63,20 @@ public sealed class SerializableTypeIdTests : UnitTestClass
         var code = $"using System.Threading.Tasks;"
                    + $"class C {{ {type} f; }}";
 
-        var compilation = testContext.CreateCompilation( code );
-        var typeModel = compilation.Types.Single().Fields.Single().Type;
-        var typeId = typeModel.ToSerializableId();
-        var roundloop = compilation.GetCompilationModel().CompilationContext.SerializableTypeIdResolver.ResolveId( typeId );
-        Assert.Equal( typeModel.GetSymbol(), roundloop, SymbolEqualityComparer.IncludeNullability );
+        var compilation = testContext.CreateCompilationModel( code );
+
+        var iType = compilation.Types.Single().Fields.Single().Type;
+
+        foreach ( var bypassSymbols in new[] { false, true } )
+        {
+            var typeId = iType.GetSerializableTypeId( bypassSymbols );
+
+            var roundTripSymbol = compilation.CompilationContext.SerializableTypeIdResolver.ResolveId( typeId );
+            Assert.Equal( iType.GetSymbol(), roundTripSymbol, SymbolEqualityComparer.IncludeNullability );
+
+            var roundTripType = compilation.SerializableTypeIdResolver.ResolveId( typeId );
+            Assert.Same( iType, roundTripType );
+        }
     }
 
     [Theory]
@@ -74,7 +86,12 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     [InlineData( "Y:List<x>" )]
     public void TestInvalidString( string s )
     {
+        using var testContext = this.CreateTestContext();
+
+        var compilation = testContext.CreateCompilationModel( "" );
+
         // We are testing that the method gracefully fails.
-        Assert.False( this._resolver.TryResolveId( new SerializableTypeId( s ), out _ ) );
+        Assert.False( compilation.CompilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( s ), out _ ) );
+        Assert.False( compilation.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( s ), out _ ) );
     }
 }

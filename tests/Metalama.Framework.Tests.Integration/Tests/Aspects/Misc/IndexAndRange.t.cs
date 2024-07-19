@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.IndexAndRange
     private void GetDataClassProperties(INamedType baseType) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
   }
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
-  class GenericType<T1, T2>
+  internal class GenericType<T1, T2>
   {
   }
   internal class TargetCode : GenericType<int, int>

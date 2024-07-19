@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30818;
 
-[assembly: AspectOrder( typeof(ValidationAspect), typeof(OnPropertyChangedAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ValidationAspect), typeof(OnPropertyChangedAspect) )]
 
 #pragma warning disable CS8618, CS8602
 
@@ -14,14 +15,12 @@ internal class ValidationAspect : FieldOrPropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
     {
-        builder.Advice.AddContract(
-            builder.Target,
+        builder.AddContract(
             nameof(ValidatePropertyGetter),
             ContractDirection.Output,
             args: new { propertyName = builder.Target.Name } );
 
-        builder.Advice.AddContract(
-            builder.Target,
+        builder.AddContract(
             nameof(ValidatePropertySetter),
             ContractDirection.Input,
             args: new { propertyName = builder.Target.Name } );
@@ -52,7 +51,7 @@ public sealed class OnPropertyChangedAspect : TypeAspect
     {
         foreach (var property in builder.Target.FieldsAndProperties.Where( f => !f.IsImplicitlyDeclared ))
         {
-            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.With( property ).OverrideAccessors( null, nameof(OverridePropertySetter) );
         }
     }
 

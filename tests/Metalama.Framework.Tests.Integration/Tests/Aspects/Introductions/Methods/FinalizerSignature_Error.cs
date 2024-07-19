@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -5,27 +6,21 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Fina
 {
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-                builder.Advice.IntroduceMethod(builder.Target, nameof(Template),
-                buildMethod: methodBuilder =>
-                {
-                    methodBuilder.Name = "Finalize";
-                });
+            builder.IntroduceMethod(
+                nameof(Template),
+                buildMethod: methodBuilder => { methodBuilder.Name = "Finalize"; } );
         }
 
         [Template]
-        public void Template()
-        {
-        }
+        public void Template() { }
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass 
+    internal class TargetClass
     {
-        ~TargetClass()
-        {
-        }
+        ~TargetClass() { }
     }
 }

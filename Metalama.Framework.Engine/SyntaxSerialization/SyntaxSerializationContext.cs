@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -19,12 +20,14 @@ internal sealed class SyntaxSerializationContext : ISyntaxGenerationContext
 
     public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationOptions syntaxGenerationOptions ) : this(
         compilation,
-        compilation.CompilationContext.GetSyntaxGenerationContext( syntaxGenerationOptions ) ) { }
+        compilation.CompilationContext.GetSyntaxGenerationContext( syntaxGenerationOptions ),
+        null ) { }
 
-    public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
+    public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext, INamedType? currentType )
     {
         this.CompilationModel = compilation;
         this.SyntaxGenerationContext = syntaxGenerationContext;
+        this.CurrentType = currentType;
     }
 
     public CompilationContext CompilationContext => this.CompilationModel.CompilationContext;
@@ -36,6 +39,9 @@ internal sealed class SyntaxSerializationContext : ISyntaxGenerationContext
     public CompilationModel CompilationModel { get; }
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
+    public INamedType? CurrentType { get; }
 
     public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 

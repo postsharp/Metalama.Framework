@@ -9,7 +9,7 @@ using System.Linq;
 
 #pragma warning disable CS0067, CS0169, CS0618, CS0649
 
-[assembly: AspectOrder( typeof(SerializeAttribute), typeof(IntroduceMembersAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(SerializeAttribute), typeof(IntroduceMembersAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced;
 
@@ -34,13 +34,13 @@ internal class IntroduceMembersAttribute : TypeAspect
     private void IndexerSet( int i, int value ) { }
 
     [Template]
-    private static bool NotOperator( dynamic x ) => false;
+    public static bool NotOperator( dynamic x ) => false;
 
     [Template]
-    private static int PlusOperator( dynamic x, dynamic y ) => 0;
+    public static int PlusOperator( dynamic x, dynamic y ) => 0;
 
     [Template]
-    private static bool CastOperator( dynamic x ) => true;
+    public static bool CastOperator( dynamic x ) => true;
 
     [Template]
     private void Finalizer() { }
@@ -55,24 +55,21 @@ internal class IntroduceMembersAttribute : TypeAspect
         var builderIds = new List<string>();
         var results = new List<IIntroductionAdviceResult<IDeclaration>>();
 
-        results.Add( builder.Advice.IntroduceMethod( builder.Target, nameof(M), buildMethod: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-        results.Add( builder.Advice.IntroduceField( builder.Target, nameof(_field), buildField: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-        results.Add( builder.Advice.IntroduceEvent( builder.Target, nameof(Event), buildEvent: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceMethod( nameof(M), buildMethod: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceField( nameof(_field), buildField: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceEvent( nameof(Event), buildEvent: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+
+        results.Add( builder.IntroduceProperty( nameof(Property), buildProperty: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceProperty( builder.Target, nameof(Property), buildProperty: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-
-        results.Add(
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
+            builder.IntroduceIndexer(
                 typeof(int),
                 nameof(IndexerGet),
                 nameof(IndexerSet),
                 buildIndexer: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceUnaryOperator(
-                builder.Target,
+            builder.IntroduceUnaryOperator(
                 nameof(NotOperator),
                 builder.Target,
                 TypeFactory.GetType( typeof(bool) ),
@@ -80,8 +77,7 @@ internal class IntroduceMembersAttribute : TypeAspect
                 buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceBinaryOperator(
-                builder.Target,
+            builder.IntroduceBinaryOperator(
                 nameof(PlusOperator),
                 builder.Target,
                 builder.Target,
@@ -90,44 +86,42 @@ internal class IntroduceMembersAttribute : TypeAspect
                 buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceConversionOperator(
-                builder.Target,
+            builder.IntroduceConversionOperator(
                 nameof(CastOperator),
                 builder.Target,
                 TypeFactory.GetType( typeof(bool) ),
                 buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
-        results.Add( builder.Advice.IntroduceFinalizer( builder.Target, nameof(Finalizer) ) );
+        results.Add( builder.IntroduceFinalizer( nameof(Finalizer) ) );
 
         results.Add(
-            builder.Advice.IntroduceParameter(
-                builder.Target.Constructors.First(),
-                "x",
-                typeof(int),
-                TypedConstant.Create( 42 ),
-                pullAction: ( p, c ) =>
-                {
-                    try
+            builder.With( builder.Target.Constructors.First() )
+                .IntroduceParameter(
+                    "x",
+                    typeof(int),
+                    TypedConstant.Create( 42 ),
+                    pullAction: ( p, c ) =>
                     {
-                        builderIds.Add( p.ToSerializableId().Id );
-                    }
-                    catch (NotSupportedException ex)
-                    {
-                        builderIds.Add( $"{ex.GetType()}: {ex.Message}" );
-                    }
+                        try
+                        {
+                            builderIds.Add( p.ToSerializableId().Id );
+                        }
+                        catch (NotSupportedException ex)
+                        {
+                            builderIds.Add( $"{ex.GetType()}: {ex.Message}" );
+                        }
 
-                    return PullAction.None;
-                } ) );
+                        return PullAction.None;
+                    } ) );
 
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(GetIds),
             buildMethod: builder => builder.Name = "GetBuilderIds",
             args: new { ids = builderIds.ToArray() } );
 
         var builtIds = results.Select( r => r.Declaration.ToSerializableId().Id ).ToArray();
 
-        builder.Advice.IntroduceMethod( builder.Target, nameof(GetIds), buildMethod: builder => builder.Name = "GetBuiltIds", args: new { ids = builtIds } );
+        builder.IntroduceMethod( nameof(GetIds), buildMethod: builder => builder.Name = "GetBuiltIds", args: new { ids = builtIds } );
     }
 }
 
@@ -156,7 +150,7 @@ internal static class TestDeclarationExtensions
             INamespace ns => ns.Namespaces.Concat<IDeclaration>( ns.Types ),
             INamedType namedType => new IEnumerable<IDeclaration>[]
                 {
-                    namedType.NestedTypes,
+                    namedType.Types,
                     namedType.Methods,
                     namedType.Constructors,
                     namedType.Fields,

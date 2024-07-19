@@ -1,7 +1,8 @@
-#if TESTOPTIONS
+#if TEST_OPTIONS
 // @AcceptInvalidInput
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.ReturnVoidForNonVoid;
@@ -11,6 +12,7 @@ internal class Aspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         CalledTemplate();
+
         return default;
     }
 

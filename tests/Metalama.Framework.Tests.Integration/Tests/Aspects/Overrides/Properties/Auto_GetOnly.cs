@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using System;
 
 #pragma warning disable CS0169
@@ -69,12 +70,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         public TargetClass()
         {
-            this.Property = 27;
-            this.InitializerProperty = 27;
-            this.AbstractBaseProperty = 27;
-            this.AbstractBaseInitializerProperty = 27;
-            this.VirtualBaseProperty = 27;
-            this.VirtualBaseInitializerProperty = 27;
+            Property = 27;
+            InitializerProperty = 27;
+            AbstractBaseProperty = 27;
+            AbstractBaseInitializerProperty = 27;
+            VirtualBaseProperty = 27;
+            VirtualBaseInitializerProperty = 27;
         }
 
         static TargetClass()

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
@@ -11,28 +12,34 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParamete
 internal class Aspect : PropertyAspect
 {
     [Introduce]
-    string? PropertyBody()
+    private string? PropertyBody
     {
-        var methodBody = meta.Target.Property.GetSymbol()
-            ?.DeclaringSyntaxReferences
-            .Select(r => r.GetSyntax())
-            .Cast<PropertyDeclarationSyntax>()
-            .Select(SyntaxNode? (p) =>
+        get
+        {
             {
-                if (p.ExpressionBody != null)
-                {
-                    return p.ExpressionBody;
-                }
+                var methodBody = meta.Target.Property.GetSymbol()
+                    ?.DeclaringSyntaxReferences
+                    .Select( r => r.GetSyntax() )
+                    .Cast<PropertyDeclarationSyntax>()
+                    .Select(
+                        SyntaxNode? ( p ) =>
+                        {
+                            if (p.ExpressionBody != null)
+                            {
+                                return p.ExpressionBody;
+                            }
 
-                var getter = p.AccessorList?.Accessors
-                    .SingleOrDefault(a => a.Keyword.IsKind(SyntaxKind.GetKeyword));
+                            var getter = p.AccessorList?.Accessors
+                                .SingleOrDefault( a => a.Keyword.IsKind( SyntaxKind.GetKeyword ) );
 
-                return (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body;
-            })
-            .WhereNotNull()
-            .FirstOrDefault();
+                            return (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body;
+                        } )
+                    .WhereNotNull()
+                    .FirstOrDefault();
 
-        return methodBody?.ToString();
+                return methodBody?.ToString();
+            }
+        }
     }
 }
 
@@ -40,5 +47,8 @@ internal class Aspect : PropertyAspect
 internal class TargetCode
 {
     [Aspect]
-    public int P { get => 42; }
+    public int P
+    {
+        get => 42;
+    }
 }

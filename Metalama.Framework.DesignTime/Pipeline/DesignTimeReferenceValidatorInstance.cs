@@ -23,7 +23,11 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
 
     public DeclarationKind ValidatedDeclarationKind { get; }
 
+    public string? ValidatedIdentifier { get; }
+
     internal ValidatorImplementation Implementation { get; }
+
+    private ReferenceGranularity Granularity { get; }
 
     internal DesignTimeReferenceValidatorInstance(
         ISymbol validatedDeclaration,
@@ -31,7 +35,8 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
         bool includeDerivedTypes,
         ValidatorDriver driver,
         ValidatorImplementation implementation,
-        string description )
+        string description,
+        ReferenceGranularity granularity )
     {
         this.ValidatedDeclaration = SymbolDictionaryKey.CreatePersistentKey( validatedDeclaration );
         this.ValidatedDeclarationKind = validatedDeclaration.GetDeclarationKind();
@@ -39,7 +44,9 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
         this.IncludeDerivedTypes = includeDerivedTypes;
         this._driver = driver;
         this._description = description;
+        this.Granularity = granularity;
         this.Implementation = implementation;
+        this.ValidatedIdentifier = validatedDeclaration.Name;
     }
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
@@ -49,7 +56,8 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
             this.Implementation,
             this.ReferenceKinds,
             this.IncludeDerivedTypes,
-            this._description );
+            this._description,
+            this.Granularity );
 
     public TransitiveValidatorInstance ToTransitiveValidatorInstance()
         => new(
@@ -59,7 +67,8 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
             this.Implementation.Implementation,
             this.Implementation.State,
             this._driver.MethodName,
-            this._description );
+            this._description,
+            this.Granularity );
 
     public override string ToString() => this._description;
 }

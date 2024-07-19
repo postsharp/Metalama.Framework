@@ -2,12 +2,15 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System;
 
 namespace Metalama.Framework.Options;
 
+/// <summary>
+/// Provides read-only access to hierarchical options.
+/// </summary>
 [CompileTime]
-internal interface IHierarchicalOptionsManager
+public interface IHierarchicalOptionsManager
 {
-    TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : class, IHierarchicalOptions, new();
+    IHierarchicalOptions? GetOptions( IDeclaration declaration, Type optionsType );
 }

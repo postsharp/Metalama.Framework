@@ -1,17 +1,18 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.TemplateParameterDiscard;
 
-class Aspect : MethodAspect
+internal class Aspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(builder.Target, nameof(Template));
+        builder.Override( nameof(Template) );
     }
 
     [Template]
-    void Template(int arg)
+    private void Template( int arg )
     {
         _ = arg;
     }
@@ -21,5 +22,5 @@ class Aspect : MethodAspect
 internal class Program
 {
     [Aspect]
-    void M(int arg) { }
+    private void M( int arg ) { }
 }

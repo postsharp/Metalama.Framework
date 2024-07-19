@@ -1,4 +1,4 @@
-int Method(int a, int b)
+private int Method(int a, int b)
 {
   var list = new global::System.Collections.Generic.List<global::System.Int32>();
   list.Add(1);

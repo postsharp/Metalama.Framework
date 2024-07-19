@@ -1,9 +1,10 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Multiple;
 
-[assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute), typeof(IntroduceAndOverrideAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute), typeof(IntroduceAndOverrideAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Multiple
 {
@@ -13,9 +14,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class FirstOverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Template));
+            builder.Override( nameof(Template) );
         }
 
         [Template]
@@ -23,13 +24,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine("First override.");
+                Console.WriteLine( "First override." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("First override.");
+                Console.WriteLine( "First override." );
                 meta.Proceed();
             }
         }
@@ -37,9 +39,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class SecondOverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Template));
+            builder.Override( nameof(Template) );
         }
 
         [Template]
@@ -47,13 +49,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine("Second override.");
+                Console.WriteLine( "Second override." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Second override.");
+                Console.WriteLine( "Second override." );
                 meta.Proceed();
             }
         }
@@ -61,10 +64,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class IntroduceAndOverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Outbound.SelectMany( x => x.FieldsAndProperties ).AddAspect(x => new FirstOverrideAttribute());
-            builder.Outbound.SelectMany( x => x.FieldsAndProperties ).AddAspect(x => new SecondOverrideAttribute());
+            builder.Outbound.SelectMany( x => x.FieldsAndProperties ).AddAspect( x => new FirstOverrideAttribute() );
+            builder.Outbound.SelectMany( x => x.FieldsAndProperties ).AddAspect( x => new SecondOverrideAttribute() );
         }
 
         [Introduce]
@@ -88,7 +91,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
         public TargetClass()
         {
-            this.ReadOnlyField = 42;
+            ReadOnlyField = 42;
         }
     }
 }

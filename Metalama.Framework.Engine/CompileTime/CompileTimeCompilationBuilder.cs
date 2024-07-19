@@ -321,8 +321,10 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         if ( this._projectOptions is { FormatCompileTimeCode: true } )
         {
+            var codeFormatter = this._serviceProvider.GetRequiredService<CodeFormatter>();
+
             var compilation = compileTimeCompilation;
-            var formattedCompilation = this._taskRunner.RunSynchronously( () => OutputCodeFormatter.FormatAllAsync( compilation, cancellationToken ) );
+            var formattedCompilation = this._taskRunner.RunSynchronously( () => codeFormatter.FormatAllAsync( compilation, cancellationToken ) );
 
             if ( !(formattedCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error ) &&
                    !compileTimeCompilation.GetDiagnostics().Any( d => d.Severity == DiagnosticSeverity.Error )) )
@@ -408,7 +410,13 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 RetryHelper.RetryWithLockDetection(
                     path,
-                    p => File.WriteAllBytes( p, bytes ),
+                    p =>
+                    {
+                        File.WriteAllBytes( p, bytes );
+
+                        // Set the file as read only to we have no temptation to edit it.
+                        File.SetAttributes( p, FileAttributes.ReadOnly );
+                    },
                     this._serviceProvider.Underlying,
                     logger: this._logger );
 

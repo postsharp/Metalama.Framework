@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining;
 
-[assembly: AspectOrder(typeof(MyOverrideMethod), typeof(MyOverrideProperty))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(MyOverrideMethod), typeof(MyOverrideProperty) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlining
 {
@@ -10,16 +10,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlini
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Generated code.");
+            Console.WriteLine( "Generated code." );
 
             try
             {
                 meta.Proceed();
+
                 return meta.Proceed();
             }
             catch (Exception)
             {
-                Console.WriteLine("Oops!");
+                Console.WriteLine( "Oops!" );
 
                 throw;
             }
@@ -44,20 +45,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.OverrideNoInlini
         }
     }
 
-    
     public class TargetCode
     {
         [MyOverrideMethod]
         public int Method()
         {
-            Console.WriteLine("User code.");
+            Console.WriteLine( "User code." );
 
             return 1;
         }
-        
+
         [MyOverrideProperty]
         public int Property { get; set; }
-        
-        
     }
 }

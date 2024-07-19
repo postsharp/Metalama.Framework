@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -10,7 +11,7 @@ public class TheAspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.ImplementInterface( builder.Target, typeof(IDisposable), whenExists: OverrideStrategy.Override );
+        builder.ImplementInterface( typeof(IDisposable), whenExists: OverrideStrategy.Override );
     }
 
     [InterfaceMember]
@@ -30,6 +31,5 @@ internal class C : IDisposable
 }
 
 // <target>
-
 [TheAspect]
 internal class D : C { }

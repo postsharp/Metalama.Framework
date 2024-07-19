@@ -9,13 +9,15 @@ namespace Metalama.Framework.DesignTime.Utilities;
 /// </summary>
 internal sealed class AsyncEvent<T>
 {
-    private readonly ConcurrentDictionary<object, Func<T, Task>> _handlers = new();
+    private readonly ConcurrentDictionary<Func<T, Task>, Unit> _handlers = new();
+
+    private struct Unit;
 
     public async Task InvokeAsync( T arg )
     {
         foreach ( var handler in this._handlers )
         {
-            await handler.Value( arg );
+            await handler.Key.Invoke( arg );
         }
     }
 
@@ -30,15 +32,7 @@ internal sealed class AsyncEvent<T>
             this._parent = parent;
         }
 
-        public void RegisterHandler( Func<T, Task> handler ) => this._parent._handlers[handler] = handler;
-
-        public void RegisterHandler( Action<T> handler )
-            => this._parent._handlers[handler] = arg =>
-            {
-                handler( arg );
-
-                return Task.CompletedTask;
-            };
+        public void RegisterHandler( Func<T, Task> handler ) => this._parent._handlers[handler] = default;
 
         public void UnregisterHandler( Func<T, Task> handler )
         {

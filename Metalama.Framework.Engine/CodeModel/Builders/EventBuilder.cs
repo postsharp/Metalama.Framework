@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -42,10 +43,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         this._fieldAttributes = new List<IAttributeData>();
     }
 
-    public void AddFieldAttribute( IAttributeData attributeData )
-    {
-        this._fieldAttributes.Add( attributeData );
-    }
+    public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
 
     public INamedType Type
     {

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.With_Erro
         [TestTemplate]
         private dynamic? Template()
         {
-            var compileTime1 = meta.CompileTime(new Entity1 { Property1 = 5 });
+            var compileTime1 = meta.CompileTime( new Entity1 { Property1 = 5 } );
 
             // This should result in an error.
             var error = compileTime1 with { Property1 = meta.This.Foo };
@@ -23,7 +24,6 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.With_Erro
     {
         public int Property1 { get; set; }
     }
-
 
     internal class TargetCode
     {

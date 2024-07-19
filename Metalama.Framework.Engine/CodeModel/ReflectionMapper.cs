@@ -58,13 +58,16 @@ namespace Metalama.Framework.Engine.CodeModel
 
                         throw new InvalidOperationException( $"The type '{metadataName}' cannot be used at run-time{explanation}" );
                     }
-                    else if ( assemblies.Length > 1 )
+
+                    var assembly = assemblies[0];
+
+                    if ( assemblies.Length > 1 )
                     {
-                        throw new InvalidOperationException(
-                            $"When resolving type '{metadataName}', found more than one assembly named '{assemblyShortName}' in project '{this._compilation.AssemblyName}': {string.Join( ",", assemblies.Select( x => $"'{x.Identity}'" ) )}." );
+                        // At design time we may have some mess and have many versions of the same assembly. Take the highest version.
+                        assembly = assemblies.OrderByDescending( a => a.Identity.Version ).First();
                     }
 
-                    symbol = assemblies[0].GetTypeByMetadataName( metadataName );
+                    symbol = assembly.GetTypeByMetadataName( metadataName );
                 }
             }
 
@@ -79,8 +82,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets a <see cref="ITypeSymbol"/> given a reflection <see cref="Type"/>.
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public ITypeSymbol GetTypeSymbol( Type type )
         {
             switch ( type )

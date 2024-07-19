@@ -1,10 +1,11 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Interfaces.ExplicitMembers
 {
     /*
      * Simple case with explicit interface members for a single interface.
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
         [InterfaceMember( IsExplicit = true )]

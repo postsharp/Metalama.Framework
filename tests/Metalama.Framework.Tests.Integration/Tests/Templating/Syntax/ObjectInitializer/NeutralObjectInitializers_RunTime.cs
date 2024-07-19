@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -10,8 +11,10 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.NeutralOb
         [TestTemplate]
         private dynamic? Template()
         {
-            var runTime1 = new Entity1 { Property1 = meta.Target.Method.Parameters.Count, 
-                Property2 = { new Entity2 { Property1 = meta.This.Foo }, new Entity2 { Property1 = 3 } } };
+            var runTime1 = new Entity1
+            {
+                Property1 = meta.Target.Method.Parameters.Count, Property2 = { new Entity2 { Property1 = meta.This.Foo }, new Entity2 { Property1 = 3 } }
+            };
 
             var result = meta.Proceed();
 

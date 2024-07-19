@@ -7,7 +7,10 @@ internal static class OptionsTestHelper
     public const string OptionsCode =
         """
         using System;
-        using Metalama.Framework.Aspects;
+        using Metalama.Framework.Advising; 
+        using Metalama.Framework.Advising;
+        using Metalama.Framework.Advising;
+        using Metalama.Framework.Aspects; 
         using Metalama.Framework.Code;
         using Metalama.Framework.Options;
         using Metalama.Framework.Eligibility;
@@ -33,7 +36,9 @@ internal static class OptionsTestHelper
 
     public const string ReportWarningFromOptionAspectCode =
         """
-        using Metalama.Framework.Aspects;
+        using Metalama.Framework.Advising; 
+        using Metalama.Framework.Advising;
+        using Metalama.Framework.Aspects; 
         using Metalama.Framework.Code;
         using Metalama.Framework.Diagnostics;
         using Metalama.Framework.Eligibility;

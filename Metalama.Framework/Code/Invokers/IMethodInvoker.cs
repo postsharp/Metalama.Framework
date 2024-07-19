@@ -40,5 +40,9 @@ namespace Metalama.Framework.Code.Invokers
         /// </param>
         /// <param name="options"></param>
         IMethodInvoker With( dynamic? target, InvokerOptions options = default );
+
+        IMethodInvoker With( IExpression target, InvokerOptions options = default );
+
+        IExpression CreateInvokeExpression( IEnumerable<IExpression> args );
     }
 }

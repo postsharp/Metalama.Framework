@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -6,7 +7,7 @@ using Metalama.Framework.Validation;
 
 #pragma warning disable CS0168, CS8618, CS0169
 
-[assembly: AspectOrder( typeof(ValidateAspect), typeof(IntroduceAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ValidateAspect), typeof(IntroduceAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Validation.Aspect_AfterAllAspects
 {

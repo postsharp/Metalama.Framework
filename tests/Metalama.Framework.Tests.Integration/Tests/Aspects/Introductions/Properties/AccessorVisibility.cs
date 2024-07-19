@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.AccessorVisibility
@@ -7,14 +8,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedGet) );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedGet) );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedSet) );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedSet) );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(PropertyWithRestrictedInit) );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoPropertyWithRestrictedInit) );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(ProtectedAutoPropertyWithPrivateProtectedSetter) );
-            builder.Advice.IntroduceProperty( builder.Target, nameof(ProtectedInternalAutoPropertyWithProtectedSetter) );
+            builder.IntroduceProperty( nameof(PropertyWithRestrictedGet) );
+            builder.IntroduceProperty( nameof(AutoPropertyWithRestrictedGet) );
+            builder.IntroduceProperty( nameof(PropertyWithRestrictedSet) );
+            builder.IntroduceProperty( nameof(AutoPropertyWithRestrictedSet) );
+            builder.IntroduceProperty( nameof(PropertyWithRestrictedInit) );
+            builder.IntroduceProperty( nameof(AutoPropertyWithRestrictedInit) );
+            builder.IntroduceProperty( nameof(ProtectedAutoPropertyWithPrivateProtectedSetter) );
+            builder.IntroduceProperty( nameof(ProtectedInternalAutoPropertyWithProtectedSetter) );
         }
 
         [Template]

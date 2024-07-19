@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -7,7 +8,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Options;
 using Metalama.Framework.Tests.Integration.Tests.Options;
 
-[assembly: AspectOrder( typeof(ShowOptionsAspect), typeof(ModifyOptionsAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ShowOptionsAspect), typeof(ModifyOptionsAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options;
 
@@ -74,8 +75,7 @@ public class ShowOptionsAspect : Attribute, IAspect<IDeclaration>
 {
     public void BuildAspect( IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
+        builder.IntroduceAttribute(
             AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { builder.Target.Enhancements().GetOptions<MyOptions>().OverrideHistory } ) );
     }
 

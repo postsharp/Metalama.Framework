@@ -13,6 +13,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets the <see cref="ITypeSymbol"/> for the current type.
         /// </summary>
-        ITypeSymbol TypeSymbol { get; }
+        ITypeSymbol? TypeSymbol { get; }
     }
 }

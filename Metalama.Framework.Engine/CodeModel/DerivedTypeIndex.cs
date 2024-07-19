@@ -2,6 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
@@ -12,153 +15,225 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel;
+
+public sealed partial class DerivedTypeIndex
 {
-    public sealed partial class DerivedTypeIndex
+    private readonly CompilationContext _compilationContext;
+
+    // Maps a base type to direct derived types.
+    private readonly ImmutableDictionaryOfArray<Ref<INamedType>, Ref<INamedType>> _relationships;
+    private readonly ImmutableHashSet<Ref<INamedType>> _processedTypes;
+
+    private DerivedTypeIndex(
+        CompilationContext compilationContext,
+        ImmutableDictionaryOfArray<Ref<INamedType>, Ref<INamedType>> relationships,
+        ImmutableHashSet<Ref<INamedType>> processedTypes )
     {
-        private readonly CompilationContext _compilationContext;
+        this._relationships = relationships;
+        this._processedTypes = processedTypes;
+        this._compilationContext = compilationContext;
+    }
 
-        // Maps a base type to direct derived types.
-        private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> _relationships;
-        private readonly ImmutableHashSet<INamedTypeSymbol> _processedTypes;
-
-        private DerivedTypeIndex(
-            CompilationContext compilationContext,
-            ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> relationships,
-            ImmutableHashSet<INamedTypeSymbol> processedTypes )
+    private bool IsContainedInCurrentCompilation( Ref<INamedType> type )
+    {
+        switch ( type.Target )
         {
-            this._relationships = relationships;
-            this._processedTypes = processedTypes;
-            this._compilationContext = compilationContext;
+            case INamedTypeSymbol symbol:
+                return this.IsCurrentCompilation( symbol.ContainingAssembly );
+
+            case INamedTypeBuilder:
+                // Builders are always "in" the current Roslyn compilation.
+                return true;
+
+            default:
+                throw new InvalidOperationException( $"Unexpected type {type.Target}." );
         }
+    }
 
-        private bool IsContainedInCurrentCompilation( INamedTypeSymbol type )
-            => this._compilationContext.SymbolComparer.Equals( this._compilationContext.Compilation.Assembly, type.ContainingAssembly );
+    private bool IsCurrentCompilation( IAssemblySymbol assembly )
+        => this._compilationContext.SymbolComparer.Equals( this._compilationContext.Compilation.Assembly, assembly );
 
-        internal IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, DerivedTypesOptions options )
+    internal IEnumerable<INamedType> GetDerivedTypesInCurrentCompilation( INamedType baseType, DerivedTypesOptions options )
+        => options switch
         {
-            return options switch
+            DerivedTypesOptions.All => this.GetAllDerivedTypes( baseType ),
+            DerivedTypesOptions.DirectOnly => this.GetDirectlyDerivedTypes( baseType ),
+            DerivedTypesOptions.FirstLevelWithinCompilationOnly => this.GetFirstLevelDerivedTypes( baseType ),
+            DerivedTypesOptions.IncludingExternalTypesDangerous => this.GetDerivedTypes( baseType ),
+            _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
+        };
+
+    internal IEnumerable<INamedType> GetDerivedTypes( INamedType baseType )
+        => this.GetDerivedTypesCore( baseType.ToTypedRef() )
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
+
+    private IEnumerable<Ref<INamedType>> GetDerivedTypesCore( Ref<INamedType> baseType )
+        => this._relationships[baseType]
+            .SelectManyRecursiveDistinct( t => this._relationships[t], this._processedTypes.KeyComparer );
+
+    private IEnumerable<INamedType> GetAllDerivedTypes( INamedType baseType )
+        => this.GetAllDerivedTypesCore( baseType.ToTypedRef() )
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
+
+    private IEnumerable<Ref<INamedType>> GetAllDerivedTypesCore( Ref<INamedType> baseType )
+        => this.GetDerivedTypesCore( baseType )
+            .Where( this.IsContainedInCurrentCompilation );
+
+    private IEnumerable<INamedType> GetDirectlyDerivedTypes( INamedType baseType )
+        => this.GetDirectlyDerivedTypesCore( baseType.ToTypedRef() )
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
+
+    private IEnumerable<Ref<INamedType>> GetDirectlyDerivedTypesCore( Ref<INamedType> baseType )
+    {
+        foreach ( var namedType in this._relationships[baseType] )
+        {
+            if ( this.IsContainedInCurrentCompilation( namedType ) )
             {
-                DerivedTypesOptions.All => this.GetAllDerivedTypesCore( baseType ),
-                DerivedTypesOptions.DirectOnly => this.GetDirectlyDerivedTypesCore( baseType ),
-                DerivedTypesOptions.FirstLevelWithinCompilationOnly => this.GetFirstLevelDerivedTypesCore( baseType ),
-                DerivedTypesOptions.IncludingExternalTypesDangerous => this.GetDerivedTypes( baseType ),
-                _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
-            };
+                yield return namedType;
+            }
         }
+    }
 
-        internal IEnumerable<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType )
-            => this._relationships[baseType]
-                .SelectManyRecursiveDistinct( t => this._relationships[t] );
+    private IEnumerable<INamedType> GetFirstLevelDerivedTypes( INamedType baseType )
+        => this.GetFirstLevelDerivedTypesCore( baseType.ToTypedRef() )
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-        private IEnumerable<INamedTypeSymbol> GetAllDerivedTypesCore( INamedTypeSymbol baseType )
-            => this.GetDerivedTypes( baseType )
-                .Where( this.IsContainedInCurrentCompilation );
+    private IEnumerable<Ref<INamedType>> GetFirstLevelDerivedTypesCore( Ref<INamedType> baseType )
+    {
+        var set = new HashSet<Ref<INamedType>>( RefEqualityComparer<INamedType>.Default );
+        GetDerivedTypesRecursive( baseType );
 
-        private IEnumerable<INamedTypeSymbol> GetDirectlyDerivedTypesCore( INamedTypeSymbol baseType )
+        return set;
+
+        void GetDerivedTypesRecursive( Ref<INamedType> parentType )
         {
-            foreach ( var type in this._relationships[baseType] )
+            foreach ( var type in this._relationships[parentType] )
             {
                 if ( this.IsContainedInCurrentCompilation( type ) )
                 {
-                    yield return type;
+                    set.Add( type );
                 }
-            }
-        }
-
-        private IEnumerable<INamedTypeSymbol> GetFirstLevelDerivedTypesCore( INamedTypeSymbol baseType )
-        {
-            var set = new HashSet<INamedTypeSymbol>( this._compilationContext.SymbolComparer );
-            GetDerivedTypesRecursive( baseType );
-
-            return set;
-
-            void GetDerivedTypesRecursive( INamedTypeSymbol parentType )
-            {
-                foreach ( var type in this._relationships[parentType] )
+                else
                 {
-                    if ( this.IsContainedInCurrentCompilation( type ) )
-                    {
-                        set.Add( type );
-                    }
-                    else
-                    {
-                        GetDerivedTypesRecursive( type );
-                    }
+                    GetDerivedTypesRecursive( type );
                 }
             }
         }
+    }
 
-        internal DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroduceInterfaceTransformation> introducedInterfaces )
+    internal DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroduceInterfaceTransformation> introducedInterfaces )
+    {
+        Builder? builder = null;
+
+        foreach ( var transformation in introducedInterfaces )
         {
-            Builder? builder = null;
+            builder ??= new Builder( this );
 
-            foreach ( var introducedInterface in introducedInterfaces )
+            var introducedInterface = transformation.InterfaceType;
+
+            if ( !introducedInterface.DeclaringAssembly.GetSymbol().Equals( this._compilationContext.Compilation.Assembly ) )
             {
-                builder ??= new Builder( this );
-
-                var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol().AssertNotNull();
-
-                if ( !introducedInterfaceSymbol.ContainingAssembly.Equals( this._compilationContext.Compilation.Assembly ) )
-                {
-                    // The type may not have been analyzed yet.
-                    builder.AnalyzeType( introducedInterfaceSymbol );
-                }
-
-                builder.AddDerivedType( introducedInterfaceSymbol, introducedInterface.TargetType.GetSymbol().AssertNotNull() );
+                // The type may not have been analyzed yet.
+                builder.AnalyzeType( introducedInterface.ToTypedRef() );
             }
 
-            if ( builder != null )
+            builder.AddDerivedType( introducedInterface, transformation.TargetType );
+        }
+
+        return builder?.ToImmutable() ?? this;
+    }
+
+    internal DerivedTypeIndex WithIntroducedTypes( IEnumerable<IntroduceNamedTypeTransformation> introducedTypes )
+    {
+        Builder? builder = null;
+
+        foreach ( var transformation in introducedTypes )
+        {
+            builder ??= new Builder( this );
+
+            var introducedType = transformation.IntroducedDeclaration;
+
+            if ( introducedType.BaseType is { } baseType )
             {
-                return builder.ToImmutable();
+                builder.AddDerivedType( baseType, introducedType );
             }
-            else
+
+            foreach ( var implementedInterface in introducedType.ImplementedInterfaces )
             {
-                return this;
+                builder.AddDerivedType( implementedInterface, introducedType );
             }
         }
 
-        public void PopulateDependencies( IDependencyCollector collector )
+        return builder?.ToImmutable() ?? this;
+    }
+
+    public void PopulateDependencies( IDependencyCollector collector )
+    {
+        foreach ( var baseType in this._relationships.Keys )
         {
-            foreach ( var baseType in this._relationships.Keys )
+            if ( baseType.Target is INamedTypeSymbol { OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty: false } baseTypeSymbol )
             {
-                if ( !baseType.OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty )
-                {
-                    this.PopulateDependenciesCore( collector, baseType, baseType );
-                }
+                this.PopulateDependenciesCore( collector, baseTypeSymbol, baseType );
             }
         }
+    }
 
-        private void PopulateDependenciesCore( IDependencyCollector collector, INamedTypeSymbol rootType, INamedTypeSymbol baseType )
+    private void PopulateDependenciesCore( IDependencyCollector collector, INamedTypeSymbol rootType, Ref<INamedType> baseType )
+    {
+        foreach ( var derivedType in this._relationships[baseType] )
         {
-            foreach ( var derivedType in this._relationships[baseType] )
+            if ( derivedType.Target is INamedTypeSymbol derivedTypeSymbol )
             {
-                collector.AddDependency( rootType, derivedType );
+                collector.AddDependency( rootType, derivedTypeSymbol );
                 this.PopulateDependenciesCore( collector, rootType, derivedType );
             }
         }
+    }
 
-        internal DerivedTypeIndex WithAdditionalAnalyzedTypes( IEnumerable<INamedTypeSymbol> types )
+    internal DerivedTypeIndex WithAdditionalAnalyzedTypes( IEnumerable<INamedTypeSymbol> types )
+    {
+        Builder? builder = null;
+
+        foreach ( var type in types )
         {
-            Builder? builder = null;
+            if ( !this._processedTypes.Contains( type.ToTypedRef<INamedType>( this._compilationContext ) ) )
+            {
+                builder ??= new Builder( this );
+                builder.AnalyzeType( type );
+            }
+        }
 
-            foreach ( var type in types )
-            {
-                if ( !this._processedTypes.Contains( type ) )
-                {
-                    builder ??= new Builder( this );
-                    builder.AnalyzeType( type );
-                }
-            }
+        if ( builder == null )
+        {
+            return this;
+        }
+        else
+        {
+            return builder.ToImmutable();
+        }
+    }
 
-            if ( builder == null )
+    internal DerivedTypeIndex WithAdditionalAnalyzedTypes( IEnumerable<INamedType> types )
+    {
+        Builder? builder = null;
+
+        foreach ( var type in types )
+        {
+            if ( !this._processedTypes.Contains( type.ToTypedRef() ) )
             {
-                return this;
+                builder ??= new Builder( this );
+                builder.AnalyzeType( type.ToTypedRef() );
             }
-            else
-            {
-                return builder.ToImmutable();
-            }
+        }
+
+        if ( builder == null )
+        {
+            return this;
+        }
+        else
+        {
+            return builder.ToImmutable();
         }
     }
 }

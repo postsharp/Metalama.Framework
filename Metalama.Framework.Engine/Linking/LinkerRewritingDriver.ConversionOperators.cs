@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Linking
                             (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
                              arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
                              semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException( $"Unexpected operator declaration at '{operatorDeclaration.GetLocation()}.'" )
+                        _ => throw new AssertionFailedException( $"Unexpected operator declaration: {operatorDeclaration}" )
                     };
 
                 var ret = operatorDeclaration.PartialUpdate(

@@ -88,6 +88,8 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
     private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo;
     private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo;
+    private readonly ConcurrentDictionary<ISymbol, bool> _cacheIsTemplateOnly;
+
     private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
     private readonly IAttributeDeserializer _attributeDeserializer;
     private readonly ILogger _logger;
@@ -119,8 +121,10 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
         this._referenceAssemblyLocator = referenceAssemblyLocator;
         this._symbolEqualityComparer = compilationContext.SymbolComparer;
+
         this._cacheNonInheritedTemplateInfo = new ConcurrentDictionary<ISymbol, TemplateInfo>( this._symbolEqualityComparer );
         this._cacheInheritedTemplateInfo = new ConcurrentDictionary<ISymbol, TemplateInfo>( this._symbolEqualityComparer );
+        this._cacheIsTemplateOnly = new ConcurrentDictionary<ISymbol, bool>( this._symbolEqualityComparer );
 
         this._caches = Enumerable.Range( 0, (int) GetTemplatingScopeOptions.Count )
             .Select( _ => new ConcurrentDictionary<ISymbol, TemplatingScope?>( this._symbolEqualityComparer ) )
@@ -220,18 +224,14 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
         var memberId = SymbolId.Create( declaringSymbol );
 
-        switch ( attributeData.AttributeClass?.Name )
+        var templateAttributeType = attributeData.AttributeClass?.Name switch
         {
-            case nameof(TemplateAttribute):
-            case nameof(TestTemplateAttribute):
-                return new TemplateInfo( memberId, TemplateAttributeType.Template, (IAdviceAttribute?) attributeInstance );
+            nameof(TemplateAttribute) or nameof(TestTemplateAttribute) => TemplateAttributeType.Template,
+            nameof(InterfaceMemberAttribute) => TemplateAttributeType.InterfaceMember,
+            _ => TemplateAttributeType.DeclarativeAdvice
+        };
 
-            case nameof(InterfaceMemberAttribute):
-                return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, (IAdviceAttribute?) attributeInstance );
-
-            default:
-                return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, (IAdviceAttribute?) attributeInstance );
-        }
+        return new TemplateInfo( memberId, templateAttributeType, (IAdviceAttribute?) attributeInstance );
     }
 
     private static TemplatingScope? GetTemplatingScope( AttributeData attribute )
@@ -278,6 +278,50 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
         return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, null )
             .GetValueOrDefault( TemplatingScope.RunTimeOnly );
+    }
+
+    public bool IsTemplateOnly( ISymbol symbol ) => this._cacheIsTemplateOnly.GetOrAdd( symbol, static ( s, x ) => x.IsTemplateOnlyCore( s ), this );
+
+    private bool IsTemplateOnlyCore( ISymbol symbol )
+    {
+        // Symbols that aren't compile-time-only can't be template-only.
+        var isCompileTimeOnly = this.GetTemplatingScope( symbol ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+
+        if ( !isCompileTimeOnly )
+        {
+            return false;
+        }
+
+        // Check whether the symbol is marked with [CompileTime(isTemplateOnly: true)].
+        var compileTimeAttribute = symbol.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) );
+
+        if ( compileTimeAttribute is { ConstructorArguments: [{ Value: true }, ..] } )
+        {
+            return true;
+        }
+
+        // Check the containing symbol.
+        if ( symbol.ContainingSymbol is { } containingSymbol && this.IsTemplateOnly( containingSymbol ) )
+        {
+            return true;
+        }
+
+        // Check whether any type in the symbol signature is dynamic.
+        var types = symbol switch
+        {
+            IMethodSymbol method => method.Parameters.Select( p => p.Type ).Append( method.ReturnType ),
+            IPropertySymbol property => property.Parameters.Select( p => p.Type ).Append( property.Type ),
+            IFieldSymbol field => [field.Type],
+            IEventSymbol @event => [@event.Type],
+            _ => []
+        };
+
+        if ( types.Any( t => this.GetTemplatingScope( t ) == TemplatingScope.Dynamic ) )
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public void ReportScopeError( SyntaxNode node, ISymbol symbol, IDiagnosticAdder diagnosticAdder )
@@ -438,7 +482,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
                 // Type parameters.
                 case ITypeParameterSymbol typeParameterSymbol:
-                    var scopeFromAttribute = GetScopeFromAttributes( typeParameterSymbol );
+                    var scopeFromAttribute = GetScopeFromAttributes( tracer, typeParameterSymbol );
 
                     if ( scopeFromAttribute == TemplatingScope.CompileTimeOnly && typeParameterSymbol.ContainingSymbol is IMethodSymbol m
                                                                                && !this.GetTemplateInfo( m ).IsNone )
@@ -630,7 +674,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
                         // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
                         // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
 
-                        var combinedScope = GetScopeFromAttributes( namedType );
+                        var combinedScope = GetScopeFromAttributes( tracer, namedType );
                         TemplatingScope? declaringTypeScope = null;
 
                         // Check the scope of the containing type.
@@ -706,7 +750,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
                 case IParameterSymbol parameter:
                     {
-                        var parameterScope = GetScopeFromAttributes( parameter );
+                        var parameterScope = GetScopeFromAttributes( tracer, parameter );
 
                         if ( parameterScope != null )
                         {
@@ -760,7 +804,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
                             }
                         }
 
-                        var memberScope = GetScopeFromAttributes( symbol );
+                        var memberScope = GetScopeFromAttributes( tracer, symbol );
 
                         // If we have no attribute, look at the associated symbol (property/event).
                         if ( memberScope == null && symbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
@@ -881,6 +925,22 @@ internal sealed class SymbolClassifier : ISymbolClassifier
                     }
             }
         }
+
+        static TemplatingScope? GetScopeFromAttributes( SymbolClassifierTracer? tracer, ISymbol symbol )
+        {
+            // From attributes.
+            var scopeFromAttributes = symbol
+                .GetAttributes()
+                .Select( GetTemplatingScope )
+                .FirstOrDefault( s => s != null );
+
+            if ( scopeFromAttributes != null )
+            {
+                tracer?.CreateChild( symbol.OriginalDefinition ).SetResult( scopeFromAttributes );
+            }
+
+            return scopeFromAttributes;
+        }
     }
 
     private void CheckRecursion( ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
@@ -972,18 +1032,6 @@ internal sealed class SymbolClassifier : ISymbolClassifier
             (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => OnConflict(),
             _ => throw new AssertionFailedException( $"Invalid combination: ({baseTypeScope}, {combinedScope})" )
         };
-    }
-
-    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-    private static TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
-    {
-        // From attributes.
-        var scopeFromAttributes = symbol
-            .GetAttributes()
-            .Select( GetTemplatingScope )
-            .FirstOrDefault( s => s != null );
-
-        return scopeFromAttributes;
     }
 
     private bool TryGetWellKnownScope( ISymbol symbol, GetTemplatingScopeOptions options, out TemplatingScope? scope )

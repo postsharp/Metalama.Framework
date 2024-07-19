@@ -1,4 +1,5 @@
 using System.Reflection;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -7,35 +8,29 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.MemberInfoAsIE
 
 public sealed class TestAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
         // typeof(RunTimeOrCompileTimeClass) is RuntimeType, not CompileTimeType, so GetMethod works on it (and returns RuntimeMethodInfo).
-        var method = typeof(RunTimeOrCompileTimeClass).GetMethod("M");
+        var method = typeof(RunTimeOrCompileTimeClass).GetMethod( "M" );
 
-        var arrayBuilder = new ArrayBuilder(typeof(MethodInfo));
-        arrayBuilder.Add(method);
+        var arrayBuilder = new ArrayBuilder( typeof(MethodInfo) );
+        arrayBuilder.Add( method.ToExpression() );
 
-        var methodsInvalidatedByField = builder.Advice.IntroduceField(
-            builder.Target,
+        var methodsInvalidatedByField = builder.IntroduceField(
             "methods",
             typeof(MethodInfo[]),
-            buildField: b =>
-            {
-                b.InitializerExpression = arrayBuilder.ToExpression();
-            });
+            buildField: b => { b.InitializerExpression = arrayBuilder.ToExpression(); } );
     }
 }
 
 // <target>
 [TestAspect]
-internal class TargetCode
-{
-}
+internal class TargetCode { }
 
 [RunTimeOrCompileTime]
-class RunTimeOrCompileTimeClass
+internal class RunTimeOrCompileTimeClass
 {
     public void M() { }
 }

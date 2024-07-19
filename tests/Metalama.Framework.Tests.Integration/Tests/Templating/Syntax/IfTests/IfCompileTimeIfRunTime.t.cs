@@ -1,4 +1,4 @@
-string Method(string a)
+private string Method(string a)
 {
   if (string.IsNullOrEmpty(a))
   {

@@ -1,8 +1,9 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.ComplexFlow;
 
-[assembly:AspectOrder(typeof(OuterAspect), typeof(InnerAspect))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OuterAspect), typeof(InnerAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.ComplexFlow;
 
@@ -18,11 +19,11 @@ public class OuterAspect : OverrideMethodAspect
         {
             if (meta.Target.Parameters[0].Value == 27)
             {
-                meta.InsertComment("The outer method is inlining into the middle of the method.");
+                meta.InsertComment( "The outer method is inlining into the middle of the method." );
                 meta.Proceed();
             }
 
-            Console.WriteLine("Outer");
+            Console.WriteLine( "Outer" );
 
             return 27;
         }
@@ -39,12 +40,13 @@ public class InnerAspect : OverrideMethodAspect
         {
             if (meta.Target.Parameters[0].Value == 42)
             {
-                meta.InsertComment("The inliner is replacing return statement, i.e. no return replacements have to be used.");
-                meta.InsertComment("All branches of this if statement need to return from the local function.");
+                meta.InsertComment( "The inliner is replacing return statement, i.e. no return replacements have to be used." );
+                meta.InsertComment( "All branches of this if statement need to return from the local function." );
+
                 return meta.Proceed();
             }
 
-            Console.WriteLine("Inner");
+            Console.WriteLine( "Inner" );
 
             return 42;
         }
@@ -58,7 +60,7 @@ internal class TargetClass
 {
     [OuterAspect]
     [InnerAspect]
-    private int Method(int z)
+    private int Method( int z )
     {
         if (z == 42)
         {
@@ -66,7 +68,7 @@ internal class TargetClass
             return 27;
         }
 
-        Console.WriteLine("Original");
+        Console.WriteLine( "Original" );
 
         return 42;
     }

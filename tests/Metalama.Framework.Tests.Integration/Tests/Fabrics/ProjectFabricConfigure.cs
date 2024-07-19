@@ -1,6 +1,7 @@
 #pragma warning disable CS0618
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;

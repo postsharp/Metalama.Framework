@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Delegate;
@@ -17,7 +18,7 @@ internal class Aspect : OverrideMethodAspect
     [Template]
     private void CalledTemplate()
     {
-        Console.WriteLine("called template");
+        Console.WriteLine( "called template" );
     }
 }
 
@@ -25,7 +26,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

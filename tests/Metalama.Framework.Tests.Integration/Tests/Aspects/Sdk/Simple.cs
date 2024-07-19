@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -9,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.Simple
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.Simple.AspectWeaver")]
+    [RequireAspectWeaver( "Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.Simple.AspectWeaver" )]
     internal class Aspect : MethodAspect { }
 
     [MetalamaPlugIn]

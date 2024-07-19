@@ -1,5 +1,6 @@
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.UseMetaCast;
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 internal class TestAttribute : TypeAspect
@@ -9,6 +10,6 @@ internal class TestAttribute : TypeAspect
     {
         var x = meta.Proceed();
 
-        return meta.Cast(meta.Target.Type, x);
+        return meta.Cast( meta.Target.Type, x );
     }
 }

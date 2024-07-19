@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -10,15 +11,21 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Options;
+using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
@@ -26,25 +33,46 @@ namespace Metalama.Framework.Engine.Fabrics
     /// An implementation of <see cref="IAspectReceiver{TDeclaration}"/>, which offers a fluent
     /// API to programmatically add children aspects.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    internal sealed class AspectReceiver<T> : IAspectReceiver<T>
-        where T : class, IDeclaration
+    internal abstract class AspectReceiver<TDeclaration, TTag> : IAspectReceiver<TDeclaration, TTag>
+        where TDeclaration : class, IDeclaration
     {
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
-        private readonly IAspectReceiverParent _parent;
-        private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
 
-        public AspectReceiver(
+        protected abstract IAspectReceiverParent Parent { get; }
+
+        private readonly CompilationModelVersion _compilationModelVersion;
+        private readonly Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> _adder;
+        private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+
+        // We track the number of children to know if we must cache results.
+        private int _childrenCount;
+
+        internal AspectReceiver(
+            ProjectServiceProvider serviceProvider,
             ISdkRef<IDeclaration> containingDeclaration,
-            IAspectReceiverParent parent,
             CompilationModelVersion compilationModelVersion,
-            Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> selectTargets )
+            Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
         {
+            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._containingDeclaration = containingDeclaration;
-            this._parent = parent;
             this._compilationModelVersion = compilationModelVersion;
-            this._selector = selectTargets;
+            this._adder = addTargets;
+        }
+
+        public IProject Project => this.Parent.Project;
+
+        public string? OriginatingNamespace => this.Parent.Namespace;
+
+        public IRef<IDeclaration> OriginatingDeclaration => this._containingDeclaration;
+
+        protected virtual bool ShouldCache => this._childrenCount > 1;
+
+        private AspectReceiver<TChildDeclaration, TChildTag> AddChild<TChildDeclaration, TChildTag>( AspectReceiver<TChildDeclaration, TChildTag> child )
+            where TChildDeclaration : class, IDeclaration
+        {
+            this._childrenCount++;
+
+            return child;
         }
 
         private AspectClass GetAspectClass<TAspect>()
@@ -53,7 +81,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private AspectClass GetAspectClass( Type aspectType )
         {
-            var aspectClass = this._parent.AspectClasses[aspectType.FullName.AssertNotNull()];
+            var aspectClass = this.Parent.AspectClasses[aspectType.FullName.AssertNotNull()];
 
             if ( aspectClass.IsAbstract )
             {
@@ -65,53 +93,65 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterAspectSource( IAspectSource aspectSource )
         {
-            this._parent.LicenseVerifier?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
+            this._childrenCount++;
 
-            this._parent.AddAspectSource( aspectSource );
+            this.Parent.LicenseVerifier?.VerifyCanAddChildAspect( this.Parent.AspectPredecessor );
+
+            this.Parent.AddAspectSource( aspectSource );
         }
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
         {
-            this._parent.LicenseVerifier?.VerifyCanAddValidator( this._parent.AspectPredecessor );
+            this._childrenCount++;
 
-            this._parent.AddValidatorSource( validatorSource );
+            this.Parent.LicenseVerifier?.VerifyCanAddValidator( this.Parent.AspectPredecessor );
+
+            this.Parent.AddValidatorSource( validatorSource );
         }
 
         private void RegisterOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
         {
-            this._parent.AddOptionsSource( hierarchicalOptionsSource );
+            this._childrenCount++;
+
+            this.Parent.AddOptionsSource( hierarchicalOptionsSource );
         }
 
-        private IEnumerable<ReferenceValidatorInstance> SelectReferenceValidatorInstances(
+        private Task SelectReferenceValidatorInstancesAsync(
             IDeclaration validatedDeclaration,
             ValidatorDriver driver,
             ValidatorImplementation implementation,
             ReferenceKinds referenceKinds,
-            bool includeDerivedTypes )
+            bool includeDerivedTypes,
+            ReferenceGranularity granularity,
+            OutboundActionCollectionContext context )
         {
             var description = MetalamaStringFormatter.Format(
-                $"reference validator for {validatedDeclaration.DeclarationKind} '{validatedDeclaration.ToDisplayString()}' provided by {this._parent.DiagnosticSourceDescription}" );
+                $"reference validator for {validatedDeclaration.DeclarationKind} '{validatedDeclaration.ToDisplayString()}' provided by {this.Parent.DiagnosticSourceDescription}" );
 
-            yield return new ReferenceValidatorInstance(
-                validatedDeclaration,
-                driver,
-                implementation,
-                referenceKinds,
-                includeDerivedTypes,
-                description );
+            context.Collector.AddValidator(
+                new ReferenceValidatorInstance(
+                    validatedDeclaration,
+                    driver,
+                    implementation,
+                    referenceKinds,
+                    includeDerivedTypes,
+                    description,
+                    granularity ) );
 
             if ( validatedDeclaration is Method validatedMethod )
             {
                 switch ( validatedMethod.MethodKind )
                 {
                     case MethodKind.PropertyGet:
-                        yield return new ReferenceValidatorInstance(
-                            validatedMethod.DeclaringMember!,
-                            driver,
-                            implementation,
-                            ReferenceKinds.Default,
-                            includeDerivedTypes,
-                            description );
+                        context.Collector.AddValidator(
+                            new ReferenceValidatorInstance(
+                                validatedMethod.DeclaringMember!,
+                                driver,
+                                implementation,
+                                ReferenceKinds.Default,
+                                includeDerivedTypes,
+                                description,
+                                granularity ) );
 
                         break;
 
@@ -119,29 +159,50 @@ namespace Metalama.Framework.Engine.Fabrics
                     case MethodKind.PropertySet:
                     case MethodKind.EventAdd:
                     case MethodKind.EventRemove:
-                        yield return new ReferenceValidatorInstance(
-                            validatedMethod.DeclaringMember!,
-                            driver,
-                            implementation,
-                            ReferenceKinds.Assignment,
-                            includeDerivedTypes,
-                            description );
+                        context.Collector.AddValidator(
+                            new ReferenceValidatorInstance(
+                                validatedMethod.DeclaringMember!,
+                                driver,
+                                implementation,
+                                ReferenceKinds.Assignment,
+                                includeDerivedTypes,
+                                description,
+                                granularity ) );
 
                         break;
                 }
             }
+
+            return Task.CompletedTask;
         }
 
-        public void ValidateReferences(
+#pragma warning disable CS0612 // Type or member is obsolete
+
+        void IValidatorReceiver.ValidateReferences(
             ValidatorDelegate<ReferenceValidationContext> validateMethod,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes )
+            => this.ValidateInboundReferencesCore( validateMethod, ReferenceGranularity.SyntaxNode, referenceKinds, includeDerivedTypes );
+
+        public void ValidateInboundReferences(
+            Action<ReferenceValidationContext> validateMethod,
+            ReferenceGranularity granularity,
+            ReferenceKinds referenceKinds,
+            ReferenceValidationOptions options )
+            => this.ValidateInboundReferencesCore( validateMethod, granularity, referenceKinds, options == ReferenceValidationOptions.IncludeDerivedTypes );
+#pragma warning restore CS0612 // Type or member is obsolete
+
+        private void ValidateInboundReferencesCore(
+            Delegate validateMethod, // Intentionally weakly typed since we accept two signatures.
+            ReferenceGranularity granularity,
+            ReferenceKinds referenceKinds,
+            bool includeDerivedTypes = false )
         {
             var methodInfo = validateMethod.Method;
 
-            if ( methodInfo.DeclaringType?.IsAssignableFrom( this._parent.Type ) != true )
+            if ( methodInfo.DeclaringType?.IsAssignableFrom( this.Parent.Type ) != true )
             {
-                throw new ArgumentOutOfRangeException( nameof(validateMethod), $"The delegate must point to a method of type '{this._parent.Type};." );
+                throw new ArgumentOutOfRangeException( nameof(validateMethod), $"The delegate must point to a method of type '{this.Parent.Type};." );
             }
 
             if ( methodInfo.DeclaringType != null &&
@@ -150,370 +211,724 @@ namespace Metalama.Framework.Engine.Fabrics
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(validateMethod),
-                    $"The type '{this._parent.Type}' must have only one method called '{methodInfo.Name}'." );
+                    $"The type '{this.Parent.Type}' must have only one method called '{methodInfo.Name}'." );
             }
 
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
-                    this._parent.GetReferenceValidatorDriver( validateMethod.Method ),
+                    this.Parent.GetReferenceValidatorDriver( validateMethod.Method ),
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
-                    this._parent.AspectPredecessor,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
+                    this.Parent.AspectPredecessor,
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
-                        compilation,
-                        (IDiagnosticAdder) diagnostics,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                        item => this.SelectReferenceValidatorInstances(
+                        context,
+                        ( item, _, context2 ) => this.SelectReferenceValidatorInstancesAsync(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( source.Predecessor.Instance ),
                             referenceKinds,
-                            includeDerivedTypes ) ) ) );
+                            includeDerivedTypes,
+                            granularity,
+                            context2 ) ) ) );
         }
 
-        public void ValidateReferences( ReferenceValidator validator )
+        [Obsolete]
+        void IValidatorReceiver.ValidateReferences( ReferenceValidator validator ) => this.ValidateInboundReferences( validator );
+
+        public void ValidateInboundReferences( InboundReferenceValidator validator )
         {
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
-                    this._parent.GetReferenceValidatorDriver( validator.GetType() ),
+                    this.Parent.GetReferenceValidatorDriver( validator.GetType() ),
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
-                    this._parent.AspectPredecessor,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
+                    this.Parent.AspectPredecessor,
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
-                        compilation,
-                        (IDiagnosticAdder) diagnostics,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                        item => this.SelectReferenceValidatorInstances(
+                        context,
+                        ( item, _, c ) => this.SelectReferenceValidatorInstancesAsync(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( validator ),
                             validator.ValidatedReferenceKinds,
-                            validator.IncludeDerivedTypes ) ) ) );
+                            validator.IncludeDerivedTypes,
+                            validator.Granularity,
+                            c ) ) ) );
         }
 
-        public void ValidateReferences<TValidator>( Func<T, TValidator> getValidator )
-            where TValidator : ReferenceValidator
+        void IValidatorReceiver<TDeclaration>.ValidateInboundReferences<TValidator>( Func<TDeclaration, TValidator> getValidator )
+            => this.ValidateInboundReferences( ( declaration, _ ) => getValidator( declaration ) );
+
+        public void ValidateInboundReferences<TValidator>( Func<TDeclaration, TTag, TValidator> getValidator )
+            where TValidator : InboundReferenceValidator
         {
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
-                    this._parent.GetReferenceValidatorDriver( typeof(TValidator) ),
+                    this.Parent.GetReferenceValidatorDriver( typeof(TValidator) ),
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
-                    this._parent.AspectPredecessor,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
+                    this.Parent.AspectPredecessor,
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
-                        compilation,
-                        (IDiagnosticAdder) diagnostics,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                        item =>
+                        context,
+                        ( item, tag, c ) =>
                         {
-                            var validator = userCodeInvoker.Invoke( () => getValidator( item ), executionContext );
+                            var validator = userCodeInvoker.Invoke( () => getValidator( item, tag ), executionContext );
 
-                            return this.SelectReferenceValidatorInstances(
+                            return this.SelectReferenceValidatorInstancesAsync(
                                 item,
                                 source.Driver,
                                 ValidatorImplementation.Create( validator ),
                                 validator.ValidatedReferenceKinds,
-                                validator.IncludeDerivedTypes );
+                                validator.IncludeDerivedTypes,
+                                validator.Granularity,
+                                c );
                         } ) ) );
         }
 
+        void IValidatorReceiver<TDeclaration>.SuggestCodeFix( Func<TDeclaration, CodeFix> codeFix )
+            => this.SuggestCodeFix( ( declaration, _ ) => codeFix( declaration ) );
+
+        IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.AfterAllAspects() => this.AfterAllAspects();
+
+        IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.BeforeAnyAspect() => this.BeforeAnyAspect();
+
+        IAspectReceiver<TMember, TTag> IAspectReceiver<TDeclaration, TTag>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IAspectReceiver<TMember, TTag> IAspectReceiver<TDeclaration, TTag>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
+
+        IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
+
+        IAspectReceiver<INamedType, TTag> IAspectReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IAspectReceiver<INamedType, TTag> IAspectReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom(
+            INamedType baseType,
+            DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
+
+        IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IValidatorReceiver<INamedType, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IValidatorReceiver<INamedType> IValidatorReceiver<TDeclaration>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypesDerivedFrom( INamedType baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
+
+        IValidatorReceiver<INamedType, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom(
+            INamedType baseType,
+            DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
+
+        IValidatorReceiver<INamedType> IValidatorReceiver<TDeclaration>.SelectTypesDerivedFrom(
+            INamedType baseType,
+            DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
+
+        private IAspectReceiver<INamedType, TTag> SelectTypesDerivedFromCore( Func<CompilationModel, INamedType> getBaseType, DerivedTypesOptions options )
+            => this.AddChild(
+                new ChildAspectReceiver<INamedType, TTag>(
+                    this._containingDeclaration,
+                    this.Parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            var baseType = getBaseType( declaration.GetCompilationModel() );
+
+                            if ( declaration is CompilationModel compilation )
+                            {
+                                var types = compilation.GetDerivedTypes( baseType, options );
+
+                                return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                    types,
+                                    child => action( child, tag, context ),
+                                    context2.CancellationToken );
+                            }
+                            else if ( options != DerivedTypesOptions.Default )
+                            {
+                                throw new NotImplementedException(
+                                    $"Non-default DerivedTypesOptions are only implemented for ICompilation but was used with a {declaration.DeclarationKind.ToDisplayString()}." );
+                            }
+                            else
+                            {
+                                IEnumerable<INamedType> types;
+
+                                switch ( declaration )
+                                {
+                                    case INamespace ns:
+                                        types = ns.DescendantsAndSelf().SelectMany( x => x.Types ).SelectManyRecursive( x => x.NestedTypesAndSelf() );
+
+                                        break;
+
+                                    case INamedType namedType:
+                                        types = namedType.NestedTypesAndSelf();
+
+                                        break;
+
+                                    case var _ when declaration.GetTopmostNamedType() is { } topmostType:
+                                        types = topmostType.NestedTypesAndSelf();
+
+                                        break;
+
+                                    default:
+                                        return Task.CompletedTask;
+                                }
+
+                                return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                    types,
+                                    child =>
+                                    {
+                                        if ( child.Is( baseType ) )
+                                        {
+                                            return action( child, tag, context );
+                                        }
+                                        else
+                                        {
+                                            return Task.CompletedTask;
+                                        }
+                                    },
+                                    context2.CancellationToken );
+                            }
+                        } ) ) );
+
+        IAspectReceiver<TDeclaration, TTag> IAspectReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
+
+        IAspectReceiver<TDeclaration, TTag1> IAspectReceiver<TDeclaration>.Tag<TTag1>( Func<TDeclaration, TTag1> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
+
+        public IReadOnlyCollection<TDeclaration> ToCollection( ICompilation? compilation )
+        {
+            var bag = new ConcurrentQueue<TDeclaration>();
+
+            this.Parent.ServiceProvider.Global.GetRequiredService<ITaskRunner>()
+                .RunSynchronously(
+                    () =>
+                        this.InvokeAdderAsync(
+                            new DeclarationSelectionContext(
+                                (CompilationModel?) compilation ?? UserCodeExecutionContext.Current.Compilation.AssertNotNull(),
+                                CancellationToken.None ),
+                            ( declaration, _, _ ) =>
+                            {
+                                bag.Enqueue( declaration );
+
+                                return Task.CompletedTask;
+                            } ) );
+
+            return bag;
+        }
+
+        IAspectReceiver<TDeclaration, TNewTag> IAspectReceiver<TDeclaration, TTag>.Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
+
+        public IAspectReceiver<TDeclaration, TNewTag> Tag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
+            => this.AddChild(
+                new ChildAspectReceiver<TDeclaration, TNewTag>(
+                    this._containingDeclaration,
+                    this.Parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            var newTag = getTag( declaration, tag );
+
+                            return action( declaration, newTag, context2 );
+                        } ) ) );
+
+        IAspectReceiver<TMember> IAspectReceiver<TDeclaration>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IAspectReceiver<TMember> IAspectReceiver<TDeclaration>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<INamedType, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectTypes( bool includeNestedTypes )
+            => this.SelectTypes( includeNestedTypes );
+
+        IAspectReceiver<TDeclaration> IAspectReceiver<TDeclaration>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
+
+        void IAspectReceiver<TDeclaration>.SetOptions<TOptions>( Func<TDeclaration, TOptions> func )
+            => this.SetOptions( ( declaration, _ ) => func( declaration ) );
+
+        IValidatorReceiver<TDeclaration, TTag> IValidatorReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
+
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
+
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.Tag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
+            => this.Tag( getTag );
+
+        IValidatorReceiver<TDeclaration, TTag> IValidatorReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, TTag, bool> predicate )
+            => this.Where( predicate );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.Select<TMember>( Func<TDeclaration, TTag, TMember> selector )
+            => this.Select( selector );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectMany<TMember>( Func<TDeclaration, TTag, IEnumerable<TMember>> selector )
+            => this.SelectMany( selector );
+
         public void Validate( ValidatorDelegate<DeclarationValidationContext> validateMethod )
         {
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
-                    this._parent,
+                    this.Parent,
                     ValidatorKind.Definition,
                     this._compilationModelVersion,
-                    this._parent.AspectPredecessor,
+                    this.Parent.AspectPredecessor,
                     validateMethod,
-                    ( source, compilation, diagnostics ) => this.SelectAndValidateValidatorOrConfiguratorTargets<ValidatorInstance>(
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, (IDiagnosticAdder) diagnostics ),
-                        compilation,
-                        (IDiagnosticAdder) diagnostics,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                        item => new[]
+                        context,
+                        ( item, tag, context2 ) =>
                         {
-                            new DeclarationValidatorInstance(
-                                item,
-                                (ValidatorDriver<DeclarationValidationContext>) source.Driver,
-                                ValidatorImplementation.Create( source.Predecessor.Instance ),
-                                this._parent.DiagnosticSourceDescription )
+                            context2.Collector.AddValidator(
+                                new DeclarationValidatorInstance(
+                                    item,
+                                    (ValidatorDriver<DeclarationValidationContext>) source.Driver,
+                                    ValidatorImplementation.Create( source.Predecessor.Instance ),
+                                    this.Parent.DiagnosticSourceDescription,
+                                    tag ) );
+
+                            return Task.CompletedTask;
                         } ) ) );
         }
 
-        public void ReportDiagnostic( Func<T, IDiagnostic> diagnostic )
-        {
-            this.Validate( new FinalValidatorHelper<IDiagnostic>( diagnostic ).ReportDiagnostic );
-        }
+        void IValidatorReceiver<TDeclaration>.ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
+            => this.ValidateInboundReferences( ( declaration, _ ) => validator( declaration ) );
 
-        public void SuppressDiagnostic( Func<T, SuppressionDefinition> suppression )
-        {
-            this.Validate( new FinalValidatorHelper<SuppressionDefinition>( suppression ).SuppressDiagnostic );
-        }
+        void IValidatorReceiver<TDeclaration>.ReportDiagnostic( Func<TDeclaration, IDiagnostic> diagnostic )
+            => this.ReportDiagnostic( ( declaration, _ ) => diagnostic( declaration ) );
 
-        public void SuggestCodeFix( Func<T, CodeFix> codeFix )
-        {
-            this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
-        }
+        void IValidatorReceiver<TDeclaration>.SuppressDiagnostic( Func<TDeclaration, SuppressionDefinition> suppression )
+            => this.SuppressDiagnostic( ( declaration, _ ) => suppression( declaration ) );
 
-        public IValidatorReceiver<T> AfterAllAspects()
-            => new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._selector );
+        public void ReportDiagnostic( Func<TDeclaration, TTag, IDiagnostic> diagnostic )
+            => this.Validate( new FinalValidatorHelper<IDiagnostic>( diagnostic ).ReportDiagnostic );
 
-        public IValidatorReceiver<T> BeforeAnyAspect()
-            => new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
+        public void SuppressDiagnostic( Func<TDeclaration, TTag, SuppressionDefinition> suppression )
+            => this.Validate( new FinalValidatorHelper<SuppressionDefinition>( suppression ).SuppressDiagnostic );
 
-        public IAspectReceiver<TMember> SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector )
+        public void SuggestCodeFix( Func<TDeclaration, TTag, CodeFix> codeFix ) => this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
+
+        public IValidatorReceiver<TDeclaration, TTag> AfterAllAspects()
+            => this.AddChild(
+                new ChildAspectReceiver<TDeclaration, TTag>( this._containingDeclaration, this.Parent, CompilationModelVersion.Final, this._adder ) );
+
+        public IValidatorReceiver<TDeclaration, TTag> BeforeAnyAspect()
+            => this.AddChild(
+                new ChildAspectReceiver<TDeclaration, TTag>( this._containingDeclaration, this.Parent, CompilationModelVersion.Initial, this._adder ) );
+
+        public IAspectReceiver<TMember, TTag> SelectMany<TMember>( Func<TDeclaration, TTag, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-            => new AspectReceiver<TMember>(
-                this._containingDeclaration,
-                this._parent,
-                this._compilationModelVersion,
-                ( c, d ) => this._selector( c, d ).SelectMany( selector ) );
+            => this.AddChild(
+                new ChildAspectReceiver<TMember, TTag>(
+                    this._containingDeclaration,
+                    this.Parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            var children = selector( declaration, tag );
 
-        public IAspectReceiver<TMember> Select<TMember>( Func<T, TMember> selector )
+                            return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                children,
+                                child => action( child, tag, context ),
+                                context2.CancellationToken );
+                        } ) ) );
+
+        public IAspectReceiver<TMember, TTag> Select<TMember>( Func<TDeclaration, TTag, TMember> selector )
             where TMember : class, IDeclaration
-            => new AspectReceiver<TMember>(
-                this._containingDeclaration,
-                this._parent,
-                this._compilationModelVersion,
-                ( c, d ) => this._selector( c, d ).Select( selector ) );
+            => this.AddChild(
+                new ChildAspectReceiver<TMember, TTag>(
+                    this._containingDeclaration,
+                    this.Parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) => action( selector( declaration, tag ), tag, context2 ) ) ) );
 
-        public IAspectReceiver<T> Where( Func<T, bool> predicate )
-            => new AspectReceiver<T>(
-                this._containingDeclaration,
-                this._parent,
-                this._compilationModelVersion,
-                ( c, d ) => this._selector( c, d ).Where( predicate ) );
+        public IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = true )
+            => this.AddChild(
+                new ChildAspectReceiver<INamedType, TTag>(
+                    this._containingDeclaration,
+                    this.Parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            IEnumerable<INamedType> types;
 
-        public void SetOptions<TOptions>( Func<T, TOptions> func )
-            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<T>, new()
+                            if ( declaration is IAssembly assembly )
+                            {
+                                types = includeNestedTypes ? assembly.AllTypes : assembly.Types;
+                            }
+                            else
+                            {
+                                switch ( declaration )
+                                {
+                                    case INamespace ns:
+                                        types = ns.DescendantsAndSelf().SelectMany( x => x.Types );
+
+                                        break;
+
+                                    case INamedType type:
+                                        types = new[] { type };
+
+                                        break;
+
+                                    case var _ when declaration.GetTopmostNamedType() is { } topmostType:
+                                        types = new[] { topmostType };
+
+                                        break;
+
+                                    default:
+                                        return Task.CompletedTask;
+                                }
+
+                                if ( includeNestedTypes )
+                                {
+                                    types = types.SelectMany( t => t.NestedTypesAndSelf() );
+                                }
+                            }
+
+                            return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                types,
+                                child => action( child, tag, context ),
+                                context2.CancellationToken );
+                        } ) ) );
+
+        IValidatorReceiver<INamedType> IValidatorReceiver<TDeclaration>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
+
+        public IAspectReceiver<TDeclaration, TTag> Where( Func<TDeclaration, TTag, bool> predicate )
+            => this.AddChild(
+                new ChildAspectReceiver<TDeclaration, TTag>(
+                    this._containingDeclaration,
+                    this.Parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            if ( predicate( declaration, tag ) )
+                            {
+                                return action( declaration, tag, context2 );
+                            }
+                            else
+                            {
+                                return Task.CompletedTask;
+                            }
+                        } ) ) );
+
+        public void SetOptions<TOptions>( Func<TDeclaration, TTag, TOptions> func )
+            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new()
         {
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterOptionsSource(
                 new ProgrammaticHierarchicalOptionsSource(
-                    ( compilation, diagnosticAdder )
-                        => this.SelectAndValidateValidatorOrConfiguratorTargets<HierarchicalOptionsInstance>(
+                    ( context )
+                        => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                             userCodeInvoker,
-                            executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
-                            compilation,
-                            diagnosticAdder,
+                            executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                             GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                            t =>
+                            context,
+                            ( declaration, tag, context2 ) =>
                             {
-                                if ( !userCodeInvoker.TryInvoke(
-                                        () => func( t ),
+                                if ( userCodeInvoker.TryInvoke(
+                                        () => func( declaration, tag ),
                                         executionContext,
                                         out var options ) )
                                 {
-                                    return null;
+                                    context2.Collector.AddOptions(
+                                        new HierarchicalOptionsInstance(
+                                            declaration,
+                                            options ) );
                                 }
 
-                                return new[]
-                                {
-                                    new HierarchicalOptionsInstance(
-                                        t,
-                                        options )
-                                };
+                                return Task.CompletedTask;
                             } ) ) );
         }
 
         public void SetOptions<TOptions>( TOptions options )
-            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<T>, new()
+            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new()
         {
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterOptionsSource(
                 new ProgrammaticHierarchicalOptionsSource(
-                    ( compilation, diagnosticAdder )
-                        => this.SelectAndValidateValidatorOrConfiguratorTargets<HierarchicalOptionsInstance>(
+                    ( context )
+                        => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                             userCodeInvoker,
-                            executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
-                            compilation,
-                            diagnosticAdder,
+                            executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                             GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                            t =>
+                            context,
+                            ( declaration, _, context2 ) =>
                             {
-                                return new[]
-                                {
+                                context2.Collector.AddOptions(
                                     new HierarchicalOptionsInstance(
-                                        t,
-                                        options )
-                                };
+                                        declaration,
+                                        options ) );
+
+                                return Task.CompletedTask;
                             } ) ) );
         }
 
-        IValidatorReceiver<T> IValidatorReceiver<T>.Where( Func<T, bool> predicate ) => this.Where( predicate );
+        IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
-        IValidatorReceiver<TMember> IValidatorReceiver<T>.SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.SelectMany( selector );
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration>.Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
 
-        IValidatorReceiver<TMember> IValidatorReceiver<T>.Select<TMember>( Func<T, TMember> selector ) => this.Select( selector );
+        IValidatorReceiver<TMember> IValidatorReceiver<TDeclaration>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<TMember> IValidatorReceiver<TDeclaration>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
 
         private sealed class FinalValidatorHelper<TOutput>
         {
-            private readonly Func<T, TOutput> _func;
+            private readonly Func<TDeclaration, TTag, TOutput> _func;
 
-            public FinalValidatorHelper( Func<T, TOutput> func )
+            public FinalValidatorHelper( Func<TDeclaration, TTag, TOutput> func )
             {
                 this._func = func;
             }
 
             public void ReportDiagnostic( in DeclarationValidationContext context )
-            {
-                context.Diagnostics.Report( (IDiagnostic) this._func( (T) context.Declaration )! );
-            }
+                => context.Diagnostics.Report( (IDiagnostic) this._func( (TDeclaration) context.Declaration, (TTag) context.Tag! )! );
 
             public void SuppressDiagnostic( in DeclarationValidationContext context )
-            {
-                context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (T) context.Declaration )! );
-            }
+                => context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (TDeclaration) context.Declaration, (TTag) context.Tag! )! );
 
             public void SuggestCodeFix( in DeclarationValidationContext context )
-            {
-                context.Diagnostics.Suggest( (CodeFix) (object) this._func( (T) context.Declaration )! );
-            }
+                => context.Diagnostics.Suggest( (CodeFix) (object) this._func( (TDeclaration) context.Declaration, (TTag) context.Tag! )! );
         }
 
-        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
-            where TAspect : class, IAspect<T>
+        public void AddAspect<TAspect>( Func<TDeclaration, TTag, TAspect> createAspect )
+            where TAspect : class, IAspect<TDeclaration>
             => this.AddAspectIfEligible( createAspect, EligibleScenarios.None );
 
-        public void AddAspect( Type aspectType, Func<T, IAspect> createAspect ) => this.AddAspectIfEligible( aspectType, createAspect, EligibleScenarios.None );
+        public void AddAspect( Type aspectType, Func<TDeclaration, TTag, IAspect> createAspect )
+            => this.AddAspectIfEligible( aspectType, createAspect, EligibleScenarios.None );
 
-        public void AddAspectIfEligible( Type aspectType, Func<T, IAspect> createAspect, EligibleScenarios eligibility )
+        public void AddAspectIfEligible( Type aspectType, Func<TDeclaration, TTag, IAspect> createAspect, EligibleScenarios eligibility )
         {
             var aspectClass = this.GetAspectClass( aspectType );
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
                     aspectClass,
-                    ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
+                    ( context ) => this.SelectAndValidateAspectTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
-                        compilation,
-                        diagnosticAdder,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         aspectClass,
                         eligibility,
-                        t =>
+                        context,
+                        ( item, tag, context2 ) =>
                         {
-                            if ( !userCodeInvoker.TryInvoke(
-                                    () => createAspect( t ),
+                            if ( userCodeInvoker.TryInvoke(
+                                    () => createAspect( item, tag ),
                                     executionContext,
                                     out var aspect ) )
                             {
-                                return null;
+                                context2.Collector.AddAspectInstance(
+                                    new AspectInstance(
+                                        aspect,
+                                        item,
+                                        aspectClass,
+                                        this.Parent.AspectPredecessor ) );
                             }
 
-                            return new AspectInstance(
-                                aspect,
-                                t,
-                                aspectClass,
-                                this._parent.AspectPredecessor );
+                            return Task.CompletedTask;
                         } ) ) );
         }
 
-        public void AddAspectIfEligible<TAspect>( Func<T, TAspect> createAspect, EligibleScenarios eligibility )
-            where TAspect : class, IAspect<T>
+        public void AddAspectIfEligible<TAspect>( Func<TDeclaration, TTag, TAspect> createAspect, EligibleScenarios eligibility )
+            where TAspect : class, IAspect<TDeclaration>
             => this.AddAspectIfEligible( typeof(TAspect), createAspect, eligibility );
 
+        void IAspectReceiver<TDeclaration>.AddAspect( Type aspectType, Func<TDeclaration, IAspect> createAspect )
+            => this.AddAspect( aspectType, ( declaration, _ ) => createAspect( declaration ) );
+
+        void IAspectReceiver<TDeclaration>.AddAspectIfEligible(
+            Type aspectType,
+            Func<TDeclaration, IAspect> createAspect,
+            EligibleScenarios eligibility )
+            => this.AddAspectIfEligible( aspectType, ( declaration, _ ) => createAspect( declaration ), eligibility );
+
+        void IAspectReceiver<TDeclaration>.AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
+            => this.AddAspect( ( declaration, _ ) => createAspect( declaration ) );
+
+        void IAspectReceiver<TDeclaration>.AddAspectIfEligible<TAspect>(
+            Func<TDeclaration, TAspect> createAspect,
+            EligibleScenarios eligibility )
+            => this.AddAspectIfEligible( ( declaration, _ ) => createAspect( declaration ), eligibility );
+
         public void AddAspect<TAspect>()
-            where TAspect : class, IAspect<T>, new()
+            where TAspect : class, IAspect<TDeclaration>, new()
             => this.AddAspectIfEligible<TAspect>( EligibleScenarios.None );
 
         public void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility )
-            where TAspect : class, IAspect<T>, new()
+            where TAspect : class, IAspect<TDeclaration>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
                     aspectClass,
-                    ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
+                    ( context ) => this.SelectAndValidateAspectTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
-                        compilation,
-                        diagnosticAdder,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         aspectClass,
                         eligibility,
-                        t =>
+                        context,
+                        ( t, _, context2 ) =>
                         {
-                            if ( !userCodeInvoker.TryInvoke(
+                            if ( userCodeInvoker.TryInvoke(
                                     () => new TAspect(),
                                     executionContext,
                                     out var aspect ) )
                             {
-                                return null;
+                                context2.Collector.AddAspectInstance(
+                                    new AspectInstance(
+                                        aspect,
+                                        t,
+                                        aspectClass,
+                                        this.Parent.AspectPredecessor ) );
                             }
 
-                            return new AspectInstance(
-                                aspect,
-                                t,
-                                aspectClass,
-                                this._parent.AspectPredecessor );
+                            return Task.CompletedTask;
                         } ) ) );
         }
 
-        private IEnumerable<TResult> SelectAndValidateAspectTargets<TResult>(
-            UserCodeInvoker? invoker,
-            UserCodeExecutionContext? executionContext,
-            CompilationModel compilation,
-            IDiagnosticAdder diagnosticAdder,
-            AspectClass aspectClass,
-            EligibleScenarios filteredEligibility,
-            Func<T, TResult?> createResult )
+        private readonly record struct CachedItem( TDeclaration Declaration, TTag Tag );
+
+        private async Task InvokeAdderAsync(
+            DeclarationSelectionContext selectionContext,
+            Func<TDeclaration, TTag, DeclarationSelectionContext, Task> processTarget,
+            UserCodeInvoker? invoker = null,
+            UserCodeExecutionContext? executionContext = null )
         {
-            IReadOnlyList<T> targets;
+            ConcurrentQueue<CachedItem>? cached = null;
+            var processTargetWithCachingIfNecessary = processTarget;
+
+            if ( this.ShouldCache )
+            {
+                // GetFromCacheAsync uses a semaphore to control exclusivity.  AddToCache must be called is the method returns null.
+                cached = await selectionContext.GetFromCacheAsync<ConcurrentQueue<CachedItem>>( this, selectionContext.CancellationToken );
+
+                if ( cached != null )
+                {
+                    await this._concurrentTaskRunner.RunConcurrentlyAsync(
+                        cached,
+                        x => processTarget( x.Declaration, x.Tag, selectionContext ),
+                        selectionContext.CancellationToken );
+
+                    return;
+                }
+                else
+                {
+                    cached = new ConcurrentQueue<CachedItem>();
+
+                    processTargetWithCachingIfNecessary = ( a, tag, ctx ) =>
+                    {
+                        cached.Enqueue( new CachedItem( a, tag ) );
+
+                        return processTarget( a, tag, ctx );
+                    };
+                }
+            }
 
             if ( invoker != null && executionContext != null )
             {
 #if DEBUG
-                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
+                if ( !ReferenceEquals( executionContext.Compilation, selectionContext.Compilation ) )
                 {
                     throw new AssertionFailedException( "Execution context mismatch." );
                 }
 #endif
 
-                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToReadOnlyList(), executionContext );
+                await invoker.InvokeAsync( () => this._adder( processTargetWithCachingIfNecessary, selectionContext ), executionContext );
             }
             else
             {
-                targets = this._selector( compilation, diagnosticAdder ).ToReadOnlyList();
+                await this._adder( processTargetWithCachingIfNecessary, selectionContext );
             }
 
-            foreach ( var targetDeclaration in targets )
+            if ( this.ShouldCache )
             {
+                selectionContext.AddToCache( this, cached.AssertNotNull() );
+            }
+        }
+
+        private async Task SelectAndValidateAspectTargetsAsync(
+            UserCodeInvoker? invoker,
+            UserCodeExecutionContext? executionContext,
+            AspectClass aspectClass,
+            EligibleScenarios filteredEligibility,
+            OutboundActionCollectionContext context,
+            Func<TDeclaration, TTag, OutboundActionCollectionContext, Task> addResult )
+        {
+            var compilation = context.Compilation;
+
+            await this.InvokeAdderAsync( context, ProcessTarget, invoker, executionContext );
+
+            Task ProcessTarget( TDeclaration targetDeclaration, TTag tag, DeclarationSelectionContext context2 )
+            {
+                context2.CancellationToken.ThrowIfCancellationRequested();
+
                 if ( targetDeclaration == null! )
                 {
-                    continue;
+                    return Task.CompletedTask;
                 }
 
-                var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
+                var predecessorInstance = (IAspectPredecessorImpl) this.Parent.AspectPredecessor.Instance;
 
                 // Verify containment.
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
@@ -523,12 +938,12 @@ namespace Metalama.Framework.Engine.Fabrics
                        || (containingDeclaration is IMember m && m.DeclaringType.Equals( targetDeclaration )))
                      || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
-                    diagnosticAdder.Report(
+                    context.Collector.Report(
                         GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, containingDeclaration) ) );
 
-                    continue;
+                    return Task.CompletedTask;
                 }
 
                 // Verify eligibility.
@@ -536,7 +951,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 if ( filteredEligibility != EligibleScenarios.None && !eligibility.IncludesAny( filteredEligibility ) )
                 {
-                    continue;
+                    return Task.CompletedTask;
                 }
 
                 var canBeInherited = ((IDeclarationImpl) targetDeclaration).CanBeInherited;
@@ -546,67 +961,46 @@ namespace Metalama.Framework.Engine.Fabrics
                 {
                     var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
-                    diagnosticAdder.Report(
+                    context.Collector.Report(
                         GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, reason) ) );
 
-                    continue;
+                    return Task.CompletedTask;
                 }
-
-                TResult? aspectInstance;
 
                 if ( invoker != null && executionContext != null )
                 {
-                    aspectInstance = invoker.Invoke( () => createResult( targetDeclaration ), executionContext );
+                    return invoker.InvokeAsync( () => addResult( targetDeclaration, tag, context ), executionContext );
                 }
                 else
                 {
-                    aspectInstance = createResult( targetDeclaration );
-                }
-
-                // ReSharper disable once CompareNonConstrainedGenericWithNull
-                if ( aspectInstance != null )
-                {
-                    yield return aspectInstance;
+                    return addResult( targetDeclaration, tag, context );
                 }
             }
         }
 
-        private IEnumerable<TResult> SelectAndValidateValidatorOrConfiguratorTargets<TResult>(
+        private async Task SelectAndValidateValidatorOrConfiguratorTargetsAsync(
             UserCodeInvoker? invoker,
             UserCodeExecutionContext? executionContext,
-            CompilationModel compilation,
-            IDiagnosticAdder diagnosticAdder,
             DiagnosticDefinition<(FormattableString Predecessor, IDeclaration Child, IDeclaration Parent)> diagnosticDefinition,
-            Func<T, IEnumerable<TResult?>?> createResult )
-            where TResult : class
+            OutboundActionCollectionContext context,
+            Func<TDeclaration, TTag, OutboundActionCollectionContext, Task> addAction )
         {
-            IReadOnlyList<T> targets;
+            var compilation = context.Compilation;
 
-            if ( invoker != null && executionContext != null )
-            {
-#if DEBUG
-                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
-                {
-                    throw new AssertionFailedException( "Execution context mismatch." );
-                }
-#endif
-                targets = invoker.Invoke( () => this._selector( compilation, diagnosticAdder ).ToReadOnlyList(), executionContext );
-            }
-            else
-            {
-                targets = this._selector( compilation, diagnosticAdder ).ToReadOnlyList();
-            }
+            await this.InvokeAdderAsync( context, ProcessTarget, invoker, executionContext );
 
-            foreach ( var targetDeclaration in targets )
+            Task ProcessTarget( TDeclaration targetDeclaration, TTag tag, DeclarationSelectionContext context2 )
             {
                 if ( targetDeclaration == null! )
                 {
-                    continue;
+                    return Task.CompletedTask;
                 }
 
-                var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
+                context2.CancellationToken.ThrowIfCancellationRequested();
+
+                var predecessorInstance = (IAspectPredecessorImpl) this.Parent.AspectPredecessor.Instance;
 
                 var containingTypeOrCompilation = (IDeclaration?) this._containingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()
                                                   ?? compilation;
@@ -614,49 +1008,41 @@ namespace Metalama.Framework.Engine.Fabrics
                 if ( (!targetDeclaration.IsContainedIn( containingTypeOrCompilation ) || targetDeclaration.DeclaringAssembly.IsExternal)
                      && containingTypeOrCompilation.DeclarationKind != DeclarationKind.Compilation )
                 {
-                    diagnosticAdder.Report(
+                    context.Collector.Report(
                         diagnosticDefinition.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingTypeOrCompilation) ) );
-
-                    continue;
                 }
 
-                var results = createResult( targetDeclaration );
-
-                if ( results != null )
-                {
-                    foreach ( var result in results )
-                    {
-                        if ( result != null )
-                        {
-                            yield return result;
-                        }
-                    }
-                }
+                return addAction( targetDeclaration, tag, context );
             }
         }
 
         public void RequireAspect<TAspect>()
-            where TAspect : class, IAspect<T>, new()
+            where TAspect : class, IAspect<TDeclaration>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
                     aspectClass,
-                    getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
+                    ( context ) => this.SelectAndValidateAspectTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
-                        compilation,
-                        diagnosticAdder,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         aspectClass,
                         EligibleScenarios.None,
-                        t => new AspectRequirement(
-                            t.ToTypedRef<IDeclaration>(),
-                            this._parent.AspectPredecessor.Instance ) ) ) );
+                        context,
+                        ( declaration, _, context2 ) =>
+                        {
+                            context2.Collector.AddAspectRequirement(
+                                new AspectRequirement(
+                                    declaration.ToTypedRef<IDeclaration>(),
+                                    this.Parent.AspectPredecessor.Instance ) );
+
+                            return Task.CompletedTask;
+                        } ) ) );
         }
     }
 }

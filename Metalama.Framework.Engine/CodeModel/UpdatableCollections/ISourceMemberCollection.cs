@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal interface ISourceMemberCollection<T> : ISourceDeclarationCollection<T>
-    where T : class, IMemberOrNamedType
+    where T : class, INamedDeclaration
 {
     ImmutableArray<MemberRef<T>> OfName( string name );
 }

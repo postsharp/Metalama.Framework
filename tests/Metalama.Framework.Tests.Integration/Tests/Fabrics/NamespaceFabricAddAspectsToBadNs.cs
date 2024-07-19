@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
@@ -10,7 +11,6 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
         public override void AmendNamespace( INamespaceAmender amender )
         {
             amender
-                .Outbound
                 .SelectMany<INamedType>( c => new[] { (INamedType)TypeFactory.GetType( typeof(C2) ) } )
                 .AddAspect<Aspect>();
         }

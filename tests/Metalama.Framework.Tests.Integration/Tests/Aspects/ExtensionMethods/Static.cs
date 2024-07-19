@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.Static;
@@ -12,7 +13,7 @@ internal class ReturnNumbers : OverrideMethodAspect
     {
         var numbers = new object[] { 42 };
 
-        return Enumerable.ToList(numbers);
+        return Enumerable.ToList( numbers );
     }
 }
 

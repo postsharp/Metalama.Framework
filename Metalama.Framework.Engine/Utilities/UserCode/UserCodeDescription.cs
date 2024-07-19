@@ -14,24 +14,23 @@ namespace Metalama.Framework.Engine.Utilities.UserCode;
 /// The point of this type is to avoid formatting the string when there is no exception but to carry on sufficient information to
 /// create this string if needed.
 /// </summary>
-internal readonly struct UserCodeDescription : IFormattable
+public readonly struct UserCodeDescription : IFormattable
 {
     private readonly object? _arg1;
     private readonly object? _arg2;
+    private readonly object? _arg3;
     private readonly string _formattingString;
 
-    private UserCodeDescription( string formattingString, object? arg1, object? arg2 )
+    private UserCodeDescription( string formattingString, object? arg1 = null, object? arg2 = null, object? arg3 = null )
     {
         this._formattingString = formattingString;
         this._arg1 = arg1;
         this._arg2 = arg2;
+        this._arg3 = arg3;
     }
 
-    public static UserCodeDescription Create( string description ) => new( description, null, null );
-
-    public static UserCodeDescription Create( string formattingString, object? arg1 ) => new( formattingString, arg1, null );
-
-    public static UserCodeDescription Create( string formattingString, object? arg1, object? arg2 ) => new( formattingString, arg1, arg2 );
+    public static UserCodeDescription Create( string formattingString, object? arg1 = null, object? arg2 = null, object? arg3 = null )
+        => new( formattingString, arg1, arg2, arg3 );
 
     private static string GetTypeName( Type t ) => typeof(Fabric).IsAssignableFrom( t ) ? t.FullName! : t.Name;
 
@@ -56,5 +55,6 @@ internal readonly struct UserCodeDescription : IFormattable
             formatProvider ?? MetalamaStringFormatter.Instance,
             this._formattingString,
             FormatArg( this._arg1, formatProvider ?? MetalamaStringFormatter.Instance ),
-            FormatArg( this._arg2, formatProvider ?? MetalamaStringFormatter.Instance ) );
+            FormatArg( this._arg2, formatProvider ?? MetalamaStringFormatter.Instance ),
+            FormatArg( this._arg3, formatProvider ?? MetalamaStringFormatter.Instance ) );
 }

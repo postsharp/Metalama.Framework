@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -10,10 +11,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInli
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "first" } );
-                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "second" } );
-                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "third" } );
-                builder.Advice.OverrideAccessors( indexer, nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "fourth" } );
+                builder.With( indexer ).OverrideAccessors( nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "first" } );
+                builder.With( indexer ).OverrideAccessors( nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "second" } );
+                builder.With( indexer ).OverrideAccessors( nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "third" } );
+                builder.With( indexer ).OverrideAccessors( nameof(GetIndexer), nameof(SetIndexer), tags: new { T = "fourth" } );
             }
         }
 

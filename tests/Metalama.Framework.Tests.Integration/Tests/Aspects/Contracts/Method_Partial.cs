@@ -1,7 +1,6 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
-
-#pragma warning disable CS8618
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Method_Partial
 {
@@ -19,14 +18,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Method_Pa
     // <target>
     internal partial class Target
     {
-        public partial void M([NotNull] string m);
+        public partial void M( [NotNull] string m );
     }
 
     // <target>
     internal partial class Target
     {
-        public partial void M(string m)
-        {
-        }
+        public partial void M( string m ) { }
     }
 }

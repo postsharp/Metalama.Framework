@@ -1,9 +1,10 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Constructor_OrderBeforeOverride;
 
-[assembly:AspectOrder(typeof(NotNullAttribute), typeof(NotEmptyAttribute), typeof(OverrideAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(NotNullAttribute), typeof(NotEmptyAttribute), typeof(OverrideAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Constructor_OrderBeforeOverride
 {
@@ -17,28 +18,29 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Construct
             }
         }
     }
+
     internal class OverrideAttribute : ConstructorAspect
     {
-        public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+        public override void BuildAspect( IAspectBuilder<IConstructor> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Template) );
+            builder.Override( nameof(Template) );
         }
 
         [Template]
         public void Template()
         {
-            Console.WriteLine("Override");
+            Console.WriteLine( "Override" );
             meta.Proceed();
         }
     }
 
     internal class NotEmptyAttribute : ContractAspect
     {
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value.Length == 0)
             {
-                throw new ArgumentNullException(meta.Target.Parameter.Name);
+                throw new ArgumentNullException( meta.Target.Parameter.Name );
             }
         }
     }

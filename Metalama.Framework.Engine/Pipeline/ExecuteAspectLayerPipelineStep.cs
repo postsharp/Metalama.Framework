@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -44,16 +45,22 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 
     public override async Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
+        IUserDiagnosticSink diagnostics,
         int stepIndex,
         CancellationToken cancellationToken )
     {
-        var aggregateInstances = this._aspectInstances
-            .GroupBy( a => a.TargetDeclaration )
-            .Select( AggregateAspectInstance.GetInstance )
-            .WhereNotNull()
-            .Select( a => (TargetDeclaration: a.TargetDeclaration.GetTarget( compilation ), AspectInstance: a) );
+        IEnumerable<IGrouping<INamedType?, (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>> instancesByType;
 
-        var instancesByType = aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
+        lock ( this._aspectInstances )
+        {
+            var aggregateInstances = this._aspectInstances
+                .GroupBy( a => a.TargetDeclaration )
+                .Select( AggregateAspectInstance.GetInstance )
+                .WhereNotNull()
+                .Select( a => (TargetDeclaration: a.TargetDeclaration.GetTarget( compilation ), AspectInstance: a) );
+
+            instancesByType = aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
+        }
 
         // This collection will contain the observable transformations that need to be replayed on the compilation.
         var observableTransformations = new ConcurrentQueue<ITransformation>();
@@ -61,9 +68,16 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
         var aspectInstancesOfSameType = new ConcurrentLinkedList<ImmutableArray<AspectInstance>>();
 
         // The processing order of types is arbitrary. Different types can be processed in parallel.
-        await this._concurrentTaskRunner.RunInParallelAsync(
+        await this._concurrentTaskRunner.RunConcurrentlyAsync(
             instancesByType,
-            t => this.ProcessType( t, compilation, stepIndex, observableTransformations.Enqueue, aspectInstancesOfSameType, cancellationToken ),
+            t => this.ProcessTypeAsync(
+                t,
+                compilation,
+                stepIndex,
+                observableTransformations.Enqueue,
+                aspectInstancesOfSameType,
+                diagnostics,
+                cancellationToken ),
             cancellationToken );
 
         var mergedAspectInstancesOfSameType = aspectInstancesOfSameType.Count > 0 ? aspectInstancesOfSameType.SelectMany( t => t ) : null;
@@ -74,12 +88,13 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
             $"After ExecuteAspectLayer({this.AspectLayer})" );
     }
 
-    private void ProcessType(
+    private async Task ProcessTypeAsync(
         IEnumerable<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)> aspects,
         CompilationModel compilation,
         int stepIndex,
         Action<ITransformation> addTransformation,
         ConcurrentLinkedList<ImmutableArray<AspectInstance>> aspectInstancesOfSameType,
+        IUserDiagnosticSink diagnostics,
         CancellationToken cancellationToken )
     {
         var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
@@ -100,7 +115,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
             var mutableCompilationForThisAspect = currentCompilation.CreateMutableClone( $"Temporary mutable clone for {this.AspectLayer}." );
 
             // Execute the aspect.
-            var aspectResult = aspectDriver.ExecuteAspect(
+            var aspectResult = await aspectDriver.ExecuteAspectAsync(
                 aspect.AspectInstance,
                 this.Id.AspectLayerId.LayerName,
                 currentCompilation,
@@ -125,10 +140,24 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     // Apply the changes done by the aspects.
                     this.Parent.AddAspectSources( aspectResult.AspectSources, true, cancellationToken );
                     this.Parent.AddValidatorSources( aspectResult.ValidatorSources );
-                    this.Parent.AddOptionsSources( aspectResult.OptionsSources );
-                    this.Parent.AddTransformations( aspectResult.Transformations );
+                    await this.Parent.AddOptionsSourcesAsync( aspectResult.OptionsSources, cancellationToken );
 
-                    foreach ( var transformation in aspectResult.Transformations )
+                    var transformations = aspectResult.Transformations;
+                    var partialCompilation = this.Parent.FirstCompilation.PartialCompilation;
+
+                    // Filter out transformations that are not considered observed by the partial compilation.
+                    if ( partialCompilation.IsPartial )
+                    {
+                        // ReSharper disable once AccessToModifiedClosure
+                        transformations = transformations.Where(
+                                t => t is not ISyntaxTreeTransformation syntaxTreeTransformation
+                                     || partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) )
+                            .ToImmutableArray();
+                    }
+
+                    this.Parent.AddTransformations( transformations );
+
+                    foreach ( var transformation in transformations )
                     {
                         if ( transformation.Observability != TransformationObservability.None )
                         {
@@ -137,10 +166,11 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     }
 
                     // Add children of the same aspect type.
-                    var newAspectInstances = this.Parent.ExecuteAspectSource(
+                    var newAspectInstances = await this.Parent.ExecuteAspectSourceAsync(
                         compilation,
                         this.AspectLayer.AspectClass,
                         aspectResult.AspectSources,
+                        diagnostics,
                         cancellationToken );
 
                     if ( !newAspectInstances.IsDefaultOrEmpty )

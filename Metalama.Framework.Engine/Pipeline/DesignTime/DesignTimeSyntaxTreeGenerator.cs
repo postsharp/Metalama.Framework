@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
@@ -32,7 +34,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             PartialCompilation partialCompilation,
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
-            IReadOnlyCollection<ITransformation> transformations,
+            IEnumerable<ITransformation> transformations,
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
         {
@@ -46,30 +48,73 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
-            var observableTransformations =
+            var transformationsByTarget =
                 transformations
                     .Where(
                         t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation
-                                                                                   && t.TargetDeclaration is INamedType or IConstructor )
+                                                                                   && t.TargetDeclaration is INamedType or IConstructor or INamespace )
                     .GroupBy(
                         t =>
                             t.TargetDeclaration switch
                             {
+                                INamespace @namespace => (INamespaceOrNamedType) @namespace,
                                 INamedType namedType => namedType,
                                 IConstructor constructor => constructor.DeclaringType,
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
-                            } );
+                            } )
+                    .ToDictionary( g => g.Key.ToTypedRef(), g => g.AsEnumerable() );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-            await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( transformationsByTarget, ProcessTransformationsOnTypeOrNamespace, cancellationToken );
 
-            void ProcessTransformationsOnType( IGrouping<INamedType, ITransformation> transformationsOnType )
+            void ProcessTransformationsOnTypeOrNamespace( KeyValuePair<Ref<INamespaceOrNamedType>, IEnumerable<ITransformation>> transformationGroup )
+            {
+                var target = transformationGroup.Key.GetTarget( finalCompilationModel );
+
+                switch ( target )
+                {
+                    case INamedType namedType:
+                        ProcessTransformationsOnType( namedType, transformationGroup.Value );
+
+                        break;
+
+                    case INamespace:
+                        ProcessTransformationsOnNamespace( transformationGroup.Value );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unsupported: {transformationGroup.Key}" );
+                }
+            }
+
+            void ProcessTransformationsOnNamespace( IEnumerable<ITransformation> namespaceTransformations )
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var declaringType = transformationsOnType.Key;
 
-                if ( !declaringType.IsPartial )
+                var orderedTransformations = namespaceTransformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
+
+                foreach ( var transformation in orderedTransformations )
+                {
+                    if ( transformation is IIntroduceDeclarationTransformation
+                         {
+                             DeclarationBuilder: INamedType namedTypeBuilder
+                         } introduceDeclarationTransformation
+                         && !transformationsByTarget.ContainsKey(
+                             introduceDeclarationTransformation.DeclarationBuilder.ToTypedRef().As<INamespaceOrNamedType>() ) )
+                    {
+                        // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
+                        ProcessTransformationsOnType( namedTypeBuilder.ToTypedRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
+                    }
+                }
+            }
+
+            void ProcessTransformationsOnType( INamedType declaringType, IEnumerable<ITransformation> typeTransformations )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( declaringType is { IsPartial: false, Origin.Kind: not DeclarationOriginKind.Aspect } )
                 {
                     // If the type is not marked as partial, we can emit a diagnostic and a code fix, but not a partial class itself.
                     diagnostics.Report(
@@ -78,7 +123,26 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     return;
                 }
 
-                var orderedTransformations = transformationsOnType.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
+                if ( IsInNonPartialSourceType( declaringType ) )
+                {
+                    // If the declaring type is not located in a partial source type, we need to skip it. The warning is needed because it was done for the parent type.
+                    return;
+                }
+
+                static bool IsInNonPartialSourceType( INamedType declaringType )
+                {
+                    var currentType = declaringType;
+
+                    // Go to the closest type that does not originate in an aspect.
+                    while ( currentType.Origin.Kind is DeclarationOriginKind.Aspect && currentType.DeclaringType != null )
+                    {
+                        currentType = currentType.DeclaringType;
+                    }
+
+                    return currentType.Origin.Kind is not DeclarationOriginKind.Aspect && !currentType.IsPartial;
+                }
+
+                var orderedTransformations = typeTransformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
 
                 // Process members.
                 BaseListSyntax? baseList = null;
@@ -90,34 +154,37 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if ( transformation is IInjectMemberTransformation injectMemberTransformation )
+                    switch ( transformation )
                     {
-                        // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
-                        // TODO: Implement support for initializable transformations.
-                        var introductionContext = new MemberInjectionContext(
-                            serviceProvider,
-                            diagnostics,
-                            injectionNameProvider,
-                            aspectReferenceSyntaxProvider,
-                            lexicalScopeFactory,
-                            syntaxGenerationContext,
-                            finalCompilationModel );
+                        case IInjectMemberTransformation injectMemberTransformation:
+                            // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
+                            // TODO: Implement support for initializable transformations.
+                            var introductionContext = new MemberInjectionContext(
+                                serviceProvider,
+                                diagnostics,
+                                injectionNameProvider,
+                                aspectReferenceSyntaxProvider,
+                                lexicalScopeFactory,
+                                syntaxGenerationContext,
+                                finalCompilationModel );
 
-                        var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
-                            .Select( m => m.Syntax );
+                            var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
+                                .Select( m => m.Syntax );
 
-                        members = members.AddRange( injectedMembers );
-                    }
+                            members = members.AddRange( injectedMembers );
 
-                    if ( transformation is IInjectInterfaceTransformation injectInterfaceTransformation )
-                    {
-                        baseList ??= BaseList();
-                        baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
+                            break;
+
+                        case IInjectInterfaceTransformation injectInterfaceTransformation:
+                            baseList ??= BaseList();
+                            baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
+
+                            break;
                     }
                 }
 
                 members = members.AddRange(
-                    CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, transformationsOnType.Key ) );
+                    CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, declaringType ) );
 
                 // Create a class.
                 var classDeclaration = CreatePartialType( declaringType, baseList, members );
@@ -134,10 +201,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 // Add the class to a namespace.
-                if ( !declaringType.Namespace.IsGlobalNamespace )
+                if ( !declaringType.ContainingNamespace.IsGlobalNamespace )
                 {
                     topDeclaration = NamespaceDeclaration(
-                        ParseName( declaringType.Namespace.FullName ),
+                        ParseName( declaringType.ContainingNamespace.FullName ),
                         default,
                         default,
                         SingletonList( topDeclaration ) );
@@ -168,14 +235,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             return additionalSyntaxTreeDictionary.Values.AsReadOnly();
         }
 
-        private static IReadOnlyList<ConstructorDeclarationSyntax> CreateInjectedConstructors(
+        private static IEnumerable<ConstructorDeclarationSyntax> CreateInjectedConstructors(
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext,
             INamedType type )
         {
             // TODO: This will not work properly with universal constructor builders.
-            var initialType = type.Translate( initialCompilationModel );
+            var initialType = type.Translate( initialCompilationModel, ReferenceResolutionOptions.CanBeMissing );
 
             var constructors = new List<ConstructorDeclarationSyntax>();
             var existingSignatures = new HashSet<(ISymbol Type, RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
@@ -183,12 +250,24 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Go through all types that will get generated constructors and index existing constructors.
             foreach ( var constructor in initialType.Constructors )
             {
-                existingSignatures.Add( constructor.Parameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) );
+                existingSignatures.Add(
+                    constructor.Parameters.SelectAsArray(
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                              p.RefKind) ) );
             }
 
             foreach ( var constructor in type.Constructors )
             {
-                var initialConstructor = constructor.Translate( initialCompilationModel );
+                if ( !constructor.TryForCompilation( initialCompilationModel, out var initialConstructor ) )
+                {
+                    continue;
+                }
+
+                if ( initialConstructor is BuiltDeclaration )
+                {
+                    continue;
+                }
+
                 var finalConstructor = constructor.Translate( finalCompilationModel );
 
                 // TODO: Currently we don't see introduced parameters in builder code model.
@@ -196,7 +275,11 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
 
-                if ( !existingSignatures.Add( finalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
+                if ( !existingSignatures.Add(
+                        finalParameters.SelectAsArray(
+                            p => (
+                                (ISymbol) p.Type.GetSymbol()
+                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) ) )
                 {
                     continue;
                 }
@@ -231,7 +314,12 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
                     var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
 
-                    if ( existingSignatures.Add( nonOptionalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
+                    if ( existingSignatures.Add(
+                            nonOptionalParameters.SelectAsArray(
+                                p => (
+                                    (ISymbol) p.Type.GetSymbol()
+                                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                                    p.RefKind) ) ) )
                     {
                         constructors.Add(
                             ConstructorDeclaration(
@@ -262,67 +350,73 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             return constructors;
 
             static SyntaxToken GetArgumentRefToken( IParameter p )
-                => p.RefKind switch
+            {
+                return p.RefKind switch
                 {
                     RefKind.None or RefKind.In => default,
                     RefKind.Ref or RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
                     RefKind.Out => Token( SyntaxKind.OutKeyword ),
                     _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" )
                 };
+            }
         }
 
         private static TypeDeclarationSyntax CreatePartialType( INamedType type, BaseListSyntax? baseList, SyntaxList<MemberDeclarationSyntax> members )
             => type.TypeKind switch
             {
                 TypeKind.Class => ClassDeclaration(
-                    default,
+                    attributeLists: default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
                     CreateTypeParameters( type ),
                     baseList,
-                    default,
+                    constraintClauses: default,
                     members ),
                 TypeKind.RecordClass => RecordDeclaration(
-                        default,
-                        SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
-                        Token( SyntaxKind.RecordKeyword ),
-                        Identifier( type.Name ),
-                        CreateTypeParameters( type )!,
-                        null!,
-                        baseList!,
-                        default,
-                        members )
-                    .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ) )
-                    .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ) )
-                    .WithClassOrStructKeyword( Token( SyntaxKind.ClassKeyword ) ),
+                    SyntaxKind.RecordDeclaration,
+                    attributeLists: default,
+                    SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
+                    keyword: Token( SyntaxKind.RecordKeyword ),
+                    classOrStructKeyword: Token( SyntaxKind.ClassKeyword ),
+                    Identifier( type.Name ),
+                    CreateTypeParameters( type ),
+                    parameterList: null,
+                    baseList,
+                    constraintClauses: default,
+                    openBraceToken: Token( SyntaxKind.OpenBraceToken ),
+                    members,
+                    closeBraceToken: Token( SyntaxKind.CloseBraceToken ),
+                    semicolonToken: default ),
                 TypeKind.Struct => StructDeclaration(
-                    default,
+                    attributeLists: default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
                     CreateTypeParameters( type ),
                     baseList,
-                    default,
+                    constraintClauses: default,
                     members ),
                 TypeKind.RecordStruct => RecordDeclaration(
-                        default,
-                        SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
-                        Token( SyntaxKind.RecordKeyword ),
-                        Identifier( type.Name ),
-                        CreateTypeParameters( type )!,
-                        null!,
-                        baseList!,
-                        default,
-                        members )
-                    .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ) )
-                    .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ) )
-                    .WithClassOrStructKeyword( Token( SyntaxKind.StructKeyword ) ),
+                    SyntaxKind.RecordStructDeclaration,
+                    attributeLists: default,
+                    SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
+                    keyword: Token( SyntaxKind.RecordKeyword ),
+                    classOrStructKeyword: Token( SyntaxKind.StructKeyword ),
+                    Identifier( type.Name ),
+                    CreateTypeParameters( type ),
+                    parameterList: null,
+                    baseList,
+                    constraintClauses: default,
+                    openBraceToken: Token( SyntaxKind.OpenBraceToken ),
+                    members,
+                    closeBraceToken: Token( SyntaxKind.CloseBraceToken ),
+                    semicolonToken: default ),
                 TypeKind.Interface => InterfaceDeclaration(
-                    default,
+                    attributeLists: default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
                     CreateTypeParameters( type ),
                     baseList,
-                    default,
+                    constraintClauses: default,
                     members ),
                 _ => throw new AssertionFailedException( $"Unknown type kind: {type.TypeKind}." )
             };
@@ -335,13 +429,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             }
 
             static SyntaxKind GetVariance( VarianceKind variance )
-                => variance switch
+            {
+                return variance switch
                 {
                     VarianceKind.None => SyntaxKind.None,
                     VarianceKind.In => SyntaxKind.InKeyword,
                     VarianceKind.Out => SyntaxKind.OutKeyword,
                     _ => throw new AssertionFailedException( $"Unknown variance: {variance}." )
                 };
+            }
 
             return TypeParameterList(
                 SeparatedList(

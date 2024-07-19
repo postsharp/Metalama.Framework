@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class ImplementedInterfacesCollection : DeclarationCollection<INamedType, Ref<INamedType>>, IImplementedInterfaceCollection
     {
-        public ImplementedInterfacesCollection( NamedType declaringType, InterfaceUpdatableCollection source ) : base( declaringType, source ) { }
+        public ImplementedInterfacesCollection( INamedType declaringType, InterfaceUpdatableCollection source ) : base( declaringType, source ) { }
 
         public bool Contains( INamedType namedType ) => ((InterfaceUpdatableCollection) this.Source).Contains( namedType.ToTypedRef() );
 

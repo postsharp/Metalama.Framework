@@ -11,11 +11,11 @@ namespace Metalama.Framework.Engine.Diagnostics
 {
     public sealed class DiagnosticBag : IDiagnosticBag
     {
-        private volatile ConcurrentBag<Diagnostic>? _bag;
+        private volatile ConcurrentQueue<Diagnostic>? _bag;
 
         public bool HasError { get; private set; }
 
-        private ConcurrentBag<Diagnostic> GetBag()
+        private ConcurrentQueue<Diagnostic> GetBag()
         {
             if ( this._bag != null )
             {
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
             else
             {
-                Interlocked.CompareExchange( ref this._bag, new ConcurrentBag<Diagnostic>(), null );
+                Interlocked.CompareExchange( ref this._bag, new ConcurrentQueue<Diagnostic>(), null );
 
                 return this._bag;
             }
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Report( Diagnostic diagnostic )
         {
-            this.GetBag().Add( diagnostic );
+            this.GetBag().Enqueue( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
@@ -47,6 +47,6 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Clear() => this._bag = null;
 
-        public override string ToString() => $"DiagnosticList Count={this.Count}";
+        public override string ToString() => $"DiagnosticBag Count={this.Count}";
     }
 }

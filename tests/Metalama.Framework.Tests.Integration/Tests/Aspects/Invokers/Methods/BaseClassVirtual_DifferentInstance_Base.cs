@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
@@ -11,42 +12,35 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ba
 
 public class InvokerAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        var anotherMethodBase = builder.Target.DeclaringType!.BaseType!.Methods.OfName("Method").Single();
+        var anotherMethodBase = builder.Target.DeclaringType!.BaseType!.Methods.OfName( "Method" ).Single();
 
-        builder.Advice.Override(
-            builder.Target,
+        builder.Override(
             nameof(Template),
-            new { target = anotherMethodBase });
+            new { target = anotherMethodBase } );
     }
 
     [Template]
-    public dynamic? Template(IMethod target)
+    public dynamic? Template( IMethod target )
     {
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Base).Invoke();
+        target.With( (IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Base ).Invoke();
 
         return meta.Proceed();
     }
 
     [Template]
-    public void AnotherMethodTemplate()
-    {
-    }
+    public void AnotherMethodTemplate() { }
 }
 
 public class BaseClass
 {
-    public virtual void Method()
-    {
-    }
+    public virtual void Method() { }
 }
 
 // <target>
 public class TargetClass : BaseClass
 {
     [InvokerAspect]
-    public void Invoker(TargetClass instance)
-    {
-    }
+    public void Invoker( TargetClass instance ) { }
 }

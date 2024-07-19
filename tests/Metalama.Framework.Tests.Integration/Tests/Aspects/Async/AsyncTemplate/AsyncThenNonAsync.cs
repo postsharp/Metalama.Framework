@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.AsyncThenNonAsync;
 
-[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.AsyncThenNonAsync
 {
@@ -13,8 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override(
-                builder.Target,
+            builder.Override(
                 new MethodTemplateSelector(
                     nameof(OverrideMethod),
                     asyncTemplate: nameof(OverrideAsyncMethod),
@@ -42,8 +41,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override(
-                builder.Target,
+            builder.Override(
                 new MethodTemplateSelector(
                     nameof(OverrideMethod),
                     asyncTemplate: nameof(OverrideAsyncMethod),

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     MethodKind: SymbolMethodKind.PropertyGet or SymbolMethodKind.PropertySet or SymbolMethodKind.EventAdd or SymbolMethodKind.EventRemove
                     or SymbolMethodKind.EventRaise
-                } method => this.Compilation.Factory.GetDeclaration( method.AssociatedSymbol.AssertNotNull() ),
+                } method => this.Compilation.Factory.GetDeclaration( method.AssociatedSymbol.AssertSymbolNotNull() ),
                 _ => base.ContainingDeclaration
             };
 

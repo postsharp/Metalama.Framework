@@ -59,7 +59,7 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic(
                         null,
-                        new[] { SupportedCSharpVersions.FormatSupportedVersions() } ) );
+                        SupportedCSharpVersions.FormatSupportedVersions() ) );
 
                 return false;
             }
@@ -94,13 +94,14 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 ImmutableArray<ManagedResource>.Empty,
                 partialCompilation,
                 ImmutableArray<AdditionalCompilationOutputFile>.Empty,
+                ImmutableArray<ScopedSuppression>.Empty,
                 null );
         }
 
         // Report error if the compilation does not have the METALAMA preprocessor symbol.
         if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
         {
-            diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnostic( null, null ) );
+            diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnostic( null, default ) );
 
             return default;
         }
@@ -117,7 +118,7 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
             return default;
         }
 
-        var licenseConsumptionService = this.ServiceProvider.GetService<IProjectLicenseConsumptionService>();
+        var licenseConsumptionService = this.ServiceProvider.GetService<IProjectLicenseConsumer>();
 
         var projectLicenseInfo = ProjectLicenseInfo.Get( licenseConsumptionService );
 
@@ -171,8 +172,10 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                     diagnosticAdder.Report( GeneralDiagnosticDescriptors.CodeFormattingEnabled.CreateRoslynDiagnostic( null, default ) );
                 }
 
+                var codeFormatter = this.ServiceProvider.GetRequiredService<CodeFormatter>();
+
                 // ReSharper disable once AccessToModifiedClosure
-                resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
+                resultPartialCompilation = await codeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
             }
 
             // Write HTML (used only when building projects for documentation).
@@ -206,7 +209,8 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
             // Create a manifest for transitive aspects and validators.
             var inheritableOptions =
                 result.Value.FirstCompilationModel.AssertNotNull()
-                    .HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel, false )
+                    .HierarchicalOptionsManager.AssertNotNull()
+                    .GetInheritableOptions( result.Value.LastCompilationModel, false )
                     .ToImmutableDictionary();
 
             var annotations = result.Value.LastCompilationModel.GetExportedAnnotations();
@@ -235,6 +239,7 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 additionalResources,
                 resultingCompilation,
                 result.Value.AdditionalCompilationOutputFiles,
+                result.Value.Diagnostics.DiagnosticSuppressions,
                 configuration );
         }
         catch ( DiagnosticException exception ) when ( exception.InSourceCode )

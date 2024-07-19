@@ -45,7 +45,4 @@ internal static class LinkerGeneratedAnnotationExtensions
     public static T WithLinkerGeneratedFlags<T>( this T node, in LinkerGeneratedFlags flags )
         where T : SyntaxNode
         => node.WithAdditionalAnnotations( new SyntaxAnnotation( _annotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
-
-    public static SyntaxTrivia WithLinkerGeneratedFlags( this SyntaxTrivia trivia, in LinkerGeneratedFlags flags )
-        => trivia.WithAdditionalAnnotations( new SyntaxAnnotation( _annotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
 }

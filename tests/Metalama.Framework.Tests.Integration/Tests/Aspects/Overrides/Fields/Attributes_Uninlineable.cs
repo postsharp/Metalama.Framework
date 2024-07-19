@@ -1,9 +1,10 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Attributes_Uninlineable;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -16,11 +17,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.Override(field, nameof(Template));
+                builder.With( field ).Override( nameof(Template) );
             }
         }
 
@@ -29,14 +30,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
                 _ = meta.Proceed();
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
                 meta.Proceed();
             }
@@ -51,15 +53,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         public int IntroducedField;
     }
 
-    [AttributeUsage(AttributeTargets.Field)]
-    public class FieldOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Field )]
+    public class FieldOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class FieldAndPropertyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
+    public class FieldAndPropertyAttribute : Attribute { }
 
     // <target>
     [Introduction]

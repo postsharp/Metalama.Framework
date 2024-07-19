@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -16,14 +17,17 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
         {
             builder
                 .Outbound
-                .ValidateReferences( Validate, ReferenceKinds.All );
+                .ValidateInboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
+            context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKind, x.OriginDeclaration ) ) );
         }
     }
+
+    [CompileTime]
+    public struct Data { }
 
     [Aspect]
     public class ValidatedClass

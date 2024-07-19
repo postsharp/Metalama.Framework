@@ -9,7 +9,7 @@ namespace Metalama.Framework.Introspection;
 /// Wraps an <see cref="IAttribute"/> (which represents a custom attribute) into a <see cref="IIntrospectionAspectPredecessor"/>.
 /// </summary>
 [PublicAPI]
-public interface IIntrospectionAttributeAsPredecessor : IIntrospectionAspectPredecessorInternal
+public interface IIntrospectionAttributeAsPredecessor : IIntrospectionAspectPredecessor
 {
     /// <summary>
     /// Gets the custom attribute.

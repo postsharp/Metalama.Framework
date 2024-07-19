@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -22,13 +23,13 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template));
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template) );
     }
 
     [Template]
     public void Template()
     {
-        Console.WriteLine("This is the overridden constructor.");
+        Console.WriteLine( "This is the overridden constructor." );
     }
 }
 
@@ -40,10 +41,10 @@ public class ParamOnlyAttribute : Attribute { }
 
 // <target>
 [Override]
-[method:ConstructorOnly]
-internal class TargetClass([ParamOnly] int x)
+[method: ConstructorOnly]
+internal class TargetClass( [ParamOnly] int x )
 {
-    int Z = x;
+    private int Z = x;
 }
 
 #endif

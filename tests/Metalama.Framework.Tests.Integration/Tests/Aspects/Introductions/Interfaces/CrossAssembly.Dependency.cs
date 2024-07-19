@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests that async methods, iterators and async iterators are correctly introduced.
      */
 
-    public interface IInterface 
+    public interface IInterface
     {
-        T Method<T>(T x);
+        T Method<T>( T x );
 
         int Property { get; set; }
 
@@ -35,28 +36,30 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
         [InterfaceMember]
-        public T Method<T>(T x)
+        public T Method<T>( T x )
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
+
             return x;
         }
 
         [InterfaceMember]
-        public int Property 
-        { 
+        public int Property
+        {
             get
             {
-                Console.WriteLine("Introduced");
+                Console.WriteLine( "Introduced" );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine("Introduced");
+                Console.WriteLine( "Introduced" );
             }
         }
 
@@ -68,12 +71,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine("Introduced");
+                Console.WriteLine( "Introduced" );
             }
 
             remove
             {
-                Console.WriteLine("Introduced");
+                Console.WriteLine( "Introduced" );
             }
         }
 
@@ -83,23 +86,26 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [InterfaceMember]
         public async Task<int> AsyncMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             return 42;
         }
 
         [InterfaceMember]
         public IEnumerable<int> Iterator()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
+
             yield return 42;
         }
 
         [InterfaceMember]
         public async IAsyncEnumerable<int> AsyncIterator()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             yield return 42;
         }
     }

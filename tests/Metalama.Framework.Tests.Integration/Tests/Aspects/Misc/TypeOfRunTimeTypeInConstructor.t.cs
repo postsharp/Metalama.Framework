@@ -1,4 +1,4 @@
 [TestAspect]
-class TargetClass
+internal class TargetClass
 {
 }

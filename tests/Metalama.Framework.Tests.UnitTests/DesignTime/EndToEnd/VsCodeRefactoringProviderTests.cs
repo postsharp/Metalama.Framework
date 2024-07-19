@@ -29,7 +29,8 @@ public sealed class VsCodeRefactoringProviderTests : DistributedDesignTimeTestBa
         await testContext.WhenFullyInitialized;
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Code;
 
                             class TheAspect : TypeAspect { }

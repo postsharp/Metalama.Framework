@@ -132,6 +132,7 @@ public static class ExpressionFactory
     /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions. The expression cannot be <c>dynamic</c>. If
     /// you have a dynamic expression, do not call this method, but cast the dynamic expression to <see cref="IExpression"/>.</param>
     /// <seealso href="@templates"/>
+    [CompileTime( isTemplateOnly: true )]
     public static IExpression Capture( dynamic? expression ) => SyntaxBuilder.CurrentImplementation.Capture( (object?) expression );
 
     /// <summary>
@@ -154,4 +155,24 @@ public static class ExpressionFactory
     /// </summary>
     /// <param name="type">A type.</param>
     public static IExpression This( INamedType type ) => SyntaxBuilder.CurrentImplementation.ThisExpression( type );
+
+    /// <summary>
+    /// Gets a <c>this</c> expression for the current type when inside a template.
+    /// </summary>
+    public static IExpression This() => This( meta.Target.Type );
+
+    /// <summary>
+    /// Returns the same expression, but assuming it has a different type <see cref="IHasType.Type"/>. This method does not generate
+    /// any cast (unlike <see cref="CastTo(Metalama.Framework.Code.IExpression,Metalama.Framework.Code.IType)"/>) and should only
+    /// be used when the of the type given expression is wrongly infered.
+    /// </summary>
+    public static IExpression WithType( this IExpression expression, IType type ) => SyntaxBuilder.CurrentImplementation.WithType( expression, type );
+
+    /// <summary>
+    /// Returns the same expression, but assuming it has a different nullability. This method does not generate
+    /// any cast (unlike <see cref="CastTo(Metalama.Framework.Code.IExpression,Metalama.Framework.Code.IType)"/>) and should only
+    /// be used when the of the nullability given expression is wrongly infered.
+    /// </summary>
+    public static IExpression WithNullability( this IExpression expression, bool isNullable )
+        => expression.WithType( isNullable ? expression.Type.ToNullableType() : expression.Type.ToNonNullableType() );
 }

@@ -19,7 +19,7 @@ internal sealed partial class LinkerRewritingDriver
     private IReadOnlyList<MemberDeclarationSyntax> RewriteConstructor(
         ConstructorDeclarationSyntax constructorDeclaration,
         IMethodSymbol symbol,
-        SyntaxGenerationContext generationContext )
+        SyntaxGenerationContext context )
     {
         var members = new List<MemberDeclarationSyntax>();
 
@@ -34,13 +34,13 @@ internal sealed partial class LinkerRewritingDriver
                         List<AttributeListSyntax>(),
                         TokenList( TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ), TokenWithTrailingSpace( SyntaxKind.ReadOnlyKeyword ) ),
                         VariableDeclaration(
-                            generationContext.SyntaxGenerator
+                            context.SyntaxGenerator
                                 .Type( primaryConstructorField.Type )
-                                .WithOptionalTrailingTrivia( ElasticSpace, generationContext.Options ),
+                                .WithOptionalTrailingTrivia( ElasticSpace, context.Options ),
                             SingletonSeparatedList(
                                 VariableDeclarator(
                                     Identifier( TriviaList( ElasticSpace ), GetCleanPrimaryConstructorFieldName( primaryConstructorField ), default ) ) ) ),
-                        Token( SyntaxKind.SemicolonToken ).WithOptionalTrailingLineFeed( generationContext ) ) );
+                        Token( SyntaxKind.SemicolonToken ).WithOptionalTrailingLineFeed( context ) ) );
             }
 
             foreach ( var primaryConstructorProperty in this.LateTransformationRegistry.GetPrimaryConstructorProperties( symbol.ContainingType ) )
@@ -49,7 +49,7 @@ internal sealed partial class LinkerRewritingDriver
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         TokenList( TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                        generationContext.SyntaxGenerator.Type( primaryConstructorProperty.Type ),
+                        context.SyntaxGenerator.Type( primaryConstructorProperty.Type ),
                         null,
                         Identifier( TriviaList( ElasticSpace ), primaryConstructorProperty.Name, default ),
                         AccessorList(
@@ -107,9 +107,10 @@ internal sealed partial class LinkerRewritingDriver
                                             SyntaxKind.SimpleAssignmentExpression,
                                             IdentifierName( p.Identifier ),
                                             MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                ThisExpression(),
-                                                IdentifierName( p.Identifier ) ) ) ) ) ),
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    ThisExpression(),
+                                                    IdentifierName( p.Identifier ) )
+                                                .WithSimplifierAnnotationIfNecessary( context ) ) ) ) ),
                         null,
                         default ) );
             }
@@ -125,21 +126,21 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
+                throw new AssertionFailedException( $"Non-inlined constructors are not supported: {lastOverride}" );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                  && this.ShouldGenerateSourceMember( symbol ) )
             {
-                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
+                throw new AssertionFailedException( $"Non-inlined constructors are not supported: {lastOverride}" );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
+                throw new AssertionFailedException( $"Non-inlined constructors are not supported: {lastOverride}" );
             }
         }
         else if ( this.InjectionRegistry.IsOverride( symbol ) )
@@ -166,7 +167,7 @@ internal sealed partial class LinkerRewritingDriver
                         symbol.ToSemantic( semanticKind ),
                         new SubstitutionContext(
                             this,
-                            generationContext,
+                            context,
                             new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) )
                     : null;
 
@@ -176,9 +177,9 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                        (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
-                         arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
-                         semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
+                        (arrowToken.LeadingTrivia.AddOptionalLineFeed( context ),
+                         arrowToken.TrailingTrivia.AddOptionalLineFeed( context ),
+                         semicolonToken.LeadingTrivia.AddOptionalLineFeed( context ), semicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException( $"Unsupported form of constructor declaration for {symbol}." )
                 };
 
@@ -195,12 +196,13 @@ internal sealed partial class LinkerRewritingDriver
                     primaryConstructorFieldAssignments.Add(
                         ExpressionStatement(
                             AssignmentExpression(
-                                SyntaxKind.SimpleAssignmentExpression,
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    ThisExpression(),
-                                    IdentifierName( cleanName ) ),
-                                IdentifierName( cleanName ) ) ) );
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        ThisExpression(),
+                                        IdentifierName( cleanName ) ),
+                                    IdentifierName( cleanName ) )
+                                .WithSimplifierAnnotationIfNecessary( context ) ) );
                 }
 
                 foreach ( var member in symbol.ContainingType.GetMembers() )
@@ -249,7 +251,7 @@ internal sealed partial class LinkerRewritingDriver
                                     break;
 
                                 default:
-                                    throw new AssertionFailedException( $"Unsupported: {primaryDeclaration.Kind()}" );
+                                    throw new AssertionFailedException( $"Unsupported: {primaryDeclaration}" );
                             }
 
                             break;
@@ -263,9 +265,10 @@ internal sealed partial class LinkerRewritingDriver
                             AssignmentExpression(
                                 SyntaxKind.SimpleAssignmentExpression,
                                 MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    ThisExpression(),
-                                    IdentifierName( name ) ),
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        ThisExpression(),
+                                        IdentifierName( name ) )
+                                    .WithSimplifierAnnotationIfNecessary( context ),
                                 expression ) ) );
                 }
 

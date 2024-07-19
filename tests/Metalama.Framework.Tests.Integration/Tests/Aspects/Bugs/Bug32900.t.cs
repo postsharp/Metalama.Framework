@@ -15,7 +15,7 @@ public partial class TargetClass
   }
   private async Task AsyncTaskMethod_Source()
   {
-    int result = 42;
+    var result = 42;
     await Task.Yield();
     _ = result;
   }
@@ -34,7 +34,7 @@ public partial class TargetClass
   }
   private async Task<int> AsyncTaskIntMethod_Source()
   {
-    int result = 42;
+    var result = 42;
     await Task.Yield();
     return result;
   }

@@ -52,6 +52,10 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
 
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new MethodInvoker( this ).CreateInvokeExpression( args );
+
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
 
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
@@ -126,6 +130,8 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
+        Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
         public IAssembly DeclaringAssembly => this._targetMethod.DeclaringAssembly;
@@ -161,8 +167,8 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
             return new TypedExpressionSyntax(
                 new TypedExpressionSyntaxImpl(
                     sourceExpression.Syntax,
-                    this.MapSymbol( sourceExpression.ExpressionType ),
-                    ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
+                    this.MapIType( sourceExpression.ExpressionType ),
+                    ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                     sourceExpression.IsReferenceable,
                     sourceExpression.CanBeNull ) );
         }

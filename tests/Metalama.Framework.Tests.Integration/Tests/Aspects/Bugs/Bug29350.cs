@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -59,7 +60,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.Bug29350
             stringBuilder.AddText( "." );
             stringBuilder.AddText( meta.Target.Method.Name );
             stringBuilder.AddText( "(" );
-            var i = meta.CompileTime( 0 );
+            var i = 0;
 
             foreach (var p in meta.Target.Parameters)
             {
@@ -72,7 +73,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.Bug29350
                 else
                 {
                     stringBuilder.AddText( $"{comma}{p.Name} = {{" );
-                    stringBuilder.AddExpression( p.Value );
+                    stringBuilder.AddExpression( p );
                     stringBuilder.AddText( "}" );
                 }
 

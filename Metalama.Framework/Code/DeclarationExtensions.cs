@@ -1,9 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Metalama.Framework.Code
 {
@@ -11,6 +14,7 @@ namespace Metalama.Framework.Code
     /// Extension methods for <see cref="IDeclaration"/>.
     /// </summary>
     [CompileTime]
+    [PublicAPI]
     public static class DeclarationExtensions
     {
         /// <summary>
@@ -28,7 +32,7 @@ namespace Metalama.Framework.Code
 
             if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
             {
-                return namedType.Namespace.IsContainedIn( containingNamespace );
+                return namedType.ContainingNamespace.IsContainedIn( containingNamespace );
             }
 
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
@@ -105,6 +109,18 @@ namespace Metalama.Framework.Code
             };
 
         /// <summary>
+        /// Gets the namespace of a given declaration, i.e. the namespace itself if the given declaration is a namespace,
+        /// the closest containing namespace, or the global namespace if an <see cref="ICompilation"/> is given.
+        /// </summary>
+        public static INamespace? GetNamespace( this IDeclaration declaration )
+            => declaration switch
+            {
+                INamespace ns => ns,
+                ICompilation compilation => compilation.GlobalNamespace,
+                _ => declaration.GetTopmostNamedType()?.ContainingNamespace
+            };
+
+        /// <summary>
         /// Gets a representation of the current declaration in a different version of the compilation.
         /// </summary>
         [return: NotNullIfNotNull( nameof(compilationElement) )]
@@ -118,7 +134,7 @@ namespace Metalama.Framework.Code
             else
             {
                 return
-                    (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
+                    ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
                     ?? throw new InvalidOperationException(
                         $"The declaration '{compilationElement}' does not exist in the requested compilation. "
                         + $"Use TryForCompilation to avoid this exception." );
@@ -143,7 +159,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                translated = (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+                translated = ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
 
                 return translated != null;
             }
@@ -158,5 +174,34 @@ namespace Metalama.Framework.Code
                 Parameters: [_],
                 DeclaringType.TypeKind: TypeKind.RecordClass or TypeKind.RecordStruct
             };
+
+        /// <summary>
+        /// Gets the declarations (namespaces, types, methods, properties, fields, constructors, events, indexers) directly contained in the given declaration.
+        /// </summary>
+        /// <remarks>The method does not descent into accessors, custom attributes, parameters, or type parameters.</remarks>
+        public static IEnumerable<IDeclaration> ContainedChildren( this IDeclaration declaration )
+            => declaration switch
+            {
+                ICompilation compilation => compilation.Types,
+                INamespace ns => ns.Namespaces.Concat<IDeclaration>( ns.Types ),
+                INamedType type => type.Members().Concat<IDeclaration>( type.Types ),
+                _ => []
+            };
+
+        /// <summary>
+        /// Gets the declarations (namespaces, types, methods, properties, fields, constructors, events, indexers) in the given declaration
+        /// and in any child of the declaration.
+        /// </summary>
+        /// <remarks>The method does not descent into accessors, custom attributes, parameters, or type parameters.</remarks>
+        public static IEnumerable<IDeclaration> ContainedDescendants( this IDeclaration declaration )
+            => declaration.SelectManyRecursive( d => d.ContainedChildren() );
+
+        /// <summary>
+        /// Gets the declarations (namespaces, types, methods, properties, fields, constructors, events, indexers) in the given declaration
+        /// and in any child of the declaration, plus the given declaration.
+        /// </summary>
+        /// <remarks>The method does not descent into accessors, custom attributes, parameters, or type parameters.</remarks>
+        public static IEnumerable<IDeclaration> ContainedDescendantsAndSelf( this IDeclaration declaration )
+            => declaration.SelectManyRecursive( d => d.ContainedChildren(), true );
     }
 }

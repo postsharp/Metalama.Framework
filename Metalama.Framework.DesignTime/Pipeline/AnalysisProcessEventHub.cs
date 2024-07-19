@@ -15,7 +15,8 @@ public sealed class AnalysisProcessEventHub : IGlobalService
 {
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _projectsWithPausedPipeline = new();
-    private readonly AsyncEvent<DesignTimePipelineStatusChangedEventArgs> _pipelineStatusChangedEvent = new();
+    private readonly WeakEvent<CompilationResultChangedEventArgs> _compilationResultChangedEvent = new();
+    private readonly AsyncWeakEvent<DesignTimePipelineStatusChangedEventArgs> _pipelineStatusChangedEvent = new();
     private readonly AsyncEvent<ProjectKey> _externalBuildCompletedEvent = new();
     private bool _isEditingCompileTimeCode;
 
@@ -42,7 +43,7 @@ public sealed class AnalysisProcessEventHub : IGlobalService
 
     public event Action? EditingCompileTimeCodeCompleted;
 
-    public event Action<CompilationResultChangedEventArgs>? CompilationResultChanged;
+    public WeakEvent<CompilationResultChangedEventArgs>.Accessors CompilationResultChangedEvent => this._compilationResultChangedEvent.GetAccessors();
 
     public void OnCompileTimeCodeCompletedEditing() => this.EditingCompileTimeCodeCompleted?.Invoke();
 
@@ -52,12 +53,12 @@ public sealed class AnalysisProcessEventHub : IGlobalService
 
     internal void PublishCompilationResultChangedNotification( CompilationResultChangedEventArgs notification )
     {
-        if ( this.CompilationResultChanged == null )
+        if ( !this._compilationResultChangedEvent.HasHandlers() )
         {
             this._logger.Warning?.Log( "Do not publish a change notification because there is no listener." );
         }
 
-        this.CompilationResultChanged?.Invoke( notification );
+        this._compilationResultChangedEvent.Invoke( notification );
     }
 
     public event Action<ProjectKey>? DirtyProject;
@@ -70,7 +71,7 @@ public sealed class AnalysisProcessEventHub : IGlobalService
     /// Gets an event raised when the pipeline result has changed because of an external cause, i.e.
     /// not a change in the source code of the project of the pipeline itself.
     /// </summary>
-    internal AsyncEvent<DesignTimePipelineStatusChangedEventArgs>.Accessors PipelineStatusChangedEvent => this._pipelineStatusChangedEvent.GetAccessors();
+    internal AsyncWeakEvent<DesignTimePipelineStatusChangedEventArgs>.Accessors PipelineStatusChangedEvent => this._pipelineStatusChangedEvent.GetAccessors();
 
     internal Task OnPipelineStatusChangedEventAsync( DesignTimePipelineStatusChangedEventArgs args )
     {

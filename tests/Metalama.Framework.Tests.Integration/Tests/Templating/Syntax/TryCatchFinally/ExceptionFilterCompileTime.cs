@@ -1,40 +1,42 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.ExceptionFilterCompileTime
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            int a = meta.Target.Parameters.Count;
-            int b = 0;
+            var a = meta.Target.Parameters.Count;
+            var b = 0;
+
             try
             {
-                meta.InsertComment("comment");
-                Console.WriteLine(a);
-                
+                meta.InsertComment( "comment" );
+                Console.WriteLine( a );
+
                 var x = 100 / 1;
                 var y = x / a;
-                
             }
-            catch(Exception e) when (e.GetType().Name.Contains("DivideByZero"))
+            catch (Exception e) when (e.GetType().Name.Contains( "DivideByZero" ))
             {
-                meta.InsertComment("comment");
-                b =  1;
+                meta.InsertComment( "comment" );
+                b = 1;
             }
 
-            Console.WriteLine(b);
+            Console.WriteLine( b );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method()
+        private int Method()
         {
             return 42;
         }

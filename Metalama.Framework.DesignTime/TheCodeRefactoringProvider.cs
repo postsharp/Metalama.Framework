@@ -35,6 +35,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
         private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
+        private readonly IProjectOptionsFactory _projectOptionsFactory;
 
         public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetSharedServiceProvider() ) { }
 
@@ -44,6 +45,7 @@ namespace Metalama.Framework.DesignTime
             this._codeRefactoringDiscoveryService = serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
+            this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
         }
 
         public sealed override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
@@ -66,8 +68,7 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                var projectOptions =
-                    MSBuildProjectOptionsFactory.Default.GetProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+                var projectOptions = this._projectOptionsFactory.GetProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsFrameworkEnabled )
                 {

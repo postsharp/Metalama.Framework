@@ -1,63 +1,45 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Transformations;
+using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Advising;
 
 /// <summary>
-/// Represents the result of a method of <see cref="IAdviceFactory"/>.
+/// Represents the result of a method of <see cref="IAdviceFactory"/>. We use a single class to implement all supported interfaces.
 /// </summary>
-/// <typeparam name="T">The type of declaration returned by the advice method.</typeparam>
-internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideAdviceResult<T>, IImplementInterfaceAdviceResult, IAddContractAdviceResult<T>,
-                                        IAddInitializerAdviceResult, IRemoveAttributesAdviceResult
-    where T : class, IDeclaration
+internal abstract class AdviceResult : IAdviceResult
 {
-    private readonly IRef<T>? _declaration;
-    private readonly CompilationModel _compilation;
+    public AdviceKind AdviceKind { get; init; }
 
-    /// <summary>
-    /// Gets the declaration created or transformed by the advice method. For introduction advice methods, this is the introduced declaration when a new
-    /// declaration is introduced, or the existing declaration when a declaration of the same name and signature already exists. For advice that modify a field,
-    /// this is the property that now represents the field.
-    /// </summary>
-    public T Declaration
-        => this.Outcome != AdviceOutcome.Error
-            ? this._declaration.AssertNotNull()
-                .GetTarget( this._compilation, ReferenceResolutionOptions.CanBeMissing )
-                .Assert( d => d is not IDeclarationBuilder )
-            : throw new InvalidOperationException( "Cannot get the resulting declaration when the outcome is Error." );
+    public AdviceOutcome Outcome { get; init; }
 
-    public AdviceKind AdviceKind { get; }
+    public ImmutableArray<Diagnostic> Diagnostics { get; init; } = ImmutableArray<Diagnostic>.Empty;
 
-    public AdviceOutcome Outcome { get; }
+    // This property is used only by the introspection API.
+    public ImmutableArray<ITransformation> Transformations { get; internal set; } = ImmutableArray<ITransformation>.Empty;
 
-    public IAspectBuilder AspectBuilder { get; }
+    public CompilationModel? Compilation { get; set; }
 
-    public IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; }
-
-    public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
-
-    internal AdviceResult(
-        IRef<T>? declaration,
-        CompilationModel compilation,
-        AdviceOutcome outcome,
-        IAspectBuilder aspectBuilder,
-        AdviceKind adviceKind,
-        IReadOnlyCollection<IInterfaceImplementationResult> interfaces,
-        IReadOnlyCollection<IInterfaceMemberImplementationResult> interfaceMembers )
+    protected T Resolve<T>( IRef<T>? reference, [CallerMemberName] string? caller = null )
+        where T : class, ICompilationElement
     {
-        this._declaration = declaration;
-        this._compilation = compilation.Assert( c => c.IsMutable );
-        this.Outcome = outcome;
-        this.AspectBuilder = aspectBuilder;
-        this.AdviceKind = adviceKind;
-        this.Interfaces = interfaces;
-        this.InterfaceMembers = interfaceMembers;
+        if ( reference == null )
+        {
+            throw this.CreateException( caller );
+        }
+
+        return reference.GetTarget( this.Compilation.AssertNotNull(), ReferenceResolutionOptions.CanBeMissing )
+            .Assert( d => d is not IDeclarationBuilder );
     }
+
+    private InvalidOperationException CreateException( [CallerMemberName] string? caller = null )
+        => new( $"Cannot get {caller} when the outcome is {this.Outcome}." );
 }

@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -8,33 +9,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var result =
-                builder.Advice.IntroduceBinaryOperator(
-                    builder.Target,
+                builder.IntroduceBinaryOperator(
                     nameof(Operator),
                     builder.Target,
-                    TypeFactory.GetType(SpecialType.Int32),
-                    TypeFactory.GetType(SpecialType.Int32),
+                    TypeFactory.GetType( SpecialType.Int32 ),
+                    TypeFactory.GetType( SpecialType.Int32 ),
                     OperatorKind.Addition,
-                    whenExists: OverrideStrategy.New);
+                    whenExists: OverrideStrategy.New );
 
-            if (result.Outcome != Advising.AdviceOutcome.Error)
+            if (result.Outcome != AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Error.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Error." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceOperator)
+            if (result.AdviceKind != AdviceKind.IntroduceOperator)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceOperator.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceOperator." );
             }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
-            }
-
 
             // TODO: #33060
             //if (!builder.Target.Compilation.Comparers.Default.Equals(
@@ -46,9 +40,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
         }
 
         [Template]
-        public int Operator(dynamic? x, dynamic? y)
+        public int Operator( dynamic? x, dynamic? y )
         {
-            Console.WriteLine("Aspect code.");
+            Console.WriteLine( "Aspect code." );
+
             return meta.Proceed();
         }
     }
@@ -57,9 +52,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
     [TestAspect]
     public class TargetClass
     {
-        public static int operator +(TargetClass x, int y)
+        public static int operator +( TargetClass x, int y )
         {
-            Console.WriteLine("Original code.");
+            Console.WriteLine( "Original code." );
+
             return y;
         }
     }

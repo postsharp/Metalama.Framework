@@ -1,11 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Utilities;
+using Metalama.Backstage.Licensing.Consumption.Sources;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Contracts.Pipeline;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
@@ -77,16 +78,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     // ReSharper disable once InconsistentlySynchronizedField
     internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
-    internal ImmutableArray<PortableExecutableReference> MetadataReferences { get; }
+    internal DependencyGraph Dependencies => this._currentState.Dependencies;
 
-    public DesignTimeAspectPipeline(
-        DesignTimeAspectPipelineFactory pipelineFactory,
-        IProjectOptions projectOptions,
-        Compilation compilation ) : this(
-        pipelineFactory,
-        projectOptions,
-        compilation.GetProjectKey(),
-        compilation.References.OfType<PortableExecutableReference>().ToImmutableArray() ) { }
+    internal ImmutableArray<PortableExecutableReference> MetadataReferences { get; }
 
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
@@ -104,7 +98,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._projectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
         this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
         this._eventHub = this.ServiceProvider.Global.GetRequiredService<AnalysisProcessEventHub>();
-        this._eventHub.CompilationResultChanged += this.OnOtherPipelineCompilationResultChanged;
+        this._eventHub.CompilationResultChangedEvent.RegisterHandler( this.OnOtherPipelineCompilationResultChanged );
         this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
         this._taskRunner = this.ServiceProvider.Global.GetRequiredService<ITaskRunner>();
         this._userDiagnosticsRegistrationService = this.ServiceProvider.Global.GetService<IUserDiagnosticRegistrationService>();
@@ -203,8 +197,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         if ( !projectOptions.IsTest || !string.IsNullOrEmpty( projectOptions.License ) )
         {
-            // We always ignore unattended licenses in a design-time process, but we ignore the user profile licenses only in tests.
-            projectServiceProvider = projectServiceProvider.AddProjectLicenseConsumptionManager( projectOptions.License );
+            projectServiceProvider = projectServiceProvider.AddProjectLicenseConsumptionManager(
+                projectOptions.License,
+                projectOptions.IgnoreUserProfileLicense ? LicenseSourceKind.All : LicenseSourceKind.None );
         }
 
         return projectServiceProvider;
@@ -329,29 +324,17 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     private async ValueTask ResumeCoreAsync( AsyncExecutionContext executionContext )
     {
-        // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
-        // is removed.
+        // Notify the IDE that errors have been removed on compile-time syntax trees.
         if ( this.MustReportPausedPipelineAsErrors )
         {
             if ( this._currentState.CompileTimeSyntaxTrees != null )
             {
-                foreach ( var file in this._currentState.CompileTimeSyntaxTrees )
-                {
-                    if ( file.Value == null )
-                    {
-                        this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
+                var notification = new CompilationResultChangedEventArgs(
+                    this.ProjectKey,
+                    true,
+                    this._currentState.CompileTimeSyntaxTrees.Keys.ToImmutableArray() );
 
-                        RetryHelper.Retry(
-                            () =>
-                            {
-                                if ( File.Exists( file.Key ) )
-                                {
-                                    File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
-                                }
-                            },
-                            logger: this.Logger );
-                    }
-                }
+                this._eventHub.PublishCompilationResultChangedNotification( notification );
             }
         }
 
@@ -410,7 +393,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._fileSystemWatcher?.Dispose();
         this._sync.Dispose();
         this._eventHub.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChangedAsync );
-        this._eventHub.CompilationResultChanged -= this.OnOtherPipelineCompilationResultChanged;
+        this._eventHub.CompilationResultChangedEvent.UnregisterHandler( this.OnOtherPipelineCompilationResultChanged );
     }
 
     private async ValueTask<ProjectVersion> InvalidateCacheAsync(
@@ -885,8 +868,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     /// determine whether an error must displayed in the editor.  
     /// </summary>
     public bool IsCompileTimeSyntaxTreeOutdated( string name )
-        => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
-                                                                                   && syntaxTree == null;
+        => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees
+           && compileTimeSyntaxTrees.TryGetValue( name, out var isValid )
+           && !isValid;
 
     private IReadOnlyList<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
     {
@@ -943,7 +927,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             // Check if the aspect class is accessible from the symbol.
 
-            if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( aspectClass.TypeId, null, out var aspectClassSymbol ) )
+            if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( aspectClass.TypeId, out var aspectClassSymbol ) )
             {
                 // This situation may happen during edits (see #34704).
                 this.Logger.Trace?.Log( $"The aspect is not eligible because '{aspectClass.TypeId}' cannot be resolved." );

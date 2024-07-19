@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -106,6 +107,9 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                     case ISymbol symbol:
                         return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+
+                    case ReferenceKinds referenceKinds:
+                        return referenceKinds.ToDisplayString();
 
                     case IFormattable formattable:
                         return formattable.ToString( format, this );

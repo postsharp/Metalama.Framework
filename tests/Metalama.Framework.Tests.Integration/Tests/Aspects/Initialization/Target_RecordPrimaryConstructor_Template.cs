@@ -9,7 +9,7 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer( builder.Target.PrimaryConstructor, nameof(Template), InitializerKind.BeforeInstanceConstructor );
+        builder.With( builder.Target.PrimaryConstructor! ).AddInitializer( nameof(Template), InitializerKind.BeforeInstanceConstructor );
     }
 
     [Template]

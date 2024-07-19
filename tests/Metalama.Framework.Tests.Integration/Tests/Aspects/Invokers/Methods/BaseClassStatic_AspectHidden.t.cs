@@ -3,8 +3,7 @@ public class TargetClass : BaseClass
 {
   [InvokerBeforeAspect]
   public void InvokerBefore()
-  {
-    // Invoke TargetClass.Method
+  { // Invoke TargetClass.Method
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_AspectHidden.BaseClass.Method();
     // Invoke BaseClass.Method
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_AspectHidden.BaseClass.Method();
@@ -16,8 +15,7 @@ public class TargetClass : BaseClass
   }
   [InvokerAfterAspect]
   public void InvokerAfter()
-  {
-    // Invoke TargetClass.Method
+  { // Invoke TargetClass.Method
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_AspectHidden.TargetClass.Method();
     // Invoke TargetClass.Method
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_AspectHidden.TargetClass.Method();

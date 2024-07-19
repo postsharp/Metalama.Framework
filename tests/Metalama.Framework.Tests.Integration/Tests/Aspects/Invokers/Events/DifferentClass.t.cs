@@ -2,7 +2,7 @@ public class TargetClass
 {
   private DifferentClass? instance;
   [InvokerAspect]
-  public event System.EventHandler Invoker
+  public event EventHandler Invoker
   {
     add
     { // Invoke instance.Event
@@ -17,7 +17,7 @@ public class TargetClass
       this.instance.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.DifferentClass.TargetClass.StaticTarget;
     }
   }
-  public static void StaticTarget(object? sender, System.EventArgs args)
+  public static void StaticTarget(object? sender, EventArgs args)
   {
   }
 }

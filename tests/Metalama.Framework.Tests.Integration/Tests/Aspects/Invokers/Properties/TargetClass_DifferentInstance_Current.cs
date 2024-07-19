@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
@@ -13,27 +14,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties
 
 public class InvokerAspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        builder.Advice.OverrideAccessors(
-            builder.Target,
+        builder.OverrideAccessors(
             nameof(GetTemplate),
             nameof(SetTemplate),
-            new { target = ((INamedType)builder.Target.DeclaringType.Fields.Single().Type).Properties.OfName("Property").Single() });
+            new { target = ( (INamedType)builder.Target.DeclaringType.Fields.Single().Type ).Properties.OfName( "Property" ).Single() } );
     }
 
     [Template]
-    public dynamic? GetTemplate([CompileTime] IProperty target)
+    public dynamic? GetTemplate( [CompileTime] IProperty target )
     {
-        _ = target.With((IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Current).Value;
+        _ = target.With( (IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Current ).Value;
 
         return meta.Proceed();
     }
 
     [Template]
-    public void SetTemplate([CompileTime] IProperty target)
+    public void SetTemplate( [CompileTime] IProperty target )
     {
-        target.With((IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Current).Value = 42;
+        target.With( (IExpression)meta.Target.Property.DeclaringType.Fields.Single().Value!, InvokerOptions.Current ).Value = 42;
 
         meta.Proceed();
     }
@@ -44,8 +44,11 @@ public class TargetClass
 {
     public int Property
     {
-        get { return 0; }
-        set {}       
+        get
+        {
+            return 0;
+        }
+        set { }
     }
 
     private TargetClass? instance;
@@ -53,7 +56,10 @@ public class TargetClass
     [InvokerAspect]
     public int Invoker
     {
-        get { return 0; }
+        get
+        {
+            return 0;
+        }
         set { }
     }
 }

@@ -2,20 +2,19 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationCollection<T>, ISourceMemberCollection<T>
-    where T : class, IMemberOrNamedType
+    where T : class, INamedDeclaration
 {
-    protected UpdatableMemberCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation )
+    protected UpdatableMemberCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation )
     {
         this.DeclaringTypeOrNamespace = declaringType;
     }
 
-    protected INamespaceOrTypeSymbol DeclaringTypeOrNamespace { get; }
+    protected Ref<INamespaceOrNamedType> DeclaringTypeOrNamespace { get; }
 
     public abstract ImmutableArray<MemberRef<T>> OfName( string name );
 }

@@ -6,10 +6,12 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Build.Solutions;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
+using PostSharp.Engineering.BuildTools.Docker;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
 using System.IO;
-using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_1;
+using System.Runtime.InteropServices;
+using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_2;
 
 var product = new Product( MetalamaDependencies.Metalama )
 {
@@ -60,8 +62,8 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.Tool.$(PackageVersion).nupkg" ),
-    ParametrizedDependencies = new[]
-    {
+    ParametrizedDependencies =
+    [
         DevelopmentDependencies.PostSharpEngineering.ToDependency(),
         MetalamaDependencies.MetalamaBackstage.ToDependency(),
         MetalamaDependencies.MetalamaCompiler.ToDependency(
@@ -69,28 +71,29 @@ var product = new Product( MetalamaDependencies.Metalama )
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
             ) ),
         MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
-    },
-    SourceDependencies = new[] { MetalamaDependencies.MetalamaFrameworkPrivate },
-    ExportedProperties = { { @"eng\Versions.props", new[] { "RoslynApiMaxVersion" } } },
+    ],
+    SourceDependencies = [MetalamaDependencies.MetalamaFrameworkPrivate],
+    ExportedProperties = { { @"eng\Versions.props", ["RoslynApiMaxVersion"] } },
     Configurations = Product.DefaultConfigurations
         .WithValue(
             BuildConfiguration.Debug,
             c => c with
             {
-                AdditionalArtifactRules = new[]
-                {
+                AdditionalArtifactRules =
+                [
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
 
                     // Do not upload uncompressed crash reports because they are too big.
-                    $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs",
-                }
+                    $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs"
+                ]
             } ),
-    SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } }
+    SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } },
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
+product.PrepareCompleted += args => TestLicenseKeyDownloader.Download( args.Context );
 
 var commandApp = new CommandApp();
 
@@ -126,7 +129,8 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     }
 
     var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net8.0" );
-    var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
+    var toolExtension = RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ? ".exe" : "";
+    var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter" + toolExtension );
     var srcDirectory = arg.Context.RepoDirectory;
     var commandLine = srcDirectory;
 

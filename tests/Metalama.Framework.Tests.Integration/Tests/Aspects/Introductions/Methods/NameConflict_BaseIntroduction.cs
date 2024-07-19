@@ -1,7 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.NameConflict_BaseIntroduction
 {
@@ -11,9 +11,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
 
     public class Introduction1Attribute : TypeAspect
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
-        {
-        }
+        public override void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
         [Introduce]
         public int Foo()
@@ -21,33 +19,26 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
             return 42;
         }
     }
+
     public class Introduction2Attribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-        }
+        public override void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
         [Introduce]
         public int Bar()
         {
             Foo();
 
-            return ExpressionFactory.Parse("Foo()").Value;
+            return ExpressionFactory.Parse( "Foo()" ).Value;
 
-            void Foo()
-            {
-            }
+            void Foo() { }
         }
     }
 
     [Introduction1]
-    internal class BaseClass
-    {
-    }
+    internal class BaseClass { }
 
     // <target>
     [Introduction2]
-    internal class TargetClass : BaseClass
-    {
-    }
+    internal class TargetClass : BaseClass { }
 }

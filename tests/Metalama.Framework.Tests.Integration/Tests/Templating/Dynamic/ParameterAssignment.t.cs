@@ -1,4 +1,4 @@
-int Method(out int a)
+private int Method(out int a)
 {
   var result = this.Method(out a);
   a = 5;

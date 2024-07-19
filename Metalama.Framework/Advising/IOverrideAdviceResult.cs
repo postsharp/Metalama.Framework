@@ -8,7 +8,7 @@ namespace Metalama.Framework.Advising;
 /// Represents the result of the <c>Override</c> methods of the <see cref="IAdviceFactory"/> interface.
 /// </summary>
 public interface IOverrideAdviceResult<out T> : IAdviceResult
-    where T : class, ICompilationElement
+    where T : class, IDeclaration
 {
     /// <summary>
     /// Gets the declaration transformed by the advice method. For advice that modify a field,

@@ -6,9 +6,9 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime.Manifest;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
@@ -33,7 +33,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         public DesignTimeDiagnosticDefinitions DiagnosticDefinitions
             => new(
                 this._registrationFile.Diagnostics.SelectAsImmutableArray( d => d.Value.DiagnosticDescriptor() ),
-                this._registrationFile.Suppressions.SelectAsImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ) );
+                this._registrationFile.Suppressions.SelectAsImmutableArray( SuppressionFactories.CreateDescriptor ) );
 
         /// <summary>
         /// Inspects a <see cref="DesignTimePipelineExecutionResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics

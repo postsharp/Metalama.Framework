@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.Override_MissingType;
@@ -7,25 +8,24 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.Override_M
  * Tests that call of a method of a missing type is handled by overrides.
  */
 
-class Aspect : OverrideMethodAspect
+internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("Aspect");
+        Console.WriteLine( "Aspect" );
+
         return meta.Proceed();
     }
-
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
-    void Method(int a)
+    private void Method( int a )
     {
 #if TESTRUNNER
         Foo.Bar();
 #endif
     }
-
 }

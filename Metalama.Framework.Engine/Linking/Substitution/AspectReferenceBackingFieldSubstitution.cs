@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -36,7 +35,7 @@ internal sealed class AspectReferenceBackingFieldSubstitution : SyntaxNodeSubsti
             {
                 InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
                     argumentList.Arguments[0].Expression,
-                _ => throw new AssertionFailedException( $"{this._aspectReference.RootNode.Kind()} is not in a supported form." )
+                _ => throw new AssertionFailedException( $"Unsupported form: {this._aspectReference.RootNode}" )
             };
         }
 
@@ -55,7 +54,7 @@ internal sealed class AspectReferenceBackingFieldSubstitution : SyntaxNodeSubsti
                 }
 
             default:
-                throw new AssertionFailedException( $"Unexpected syntax kind: {currentNode.Kind()}" );
+                throw new AssertionFailedException( $"Unexpected syntax: {currentNode}" );
         }
     }
 }

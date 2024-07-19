@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
@@ -16,9 +17,7 @@ public class TheAspect : TypeAspect, IHierarchicalOptionsProvider
     {
         var options = builder.Target.Enhancements().GetOptions<MyOptions>();
 
-        builder.Advice.IntroduceAttribute(
-            builder.Target,
-            AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { options.OverrideHistory } ) );
+        builder.IntroduceAttribute( AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { options.OverrideHistory } ) );
     }
 
     public IEnumerable<IHierarchicalOptions> GetOptions( in OptionsProviderContext context )

@@ -1,22 +1,24 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Pragma.TwoComments
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            meta.InsertComment("Oops 1", null, "Oops 2");
-            meta.InsertComment("Oops 3", null, "Oops 4");
+            meta.InsertComment( "Oops 1", null, "Oops 2" );
+            meta.InsertComment( "Oops 3", null, "Oops 4" );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

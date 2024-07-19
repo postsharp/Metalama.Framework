@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using System;
@@ -5,7 +6,7 @@ using System.Linq;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;
 using Metalama.Framework.Code;
 
-[assembly: AspectOrder( typeof(ParameterContractAspect), typeof(OverrideAspect), typeof(IntroductionAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ParameterContractAspect), typeof(OverrideAspect), typeof(IntroductionAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;
 
@@ -13,16 +14,16 @@ public class MethodFabric : TransitiveProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( x => x.Types.SelectMany( t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ) ) )
+        amender.SelectMany( x => x.Types.SelectMany( t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ) ) )
             .AddAspect<OverrideAspect>();
 
-        amender.Outbound
+        amender
             .SelectMany(
                 x => x.Types.SelectMany(
                     t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ).Select( x => x.ReturnParameter ) ) )
             .AddAspect<ParameterContractAspect>();
 
-        amender.Outbound
+        amender
             .SelectMany(
                 x => x.Types.SelectMany(
                     t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ).SelectMany( x => x.Parameters ) ) )
@@ -34,7 +35,7 @@ public class TypeFabric : TransitiveProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( x => x.Types ).Where( t => !t.IsStatic ).AddAspect<IntroductionAspect>();
+        amender.SelectMany( x => x.Types ).Where( t => !t.IsStatic ).AddAspect<IntroductionAspect>();
     }
 }
 

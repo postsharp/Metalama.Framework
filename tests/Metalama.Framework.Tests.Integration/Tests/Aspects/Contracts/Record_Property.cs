@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 
@@ -7,11 +8,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Record_Pr
 {
     internal class NotNullAttribute : ContractAspect
     {
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value == null)
             {
-                throw new ArgumentNullException(meta.Target.Property.Name);
+                throw new ArgumentNullException( meta.Target.Property.Name );
             }
         }
     }

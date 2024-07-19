@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Redirection_Property;
 
-[assembly: AspectOrder(typeof(NotNullAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(NotNullAttribute) )]
 
 #pragma warning disable CS0169, CS0649
 
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Redirecti
 {
     internal class NotNullAttribute : ContractAspect
     {
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value == null)
             {
@@ -26,19 +27,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Redirecti
 
     internal class RedirectingAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceMethod(builder.Target, nameof(Foo));
+            var result = builder.IntroduceMethod( nameof(Foo) );
 
-            ContractAspect.RedirectContracts(builder, builder.Target.Properties.OfName("P").Single(), result.Declaration.Parameters[0]);
-            ContractAspect.RedirectContracts(builder, builder.Target.Properties.OfName("Q").Single(), result.Declaration.Parameters[1]);
+            ContractAspect.RedirectContracts( builder, builder.Target.Properties.OfName( "P" ).Single(), result.Declaration.Parameters[0] );
+            ContractAspect.RedirectContracts( builder, builder.Target.Properties.OfName( "Q" ).Single(), result.Declaration.Parameters[1] );
         }
-
 
         [Template]
-        public void Foo(string p, string q)
-        {
-        }
+        public void Foo( string p, string q ) { }
     }
 
     // <target>

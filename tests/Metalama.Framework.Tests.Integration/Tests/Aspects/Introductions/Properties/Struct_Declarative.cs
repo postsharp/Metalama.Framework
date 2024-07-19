@@ -3,6 +3,7 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 # endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.Struct_Declarative
@@ -28,9 +29,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.S
     {
         private int _existingField;
 
-        public TargetStruct(int x)
+        public TargetStruct( int x )
         {
-            this._existingField = x;
+            _existingField = x;
         }
     }
 }

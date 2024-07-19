@@ -1,5 +1,5 @@
 [Aspect]
-class TargetCode
+internal class TargetCode
 {
   private global::System.String Default(global::System.Object arg)
   {

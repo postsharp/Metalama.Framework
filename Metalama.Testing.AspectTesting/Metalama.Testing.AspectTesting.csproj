@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\Build\RoslynVersion\Latest.imports" />
+    <Import Project="../build/RoslynVersion/Latest.imports" />
     
     <PropertyGroup>
         <!-- We are targeting .NET 6.0 because we can provide an unloadable implementation of CompileTimeDomain. -->
-        <TargetFrameworks>netstandard2.0;net472;net6.0</TargetFrameworks>
+        <TargetFrameworks>net472;net6.0</TargetFrameworks>
         <!-- Packaging -->
         <Description>Test framework for Metalama aspects and fabrics. This is not your typical test framework. When referencing this package, every _file_ is turned into a test by default. Please read the documentation before use.</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -16,20 +16,21 @@
         <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="$(ThisRoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" VersionOverride="$(ThisRoslynVersion)" />
+        <PackageReference Include="DiffEngine" />
         <PackageReference Include="xunit.assert" />
         <PackageReference Include="xunit.extensibility.core" />
         <PackageReference Include="xunit.extensibility.execution" />
         <PackageReference Include="Metalama.Backstage" />
         
         <!-- Validate that we do not expose internal APIs -->
-        <ProjectReference Include="..\Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="../Metalama.Framework.Engine.Analyzers/Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
-        <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
-        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../Metalama.Framework.Sdk/Metalama.Framework.Sdk.csproj" />
+        <ProjectReference Include="../Metalama.Framework/Metalama.Framework.csproj" />
+        <ProjectReference Include="../Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix)/Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix).csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -52,7 +53,7 @@
 
     <!-- Packaging -->
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
 </Project>

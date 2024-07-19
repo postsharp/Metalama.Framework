@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_SharedBase;
 
-[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing_SharedBase
 {
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor );
+            builder.AddInitializer( nameof(Template), InitializerKind.BeforeInstanceConstructor );
         }
 
         [Template]

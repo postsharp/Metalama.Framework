@@ -18,7 +18,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     private readonly BuiltMember _builtMember;
     private readonly AccessorBuilder _accessorBuilder;
 
-    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builder )
+    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation )
     {
         this._builtMember = builtMember;
         this._accessorBuilder = builder;
@@ -54,6 +54,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool IsAsync => this._accessorBuilder.IsAsync;
 
+    public override bool IsImplicitlyDeclared => this is { MethodKind: MethodKind.PropertySet, ContainingDeclaration: IProperty { Writeability: Writeability.ConstructorOnly } };
+
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
@@ -75,6 +77,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public IMethodInvoker With( InvokerOptions options ) => this._accessorBuilder.With( options );
 
     public IMethodInvoker With( object? target, InvokerOptions options ) => this._accessorBuilder.With( target, options );
+
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => this._accessorBuilder.With( target, options );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this._accessorBuilder.CreateInvokeExpression( args );
 
     public object? Invoke( params object?[] args ) => this._accessorBuilder.Invoke( args );
 

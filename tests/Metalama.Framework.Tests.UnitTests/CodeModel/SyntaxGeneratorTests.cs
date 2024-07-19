@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
@@ -71,15 +72,21 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
             var compilation = testContext.CreateCompilationModel( code );
-            var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
+            var fieldType = compilation.Types.Single().Fields.Single().Type;
 
             var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: !nullable ).SyntaxGenerator;
 
             var typeOf = syntaxGenerator.TypeOfExpression( fieldType ).ToString();
 
-            this._logger.WriteLine( "Actual: " + typeOf );
+            this._logger.WriteLine( $"Actual using symbols: {typeOf}" );
 
             Assert.Equal( expectedTypeOf, typeOf );
+
+            var typeOf2 = syntaxGenerator.TypeOfExpression( fieldType, bypassSymbols: true ).ToString();
+
+            this._logger.WriteLine( $"Actual using IType: {typeOf2}" );
+
+            Assert.Equal( expectedTypeOf, typeOf2 );
         }
 
         [Theory]
@@ -119,15 +126,46 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var code = $"using System.Collections.Generic; class T {{ {type} field; }} ";
             var compilation = testContext.CreateCompilationModel( code );
-            var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
+            var fieldType = compilation.Types.Single().Fields.Single().Type;
 
             var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: !nullable ).SyntaxGenerator;
 
-            var typeOf = syntaxGenerator.Type( fieldType ).ToString();
+            var typeSyntax = syntaxGenerator.Type( fieldType ).ToString();
 
-            this._logger.WriteLine( "Actual: " + typeOf );
+            this._logger.WriteLine( $"Actual using symbols: {typeSyntax}" );
 
-            Assert.Equal( expectedTypeOf, typeOf );
+            Assert.Equal( expectedTypeOf, typeSyntax );
+
+            var typeSyntax2 = syntaxGenerator.Type( fieldType, bypassSymbols: true ).ToString();
+
+            this._logger.WriteLine( $"Actual using IType: {typeSyntax2}" );
+
+            Assert.Equal( expectedTypeOf, typeSyntax2 );
+        }
+
+        [Fact]
+        public void UnboundGenericType()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( "" );
+
+            var type = compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<,>) );
+
+            var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted ).SyntaxGenerator;
+
+            var typeSyntax = syntaxGenerator.Type( type ).ToString();
+
+            this._logger.WriteLine( $"Actual using symbols: {typeSyntax}" );
+
+            const string expected = "global::System.Collections.Generic.Dictionary<TKey,TValue>";
+            Assert.Equal( expected, typeSyntax );
+
+            var typeSyntax2 = syntaxGenerator.Type( type, bypassSymbols: true ).ToString();
+
+            this._logger.WriteLine( $"Actual using IType: {typeSyntax2}" );
+
+            Assert.Equal( expected, typeSyntax2 );
         }
 
         [Theory]

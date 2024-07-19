@@ -1,5 +1,5 @@
-
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33273;
@@ -9,7 +9,7 @@ public sealed class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        _ = meta.Cast(meta.Target.Method.ReturnType, StaticClass.StaticMethod());
+        _ = meta.Cast( meta.Target.Method.ReturnType, StaticClass.StaticMethod() );
 
         return meta.Proceed();
     }
@@ -29,4 +29,3 @@ public class StaticClass
 {
     public static double StaticMethod() => Math.PI;
 }
-

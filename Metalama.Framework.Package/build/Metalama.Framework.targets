@@ -5,7 +5,7 @@
         <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>
 
         <!-- Auxiliary files used at design time. -->
-        <MetalamaAdditionalCompilationOutputDirectory Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
+        <MetalamaAdditionalCompilationOutputDirectory Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MSBuildProjectDirectory)/$(IntermediateOutputPath)/metalama-aux/</MetalamaAdditionalCompilationOutputDirectory>
 
         <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
         <MetalamaDesignTimeFallbackTouchFile Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MetalamaAdditionalCompilationOutputDirectory)MetalamaDesignTimeTouch.touch</MetalamaDesignTimeFallbackTouchFile>

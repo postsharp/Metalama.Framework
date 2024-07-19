@@ -32,7 +32,7 @@ internal class TargetClass
   }
   public TargetClass(object value)
   {
-    this.Field = value;
-    this.Property = value;
+    Field = value;
+    Property = value;
   }
 }

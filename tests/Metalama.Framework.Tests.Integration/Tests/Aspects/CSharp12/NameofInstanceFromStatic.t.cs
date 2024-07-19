@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.NameofInstanceFromStatic;
@@ -6,17 +7,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.NameofInst
 public class TheAspect : MethodAspect
 {
   public override void BuildAspect(IAspectBuilder<IMethod> builder) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-  string? p;
+  private string? p;
   [Template]
   [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility = global::Metalama.Framework.Code.Accessibility.Private, IsAsync = false, IsIteratorMethod = false)]
-  static string M() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+  private static string M() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 }
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
 public class C
 {
-  string? p;
+  private string? p;
   [TheAspect]
-  static string M()
+  private static string M()
   {
     return (global::System.String)(global::Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.NameofInstanceFromStatic.C.M_Source() + "Length");
   }

@@ -57,14 +57,14 @@ namespace Metalama.Framework.Engine.Linking
                 input.LateTransformationRegistry,
                 input.AnalysisRegistry );
 
-            ConcurrentBag<SyntaxTreeTransformation> transformations = new();
+            ConcurrentQueue<SyntaxTreeTransformation> transformations = new();
 
             async Task ProcessTransformationAsync( SyntaxTreeTransformation modifiedSyntaxTree )
             {
-                if ( modifiedSyntaxTree.Kind == SyntaxTreeTransformationKind.Add )
+                if ( modifiedSyntaxTree is { Kind: SyntaxTreeTransformationKind.Add, FilePath: LinkerInjectionHelperProvider.SyntaxTreeName } )
                 {
                     // This is an intermediate tree we added and we don't need it in the final compilation.
-                    transformations.Add( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.NewTree.AssertNotNull() ) );
+                    transformations.Enqueue( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.NewTree.AssertNotNull() ) );
                 }
                 else
                 {
@@ -75,10 +75,23 @@ namespace Metalama.Framework.Engine.Linking
                         new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )
                             .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
-                    var syntaxGenerationContext = input.SourceCompilationModel.CompilationContext.GetSyntaxGenerationContext(
-                        this._syntaxGenerationOptions,
-                        modifiedSyntaxTree.OldTree!,
-                        0 );
+                    SyntaxGenerationContext syntaxGenerationContext;
+
+                    if ( modifiedSyntaxTree.OldTree == null )
+                    {
+                        syntaxGenerationContext = input.SourceCompilationModel.CompilationContext.GetSyntaxGenerationContext(
+                            this._syntaxGenerationOptions,
+                            false,
+                            false,
+                            "\n" );
+                    }
+                    else
+                    {
+                        syntaxGenerationContext = input.SourceCompilationModel.CompilationContext.GetSyntaxGenerationContext(
+                            this._syntaxGenerationOptions,
+                            modifiedSyntaxTree.OldTree!,
+                            0 );
+                    }
 
                     var cleanRoot =
                         new CleanupRewriter(
@@ -90,11 +103,11 @@ namespace Metalama.Framework.Engine.Linking
 
                     var newSyntaxTree = syntaxTree.WithRootAndOptions( fixedRoot, syntaxTree.Options );
 
-                    transformations.Add( SyntaxTreeTransformation.ReplaceTree( syntaxTree, newSyntaxTree ) );
+                    transformations.Enqueue( SyntaxTreeTransformation.ReplaceTree( syntaxTree, newSyntaxTree ) );
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync(
+            await this._concurrentTaskRunner.RunConcurrentlyAsync(
                 input.IntermediateCompilation.ModifiedSyntaxTrees.Values,
                 ProcessTransformationAsync,
                 cancellationToken );

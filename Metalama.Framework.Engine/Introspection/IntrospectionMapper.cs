@@ -17,7 +17,7 @@ public static class IntrospectionMapper
     public static ImmutableArray<IIntrospectionDiagnostic> ToIntrospectionDiagnostics(
         this ImmutableArray<Diagnostic> diagnostics,
         ICompilation compilation,
-        DiagnosticSource source )
+        IntrospectionDiagnosticSource source )
         => diagnostics.Select( x => new IntrospectionDiagnostic( x, compilation, source ) )
             .ToImmutableArray<IIntrospectionDiagnostic>();
 

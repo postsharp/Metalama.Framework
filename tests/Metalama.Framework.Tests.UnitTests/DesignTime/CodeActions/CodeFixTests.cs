@@ -33,7 +33,8 @@ public sealed class CodeFixTests : UnitTestClass
 
         const string code =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using Metalama.Framework.CodeFixes;
             using Metalama.Framework.Diagnostics;
@@ -86,7 +87,7 @@ public sealed class CodeFixTests : UnitTestClass
         var pipeline = factory.GetOrCreatePipeline( project )!;
         var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
         Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" ).Diagnostics;
+        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
         Assert.Equal( 3, diagnostics.Length );
         Assert.Single( diagnostics, d => d.Id == "MY001" );
         Assert.Single( diagnostics, d => d.Id == "MY002" );
@@ -123,7 +124,8 @@ public sealed class CodeFixTests : UnitTestClass
 
         const string libraryCode =
             """
-            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects; 
             using Metalama.Framework.Code;
             using Metalama.Framework.CodeFixes;
             using Metalama.Framework.Diagnostics;
@@ -200,7 +202,7 @@ public sealed class CodeFixTests : UnitTestClass
         var pipeline = factory.GetOrCreatePipeline( project )!;
         var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
         Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" ).Diagnostics;
+        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
         Assert.Equal( 2, diagnostics.Length );
         Assert.Single( diagnostics, d => d.Id == "RA01" );
         Assert.Single( diagnostics, d => d.Id == "LAMA0043" );
@@ -225,6 +227,6 @@ public sealed class CodeFixTests : UnitTestClass
 
         var modifiedText = await workspace.GetProject( "app" ).Documents.Single().GetTextAsync();
 
-        Assert.Equal( modifiedAppCode, modifiedText.ToString() );
+        AssertEx.EolInvariantEqual( modifiedAppCode, modifiedText.ToString() );
     }
 }

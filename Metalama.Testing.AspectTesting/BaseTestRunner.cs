@@ -1,7 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using DiffEngine;
 using JetBrains.Annotations;
+using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Infrastructure;
+using Metalama.Backstage.Licensing.Consumption.Sources;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
@@ -45,18 +48,26 @@ internal abstract partial class BaseTestRunner
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 
     private readonly TestProjectReferences _references;
+
+    protected ILicenseKeyProvider LicenseKeyProvider { get; }
+
     private readonly IFileSystem _fileSystem;
+    private readonly TestRunnerOptions _testRunnerOptions;
 
     private protected BaseTestRunner(
         GlobalServiceProvider serviceProvider,
         string? projectDirectory,
         TestProjectReferences references,
-        ITestOutputHelper? logger )
+        ITestOutputHelper? logger,
+        ILicenseKeyProvider? licenseKeyProvider )
     {
         this._references = references;
+        this.LicenseKeyProvider = licenseKeyProvider ?? new NullLicenseKeyProvider();
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
         this._fileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
+        this._testRunnerOptions = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<TestRunnerOptions>();
+        DiffRunner.MaxInstancesToLaunch( this._testRunnerOptions.MaxDiffToolInstances );
     }
 
     /// <summary>
@@ -84,41 +95,22 @@ internal abstract partial class BaseTestRunner
 
         try
         {
-            try
-            {
-                await this.RunAndAssertCoreAsync( testInput, testContextOptions );
-            }
-            finally
-            {
-                // This is a trick to make the current task, on the heap, stop having a reference to the previous
-                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
-                // have references to the objects that are in the scope of the test.
-                await Task.Yield();
-            }
-        }
-        catch ( Exception ex1 )
-        {
-            // If the test throws an exception due to a bug, it may also prevent unloading.
-            // In that case, throw both the exception from the test and the unloading exception, wrapped in AggregateException.
-            try
-            {
-                collectibleExecutionContext?.Dispose();
-                collectibleExecutionContext = null;
-            }
-            catch ( Exception ex2 )
-            {
-                collectibleExecutionContext = null;
-
-                throw new AggregateException( ex1, ex2 );
-            }
-
-            throw;
+            await this.RunAndAssertCoreAsync( testInput, testContextOptions );
         }
         finally
         {
-            collectibleExecutionContext?.Dispose();
+            // This is a trick to make the current task, on the heap, stop having a reference to the previous
+            // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+            // have references to the objects that are in the scope of the test.
+            await Task.Yield();
         }
+
+        // We intentionally do not check memory leaks (which is done by the following line) when we have an unhandled
+        // exception here because the exception may hold a reference to the domain context we want to unload.
+        collectibleExecutionContext?.Dispose();
     }
+
+    protected virtual TestResult CreateTestResult() => new();
 
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
@@ -142,11 +134,10 @@ internal abstract partial class BaseTestRunner
 
                 using var testContext = new TestContext( transformedOptions );
 
-                Dictionary<string, object?> state = new( StringComparer.Ordinal );
-                using var testResult = new TestResult();
-                await this.RunAsync( testInput, testResult, testContext, state );
-                this.SaveResults( testInput, testResult, state );
-                this.ExecuteAssertions( testInput, testResult, state );
+                using var testResult = this.CreateTestResult();
+                await this.RunAsync( testInput, testResult, testContext );
+                this.SaveResults( testInput, testResult );
+                this.ExecuteAssertions( testInput, testResult );
             }
             catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException
                                          || (e.InnerException?.GetType().FullName is { } innerException
@@ -167,15 +158,25 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    [PublicAPI]
-    public Task RunAsync( TestInput testInput, TestResult testResult, TestContext testContext )
-        => this.RunAsync(
-            testInput,
-            testResult,
-            testContext,
-            new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
-
     protected virtual TestContextOptions GetContextOptions( TestContextOptions options ) => options;
+
+    public async Task<TestResult> RunAsync(
+        TestInput testInput,
+        TestContext testContext )
+    {
+        var testResult = this.CreateTestResult();
+
+        try
+        {
+            await this.RunAsync( testInput, testResult, testContext );
+        }
+        catch ( Exception e )
+        {
+            testResult.SetFailed( "Exception during test execution.", e );
+        }
+
+        return testResult;
+    }
 
     /// <summary>
     /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
@@ -185,12 +186,10 @@ internal abstract partial class BaseTestRunner
     /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
     ///     a partial object in case of exception.</param>
     /// <param name="testContext"></param>
-    /// <param name="state"></param>
     protected virtual async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        TestContext testContext,
-        Dictionary<string, object?> state )
+        TestContext testContext )
     {
         if ( testInput.Options.InvalidSourceOptions.Count > 0 )
         {
@@ -219,15 +218,13 @@ internal abstract partial class BaseTestRunner
         // ReSharper disable once RedundantAssignment
         string? dependencyLicenseKey = null;
 
-        if ( testInput.Options.DependencyLicenseFile != null )
+        if ( testInput.Options.DependencyLicenseKey != null )
         {
             // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.SourceDirectory, testInput.Options.DependencyLicenseFile ) );
-        }
-        else if ( testInput.Options.DependencyLicenseExpression != null )
-        {
-            // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = TestOptions.ReadLicenseExpression( testInput.Options.DependencyLicenseExpression );
+            if ( !this.LicenseKeyProvider.TryGetLicenseKey( testInput.Options.DependencyLicenseKey, out dependencyLicenseKey ) )
+            {
+                throw new InvalidOperationException( $"Unknown dependency license key name '{testInput.Options.DependencyLicenseKey}'." );
+            }
         }
 
         try
@@ -262,6 +259,12 @@ internal abstract partial class BaseTestRunner
                 string sourceCode,
                 bool acceptFileWithoutMember = false )
             {
+                if ( fileName.EndsWith( FileExtensions.TransformedCode, StringComparison.OrdinalIgnoreCase ) ||
+                     fileName.EndsWith( FileExtensions.IntroducedCode, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    throw new AssertionFailedException();
+                }
+
                 // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                 // which is more difficult to test.
                 var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
@@ -277,7 +280,7 @@ internal abstract partial class BaseTestRunner
                     return (project, null);
                 }
 
-                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, state );
+                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, testResult );
                 var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
 
                 return (document.Project, document);
@@ -304,7 +307,9 @@ internal abstract partial class BaseTestRunner
 
             foreach ( var includedFile in testInput.Options.IncludedFiles.Where( f => !f.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
-                var includedFullPath = Path.GetFullPath( Path.Combine( testDirectory, includedFile ) );
+                var includedFullPath = Path.GetFullPath(
+                    Path.Combine( testDirectory, includedFile.Replace( '\\', Path.DirectorySeparatorChar ).Replace( '/', Path.DirectorySeparatorChar ) ) );
+
                 var includedText = this._fileSystem.ReadAllText( includedFullPath );
 
                 var includedFileName = Path.GetFileName( includedFullPath );
@@ -429,7 +434,8 @@ internal abstract partial class BaseTestRunner
                         dependencyProject,
                         testResult,
                         testContext,
-                        dependencyLicenseKey );
+                        dependencyLicenseKey,
+                        testInput.Options.IgnoreUserProfileLicenses.GetValueOrDefault() );
 
                 if ( dependencyReference == null )
                 {
@@ -455,7 +461,8 @@ internal abstract partial class BaseTestRunner
         Project emptyProject,
         TestResult testResult,
         TestContext testContext,
-        string? licenseKey = null )
+        string? licenseKey,
+        bool ignoreUserProfileLicense )
     {
         // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
         var name = "dependency_" + RandomIdGenerator.GenerateId();
@@ -469,7 +476,10 @@ internal abstract partial class BaseTestRunner
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            serviceProvider = serviceProvider.Underlying.AddProjectLicenseConsumptionManager( licenseKey! );
+            serviceProvider = serviceProvider.Underlying.AddProjectLicenseConsumptionManager(
+                licenseKey!,
+                ignoreUserProfileLicense ? LicenseSourceKind.All : LicenseSourceKind.None,
+                _ => { } );
         }
 
         // Transform with Metalama.
@@ -513,9 +523,9 @@ internal abstract partial class BaseTestRunner
     /// Processes syntax root of the test file before it is added to the test project.
     /// </summary>
     /// <param name="syntaxRoot"></param>
-    /// <param name="state"></param>
+    /// <param name="testResult"></param>
     /// <returns></returns>
-    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, Dictionary<string, object?> state ) => syntaxRoot;
+    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestResult testResult ) => syntaxRoot;
 
     private static void ValidateCustomAttributes( Compilation compilation )
     {
@@ -531,7 +541,7 @@ internal abstract partial class BaseTestRunner
 
     protected virtual bool CompareTransformedCode => true;
 
-    private protected virtual void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    private protected virtual void SaveResults( TestInput testInput, TestResult testResult )
     {
         if ( this.ProjectDirectory == null )
         {
@@ -545,127 +555,187 @@ internal abstract partial class BaseTestRunner
 
         var compareWhitespace = testInput.Options.CompareWhitespace ?? false;
 
-        // Compare the "Target" region of the transformed code to the expected output.
-        // If the region is not found then compare the complete transformed code.
-        var sourceAbsolutePath = testInput.FullPath;
+        var sourceDirectory = Path.GetDirectoryName( testInput.FullPath );
 
-        var expectedTransformedPath = Path.Combine(
-            Path.GetDirectoryName( sourceAbsolutePath )!,
-            Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
+        testResult.BuildSyntaxTreesForComparison();
 
-        var testOutputs = testResult.GetTestOutputsWithDiagnostics();
-        var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-        var actualTransformedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, true );
-        var actualTransformedSourceTextForStorage = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, false );
-
-        // If the expectation file does not exist, create it with some placeholder content.
-        if ( !this._fileSystem.FileExists( expectedTransformedPath ) )
+        foreach ( var testSyntaxTree in testResult.SyntaxTrees.Where( t => t.OutputRunTimeSyntaxTreeForComparison != null ) )
         {
-            // Coverage: ignore
+            var syntaxTreeForComparison = testSyntaxTree.OutputRunTimeSyntaxTreeForComparison!;
+            var isIntroduced = testSyntaxTree.InputPath == null;
+            var expectedTransformedExtension = isIntroduced ? FileExtensions.IntroducedCode : FileExtensions.TransformedCode;
 
-            this._fileSystem.WriteAllText(
-                expectedTransformedPath,
-                "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
-        }
+            var testFileName = testSyntaxTree.ShortName + expectedTransformedExtension;
 
-        // Read expectations from the file.
-        var expectedSourceText = this._fileSystem.ReadAllText( expectedTransformedPath );
-        var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, compareWhitespace, true );
+            var expectedTransformedPath = Path.Combine(
+                sourceDirectory!,
+                testFileName );
 
-        // Update the file in obj/transformed if it is different.
-        var actualTransformedPath = Path.Combine(
-            this.ProjectDirectory,
-            "obj",
-            "transformed",
-            testInput.ProjectProperties.TargetFramework,
-            Path.GetDirectoryName( testInput.RelativePath ) ?? "",
-            Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
+            var actualTransformedNonNormalizedText = syntaxTreeForComparison.GetRoot().ToFullString();
 
-        this._fileSystem.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
+            var actualTransformedSourceTextForComparison =
+                TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, true );
 
-        var storedTransformedSourceText =
-            this._fileSystem.FileExists( actualTransformedPath ) ? this._fileSystem.ReadAllText( actualTransformedPath ) : null;
+            var actualTransformedSourceTextForStorage =
+                TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, false );
 
-        // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
-        // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
-        // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.       
-        if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
-        {
-            if ( TestOutputNormalizer.NormalizeEndOfLines( expectedSourceText )
-                 != TestOutputNormalizer.NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
+            // If the expectation file does not exist, create it with some placeholder content.
+            if ( !this._fileSystem.FileExists( expectedTransformedPath ) )
             {
-                // The test output is correct but it must be formatted.
+                // Coverage: ignore
+
+                this._fileSystem.WriteAllText(
+                    expectedTransformedPath,
+                    "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
+            }
+
+            // Read expectations from the file.
+            var expectedSourceText = this._fileSystem.ReadAllText( expectedTransformedPath );
+            var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, compareWhitespace, true );
+
+            // Update the file in obj/transformed if it is different.
+            var actualTransformedPath = Path.Combine(
+                this.ProjectDirectory,
+                "obj",
+                "transformed",
+                testInput.ProjectProperties.TargetFramework,
+                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+                testFileName );
+
+            this._fileSystem.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
+
+            var storedTransformedSourceText =
+                this._fileSystem.FileExists( actualTransformedPath ) ? this._fileSystem.ReadAllText( actualTransformedPath ) : null;
+
+            // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
+            // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
+            // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.       
+            if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
+            {
+                if ( TestOutputNormalizer.NormalizeEndOfLines( expectedSourceText )
+                     != TestOutputNormalizer.NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
+                {
+                    // The test output is correct but it must be formatted.
+                    this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
+                }
+                else if ( expectedSourceText != storedTransformedSourceText )
+                {
+                    // Write the exact expected file to the actual file because the only differences are in EOL.
+                    this._fileSystem.WriteAllText( actualTransformedPath, expectedSourceText );
+                }
+            }
+            else
+            {
                 this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
             }
-            else if ( expectedSourceText != storedTransformedSourceText )
+
+            if ( this.Logger != null )
             {
-                // Write the exact expected file to the actual file because the only differences are in EOL.
-                this._fileSystem.WriteAllText( actualTransformedPath, expectedSourceText );
+                var logger = this.Logger!;
+                logger.WriteLine( "Test principal file: " + testInput.FullPath );
+                logger.WriteLine( "Expected transformed file: " + expectedTransformedPath );
+                logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
+                logger.WriteLine( "" );
+                logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
+                logger.WriteLine( actualTransformedSourceTextForStorage );
+                logger.WriteLine( "=====================" );
+
+                // Write all diagnostics to the logger.
+                foreach ( var diagnostic in testResult.Diagnostics )
+                {
+                    logger.WriteLine( diagnostic.ToString() );
+                }
             }
-        }
-        else
-        {
-            this._fileSystem.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage ?? "" );
-        }
 
-        if ( this.Logger != null )
-        {
-            var logger = this.Logger!;
-            logger.WriteLine( "Expected transformed file: " + expectedTransformedPath );
-            logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
-            logger.WriteLine( "" );
-            logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
-            logger.WriteLine( actualTransformedSourceTextForStorage );
-            logger.WriteLine( "=====================" );
-
-            // Write all diagnostics to the logger.
-            foreach ( var diagnostic in testResult.Diagnostics )
-            {
-                logger.WriteLine( diagnostic.ToString() );
-            }
-        }
-
-        state["expectedTransformedSourceText"] = expectedSourceTextForComparison;
-        state["actualTransformedNormalizedSourceText"] = actualTransformedSourceTextForComparison;
-        state["actualTransformedSourceTextForStorage"] = actualTransformedSourceTextForStorage;
-
-        static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
-        {
-            switch ( compilationUnits.Count )
-            {
-                case 0:
-                    return "// --- No output compilation units ---";
-
-                case 1:
-                    return compilationUnits[0].GetRoot().ToFullString();
-
-                default:
-                    var sb = new StringBuilder();
-
-                    foreach ( var syntaxTree in compilationUnits )
-                    {
-                        sb.AppendLine();
-                        sb.AppendLineInvariant( $"// --- {syntaxTree.FilePath} ---" );
-                        sb.AppendLine();
-                        sb.AppendLine( syntaxTree.GetRoot().ToFullString() );
-                    }
-
-                    return sb.ToString();
-            }
+            testSyntaxTree.SetTransformedSource(
+                expectedSourceTextForComparison,
+                expectedTransformedPath,
+                actualTransformedSourceTextForComparison,
+                actualTransformedSourceTextForStorage,
+                actualTransformedPath );
         }
     }
 
-    protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
     {
         if ( !this.CompareTransformedCode )
         {
             return;
         }
 
-        var expectedTransformedSourceText = (string) state["expectedTransformedSourceText"]!;
-        var actualTransformedNormalizedSourceText = (string) state["actualTransformedNormalizedSourceText"]!;
+        var actuallyWrittenFiles = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
 
-        Assert.Equal( expectedTransformedSourceText, actualTransformedNormalizedSourceText );
+        // First run the diff tool on all files so we popupate DiffEngineTray for all files before failing.
+        var hasDifference = false;
+
+        foreach ( var syntaxTree in testResult.SyntaxTrees )
+        {
+            if ( syntaxTree.ExpectedTransformedCodeText == null )
+            {
+                continue;
+            }
+
+            hasDifference |= this.RunDiffToolIfDifferent(
+                syntaxTree.ExpectedTransformedCodeText!,
+                syntaxTree.ExpectedTransformedCodePath!,
+                syntaxTree.ActualTransformedNormalizedCodeText!,
+                syntaxTree.ActualTransformedCodePath! );
+
+            actuallyWrittenFiles.Add( syntaxTree.ExpectedTransformedCodePath! );
+        }
+
+        // Throw exceptions.
+        if ( hasDifference )
+        {
+            foreach ( var syntaxTree in testResult.SyntaxTrees )
+            {
+                Assert.Equal( syntaxTree.ExpectedTransformedCodeText, syntaxTree.ActualTransformedNormalizedCodeText );
+            }
+        }
+
+        // Verify that all expected files have been written.
+        var directory = Path.GetDirectoryName( testInput.FullPath )!;
+
+        if ( Directory.Exists( directory ) )
+        {
+            foreach ( var file in Directory.EnumerateFiles( directory, testInput.TestName + ".*.cs" ) )
+            {
+                if ( !(file.EndsWith( ".t.cs", StringComparison.Ordinal ) || file.EndsWith( ".i.cs", StringComparison.Ordinal )) )
+                {
+                    continue;
+                }
+
+                Assert.True( actuallyWrittenFiles.Contains( file ), $"The file '{file}' is expected but was not written." );
+            }
+        }
+        else
+        {
+            // The directory does not exist in some self-tests of the aspect framework.
+        }
+    }
+
+    protected bool RunDiffToolIfDifferent( string expectedText, string expectedPath, string actualText, string actualPath )
+    {
+        var useDiff = this._testRunnerOptions.LaunchDiffTool && !DiffRunner.Disabled;
+
+        if ( expectedText != actualText )
+        {
+            if ( useDiff )
+            {
+                DiffRunner.Launch( actualPath, expectedPath );
+            }
+
+            return true;
+        }
+        else
+        {
+            if ( useDiff )
+            {
+                DiffRunner.Kill( actualPath, expectedPath );
+            }
+
+            return false;
+        }
     }
 
     private protected virtual bool ShouldStopOnInvalidInput( TestOptions testOptions ) => !testOptions.AcceptInvalidInput.GetValueOrDefault( true );
@@ -731,7 +801,7 @@ internal abstract partial class BaseTestRunner
 
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
-                var isTargetCode = Path.GetFileName( syntaxTree.InputPath )!.Count( c => c == '.' ) == 1;
+                var writeDiff = Path.GetFileName( syntaxTree.FilePath ).Count( c => c == '.' ) == 1;
 
                 await this.WriteHtmlAsync(
                     compilationWithDesignTimeTrees,
@@ -739,7 +809,7 @@ internal abstract partial class BaseTestRunner
                     syntaxTree,
                     htmlDirectory,
                     htmlCodeWriter,
-                    isTargetCode,
+                    writeDiff,
                     designTimePipelineResult.Suppressions );
             }
         }
@@ -763,7 +833,7 @@ internal abstract partial class BaseTestRunner
         StreamWriter? outputTextWriter = null;
         List<Diagnostic>? inputDiagnostics = null;
 
-        if ( testResult.TestInput!.Options.WriteInputHtml == true )
+        if ( testResult.TestInput!.Options.WriteInputHtml == true && testSyntaxTree.InputDocument != null )
         {
             testSyntaxTree.HtmlInputPath = Path.Combine(
                 htmlDirectory,
@@ -775,14 +845,17 @@ internal abstract partial class BaseTestRunner
 
             // Add diagnostics to the input tree.
             inputDiagnostics = new List<Diagnostic>();
-            inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
-            var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
+
+            inputDiagnostics.AddRange(
+                testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.AssertNotNull().FilePath ) );
+
+            var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree.AssertNotNull() );
 
             foreach ( var diagnostic in semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) )
             {
                 // Check if any suppression applies to this diagnostic.
                 if ( suppressions.Any(
-                        s => s.Definition.SuppressedDiagnosticId == diagnostic.Id
+                        s => s.Suppression.Definition.SuppressedDiagnosticId == diagnostic.Id
                              && s.GetScopeSymbolOrNull( compilationWithDesignTimeTrees )
                                  ?.DeclaringSyntaxReferences.Any(
                                      r =>
@@ -799,16 +872,23 @@ internal abstract partial class BaseTestRunner
 
         if ( testResult.TestInput.Options.WriteOutputHtml == true && testResult.OutputProject != null )
         {
+            var fileName = Path.GetFileNameWithoutExtension( testSyntaxTree.FilePath );
+
+            if ( !fileName.StartsWith( testResult.TestInput.TestName, StringComparison.Ordinal ) )
+            {
+                fileName = testResult.TestInput.TestName + "." + fileName;
+            }
+
             testSyntaxTree.HtmlOutputPath = Path.Combine(
                 htmlDirectory,
-                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.TransformedHtml );
+                fileName + FileExtensions.TransformedHtml );
 
             this.Logger?.WriteLine( "HTML of output: " + testSyntaxTree.HtmlOutputPath );
 
             outputTextWriter = new StreamWriter( this._fileSystem.Open( testSyntaxTree.HtmlOutputPath, FileMode.Create ) );
         }
 
-        if ( writeDiff && inputTextWriter != null && outputTextWriter != null )
+        if ( writeDiff && inputTextWriter != null && outputTextWriter != null && testSyntaxTree.InputDocument != null )
         {
             using ( inputTextWriter.IgnoreAsyncDisposable() )
             using ( outputTextWriter.IgnoreAsyncDisposable() )
@@ -823,7 +903,7 @@ internal abstract partial class BaseTestRunner
         }
         else
         {
-            if ( inputTextWriter != null )
+            if ( inputTextWriter != null && testSyntaxTree.InputDocument != null )
             {
                 using ( inputTextWriter.IgnoreAsyncDisposable() )
                 {

@@ -55,5 +55,9 @@ public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     private sealed class DependencyCollector : IDependencyCollector
     {
         public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol ) { }
+
+        public void AddDependency( INamedTypeSymbol masterSymbol, SyntaxTree dependentTree ) { }
+
+        public void AddDependency( SyntaxTree masterTree, SyntaxTree dependentTree ) { }
     }
 }

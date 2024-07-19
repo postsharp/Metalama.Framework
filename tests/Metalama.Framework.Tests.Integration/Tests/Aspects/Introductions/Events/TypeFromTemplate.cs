@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,20 +7,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.TypeF
 {
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceEvent(
-                builder.Target, 
-                "IntroducedEvent", 
-                nameof(Template), 
+            builder.IntroduceEvent(
+                "IntroducedEvent",
                 nameof(Template),
-                args: new { x = "42" });
+                nameof(Template),
+                args: new { x = "42" } );
         }
 
         [Template]
-        public void Template([CompileTime] string x, EventHandler y)
+        public void Template( [CompileTime] string x, EventHandler y )
         {
-            y.Invoke(null, new EventArgs());
+            y.Invoke( null, new EventArgs() );
         }
     }
 

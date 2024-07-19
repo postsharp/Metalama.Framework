@@ -38,7 +38,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
-    internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
+    private static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
            _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
 
@@ -52,7 +52,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();
 
-    internal static SyntaxSerializationContext? CurrentSyntaxSerializationContextOrNull
+    private static SyntaxSerializationContext? CurrentSyntaxSerializationContextOrNull
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
            ?? _currentSyntaxSerializationContext.Value;
 
@@ -148,7 +148,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
-        UserCodeDescription.Create( "executing the template method {0}", template?.TemplateMember.Declaration.GetSymbol() ),
+        UserCodeDescription.Create(
+            "executing the template method '{0}' in the context of the aspect '{1}' applied to '{2}'",
+            template?.TemplateMember.Declaration.GetSymbol(),
+            metaApi.AspectInstance?.AspectClass.FullName,
+            metaApi.AspectInstance?.TargetDeclaration ),
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,
@@ -157,7 +161,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._template = template?.TemplateMember;
         this.TemplateProvider = templateProvider;
         this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
-        this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
+        this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext, metaApi.Type );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpressionProvider = proceedExpressionProvider;
@@ -348,34 +352,27 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             var compilation = returnType.GetCompilationModel();
 
-            if ( SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+            var expression = awaitResult
+                ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
+                : returnExpression;
+
+            if ( TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                      returnExpression,
-                     returnType.GetCompilationModel().CompilationContext,
+                     compilation,
                      out var expressionType ) &&
-                 compilation.RoslynCompilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
+                 compilation.Comparers.Default.Is( expressionType, returnType, ConversionKind.Implicit ) )
             {
                 // No need to emit a cast.
-                return
-                    ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                        awaitResult
-                            ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
-                            : returnExpression,
-                        Token( SyntaxKind.SemicolonToken ) );
             }
             else
             {
-                return
-                    ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                        this.SyntaxGenerator.CastExpression(
-                                returnType.GetSymbol(),
-                                awaitResult
-                                    ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
-                                    : returnExpression )
-                            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ),
-                        Token( SyntaxKind.SemicolonToken ) );
+                expression = this.SyntaxGenerator.CastExpression( returnType, expression );
             }
+
+            return ReturnStatement(
+                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                expression,
+                Token( SyntaxKind.SemicolonToken ) );
         }
     }
 

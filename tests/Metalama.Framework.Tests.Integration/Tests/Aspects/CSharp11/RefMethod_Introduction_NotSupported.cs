@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_4_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp11.RefMethod_Introduction_NotSupported;
@@ -18,9 +19,6 @@ public class TheAspect : TypeAspect
 }
 
 [TheAspect]
-internal class C
-{
-    
-}
+internal class C { }
 
 #endif

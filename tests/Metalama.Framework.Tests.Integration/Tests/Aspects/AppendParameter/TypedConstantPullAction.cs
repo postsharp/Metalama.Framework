@@ -6,12 +6,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.Typ
 
 public class AddParameter : ConstructorAspect
 {
-    public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+    public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.IntroduceParameter(
-            builder.Target, "arg", typeof(int), TypedConstant.Default(typeof(int)), (param, ctor) => PullAction.UseExpression(TypedConstant.Create(42)));
+        builder.IntroduceParameter(
+            "arg",
+            typeof(int),
+            TypedConstant.Default( typeof(int) ),
+            ( param, ctor ) => PullAction.UseExpression( TypedConstant.Create( 42 ) ) );
     }
 }
 
@@ -19,6 +22,7 @@ public class AddParameter : ConstructorAspect
 internal class TargetCode
 {
     [AddParameter]
-    TargetCode(string s) { }
-    TargetCode(int i) : this(i.ToString()) { }
+    private TargetCode( string s ) { }
+
+    private TargetCode( int i ) : this( i.ToString() ) { }
 }

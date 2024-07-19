@@ -175,17 +175,17 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     var newMembers = this.ProcessPseudoAttributeNode( node );
                     var newMemberList = new List<MemberDeclarationSyntax>();
 
-                    foreach ( var newMember in newMembers )
+                    foreach ( var (newNode, isPseudoMember) in newMembers )
                     {
-                        if ( !newMember.IsPseudoMember )
+                        if ( !isPseudoMember )
                         {
-                            var nodeWithId = AssignNodeId( newMember.Node.AssertNotNull() );
+                            var nodeWithId = AssignNodeId( newNode.AssertNotNull() );
                             newMemberList.Add( nodeWithId );
                             this._currentInsertPosition = new InsertPosition( InsertPositionRelation.After, nodeWithId );
                         }
                         else
                         {
-                            newMemberList.Add( newMember.Node );
+                            newMemberList.Add( newNode );
                         }
                     }
 
@@ -682,7 +682,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
                 A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( this._nextTransformationOrdinal++ );
 
-                A.CallTo( () => transformation.TargetDeclaration ).ReturnsLazily( () => (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
+                A.CallTo( () => transformation.TargetDeclaration )
+                    .ReturnsLazily( () => (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
@@ -865,11 +866,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     i => i.WithArgumentsForConstructor(
                         new object?[]
                         {
-                            fakeAspectInstance,
-                            fakeAspectInstance.TemplateInstances.Values.Single(),
-                            A.Fake<IDeclarationImpl>(),
-                            A.Fake<ICompilation>(),
-                            aspectLayer.LayerName
+                            new Advice.AdviceConstructorParameters(
+                                fakeAspectInstance,
+                                fakeAspectInstance.TemplateInstances.Values.Single(),
+                                A.Fake<IDeclarationImpl>(),
+                                A.Fake<ICompilation>(),
+                                aspectLayer.LayerName )
                         } ) );
             }
         }

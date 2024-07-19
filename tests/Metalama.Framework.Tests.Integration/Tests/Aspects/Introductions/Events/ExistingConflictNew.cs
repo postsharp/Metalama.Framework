@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNew
@@ -447,7 +448,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Exist
 
     // <target>
     [Introduction]
-    internal class TargetClass : DerivedClass
-    {
-    }
+    internal class TargetClass : DerivedClass { }
 }

@@ -1,25 +1,25 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
-
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicReceiverThisInStaticContext
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var x = meta.This;
-            
+
             return default;
         }
     }
 
     // <target>
-    static class TargetCode
+    internal static class TargetCode
     {
-        static int Method(int a)
+        private static int Method( int a )
         {
             return a;
         }

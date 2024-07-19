@@ -14,4 +14,14 @@ internal sealed class TestDependencyCollector : IDependencyCollector
     {
         this.Dependencies.Add( $"{dependentSymbol}->{masterSymbol}" );
     }
+
+    public void AddDependency( INamedTypeSymbol masterSymbol, SyntaxTree dependentTree )
+    {
+        this.Dependencies.Add( $"{dependentTree.FilePath}->{masterSymbol}" );        
+    }
+
+    public void AddDependency( SyntaxTree masterTree, SyntaxTree dependentTree )
+    {
+        this.Dependencies.Add( $"{dependentTree.FilePath}->{masterTree.FilePath}" );
+    }
 }

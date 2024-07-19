@@ -31,7 +31,8 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
         await testContext.WhenFullyInitialized;
 
         const string code = """
-                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
                             using Metalama.Framework.Advising;
                             using Metalama.Framework.Code;
                             using Metalama.Framework.CodeFixes;
@@ -61,7 +62,7 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
         var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( project )!;
         var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
         Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" ).Diagnostics;
+        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
         Assert.Single( diagnostics, d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id );
         Assert.Single( diagnostics, d => d.Id == GeneralDiagnosticDescriptors.SuggestedCodeFix.Id );
 

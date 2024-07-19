@@ -1,11 +1,13 @@
-int Method(int a)
+private int Method(int a)
 {
-  int i = 0;
+  var i = 0;
   do
   {
     i++;
     if (i >= 1)
+    {
       break;
+    }
   }
   while (true);
   global::System.Console.WriteLine("Test result = " + i);

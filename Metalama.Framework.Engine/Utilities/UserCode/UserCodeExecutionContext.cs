@@ -14,8 +14,11 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
+using Metalama.Framework.Validation;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 
 namespace Metalama.Framework.Engine.Utilities.UserCode;
@@ -31,6 +34,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     private readonly bool _throwOnUnsupportedDependencies;
     private readonly IDependencyCollector? _dependencyCollector;
     private readonly INamedType? _targetType;
+    private readonly ImmutableArray<SyntaxTree>? _sourceTrees;
     private readonly ISyntaxBuilderImpl? _syntaxBuilder;
     private readonly CompilationContext? _compilationServices;
     private bool _collectDependencyDisabled;
@@ -105,6 +109,9 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     internal static DisposeAction WithContext( in ProjectServiceProvider serviceProvider, CompilationModel compilation, UserCodeDescription description )
         => WithContext( new UserCodeExecutionContext( serviceProvider, description, compilationModel: compilation ) );
 
+    public UserCodeExecutionContext( ProjectServiceProvider serviceProvider, UserCodeDescription description )
+        : this( serviceProvider, description, null ) { }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
     /// to invoke user code using <see cref="UserCodeInvoker.Invoke"/> but not <see cref="UserCodeInvoker.TryInvoke{T}"/>.
@@ -126,7 +133,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this.TargetDeclaration = targetDeclaration;
         this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
         this._targetType = targetDeclaration?.GetTopmostNamedType();
-        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider );
+        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider, targetDeclaration );
         this.MetaApi = metaApi;
     }
 
@@ -141,6 +148,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         AspectLayerId? aspectAspectLayerId = null,
         CompilationModel? compilationModel = null,
         IDeclaration? targetDeclaration = null,
+        ImmutableArray<SyntaxTree>? sourceTrees = null,
         bool throwOnUnsupportedDependencies = false,
         ISyntaxBuilderImpl? syntaxBuilder = null,
         MetaApi? metaApi = null,
@@ -153,12 +161,14 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
         this.Description = description;
         this.TargetDeclaration = targetDeclaration;
+        this._sourceTrees = sourceTrees;
+
         this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
         this._targetType = targetDeclaration?.GetTopmostNamedType();
 
         this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
 
-        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider );
+        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider, targetDeclaration );
         this.MetaApi = metaApi;
     }
 
@@ -171,6 +181,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this._throwOnUnsupportedDependencies = prototype._throwOnUnsupportedDependencies;
         this.Description = prototype.Description;
         this.TargetDeclaration = prototype.TargetDeclaration;
+        this._sourceTrees = prototype._sourceTrees;
         this._dependencyCollector = prototype._dependencyCollector;
         this._targetType = prototype._targetType;
         this._compilationServices = prototype._compilationServices;
@@ -181,10 +192,14 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     private static ISyntaxBuilderImpl? GetSyntaxBuilder(
         CompilationModel? compilationModel,
         ISyntaxBuilderImpl? syntaxBuilderImpl,
-        ProjectServiceProvider serviceProvider )
+        ProjectServiceProvider serviceProvider,
+        IDeclaration? targetDeclaration )
         => syntaxBuilderImpl ?? (compilationModel == null
             ? null
-            : new SyntaxBuilderImpl( compilationModel, serviceProvider.GetRequiredService<SyntaxGenerationOptions>() ));
+            : new SyntaxBuilderImpl(
+                compilationModel,
+                serviceProvider.GetRequiredService<SyntaxGenerationOptions>(),
+                targetDeclaration?.GetClosestNamedType() ));
 
     internal IDiagnosticAdder Diagnostics
         => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
@@ -225,6 +240,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             this.AspectLayerId,
             this.Compilation,
             this.TargetDeclaration,
+            this._sourceTrees,
             this._throwOnUnsupportedDependencies,
             this._syntaxBuilder,
             this.MetaApi );
@@ -243,12 +259,13 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             this.AspectLayerId,
             compilation,
             this.TargetDeclaration,
+            this._sourceTrees,
             this._throwOnUnsupportedDependencies,
-            GetSyntaxBuilder( compilation, null, this.ServiceProvider ),
+            GetSyntaxBuilder( compilation, null, this.ServiceProvider, null ),
             this.MetaApi );
     }
 
-    internal void AddDependency( IDeclaration declaration )
+    internal void AddDependencyFrom( IDeclaration declaration )
     {
         // Prevent infinite recursion while getting the declaring type.
         // We assume that there is one instance of this class per execution context and that it is single-threaded.
@@ -268,7 +285,9 @@ public class UserCodeExecutionContext : IExecutionContextInternal
 
                 if ( declaringType != null && declaringType != this._targetType )
                 {
-                    this._dependencyCollector.AddDependency( declaringType.GetSymbol(), this._targetType.GetSymbol() );
+                    this._dependencyCollector.AddDependency(
+                        declaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
+                        this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ) );
                 }
             }
         }
@@ -278,13 +297,33 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         }
     }
 
+    internal void AddDependencyTo( SyntaxTree syntaxTree )
+    {
+        if ( this._dependencyCollector != null )
+        {
+            if ( this._targetType != null )
+            {
+                this._dependencyCollector.AddDependency(
+                    this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
+                    syntaxTree );
+            }
+            else if ( this._sourceTrees is { } sourceTrees )
+            {
+                foreach ( var sourceTree in sourceTrees )
+                {
+                    this._dependencyCollector.AddDependency( sourceTree, syntaxTree );
+                }
+            }
+        }
+    }
+
     internal void OnUnsupportedDependency( string api )
     {
         if ( this._throwOnUnsupportedDependencies && this._dependencyCollector != null && !this._collectDependencyDisabled )
         {
             throw new InvalidOperationException(
                 $"'The '{api}' API is not supported in the BuildAspect context at design time. " +
-                $"It is only supported in the context of a adding new aspects ({nameof(IAspectReceiverSelector<IDeclaration>)}.{nameof(IAspectReceiverSelector<IDeclaration>.With)})'."
+                $"It is only supported in the context of a adding new aspects ({nameof(IValidatorReceiver)}.{nameof(IValidatorReceiver<IDeclaration>.Select)})' and sibling methods."
                 +
                 $"You can use {nameof(MetalamaExecutionContext)}.{nameof(MetalamaExecutionContext.Current)}.{nameof(IExecutionContext.ExecutionScenario)}.{nameof(IExecutionScenario.IsDesignTime)} to run your code at design time only." );
         }

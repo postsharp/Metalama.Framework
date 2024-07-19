@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.NestedRunTimeOrCompileTimeInvocations;
@@ -7,9 +8,10 @@ public class AspectAttribute : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Expression.Property(Expression.Parameter(typeof(int), "p"), "propertyName");
-        var p = Expression.Property(Expression.Parameter(typeof(int), "p"), "propertyName");
-        return Expression.Property(Expression.Parameter(typeof(int), "p"), "propertyName");
+        Expression.Property( Expression.Parameter( typeof(int), "p" ), "propertyName" );
+        var p = Expression.Property( Expression.Parameter( typeof(int), "p" ), "propertyName" );
+
+        return Expression.Property( Expression.Parameter( typeof(int), "p" ), "propertyName" );
     }
 }
 

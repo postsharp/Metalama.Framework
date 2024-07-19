@@ -10,54 +10,53 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal sealed class ExternalAssembly : Declaration, IAssembly
 {
-    internal sealed class ExternalAssembly : Declaration, IAssembly
+    private readonly IAssemblySymbol _assemblySymbol;
+
+    public ExternalAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation )
     {
-        private readonly IAssemblySymbol _assemblySymbol;
-
-        public ExternalAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation )
-        {
-            this._assemblySymbol = assemblySymbol;
-        }
-
-        public override IDeclaration ContainingDeclaration => this.Compilation;
-
-        public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
-
-        public override ISymbol Symbol => this._assemblySymbol;
-
-        public override bool CanBeInherited => false;
-
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
-
-        public INamespace GlobalNamespace => this.Compilation.Factory.GetNamespace( this._assemblySymbol.GlobalNamespace );
-
-        bool IAssembly.IsExternal => true;
-
-        [Memo]
-        public IAssemblyIdentity Identity => new AssemblyIdentityModel( this._assemblySymbol.Identity );
-
-        [Memo]
-        public INamedTypeCollection Types => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, false );
-
-        [Memo]
-        public INamedTypeCollection AllTypes => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, true );
-
-        public bool AreInternalsVisibleFrom( IAssembly assembly )
-            => this._assemblySymbol.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
-
-        [Memo]
-        public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this.Compilation, this._assemblySymbol.Modules.First() );
-
-        public override SyntaxTree? PrimarySyntaxTree => null;
-
-        public override IDeclarationOrigin Origin => DeclarationOrigin.External;
-
-        public override IAssembly DeclaringAssembly => this;
-
-        public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
-
-        public override bool BelongsToCurrentProject => false;
+        this._assemblySymbol = assemblySymbol;
     }
+
+    public override IDeclaration ContainingDeclaration => this.Compilation;
+
+    public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
+
+    public override ISymbol Symbol => this._assemblySymbol;
+
+    public override bool CanBeInherited => false;
+
+    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
+
+    public INamespace GlobalNamespace => this.Compilation.Factory.GetNamespace( this._assemblySymbol.GlobalNamespace );
+
+    bool IAssembly.IsExternal => true;
+
+    [Memo]
+    public IAssemblyIdentity Identity => new AssemblyIdentityModel( this._assemblySymbol.Identity );
+
+    [Memo]
+    public INamedTypeCollection Types => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, false );
+
+    [Memo]
+    public INamedTypeCollection AllTypes => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, true );
+
+    public bool AreInternalsVisibleFrom( IAssembly assembly )
+        => this._assemblySymbol.AreInternalsVisibleToImpl( assembly.GetSymbol() );
+
+    [Memo]
+    public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this.Compilation, this._assemblySymbol.Modules.First() );
+
+    public override SyntaxTree? PrimarySyntaxTree => null;
+
+    public override IDeclarationOrigin Origin => DeclarationOrigin.External;
+
+    public override IAssembly DeclaringAssembly => this;
+
+    public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
+
+    public override bool BelongsToCurrentProject => false;
 }

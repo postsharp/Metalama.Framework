@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.AccessorVisibility_Declarative
 {
@@ -12,9 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
                 return 42;
             }
 
-            set
-            {
-            }
+            set { }
         }
 
         [Introduce]
@@ -28,14 +27,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
                 return 42;
             }
 
-            private set
-            {
-            }
+            private set { }
         }
 
         [Introduce]
         public int AutoPropertyWithRestrictedSet { get; private set; }
-
 
         [Introduce]
         public int PropertyWithRestrictedInit
@@ -45,9 +41,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
                 return 42;
             }
 
-            private init
-            {
-            }
+            private init { }
         }
 
         [Introduce]

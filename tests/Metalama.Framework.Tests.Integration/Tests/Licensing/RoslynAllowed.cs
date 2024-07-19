@@ -1,6 +1,7 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaProfessionalPersonal)
+﻿#if TEST_OPTIONS
+// @LicenseKey(MetalamaProfessionalPersonal)
 // @Include(_Roslyn.cs);
-// @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.RoslynAllowed;
 

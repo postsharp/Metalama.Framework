@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.Linking;
 // ReSharper disable MemberCanBeMadeStatic.Global
 internal sealed class LinkerInjectionHelperProvider
 {
+    public const string SyntaxTreeName = "__LinkerInjectionHelpers__.cs";
+
     public const string HelperTypeName = "__LinkerInjectionHelpers__";
     public const string ConstructorMemberName = "__Constructor";
     public const string FinalizeMemberName = "__Finalize";
@@ -35,7 +37,6 @@ internal sealed class LinkerInjectionHelperProvider
     private const string _auxiliaryTypeName = "__Auxiliary";
     private const string _ordinalTypeName = "__Ordinal";
     private const string _compositeOrdinalTypeName = "__CompositeOrdinal";
-    private const string _syntaxTreeName = "__LinkerInjectionHelpers__.cs";
 
     private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
@@ -99,8 +100,8 @@ internal sealed class LinkerInjectionHelperProvider
                 Identifier( operatorKind.ToOperatorMethodName() ),
                 TypeArgumentList(
                     SeparatedList(
-                        parameterTypes.Select( p => syntaxGenerator.Type( p.GetSymbol().AssertNotNull() ) )
-                            .Append( syntaxGenerator.Type( returnType.GetSymbol().AssertNotNull() ) ) ) ) ) );
+                        parameterTypes.Select( p => syntaxGenerator.Type( p ) )
+                            .Append( syntaxGenerator.Type( returnType ) ) ) ) ) );
 
     public TypeSyntax GetSourceType() => QualifiedName( IdentifierName( HelperTypeName ), IdentifierName( _sourceCodeTypeName ) );
 
@@ -117,7 +118,7 @@ internal sealed class LinkerInjectionHelperProvider
         IAspectClass aspectType,
         int ordinal )
     {
-        var aspectTypeSyntax = context.SyntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
+        var aspectTypeSyntax = context.SyntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ) );
 
         switch ( ordinal )
         {
@@ -265,7 +266,7 @@ internal class {HelperTypeName}
 
         return CSharpSyntaxTree.ParseText(
             code,
-            path: _syntaxTreeName,
+            path: SyntaxTreeName,
             encoding: Encoding.UTF8,
             options: options.ToParseOptions() );
     }

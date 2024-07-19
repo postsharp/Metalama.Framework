@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810;
 
-[assembly: AspectOrder(typeof(TestAspect), typeof(DeepCloneAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(TestAspect), typeof(DeepCloneAttribute) )]
 
 #pragma warning disable CS0169, CS8618
 
@@ -14,16 +15,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advice.IntroduceMethod(
-                builder.Target,
+            var typedMethod = builder.IntroduceMethod(
                 nameof(CloneImpl),
                 buildMethod: m =>
                 {
                     m.Name = "Clone";
                     m.ReturnType = builder.Target;
-                });
+                } );
 
-            builder.Advice.ImplementInterface( builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
+            builder.ImplementInterface( typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
         }
 
         [Template]
@@ -45,11 +45,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Introduce]
         public void Foo()
         {
-            var baseMethod1 = meta.Target.Type.Methods.OfCompatibleSignature("Clone", Array.Empty<IType>(), Array.Empty<RefKind?>()).Single();
+            var baseMethod1 = meta.Target.Type.Methods.OfCompatibleSignature( "Clone", Array.Empty<IType>(), Array.Empty<RefKind?>() ).Single();
 
             baseMethod1.Invoke();
 
-            var baseMethod2 = meta.Target.Type.Methods.OfExactSignature("Clone", Array.Empty<IType>())!;
+            var baseMethod2 = meta.Target.Type.Methods.OfExactSignature( "Clone", Array.Empty<IType>() )!;
 
             baseMethod2.Invoke();
         }

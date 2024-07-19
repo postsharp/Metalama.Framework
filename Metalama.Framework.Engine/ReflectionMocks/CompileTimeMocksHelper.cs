@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
                 new TypedExpressionSyntaxImpl(
                     expression,
                     iType,
-                    serializationContext.SyntaxGenerationContext,
+                    serializationContext.CompilationModel,
                     true ) );
         }
     }

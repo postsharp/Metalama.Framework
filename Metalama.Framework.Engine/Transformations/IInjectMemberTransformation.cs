@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Transformations;
 /// <summary>
 /// Represents any transformation that injects a member, including introducing or overriding members, which work by introducing a new member.
 /// </summary>
-internal interface IInjectMemberTransformation : ITransformation
+internal interface IInjectMemberTransformation : ISyntaxTreeTransformation
 {
     /// <summary>
     /// Gets the full syntax of introduced members including the body.

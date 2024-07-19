@@ -2,26 +2,30 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Metalama.Framework.Code;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.MismatchScopePatternMatchingSwitch
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var o = new object();
 
             switch (o)
             {
                 case IParameter p:
-                    Console.WriteLine("0");
+                    Console.WriteLine( "0" );
+
                     break;
+
                 case IEnumerable<object> e when e.Count() == meta.Target.Parameters.Count:
                 default:
-                    Console.WriteLine("Default");
+                    Console.WriteLine( "Default" );
+
                     break;
             }
 
@@ -29,9 +33,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.Mismatch
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

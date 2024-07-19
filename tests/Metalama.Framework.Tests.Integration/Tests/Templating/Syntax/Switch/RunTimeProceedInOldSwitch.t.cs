@@ -1,6 +1,6 @@
-int Method(int a)
+private int Method(int a)
 {
-  int i = 1;
+  var i = 1;
   switch (i)
   {
     case 0:

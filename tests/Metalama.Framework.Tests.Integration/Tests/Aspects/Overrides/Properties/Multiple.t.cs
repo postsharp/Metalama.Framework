@@ -149,6 +149,12 @@ internal class TargetClass
       global::System.Console.WriteLine("Second override.");
       return this._introducedGetOnlyAutoProperty;
     }
+    private init
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      this._introducedGetOnlyAutoProperty = value;
+    }
   }
   public global::System.Int32 IntroducedProperty
   {

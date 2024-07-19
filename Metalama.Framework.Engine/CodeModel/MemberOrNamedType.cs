@@ -17,15 +17,15 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public bool IsSealed => this.Symbol.IsSealed;
 
-        public bool IsNew
-        {
-            get
-            {
-                this.OnUsingDeclaration();
+        [Memo]
+        public bool IsNew => this.IsNewCore();
 
-                // TODO: This is quite expensive (looks at all member collections with the same name in all ancestor types) and would likely need an optimization structure in NamedType to prevent too many allocations.
-                return this.TryGetHiddenDeclaration( out _ );
-            }
+        private bool IsNewCore()
+        {
+            this.OnUsingDeclaration();
+
+            // TODO: This is quite expensive (looks at all member collections with the same name in all ancestor types) and would likely need an optimization structure in NamedType to prevent too many allocations.
+            return this.TryGetHiddenDeclaration( out _ );
         }
 
         public bool IsAbstract

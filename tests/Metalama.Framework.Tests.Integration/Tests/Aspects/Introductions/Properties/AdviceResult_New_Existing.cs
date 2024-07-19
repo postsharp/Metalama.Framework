@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -8,23 +9,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceProperty(builder.Target, nameof(Property), whenExists: OverrideStrategy.New);
+            var result = builder.IntroduceProperty( nameof(Property), whenExists: OverrideStrategy.New );
 
-            if (result.Outcome != Advising.AdviceOutcome.Error)
+            if (result.Outcome != AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Error.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Error." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceProperty)
+            if (result.AdviceKind != AdviceKind.IntroduceProperty)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceProperty.");
-            }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceProperty." );
             }
 
             // TODO: #33060
@@ -41,12 +37,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
         {
             get
             {
-                Console.WriteLine("Aspect code.");
+                Console.WriteLine( "Aspect code." );
+
                 return meta.Proceed();
             }
             set
             {
-                Console.WriteLine("Aspect code.");
+                Console.WriteLine( "Aspect code." );
                 meta.Proceed();
             }
         }
@@ -60,12 +57,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Prope
         {
             get
             {
-                Console.WriteLine("Original code.");
+                Console.WriteLine( "Original code." );
+
                 return 42;
             }
             set
             {
-                Console.WriteLine("Original code.");
+                Console.WriteLine( "Original code." );
             }
         }
     }

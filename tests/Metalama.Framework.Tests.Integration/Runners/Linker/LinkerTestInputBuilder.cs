@@ -7,7 +7,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -105,7 +104,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         this._rewriter.NonObservableTransformations )
                     .ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
                 orderedLayers,
-                new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
                 null! );
 
             return linkerInput;

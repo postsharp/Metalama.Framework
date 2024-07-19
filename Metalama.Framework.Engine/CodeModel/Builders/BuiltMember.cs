@@ -9,11 +9,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 {
-    protected BuiltMember( CompilationModel compilation, MemberBuilder builder ) : base( compilation, builder ) { }
+    protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
 
     protected abstract MemberBuilder MemberBuilder { get; }
-
-    public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 
     public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
 

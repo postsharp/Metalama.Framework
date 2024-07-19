@@ -4,11 +4,11 @@
 #endif
 
 #if NET7_0_OR_GREATER && ROSLYN_4_4_0_OR_GREATER
-
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.StaticInterfaceMember;
@@ -17,7 +17,7 @@ internal class MyAspect : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Method), args: new { T = typeof(int) });
+        builder.IntroduceMethod( nameof(Method), args: new { T = typeof(int) });
     }
 
     [Template]

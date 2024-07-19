@@ -1,7 +1,7 @@
 internal class TargetCode
 {
   private global::System.Int32 _f;
-  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { 0 })]
+  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(0)]
   public global::System.Int32 F
   {
     get
@@ -18,7 +18,7 @@ internal class TargetCode
     }
   }
   private global::System.String? _s;
-  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { "" })]
+  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute("")]
   public global::System.String? S
   {
     get
@@ -35,7 +35,7 @@ internal class TargetCode
     }
   }
   private global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum _e;
-  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum.None })]
+  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum.None)]
   public global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum E
   {
     get
@@ -52,7 +52,7 @@ internal class TargetCode
     }
   }
   private global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum _e2;
-  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[] { global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum.Something })]
+  [global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum.Something)]
   public global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum E2
   {
     get

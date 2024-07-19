@@ -205,7 +205,7 @@ public abstract class AspectPipeline : IDisposable
 
         // Initialize the licensing service with redistribution licenses.
         // Add the license verifier.
-        var licenseConsumptionManager = projectServiceProviderWithProject.GetService<ProjectLicenseConsumptionService>();
+        var licenseConsumptionManager = projectServiceProviderWithProject.GetService<ProjectLicenseConsumer>();
 
         if ( licenseConsumptionManager != null )
         {
@@ -247,11 +247,6 @@ public abstract class AspectPipeline : IDisposable
             .ToImmutableArray();
 
         // Get aspect parts and sort them.
-        var unsortedAspectLayers = aspectClasses
-            .Where( t => !t.IsAbstract )
-            .SelectMany( at => at.Layers )
-            .ToImmutableArray();
-
         var aspectOrderSources = new IAspectOrderingSource[]
         {
             new AttributeAspectOrderingSource( projectServiceProviderWithProject, compilation ),
@@ -259,7 +254,7 @@ public abstract class AspectPipeline : IDisposable
             new FrameworkAspectOrderingSource( aspectClasses )
         };
 
-        if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
+        if ( !AspectLayerSorter.TrySort( aspectClasses, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
         {
             this.Logger.Warning?.Log( $"TryInitialize('{this.ProjectOptions.AssemblyName}') failed: cannot sort aspect layers." );
 
@@ -434,12 +429,13 @@ public abstract class AspectPipeline : IDisposable
 
         var diagnosticSink = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
 
-        hierarchicalOptionsManager.Initialize(
+        await hierarchicalOptionsManager.InitializeAsync(
             pipelineConfiguration.CompileTimeProject,
             contributorSources.OptionsSources,
             contributorSources.ExternalOptionsProvider,
             compilationModel,
-            diagnosticSink );
+            diagnosticSink,
+            cancellationToken );
 
         diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
 

@@ -91,6 +91,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+
     public SerializableDeclarationId ToSerializableId() => this.DeclaringMember.GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
 
     public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
@@ -116,6 +118,10 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
 
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new MethodInvoker( this ).CreateInvokeExpression( args );
 
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 

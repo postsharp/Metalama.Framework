@@ -30,7 +30,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver );
 
     [Memo]
-    internal CompilationComparers Comparers => new( this.ReflectionMapper, this.Compilation );
+    internal CompilationComparers Comparers => new( this.Compilation );
 
     public Compilation Compilation { get; }
 
@@ -50,7 +50,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
 
     [Memo]
-    public SerializableTypeIdResolver SerializableTypeIdResolver => new( this.Compilation );
+    public SerializableTypeIdResolverForSymbol SerializableTypeIdResolver => new( this.Compilation );
 
     [Memo]
     internal SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
@@ -68,6 +68,9 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
+
+    [Memo]
+    internal IEqualityComparer<MemberRef<INamespace>> NamespaceRefComparer => new MemberRefEqualityComparer<INamespace>( this.SymbolComparer );
 
     [Memo]
     internal IEqualityComparer<MemberRef<IConstructor>> ConstructorRefComparer => new MemberRefEqualityComparer<IConstructor>( this.SymbolComparer );
@@ -88,22 +91,22 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
 
     [Memo]
-    internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.SymbolComparer );
+    internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.SymbolComparer );
+    internal IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IFieldOrProperty> FieldOrPropertyComparer => new MemberComparer<IFieldOrProperty>( this.SymbolComparer );
+    internal IEqualityComparer<IFieldOrProperty> FieldOrPropertyComparer => new MemberComparer<IFieldOrProperty>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.SymbolComparer );
+    internal IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.SymbolComparer );
+    internal IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.SymbolComparer );
+    internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );
@@ -114,9 +117,14 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         int nodeSpanStart,
         bool isPartial = false )
     {
-        var semanticModel = this.Compilation.GetCachedSemanticModel( tree );
-        var nullableContext = semanticModel.GetNullableContext( nodeSpanStart );
-        var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) == 0;
+        bool? isNullOblivious = null;
+
+        if ( this.Compilation.ContainsSyntaxTree( tree ) )
+        {
+            var semanticModel = this.Compilation.GetCachedSemanticModel( tree );
+            var nullableContext = semanticModel.GetNullableContext( nodeSpanStart );
+            isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) == 0;
+        }
 
         return this.GetSyntaxGenerationContext( options, isPartial, isNullOblivious );
     }

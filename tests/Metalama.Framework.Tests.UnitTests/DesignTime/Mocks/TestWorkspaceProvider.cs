@@ -131,12 +131,14 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         }
     }
 
-    public Document GetDocument( string projectName, string documentName )
+    public Document GetDocument( string projectName, string documentName ) => this.GetDocumentOrNull( projectName, documentName ).AssertNotNull();
+
+    public Document? GetDocumentOrNull( string projectName, string documentName )
     {
         var projectData = this._projectIdsByProjectName[projectName];
-        var documentId = projectData.Documents[documentName];
+        projectData.Documents.TryGetValue( documentName, out var documentId );
 
-        return this._workspace.CurrentSolution.GetDocument( documentId ).AssertNotNull();
+        return this._workspace.CurrentSolution.GetDocument( documentId );
     }
 
     public override void Dispose()

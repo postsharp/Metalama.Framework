@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             if (builder.Target.SetMethod != null)
             {
-                builder.Advice.OverrideAccessors( builder.Target, null, setTemplate: nameof(SetProperty) );
+                builder.OverrideAccessors( null, setTemplate: nameof(SetProperty) );
             }
         }
 

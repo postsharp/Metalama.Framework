@@ -80,7 +80,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 serviceProvider,
                 projectDirectory,
                 references,
-                logger )
+                logger,
+                null )
         {
             this._testAnalyzers = testAnalyzers;
         }
@@ -91,15 +92,13 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="testContext"></param>
-        /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContext testContext,
-            Dictionary<string, object?> state )
+            TestContext testContext )
         {
-            await base.RunAsync( testInput, testResult, testContext, state );
+            await base.RunAsync( testInput, testResult, testContext );
 
             if ( !testResult.Success )
             {
@@ -110,7 +109,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var templateDocument = testSyntaxTree.InputDocument;
             var templateSyntaxRoot = await templateDocument.GetSyntaxRootAsync();
             var templateSemanticModel = await templateDocument.GetSemanticModelAsync();
-            
+
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
                 testAnalyzer.Visit( templateSyntaxRoot );
@@ -126,7 +125,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     assemblyLocator.StandardCompileTimeMetadataReferences,
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
-            
+
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, serviceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
@@ -191,7 +190,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 buildTimeDebugStream,
                 options: new EmitOptions(
                     defaultSourceFileEncoding: Encoding.UTF8,
-                    fallbackSourceFileEncoding: Encoding.UTF8 ) );
+                    fallbackSourceFileEncoding: Encoding.UTF8,
+                    debugInformationFormat: DebugInformationFormat.PortablePdb ) );
 
             if ( !emitResult.Success )
             {

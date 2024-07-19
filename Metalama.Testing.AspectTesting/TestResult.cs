@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Metalama.Testing.AspectTesting;
 /// Represents the result of a test run.
 /// </summary>
 [PublicAPI]
-internal sealed class TestResult : IDisposable
+internal class TestResult : IDisposable
 {
     private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
@@ -42,12 +43,52 @@ internal sealed class TestResult : IDisposable
 
     public IDiagnosticBag PipelineDiagnostics { get; } = new DiagnosticBag();
 
-    public IEnumerable<Diagnostic> Diagnostics
-        => this.OutputCompilationDiagnostics
-            .Concat( this.PipelineDiagnostics )
-            .Concat( this.InputCompilationDiagnostics );
-
     // We don't add the CompileTimeCompilationDiagnostics to Diagnostics because they are already in PipelineDiagnostics.
+    public IEnumerable<Diagnostic> Diagnostics
+    {
+        get
+        {
+            var minimalSeverity = this.TestInput?.Options.ReportOutputWarnings == true ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+
+            var allDiagnostics = this.OutputCompilationDiagnostics.Where( d => d.Severity >= minimalSeverity )
+                .Concat( this.PipelineDiagnostics )
+                .Concat( this.InputCompilationDiagnostics );
+
+            return allDiagnostics.Where( MustBeReported );
+
+            bool MustBeReported( Diagnostic d )
+            {
+                if ( d.Id == "CS1701" )
+                {
+                    // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
+                    // This warning is ignored by MSBuild anyway.
+                    return false;
+                }
+
+                if ( this.TestInput?.ShouldIgnoreDiagnostic( d.Id ) == true )
+                {
+                    return false;
+                }
+
+                foreach ( var suppression in this.DiagnosticSuppressions )
+                {
+                    if ( suppression.Matches( d, this.InputCompilation!, filter => filter() ) )
+                    {
+                        return false;
+                    }
+
+                    if ( suppression.Matches( d, this.OutputCompilation!, filter => filter() ) )
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+    }
+
+    public ImmutableArray<ScopedSuppression> DiagnosticSuppressions { get; set; } = ImmutableArray<ScopedSuppression>.Empty;
 
     public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;
 
@@ -83,7 +124,7 @@ internal sealed class TestResult : IDisposable
 
     /// <summary>
     /// Gets or sets a value indicating whether the output run-time code should be included in the result of
-    ///  <see cref="GetTestOutputsWithDiagnostics"/>.
+    ///  <see cref="BuildSyntaxTreesForComparison"/>.
     /// </summary>
     public bool HasOutputCode { get; set; }
 
@@ -175,23 +216,35 @@ internal sealed class TestResult : IDisposable
              this.TestInput == null ||
              this.InputProject == null )
         {
-            throw new InvalidOperationException( "The object has not bee properly initialized." );
+            throw new InvalidOperationException( "The object has not been properly initialized." );
         }
+
+        var introducedSyntaxTreePaths = this.InputCompilation.SyntaxTrees.Select( t => t.FilePath ).ToHashSet();
 
         foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
         {
-            var testSyntaxTree = this.SyntaxTrees.SingleOrDefault( x => StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
+            TestSyntaxTree? testSyntaxTree;
 
-            if ( testSyntaxTree == null )
+            if ( !introducedSyntaxTreePaths.Contains( syntaxTree.FilePath ) )
             {
-                // This is the "Intrinsics" syntax tree.
-                continue;
+                testSyntaxTree = TestSyntaxTree.CreateIntroduced( this );
+
+                this._syntaxTrees.Add( testSyntaxTree );
+            }
+            else
+            {
+                testSyntaxTree = this.SyntaxTrees.SingleOrDefault(
+                    x => x.InputDocument != null && StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
+
+                if ( testSyntaxTree == null )
+                {
+                    // This is the "Intrinsics" syntax tree.
+                    continue;
+                }
             }
 
-            var syntaxNode = await syntaxTree.GetRootAsync();
-
             // Format the output code.
-            await testSyntaxTree.SetRunTimeCodeAsync( syntaxNode );
+            await testSyntaxTree.SetRunTimeCodeAsync( await syntaxTree.GetRootAsync() );
         }
     }
 
@@ -241,32 +294,88 @@ internal sealed class TestResult : IDisposable
     /// Gets the content of the <c>.t.cs</c> file, i.e. the output transformed code with comments
     /// for diagnostics.
     /// </summary>
-    public IReadOnlyList<SyntaxTree> GetTestOutputsWithDiagnostics()
+    public void BuildSyntaxTreesForComparison()
     {
         if ( this.TestInput == null )
         {
             throw new InvalidOperationException();
         }
 
-        List<SyntaxTree> result = new();
+        bool IsSyntaxTreeIncluded( TestSyntaxTree testSyntaxTree )
+        {
+            switch ( testSyntaxTree.Kind )
+            {
+                case TestSyntaxTreeKind.Introduced:
+                    return true;
+
+                case TestSyntaxTreeKind.Default:
+                    // Include the primary file and any secondary file that includes <target>.
+                    return testSyntaxTree.ShortName == this.TestInput.TestName
+                           || testSyntaxTree.OutputRunTimeSyntaxRoot?.SyntaxTree.GetText().ToString().ContainsOrdinal( "<target>" ) == true;
+
+                default:
+                    return false;
+            }
+        }
 
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
-            this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.AsEnumerable()
-                : this.SyntaxTrees.Take( 1 );
+            this.SyntaxTrees
+                .Where( IsSyntaxTreeIncluded )
+                .OrderBy( x => x.FilePath.Length )
+                .ThenBy( x => x.FilePath, StringComparer.InvariantCultureIgnoreCase )
+                .ToArray();
 
-        foreach ( var outputSyntaxTree in outputSyntaxTrees )
+        if ( outputSyntaxTrees.Length == 0 )
+        {
+            return;
+        }
+
+        var primaryOutputTree = outputSyntaxTrees.Single( x => x.ShortName == this.TestInput.TestName );
+
+        var outputTreesByFilePath = outputSyntaxTrees
+            .ToDictionary( x => x.FilePath, x => x );
+
+        // Assign diagnostics to syntax trees.
+        var diagnosticsBySyntaxTree = new Dictionary<TestSyntaxTree, List<Diagnostic>>();
+
+        foreach ( var diagnostic in this.Diagnostics )
+        {
+            var diagnosticsSourceFilePath = diagnostic.Location.SourceTree?.FilePath;
+
+            if ( diagnosticsSourceFilePath != null && outputTreesByFilePath.TryGetValue( diagnosticsSourceFilePath, out var diagnosticSourceSyntaxTree ) )
+            {
+                if ( !diagnosticsBySyntaxTree.TryGetValue( diagnosticSourceSyntaxTree, out var diagnostics ) )
+                {
+                    diagnostics = new List<Diagnostic>();
+                    diagnosticsBySyntaxTree.Add( diagnosticSourceSyntaxTree, diagnostics );
+                }
+
+                diagnostics.Add( diagnostic );
+            }
+            else if ( primaryOutputTree != null )
+            {
+                if ( !diagnosticsBySyntaxTree.TryGetValue( primaryOutputTree, out var diagnostics ) )
+                {
+                    diagnostics = new List<Diagnostic>();
+                    diagnosticsBySyntaxTree.Add( primaryOutputTree, diagnostics );
+                }
+
+                diagnostics.Add( diagnostic );
+            }
+        }
+
+        foreach ( var testSyntaxTree in outputSyntaxTrees )
         {
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
-            if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } && this.TestInput.Options.RemoveOutputCode != true )
+            if ( this.HasOutputCode && testSyntaxTree is { OutputRunTimeSyntaxRoot: not null } && this.TestInput.Options.RemoveOutputCode != true )
             {
                 // Adding syntax annotations for the output compilation. We cannot add syntax annotations for diagnostics
                 // on the input compilation because they would potentially not map properly to the output compilation.
                 var outputSyntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations(
-                    outputSyntaxTree.OutputRunTimeSyntaxRoot,
-                    outputSyntaxTree.InputPath,
+                    testSyntaxTree.OutputRunTimeSyntaxRoot,
+                    testSyntaxTree.InputPath,
                     this.OutputCompilationDiagnostics.ToArray() );
 
                 if ( this.TestInput.Options.ExcludeAssemblyAttributes != true )
@@ -291,7 +400,21 @@ internal sealed class TestResult : IDisposable
                         .Cast<SyntaxNode>()
                         .ToArray();
 
-                outputMembers = outputMembers is [] ? new SyntaxNode[] { outputSyntaxRoot } : outputMembers;
+                if ( outputMembers is [] )
+                {
+                    // There is no <target> member.
+
+                    if ( testSyntaxTree == primaryOutputTree || testSyntaxTree.Kind is TestSyntaxTreeKind.Introduced )
+                    {
+                        // If this is the primary syntax tree, include the complete output.
+                        outputMembers = [outputSyntaxRoot];
+                    }
+                    else
+                    {
+                        // Otherwise, skip the syntax tree.
+                        continue;
+                    }
+                }
 
                 for ( var i = 0; i < outputMembers.Length; i++ )
                 {
@@ -334,39 +457,50 @@ internal sealed class TestResult : IDisposable
             // Adding the diagnostics as trivia.
             List<SyntaxTrivia> comments = new();
 
-            if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
-                                   || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )
+            if ( diagnosticsBySyntaxTree.TryGetValue( testSyntaxTree, out var diagnosticsForOutputTree ) )
             {
-                comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
+                                       || diagnosticsForOutputTree.All( c => c.Severity != DiagnosticSeverity.Error )) )
+                {
+                    comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                }
+
+                // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
+                comments.AddRange(
+                    diagnosticsForOutputTree
+                        .Where(
+                            d => d.Id != "LAMA0222" &&
+                                 (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
+                                  || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )
+                        .OrderBy( d => d.Location.SourceSpan.Start )
+                        .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
+                        .SelectMany( this.GetDiagnosticComments )
+                        .Select( SyntaxFactory.Comment )
+                        .ToReadOnlyList() );
             }
-
-            // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
-
-            comments.AddRange(
-                this.Diagnostics
-                    .Where(
-                        d => d.Id != "LAMA0222" &&
-                             (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                              || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )
-                    .OrderBy( d => d.Location.SourceSpan.Start )
-                    .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
-                    .SelectMany( this.GetDiagnosticComments )
-                    .Select( SyntaxFactory.Comment )
-                    .ToReadOnlyList() );
+            else
+            {
+                if ( !this.Success )
+                {
+                    comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                }
+                else if ( !consolidatedCompilationUnit.ChildNodes().Any() )
+                {
+                    // This can happen when the test does not want to include the output code.
+                    comments.Add( SyntaxFactory.Comment( $"// The compilation was successful.\n" ) );
+                }
+            }
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 
             // Individual trees should be formatted, so we don't need to format again.
-
-            result.Add(
+            testSyntaxTree.OutputRunTimeSyntaxTreeForComparison =
                 CSharpSyntaxTree.Create(
                     consolidatedCompilationUnit,
                     path: Path.GetFileName(
-                        outputSyntaxTree.InputPath
-                        ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) ) );
+                        testSyntaxTree.FilePath
+                        ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
         }
-
-        return result;
     }
 
     private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
@@ -403,6 +537,23 @@ internal sealed class TestResult : IDisposable
             yield return $"//    CodeFix: {codeFix}`\n";
         }
     }
+
+    private TestSyntaxTree? PrimaryTestSyntaxTree => this.SyntaxTrees.FirstOrDefault( t => t.Kind is TestSyntaxTreeKind.Default );
+
+    [Obsolete( "Use SyntaxTrees[...].ExpectedTransformedSourceText" )]
+    public string? ExpectedTransformedSourceText => this.PrimaryTestSyntaxTree?.ExpectedTransformedCodeText;
+
+    [Obsolete( "Use SyntaxTrees[...].ActualTransformedNormalizedSourceText" )]
+    public string? ActualTransformedNormalizedSourceText => this.PrimaryTestSyntaxTree?.ActualTransformedCodePath;
+
+    [Obsolete( "Use SyntaxTrees[...].ActualTransformedSourceTextForStorage" )]
+    public string? ActualTransformedSourceTextForStorage => this.PrimaryTestSyntaxTree?.ActualTransformedSourceTextForStorage;
+
+    [Obsolete( "Use SyntaxTrees[...].ActualTransformedSourcePath" )]
+    public string? ActualTransformedSourcePath => this.PrimaryTestSyntaxTree?.ActualTransformedCodePath;
+
+    [Obsolete( "Use SyntaxTrees[...].ExpectedTransformedSourcePath" )]
+    public string? ExpectedTransformedSourcePath => this.PrimaryTestSyntaxTree?.ExpectedTransformedCodePath;
 
     public void Dispose()
     {

@@ -1,12 +1,13 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lock.CompileTimeLock
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             lock (meta.Target.Compilation)
             {
@@ -15,9 +16,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lock.CompileTim
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

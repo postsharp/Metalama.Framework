@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.DuplicateDeclarationWithAspect;
@@ -15,7 +16,7 @@ public class Aspect : OverrideMethodAspect
 }
 
 // <target>
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
     public int Foo()

@@ -16,11 +16,11 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer(builder.Target, nameof(InitializerTemplate), InitializerKind.BeforeInstanceConstructor);
+        builder.AddInitializer( nameof(InitializerTemplate), InitializerKind.BeforeInstanceConstructor );
     }
 
     [Template]
-    void InitializerTemplate()
+    private void InitializerTemplate()
     {
         foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties)
         {
@@ -34,12 +34,13 @@ public class Aspect : TypeAspect
 
 // <target>
 [Aspect]
-class TargetCode()
+internal class TargetCode()
 {
-    string? f;
-    string? f1, f2;
+    private string? f;
+    private string? f1, f2;
 
     public string? Property1 { get; }
+
     public string? Property2 { get; set; }
 }
 

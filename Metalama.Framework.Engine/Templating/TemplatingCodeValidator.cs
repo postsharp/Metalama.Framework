@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            await taskScheduler.RunInParallelAsync( compilationContext.SourceCompilation.SyntaxTrees, ValidateSyntaxTree, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( compilationContext.SourceCompilation.SyntaxTrees, ValidateSyntaxTree, cancellationToken );
 
             return !hasError;
         }

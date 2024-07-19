@@ -1,4 +1,4 @@
-int Method(int a, int bb)
+private int Method(int a, int bb)
 {
   if (this.logMembers)
   {

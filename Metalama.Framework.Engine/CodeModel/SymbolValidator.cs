@@ -12,23 +12,6 @@ internal sealed class SymbolValidator : SymbolVisitor<bool>
 
     private SymbolValidator() { }
 
-    public bool VisitAttribute( AttributeData attribute )
-        => attribute is { AttributeClass: { }, AttributeConstructor: { } }
-           && this.Visit( attribute.AttributeClass )
-           && attribute.ConstructorArguments.All( a => this.VisitTypedConstant( a ) )
-           && attribute.NamedArguments.All( a => this.VisitTypedConstant( a.Value ) );
-
-    private bool VisitTypedConstant( in TypedConstant constant )
-        => constant.Kind switch
-        {
-            TypedConstantKind.Array => constant.Values.IsDefaultOrEmpty || constant.Values.All( v => this.VisitTypedConstantValue( v ) ),
-            TypedConstantKind.Error => false,
-            TypedConstantKind.Type => constant.Value == null || this.VisitTypedConstantValue( constant.Value ),
-            _ => true
-        };
-
-    private bool VisitTypedConstantValue( object value ) => !(value is ITypeSymbol type && !this.Visit( type ));
-
     public override bool DefaultVisit( ISymbol symbol ) => throw new NotImplementedException();
 
     public override bool VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType );

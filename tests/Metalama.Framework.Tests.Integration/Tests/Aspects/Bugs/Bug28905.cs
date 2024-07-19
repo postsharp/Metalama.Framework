@@ -1,25 +1,26 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905
 {
     internal class ImportAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
-        { 
+        public override dynamic? OverrideProperty
+        {
             get
             {
                 // Get the property value.
                 var value = meta.Proceed();
 
-                if ( value == null )
+                if (value == null)
                 {
                     // Call the service locator.
-                    value = meta.Cast( meta.Target.FieldOrProperty.Type, ServiceLocator.ServiceProvider.GetService(meta.Target.Property.Type.ToType() ) );
+                    value = meta.Cast( meta.Target.FieldOrProperty.Type, ServiceLocator.ServiceProvider.GetService( meta.Target.Property.Type.ToType() ) );
 
                     // Set the field/property to the new value.
                     meta.Target.Property.Value = value
-                                          ?? throw new InvalidOperationException($"Cannot get a service of type {meta.Target.Property.Type}.");
+                                                 ?? throw new InvalidOperationException( $"Cannot get a service of type {meta.Target.Property.Type}." );
                 }
 
                 return value;
@@ -28,23 +29,21 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28905
             set => meta.Proceed();
         }
     }
-    
+
     // <target>
-    class Yack
+    internal class Yack
     {
         [Import]
-        IGreetingService? _service { get; set; }
+        private IGreetingService? _service { get; set; }
     }
-    
-    interface IGreetingService
+
+    internal interface IGreetingService
     {
-        void Greet(string name);
+        void Greet( string name );
     }
-    
-    
-    class ServiceLocator
+
+    internal class ServiceLocator
     {
         public static readonly IServiceProvider ServiceProvider = null!;
-
     }
 }

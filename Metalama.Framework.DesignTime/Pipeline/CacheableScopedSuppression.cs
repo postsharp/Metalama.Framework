@@ -6,36 +6,24 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.DesignTime.Pipeline
+namespace Metalama.Framework.DesignTime.Pipeline;
+
+/// <summary>
+/// A compilation-independent version of <see cref="ScopedSuppression"/>, which stores the symbol id instead of the <see cref="ISymbol"/> itself.
+/// </summary>
+internal sealed class CacheableScopedSuppression : IScopedSuppression
 {
-    /// <summary>
-    /// A compilation-independent version of <see cref="ScopedSuppression"/>, which stores the symbol id instead of the <see cref="ISymbol"/> itself.
-    /// </summary>
-    internal sealed class CacheableScopedSuppression : IScopedSuppression
+    public ISuppression Suppression { get; }
+
+    ISymbol? IScopedSuppression.GetScopeSymbolOrNull( Compilation compilation ) => this.DeclarationId.ResolveToSymbolOrNull( compilation );
+
+    public SerializableDeclarationId DeclarationId { get; }
+
+    public CacheableScopedSuppression( ScopedSuppression suppression )
     {
-        /// <summary>
-        /// Gets the suppression definition.
-        /// </summary>
-        public SuppressionDefinition Definition { get; }
-
-        ISymbol? IScopedSuppression.GetScopeSymbolOrNull( Compilation compilation ) => this.DeclarationId.ResolveToSymbolOrNull( compilation );
-
-        /// <summary>
-        /// Gets the symbol identifier.
-        /// </summary>
-        public SerializableDeclarationId DeclarationId { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CacheableScopedSuppression"/> class.
-        /// </summary>
-        /// <param name="suppression"></param>
-        public CacheableScopedSuppression( in ScopedSuppression suppression )
-        {
-            this.Definition = suppression.Definition;
-
-            this.DeclarationId = suppression.Declaration.ToSerializableId();
-        }
-
-        public override string ToString() => $"{this.Definition.SuppressedDiagnosticId} in {this.DeclarationId}";
+        this.Suppression = suppression.Suppression;
+        this.DeclarationId = suppression.Declaration.GetSourceSerializableId();
     }
+
+    public override string ToString() => $"{this.Suppression} on {this.DeclarationId}";
 }

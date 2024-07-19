@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Generic.SyntaxFromGenericArgumentType;
@@ -8,7 +9,7 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.Target.Method.ReturnType.ToType());
+        Console.WriteLine( meta.Target.Method.ReturnType.ToType() );
 
         return meta.Proceed();
     }
@@ -18,23 +19,23 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode<T>
 {
     [Aspect]
-    Task<T> GenericClassTypeParameter() => null!;
+    private Task<T> GenericClassTypeParameter() => null!;
 
     [Aspect]
-    Task<TM> GenericMethodTypeParameter<TM>() => null!;
+    private Task<TM> GenericMethodTypeParameter<TM>() => null!;
 
     [Aspect]
-    Task<int> ClosedGeneric() => null!;
+    private Task<int> ClosedGeneric() => null!;
 
     [Aspect]
-    T[] ArrayClassTypeParameter() => null!;
+    private T[] ArrayClassTypeParameter() => null!;
 
     [Aspect]
-    TM[] ArrayMethodTypeParameter<TM>() => null!;
+    private TM[] ArrayMethodTypeParameter<TM>() => null!;
 
     [Aspect]
-    int[] ClosedArray() => null!;
+    private int[] ClosedArray() => null!;
 
     [Aspect]
-    Action<T, TM, T[], TM[], int, int[], Action<T, TM>> ComplexType<TM>() => null!;
+    private Action<T, TM, T[], TM[], int, int[], Action<T, TM>> ComplexType<TM>() => null!;
 }

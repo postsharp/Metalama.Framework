@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
@@ -11,8 +12,9 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TwoProjectFabr
         public override void AmendProject( IProjectAmender amender )
         {
             amender
-                .Outbound
-                .SelectMany( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )
+                .SelectMany( c => c.Types )
+                .SelectMany( t => t.Methods )
+                .Where( m => m.ReturnType.Is( typeof(string) ) )
                 .AddAspect<Aspect>();
         }
     }
@@ -22,8 +24,9 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TwoProjectFabr
         public override void AmendProject( IProjectAmender amender )
         {
             amender
-                .Outbound
-                .SelectMany( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(int) ) ) )
+                .SelectMany( c => c.Types )
+                .SelectMany( t => t.Methods )
+                .Where( m => m.ReturnType.Is( typeof(int) ) )
                 .AddAspect<Aspect>();
         }
     }

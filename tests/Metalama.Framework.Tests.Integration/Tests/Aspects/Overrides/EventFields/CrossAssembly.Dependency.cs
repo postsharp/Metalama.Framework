@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.CrossAssembly;
@@ -5,7 +6,7 @@ using System;
 
 #pragma warning disable CS0067
 
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.CrossAssembly
 {
@@ -27,7 +28,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.Cros
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors( @event, nameof(Template), nameof(Template) );
+                builder.With( @event ).OverrideAccessors( nameof(Template), nameof(Template) );
             }
         }
 

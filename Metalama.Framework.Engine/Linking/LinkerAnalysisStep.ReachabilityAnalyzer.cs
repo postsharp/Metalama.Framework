@@ -87,7 +87,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( this._injectionRegistry.GetOverriddenMembers(), ProcessOverriddenMember, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( this._injectionRegistry.GetOverriddenMembers(), ProcessOverriddenMember, cancellationToken );
 
             // Run DFS from any non-discardable declaration.
             void ProcessInjectedMember( InjectedMember injectedMember )
@@ -123,7 +123,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( this._injectionRegistry.GetInjectedMembers(), ProcessInjectedMember, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( this._injectionRegistry.GetInjectedMembers(), ProcessInjectedMember, cancellationToken );
 
             // Run DFS for additional non-discardable semantics
             void ProcessAdditionalNonDiscardableSemantic( IntermediateSymbolSemantic semantic )
@@ -131,7 +131,7 @@ internal sealed partial class LinkerAnalysisStep
                 DepthFirstSearch( semantic );
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync(
+            await this._concurrentTaskRunner.RunConcurrentlyAsync(
                 this._additionalNonDiscardableSemantics,
                 ProcessAdditionalNonDiscardableSemantic,
                 cancellationToken );

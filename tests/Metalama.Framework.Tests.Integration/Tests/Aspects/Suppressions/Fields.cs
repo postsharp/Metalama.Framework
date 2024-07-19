@@ -1,9 +1,14 @@
+#if TEST_OPTIONS
+// @ClearIgnoredDiagnostics
+#endif
+
 #if !TESTRUNNER
 
 // Disable the warning in the main build, not during tests.
 #pragma warning disable CS0169
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;

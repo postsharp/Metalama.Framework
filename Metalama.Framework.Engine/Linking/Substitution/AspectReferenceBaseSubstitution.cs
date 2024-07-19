@@ -72,7 +72,7 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
         {
             if ( !targetSymbol.TryGetHiddenSymbol( this.CompilationContext.Compilation, out var hiddenSymbol ) )
             {
-                throw new AssertionFailedException( $"Expected hidden symbol for {targetSymbol}." );
+                throw new AssertionFailedException( $"Expected hidden symbol for '{targetSymbol}'." );
             }
 
             return currentNode

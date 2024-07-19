@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -49,7 +50,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     private bool IsEmpty
         => this.SyntaxTreeResults.IsEmpty && this.IntroducedSyntaxTrees.IsEmpty && this.ReferenceValidators.IsEmpty && this._inheritableAspects.IsEmpty;
 
-    internal DesignTimeReferenceValidatorCollection ReferenceValidators { get; } = DesignTimeReferenceValidatorCollection.Empty;
+    public DesignTimeReferenceValidatorCollection ReferenceValidators { get; } = DesignTimeReferenceValidatorCollection.Empty;
 
     public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
@@ -307,6 +308,9 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             .InputSyntaxTrees
             .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResult.Builder( syntaxTree.Value ) );
 
+        // TODO: This selects a single syntax tree and uses it as input tree of all "independent" introduced syntax trees.
+        var inputSyntaxTreeForDetached = pipelineResults.InputSyntaxTrees.First().Value;
+
         List<DesignTimeReferenceValidatorInstance>? externalValidators = null;
 
         // Split diagnostic by syntax tree.
@@ -335,9 +339,15 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             {
                 if ( !string.IsNullOrEmpty( path ) )
                 {
-                    var builder = resultBuilders[path];
-                    builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
-                    builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
+                    if ( resultBuilders.TryGetValue( path, out var builder ) )
+                    {
+                        builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
+                        builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
+                    }
+                    else
+                    {
+                        // This can happen when a suppression is applied to an aspect that is in a different compilation, e.g. with [IntroduceDependency].
+                    }
                 }
             }
 
@@ -366,9 +376,25 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split introductions by original syntax tree.
         foreach ( var introduction in pipelineResults.IntroducedSyntaxTrees )
         {
-            var filePath = introduction.SourceSyntaxTree.FilePath;
-            var builder = resultBuilders[filePath];
+            var syntaxTree = introduction.SourceSyntaxTree ?? inputSyntaxTreeForDetached;
+            var filePath = syntaxTree.FilePath;
+
+            if ( !resultBuilders.TryGetValue( filePath, out var builder ) )
+            {
+                // This happens when the source tree is not dirty, so it's not part of the PartialCompilation.
+                builder = resultBuilders[filePath] = new SyntaxTreePipelineResult.Builder( syntaxTree );
+            }
+
             builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
+
+            if ( introduction.SourceSyntaxTree == null )
+            {
+                // TODO: This is a temporary hack until we have a proper way to handle "independent" introduced syntax trees.
+                builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, inputSyntaxTreeForDetached, introduction.GeneratedSyntaxTree ) );
+
+                continue;
+            }
+
             builder.Introductions.Add( introduction );
         }
 
@@ -408,11 +434,12 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             {
                 var designTimeValidator = new DesignTimeReferenceValidatorInstance(
                     validatedDeclarationSymbol,
-                    validator.ReferenceKinds,
-                    validator.IncludeDerivedTypes,
+                    validator.Properties.ReferenceKinds,
+                    validator.Properties.IncludeDerivedTypes,
                     validator.Driver,
                     validator.Implementation,
-                    validator.DiagnosticSourceDescription );
+                    validator.DiagnosticSourceDescription,
+                    validator.Granularity );
 
                 if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                 {
@@ -453,7 +480,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 var predecessorDeclarationSymbol = predecessor.Instance switch
                 {
                     IAspectInstance predecessorAspect => reflectionMapper.GetTypeSymbol( predecessorAspect.Aspect.GetType() ),
-                    IFabricInstance fabricInstance => reflectionMapper.GetTypeSymbol( fabricInstance.Fabric.GetType() ),
+
+                    // Can't use fabricInstance.Fabric.GetType() here, because for type fabrics,
+                    // we need the original type (e.g. C.Fabric), not the rewritten type (e.g. C_Fabric).
+                    IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName(
+                        ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
                     _ => null
                 };
 
@@ -476,24 +507,15 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         foreach ( var transformation in pipelineResults.Transformations )
         {
             var targetSymbol = transformation.TargetDeclaration.GetSymbol();
+            var primarySyntaxReference = targetSymbol?.GetPrimarySyntaxReference();
 
-            if ( targetSymbol == null )
+            var filePath = primarySyntaxReference?.SyntaxTree.FilePath;
+
+            if ( filePath == null || !resultBuilders.ContainsKey( filePath ) )
             {
-                // Transformations on introduced declarations are not represented at design time at the moment.
-                continue;
+                filePath = inputSyntaxTreeForDetached.FilePath;
             }
 
-            var primarySyntaxReference = targetSymbol.GetPrimarySyntaxReference();
-
-            if ( primarySyntaxReference == null )
-            {
-                // This is a transformation of an implicitly declared declaration that is implicitly declared even after syntax generator is executed.
-                // E.g. appending parameters to implicit constructor of a non-partial type.
-                continue;
-            }
-
-            var syntaxTree = primarySyntaxReference.SyntaxTree;
-            var filePath = syntaxTree.FilePath;
             var builder = resultBuilders[filePath];
             builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
@@ -577,18 +599,6 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     }
 
     public Invalidator ToInvalidator() => new( this );
-
-    internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
-    {
-        if ( this.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResult ) )
-        {
-            return (syntaxTreeResult.Diagnostics, syntaxTreeResult.Suppressions);
-        }
-        else
-        {
-            return (ImmutableArray<Diagnostic>.Empty, ImmutableArray<CacheableScopedSuppression>.Empty);
-        }
-    }
 
     public bool IsSyntaxTreeDirty( SyntaxTree syntaxTree ) => !this.SyntaxTreeResults.ContainsKey( syntaxTree.FilePath );
 

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.AspectTesting.XunitFramework;
 using Metalama.Testing.UnitTesting;
+using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -19,20 +20,24 @@ public sealed class TestExecutorTests : UnitTestClass
     [InlineData(
         "Error!",
         "**ERROR**",
-        "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestFailed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
+        "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestFailed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     [InlineData(
         "/* Empty */",
-        "// --- No output compilation units ---",
-        "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestPassed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
+        "// The compilation was successful.",
+        "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestPassed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     [InlineData(
-        "// @Skipped",
+        """
+        #if TEST_OPTIONS
+        // @Skipped
+        #endif
+        """,
         "",
-        "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestSkipped,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
+        "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestSkipped,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     public void EventSequence( string testInput, string expectedTestOutput, string expectedEventSequence )
     {
         using var testContext = this.CreateTestContext();
         var fileSystem = new TestFileSystem( testContext.ServiceProvider.Underlying );
-        const string directory = "C:\\test";
+        var directory = Path.Combine( Environment.CurrentDirectory, "tests" );
         fileSystem.CreateDirectory( directory );
         fileSystem.WriteAllText( Path.Combine( directory, "Test.cs" ), testInput );
         fileSystem.WriteAllText( Path.Combine( directory, "Test.t.cs" ), expectedTestOutput );
@@ -41,7 +46,14 @@ public sealed class TestExecutorTests : UnitTestClass
             .WithUntypedService( typeof(IFileSystem), fileSystem )
             .WithService( new FakeMetadataReader( directory ) );
 
-        var testProperties = new TestProjectProperties( assemblyName: null, directory, directory, ImmutableArray<string>.Empty, "net6.0", ImmutableArray<string>.Empty );
+        var testProperties = new TestProjectProperties(
+            assemblyName: null,
+            directory,
+            directory,
+            ImmutableArray<string>.Empty,
+            "net6.0",
+            ImmutableArray<string>.Empty );
+
         var assemblyInfo = new TestAssemblyInfo( $"test.dll" );
         var testFactory = new TestFactory( serviceProvider, testProperties, new TestDirectoryOptionsReader( serviceProvider, directory ), assemblyInfo );
         var messageSink = new TestMessageSink();

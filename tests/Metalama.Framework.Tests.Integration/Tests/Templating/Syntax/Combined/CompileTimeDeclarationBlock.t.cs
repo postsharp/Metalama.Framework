@@ -1,4 +1,4 @@
-void Method()
+private void Method()
 {
   return;
 }

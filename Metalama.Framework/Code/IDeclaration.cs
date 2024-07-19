@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Metrics;
+using Metalama.Framework.Utilities;
 using System;
 using System.Collections.Immutable;
 
@@ -49,7 +50,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the containing declaration, such as a <see cref="INamedType"/> for nested
         /// types or for methods. For non-nested types, returns the containing assembly
-        /// (and not the namespace, use <see cref="INamedType.Namespace"/> for that).
+        /// (and not the namespace, use <see cref="INamedType.ContainingNamespace"/> for that).
         /// </summary>
         IDeclaration? ContainingDeclaration { get; }
 
@@ -75,6 +76,7 @@ namespace Metalama.Framework.Code
         /// than the declaration in which it is contained. A type has always a greater depths than the base it derives from or the interfaces
         /// it implements.
         /// </summary>
+        [Hidden]
         int Depth { get; }
 
         /// <summary>

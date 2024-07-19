@@ -14,7 +14,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger )
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider )
             => new HighlightingTestRunner( serviceProvider, projectDirectory, references, logger );
     }
 }

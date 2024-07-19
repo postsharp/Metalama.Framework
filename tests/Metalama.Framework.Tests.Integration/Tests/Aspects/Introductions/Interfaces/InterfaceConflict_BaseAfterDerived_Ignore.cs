@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -24,14 +25,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IDerivedInterface), tags: new { Source = "Derived" });
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IBaseInterface), OverrideStrategy.Ignore, tags: new { Source = "Base" });
+            aspectBuilder.ImplementInterface( typeof(IDerivedInterface), tags: new { Source = "Derived" } );
+            aspectBuilder.ImplementInterface( typeof(IBaseInterface), OverrideStrategy.Ignore, tags: new { Source = "Base" } );
         }
 
         [InterfaceMember]
         public int Foo()
         {
-            Console.WriteLine($"This is introduced interface member by {meta.Tags["Source"]} (should be Derived).");
+            Console.WriteLine( $"This is introduced interface member by {meta.Tags["Source"]} (should be Derived)." );
 
             return meta.Proceed();
         }
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [InterfaceMember]
         public int Bar()
         {
-            Console.WriteLine($"This is introduced interface member by {meta.Tags["Source"]} (should be Derived).");
+            Console.WriteLine( $"This is introduced interface member by {meta.Tags["Source"]} (should be Derived)." );
 
             return meta.Proceed();
         }

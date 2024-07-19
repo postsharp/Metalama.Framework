@@ -1,5 +1,5 @@
 using System;
-using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
@@ -10,12 +10,11 @@ internal class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Outbound
-            .SelectMany(
-                c => c.DescendantsAndSelf()
-                    .SelectMany( t => t.Types )
-                    .SelectMany( t => t.Methods )
-                    .Where( m => m.ReturnType.Is( typeof(string) ) ) )
+        amender
+            .SelectMany( c => c.DescendantsAndSelf() )
+            .SelectMany( t => t.Types )
+            .SelectMany( t => t.Methods )
+            .Where( m => m.ReturnType.Is( typeof(string) ) )
             .AddAspect<Aspect>();
     }
 }

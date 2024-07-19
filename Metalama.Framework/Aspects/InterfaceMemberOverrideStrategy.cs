@@ -13,7 +13,7 @@ namespace Metalama.Framework.Aspects
     {
         /// <summary>
         /// The behavior depends on the <see cref="OverrideStrategy"/> specified when calling the <see cref="IAdviceFactory.ImplementInterface(INamedType,INamedType,OverrideStrategy,object?)"/>
-        /// method. When set to <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>, the default value is <see cref="Fail"/>. When set to <see cref="OverrideStrategy.Override"/>,
+        /// method. When set to <see cref="OverrideStrategy.Fail"/>, the default value is <see cref="Fail"/>. When set to <see cref="OverrideStrategy.Override"/>,
         /// the strategy is to override.
         /// </summary>
         Default = 0,

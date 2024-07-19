@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-internal interface IConcurrentTaskRunner : IProjectService // Must be project-scoped because the option to enable/disable concurrency is in the project options.
+// Must be project-scoped because the option to enable/disable concurrency is in the project options.
+internal interface IConcurrentTaskRunner : IProjectService
 {
-    Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+    Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull;
 
-    Task RunInParallelAsync<TItem, TContext>(
+    // ReSharper disable once UnusedMember.Global
+    Task RunConcurrentlyAsync<TItem, TContext>(
         IEnumerable<TItem> items,
         Action<TItem, TContext> action,
         Func<TContext> createContext,
@@ -21,6 +23,6 @@ internal interface IConcurrentTaskRunner : IProjectService // Must be project-sc
         where TItem : notnull
         where TContext : IDisposable;
 
-    Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
+    Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
         where T : notnull;
 }

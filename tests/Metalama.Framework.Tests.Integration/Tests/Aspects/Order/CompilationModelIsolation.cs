@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride.CompilationModelIsolation;
 
-[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride.CompilationModelIsolation;
 
@@ -15,7 +16,7 @@ internal class Aspect1 : TypeAspect
     {
         foreach (var m in builder.Target.Methods)
         {
-            builder.Advice.Override( m, nameof(Override) );
+            builder.With( m ).Override( nameof(Override) );
         }
     }
 
@@ -44,7 +45,7 @@ internal class Aspect2 : TypeAspect
     {
         foreach (var m in builder.Target.Methods)
         {
-            builder.Advice.Override( m, nameof(Override) );
+            builder.With( m ).Override( nameof(Override) );
         }
     }
 

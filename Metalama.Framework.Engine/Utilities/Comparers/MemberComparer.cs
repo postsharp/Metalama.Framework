@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
@@ -11,12 +9,12 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
     internal sealed class MemberComparer<T> : IEqualityComparer<T>
         where T : class, IMember
     {
-        public MemberComparer( IEqualityComparer<ISymbol> symbolComparer )
+        public MemberComparer( IEqualityComparer<IType> typeComparer )
         {
-            this._symbolComparer = symbolComparer;
+            this._typeComparer = typeComparer;
         }
 
-        private readonly IEqualityComparer<ISymbol> _symbolComparer;
+        private readonly IEqualityComparer<IType> _typeComparer;
 
         public bool Equals( T? x, T? y )
         {
@@ -58,7 +56,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     var xParameter = xHasParameters.Parameters[i].Type;
                     var yParameter = yHasParameters.Parameters[i].Type;
 
-                    if ( !this._symbolComparer.Equals( xParameter.GetSymbol(), yParameter.GetSymbol() ) )
+                    if ( !this._typeComparer.Equals( xParameter, yParameter ) )
                     {
                         return false;
                     }
@@ -77,7 +75,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             {
                 foreach ( var parameter in hasParameters.Parameters )
                 {
-                    hashCode.Add( parameter.Type.GetSymbol(), this._symbolComparer );
+                    hashCode.Add( parameter.Type, this._typeComparer );
                 }
             }
 

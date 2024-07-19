@@ -19,7 +19,6 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
@@ -29,22 +28,25 @@ namespace Metalama.Framework.Engine.Aspects
         where T : class, IDeclaration
     {
         private readonly AspectBuilderState _aspectBuilderState;
-        private AspectReceiverSelector<T>? _declarationSelector;
+        private readonly AdviceFactory<T> _adviceFactory;
 
         public AspectBuilder(
             T target,
             AspectBuilderState aspectBuilderState,
-            AdviceFactory adviceFactory,
+            AdviceFactory<T> adviceFactory,
             AspectPredecessor? aspectPredecessor = null )
         {
             this.Target = target;
             this._aspectBuilderState = aspectBuilderState;
-            this.AdviceFactory = adviceFactory;
+            this._adviceFactory = adviceFactory;
             this.AspectPredecessor = aspectPredecessor ?? new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectBuilderState.AspectInstance );
             this.LicenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
         }
 
         public IProject Project => this.Target.Compilation.Project;
+
+        [Memo]
+        public string? Namespace => this.Target.GetNamespace()?.FullName;
 
         public IAspectInstance AspectInstance => this._aspectBuilderState.AspectInstance;
 
@@ -65,7 +67,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ProjectServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
 
-        public AdviceFactory AdviceFactory { get; }
+        [Obsolete]
+        IAdviceFactory IAspectBuilder.Advice => this._adviceFactory;
+
+        IAdviceFactory IAdviserInternal.AdviceFactory => this._adviceFactory;
 
         public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
         {
@@ -82,20 +87,13 @@ namespace Metalama.Framework.Engine.Aspects
         public T Target { get; }
 
         [Memo]
-        public IAspectReceiver<T> Outbound => this.GetAspectReceiverSelector().With( t => t );
+        public IAspectReceiver<T> Outbound
+            => new RootAspectReceiver<T>(
+                this.Target.ToTypedRef(),
+                this,
+                CompilationModelVersion.Current );
 
         IDeclaration IAspectBuilder.Target => this.Target;
-
-        private AspectReceiverSelector<T> GetAspectReceiverSelector()
-            => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this, CompilationModelVersion.Current );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector )
-            => this.GetAspectReceiverSelector().With( selector );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector )
-            => this.GetAspectReceiverSelector().With( selector );
-
-        IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 
         public void SkipAspect() => this._aspectBuilderState.AspectInstance.Skip();
 
@@ -144,16 +142,30 @@ namespace Metalama.Framework.Engine.Aspects
 
         public string? Layer => this._aspectBuilderState.Layer;
 
-        public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget )
+        IAspectBuilder<T1> IAspectBuilder.WithTarget<T1>( T1 newTarget ) => this.With( newTarget );
+
+        public object? Tags
+        {
+            get => this._aspectBuilderState.Tags;
+            set => this._aspectBuilderState.Tags = value;
+        }
+
+        IAspectBuilder<T1> IAspectBuilder<T>.WithTarget<T1>( T1 newTarget ) => this.With( newTarget );
+
+        public IAspectBuilder<TNewTarget> With<TNewTarget>( TNewTarget declaration )
             where TNewTarget : class, IDeclaration
         {
-            if ( newTarget == this.Target )
+            if ( declaration == this.Target )
             {
                 return (IAspectBuilder<TNewTarget>) (object) this;
             }
             else
             {
-                return new AspectBuilder<TNewTarget>( newTarget, this._aspectBuilderState, this.AdviceFactory, this.AspectPredecessor );
+                return new AspectBuilder<TNewTarget>(
+                    declaration,
+                    this._aspectBuilderState,
+                    this._adviceFactory.WithDeclaration( declaration ),
+                    this.AspectPredecessor );
             }
         }
 
@@ -179,5 +191,9 @@ namespace Metalama.Framework.Engine.Aspects
         public LicenseVerifier? LicenseVerifier { get; }
 
         string IDiagnosticSource.DiagnosticSourceDescription => ((IAspectInstanceInternal) this.AspectInstance).DiagnosticSourceDescription;
+
+        T IAdviser<T>.Target => this.Target;
+
+        IAdviser<TNewDeclaration> IAdviser<T>.With<TNewDeclaration>( TNewDeclaration declaration ) => throw new NotImplementedException();
     }
 }

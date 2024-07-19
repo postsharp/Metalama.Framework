@@ -1,4 +1,4 @@
-int Method(int a, int bb)
+private int Method(int a, int bb)
 {
   global::System.Console.WriteLine(1);
   var result = this.Method(a, bb);

@@ -1,6 +1,6 @@
-
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.ExplicitInterfaceMember;
@@ -10,8 +10,9 @@ public sealed class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.Target.Type.Events.Single().Add(null);
-        meta.Target.Type.Events.Single().Remove(null);
+        meta.Target.Type.Events.Single().Add( null );
+        meta.Target.Type.Events.Single().Remove( null );
+
         return meta.Proceed();
     }
 }
@@ -31,8 +32,5 @@ public partial class TestClass : ITestInterface
     }
 
     [TestAspect]
-    public void Foo()
-    {
-    }
+    public void Foo() { }
 }
-

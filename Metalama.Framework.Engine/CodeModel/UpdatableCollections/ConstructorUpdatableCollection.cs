@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class ConstructorUpdatableCollection : NonUniquelyNamedMemberUpdatableCollection<IConstructor>
 {
-    public ConstructorUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    public ConstructorUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation, declaringType.As<INamespaceOrNamedType>() ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol )
         => symbol.Kind == SymbolKind.Method &&

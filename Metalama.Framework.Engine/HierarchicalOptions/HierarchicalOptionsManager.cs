@@ -2,9 +2,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
@@ -13,6 +15,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
@@ -24,6 +28,8 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
     private IExternalHierarchicalOptionsProvider? _externalOptionsProvider;
 
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
+
+    private bool IsInitialized { get; set; }
 
     internal HierarchicalOptionsManager( in ProjectServiceProvider serviceProvider )
     {
@@ -37,19 +43,34 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
         this._typeResolver ??= this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
 
+        var type = compilationModel.Factory.GetTypeByReflectionName( typeName );
+
+        if ( type == null! )
+        {
+            return null;
+        }
+
         return
-            this._typeResolver.GetCompileTimeType(
-                compilationModel.Factory.GetTypeByReflectionName( typeName ).GetSymbol().AssertNotNull(),
-                false );
+            this._typeResolver.GetCompileTimeType( type.GetSymbol().AssertSymbolNotNull(), false );
     }
 
-    internal void Initialize(
+    internal Task InitializeAsync(
         CompileTimeProject project,
         ImmutableArray<IHierarchicalOptionsSource> sources,
         IExternalHierarchicalOptionsProvider? externalOptionsProvider,
         CompilationModel compilationModel,
-        IUserDiagnosticSink diagnosticSink )
+        IUserDiagnosticSink diagnosticSink,
+        CancellationToken cancellationToken )
     {
+        if ( this.IsInitialized )
+        {
+            throw new InvalidOperationException();
+        }
+        else
+        {
+            this.IsInitialized = true;
+        }
+
         // Initialize all default options. We need to do this during initialization because we need a diagnostic sink and won't have it later.
 
         foreach ( var optionTypeName in project.ClosureOptionTypes )
@@ -110,15 +131,19 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
             }
         }
 
-        foreach ( var source in sources )
-        {
-            this.AddSource( source, compilationModel, diagnosticSink );
-        }
+        return Task.WhenAll( sources.Select( s => this.AddSourceAsync( s, compilationModel, diagnosticSink, cancellationToken ) ) );
     }
 
-    internal void AddSource( IHierarchicalOptionsSource source, CompilationModel compilationModel, IUserDiagnosticSink diagnosticSink )
+    internal async Task AddSourceAsync(
+        IHierarchicalOptionsSource source,
+        CompilationModel compilationModel,
+        IUserDiagnosticSink diagnosticSink,
+        CancellationToken cancellationToken )
     {
-        foreach ( var configurator in source.GetOptions( compilationModel, diagnosticSink ) )
+        var collector = new OutboundActionCollector( diagnosticSink );
+        await source.CollectOptionsAsync( new OutboundActionCollectionContext( collector, compilationModel, cancellationToken ) );
+
+        foreach ( var configurator in collector.HierarchicalOptions )
         {
             var optionTypeName = configurator.Options.GetType().FullName.AssertNotNull();
 
@@ -130,6 +155,11 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
     private OptionTypeNode GetOptionTypeNode( string optionTypeName )
     {
+        if ( !this.IsInitialized )
+        {
+            throw new InvalidOperationException( $"The {nameof(HierarchicalOptionsManager)} has not been initialized." );
+        }
+
         if ( !this._optionTypes.TryGetValue( optionTypeName, out var optionTypeNode ) )
         {
             throw new AssertionFailedException( $"The option type '{optionTypeName}' is not a part of the current project." );
@@ -138,16 +168,12 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         return optionTypeNode;
     }
 
-    internal IHierarchicalOptions GetOptions( IDeclaration declaration, Type optionsType )
+    public IHierarchicalOptions GetOptions( IDeclaration declaration, Type optionsType )
     {
         var optionTypeNode = this.GetOptionTypeNode( optionsType.FullName.AssertNotNull() );
 
         return optionTypeNode.GetOptions( declaration ).AssertNotNull();
     }
-
-    public TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : class, IHierarchicalOptions, new()
-        => (TOptions) this.GetOptions( declaration, typeof(TOptions) );
 
     public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>>
         GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )

@@ -10,10 +10,9 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberOrNamedTypeImpl
+internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberOrNamedTypeImpl
 {
     private Accessibility _accessibility;
-    private string _name;
     private bool _isSealed;
     private bool _isNew;
     private bool _usesNewKeyword;
@@ -53,7 +52,7 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         }
     }
 
-    public INamedType DeclaringType { get; }
+    public INamedType? DeclaringType { get; }
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
@@ -67,17 +66,6 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
             this.CheckNotFrozen();
 
             this._accessibility = value;
-        }
-    }
-
-    public virtual string Name
-    {
-        get => this._name;
-        set
-        {
-            this.CheckNotFrozen();
-
-            this._name = value;
         }
     }
 
@@ -103,12 +91,12 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         }
     }
 
-    public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
+    public override IDeclaration ContainingDeclaration
+        => this.DeclaringType.AssertNotNull( "Declaring type should not be null (missing override?)." );
 
-    protected MemberOrNamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice )
+    protected MemberOrNamedTypeBuilder( Advice advice, INamedType? declaringType, string name ) : base( advice, name )
     {
         this.DeclaringType = declaringType;
-        this._name = name;
         this._usesNewKeyword = false;
     }
 

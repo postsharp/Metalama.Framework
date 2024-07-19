@@ -30,7 +30,9 @@ namespace Metalama.Framework.Workspaces
             this.Projects = projects;
         }
 
-        public IProjectSet GetSubset( Predicate<Project> filter )
+        IProjectSet IProjectSet.GetSubset( Predicate<Project> filter ) => this.GetSubset( filter );
+
+        public ProjectSet GetSubset( Predicate<Project> filter )
         {
             var filteredProjects = this.Projects.Where( p => filter( p ) ).OrderBy( p => p.ToString() ).ToImmutableArray();
             var filteredProjectKey = string.Join( "+", filteredProjects );
@@ -63,7 +65,7 @@ namespace Metalama.Framework.Workspaces
 
         [Memo]
         internal ICompilationSetResult CompilationResult
-            => new CompilationSetResult( this.Projects.AsParallel().Select( x => x.CompilationResult ).ToImmutableArray(), this.ToString() );
+            => new CompilationSetResult( [..this.Projects.AsParallel().Select( x => x.CompilationResult )], this.ToString() );
 
         public override string ToString() => this._sourceCode.ToString();
 

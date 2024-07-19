@@ -1,7 +1,7 @@
 public class TargetClass : BaseClass
 {
   [OverrideAspect]
-  public new event System.EventHandler Event
+  public new event EventHandler Event
   {
     add
     { // Invoke this.Event_Source
@@ -28,7 +28,7 @@ public class TargetClass : BaseClass
       this.Event_Source -= value;
     }
   }
-  private event System.EventHandler Event_Source
+  private event EventHandler Event_Source
   {
     add
     {
@@ -38,7 +38,7 @@ public class TargetClass : BaseClass
     }
   }
   [InvokerBeforeAspect]
-  public event System.EventHandler InvokerBefore
+  public event EventHandler InvokerBefore
   {
     add
     { // Invoke this.Event
@@ -62,7 +62,7 @@ public class TargetClass : BaseClass
     }
   }
   [InvokerAfterAspect]
-  public event System.EventHandler InvokerAfter
+  public event EventHandler InvokerAfter
   {
     add
     { // Invoke this.Event
@@ -87,7 +87,7 @@ public class TargetClass : BaseClass
     // Invoke this.Event
     }
   }
-  public static void StaticTarget(object? sender, System.EventArgs args)
+  public static void StaticTarget(object? sender, EventArgs args)
   {
   }
 }

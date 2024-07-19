@@ -1,8 +1,9 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Constructor_Order;
 
-[assembly:AspectOrder(typeof(NotNullAttribute), typeof(NotEmptyAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(NotNullAttribute), typeof(NotEmptyAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Constructor_Order
 {
@@ -19,11 +20,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Construct
 
     internal class NotEmptyAttribute : ContractAspect
     {
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value.Length == 0)
             {
-                throw new ArgumentNullException(meta.Target.Parameter.Name);
+                throw new ArgumentNullException( meta.Target.Parameter.Name );
             }
         }
     }

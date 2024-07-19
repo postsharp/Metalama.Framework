@@ -57,7 +57,8 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
             using var testContext = this.CreateTestContext();
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 class C : TypeAspect 
 {
    void M() {}
@@ -100,7 +101,8 @@ class E { ErrorType X; }
             using var testContext = this.CreateTestContext();
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class C 
 {
@@ -129,7 +131,8 @@ class D : System.IDisposable
             using var testContext = this.CreateTestContext();
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [assembly: RunTimeOrCompileTime]
 class C 
 {
@@ -145,7 +148,8 @@ class C
         public void MarkedAsCompileTimeOnly()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [CompileTime]
 class C 
@@ -173,7 +177,8 @@ class C
             // We cannot use CompilationModel for this test because CompileTimeOnly are hidden from the model.
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 [RunTimeOrCompileTime]
 class C 
@@ -207,7 +212,8 @@ class C
             // The main purpose of these tests is to check that there is no infinite recursion.
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using System.Collections.Generic;
 
 internal class C : TypeAspect
@@ -230,7 +236,8 @@ internal class C : TypeAspect
             // The main purpose of these tests is to check that there is no infinite recursion.
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using System.Collections.Generic;
 
 internal class C : TypeAspect
@@ -261,7 +268,8 @@ internal class C : TypeAspect
             using var testContext = this.CreateTestContext();
 
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using System.Collections.Generic;
 
 internal class C : TypeAspect
@@ -344,7 +352,8 @@ class C
         public void NestedClassCompileTimeByInheritance()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class C : TypeAspect 
 {
@@ -363,7 +372,8 @@ class C : TypeAspect
         public void ConflictDiagnostic()
         {
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 class RunTimeClass { } 

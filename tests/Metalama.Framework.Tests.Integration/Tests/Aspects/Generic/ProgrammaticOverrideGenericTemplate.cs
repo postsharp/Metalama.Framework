@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,7 +9,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.ProgrammaticOv
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override( builder.Target, nameof(OverrideMethod) );
+            builder.Override( nameof(OverrideMethod) );
         }
 
         [Template]

@@ -1,3 +1,5 @@
+using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -5,32 +7,35 @@ using Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDecla
 
 #pragma warning disable CS0067, CS0169
 
-[assembly: AspectOrder(typeof(SerializeAttribute), typeof(IntroduceMembersAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(SerializeAttribute), typeof(IntroduceMembersAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroducedDeclarative;
 
-class IntroduceMembersAttribute : TypeAspect
+internal class IntroduceMembersAttribute : TypeAspect
 {
     [Introduce]
-    void M2<T>((int x, int y) p) { }
+    private void M2<T>( (int x, int y) p ) { }
+
     [Introduce]
-    int _field;
+    private int _field;
+
     [Introduce]
-    event System.EventHandler? Event;
+    private event EventHandler? Event;
+
     [Introduce]
-    int Property { get; set; }
+    private int Property { get; set; }
 }
 
-class SerializeAttribute : OverrideMethodAspect
+internal class SerializeAttribute : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        var arrayBuilder = new ArrayBuilder(typeof(string));
+        var arrayBuilder = new ArrayBuilder( typeof(string) );
 
         foreach (var member in meta.Target.Type.Members())
         {
             var serializableId = member.ToSerializableId();
-            arrayBuilder.Add(serializableId.Id);
+            arrayBuilder.Add( serializableId.Id );
         }
 
         return arrayBuilder;
@@ -39,8 +44,8 @@ class SerializeAttribute : OverrideMethodAspect
 
 // <target>
 [IntroduceMembers]
-class C
+internal class C
 {
     [Serialize]
-    string[] M() => null!;
+    private string[] M() => null!;
 }

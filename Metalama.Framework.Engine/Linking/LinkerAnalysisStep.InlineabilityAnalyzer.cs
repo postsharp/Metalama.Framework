@@ -80,7 +80,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( this._reachableSymbolSemantics, ProcessSemantic, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( this._reachableSymbolSemantics, ProcessSemantic, cancellationToken );
 
             return inlineableSemantics;
 
@@ -247,7 +247,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( inlineableSemantics, ProcessSemantic, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( inlineableSemantics, ProcessSemantic, cancellationToken );
 
             return inlineableReferences;
 
@@ -318,7 +318,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( inlineableSemantics, ProcessSemantic, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( inlineableSemantics, ProcessSemantic, cancellationToken );
 
             return inlinedSemantics;
 

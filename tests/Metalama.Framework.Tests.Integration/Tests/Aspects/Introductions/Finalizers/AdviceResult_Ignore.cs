@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -8,28 +9,23 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Final
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceFinalizer(builder.Target, nameof(Finalizer), whenExists: OverrideStrategy.Ignore);
+            var result = builder.IntroduceFinalizer( nameof(Finalizer), whenExists: OverrideStrategy.Ignore );
 
-            if (result.Outcome != Advising.AdviceOutcome.Ignore)
+            if (result.Outcome != AdviceOutcome.Ignore)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignore.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Ignore." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceFinalizer)
+            if (result.AdviceKind != AdviceKind.IntroduceFinalizer)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceFinalizer.");
-            }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceFinalizer." );
             }
 
-            if (result.Declaration != builder.Target.Finalizer.ForCompilation(result.Declaration.Compilation))
+            if (result.Declaration != builder.Target.Finalizer.ForCompilation( result.Declaration.Compilation ))
             {
-                throw new InvalidOperationException($"Declaration was not correct.");
+                throw new InvalidOperationException( $"Declaration was not correct." );
             }
         }
 
@@ -46,7 +42,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Final
     {
         ~TargetClass()
         {
-            Console.WriteLine("Original code.");
+            Console.WriteLine( "Original code." );
         }
     }
 }

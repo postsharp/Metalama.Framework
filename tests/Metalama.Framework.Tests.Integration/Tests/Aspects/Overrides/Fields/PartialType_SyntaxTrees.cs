@@ -1,8 +1,7 @@
-﻿#if TEST_OPTIONS
-// @OutputAllSyntaxTrees
-#endif
+﻿
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -14,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.PartialTy
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.OverrideAccessors( field, nameof(Template), nameof(Template), tags: new { name = field.Name } );
+                builder.With( field ).OverrideAccessors( nameof(Template), nameof(Template), tags: new { name = field.Name } );
             }
         }
 

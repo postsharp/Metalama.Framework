@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -56,7 +57,7 @@ public sealed partial class CompilationChangesTests
         var code = new Dictionary<string, string>();
         var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
-        code.Add( "code.cs", "using Metalama.Framework.Aspects; class C { }" );
+        code.Add( "code.cs", "using Metalama.Framework.Aspects;  class C { }" );
 
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
@@ -223,7 +224,7 @@ public sealed partial class CompilationChangesTests
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
         var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
-        code["code.cs"] = "using Metalama.Framework.Aspects; class C {}";
+        code["code.cs"] = "using Metalama.Framework.Aspects;  class C {}";
 
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
 
@@ -239,7 +240,7 @@ public sealed partial class CompilationChangesTests
     [Fact]
     public void ChangeSyntaxTree_NoLongerCompileTime()
     {
-        var code = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
+        var code = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects;  class C {}" } };
         var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code["code.cs"] = "class C {}";
@@ -253,5 +254,16 @@ public sealed partial class CompilationChangesTests
         Assert.True( changes.IsIncremental );
         Assert.Single( changes.SyntaxTreeChanges );
         Assert.Equal( CompileTimeChangeKind.NoLongerCompileTime, changes.SyntaxTreeChanges.Single().Value.CompileTimeChangeKind );
+    }
+
+    [Fact]
+    public void DuplicateTrees()
+    {
+        var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null )
+            .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( "class C;", path: "C.cs" ), SyntaxFactory.ParseSyntaxTree( "internal class C;", path: "C.cs" ) );
+
+        var changes = this.CompareSyntaxTrees( compilation, compilation );
+
+        Assert.False( changes.HasChange );
     }
 }

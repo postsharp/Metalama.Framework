@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.InheritableTyp
         }
     }
 
-     // <target>
+    // <target>
     internal class DerivedClass : BaseClass
     {
         private int Method3( int a ) => a;

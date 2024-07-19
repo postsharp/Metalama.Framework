@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal sealed class AllFieldsCollection : AllMembersCollection<IField>, IFieldCollection
 {
-    public AllFieldsCollection( NamedType declaringType ) : base( declaringType ) { }
+    public AllFieldsCollection( INamedTypeImpl declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IField> GetMembers( INamedType namedType ) => namedType.Fields;
 

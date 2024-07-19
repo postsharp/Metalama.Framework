@@ -6,13 +6,13 @@ using Xunit.Abstractions;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal sealed class TestCollection : LongLivedMarshalByRefObject, ITestCollection, ITestAssembly
+    internal sealed class TestCollection : LongLivedMarshalByRefObject, ITestCollection
     {
-        private readonly TestFactory _factory;
+        private readonly TestAssembly _assembly;
 
-        public TestCollection( TestFactory factory )
+        public TestCollection( TestAssembly assembly )
         {
-            this._factory = factory;
+            this._assembly = assembly;
         }
 
         void IXunitSerializable.Deserialize( IXunitSerializationInfo info ) { }
@@ -23,12 +23,8 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         string ITestCollection.DisplayName => "All tests";
 
-        ITestAssembly ITestCollection.TestAssembly => this;
+        ITestAssembly ITestCollection.TestAssembly => this._assembly;
 
         Guid ITestCollection.UniqueID { get; } = Guid.NewGuid();
-
-        IAssemblyInfo ITestAssembly.Assembly => this._factory.AssemblyInfo;
-
-        string ITestAssembly.ConfigFileName => null!;
     }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -43,7 +44,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
 
                 foreach ( var attribute in attributes )
                 {
-                    if ( !SymbolValidator.Instance.VisitAttribute( attribute ) )
+                    if ( !attribute.IsValid() )
                     {
                         continue;
                     }
@@ -52,6 +53,22 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
                     // as the parent symbol, probably because of some bug or optimisation.
 
                     action( new AttributeRef( attribute, this._parent, this.Compilation.CompilationContext ) );
+                }
+
+                if ( this.Compilation.TryGetRedirectedDeclaration( this._parent, out var redirectedDeclaration ) )
+                {
+                    // If the declaration was redirected, we need to add the attributes from the builder.
+                    if ( redirectedDeclaration.Target is IDeclarationBuilder redirectedBuilder )
+                    {
+                        foreach ( var attribute in redirectedBuilder.Attributes )
+                        {
+                            action( new AttributeRef( (AttributeBuilder) attribute ) );
+                        }
+                    }
+                    else
+                    {
+                        Invariant.Assert( false );
+                    }
                 }
 
                 break;

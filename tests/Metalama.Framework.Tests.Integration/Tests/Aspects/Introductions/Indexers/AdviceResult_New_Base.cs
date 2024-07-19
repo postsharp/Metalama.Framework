@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -9,51 +10,51 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Index
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceIndexer(builder.Target, typeof(int), nameof(GetTemplate), nameof(SetTemplate), whenExists: OverrideStrategy.New);
+            var result = builder.IntroduceIndexer(
+                typeof(int),
+                nameof(GetTemplate),
+                nameof(SetTemplate),
+                whenExists: OverrideStrategy.New );
 
-            if (result.Outcome != Advising.AdviceOutcome.New)
+            if (result.Outcome != AdviceOutcome.New)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of New.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of New." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceIndexer)
+            if (result.AdviceKind != AdviceKind.IntroduceIndexer)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceIndexer.");
-            }
-
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceIndexer." );
             }
 
             if (!builder.Advice.MutableCompilation.Comparers.Default.Equals(
-                    result.Declaration.ForCompilation(builder.Advice.MutableCompilation), 
-                    builder.Target.ForCompilation(builder.Advice.MutableCompilation).Indexers.Single()))
+                    result.Declaration.ForCompilation( builder.Advice.MutableCompilation ),
+                    builder.Target.ForCompilation( builder.Advice.MutableCompilation ).Indexers.Single() ))
             {
-                throw new InvalidOperationException($"Declaration was not correct.");
+                throw new InvalidOperationException( $"Declaration was not correct." );
             }
         }
 
         [Template]
-        public int GetTemplate(int index)
+        public int GetTemplate( int index )
         {
-            Console.WriteLine("Aspect code.");
+            Console.WriteLine( "Aspect code." );
+
             return meta.Proceed();
         }
 
         [Template]
-        public void SetTemplate(int index, int value)
+        public void SetTemplate( int index, int value )
         {
-            Console.WriteLine("Aspect code.");
+            Console.WriteLine( "Aspect code." );
             meta.Proceed();
         }
     }
 
     public class BaseClass
     {
-        public virtual int this[int index]
+        public virtual int this[ int index ]
         {
             get => 42;
             set { }
@@ -62,7 +63,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Index
 
     // <target>
     [TestAspect]
-    public class TargetClass : BaseClass
-    {
-    }
+    public class TargetClass : BaseClass { }
 }

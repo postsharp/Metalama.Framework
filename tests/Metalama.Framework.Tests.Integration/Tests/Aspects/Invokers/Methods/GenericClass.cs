@@ -1,4 +1,5 @@
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,8 +10,8 @@ public class MyAspect : TypeAspect
     [Introduce]
     public void Introduced()
     {
-        meta.Target.Type.Methods.OfName("Method").Single().Invoke();
-        meta.Target.Type.WithTypeArguments(typeof(int)).Methods.OfName("Method").Single().Invoke();
+        meta.Target.Type.Methods.OfName( "Method" ).Single().Invoke();
+        meta.Target.Type.WithTypeArguments( typeof(int) ).Methods.OfName( "Method" ).Single().Invoke();
     }
 }
 

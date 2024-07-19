@@ -1,12 +1,12 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.Template_Expression
 {
     internal class TestAttribute : OverrideMethodAspect
     {
-        public override dynamic? OverrideMethod()
-            => default;
+        public override dynamic? OverrideMethod() => default;
     }
 
     // <target>
@@ -15,20 +15,22 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.T
         [Test]
         public void VoidMethod()
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
         }
 
         [Test]
         public int Method()
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
+
             return 42;
         }
 
         [Test]
         public T? Method<T>()
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
+
             return default;
         }
     }

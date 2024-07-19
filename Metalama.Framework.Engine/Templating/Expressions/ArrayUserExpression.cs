@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -28,9 +27,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             var generator = syntaxSerializationContext.SyntaxGenerator;
 
-            return generator.ArrayCreationExpression(
-                generator.Type( this._itemType.GetSymbol() ),
-                items );
+            return generator.ArrayCreationExpression( generator.Type( this._itemType ), items );
         }
 
         protected override bool CanBeNull => false;

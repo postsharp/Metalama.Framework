@@ -5,7 +5,6 @@
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
-using Metalama.Framework.Code;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Validation.ExternalAssembly;
@@ -19,13 +18,13 @@ public class Fabric : ProjectFabric
 
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( compilation => compilation.ReferencedAssemblies.OfName( typeof(Regex).Assembly.GetName().Name! ) )
-            .ValidateReferences( Validate, ReferenceKinds.All );
+        amender.SelectMany( compilation => compilation.ReferencedAssemblies.OfName( typeof(Regex).Assembly.GetName().Name! ) )
+            .ValidateInboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
     }
 
-    private void Validate( in ReferenceValidationContext context )
+    private void Validate( ReferenceValidationContext context )
     {
-        context.Diagnostics.Report( _warning.WithArguments( ( (IAssembly)context.ReferencedDeclaration ).Identity.Name ) );
+        context.Diagnostics.Report( _warning.WithArguments( ( context.Destination.Assembly.Identity.Name ) ) );
     }
 }
 

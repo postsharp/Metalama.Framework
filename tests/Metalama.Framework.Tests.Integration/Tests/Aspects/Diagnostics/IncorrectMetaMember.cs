@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -7,69 +8,84 @@ using System.Linq;
 
 #pragma warning disable CS0169
 
-[assembly: AspectOrder(typeof(FieldAspectTest), typeof(FieldOrPropertyAspectTest), typeof(IndexerAspectTest), typeof(PropertyAspectTest))]
+[assembly:
+    AspectOrder(
+        AspectOrderDirection.RunTime,
+        typeof(FieldAspectTest),
+        typeof(FieldOrPropertyAspectTest),
+        typeof(IndexerAspectTest),
+        typeof(PropertyAspectTest) )]
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.IncorrectMetaMember;
 
-abstract class AspectBase : Aspect, IAspect<IFieldOrPropertyOrIndexer>
+internal abstract class AspectBase : Aspect, IAspect<IFieldOrPropertyOrIndexer>
 {
-    public void BuildAspect(IAspectBuilder<IFieldOrPropertyOrIndexer> builder)
+    public void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
     {
-        builder.Advice.OverrideAccessors(builder.Target, getTemplate: nameof(Template));
+        builder.OverrideAccessors( getTemplate: nameof(Template) );
     }
 
-    public void BuildEligibility(IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder) { }
+    public void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder ) { }
 
     protected abstract string TargetName { get; }
 
     [Template]
-    dynamic? Template()
+    private dynamic? Template()
     {
-        Console.WriteLine(TargetName);
+        Console.WriteLine( TargetName );
 
         return meta.Proceed();
     }
 }
 
-class FieldAspectTest : AspectBase
+internal class FieldAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.Field.Name;
 }
 
-class PropertyAspectTest : AspectBase
+internal class PropertyAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.Property.Name;
 }
 
-class FieldOrPropertyAspectTest : AspectBase
+internal class FieldOrPropertyAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.FieldOrProperty.Name;
 }
 
-class IndexerAspectTest : AspectBase
+internal class IndexerAspectTest : AspectBase
 {
     [CompileTime]
     protected override string TargetName => meta.Target.Indexer.Name;
 }
 
-class ParametersAspectTest : TypeAspect
+internal class ParametersAspectTest : TypeAspect
 {
     [Introduce]
     private string? field = meta.Target.Parameters.FirstOrDefault()?.Name;
 }
 
 [ParametersAspectTest]
-class TargetCode
+internal class TargetCode
 {
-    [FieldAspectTest, PropertyAspectTest, FieldOrPropertyAspectTest, IndexerAspectTest]
-    int field;
+    [FieldAspectTest]
+    [PropertyAspectTest]
+    [FieldOrPropertyAspectTest]
+    [IndexerAspectTest]
+    private int field;
 
-    [FieldAspectTest, PropertyAspectTest, FieldOrPropertyAspectTest, IndexerAspectTest]
-    int property { get; set; }
+    [FieldAspectTest]
+    [PropertyAspectTest]
+    [FieldOrPropertyAspectTest]
+    [IndexerAspectTest]
+    private int property { get; set; }
 
-    [FieldAspectTest, PropertyAspectTest, FieldOrPropertyAspectTest, IndexerAspectTest]
-    int this[int i] => 42;
+    [FieldAspectTest]
+    [PropertyAspectTest]
+    [FieldOrPropertyAspectTest]
+    [IndexerAspectTest]
+    private int this[ int i ] => 42;
 }

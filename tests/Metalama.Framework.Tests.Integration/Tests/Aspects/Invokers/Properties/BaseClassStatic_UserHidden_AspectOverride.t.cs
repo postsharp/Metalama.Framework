@@ -4,7 +4,8 @@ public class TargetClass : BaseClass
   public new static int Property
   {
     get
-    { // Invoke TargetClass.Property_Source
+    {
+      // Invoke TargetClass.Property_Source
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source;
       // Invoke TargetClass.Property_Source
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Property_Source;
@@ -42,7 +43,8 @@ public class TargetClass : BaseClass
   public int InvokerBefore
   {
     get
-    { // Invoke TargetClass.Property
+    {
+      // Invoke TargetClass.Property
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
       // Invoke TargetClass.Property_Source
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
@@ -67,7 +69,8 @@ public class TargetClass : BaseClass
   public int InvokerAfter
   {
     get
-    { // Invoke TargetClass.Property
+    {
+      // Invoke TargetClass.Property
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;
       // Invoke TargetClass.Property
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Property;

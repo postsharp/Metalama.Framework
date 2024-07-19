@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -12,7 +13,7 @@ using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFie
 
 #pragma warning disable CS0067
 
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers_PrimaryConstructor
 {
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors( @event, nameof(OverrideAdd), nameof(OverrideRemove) );
+                builder.With( @event ).OverrideAccessors( nameof(OverrideAdd), nameof(OverrideRemove) );
             }
         }
 
@@ -44,13 +45,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        public event EventHandler? IntroducedEvent = ExpressionFactory.Parse("h").Value;
+        public event EventHandler? IntroducedEvent = ExpressionFactory.Parse( "h" ).Value;
     }
 
     // <target>
     [Override]
     [Introduction]
-    internal class TargetClass(EventHandler h)
+    internal class TargetClass( EventHandler h )
     {
         public event EventHandler? Event = h;
     }

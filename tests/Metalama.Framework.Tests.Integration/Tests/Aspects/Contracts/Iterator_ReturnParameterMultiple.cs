@@ -3,6 +3,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Iterator_
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -14,31 +15,31 @@ public sealed class TestAttribute : TypeAspect
 
         foreach (var method in builder.Target.Methods)
         {
-            builder.Advice.AddContract(
-                method.ReturnParameter,
-                nameof(ValidateParameter),
-                args: new { adviceId = 1 });
+            builder.With( method.ReturnParameter )
+                .AddContract(
+                    nameof(ValidateParameter),
+                    args: new { adviceId = 1 } );
 
-            builder.Advice.AddContract(
-                method.ReturnParameter,
-                nameof(ValidateParameter),
-                args: new { adviceId = 2 });
+            builder.With( method.ReturnParameter )
+                .AddContract(
+                    nameof(ValidateParameter),
+                    args: new { adviceId = 2 } );
         }
     }
 
     [Template]
     private void ValidateParameter( dynamic? value, [CompileTime] int adviceId )
     {
-        Console.WriteLine($"Advice {adviceId}");
+        Console.WriteLine( $"Advice {adviceId}" );
 
-        if (meta.Target.Parameter.Type.Is(SpecialType.IEnumerable)
-            || meta.Target.Parameter.Type.Is(TypeFactory.GetType(SpecialType.IEnumerable_T).WithTypeArguments(TypeFactory.GetType(SpecialType.String))))
+        if (meta.Target.Parameter.Type.Is( SpecialType.IEnumerable )
+            || meta.Target.Parameter.Type.Is( TypeFactory.GetType( SpecialType.IEnumerable_T ).WithTypeArguments( TypeFactory.GetType( SpecialType.String ) ) ))
         {
             foreach (var item in value!)
             {
                 if (item is null)
                 {
-                    throw new ArgumentNullException("<return>");
+                    throw new ArgumentNullException( "<return>" );
                 }
             }
         }
@@ -48,7 +49,7 @@ public sealed class TestAttribute : TypeAspect
             {
                 if (value.Current is null)
                 {
-                    throw new ArgumentNullException("<return>");
+                    throw new ArgumentNullException( "<return>" );
                 }
             }
         }
@@ -62,28 +63,28 @@ public class Program
         const string text = "testText";
         var test = new TestClass();
 
-        foreach (var item in test.Enumerable(text))
+        foreach (var item in test.Enumerable( text ))
         {
-            Console.WriteLine($"{item};");
+            Console.WriteLine( $"{item};" );
         }
 
-        var enumerator1 = test.Enumerator(text);
+        var enumerator1 = test.Enumerator( text );
 
         while (enumerator1.MoveNext())
         {
-            Console.WriteLine($"{enumerator1.Current};");
+            Console.WriteLine( $"{enumerator1.Current};" );
         }
 
-        foreach (var item in test.EnumerableT(text))
+        foreach (var item in test.EnumerableT( text ))
         {
-            Console.WriteLine($"{item};");
+            Console.WriteLine( $"{item};" );
         }
 
-        var enumerator2 = test.EnumeratorT(text);
+        var enumerator2 = test.EnumeratorT( text );
 
         while (enumerator2.MoveNext())
         {
-            Console.WriteLine($"{enumerator2.Current};");
+            Console.WriteLine( $"{enumerator2.Current};" );
         }
     }
 }
@@ -92,19 +93,19 @@ public class Program
 [Test]
 public class TestClass
 {
-    public IEnumerable Enumerable(string text)
+    public IEnumerable Enumerable( string text )
     {
         yield return "Hello";
         yield return text;
     }
 
-    public IEnumerator Enumerator(string text)
+    public IEnumerator Enumerator( string text )
     {
         yield return "Hello";
         yield return text;
     }
 
-    public IEnumerable<string> EnumerableT(string text)
+    public IEnumerable<string> EnumerableT( string text )
     {
         yield return "Hello";
         yield return text;

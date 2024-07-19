@@ -1,9 +1,10 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAssemblyChildAspect;
 
-[assembly: AspectOrder( typeof(ChildAspect), typeof(ParentAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ChildAspect), typeof(ParentAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAssemblyChildAspect
 {

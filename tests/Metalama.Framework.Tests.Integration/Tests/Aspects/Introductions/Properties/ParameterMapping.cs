@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ParameterMapping
@@ -11,8 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceProperty(
-                builder.Target,
+            builder.IntroduceProperty(
                 "Property_NameConflict",
                 nameof(GetTemplate),
                 nameof(SetTemplate) );
@@ -25,7 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         }
 
         [Template]
-        public void SetTemplate(int x)
+        public void SetTemplate( int x )
         {
             var z = x;
         }

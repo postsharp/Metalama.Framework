@@ -1,11 +1,14 @@
 internal class TargetCode
 {
   [Aspect]
-  void M()
+  private void M()
   {
-    this.M();
-    this.M();
-    this.M();
+    this.M_Source();
+    this.M_Source();
+    this.M_Source();
     return;
+  }
+  private void M_Source()
+  {
   }
 }

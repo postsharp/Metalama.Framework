@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @Skipped (#31074)
+// @ClearIgnoredDiagnostics
 #endif
 
 #if !TESTRUNNER
@@ -8,11 +8,12 @@
 #pragma warning disable CS0219
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.OverrideMethod
+namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMethod
 {
     public class SuppressWarningAttribute : TypeAspect
     {
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var introduced = builder.Advice.IntroduceMethod( builder.Target, nameof(Introduced) ).Declaration;
+            var introduced = builder.IntroduceMethod( nameof(Introduced) ).Declaration;
             builder.Diagnostics.Suppress( _suppression1, introduced );
         }
     }
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
         // CS0219 expected 
         private void M1( string m )
         {
-            var x = 0;
+            var y = 0;
         }
     }
 }

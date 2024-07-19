@@ -30,7 +30,8 @@ public sealed class SourceGeneratorIntegrationTests : UnitTestClass
         var dependentCode = new Dictionary<string, string>()
         {
             ["dependent.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 

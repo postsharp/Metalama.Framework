@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -9,28 +10,23 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceMethod(builder.Target, nameof(Method), whenExists: OverrideStrategy.Ignore);
+            var result = builder.IntroduceMethod( nameof(Method), whenExists: OverrideStrategy.Ignore );
 
-            if (result.Outcome != Advising.AdviceOutcome.Ignore)
+            if (result.Outcome != AdviceOutcome.Ignore)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Ignored." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceMethod)
+            if (result.AdviceKind != AdviceKind.IntroduceMethod)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceMethod.");
-            }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceMethod." );
             }
 
-            if (result.Declaration != builder.Target.Methods.OfName("Method").Single().ForCompilation(result.Declaration.Compilation))
+            if (result.Declaration != builder.Target.Methods.OfName( "Method" ).Single().ForCompilation( result.Declaration.Compilation ))
             {
-                throw new InvalidOperationException($"Declaration was not correct.");
+                throw new InvalidOperationException( $"Declaration was not correct." );
             }
         }
 
@@ -47,7 +43,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public int Method()
         {
-            Console.WriteLine("Original code.");
+            Console.WriteLine( "Original code." );
+
             return 42;
         }
     }

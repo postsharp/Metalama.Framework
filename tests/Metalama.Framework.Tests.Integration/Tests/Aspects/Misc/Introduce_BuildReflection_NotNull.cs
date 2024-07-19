@@ -3,10 +3,11 @@
 
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_BuildReflection_NotNull;
 
-[assembly: AspectOrder( typeof(Verification), typeof(Introduction) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Verification), typeof(Introduction) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_BuildReflection_NotNull
 {
@@ -217,7 +218,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
         {
             var type = meta.Target.Type;
 
-            foreach (var f in type.Fields.OrderBy(f => f.Name) )
+            foreach (var f in type.Fields.OrderBy( f => f.Name ))
             {
                 var fieldInfo = f.ToFieldInfo();
                 Assert.NotNull( fieldInfo );
@@ -225,13 +226,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
                 Assert.NotNull( fieldOrPropertyInfo );
             }
 
-            foreach (var e in type.Events.OrderBy(f => f.Name))
+            foreach (var e in type.Events.OrderBy( f => f.Name ))
             {
                 var eventInfo = e.ToEventInfo();
                 Assert.NotNull( eventInfo );
             }
 
-            foreach (var p in type.Properties.OrderBy(f => f.Name))
+            foreach (var p in type.Properties.OrderBy( f => f.Name ))
             {
                 var propertyInfo = p.ToPropertyInfo();
                 Assert.NotNull( propertyInfo );
@@ -239,13 +240,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
                 Assert.NotNull( fieldOrPropertyInfo );
             }
 
-            foreach (var m in type.Methods.OrderBy(f => f.Name))
+            foreach (var m in type.Methods.OrderBy( f => f.Name ))
             {
                 var methodInfo = m.ToMethodInfo();
                 Assert.NotNull( methodInfo );
             }
 
-            foreach (var c in type.Constructors.OrderBy(f => f.Name))
+            foreach (var c in type.Constructors.OrderBy( f => f.Name ))
             {
                 var constructorInfo = c.ToConstructorInfo();
                 Assert.NotNull( constructorInfo );
