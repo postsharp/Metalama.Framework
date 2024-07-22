@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var transformationsByTarget =
                 transformations
                     .Where(
-                        t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation
+                        t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation { ReplacedMember.IsDefault: false }
                                                                                    && t.TargetDeclaration is INamedType or IConstructor or INamespace )
                     .GroupBy(
                         t =>
@@ -171,6 +171,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
                                 .Select( m => m.Syntax );
 
+                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: ConstructorBuilder builder } )
+                            {
+                                injectedMembers = AddIntroducedConstructorParameters(
+                                    injectedMembers,
+                                    builder,
+                                    finalCompilationModel,
+                                    syntaxGenerationContext );
+                            }
+
                             members = members.AddRange( injectedMembers );
 
                             break;
@@ -235,6 +244,37 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             return additionalSyntaxTreeDictionary.Values.AsReadOnly();
         }
 
+        private static IEnumerable<MemberDeclarationSyntax> AddIntroducedConstructorParameters(
+            IEnumerable<MemberDeclarationSyntax> injectedMembers,
+            ConstructorBuilder constructorBuilder,
+            CompilationModel finalCompilationModel,
+            SyntaxGenerationContext syntaxGenerationContext )
+        {
+            var finalConstructor = constructorBuilder.ToRef().As<IConstructor>().GetTarget( finalCompilationModel );
+
+            foreach ( var member in injectedMembers )
+            {
+                if ( member is not ConstructorDeclarationSyntax constructorDeclaration )
+                {
+                    yield return member;
+
+                    continue;
+                }
+
+                for ( var index = constructorBuilder.Parameters.Count; index < finalConstructor.Parameters.Count; index++ )
+                {
+                    constructorDeclaration =
+                        constructorDeclaration.AddParameterListParameters(
+                            syntaxGenerationContext.SyntaxGenerator.Parameter(
+                                finalConstructor.Parameters[index],
+                                finalCompilationModel,
+                                false ) );
+                }
+
+                yield return constructorDeclaration;
+            }
+        }
+
         private static IEnumerable<ConstructorDeclarationSyntax> CreateInjectedConstructors(
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
@@ -243,6 +283,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
         {
             // TODO: This will not work properly with universal constructor builders.
             var initialType = type.Translate( initialCompilationModel, ReferenceResolutionOptions.CanBeMissing );
+            var finalType = type.Translate( finalCompilationModel, ReferenceResolutionOptions.CanBeMissing );
 
             var constructors = new List<ConstructorDeclarationSyntax>();
             var existingSignatures = new HashSet<(ISymbol Type, RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
@@ -252,6 +293,23 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 existingSignatures.Add(
                     constructor.Parameters.SelectAsArray(
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                              p.RefKind) ) );
+            }
+
+            // Additionally, add all introduced constructors to the list.
+            foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
+            {
+                var constructorBuilder = introducedConstructor.ToTypedRef().Target as ConstructorBuilder;
+
+                if ( constructorBuilder is null or { ReplacedImplicit.IsDefault: false } )
+                {
+                    // Skip introduced constructors that are replacements.
+                    continue;
+                }
+
+                existingSignatures.Add(
+                    introducedConstructor.Parameters.SelectAsArray(
                         p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
                               p.RefKind) ) );
             }
@@ -339,9 +397,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                                         Argument(
                                                             NameColon( p.Name ),
                                                             GetArgumentRefToken( p ),
-                                                            LiteralExpression(
-                                                                SyntaxKind.DefaultLiteralExpression,
-                                                                Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) ),
+                                                            DefaultExpression( syntaxGenerationContext.SyntaxGenerator.Type( p.Type ) ) ) ) ) ) ),
                                 Block() ) );
                     }
                 }

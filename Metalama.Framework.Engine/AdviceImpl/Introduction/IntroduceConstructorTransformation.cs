@@ -99,7 +99,10 @@ internal sealed class IntroduceConstructorTransformation
             ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
             : this.IntroducedDeclaration.ToInsertPosition();
 
-    public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
+    public override TransformationObservability Observability
+        => this.ReplacedMember.IsDefault
+            ? TransformationObservability.Always
+            : TransformationObservability.CompileTimeOnly;
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {

@@ -157,6 +157,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         // Only return fully valid attributes.
                         attribute = null;
+
                         return false;
                     }
 

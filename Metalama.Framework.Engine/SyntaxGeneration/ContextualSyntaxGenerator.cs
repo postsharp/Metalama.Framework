@@ -751,16 +751,17 @@ internal sealed partial class ContextualSyntaxGenerator
         IReadOnlyList<IParameter> parameters,
         CompilationModel compilation,
         bool removeDefaultValues )
-        => SeparatedList(
-            parameters.SelectAsReadOnlyList(
-                p => Parameter(
-                    this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
-                    p.GetSyntaxModifierList(),
-                    this.Type( p.Type ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
-                    Identifier( p.Name ),
-                    removeDefaultValues || p.DefaultValue == null
-                        ? null
-                        : EqualsValueClause( LiteralExpressionOrNull( p.DefaultValue.Value.Value ).AssertNotNull() ) ) ) );
+        => SeparatedList( parameters.SelectAsReadOnlyList( p => this.Parameter( p, compilation, removeDefaultValues ) ) );
+
+    public ParameterSyntax Parameter( IParameter parameter, CompilationModel compilation, bool removeDefaultValue )
+        => SyntaxFactory.Parameter(
+            this.AttributesForDeclaration( parameter.ToTypedRef<IDeclaration>(), compilation ),
+            parameter.GetSyntaxModifierList(),
+            this.Type( parameter.Type ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
+            Identifier( parameter.Name ),
+            removeDefaultValue || parameter.DefaultValue == null
+                ? null
+                : EqualsValueClause( LiteralExpressionOrNull( parameter.DefaultValue.Value.Value ).AssertNotNull() ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {

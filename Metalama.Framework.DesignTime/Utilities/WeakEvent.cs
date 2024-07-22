@@ -145,12 +145,15 @@ public abstract class WeakEventBase<TDelegate, TEventArgs>
             else
             {
                 index = -1;
+
                 for ( var i = 0; i < myTargets.Length; i++ )
                 {
                     var handlerRef = myTargets[i];
+
                     if ( handlerRef == null )
                     {
                         index = i;
+
                         // We continue to loop because we want to keep cleaning the list.
                     }
                     else if ( !handlerRef.TryGetTarget( out _ ) )
@@ -189,6 +192,7 @@ public abstract class WeakEventBase<TDelegate, TEventArgs>
             for ( var i = myTargets.Length - 1; i >= 0; i-- )
             {
                 var targetRef = myTargets[i];
+
                 if ( targetRef != null )
                 {
                     if ( !targetRef.TryGetTarget( out var t ) )
@@ -222,6 +226,7 @@ public abstract class WeakEventBase<TDelegate, TEventArgs>
             for ( var i = 0; i < myTargets.Length; i++ )
             {
                 var handlerRef = myTargets[i];
+
                 if ( handlerRef != null )
                 {
                     if ( !handlerRef.TryGetTarget( out _ ) )
