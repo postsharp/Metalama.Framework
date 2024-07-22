@@ -8,7 +8,7 @@ public class TargetType
   }
   public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.AsProperty.TargetType.ExistingNestedType PropertyWithExisting { get; set; }
   public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.AsProperty.TargetType.IntroducedNestedType PropertyWithIntroduced { get; set; }
-  public class IntroducedNestedType : global::System.Object
+  public class IntroducedNestedType
   {
   }
 }

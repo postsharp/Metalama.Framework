@@ -1,7 +1,7 @@
 [Aspect1]
 internal class TargetCode
 {
-  class IntroducedType : global::System.Object
+  class IntroducedType
   {
     public void Foo()
     {

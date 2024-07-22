@@ -1,6 +1,6 @@
 namespace Some.Namespace
 {
-  class SomeClass : object
+  class SomeClass
   {
   }
 }

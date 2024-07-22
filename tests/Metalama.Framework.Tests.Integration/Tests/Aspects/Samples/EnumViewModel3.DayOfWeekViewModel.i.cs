@@ -1,6 +1,6 @@
 namespace Doc.EnumViewModel
 {
-  class DayOfWeekViewModel : global::System.Object
+  class DayOfWeekViewModel
   {
     private readonly global::System.DayOfWeek _value;
     public DayOfWeekViewModel(global::System.DayOfWeek underlying)

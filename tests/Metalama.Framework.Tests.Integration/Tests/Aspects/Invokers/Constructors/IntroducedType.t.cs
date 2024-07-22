@@ -2,12 +2,11 @@ public class TargetClass
 {
   [InvokerAspect]
   public void Invoker()
-  {
-    // Invoke new <introduced>();
+  { // Invoke new <introduced>();
     new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Constructors.IntroducedType.TargetClass.IntroducedType();
     return;
   }
-  class IntroducedType : global::System.Object
+  class IntroducedType
   {
     public IntroducedType()
     {

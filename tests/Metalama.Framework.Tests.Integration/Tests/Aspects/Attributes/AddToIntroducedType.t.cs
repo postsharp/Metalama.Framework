@@ -2,7 +2,7 @@
 internal class C
 {
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroducedType.MyAttribute]
-  class TestType : global::System.Object
+  class TestType
   {
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroducedType.MyAttribute]
     private global::System.Int32 _field;

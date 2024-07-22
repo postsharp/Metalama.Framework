@@ -1,7 +1,7 @@
 [Aspect]
 internal class Target
 {
-  class TestType : global::System.Object
+  class TestType
   {
     private global::System.Int32 _introducedField;
     public global::System.Int32 IntroducedField

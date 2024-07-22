@@ -1,7 +1,7 @@
 [Aspect]
 internal class Target
 {
-  class TestType : global::System.Object
+  class TestType
   {
     private event global::System.EventHandler? _introducedEvent;
     public event global::System.EventHandler? IntroducedEvent

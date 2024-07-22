@@ -9,7 +9,7 @@ public class TargetClass
     RemoveSpace = 2,
     Trim = 4
   }
-  public class StringOptionsViewModel : global::System.Object
+  public class StringOptionsViewModel
   {
     private readonly global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions _value;
     public StringOptionsViewModel(global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions value)

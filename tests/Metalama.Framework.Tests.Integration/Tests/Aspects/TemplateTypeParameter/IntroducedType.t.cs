@@ -9,7 +9,7 @@ public class Target
   {
     global::System.Console.WriteLine(typeof(global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.IntroducedType.Target.IntroducedType).Name);
   }
-  class IntroducedType : global::System.Object
+  class IntroducedType
   {
   }
 }

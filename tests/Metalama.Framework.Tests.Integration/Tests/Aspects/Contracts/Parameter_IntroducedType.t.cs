@@ -8,7 +8,7 @@ internal class Target
       throw new global::System.ArgumentNullException("p");
     }
   }
-  public class IntroducedType : global::System.Object
+  public class IntroducedType
   {
   }
 }
