@@ -728,7 +728,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
-                            declaredSymbol.GetDiagnosticLocation(),
+                            node.GetDiagnosticLocation(),
                             (declaredSymbol, CompileTimeCodeFastDetector.Namespace, attributeName) ) );
                 }
 

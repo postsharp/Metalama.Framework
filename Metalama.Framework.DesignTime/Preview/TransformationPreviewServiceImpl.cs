@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Preview;
 
@@ -42,7 +41,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
             preparation.Configuration!,
             cancellationToken );
 
-        var errorMessages = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray();
+        var errorMessages = FormatErrors( diagnostics );
 
         if ( !pipelineResult.IsSuccessful || errorMessages.Length > 0 )
         {
@@ -51,7 +50,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
 
         var transformedSyntaxTree = pipelineResult.Value.SyntaxTrees[syntaxTreeName];
 
-        return SerializablePreviewTransformationResult.Success( JsonSerializationHelper.CreateSerializableSyntaxTree( transformedSyntaxTree ), errorMessages );
+        return SerializablePreviewTransformationResult.Success( JsonSerializationHelper.CreateSerializableSyntaxTree( transformedSyntaxTree ), null );
     }
 
     Task<SerializablePreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(
