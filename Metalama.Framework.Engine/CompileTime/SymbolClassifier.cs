@@ -55,8 +55,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
                 (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly),
                 (typeof(Marshal), TemplatingScope.RunTimeOnly),
                 (typeof(Index), TemplatingScope.RunTimeOrCompileTime),
-                (typeof(Range), TemplatingScope.RunTimeOrCompileTime),
-                (typeof(Random), TemplatingScope.RunTimeOnly)
+                (typeof(Range), TemplatingScope.RunTimeOrCompileTime)
             }.ToImmutableDictionary(
                 t => t.ReflectionType.Name.AssertNotNull(),
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope) )
