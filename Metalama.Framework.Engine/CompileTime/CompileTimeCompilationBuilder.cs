@@ -33,7 +33,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -47,7 +46,9 @@ internal sealed partial class CompileTimeCompilationBuilder
 {
     private const int _inconsistentFallbackLimit = 10;
 
-    public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
+    // The prefix need to be kept small so we don't consume too many characters in 
+    // the TEMP directory, where our paths  must fit within a 256-character limit.
+    public const string CompileTimeAssemblyPrefix = "ml!";
 
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompileTimeDomain _domain;
@@ -342,26 +343,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         return true;
     }
 
-    public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen( true )] out string? runTimeAssemblyName )
-    {
-        if ( assemblyName.StartsWith( CompileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
-        {
-            var parsedAssemblyName = new AssemblyName( assemblyName );
-            var shortName = parsedAssemblyName.Name.AssertNotNull();
-
-            runTimeAssemblyName = shortName.Substring(
-                CompileTimeAssemblyPrefix.Length,
-                shortName.Length - CompileTimeAssemblyPrefix.Length - 17 );
-
-            return true;
-        }
-        else
-        {
-            runTimeAssemblyName = null;
-
-            return false;
-        }
-    }
+    public static bool IsCompileTimeAssemblyName( string assemblyName )
+        => assemblyName.StartsWith( CompileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase );
 
     private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
     {

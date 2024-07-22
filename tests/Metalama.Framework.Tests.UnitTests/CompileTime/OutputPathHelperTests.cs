@@ -10,23 +10,40 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime;
 
 public sealed class OutputPathHelperTests
 {
-    private readonly TestTempFileManager _tempFileManager = new();
-
     [Theory]
     [InlineData( "Metalama.Extensions.DependencyInjection.ServiceLocator", ".NetStandard,Version=v2.0" )]
     public void LengthUnder256( string assemblyName, string frameworkName )
     {
-        var outputPathHelper = new OutputPathHelper( this._tempFileManager );
+        var outputPathHelper = new OutputPathHelper( new TestTempFileManager() );
         var paths = outputPathHelper.GetOutputPaths( assemblyName, new FrameworkName( frameworkName ), ulong.MaxValue );
         Assert.True( paths.Pe.Length < 256 );
         Assert.True( paths.Pdb.Length < 256 );
         Assert.True( paths.Manifest.Length < 256 );
+        Assert.True( CompileTimeCompilationBuilder.IsCompileTimeAssemblyName( paths.CompileTimeAssemblyName ) );
+    }
+
+    [Fact]
+    public void BasePathTooLong()
+    {
+        var basePath = "C:\\" + new string( 'x', 200 );
+
+        var outputPathHelper = new OutputPathHelper( new TestTempFileManager( basePath ) );
+
+        Assert.Throws<PathTooLongException>(
+            () => outputPathHelper.GetOutputPaths( "short", new FrameworkName( ".NetStandard,Version=v2.0" ), ulong.MaxValue ) );
     }
 
     private sealed class TestTempFileManager : ITempFileManager
     {
+        private string _basePath;
+
+        public TestTempFileManager( string? basePath = null )
+        {
+            this._basePath = basePath ?? @"C:\Users\GaelFraiteur.AzureAD\AppData\Local\Temp\Metalama";
+        }
+
         // We hardcode a long directory so that it does not change according to test environments.
         public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, string? subsubirectory, TempFileVersionScope versionScope )
-            => Path.Combine( @"C:\Users\GaelFraiteur.AzureAD\AppData\Local\Temp\Metalama", subdirectory, "0.5.53.1189-local-GaelFraiteur-debug" );
+            => Path.Combine( this._basePath, subdirectory, "0.5.53.1189-local-GaelFraiteur-debug" );
     }
 }

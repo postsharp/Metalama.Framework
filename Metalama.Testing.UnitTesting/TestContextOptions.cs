@@ -84,4 +84,10 @@ public sealed record TestContextOptions
     public string? ProjectName { get; init; }
 
     public bool IgnoreUserProfileLicenses { get; init; }
+
+    /// <summary>
+    /// Gets the number of characters in the temporary directory.
+    /// This allows to reproduce issues linked to the length of the temp path.
+    /// </summary>
+    public int? TempPathLength { get; init; }
 }

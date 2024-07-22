@@ -39,7 +39,8 @@ internal sealed class CompileTimeProject : IProjectService
 
     internal string? CompiledAssemblyPath { get; }
 
-    private readonly AssemblyIdentity _compileTimeIdentity;
+    public AssemblyIdentity CompileTimeIdentity { get; }
+
     private readonly ITextMapFileProvider? _mapFileProvider;
     private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
 
@@ -91,6 +92,20 @@ internal sealed class CompileTimeProject : IProjectService
     public IReadOnlyList<CompileTimeProject> References { get; }
 
     public IReadOnlyList<CompileTimeProject> ClosureProjects { get; }
+
+    [Memo]
+    private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByRunTimeAssemblyName
+        => this.ClosureProjects.ToDictionary( p => p.RunTimeIdentity.Name, p => p );
+
+    [Memo]
+    private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByCompileTimeAssemblyName
+        => this.ClosureProjects.ToDictionary( p => p.CompileTimeIdentity.Name, p => p );
+
+    public bool TryGetProjectByRunTimeAssemblyName( string runTimeName, [NotNullWhen( true )] out CompileTimeProject? project )
+        => this.ClosureProjectsByRunTimeAssemblyName.TryGetValue( runTimeName, out project );
+
+    public bool TryGetProjectByCompileTimeAssemblyName( string runTimeName, [NotNullWhen( true )] out CompileTimeProject? project )
+        => this.ClosureProjectsByCompileTimeAssemblyName.TryGetValue( runTimeName, out project );
 
     /// <summary>
     /// Gets the list of transformed code files in the current project. 
@@ -187,7 +202,7 @@ internal sealed class CompileTimeProject : IProjectService
         this._cacheableTemplateDiscoveryContextProvider = cacheableTemplateDiscoveryContextProvider;
         this.Manifest = manifest;
         this.RunTimeIdentity = runTimeIdentity;
-        this._compileTimeIdentity = compileTimeIdentity;
+        this.CompileTimeIdentity = compileTimeIdentity;
         this.References = references;
 
         this._assembly = assembly;
@@ -461,22 +476,24 @@ internal sealed class CompileTimeProject : IProjectService
         }
     }
 
-    public Type GetType( string reflectionName, string runTimeAssemblyName )
+    public bool TryGetType( string reflectionName, string runTimeAssemblyName, out Type? type )
     {
-        var project = this.ClosureProjects.FirstOrDefault( p => p.RunTimeIdentity.Name == runTimeAssemblyName );
-
-        if ( project == null )
+        if ( !this.TryGetProjectByRunTimeAssemblyName( runTimeAssemblyName, out var project ) )
         {
-            throw new InvalidOperationException( $"Cannot find the compile-time assembly 'P{runTimeAssemblyName}'." );
+            type = null;
+
+            return false;
         }
 
-        return project.GetType( reflectionName );
+        type = project.GetTypeOrNull( reflectionName );
+
+        return type != null;
     }
 
     public Type GetType( string reflectionName )
         => this.GetTypeOrNull( reflectionName ) ?? throw new ArgumentOutOfRangeException(
             nameof(reflectionName),
-            $"Cannot find a type named '{reflectionName}' in the compile-time project '{this._compileTimeIdentity}'." );
+            $"Cannot find a type named '{reflectionName}' in the compile-time project '{this.CompileTimeIdentity}'." );
 
     internal (CompileTimeFileManifest? File, CompileTimeProject? Project) FindCodeFileFromTransformedPath( string transformedCodePath )
         => this.ClosureCodeFiles[Path.GetFileName( transformedCodePath )]
@@ -499,7 +516,7 @@ internal sealed class CompileTimeProject : IProjectService
                 }
             }
 
-            this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity, this.CompiledAssemblyPath! );
+            this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity, this.CompiledAssemblyPath! );
         }
     }
 

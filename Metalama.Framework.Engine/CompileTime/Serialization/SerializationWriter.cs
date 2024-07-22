@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization;
 
 internal sealed class SerializationWriter
 {
-    private const int _version = 1;
+    public const int Version = 2;
 
     private readonly SerializationBinaryWriter _binaryWriter;
 
@@ -42,7 +42,7 @@ internal sealed class SerializationWriter
 
     public void Serialize( object? obj )
     {
-        this._binaryWriter.WriteCompressedInteger( _version );
+        this._binaryWriter.WriteCompressedInteger( Version );
 
         // Assertion was added after importing code from PostSharp.
         var cause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.AssertNotNull().GetType() ) : null;
@@ -308,6 +308,12 @@ internal sealed class SerializationWriter
         if ( !this._typeNameCache.TryGetValue( type, out var assemblyTypeName ) )
         {
             this._formatter.Binder.BindToName( type, out var typeName, out var assemblyName );
+
+            if ( CompileTimeCompilationBuilder.IsCompileTimeAssemblyName( assemblyName ) )
+            {
+                throw new AssertionFailedException();
+            }
+
             assemblyTypeName = new AssemblyTypeName( typeName, assemblyName );
 
             this._typeNameCache.Add( type, assemblyTypeName );

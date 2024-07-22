@@ -23,6 +23,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public sealed class CompileTimeCompilationBuilderTests : UnitTestClass
@@ -1433,7 +1435,7 @@ namespace RemainingNamespace
         {
             var code = $$"""
                          using Metalama.Framework.Advising;
-                         using Metalama.Framework.Aspects; 
+                         using Metalama.Framework.Aspects;
                          using Metalama.Framework.Code;
 
                          namespace NS_{{Guid.NewGuid():N}};
@@ -1486,8 +1488,7 @@ namespace RemainingNamespace
         private static (CompileTimeProject Project, WeakReference WeakRef) CreateCompileTimeProject( TestContext testContext, CompileTimeDomain domain )
         {
             var code = $$"""
-                         using Metalama.Framework.Advising;
-                         using Metalama.Framework.Aspects; 
+                         using Metalama.Framework.Advising;using Metalama.Framework.Aspects;
                          using Metalama.Framework.Code;
 
                          namespace NS_{{Guid.NewGuid():N}};
@@ -1513,6 +1514,47 @@ namespace RemainingNamespace
                 .RootProject;
 
             return (project, new WeakReference( compilation ));
+        }
+
+        [Fact]
+        public async Task AssemblyNameTruncated()
+        {
+            using var testContext = this.CreateTestContext( new TestContextOptions() { TempPathLength = 133 } );
+
+            const string dependencyCode = """
+                                          using Metalama.Framework.Aspects;
+                                          using System;
+
+                                          [Inheritable]
+                                          [AttributeUsage( AttributeTargets.Class )]
+                                          public class Aspect1 : TypeAspect { }
+
+                                          [Aspect1]
+                                          public class BaseClass { }
+                                          """;
+
+            const string mainCode = """
+                                    public class TargetClass : BaseClass
+                                    {
+                                    }
+                                    """;
+
+            const string dependencyAssemblyName = "VeryVeryVeryLongNameThatShouldBeTrimmed";
+            var dependencyCompilation = TestCompilationFactory.CreateCSharpCompilation( dependencyCode, name: dependencyAssemblyName );
+
+            var mainCompilation = TestCompilationFactory.CreateCSharpCompilation(
+                mainCode,
+                additionalReferences: [dependencyCompilation.ToMetadataReference()] );
+
+            var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, testContext.Domain );
+            var result = await pipeline.ExecuteAsync( ThrowingDiagnosticAdder.Instance, mainCompilation, ImmutableArray<ManagedResource>.Empty );
+            Assert.True( result.IsSuccessful );
+
+            var dependencyProject =
+                result.Value.Configuration.CompileTimeProject.ClosureProjects.Single( p => p.RunTimeIdentity.Name == dependencyAssemblyName );
+
+            // The name must have been trimmed, otherwise the test is worthless.
+            Assert.DoesNotContain( dependencyAssemblyName, dependencyProject.CompileTimeIdentity.Name, StringComparison.Ordinal );
         }
     }
 }

@@ -94,7 +94,8 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 ImmutableArray<ManagedResource>.Empty,
                 partialCompilation,
                 ImmutableArray<AdditionalCompilationOutputFile>.Empty,
-                ImmutableArray<ScopedSuppression>.Empty );
+                ImmutableArray<ScopedSuppression>.Empty,
+                null );
         }
 
         // Report error if the compilation does not have the METALAMA preprocessor symbol.
@@ -238,7 +239,8 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 additionalResources,
                 resultingCompilation,
                 result.Value.AdditionalCompilationOutputFiles,
-                result.Value.Diagnostics.DiagnosticSuppressions );
+                result.Value.Diagnostics.DiagnosticSuppressions,
+                configuration );
         }
         catch ( DiagnosticException exception ) when ( exception.InSourceCode )
         {
