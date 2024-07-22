@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -25,6 +26,19 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
     {
         var typeBuilder = this.IntroducedDeclaration;
 
+        BaseListSyntax? baseList;
+
+        if ( this.IntroducedDeclaration.BaseType != null && this.IntroducedDeclaration.BaseType.SpecialType != SpecialType.Object )
+        {
+            baseList = BaseList(
+                SingletonSeparatedList<BaseTypeSyntax>(
+                    SimpleBaseType( context.SyntaxGenerator.Type( this.IntroducedDeclaration.BaseType.ToNonNullableType() ) ) ) );
+        }
+        else
+        {
+            baseList = null;
+        }
+
         var type =
             ClassDeclaration(
                     typeBuilder.GetAttributeLists( context ),
@@ -36,9 +50,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                             SeparatedList(
                                 ((IEnumerable<TypeParameterBuilder>) this.IntroducedDeclaration.TypeParameters).Select(
                                     tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
-                    BaseList(
-                        SingletonSeparatedList<BaseTypeSyntax>(
-                            SimpleBaseType( context.SyntaxGenerator.Type( this.IntroducedDeclaration.BaseType.AssertNotNull() ) ) ) ),
+                    baseList,
                     List<TypeParameterConstraintClauseSyntax>(),
                     List<MemberDeclarationSyntax>() )
                 .NormalizeWhitespaceIfNecessary( context.SyntaxGenerationContext );

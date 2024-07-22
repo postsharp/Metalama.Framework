@@ -1,25 +1,25 @@
 [IntroductionAttribute]
 public class TargetType
 {
-  internal class InternalType : global::System.Object
+  internal class InternalType
   {
   }
-  private protected class PrivateProtectedType : global::System.Object
+  private protected class PrivateProtectedType
   {
   }
-  private class PrivateType : global::System.Object
+  private class PrivateType
   {
   }
-  protected internal class ProtectedInternalType : global::System.Object
+  protected internal class ProtectedInternalType
   {
   }
-  protected class ProtectedType : global::System.Object
+  protected class ProtectedType
   {
   }
-  public class PublicType : global::System.Object
+  public class PublicType
   {
   }
-  class UndefinedType : global::System.Object
+  class UndefinedType
   {
   }
 }

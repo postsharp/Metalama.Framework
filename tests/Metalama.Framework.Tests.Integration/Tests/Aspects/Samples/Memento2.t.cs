@@ -19,7 +19,7 @@ public class Vehicle
   {
     return new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2.Vehicle.Snapshot(this.Payload, this.Fuel);
   }
-  private class Snapshot : global::System.Object
+  private class Snapshot
   {
     public readonly global::System.String Fuel;
     public readonly global::System.Decimal Payload;

@@ -1,11 +1,11 @@
 [IntroductionAttribute]
 public class TargetType
 {
-  class Test : global::System.Object
+  class Test
   {
-    class InnerTest : global::System.Object
+    class InnerTest
     {
-      class InnerInnerTest : global::System.Object
+      class InnerInnerTest
       {
       }
     }

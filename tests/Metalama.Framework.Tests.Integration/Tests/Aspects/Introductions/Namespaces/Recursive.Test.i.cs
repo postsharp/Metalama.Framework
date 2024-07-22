@@ -1,6 +1,6 @@
 namespace Outer.Middle.Inner
 {
-  class Test : global::System.Object
+  class Test
   {
   }
 }

@@ -12,7 +12,7 @@ internal class TargetClass : global::Metalama.Framework.Tests.Integration.Aspect
   {
     return (global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IMemento)new global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento(this._state1, this.State2);
   }
-  public class Memento : global::System.Object, global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IMemento
+  public class Memento : global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IMemento
   {
     public readonly global::System.Int32 State2;
     public readonly global::System.Int32 _state1;

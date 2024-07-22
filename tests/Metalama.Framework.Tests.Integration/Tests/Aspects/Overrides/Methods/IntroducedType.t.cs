@@ -1,7 +1,7 @@
 [Aspect]
 internal class Target
 {
-  class TestType : global::System.Object
+  class TestType
   {
     public void IntroducedMethod()
     {

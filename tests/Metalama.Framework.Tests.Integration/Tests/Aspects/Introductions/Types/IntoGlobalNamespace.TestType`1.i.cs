@@ -1,3 +1,3 @@
-class TestType<T> : global::System.Object
+class TestType<T>
 {
 }
