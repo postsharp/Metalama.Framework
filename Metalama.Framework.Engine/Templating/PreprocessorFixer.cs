@@ -68,15 +68,7 @@ internal static class PreprocessorFixer
 
         public override void VisitTrivia( SyntaxTrivia trivia )
         {
-            if ( trivia.IsKind( SyntaxKind.EndOfLineTrivia ) )
-            {
-                this._justAfterNewline = true;
-            }
-            else if ( trivia.IsKind( SyntaxKind.WhitespaceTrivia ) )
-            {
-                // Do nothing, whitespace is allowed before preprocessor directives.
-            }
-            else if ( SyntaxFacts.IsPreprocessorDirective( trivia.Kind() ) )
+            if ( SyntaxFacts.IsPreprocessorDirective( trivia.Kind() ) )
             {
                 if ( !this._justAfterNewline )
                 {
@@ -84,7 +76,16 @@ internal static class PreprocessorFixer
                     this.TokensToFix.Add( this._lastToken );
                 }
 
-                this._justAfterNewline = false;
+                this._justAfterNewline = true;
+            }
+            else if ( trivia.ToString() is [.., var ch] && SyntaxFacts.IsNewLine( ch ) )
+            {
+                // This can be EndOfLineTrivia, DisabledTextTrivia or possibly other trivia.
+                this._justAfterNewline = true;
+            }
+            else if ( trivia.IsKind( SyntaxKind.WhitespaceTrivia ) )
+            {
+                // Do nothing, whitespace is allowed before preprocessor directives.
             }
             else
             {
