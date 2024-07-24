@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
@@ -43,9 +44,12 @@ namespace Metalama.Testing.AspectTesting
 
                 if ( introducedSyntaxTrees.Length > 0 )
                 {
+                    // Sort syntax trees by name.
+                    // Since the syntax tree name includes the full name of the type, we must index them to avoid too long test result file names.
+                    // TODO: Underlying names may not be deterministic, which makes this non-deterministic too.
                     var outputCompilation =
                         testResult.InputCompilation!.AddSyntaxTrees(
-                            introducedSyntaxTrees.Select( ( x, i ) => x.GeneratedSyntaxTree.WithFilePath( $"{i}.cs" ) ) );
+                            introducedSyntaxTrees.OrderBy(x => x.Name, StringComparer.Ordinal).Select( ( x, i ) => x.GeneratedSyntaxTree.WithFilePath( $"{i}.cs" ) ) );
 
                     await testResult.SetOutputCompilationAsync( outputCompilation );
                     testResult.OutputCompilationDiagnostics.Report( outputCompilation.GetDiagnostics() );

@@ -241,6 +241,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 var generatedSyntaxTree = SyntaxTree( compilationUnit.NormalizeWhitespace(), encoding: Encoding.UTF8 );
                 var syntaxTreeName = declaringType.FullName + ".cs";
 
+                // TODO: This deduplication is may lead to non-deterministic results.
                 var index = 1;
 
                 while ( !additionalSyntaxTreeDictionary.TryAdd(
