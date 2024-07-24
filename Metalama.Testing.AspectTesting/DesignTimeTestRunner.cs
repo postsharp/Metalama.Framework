@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
@@ -40,15 +39,14 @@ namespace Metalama.Testing.AspectTesting
 
                 var introducedSyntaxTrees = pipelineResult.AdditionalSyntaxTrees;
                 var mainSyntaxTree = testResult.SyntaxTrees.Single( x => x.Kind is TestSyntaxTreeKind.Default );
-                
+
                 testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
 
                 if ( introducedSyntaxTrees.Length > 0 )
                 {
                     var outputCompilation =
                         testResult.InputCompilation!.AddSyntaxTrees(
-                            introducedSyntaxTrees.Select(
-                                ( x, i ) => x.GeneratedSyntaxTree.WithFilePath( $"{i}.cs" ) ) );
+                            introducedSyntaxTrees.Select( ( x, i ) => x.GeneratedSyntaxTree.WithFilePath( $"{i}.cs" ) ) );
 
                     await testResult.SetOutputCompilationAsync( outputCompilation );
                     testResult.OutputCompilationDiagnostics.Report( outputCompilation.GetDiagnostics() );
