@@ -182,6 +182,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                             if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: NamedTypeBuilder } )
                             {
+                                // TODO: This is not optimal - the injected member should be skipped instead.
+                                //       However, determining whether the type should be injected as a member depends on transformations after this
+                                //       one, so we would need two passes.
                                 injectedMembers = AddPartialModifierToTypes( injectedMembers );
                             }
 
