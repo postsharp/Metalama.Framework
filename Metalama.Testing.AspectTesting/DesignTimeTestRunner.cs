@@ -38,7 +38,6 @@ namespace Metalama.Testing.AspectTesting
                 testResult.HasOutputCode = true;
 
                 var introducedSyntaxTrees = pipelineResult.AdditionalSyntaxTrees;
-                var mainSyntaxTree = testResult.SyntaxTrees.Single( x => x.Kind is TestSyntaxTreeKind.Default );
 
                 testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
 
