@@ -38,21 +38,19 @@ namespace Metalama.Testing.AspectTesting
             {
                 testResult.HasOutputCode = true;
 
-                var introducedSyntaxTree = pipelineResult.AdditionalSyntaxTrees.SingleOrDefault();
-
-                var introducedSyntaxRoot = introducedSyntaxTree == null
-                    ? SyntaxFactory.CompilationUnit()
-                    : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
-
-                await testResult.SyntaxTrees.Single( x => x.Kind is TestSyntaxTreeKind.Default ).SetRunTimeCodeAsync( introducedSyntaxRoot );
+                var introducedSyntaxTrees = pipelineResult.AdditionalSyntaxTrees;
+                var mainSyntaxTree = testResult.SyntaxTrees.Single( x => x.Kind is TestSyntaxTreeKind.Default );
                 
                 testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
 
-                if ( introducedSyntaxTree != null )
+                if ( introducedSyntaxTrees.Length > 0 )
                 {
-                    var outputCompilation = testResult.InputCompilation!.AddSyntaxTrees( introducedSyntaxTree.GeneratedSyntaxTree );
+                    var outputCompilation =
+                        testResult.InputCompilation!.AddSyntaxTrees(
+                            introducedSyntaxTrees.Select(
+                                ( x, i ) => x.GeneratedSyntaxTree.WithFilePath( $"{i}.cs" ) ) );
 
-                    testResult.OutputCompilation = outputCompilation;
+                    await testResult.SetOutputCompilationAsync( outputCompilation );
                     testResult.OutputCompilationDiagnostics.Report( outputCompilation.GetDiagnostics() );
                 }
                 else

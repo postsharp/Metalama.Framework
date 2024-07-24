@@ -171,13 +171,18 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
                                 .Select( m => m.Syntax );
 
-                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: ConstructorBuilder builder } )
+                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: ConstructorBuilder constructorBuilder } )
                             {
                                 injectedMembers = AddIntroducedConstructorParameters(
                                     injectedMembers,
-                                    builder,
+                                    constructorBuilder,
                                     finalCompilationModel,
                                     syntaxGenerationContext );
+                            }
+
+                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: NamedTypeBuilder } )
+                            {
+                                injectedMembers = AddPartialModifierToTypes( injectedMembers );
                             }
 
                             members = members.AddRange( injectedMembers );
@@ -272,6 +277,26 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 yield return constructorDeclaration;
+            }
+        }
+
+        private static IEnumerable<MemberDeclarationSyntax> AddPartialModifierToTypes(
+            IEnumerable<MemberDeclarationSyntax> injectedMembers )
+        {
+            foreach ( var member in injectedMembers )
+            {
+                if ( member is TypeDeclarationSyntax typeDeclaration
+                     && typeDeclaration.Modifiers.All( m => !m.IsKind(SyntaxKind.PartialKeyword) ))
+                {
+                    yield return
+                        member.WithModifiers(
+                            member.Modifiers.Add(
+                                Token( TriviaList( ElasticSpace ), SyntaxKind.PartialKeyword, TriviaList() ) ) );
+                }
+                else
+                {
+                    yield return member;
+                }
             }
         }
 

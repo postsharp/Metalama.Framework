@@ -1,9 +1,4 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeIntoType
+[Introduction]
+internal partial class TargetClass
 {
-  partial class TargetClass
-  {
-    class TestType
-    {
-    }
-  }
 }

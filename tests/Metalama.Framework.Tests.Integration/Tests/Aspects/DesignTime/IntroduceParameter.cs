@@ -10,28 +10,28 @@ using Metalama.Framework.Code;
  * Tests that when a parameter is appended to a constructor, the design-time pipeline generates a new constructor the allows settings the parameters in code.
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter;
+
+public class IntroductionAttribute : TypeAspect
 {
-    public class IntroductionAttribute : TypeAspect
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        foreach (var constructor in builder.Target.Constructors)
         {
-            foreach (var constructor in builder.Target.Constructors)
-            {
-                builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
-                builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
-            }
+            builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+            builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
         }
     }
+}
 
-    [Introduction]
-    internal partial class TestClass
+// <target>
+[Introduction]
+internal partial class TestClass
+{
+    public TestClass( int param ) { }
+
+    public void Foo()
     {
-        public TestClass( int param ) { }
-
-        public void Foo()
-        {
-            _ = new TestClass( 42 );
-        }
+        _ = new TestClass( 42 );
     }
 }

@@ -1,3 +1,4 @@
-partial class TestType
+[Introduction]
+public class TargetType
 {
 }

@@ -41,6 +41,7 @@ public class ParameterIntroductionAttribute : ConstructorAspect
     }
 }
 
+// <target>
 [ConstructorIntroduction]
 internal partial class TestClass
 {

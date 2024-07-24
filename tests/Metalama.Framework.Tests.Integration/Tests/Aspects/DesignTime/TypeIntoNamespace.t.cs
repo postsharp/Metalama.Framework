@@ -1,6 +1,7 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeIntoNamespace.TargetNamespace
+namespace TargetNamespace
 {
-  partial class TestType
+  [Introduction]
+  public class TargetType
   {
   }
 }
