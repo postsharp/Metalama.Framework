@@ -51,8 +51,10 @@ namespace Metalama.Testing.AspectTesting
                         testResult.InputCompilation!.AddSyntaxTrees(
                             introducedSyntaxTrees.OrderBy(x => x.Name, StringComparer.Ordinal).Select( ( x, i ) => x.GeneratedSyntaxTree.WithFilePath( $"{i}.cs" ) ) );
 
-                    await testResult.SetOutputCompilationAsync( outputCompilation );
+                    testResult.OutputCompilation = outputCompilation;
                     testResult.OutputCompilationDiagnostics.Report( outputCompilation.GetDiagnostics() );
+
+                    await testResult.SetOutputCompilationAsync( outputCompilation );
                 }
                 else
                 {
