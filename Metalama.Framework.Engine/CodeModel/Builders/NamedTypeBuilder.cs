@@ -114,6 +114,9 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     public INamedTypeCollection Types => new EmptyNamedTypeCollection();
 
     [Memo]
+    public INamedTypeCollection AllTypes => new EmptyNamedTypeCollection();
+
+    [Memo]
     public IPropertyCollection Properties => new EmptyPropertyCollection( this );
 
     [Memo]

@@ -33,11 +33,13 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
         this.GenericMap = new GenericMap( substitutedType.TypeArguments, sourceMember.Compilation.RoslynCompilation );
     }
 
+    public CompilationModel Compilation => this._sourceMember.Compilation;
+
     protected IType Substitute( IType sourceType )
         => this._sourceMember.Compilation.Factory.GetIType(
             this.GenericMap.Map( sourceType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
 
-    public ICompilation Compilation => this._sourceMember.Compilation;
+    ICompilation ICompilationElement.Compilation => this._sourceMember.Compilation;
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 

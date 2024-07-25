@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel
     internal abstract class RoslynType<T> : ITypeImpl
         where T : ITypeSymbol
     {
-        protected CompilationModel Compilation { get; }
+        public CompilationModel Compilation { get; }
 
         protected T Symbol { get; }
 

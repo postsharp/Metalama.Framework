@@ -1532,6 +1532,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     public IClassIntroductionAdviceResult IntroduceClass(
         INamespaceOrNamedType targetNamespaceOrType,
         string name,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<INamedTypeBuilder>? buildType = null )
     {
         using ( this.WithNonUserCode() )
@@ -1543,6 +1544,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 new IntroduceNamedTypeAdvice(
                         this.GetAdviceConstructorParameters( targetNamespaceOrType ),
                         name,
+                        whenExists,
                         buildType )
                     .Execute( this._state ) );
         }

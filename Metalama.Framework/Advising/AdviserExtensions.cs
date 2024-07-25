@@ -1076,10 +1076,12 @@ public static class AdviserExtensions
     public static IClassIntroductionAdviceResult IntroduceClass(
         this IAdviser<INamespaceOrNamedType> adviser,
         string name,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<INamedTypeBuilder>? buildType = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
             adviser.Target,
             name,
+            whenExists,
             buildType );
 
     public static IAdviser<INamespace> WithNamespace( this IAdviser<ICompilation> adviser, string name )

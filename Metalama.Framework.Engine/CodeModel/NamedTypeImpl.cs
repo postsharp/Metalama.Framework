@@ -139,6 +139,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     [Memo]
+    public INamedTypeCollection AllTypes => new AllTypesCollection( this._facade );
+
+    [Memo]
     public IPropertyCollection Properties
         => new PropertyCollection(
             this._facade,

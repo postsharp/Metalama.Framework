@@ -21,22 +21,22 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal sealed class Attribute : IAttributeImpl
 {
-    private readonly CompilationModel _compilation;
-
     public Attribute( AttributeData data, CompilationModel compilation, IDeclaration containingDeclaration )
     {
         // Note that Roslyn can return an AttributeData that does not belong to the same compilation
         // as the parent symbol, probably because of some bug or optimisation.
 
         this.AttributeData = data;
-        this._compilation = compilation;
+        this.Compilation = compilation;
         this.ContainingDeclaration = containingDeclaration;
     }
+
+    public CompilationModel Compilation { get; }
 
     public AttributeData AttributeData { get; }
 
     IRef<IDeclaration> IDeclaration.ToRef()
-        => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToTypedRef(), this._compilation.CompilationContext );
+        => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToTypedRef(), this.Compilation.CompilationContext );
 
     public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
@@ -61,17 +61,17 @@ internal sealed class Attribute : IAttributeImpl
         => ((IDeclarationImpl) this).DeclaringSyntaxReferences.SelectAsImmutableArray(
             sr => new SourceReference( sr.GetSyntax(), SourceReferenceImpl.Instance ) );
 
-    public ICompilation Compilation => this.Constructor.Compilation;
+    ICompilation ICompilationElement.Compilation => this.Compilation;
 
     [Memo]
     public INamedType Type
-        => this._compilation.Factory.GetNamedType(
+        => this.Compilation.Factory.GetNamedType(
             this.AttributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ),
             true );
 
     [Memo]
     public IConstructor Constructor
-        => this._compilation.Factory.GetConstructor(
+        => this.Compilation.Factory.GetConstructor(
             this.AttributeData.AttributeConstructor.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ),
             true );
 
@@ -86,12 +86,12 @@ internal sealed class Attribute : IAttributeImpl
 
     private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
     {
-        var type = this._compilation.Factory.GetIType( constant.Type.AssertSymbolNotNull() );
+        var type = this.Compilation.Factory.GetIType( constant.Type.AssertSymbolNotNull() );
 
         var value = constant.Kind switch
         {
             TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
-            TypedConstantKind.Type => constant.Value == null ? null : this._compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
+            TypedConstantKind.Type => constant.Value == null ? null : this.Compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
             TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
             _ => throw new ArgumentException( nameof(constant) )
         };
