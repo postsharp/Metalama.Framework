@@ -12,34 +12,34 @@ using Metalama.Framework.Code;
  * the design-time pipeline does not generate the conflicting constructor.
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_Conflicting;
-
-public class IntroductionAttribute : TypeAspect
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_Conflicting
 {
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public class IntroductionAttribute : TypeAspect
     {
-        foreach (var constructor in builder.Target.Constructors.Where( c => c.Parameters.Count == 1 ))
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
-            builder.With( constructor ).IntroduceParameter( "introduced2", typeof(int), TypedConstant.Create( "42" ) );
+            foreach (var constructor in builder.Target.Constructors.Where( c => c.Parameters.Count == 1 ))
+            {
+                builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+                builder.With( constructor ).IntroduceParameter( "introduced2", typeof(int), TypedConstant.Create( "42" ) );
+            }
         }
     }
-}
 
-// <target>
-[Introduction]
-internal partial class TestClass
-{
-    public TestClass( int param, int optional1 = 42, int optional2 = 42 ) { }
-
-    public TestClass( int param ) { }
-
-    public void Foo()
+    [Introduction]
+    internal partial class TestClass
     {
-        _ = new TestClass( 42 );
-        _ = new TestClass( 42, 42, 42 );
-        _ = new TestClass( 42, optional1: 42 );
-        _ = new TestClass( 42, optional2: 42 );
-        _ = new TestClass( 42, optional1: 42, optional2: 42 );
+        public TestClass( int param, int optional1 = 42, int optional2 = 42 ) { }
+
+        public TestClass( int param ) { }
+
+        public void Foo()
+        {
+            _ = new TestClass( 42 );
+            _ = new TestClass( 42, 42, 42 );
+            _ = new TestClass( 42, optional1: 42 );
+            _ = new TestClass( 42, optional2: 42 );
+            _ = new TestClass( 42, optional1: 42, optional2: 42 );
+        }
     }
 }

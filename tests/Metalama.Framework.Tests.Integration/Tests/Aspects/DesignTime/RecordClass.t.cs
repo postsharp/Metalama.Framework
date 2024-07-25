@@ -1,2 +1,9 @@
-[Introduction]
-internal partial record class TargetClassRecord(int x);
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.ClassRecord
+{
+  partial record class TargetClassRecord
+  {
+    public void M()
+    {
+    }
+  }
+}
