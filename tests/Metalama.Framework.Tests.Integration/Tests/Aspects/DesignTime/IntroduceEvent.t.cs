@@ -1,15 +1,4 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceEvent
+[Introduction]
+internal partial class TargetClass
 {
-  partial class TargetClass
-  {
-    public event global::System.EventHandler? Event
-    {
-      add
-      {
-      }
-      remove
-      {
-      }
-    }
-  }
 }

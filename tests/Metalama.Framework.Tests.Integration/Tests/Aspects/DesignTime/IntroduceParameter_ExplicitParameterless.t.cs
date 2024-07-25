@@ -1,9 +1,11 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ExplicitParameterless
+[Introduction]
+internal partial class TestClass
 {
-  partial class TestClass
+  public TestClass()
   {
-    public TestClass(global::System.Int32 introduced1 = 42, global::System.String introduced2 = "42") : this()
-    {
-    }
+  }
+  public void Foo()
+  {
+    _ = new TestClass();
   }
 }
