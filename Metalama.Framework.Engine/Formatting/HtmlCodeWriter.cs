@@ -84,7 +84,16 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
 
         void FlushLine( TextSpan span )
         {
-            var lineDiffInfo = diffInfo?.Lines[lineNumber];
+            LineDiffInfo? lineDiffInfo;
+
+            if ( diffInfo is { Lines.Length: > 0 } )
+            {
+                lineDiffInfo = diffInfo?.Lines[lineNumber];
+            }
+            else
+            {
+                lineDiffInfo = null;
+            }
 
             // First write the imaginary diff lines before.
             AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
@@ -406,11 +415,18 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
         }
     }
 
+    internal enum SyntaxTreeKind
+    {
+        Source,
+        Transformed,
+        Introduced
+    }
+
     private static async Task WriteAllAsync(
         IProjectOptions projectOptions,
         ProjectServiceProvider serviceProvider,
         PartialCompilation partialCompilation,
-        string htmlExtension,
+        Func<string, SyntaxTreeKind> getSyntaxTreeKind,
         Func<string, FileDiffInfo?>? getDiffInfo = null,
         bool includeDiagnostics = false,
         IEnumerable<Diagnostic>? additionalDiagnostics = null )
@@ -421,7 +437,7 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
 
         if ( includeDiagnostics )
         {
-            additionalDiagnostics ??= Enumerable.Empty<Diagnostic>();
+            additionalDiagnostics ??= [];
 
             diagnosticsBySyntaxTree = additionalDiagnostics.Concat( compilation.GetDiagnostics() )
                 .ToMultiValueDictionary( d => d.Location.SourceTree?.FilePath ?? "", d => d );
@@ -453,7 +469,8 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
 
         foreach ( var syntaxTree in compilation.SyntaxTrees )
         {
-            project = project.AddDocument( syntaxTree.FilePath, await syntaxTree.GetRootAsync(), null, syntaxTree.FilePath ).Project;
+            var document = project.AddDocument( syntaxTree.FilePath, await syntaxTree.GetRootAsync(), null, syntaxTree.FilePath );
+            project = document.Project;
         }
 
         var projectDirectory = Path.GetFullPath( Path.GetDirectoryName( projectOptions.ProjectPath )! );
@@ -462,16 +479,40 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
         foreach ( var document in project.Documents )
         {
             var documentPath = document.FilePath.AssertNotNull();
-            var documentFullPath = Path.GetFullPath( documentPath );
+            var syntaxTreeKind = getSyntaxTreeKind( documentPath );
 
-            if ( !documentFullPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
+            var htmlExtension = syntaxTreeKind switch
             {
-                // Skipping this document.
-                continue;
-            }
+                SyntaxTreeKind.Introduced => ".i.cs.html",
+                SyntaxTreeKind.Source => ".cs.html",
+                SyntaxTreeKind.Transformed => ".t.cs.html",
+                _ => throw new AssertionFailedException()
+            };
 
-            var relativePath = documentFullPath.Substring( projectDirectory.Length + 1 );
-            var outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( relativePath, htmlExtension ) );
+            string outputPath;
+            FileDiffInfo? diffInfo;
+
+            if ( syntaxTreeKind == SyntaxTreeKind.Introduced )
+            {
+                diffInfo = null;
+
+                outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( documentPath, htmlExtension ) );
+            }
+            else
+            {
+                var documentFullPath = Path.GetFullPath( documentPath );
+
+                if ( !documentFullPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    // Skipping this document.
+                    continue;
+                }
+
+                var relativePath = documentFullPath.Substring( projectDirectory.Length + 1 );
+                outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( relativePath, htmlExtension ) );
+
+                diffInfo = getDiffInfo?.Invoke( documentPath );
+            }
 
             var outputSubdirectory = Path.GetDirectoryName( outputPath ).AssertNotNull();
             Directory.CreateDirectory( outputSubdirectory );
@@ -481,7 +522,6 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
 #else
             using var textWriter = new StreamWriter( outputPath );
 #endif
-            var diffInfo = getDiffInfo?.Invoke( documentPath );
 
             var diagnostics = includeDiagnostics ? diagnosticsBySyntaxTree![documentPath] : ImmutableArray<Diagnostic>.Empty;
 
@@ -500,7 +540,7 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
             projectOptions,
             serviceProvider,
             inputCompilation,
-            ".cs.html",
+            _ => SyntaxTreeKind.Source,
             p => GetDiffInfoForPath( p, true ),
             true,
             additionalDiagnostics );
@@ -509,7 +549,7 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
             projectOptions,
             serviceProvider,
             outputCompilation,
-            ".t.cs.html",
+            GetOutputSyntaxTreeKind,
             p => GetDiffInfoForPath( p, false ) );
 
         FileDiffInfo? GetDiffInfoForPath( string path, bool isOld )
@@ -525,6 +565,18 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
             }
 
             return GetDiffInfo( oldTree, newTree, isOld );
+        }
+
+        SyntaxTreeKind GetOutputSyntaxTreeKind( string path )
+        {
+            if ( inputCompilation.SyntaxTrees.ContainsKey( path ) )
+            {
+                return SyntaxTreeKind.Transformed;
+            }
+            else
+            {
+                return SyntaxTreeKind.Introduced;
+            }
         }
     }
 
