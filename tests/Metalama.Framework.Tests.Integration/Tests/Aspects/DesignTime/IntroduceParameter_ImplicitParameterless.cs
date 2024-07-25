@@ -10,26 +10,26 @@ using Metalama.Framework.Code;
  * Tests that when a parameter is appended to a implicit parameterless constructor, the design-time pipeline generates a correct constructor with optional parameters.
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ImplicitParameterless;
-
-public class IntroductionAttribute : TypeAspect
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ImplicitParameterless
 {
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public class IntroductionAttribute : TypeAspect
     {
-        foreach (var constructor in builder.Target.Constructors)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
-            builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            foreach (var constructor in builder.Target.Constructors)
+            {
+                builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+                builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            }
         }
     }
-}
 
-// <target>
-[Introduction]
-internal partial class TestClass
-{
-    public void Foo()
+    [Introduction]
+    internal partial class TestClass
     {
-        _ = new TestClass();
+        public void Foo()
+        {
+            _ = new TestClass();
+        }
     }
 }

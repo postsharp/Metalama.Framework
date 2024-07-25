@@ -6,21 +6,22 @@ using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.ClassInClass;
-
-public class IntroductionAttribute : TypeAspect
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.ClassInClass
 {
-    [Introduce]
-    public void M()
+    public class IntroductionAttribute : TypeAspect
     {
-        Console.WriteLine( "This is introduced method." );
-        var nic = meta.Proceed();
+        [Introduce]
+        public void M()
+        {
+            Console.WriteLine( "This is introduced method." );
+            var nic = meta.Proceed();
+        }
     }
-}
 
-// <target>
-internal partial class TargetClass
-{
-    [Introduction]
-    private partial class Nested { }
+    // <target>
+    internal partial class TargetClass
+    {
+        [Introduction]
+        private partial class Nested { }
+    }
 }

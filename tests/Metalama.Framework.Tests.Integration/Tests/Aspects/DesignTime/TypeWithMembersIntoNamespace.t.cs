@@ -1,7 +1,7 @@
-namespace TargetNamespace
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeWithMembersIntoNamespace.TargetNamespace
 {
-  [Introduction]
-  public class TargetType
+  partial class TestType
   {
+    private global::System.Int32 TestField;
   }
 }

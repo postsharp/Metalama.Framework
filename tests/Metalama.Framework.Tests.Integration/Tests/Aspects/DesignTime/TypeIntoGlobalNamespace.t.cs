@@ -1,4 +1,3 @@
-[Introduction]
-public class TargetType
+partial class TestType
 {
 }

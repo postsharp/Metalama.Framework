@@ -1,7 +1,12 @@
-internal partial struct TargetStruct
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.ClassInStruct
 {
-  [Introduction]
-  private partial class Nested
+  partial struct TargetStruct
   {
+    partial class Nested
+    {
+      public void M()
+      {
+      }
+    }
   }
 }

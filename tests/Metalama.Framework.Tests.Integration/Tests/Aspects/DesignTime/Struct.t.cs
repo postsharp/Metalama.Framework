@@ -1,4 +1,9 @@
-[Introduction]
-internal partial struct Struct
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.Struct
 {
+  partial struct Struct
+  {
+    public void M()
+    {
+    }
+  }
 }

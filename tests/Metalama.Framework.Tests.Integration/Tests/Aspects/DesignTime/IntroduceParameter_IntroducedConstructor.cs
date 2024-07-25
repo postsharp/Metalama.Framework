@@ -13,38 +13,38 @@ using Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_
  * Tests that when a parameter is appended to an introduced constructor, the design-time pipeline generates a correct constructor with optional parameters.
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_IntroducedConstructor;
-
-public class ConstructorIntroductionAttribute : TypeAspect
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_IntroducedConstructor
 {
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public class ConstructorIntroductionAttribute : TypeAspect
     {
-        builder.IntroduceConstructor(
-            nameof(Template),
-            buildConstructor: c => { } );
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        {
+            builder.IntroduceConstructor(
+                nameof(Template),
+                buildConstructor: c => { } );
 
-        builder.IntroduceConstructor(
-            nameof(Template),
-            buildConstructor: c => { c.AddParameter( "p", typeof(int) ); } );
+            builder.IntroduceConstructor(
+                nameof(Template),
+                buildConstructor: c => { c.AddParameter( "p", typeof(int) ); } );
+        }
+
+        [Template]
+        public void Template() { }
     }
 
-    [Template]
-    public void Template() { }
-}
-
-public class ParameterIntroductionAttribute : TypeAspect
-{
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public class ParameterIntroductionAttribute : TypeAspect
     {
-        foreach (var constructor in builder.Target.Constructors)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
-            builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            foreach (var constructor in builder.Target.Constructors)
+            {
+                builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+                builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            }
         }
     }
-}
 
-// <target>
-[ConstructorIntroduction]
-[ParameterIntroduction]
-internal partial class TestClass { }
+    [ConstructorIntroduction]
+    [ParameterIntroduction]
+    internal partial class TestClass { }
+}

@@ -1,18 +1,9 @@
-[Introduction]
-internal partial class TestClass
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ExistingOptionalNonOptional
 {
-  public TestClass(int param)
+  partial class TestClass
   {
-  }
-  public TestClass(int param, int optParam = 42)
-  {
-  }
-  public void Foo()
-  {
-    _ = new TestClass(42);
-    _ = new TestClass(param: 42);
-    _ = new TestClass(42, 42);
-    _ = new TestClass(42, optParam: 42);
-    _ = new TestClass(optParam: 42, param: 13);
+    public TestClass(global::System.Int32 param, global::System.Int32 optParam = 42, global::System.Int32 introduced1 = 42, global::System.String introduced2 = "42") : this(param, optParam: optParam)
+    {
+    }
   }
 }

@@ -11,32 +11,32 @@ using Metalama.Framework.Code;
  * a "deambiguing" constructor without any optional parameter that prevents C# "ambiguous call" error cause by the constructor with new parameters.
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ExistingOptional;
-
-public class IntroductionAttribute : TypeAspect
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ExistingOptional
 {
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public class IntroductionAttribute : TypeAspect
     {
-        foreach (var constructor in builder.Target.Constructors)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
-            builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            foreach (var constructor in builder.Target.Constructors)
+            {
+                builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+                builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            }
         }
     }
-}
 
-// <target>
-[Introduction]
-internal partial class TestClass
-{
-    public TestClass( int param, int optParam = 42 ) { }
-
-    public void Foo()
+    [Introduction]
+    internal partial class TestClass
     {
-        _ = new TestClass( 42 );
-        _ = new TestClass( param: 42 );
-        _ = new TestClass( 42, 42 );
-        _ = new TestClass( 42, optParam: 42 );
-        _ = new TestClass( optParam: 42, param: 13 );
+        public TestClass( int param, int optParam = 42 ) { }
+
+        public void Foo()
+        {
+            _ = new TestClass( 42 );
+            _ = new TestClass( param: 42 );
+            _ = new TestClass( 42, 42 );
+            _ = new TestClass( 42, optParam: 42 );
+            _ = new TestClass( optParam: 42, param: 13 );
+        }
     }
 }

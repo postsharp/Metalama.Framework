@@ -4,7 +4,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
-using System;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
@@ -38,20 +38,21 @@ namespace Metalama.Testing.AspectTesting
             {
                 testResult.HasOutputCode = true;
 
-                var introducedSyntaxTrees = pipelineResult.AdditionalSyntaxTrees;
+                var introducedSyntaxTree = pipelineResult.AdditionalSyntaxTrees.SingleOrDefault();
 
+                var introducedSyntaxRoot = introducedSyntaxTree == null
+                    ? SyntaxFactory.CompilationUnit()
+                    : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
+
+                await testResult.SyntaxTrees.Single( x => x.Kind is TestSyntaxTreeKind.Default ).SetRunTimeCodeAsync( introducedSyntaxRoot );
+                
                 testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
 
-                if ( introducedSyntaxTrees.Length > 0 )
+                if ( introducedSyntaxTree != null )
                 {
-                    // Sort syntax trees by name.
-                    // Since the syntax tree name includes the full name of the type, we must index them to avoid too long test result file names.
-                    // TODO: Underlying names may not be deterministic, which makes this non-deterministic too.
-                    var outputCompilation =
-                        testResult.InputCompilation!.AddSyntaxTrees(
-                            introducedSyntaxTrees.OrderBy(x => x.Name, StringComparer.Ordinal).Select( ( x, i ) => x.GeneratedSyntaxTree.WithFilePath( $"{i}.cs" ) ) );
+                    var outputCompilation = testResult.InputCompilation!.AddSyntaxTrees( introducedSyntaxTree.GeneratedSyntaxTree );
 
-                    await testResult.SetOutputCompilationAsync( outputCompilation );
+                    testResult.OutputCompilation = outputCompilation;
                     testResult.OutputCompilationDiagnostics.Report( outputCompilation.GetDiagnostics() );
                 }
                 else

@@ -11,35 +11,35 @@ using Metalama.Framework.Code;
  * a constructor that uses existing constructor with correct "refness".
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_RefOut;
-
-public class IntroductionAttribute : TypeAspect
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_RefOut
 {
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public class IntroductionAttribute : TypeAspect
     {
-        foreach (var constructor in builder.Target.Constructors)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
-            builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            foreach (var constructor in builder.Target.Constructors)
+            {
+                builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+                builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+            }
         }
     }
-}
 
-// <target>
-[Introduction]
-internal partial class TestClass
-{
-    public TestClass( ref int param, int optParam = 42 ) { }
-
-    public TestClass( out string param, int optParam = 42 )
+    [Introduction]
+    internal partial class TestClass
     {
-        param = "42";
-    }
+        public TestClass( ref int param, int optParam = 42 ) { }
 
-    public void Foo()
-    {
-        var f = 42;
-        _ = new TestClass( ref f );
-        _ = new TestClass( out var g );
+        public TestClass( out string param, int optParam = 42 )
+        {
+            param = "42";
+        }
+
+        public void Foo()
+        {
+            var f = 42;
+            _ = new TestClass( ref f );
+            _ = new TestClass( out var g );
+        }
     }
 }
