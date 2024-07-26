@@ -13,7 +13,5 @@ internal abstract class AllMembersCollection<T> : AllMemberOrNamedTypesCollectio
 
     INamedType IMemberCollection<T>.DeclaringType => this.DeclaringType;
 
-    private INamedTypeImpl DeclaringType => (INamedTypeImpl) base.DeclaringNamedType;
-
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 }

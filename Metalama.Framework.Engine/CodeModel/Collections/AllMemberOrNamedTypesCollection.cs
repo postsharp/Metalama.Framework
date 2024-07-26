@@ -15,14 +15,14 @@ internal abstract class AllMemberOrNamedTypesCollection<TItem, TCollection> : IM
 {
     private volatile HashSet<TItem>? _members;
 
-    protected AllMemberOrNamedTypesCollection( INamedType declaringNamespaceOrNamedType )
+    protected AllMemberOrNamedTypesCollection( INamedType declaringType )
     {
-        this.DeclaringNamedType = declaringNamespaceOrNamedType;
+        this.DeclaringType = declaringType;
     }
 
     protected CompilationContext CompilationContext => ((IDeclarationImpl) this.DeclaringNamedType).Compilation.CompilationContext;
 
-    protected INamedType DeclaringNamedType { get; }
+    protected INamedType DeclaringType { get; }
 
     public IEnumerable<TItem> OfName( string name ) => this.GetItemsCore( name );
 
@@ -41,9 +41,9 @@ internal abstract class AllMemberOrNamedTypesCollection<TItem, TCollection> : IM
         // We don't assign the field directly so we don't get into concurrent updates of the collection.
         var members = new HashSet<TItem>( this.Comparer );
 
-        for ( var t = this.DeclaringNamedType; t != null; t = t.BaseType )
+        for ( var t = this.DeclaringType; t != null; t = t.BaseType )
         {
-            var includePrivate = ReferenceEquals( t, this.DeclaringNamedType );
+            var includePrivate = ReferenceEquals( t, this.DeclaringType );
             var declaredMembers = name == null ? this.GetMembers( t ) : this.GetMembers( t ).OfName( name );
 
             foreach ( var member in declaredMembers )
