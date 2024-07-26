@@ -56,6 +56,7 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
                     namedType.AllTypes
                         .OfName( this.Builder.Name )
                         .FirstOrDefault( t => this.Builder.TypeParameters.Count == t.TypeParameters.Count ),
+                _ => throw new AssertionFailedException( $"Unsupported: {targetDeclaration}" ),
             };
 
         if ( existingType == null )

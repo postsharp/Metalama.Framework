@@ -9,9 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 internal abstract class AllMembersCollection<T> : AllMemberOrNamedTypesCollection<T, IMemberCollection<T>>, IMemberCollection<T>
     where T : class, IMember
 {
-    protected AllMembersCollection( INamedTypeImpl declaringType ) : base(declaringType)
-    {
-    }
+    protected AllMembersCollection( INamedTypeImpl declaringType ) : base( declaringType ) { }
 
     INamedType IMemberCollection<T>.DeclaringType => this.DeclaringType;
 
