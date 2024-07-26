@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
-using System.Collections.Generic;
+using System;
 using System.Collections.Immutable;
 using System.IO;
 
@@ -62,8 +62,6 @@ public class DefaultProjectOptions : IProjectOptions
         return false;
     }
 
-    public virtual IEnumerable<string> PropertyNames => [];
-
     public virtual bool RemoveCompileTimeOnlyCode => true;
 
     public virtual bool RequiresCodeCoverageAnnotations => false;
@@ -105,4 +103,11 @@ public class DefaultProjectOptions : IProjectOptions
     public virtual bool? DebugTransformedCode => null;
 
     public virtual string? TransformedFilesOutputPath => null;
+
+    // IProjectoptions is currently not used as a dictionary key, so we can throw here.
+    public sealed override int GetHashCode() => throw new NotImplementedException();
+
+    public sealed override bool Equals( object? obj ) => this.Equals( obj as IProjectOptions );
+
+    public virtual bool Equals( IProjectOptions? other ) => ReferenceEquals( this, other );
 }

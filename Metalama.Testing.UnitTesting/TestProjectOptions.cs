@@ -5,11 +5,9 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -125,19 +123,7 @@ internal sealed class TestProjectOptions : DefaultProjectOptions, IDisposable
 
     public override bool RoslynIsCompileTimeOnly { get; }
 
-    // Since this is a test class, we can only include properties where equality matters in tests.
-    public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
-    {
-        if ( name == nameof(this.CodeFormattingOptions) )
-        {
-            value = this.CodeFormattingOptions.ToString();
-            return true;
-        }
-
-        return this._properties.TryGetValue( name, out value );
-    }
-
-    public override IEnumerable<string> PropertyNames => this._properties.Keys.Concat( nameof(this.CodeFormattingOptions) );
+    public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
     private void AddFileLocker() => Interlocked.Increment( ref this._fileLockers );
 

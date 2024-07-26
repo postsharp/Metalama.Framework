@@ -191,7 +191,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
                 return x.Zip( y, ( x, y ) => (x, y) ).All( pair => pair.x.FilePath == pair.y.FilePath && pair.x.FilePath != null );
             }
 
-            if ( ProjectOptionsEqualityComparer.Equals( projectOptions, pipelineOptions )
+            if ( projectOptions.Equals( pipelineOptions )
                  && ReferencesAreEqual( references, pipeline.MetadataReferences ) )
             {
                 return true;
@@ -201,7 +201,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
                 if ( this._logger.Trace is { } trace )
                 {
                     // Recreating the pipeline over and over is a performance issue, so we log the reason.
-                    if ( !ProjectOptionsEqualityComparer.Equals( projectOptions, pipelineOptions ) )
+                    if ( !projectOptions.Equals( pipelineOptions ) )
                     {
                         var jsonSettings = new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
                         trace.Log(

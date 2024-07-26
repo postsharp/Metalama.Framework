@@ -42,6 +42,7 @@ public static class MSBuildPropertyNames
     public const string MetalamaDebugTransformedCode = nameof(MetalamaDebugTransformedCode);
     public const string MetalamaCompilerTransformedFilesOutputPath = nameof(MetalamaCompilerTransformedFilesOutputPath);
     public const string MetalamaEmitCompilerTransformedFiles = nameof(MetalamaEmitCompilerTransformedFiles);
+    public const string MetalamaCompilerVisiblePropertiesList = nameof(MetalamaCompilerVisiblePropertiesList);
 
     public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
         MetalamaBuildTouchFile,
@@ -73,5 +74,6 @@ public static class MSBuildPropertyNames
         MetalamaRestoreSources,
         MetalamaTemplateLanguageVersion,
         MetalamaDebugTransformedCode,
-        MetalamaCompilerTransformedFilesOutputPath );
+        MetalamaCompilerTransformedFilesOutputPath,
+        MetalamaCompilerVisiblePropertiesList );
 }

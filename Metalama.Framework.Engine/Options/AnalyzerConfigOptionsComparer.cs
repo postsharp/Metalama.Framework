@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using static Metalama.Framework.Engine.Options.AnalyzerConfigOptionsBuildProperties;
 
 namespace Metalama.Framework.Engine.Options;
 
@@ -14,13 +15,8 @@ internal sealed class AnalyzerConfigOptionsComparer : IEqualityComparer<Analyzer
 
     public AnalyzerConfigOptionsComparer( IEnumerable<string>? msbuildProperties )
     {
-#if !ROSLYN_4_4_0_OR_GREATER
-        msbuildProperties ??= MSBuildPropertyNames.All;
-#endif
-        this._allProperties = msbuildProperties?.Select( n => $"build_property.{n}" ).ToImmutableArray();
+        this._allProperties = msbuildProperties?.Select( ToAnalyzerConfigName ).ToImmutableArray();
     }
-
-    private static bool IsBuildProperty( string propertyName ) => propertyName.StartsWith( "build_property.", StringComparison.Ordinal );
 
     public bool Equals( AnalyzerConfigOptions? x, AnalyzerConfigOptions? y )
     {
@@ -34,11 +30,7 @@ internal sealed class AnalyzerConfigOptionsComparer : IEqualityComparer<Analyzer
             return false;
         }
 
-#if ROSLYN_4_4_0_OR_GREATER
-        var allProperties = this._allProperties ?? x.Keys.Union( y.Keys ).Where( IsBuildProperty );
-#else
-        var allProperties = this._allProperties.Value;
-#endif
+        var allProperties = this._allProperties ?? x.GetBuildProperties().Union( y.GetBuildProperties() );
 
         foreach ( var propertyName in allProperties )
         {
@@ -59,11 +51,7 @@ internal sealed class AnalyzerConfigOptionsComparer : IEqualityComparer<Analyzer
     {
         HashCode hashCode = default;
 
-#if ROSLYN_4_4_0_OR_GREATER
-        var allProperties = this._allProperties ?? obj.Keys.Where( IsBuildProperty );
-#else
-        var allProperties = this._allProperties.Value;
-#endif
+        var allProperties = this._allProperties ?? obj.GetBuildProperties();
 
         foreach ( var propertyName in allProperties )
         {

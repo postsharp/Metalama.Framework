@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <Import Project="Metalama.CompilerVisibleProperties.props"
-            Condition="'$(MetalamaCompilerVisiblePropertiesProjectImported)'==''"/>
+            Condition="'$(MetalamaCompilerVisiblePropertiesTargetsImported)'==''"/>
 
     <!-- Implementation of the 'LamaDebug' build configuration.
          It is import to define this in the .props file, and not in the .targets file, because it needs to be processed _before_

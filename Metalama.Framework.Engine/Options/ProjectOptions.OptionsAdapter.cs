@@ -3,10 +3,8 @@
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
-
-#if ROSLYN_4_4_0_OR_GREATER
 using System.Linq;
-#endif
+using static Metalama.Framework.Engine.Options.AnalyzerConfigOptionsBuildProperties;
 
 // ReSharper disable ClassCanBeSealed.Global, InconsistentNaming
 
@@ -19,8 +17,6 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         private sealed class OptionsAdapter : IProjectOptionsSource
         {
-            private const string _prefix = "build_property.";
-
             private readonly AnalyzerConfigOptions _options;
 
             public OptionsAdapter( AnalyzerConfigOptions options )
@@ -28,14 +24,9 @@ namespace Metalama.Framework.Engine.Options
                 this._options = options;
             }
 
-            public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( $"{_prefix}{name}", out value );
+            public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( ToAnalyzerConfigName( name ), out value );
 
-            public IEnumerable<string> PropertyNames
-#if ROSLYN_4_4_0_OR_GREATER
-                => this._options.Keys.Where( key => key.StartsWith( _prefix, StringComparison.Ordinal ) ).Select( key => key.Substring( _prefix.Length ) );
-#else
-                => MSBuildPropertyNames.All;
-#endif
+            public IEnumerable<string> PropertyNames => this._options.GetBuildProperties().Select( ToMsBuildPropertyName );
         }
 
         public override IProjectOptions Apply( IProjectOptions options ) => throw new NotSupportedException();
