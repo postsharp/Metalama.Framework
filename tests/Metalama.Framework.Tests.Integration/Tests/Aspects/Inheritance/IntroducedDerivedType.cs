@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Introduced
         {
             builder.IntroduceClass(
                 "IntroducedDerived",
-                b => { b.BaseType = builder.Target.Types.OfName( "BaseType" ).Single(); } );
+                buildType: b => { b.BaseType = builder.Target.Types.OfName( "BaseType" ).Single(); } );
         }
     }
 

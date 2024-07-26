@@ -52,6 +52,11 @@ namespace Metalama.Framework.Code
         INamedTypeCollection NestedTypes { get; }
 
         /// <summary>
+        /// Gets the list of nested types defined in the current type or inherited from the base types.
+        /// </summary>
+        INamedTypeCollection AllTypes { get; }
+
+        /// <summary>
         /// Gets the list of properties defined in the current type, but not those inherited from the base types.
         /// Note that fields can be promoted to properties by aspects, so a source code field can be 
         /// represented in the <see cref="Properties" /> collection instead of the <see cref="Fields"/>

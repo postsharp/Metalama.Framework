@@ -777,6 +777,7 @@ namespace Metalama.Framework.Advising
         IClassIntroductionAdviceResult IntroduceClass(
             INamespaceOrNamedType targetNamespaceOrType,
             string name,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<INamedTypeBuilder>? buildType = null );
 
         IAdviser<INamespace> WithNamespace(

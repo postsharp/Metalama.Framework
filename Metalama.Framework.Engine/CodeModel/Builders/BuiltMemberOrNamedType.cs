@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberOrNamedType
+internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberOrNamedTypeImpl
 {
     protected BuiltMemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
 

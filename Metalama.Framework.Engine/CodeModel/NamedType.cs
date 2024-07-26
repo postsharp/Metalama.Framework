@@ -256,6 +256,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public INamedTypeCollection AllTypes
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllTypes;
+            }
+        }
+
         public IPropertyCollection Properties
         {
             get

@@ -416,7 +416,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             .Implements<IIntroduceDeclarationTransformation>()
                             .Implements<IDeclarationBuilderImpl>()
                             .Implements<IMemberBuilder>()
-                            .Implements<IDeclarationImpl>()
+                            .Implements<IMemberImpl>()
                             .Implements<ITestTransformation>();
 
                         _ = declarationKind switch

@@ -25,7 +25,7 @@ public class EnumViewModelAttribute : TypeAspect
 
         var viewModelType = builder.IntroduceClass(
                 enumType.Name + "ViewModel",
-                b => { b.Accessibility = Accessibility.Public; } )
+                buildType: b => { b.Accessibility = Accessibility.Public; } )
             .Declaration;
 
         var valueField =

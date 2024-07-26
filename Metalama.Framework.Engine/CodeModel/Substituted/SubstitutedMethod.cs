@@ -112,9 +112,11 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
             this._sourceParameter = sourceParameter;
         }
 
+        public CompilationModel Compilation => this._targetMethod.Compilation;
+
         GenericMap ISubstitutedDeclaration.GenericMap => this._targetMethod.GenericMap;
 
-        public ICompilation Compilation => this._targetMethod.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this._sourceParameter.GetDeclaringSyntaxReferences();
 

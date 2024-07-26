@@ -31,12 +31,14 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
         this.MethodKind = semantic;
     }
 
+    public CompilationModel Compilation => this.DeclaringMember.Compilation;
+
     [Memo]
     public IParameter ReturnParameter => new PseudoParameter( this, -1, this.ReturnType, null );
 
     public IType ReturnType
         => this.MethodKind != MethodKind.PropertyGet
-            ? this.DeclaringMember.Compilation.GetCompilationModel().Cache.SystemVoidType
+            ? this.DeclaringMember.Compilation.Cache.SystemVoidType
             : ((IFieldOrProperty) this.DeclaringMember).Type;
 
     [Memo]
@@ -127,7 +129,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
-    public ICompilation Compilation => this.DeclaringMember.Compilation;
+    ICompilation ICompilationElement.Compilation => this.DeclaringMember.Compilation;
 
     public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => this.ContainingDeclaration.GetClosestNamedType().AssertNotNull().ToDisplayString( format, context ) + "." + this.Name;

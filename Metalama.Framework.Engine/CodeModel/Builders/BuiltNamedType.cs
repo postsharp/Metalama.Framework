@@ -60,6 +60,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
             this.Compilation.GetNamedTypeCollection( this.TypeBuilder.ToRef().As<INamespaceOrNamedType>() ) );
 
     [Memo]
+    public INamedTypeCollection AllTypes => new AllTypesCollection( this );
+
+    [Memo]
     public IPropertyCollection Properties
         => new PropertyCollection(
             this,

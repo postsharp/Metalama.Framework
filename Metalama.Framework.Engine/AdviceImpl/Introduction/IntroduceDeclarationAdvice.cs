@@ -34,7 +34,7 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
         return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, memberRef, null );
     }
 
-    protected IntroductionAdviceResult<TIntroduced> CreateIgnoredResult( IMember existingMember )
+    protected IntroductionAdviceResult<TIntroduced> CreateIgnoredResult( IMemberOrNamedType existingMember )
         => new(
             this.AdviceKind,
             AdviceOutcome.Ignore,
