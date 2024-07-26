@@ -244,7 +244,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 {
                     var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName.AssertNotNull();
 
-                    A.CallTo( () => ((IDeclarationImpl) introduceDeclarationTransformation).Compilation ).Returns( initialCompilationModel );
+                    A.CallTo( () => ((ICompilationElement) introduceDeclarationTransformation).Compilation ).Returns( initialCompilationModel );
+                    A.CallTo( () => ((ICompilationElementImpl) introduceDeclarationTransformation).Compilation ).Returns( initialCompilationModel );
                     A.CallTo( () => ((IDeclarationImpl) introduceDeclarationTransformation).PrimarySyntaxTree ).Returns( containingNode.SyntaxTree );
 
                     var insertPositionNode =
@@ -289,7 +290,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             var replacedTransformation =
                                 rewriter.ReplacedTransformations.Single( x => ((ITestTransformation) x).SymbolHelperNodeId == replacedSymbolHelperNodeId );
 
-                            A.CallTo( () => ((IDeclarationImpl) replacedTransformation).Compilation ).Returns( initialCompilationModel );
+                            A.CallTo( () => ((ICompilationElement) replacedTransformation).Compilation ).Returns( initialCompilationModel );
+                            A.CallTo( () => ((ICompilationElementImpl) replacedTransformation).Compilation ).Returns( initialCompilationModel );
 
                             A.CallTo( () => replaceMember.ReplacedMember )
                                 .Returns( new MemberRef<IMember>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );

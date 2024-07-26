@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'TargetClass.ExistingField' into type 'TargetClass' because it is already defined in type 'BaseClass'. Use a different OverrideStrategy or skip the member.`
+// Error LAMA0531 on `TargetClass`: `The aspect 'Introduction' cannot introduce type 'Metalama.Framework.IntegrationTests.Aspects.Introductions.Types.ExistingConflictFail.TargetClass.ExistingType' into 'TargetClass' because the type already exists.`
