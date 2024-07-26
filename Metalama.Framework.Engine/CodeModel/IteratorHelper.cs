@@ -67,7 +67,19 @@ internal static partial class IteratorHelper
     }
 
     private static EnumerableKind GetEnumerableKind( IType returnType )
-        => GetEnumerableKind( returnType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeStateMachines ) );
+    {
+        // TODO: We should check implemented interfaces, not just the type itself.
+        var symbol = returnType.GetSymbol();
+
+        if ( symbol != null )
+        {
+            return GetEnumerableKind( symbol );
+        }
+        else
+        {
+            return EnumerableKind.None;
+        }
+    }
 
     private static EnumerableKind GetEnumerableKind( ITypeSymbol returnType )
         => returnType.OriginalDefinition.SpecialType switch
