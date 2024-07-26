@@ -43,9 +43,10 @@ internal sealed class SerializationReader
     {
         int v = this._binaryReader.ReadCompressedInteger();
 
-        if ( v > SerializationWriter.Version )
+        if ( v is > SerializationProtocol.CurrentVersion or < SerializationProtocol.LastSupportedVersion )
         {
-            throw new NotSupportedException( $"The assembly '{this._assemblyName}' was compiled with an old version of Metalama and must be recompiled." );
+            throw new NotSupportedException(
+                $"The assembly '{this._assemblyName}' was compiled with an incompatible version of Metalama (protocol version: {v}) and must be recompiled." );
         }
 
         var instanceId = 1;
