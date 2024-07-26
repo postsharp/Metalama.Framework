@@ -15,8 +15,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization;
 
 internal sealed class SerializationWriter
 {
-    public const int Version = 2;
-
     private readonly SerializationBinaryWriter _binaryWriter;
 
     private readonly Queue<SerializationQueueItem<object>> _serializationQueue = new();
@@ -42,7 +40,7 @@ internal sealed class SerializationWriter
 
     public void Serialize( object? obj )
     {
-        this._binaryWriter.WriteCompressedInteger( Version );
+        this._binaryWriter.WriteCompressedInteger( SerializationProtocol.CurrentVersion );
 
         // Assertion was added after importing code from PostSharp.
         var cause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.AssertNotNull().GetType() ) : null;
