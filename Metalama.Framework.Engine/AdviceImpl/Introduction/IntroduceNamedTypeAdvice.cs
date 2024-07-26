@@ -18,10 +18,10 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
 {
     public override AdviceKind AdviceKind => AdviceKind.IntroduceType;
 
-    protected OverrideStrategy OverrideStrategy { get; }
+    private OverrideStrategy OverrideStrategy { get; }
 
-    public IntroduceNamedTypeAdvice( 
-        AdviceConstructorParameters<INamespaceOrNamedType> parameters, 
+    public IntroduceNamedTypeAdvice(
+        AdviceConstructorParameters<INamespaceOrNamedType> parameters,
         string? explicitName,
         OverrideStrategy overrideStrategy,
         Action<NamedTypeBuilder>? buildAction )
@@ -44,14 +44,15 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
         Action<ITransformation> addTransformation )
     {
         var targetDeclaration = this.TargetDeclaration.As<INamespaceOrNamedType>().GetTarget( compilation );
+
         var existingType =
             targetDeclaration switch
             {
-                INamespace @namespace => 
+                INamespace @namespace =>
                     @namespace.Types
                         .OfName( this.Builder.Name )
                         .FirstOrDefault( t => this.Builder.TypeParameters.Count == t.TypeParameters.Count ),
-                INamedType namedType => 
+                INamedType namedType =>
                     namedType.AllTypes
                         .OfName( this.Builder.Name )
                         .FirstOrDefault( t => this.Builder.TypeParameters.Count == t.TypeParameters.Count ),

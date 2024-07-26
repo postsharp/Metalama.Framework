@@ -1088,7 +1088,7 @@ public static class AdviserExtensions
         => ((IAdviserInternal) adviser).AdviceFactory.WithNamespace(
             adviser.Target.GlobalNamespace,
             name );
-    
+
     public static IAdviser<INamespace> WithChildNamespace( this IAdviser<INamespace> adviser, string name )
         => ((IAdviserInternal) adviser).AdviceFactory.WithNamespace(
             adviser.Target,
