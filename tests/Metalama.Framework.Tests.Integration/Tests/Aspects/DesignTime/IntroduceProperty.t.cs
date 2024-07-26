@@ -1,7 +1,4 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceProperty
+[Introduction]
+internal partial class TargetClass
 {
-  partial class TargetClass
-  {
-    public global::System.Int32 Property { get; set; }
-  }
 }
