@@ -1,9 +1,4 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceMethod
+[Introduction]
+internal partial class TargetClass
 {
-  partial class TargetClass
-  {
-    public void Method(global::System.Int32 x)
-    {
-    }
-  }
 }

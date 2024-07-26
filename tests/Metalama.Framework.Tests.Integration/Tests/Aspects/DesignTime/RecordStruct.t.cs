@@ -1,9 +1,2 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.RecordStruct
-{
-  partial record struct TargetStructRecord
-  {
-    public void M()
-    {
-    }
-  }
-}
+[Introduction]
+internal partial record struct TargetStructRecord(int x);
