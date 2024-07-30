@@ -57,6 +57,15 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
             }
         }
 
+        if ( right.TryForCompilation( left.Compilation, out var translatedRight ) )
+        {
+            right = translatedRight;
+        }
+        else if ( left.TryForCompilation( right.Compilation, out var translatedLeft ) )
+        {
+            left = translatedLeft;
+        }
+
         if ( left.GetSymbol() is { } leftSymbol && right.GetSymbol() is { } rightSymbol && !bypassSymbols )
         {
             // If there is conversion between the original symbols, there should be conversion between the modified types.
