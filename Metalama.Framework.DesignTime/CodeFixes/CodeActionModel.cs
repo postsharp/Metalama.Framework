@@ -34,7 +34,8 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         {
             var title = titlePrefix + this.Title;
 
-            return ImmutableArray.Create( LamaCodeAction.Create( title, ( p, ct ) => this.InvokeAsync( invocationContext, p, ct ) ) );
+            return ImmutableArray.Create(
+                LamaCodeAction.Create( title, ( p, ct ) => this.InvokeAsync( invocationContext, p, ct ), invocationContext.Document.Id ) );
         }
 
         /// <summary>
