@@ -8,20 +8,30 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 internal sealed class LamaCodeAction : CodeAction
 {
     private readonly Func<bool, CancellationToken, Task<Solution>> _createChangedSolution;
+    private readonly DocumentId _documentId;
 
     public override string Title { get; }
 
     public override string? EquivalenceKey { get; }
 
-    private LamaCodeAction( string title, Func<bool, CancellationToken, Task<Solution>> createChangedSolution, string? equivalenceKey = null )
+    private LamaCodeAction(
+        string title,
+        Func<bool, CancellationToken, Task<Solution>> createChangedSolution,
+        DocumentId documentId,
+        string? equivalenceKey = null )
     {
         this._createChangedSolution = createChangedSolution;
+        this._documentId = documentId;
         this.Title = title;
         this.EquivalenceKey = equivalenceKey;
     }
 
-    public static CodeAction Create( string title, Func<bool, CancellationToken, Task<Solution>> createChangedSolution, string? equivalenceKey = null )
-        => new LamaCodeAction( title, createChangedSolution, equivalenceKey );
+    public static CodeAction Create(
+        string title,
+        Func<bool, CancellationToken, Task<Solution>> createChangedSolution,
+        DocumentId documentId,
+        string? equivalenceKey = null )
+        => new LamaCodeAction( title, createChangedSolution, documentId, equivalenceKey );
 
     private async Task<IEnumerable<CodeActionOperation>> ComputeOperationsAsync( bool computingPreview, CancellationToken cancellationToken )
     {
@@ -29,10 +39,10 @@ internal sealed class LamaCodeAction : CodeAction
 
         if ( changedSolution == null! )
         {
-            return Array.Empty<CodeActionOperation>();
+            return [];
         }
 
-        return new CodeActionOperation[] { new ApplyChangesOperation( changedSolution ) };
+        return [new ApplyChangesOperation( changedSolution )];
     }
 
     protected override Task<IEnumerable<CodeActionOperation>> ComputeOperationsAsync( CancellationToken cancellationToken )
@@ -43,5 +53,12 @@ internal sealed class LamaCodeAction : CodeAction
     protected override Task<IEnumerable<CodeActionOperation>> ComputePreviewOperationsAsync( CancellationToken cancellationToken )
     {
         return this.ComputeOperationsAsync( true, cancellationToken );
+    }
+
+    protected override async Task<Document> GetChangedDocumentAsync( CancellationToken cancellationToken )
+    {
+        var changedSolution = await this._createChangedSolution( false, cancellationToken ).ConfigureAwait( false );
+
+        return changedSolution.GetDocument( this._documentId )!;
     }
 }
