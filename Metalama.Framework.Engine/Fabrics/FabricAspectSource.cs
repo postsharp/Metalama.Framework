@@ -41,12 +41,12 @@ internal sealed class FabricAspectSource : IAspectSource
         var driversByTarget =
             this._drivers.Select( x => (Driver: x, Target: x.GetTargetIfInPartialCompilation( compilation )) )
                 .Where( x => x.Target != null )
-                .GroupBy( x => x.Target );
+                .GroupBy( x => x.Target!, x => x.Driver );
 
         return this._concurrentTaskRunner.RunConcurrentlyAsync( driversByTarget, ProcessDriver, context.CancellationToken );
 
         // Process target declarations.
-        void ProcessDriver( IGrouping<IDeclaration?, (TypeFabricDriver Driver, IDeclaration? Target)> driverGroup )
+        void ProcessDriver( IGrouping<IDeclaration, TypeFabricDriver> driverGroup )
         {
             var target = driverGroup.Key!;
 
@@ -55,10 +55,10 @@ internal sealed class FabricAspectSource : IAspectSource
 
             var drivers = driverGroup
                 .Select(
-                    x => new FabricTemplateClass(
+                    driver => new FabricTemplateClass(
                         this._fabricManager.ServiceProvider,
-                        x.Driver,
-                        x.Driver.CompileTimeProject.TemplateReflectionContext ?? compilation.CompilationContext,
+                        driver,
+                        driver.CompileTimeProject.TemplateReflectionContext ?? compilation.CompilationContext,
                         context.Collector,
                         null ) )
                 .ToImmutableArray();

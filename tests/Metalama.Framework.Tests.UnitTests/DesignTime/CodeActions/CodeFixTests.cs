@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Rider;
@@ -8,7 +7,9 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -24,6 +25,44 @@ public sealed class CodeFixTests : UnitTestClass
         base.ConfigureServices( services );
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
         services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService( shouldWrapUnsupportedDiagnostics: true ) );
+    }
+
+    private static async Task<(ImmutableArray<Diagnostic> diagnostics, GlobalServiceProvider serviceProvider)> ExecutePipeline(
+        TestContext testContext, TestWorkspaceProvider workspace, TestDesignTimeAspectPipelineFactory pipelineFactory )
+    {
+        var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
+
+        serviceProvider = serviceProvider.WithServices(
+            new CodeActionExecutionService( serviceProvider ),
+            new CodeRefactoringDiscoveryService( serviceProvider ) );
+
+        var project = workspace.GetProject( "target" );
+        var pipeline = pipelineFactory.GetOrCreatePipeline( project )!;
+        var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
+        Assert.True( result.IsSuccessful );
+        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
+
+        return (diagnostics, serviceProvider);
+    }
+
+    private static async Task<(TestCodeFixContext codeFixContext, TestCodeRefactoringContext riderRefactoringContext)> QueryCodeFixes(
+        TestWorkspaceProvider workspace, GlobalServiceProvider serviceProvider, ImmutableArray<Diagnostic> diagnostics, string targetTokenText )
+    {
+        var document = workspace.GetDocument( "target", "code.cs" );
+        var syntaxRoot = await document.GetSyntaxRootAsync();
+        var span = syntaxRoot.DescendantTokens().Single( t => t.Text == targetTokenText ).Span;
+
+        var codeFixProvider = new RiderCodeFixProvider( serviceProvider );
+        var codeFixContext = new TestCodeFixContext( document, diagnostics, span );
+
+        await codeFixProvider.RegisterCodeFixesAsync( codeFixContext );
+
+        var codeRefactoringProvider = new RiderCodeRefactoringProvider( serviceProvider );
+        var codeRefactoringContext = new TestCodeRefactoringContext( document, span );
+
+        await codeRefactoringProvider.ComputeRefactoringsAsync( codeRefactoringContext );
+
+        return (codeFixContext, codeRefactoringContext);
     }
 
     [Fact]
@@ -73,44 +112,23 @@ public sealed class CodeFixTests : UnitTestClass
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
-        workspace.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
+        workspace.AddOrUpdateProject( "target", new Dictionary<string, string> { ["code.cs"] = code } );
 
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
-        var serviceProvider = testContext.ServiceProvider.Global.WithService( factory );
 
-        serviceProvider = serviceProvider.WithServices(
-            new CodeActionExecutionService( serviceProvider ),
-            new CodeRefactoringDiscoveryService( serviceProvider ) );
+        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
 
-        var project = workspace.GetProject( "project" );
-        var pipeline = factory.GetOrCreatePipeline( project )!;
-        var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
-        Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
         Assert.Equal( 3, diagnostics.Length );
         Assert.Single( diagnostics, d => d.Id == "MY001" );
         Assert.Single( diagnostics, d => d.Id == "MY002" );
         Assert.Single( diagnostics, d => d.Id == "LAMA0043" );
 
-        // Query code fixes.
-        var document = workspace.GetDocument( "project", "code.cs" );
-        var syntaxRoot = await document.GetSyntaxRootAsync();
-        var token = syntaxRoot!.DescendantTokens().Single( t => t.Text == "Method" );
-
-        var codeFixProvider = new RiderCodeFixProvider( serviceProvider );
-        var codeFixContext = new TestCodeFixContext( document, diagnostics, token.Span );
-
-        await codeFixProvider.RegisterCodeFixesAsync( codeFixContext );
+        // Query code fixes and refactorings.
+        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, "Method" );
 
         Assert.Single( codeFixContext.RegisteredCodeFixes );
         Assert.Single( codeFixContext.RegisteredCodeFixes, fix => fix.CodeAction.Title.Contains( "[Info]" ) );
-
-        // Query refactorings.
-        var codeRefactoringProvider = new RiderCodeRefactoringProvider( serviceProvider );
-        var codeRefactoringContext = new TestCodeRefactoringContext( document, token.Span );
-
-        await codeRefactoringProvider.ComputeRefactoringsAsync( codeRefactoringContext );
 
         Assert.Equal( 2, codeRefactoringContext.RegisteredRefactorings.Count );
         Assert.Single( codeRefactoringContext.RegisteredRefactorings, refactoring => refactoring.Title.Contains( "[Hidden]" ) );
@@ -188,34 +206,19 @@ public sealed class CodeFixTests : UnitTestClass
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
         workspace.AddOrUpdateProject( "library", new Dictionary<string, string> { ["library-code.cs"] = libraryCode } );
-        workspace.AddOrUpdateProject( "app", new Dictionary<string, string> { ["code.cs"] = appCode }, new[] { "library" } );
+        workspace.AddOrUpdateProject( "target", new Dictionary<string, string> { ["code.cs"] = appCode }, ["library"] );
 
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
-        var serviceProvider = testContext.ServiceProvider.Global.WithService( factory );
 
-        serviceProvider = serviceProvider.WithServices(
-            new CodeActionExecutionService( serviceProvider ),
-            new CodeRefactoringDiscoveryService( serviceProvider ) );
+        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
 
-        var project = workspace.GetProject( "app" );
-        var pipeline = factory.GetOrCreatePipeline( project )!;
-        var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
-        Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
         Assert.Equal( 2, diagnostics.Length );
         Assert.Single( diagnostics, d => d.Id == "RA01" );
         Assert.Single( diagnostics, d => d.Id == "LAMA0043" );
 
         // Query code fixes.
-        var document = workspace.GetDocument( "app", "code.cs" );
-        var syntaxRoot = await document.GetSyntaxRootAsync();
-        var token = syntaxRoot!.DescendantTokens().Single( t => t.Text == "TestClass" );
-
-        var codeFixProvider = new TheCodeFixProvider( serviceProvider );
-        var codeFixContext = new TestCodeFixContext( document, diagnostics, token.Span );
-
-        await codeFixProvider.RegisterCodeFixesAsync( codeFixContext );
+        var (codeFixContext, _) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, "TestClass" );
 
         var codeFix = Assert.Single( codeFixContext.RegisteredCodeFixes );
         Assert.Contains( "[Required]", codeFix.CodeAction.Title );
@@ -225,8 +228,78 @@ public sealed class CodeFixTests : UnitTestClass
 
         previewOperation.Apply( workspace.Workspace, testContext.CancellationToken );
 
-        var modifiedText = await workspace.GetProject( "app" ).Documents.Single().GetTextAsync();
+        var modifiedText = await workspace.GetProject( "target" ).Documents.Single().GetTextAsync();
 
         AssertEx.EolInvariantEqual( modifiedAppCode, modifiedText.ToString() );
+    }
+
+    [Fact]
+    public async Task FabricCodeFix()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string fabricCode = """
+            using Metalama.Framework.CodeFixes;
+            using Metalama.Framework.Diagnostics;
+            using Metalama.Framework.Fabrics;
+
+            class A : Attribute;
+
+            class Fabric : TransitiveProjectFabric
+            {
+                private static DiagnosticDefinition _diag = new("TEST01", Severity.Warning, "warning from fabric");
+
+                public override void AmendProject(IProjectAmender amender)
+                {
+                    amender
+                        .SelectMany(project => project.Types)
+                        .SelectMany(type => type.Properties)
+                        .ReportDiagnostic(prop => _diag.WithCodeFixes(CodeFixFactory.AddAttribute(prop, typeof(A))));
+                }
+            }
+            """;
+
+        const string targetCode = """
+            class C
+            {
+                string? Name { get; set; }
+            }
+            """;
+
+        const string modifiedTargetCode = """
+            class C
+            {
+                [global::A]
+                string? Name { get; set; }
+            }
+            """;
+
+        // Initialize the workspace.
+        var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
+        workspace.AddOrUpdateProject( "fabric", new Dictionary<string, string> { ["fabric.cs"] = fabricCode } );
+        workspace.AddOrUpdateProject( "target", new Dictionary<string, string> { ["code.cs"] = targetCode }, ["fabric"] );
+
+        // Execute the pipeline to get diagnostics.
+        using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
+
+        Assert.Single( diagnostics );
+        Assert.Single( diagnostics, d => d.Id == "TEST01" );
+
+        // Query code fixes.
+        var (codeFixContext, _) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, "Name" );
+
+        var codeFix = Assert.Single( codeFixContext.RegisteredCodeFixes );
+        Assert.Contains( "[A]", codeFix.CodeAction.Title );
+
+        // Apply code fix.
+        var previewOperation = Assert.Single( await codeFix.CodeAction.GetPreviewOperationsAsync( testContext.CancellationToken ) );
+
+        previewOperation.Apply( workspace.Workspace, testContext.CancellationToken );
+
+        var modifiedText = await workspace.GetProject( "target" ).Documents.Single().GetTextAsync();
+
+        AssertEx.EolInvariantEqual( modifiedTargetCode, modifiedText.ToString() );
     }
 }
