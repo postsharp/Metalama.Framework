@@ -21,8 +21,8 @@
 
         <!-- Defaults from .NET SDK -->
         <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
-        <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>    
-        <MetadataUpdaterSupport Condition="'$(MetadataUpdaterSupport)'">true</MetadataUpdaterSupport>
+        <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+        <MetadataUpdaterSupport Condition="'$(MetadataUpdaterSupport)' == ''">true</MetadataUpdaterSupport>
         <XamlDebuggingInformation Condition="'$(XamlDebuggingInformation)' == ''">true</XamlDebuggingInformation>
         <_SGenGenerateSerializationAssembliesConfig Condition="'$(_SGenGenerateSerializationAssembliesConfig)' == 'Auto'">Off</_SGenGenerateSerializationAssembliesConfig>
         <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
