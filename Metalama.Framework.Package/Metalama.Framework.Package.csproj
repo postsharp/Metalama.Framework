@@ -14,7 +14,7 @@
         <Deterministic>False</Deterministic>
 
         <!-- Disable a warning saying that we have nothing under the lib folder. -->
-        <NoWarn>NU5128</NoWarn>
+        <NoWarn>$(NoWarn);NU5128</NoWarn>
 
         <UseMetalamaCompiler>Public</UseMetalamaCompiler>
 
