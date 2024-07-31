@@ -25,8 +25,8 @@ namespace Metalama.Framework.Engine
         /// Checks that a given condition is true and throws an <see cref="AssertionFailedException"/> in case it is not.
         /// </summary>
         /// <param name="condition">The condition that must be true.</param>
-#if DEBUG
         [DebuggerStepThrough]
+        [Conditional( "DEBUG" )]
         public static void Assert( [DoesNotReturnIf( false )] bool condition, [CallerArgumentExpression( nameof(condition) )] string? expression = null )
         {
             if ( !condition )
@@ -34,18 +34,13 @@ namespace Metalama.Framework.Engine
                 throw new AssertionFailedException( $"Assert({expression})" );
             }
         }
-#else
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
-            [DebuggerStepThrough]
-        public static void Assert( [DoesNotReturnIf( false )] bool condition ) { }
-#endif
 
         /// <summary>
         /// Checks that a given condition is false and throws an <see cref="AssertionFailedException"/> in case it is not.
         /// </summary>
         /// <param name="condition">The condition that must be true.</param>
-#if DEBUG
         [DebuggerStepThrough]
+        [Conditional( "DEBUG" )]
         public static void AssertNot( [DoesNotReturnIf( false )] bool condition, [CallerArgumentExpression( nameof(condition) )] string? expression = null )
         {
             if ( condition )
@@ -53,14 +48,9 @@ namespace Metalama.Framework.Engine
                 throw new AssertionFailedException( $"AssertNot({expression})" );
             }
         }
-#else
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
-            [DebuggerStepThrough]
-        public static void AssertNot( [DoesNotReturnIf( false )] bool condition ) { }
-#endif
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         [return: NotNullIfNotNull( "obj" )]
@@ -76,22 +66,18 @@ namespace Metalama.Framework.Engine
             return (T?) obj;
         }
 
-#if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
-#endif
         [DebuggerStepThrough]
+        [Conditional( "DEBUG" )]
         public static void Implies( bool premise, bool conclusion )
         {
-#if DEBUG
             if ( premise && !conclusion )
             {
                 throw new AssertionFailedException();
             }
-#endif
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static T Assert<T>( this T obj, Predicate<T> predicate )
@@ -108,7 +94,7 @@ namespace Metalama.Framework.Engine
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static IEnumerable<T> AssertEach<T>( this IEnumerable<T> obj, Predicate<T> predicate )
@@ -124,7 +110,7 @@ namespace Metalama.Framework.Engine
                 yield return item;
             }
 #else
-                return obj;
+            return obj;
 #endif
         }
 
@@ -132,7 +118,7 @@ namespace Metalama.Framework.Engine
         /// Checks that a reference is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
         /// </summary>
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static T AssertNotNull<T>( [NotNull] this T? obj, string? justification = null )
@@ -147,7 +133,7 @@ namespace Metalama.Framework.Engine
             return obj;
 #else
 #pragma warning disable CS8777
-                return obj!;
+            return obj!;
 #pragma warning restore CS8777
 #endif
         }
@@ -156,7 +142,7 @@ namespace Metalama.Framework.Engine
         /// Checks that a nullable value is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
         /// </summary>
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static T AssertNotNull<T>( this T? obj, string? justification = null )
@@ -175,7 +161,7 @@ namespace Metalama.Framework.Engine
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static IEnumerable<T> AssertNoneNull<T>( this IEnumerable<T?>? items )
@@ -207,7 +193,7 @@ namespace Metalama.Framework.Engine
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static ImmutableArray<T> AssertNoneNull<T>( this ImmutableArray<T?> items )
@@ -229,7 +215,7 @@ namespace Metalama.Framework.Engine
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static T[] AssertNoneNull<T>( this T?[]? items )
@@ -249,7 +235,7 @@ namespace Metalama.Framework.Engine
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static IEnumerable<T> AssertDistinct<T>( this IEnumerable<T> items )
@@ -273,7 +259,7 @@ namespace Metalama.Framework.Engine
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static IReadOnlyList<TItem> AssertSorted<TItem>( this IReadOnlyList<TItem> items )
@@ -287,12 +273,12 @@ namespace Metalama.Framework.Engine
                 return left.CompareTo( right );
             }
 #else
-                return items;
+            return items;
 #endif
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static IReadOnlyList<TItem> AssertSorted<TItem, TComparable>( this IReadOnlyList<TItem> items, Func<TItem, TComparable> selectComparable )
@@ -306,7 +292,7 @@ namespace Metalama.Framework.Engine
                 return left.CompareTo( right );
             }
 #else
-                return items;
+            return items;
 #endif
         }
 
@@ -319,12 +305,12 @@ namespace Metalama.Framework.Engine
 #if DEBUG
             return AssertSorted( items, static x => x, comparison );
 #else
-                return items;
+            return items;
 #endif
         }
 
 #if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
         public static IReadOnlyList<TItem> AssertSorted<TItem, TComparable>(
@@ -346,7 +332,7 @@ namespace Metalama.Framework.Engine
             // Materialized list is intentionally thrown away to allow further assertions on materialization.
             return items;
 #else
-                return items;
+            return items;
 #endif
         }
 

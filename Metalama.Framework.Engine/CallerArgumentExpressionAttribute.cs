@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if DEBUG && NETSTANDARD2_0
+#if NETSTANDARD2_0
 using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
