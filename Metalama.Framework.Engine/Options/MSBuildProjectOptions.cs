@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -200,5 +201,34 @@ public partial class MSBuildProjectOptions : DefaultProjectOptions
         }
 
         return defaultValue;
+    }
+
+    public override bool Equals( IProjectOptions? other )
+    {
+        if ( other is not MSBuildProjectOptions otherOptions )
+        {
+            return false;
+        }
+
+        if ( ReferenceEquals( this, otherOptions ) )
+        {
+            return true;
+        }
+
+        var propertyNames = this._source.PropertyNames.Union( otherOptions._source.PropertyNames );
+
+        foreach ( var propertyName in propertyNames )
+        {
+            if ( this.TryGetProperty( propertyName, out var thisProperty ) != otherOptions.TryGetProperty( propertyName, out var otherProperty ) )
+            {
+                return false;
+            }
+            else if ( !StringComparer.Ordinal.Equals( thisProperty, otherProperty ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

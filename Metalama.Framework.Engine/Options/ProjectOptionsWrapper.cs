@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
@@ -89,4 +90,10 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public virtual bool? DebugTransformedCode => this.Wrapped.DebugTransformedCode;
 
     public virtual string? TransformedFilesOutputPath => this.Wrapped.TransformedFilesOutputPath;
+
+    public sealed override int GetHashCode() => throw new NotImplementedException();
+
+    public sealed override bool Equals( object? obj ) => this.Equals( obj as IProjectOptions );
+
+    public bool Equals( IProjectOptions? other ) => other?.GetType() == this.GetType() && this.Wrapped.Equals( ((ProjectOptionsWrapper) other).Wrapped );
 }
