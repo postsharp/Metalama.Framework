@@ -616,7 +616,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         {
             var manifest = TransitiveAspectsManifest.Create(
                 this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
-                this.ReferenceValidators.ToTransitiveValidatorInstances(),
+                this.ReferenceValidators.ToTransitiveValidatorInstances( CompilationContextFactory.GetInstance( compilation ) ),
                 this.InheritableOptions,
                 this.Annotations );
 
