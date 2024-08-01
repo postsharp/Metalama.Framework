@@ -19,7 +19,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
     private readonly IMetalamaProjectClassifier _projectClassifier;
     private readonly WeakCache<IProjectOptions, ClassificationService> _projectClassificationServices = new();
 
-    private readonly MSBuildProjectOptionsFactory _msBuildProjectOptionsFactory = new( new[] { MSBuildPropertyNames.MetalamaCompileTimePackages } );
+    private readonly MSBuildProjectOptionsFactory _msBuildProjectOptionsFactory = new( [MSBuildPropertyNames.MetalamaCompileTimePackages] );
 
     public DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
     {

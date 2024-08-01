@@ -86,7 +86,8 @@ internal sealed class CodeFixPipeline : AspectPipeline
 
         if ( !validatorSources.IsDefaultOrEmpty )
         {
-            var validationRunner = new ValidationRunner( configuration, validatorSources );
+            // Note: this can't use the local variable `configuration`, because ExecuteAsync sets CodeFixFilter, which we need here.
+            var validationRunner = new ValidationRunner( pipelineResult.Value.Configuration, validatorSources );
             var initialCompilation = pipelineResult.Value.FirstCompilationModel.AssertNotNull();
             var validationResult = await validationRunner.RunAllAsync( initialCompilation, finalCompilation, cancellationToken );
 

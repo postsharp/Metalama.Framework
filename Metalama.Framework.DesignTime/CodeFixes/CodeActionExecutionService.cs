@@ -35,7 +35,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
 
         if ( project == null )
         {
-            this._logger.Error?.Log( "Cannot get the project." );
+            this._logger.Warning?.Log( "Cannot get the project." );
 
             return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
@@ -44,7 +44,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
 
         if ( compilation == null )
         {
-            this._logger.Error?.Log( "Cannot get the compilation." );
+            this._logger.Warning?.Log( "Cannot get the compilation." );
 
             return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
@@ -53,7 +53,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
 
         if ( pipeline == null )
         {
-            this._logger.Error?.Log( "Cannot get the pipeline." );
+            this._logger.Warning?.Log( "Cannot get the pipeline." );
 
             return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
@@ -68,7 +68,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
 
         if ( !getConfigurationResult.IsSuccessful )
         {
-            this._logger.Error?.Log( "Cannot initialize the pipeline." );
+            this._logger.Warning?.Log( "Cannot initialize the pipeline." );
 
             return CodeActionResult.Error( "The Metalama code action execution failed because there is an error in some aspect or fabric." );
         }

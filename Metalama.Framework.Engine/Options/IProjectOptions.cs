@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Services;
+using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.Options;
 /// Exposes project options (typically defined in MSBuild or .editorconfig) in a strongly-typed manner.
 /// The production implementation is <see cref="MSBuildProjectOptions"/> but tests can provide their own implementation.
 /// </summary>
-public interface IProjectOptions : IProjectService
+public interface IProjectOptions : IProjectService, IEquatable<IProjectOptions>
 {
     /// <summary>
     /// Gets the path to a file that gets touched when the project is built.
@@ -179,6 +180,4 @@ public interface IProjectOptions : IProjectService
     bool? WriteTransformedFiles { get; }
 
     bool IsTest { get; }
-
-    // Note: when adding a new property, also update ProjectOptionsEqualityComparer.
 }

@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <Import Project="Metalama.CompilerVisibleProperties.props"
-            Condition="'$(MetalamaCompilerVisiblePropertiesProjectImported)'==''"/>
+            Condition="'$(MetalamaCompilerVisiblePropertiesTargetsImported)'==''"/>
 
     <!-- Implementation of the 'LamaDebug' build configuration.
          It is import to define this in the .props file, and not in the .targets file, because it needs to be processed _before_
@@ -18,6 +18,15 @@
     
     <PropertyGroup Condition="'$(Configuration)'=='LamaDebug'">
         <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
+
+        <!-- Defaults from .NET SDK -->
+        <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+        <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+        <MetadataUpdaterSupport Condition="'$(MetadataUpdaterSupport)' == ''">true</MetadataUpdaterSupport>
+        <XamlDebuggingInformation Condition="'$(XamlDebuggingInformation)' == ''">true</XamlDebuggingInformation>
+        <_SGenGenerateSerializationAssembliesConfig Condition="'$(_SGenGenerateSerializationAssembliesConfig)' == 'Auto'">Off</_SGenGenerateSerializationAssembliesConfig>
+        <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
+
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(MetalamaDebugTransformedCode)'=='True'">

@@ -2,6 +2,9 @@
 
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using static Metalama.Framework.Engine.Options.AnalyzerConfigOptionsBuildProperties;
 
 // ReSharper disable ClassCanBeSealed.Global, InconsistentNaming
 
@@ -21,7 +24,9 @@ namespace Metalama.Framework.Engine.Options
                 this._options = options;
             }
 
-            public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( $"build_property.{name}", out value );
+            public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( ToAnalyzerConfigName( name ), out value );
+
+            public IEnumerable<string> PropertyNames => this._options.GetBuildProperties().Select( ToMsBuildPropertyName );
         }
 
         public override IProjectOptions Apply( IProjectOptions options ) => throw new NotSupportedException();
