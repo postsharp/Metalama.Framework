@@ -36,6 +36,11 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
             case INamedTypeSymbol namedTypeSymbol:
                 foreach ( var i in namedTypeSymbol.Interfaces )
                 {
+                    if ( !SymbolValidator.Instance.Visit( i ) )
+                    {
+                        continue;
+                    }
+
                     action( new Ref<INamedType>( i, this.Compilation.CompilationContext ) );
                 }
 
