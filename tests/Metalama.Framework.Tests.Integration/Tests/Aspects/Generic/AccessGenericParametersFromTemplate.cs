@@ -1,6 +1,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.AccessGenericParametersFromTemplate
 {
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.AccessGenericP
         {
             foreach (var genericParameter in meta.Target.Method.TypeParameters)
             {
-                var v = genericParameter.DefaultValue();
+                var v = meta.Default( genericParameter );
                 var t = meta.RunTime( genericParameter.ToType() );
             }
 

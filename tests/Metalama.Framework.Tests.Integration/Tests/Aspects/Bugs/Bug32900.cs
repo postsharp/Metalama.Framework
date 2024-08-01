@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32900;
 
@@ -9,7 +10,7 @@ public sealed class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        var result = meta.Target.Method.GetAsyncInfo().ResultType.DefaultValue();
+        var result = meta.Default( meta.Target.Method.GetAsyncInfo().ResultType );
 
         try
         {

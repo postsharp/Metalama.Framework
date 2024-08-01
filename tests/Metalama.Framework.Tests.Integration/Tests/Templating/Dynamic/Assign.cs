@@ -1,6 +1,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Assign
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Assign
         [TestTemplate]
         private dynamic? Template()
         {
-            var x = TypeFactory.GetType( SpecialType.Int32 ).DefaultValue();
+            var x = meta.Default( SpecialType.Int32 );
 
             x = meta.Proceed();
             x += meta.Proceed();

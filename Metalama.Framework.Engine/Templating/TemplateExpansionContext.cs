@@ -551,7 +551,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
                     // Special case for default(void), which cannot be an expression statement
                     // (because it's not a valid expression in the first place, but is useful in templates).
-                    if ( returnUserExpression is DefaultUserExpression )
+                    if ( returnUserExpression is TypedDefaultUserExpression )
                     {
                         return returnStatement;
                     }
