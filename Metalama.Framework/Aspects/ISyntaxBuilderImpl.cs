@@ -58,4 +58,8 @@ internal interface ISyntaxBuilderImpl
     IStatementList CreateStatementList( ImmutableArray<object> items );
 
     IStatement CreateBlock( IStatementList statements );
+
+    IExpression NullExpression( IType? type );
+
+    IExpression DefaultExpression( IType? type );
 }

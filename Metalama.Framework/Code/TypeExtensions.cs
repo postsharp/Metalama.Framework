@@ -75,6 +75,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
+        [Obsolete( "Use ExpressionFactory.Default or ExpressionFactory.Null." )]
         public static dynamic? DefaultValue( this IType type ) => ((ICompilationInternal) type.Compilation).Factory.DefaultValue( type );
 
         /// <summary>

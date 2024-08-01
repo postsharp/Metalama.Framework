@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ReturnDefault;
 
@@ -23,7 +24,7 @@ internal sealed class IgnoreExceptionAttribute : OverrideMethodAspect
             var asyncInfo = meta.Target.Method.GetAsyncInfo();
             var returnType = asyncInfo.IsAsync == true ? asyncInfo.ResultType : meta.Target.Method.ReturnType;
 
-            return returnType.DefaultValue();
+            return ExpressionFactory.Default( returnType );
         }
     }
 }
