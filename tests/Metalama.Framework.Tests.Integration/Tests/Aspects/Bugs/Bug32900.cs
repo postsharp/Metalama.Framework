@@ -10,7 +10,7 @@ public sealed class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        var result = ExpressionFactory.Default( meta.Target.Method.GetAsyncInfo().ResultType );
+        var result = meta.Default( meta.Target.Method.GetAsyncInfo().ResultType );
 
         try
         {

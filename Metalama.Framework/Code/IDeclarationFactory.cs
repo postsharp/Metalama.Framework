@@ -57,13 +57,6 @@ namespace Metalama.Framework.Code
         INamedType GetSpecialType( SpecialType specialType );
 
         /// <summary>
-        /// Gets a run-time value that corresponds to the default value of a specified type.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        dynamic? DefaultValue( IType type );
-
-        /// <summary>
         /// Get a run-time value cast to a given type.
         /// </summary>
         /// <param name="type"></param>

@@ -211,9 +211,28 @@ namespace Metalama.Framework.Aspects
         /// <param name="value">Must be explicitly cast to <c>object</c> otherwise the C# compiler will emit an error.</param>
         /// <returns></returns>
         /// <seealso href="@templates"/>
+        /// <seealso cref="ExpressionFactory.CastTo(Metalama.Framework.Code.IExpression,Metalama.Framework.Code.IType)"/>
         [TemplateKeyword]
         [return: NotNullIfNotNull( nameof(value) )]
         public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).Factory.Cast( type, (object?) value );
+
+        /// <summary>
+        /// Generates the <c>default(T)</c> syntax for the specified type.
+        /// </summary>
+        /// <see cref="ExpressionFactory.Default(Metalama.Framework.Code.IType)"/>
+        public static dynamic? Default( IType type ) => ExpressionFactory.Default( type ).Value;
+
+        /// <summary>
+        /// Generates the <c>default(T)</c> syntax for the specified type.
+        /// </summary>
+        /// <see cref="ExpressionFactory.Default(Metalama.Framework.Code.IType)"/>
+        public static dynamic? Default( SpecialType type ) => ExpressionFactory.Default( type ).Value;
+
+        /// <summary>
+        /// Generates the <c>default(T)</c> syntax for the specified type.
+        /// </summary>
+        /// <see cref="ExpressionFactory.Default(Metalama.Framework.Code.IType)"/>
+        public static dynamic? Default( Type type ) => ExpressionFactory.Default( type ).Value;
 
         /// <summary>
         /// Injects a comment to the target code.

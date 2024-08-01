@@ -42,7 +42,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         this._compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
         this._currentType = currentType;
-        
+
         // The IExpression interface does not allow to represent target-typed expressions (such as `null` or `default`), so we use `object` instead.
         this._targetTypedExpressionType = compilation.Factory.GetSpecialType( SpecialType.Object );
     }
@@ -221,16 +221,19 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
 
-    public IExpression NullExpression( IType? type ) => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullableType() ?? this._targetTypedExpressionType );
+    public IExpression NullExpression( IType? type )
+        => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullableType() ?? this._targetTypedExpressionType );
 
     public IExpression DefaultExpression( IType? type )
     {
-        if ( type is { IsReferenceType: true } )
+        if ( type != null )
         {
-            type = type.ToNullableType();
+            return new TypedDefaultUserExpression( type );
         }
-
-        return new SyntaxUserExpression( SyntaxFactoryEx.Default, type ?? this._targetTypedExpressionType );
+        else
+        {
+            return new SyntaxUserExpression( SyntaxFactoryEx.Default, this._targetTypedExpressionType );
+        }
     }
 
     public IStatementList UnwrapBlock( IStatement statement ) => new UnwrappedBlockStatementList( statement );

@@ -9,9 +9,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.Default
     {
         public override dynamic? OverrideMethod()
         {
-            var classDefault = ExpressionFactory.Default( meta.Target.Method.ReturnType );
-            var literalDefault = ExpressionFactory.Default( ( (IParameter)meta.Target.Method.Parameters[1] ).Type );
-            var structDefault = ExpressionFactory.Default(( (IParameter)meta.Target.Method.Parameters[2] ).Type );
+            var classDefault = meta.Default( meta.Target.Method.ReturnType );
+            var literalDefault = meta.Default( ( (IParameter)meta.Target.Method.Parameters[1] ).Type );
+            var structDefault = meta.Default( ( (IParameter)meta.Target.Method.Parameters[2] ).Type );
 
             return default;
         }

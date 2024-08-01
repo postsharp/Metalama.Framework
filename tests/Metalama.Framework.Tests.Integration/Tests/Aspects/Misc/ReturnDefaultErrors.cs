@@ -24,7 +24,7 @@ internal sealed class IgnoreExceptionAttribute : OverrideMethodAspect
         }
         catch
         {
-            return ExpressionFactory.Default( meta.Target.Method.GetAsyncInfo().ResultType );
+            return meta.Default( meta.Target.Method.GetAsyncInfo().ResultType );
         }
     }
 }

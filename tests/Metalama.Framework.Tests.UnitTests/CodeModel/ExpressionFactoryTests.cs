@@ -48,7 +48,7 @@ public sealed class ExpressionFactoryTests : UnitTestClass
         var expression = this.GetExpression( ExpressionFactory.Null );
 
         Assert.Equal( "null", expression.Syntax );
-        
+
         // The expression should be untyped (target typed) but the Metalama model does not allow for it.
         Assert.Equal( "object", expression.Type.ToString() );
     }
@@ -68,9 +68,9 @@ public sealed class ExpressionFactoryTests : UnitTestClass
         var expression = this.GetExpression( ExpressionFactory.Default );
 
         Assert.Equal( "default", expression.Syntax );
-        
+
         // The expression should be untyped (target typed) but the Metalama model does not allow for it.
-        Assert.Equal( "object", expression.Type.ToString() ); 
+        Assert.Equal( "object", expression.Type.ToString() );
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class ExpressionFactoryTests : UnitTestClass
     {
         var expression = this.GetExpression( ExpressionFactory.Default<string> );
 
-        Assert.Equal( "default", expression.Syntax );
+        Assert.Equal( "default(global::System.String)", expression.Syntax );
         Assert.Equal( "string?", expression.Type.ToString() );
     }
 
@@ -87,7 +87,7 @@ public sealed class ExpressionFactoryTests : UnitTestClass
     {
         var expression = this.GetExpression( ExpressionFactory.Default<int> );
 
-        Assert.Equal( "default", expression.Syntax );
+        Assert.Equal( "default(global::System.Int32)", expression.Syntax );
         Assert.Equal( "int", expression.Type.ToString() );
     }
 

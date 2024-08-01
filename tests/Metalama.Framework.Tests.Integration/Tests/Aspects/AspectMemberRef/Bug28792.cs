@@ -38,7 +38,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
                 }
                 else
                 {
-                    return ExpressionFactory.Default( meta.Target.FieldOrProperty.Type );
+                    return meta.Default( meta.Target.FieldOrProperty.Type );
                 }
             }
         }

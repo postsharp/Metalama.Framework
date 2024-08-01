@@ -24,7 +24,7 @@ internal sealed class IgnoreExceptionAttribute : OverrideMethodAspect
             var asyncInfo = meta.Target.Method.GetAsyncInfo();
             var returnType = asyncInfo.IsAsync == true ? asyncInfo.ResultType : meta.Target.Method.ReturnType;
 
-            return ExpressionFactory.Default( returnType );
+            return meta.Default( returnType );
         }
     }
 }

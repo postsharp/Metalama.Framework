@@ -172,7 +172,7 @@ public static class ExpressionFactory
     /// <summary>
     /// Gets a <c>null</c> expression without specifying a type. The expression will be target-typed.
     /// </summary>
-    public static IExpression Null() => Null( null );
+    public static IExpression Null() => SyntaxBuilder.CurrentImplementation.NullExpression( null );
 
     /// <summary>
     /// Gets a <c>null</c> expression for a given type.
@@ -187,22 +187,32 @@ public static class ExpressionFactory
     /// <summary>
     /// Gets a <c>null</c> expression for a given type.
     /// </summary>
+    public static IExpression Null( Type type ) => Null( TypeFactory.GetType( type ) );
+
+    /// <summary>
+    /// Gets a <c>null</c> expression for a given type.
+    /// </summary>
     public static IExpression Null<T>() => Null( TypeFactory.GetType( typeof(T) ) );
 
     /// <summary>
     /// Gets a <c>default</c> expression without specifying a type. The expression will be target-typed.
     /// </summary>
-    public static IExpression Default() => Default( null );
+    public static IExpression Default() => SyntaxBuilder.CurrentImplementation.DefaultExpression( null );
 
     /// <summary>
     /// Gets a <c>default</c> expression for a given type.
     /// </summary>
     public static IExpression Default( IType? type ) => SyntaxBuilder.CurrentImplementation.DefaultExpression( type );
-    
+
     /// <summary>
     /// Gets a <c>default</c> expression for a given type.
     /// </summary>
     public static IExpression Default( SpecialType type ) => Default( TypeFactory.GetType( type ) );
+
+    /// <summary>
+    /// Gets a <c>default</c> expression for a given type.
+    /// </summary>
+    public static IExpression Default( Type type ) => Default( TypeFactory.GetType( type ) );
 
     /// <summary>
     /// Gets a <c>default</c> expression for a given type.

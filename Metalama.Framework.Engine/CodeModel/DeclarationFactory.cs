@@ -433,8 +433,6 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
         };
 
-    object IDeclarationFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
-
     object IDeclarationFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
     public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )

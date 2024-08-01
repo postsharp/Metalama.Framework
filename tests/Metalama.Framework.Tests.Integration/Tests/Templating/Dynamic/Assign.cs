@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Assign
         [TestTemplate]
         private dynamic? Template()
         {
-            var x = ExpressionFactory.Default( SpecialType.Int32 );
+            var x = meta.Default( SpecialType.Int32 );
 
             x = meta.Proceed();
             x += meta.Proceed();

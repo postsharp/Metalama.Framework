@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.AccessGenericP
         {
             foreach (var genericParameter in meta.Target.Method.TypeParameters)
             {
-                var v = ExpressionFactory.Default( genericParameter );
+                var v = meta.Default( genericParameter );
                 var t = meta.RunTime( genericParameter.ToType() );
             }
 
