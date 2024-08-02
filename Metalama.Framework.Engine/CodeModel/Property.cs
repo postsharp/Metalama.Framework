@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -97,5 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IProperty>( this.ToRef() );
     }
 }

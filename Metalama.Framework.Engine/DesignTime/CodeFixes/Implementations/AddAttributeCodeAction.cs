@@ -30,7 +30,7 @@ internal sealed class AddAttributeCodeAction : ICodeAction
 
         var compilation = context.Compilation.Compilation;
 
-        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation );
+        var targetSymbol = this.TargetDeclaration.GetReference().GetSymbol( compilation );
 
         if ( targetSymbol == null )
         {

@@ -77,4 +77,6 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
         => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
     public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
+
+    internal sealed override IRef<IDeclaration> ToIRef() => new BoxedRef<IParameter>( this.ToRef() );
 }

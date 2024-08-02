@@ -61,4 +61,6 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
         => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetIndexer( p ) ).ToReadOnlyList();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
+
+    internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IIndexer>( this.ToRef() );
 }

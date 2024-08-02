@@ -103,6 +103,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public virtual Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
+    public abstract IRef<IDeclaration> ToIRef();
+
     public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();

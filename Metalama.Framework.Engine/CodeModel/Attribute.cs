@@ -113,7 +113,7 @@ internal sealed class Attribute : IAttributeImpl
 
     int IAspectPredecessorImpl.TargetDeclarationDepth => this.ContainingDeclaration.Depth;
 
-    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.GetReference();
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 

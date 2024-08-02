@@ -33,7 +33,7 @@ internal sealed class ChangeVisibilityCodeAction : ICodeAction
 
         var compilation = context.Compilation.Compilation;
 
-        var targetSymbol = this.TargetMember.ToRef().GetSymbol( compilation );
+        var targetSymbol = this.TargetMember.GetReference().GetSymbol( compilation );
 
         if ( targetSymbol == null )
         {

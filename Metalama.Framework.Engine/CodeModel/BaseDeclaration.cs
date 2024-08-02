@@ -17,6 +17,8 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public abstract class BaseDeclaration : IDeclarationImpl
     {
+        private IRef<IDeclaration>? _boxedRef;
+
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
         [PublicAPI]
@@ -24,7 +26,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+        IRef<IDeclaration> IDeclaration.ToRef() => this._boxedRef ??= this.ToIRef();
+
+        /// <summary>
+        /// Returns a <see cref="BoxedRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
+        /// but <see cref="IMethod"/>, <see cref="INamedType"/>, ... 
+        /// </summary>
+        /// <returns></returns>
+        internal abstract IRef<IDeclaration> ToIRef();
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 

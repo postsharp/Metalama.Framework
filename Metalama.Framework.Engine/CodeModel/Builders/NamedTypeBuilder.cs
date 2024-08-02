@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -107,7 +108,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             { DeclaringType: not null } => $"{this.DeclaringType.FullName}.{this.Name}",
             { ContainingNamespace.IsGlobalNamespace: true } => this.Name,
             { ContainingNamespace.IsGlobalNamespace: false } => $"{this.ContainingNamespace.FullName}.{this.Name}",
-            _ => throw new AssertionFailedException( $"Unsupported: {this}" ),
+            _ => throw new AssertionFailedException( $"Unsupported: {this}" )
         };
 
     [Memo]
@@ -248,4 +249,6 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
+
+    public override IRef<IDeclaration> ToIRef() => new BoxedRef<INamedType>( this.ToRef() );
 }

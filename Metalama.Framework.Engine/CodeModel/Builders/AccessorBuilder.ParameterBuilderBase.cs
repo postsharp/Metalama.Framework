@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Reflection;
 
@@ -42,5 +43,7 @@ internal partial class AccessorBuilder
         public override bool IsReturnParameter => this.Index < 0;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
+
+        public sealed override IRef<IDeclaration> ToIRef() => new BoxedRef<IParameter>( this.ToRef() );
     }
 }

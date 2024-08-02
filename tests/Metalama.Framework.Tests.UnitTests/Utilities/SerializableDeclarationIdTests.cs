@@ -81,7 +81,7 @@ class C<T>
         }
 
         // Test declaration roundtrip from reference
-        var roundtripFromReference = declaration.ToRef().GetTarget( compilation );
+        var roundtripFromReference = declaration.GetReference().GetTarget( compilation );
         Assert.Same( declaration, roundtripFromReference );
 
         // Test declaration roundtrip from serialization.

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Validation;
+using System;
 
 namespace Metalama.Framework.Code
 {
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Code
     /// <typeparam name="T">The type of the target object of the declaration.</typeparam>
     [CompileTime]
     [InternalImplement]
-    public interface IRef<out T>
+    public interface IRef<out T> : IEquatable<IRef<ICompilationElement>>
         where T : class, ICompilationElement
     {
         /// <summary>
@@ -34,5 +35,10 @@ namespace Metalama.Framework.Code
         /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
         /// </summary>
         T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default );
+
+        IRef<TOut> As<TOut>()
+            where TOut : class, ICompilationElement;
+
+        bool Equals( IRef<ICompilationElement>? other, bool includeNullability );
     }
 }

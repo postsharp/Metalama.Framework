@@ -50,6 +50,8 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
     internal override Ref<IDeclaration> ToRef() => this.Builder.ToRef();
 
+    internal override IRef<IDeclaration> ToIRef() => this.Builder.ToIRef();
+
     public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 
     public override bool CanBeInherited => this.Builder.CanBeInherited;

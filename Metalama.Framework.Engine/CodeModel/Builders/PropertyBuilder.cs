@@ -8,6 +8,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.RunTime;
@@ -147,4 +148,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
             this.InitializerTags,
             out initializerExpression,
             out initializerMethod );
+
+    public override IRef<IDeclaration> ToIRef() => new BoxedRef<IProperty>( this.ToRef() );
 }

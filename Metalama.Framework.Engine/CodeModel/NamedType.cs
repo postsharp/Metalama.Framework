@@ -448,6 +448,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
+        internal override IRef<IDeclaration> ToIRef() => this.Implementation.ToIRef();
+
         public bool IsSubclassOf( INamedType type )
         {
             this.OnUsingDeclaration();

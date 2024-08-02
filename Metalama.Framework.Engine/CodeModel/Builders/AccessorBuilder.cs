@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -291,4 +292,6 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
+
+    public override IRef<IDeclaration> ToIRef() => new BoxedRef<IMethod>( this.ToRef() );
 }

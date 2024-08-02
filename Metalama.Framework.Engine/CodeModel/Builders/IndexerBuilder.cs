@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Collections.Generic;
@@ -109,4 +110,6 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
     }
 
     public void SetExplicitInterfaceImplementation( IIndexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = [interfaceIndexer];
+
+    public override IRef<IDeclaration> ToIRef() => new BoxedRef<IIndexer>( this.ToRef() );
 }

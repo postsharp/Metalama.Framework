@@ -27,6 +27,7 @@ namespace Metalama.Framework.Code
         /// in a different revision of the compilation.
         /// </summary>
         /// <returns></returns>
+        [Obsolete( "Use the GetReference extension method." )]
         IRef<IDeclaration> ToRef();
 
         /// <summary>

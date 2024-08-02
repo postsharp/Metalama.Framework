@@ -625,5 +625,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
 
         public override bool BelongsToCurrentProject => true;
+
+        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<ICompilation>( this.ToRef() );
     }
 }

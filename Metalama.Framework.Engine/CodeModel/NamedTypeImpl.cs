@@ -632,4 +632,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public bool Equals( INamedType? other ) => this.Equals( other, TypeComparison.Default );
 
     public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.TypeSymbol );
+
+    internal override IRef<IDeclaration> ToIRef() => new BoxedRef<INamedType>( this.ToRef() );
 }

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -44,8 +45,7 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
     [Memo]
     public INamedTypeCollection AllTypes => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, true );
 
-    public bool AreInternalsVisibleFrom( IAssembly assembly )
-        => this._assemblySymbol.AreInternalsVisibleToImpl( assembly.GetSymbol() );
+    public bool AreInternalsVisibleFrom( IAssembly assembly ) => this._assemblySymbol.AreInternalsVisibleToImpl( assembly.GetSymbol() );
 
     [Memo]
     public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this.Compilation, this._assemblySymbol.Modules.First() );
@@ -59,4 +59,6 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
     public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 
     public override bool BelongsToCurrentProject => false;
+
+    internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IAssembly>( this.ToRef() );
 }

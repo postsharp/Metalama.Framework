@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -53,4 +54,6 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     }
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
+
+    public override IRef<IDeclaration> ToIRef() => new BoxedRef<INamespace>( this.ToRef() );
 }

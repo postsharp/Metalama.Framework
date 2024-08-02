@@ -54,7 +54,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool IsAsync => this._accessorBuilder.IsAsync;
 
-    public override bool IsImplicitlyDeclared => this is { MethodKind: MethodKind.PropertySet, ContainingDeclaration: IProperty { Writeability: Writeability.ConstructorOnly } };
+    public override bool IsImplicitlyDeclared
+        => this is { MethodKind: MethodKind.PropertySet, ContainingDeclaration: IProperty { Writeability: Writeability.ConstructorOnly } };
 
     [Memo]
     public IParameterList Parameters

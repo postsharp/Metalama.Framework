@@ -75,6 +75,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         internal override Ref<IDeclaration> ToRef() => Ref.PseudoParameter( this );
 
+        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IParameter>( this.ToRef() );
+
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;

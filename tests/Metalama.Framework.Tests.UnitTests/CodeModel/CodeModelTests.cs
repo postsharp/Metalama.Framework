@@ -1340,7 +1340,7 @@ class C {}
             // Check that roundtrip attribute reference resolution work.
             foreach ( var attribute in attributes )
             {
-                var roundtrip = attribute.ToRef().GetTarget( compilation );
+                var roundtrip = attribute.GetReference().GetTarget( compilation );
 
                 // Note that the code model does not preserve reference identity of attributes.
                 Assert.Same(

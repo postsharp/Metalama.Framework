@@ -94,9 +94,14 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public IObjectCreationExpression CreateInvokeExpression() => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IObjectCreationExpression CreateInvokeExpression( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public IObjectCreationExpression CreateInvokeExpression( params object?[] args )
+        => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args )
+        => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
+        => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+
+    public override IRef<IDeclaration> ToIRef() => new BoxedRef<IConstructor>( this.ToRef() );
 }

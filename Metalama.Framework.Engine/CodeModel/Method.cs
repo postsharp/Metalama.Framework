@@ -157,4 +157,6 @@ internal sealed class Method : MethodBase, IMethodImpl
             return base.Sources;
         }
     }
+
+    internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IMethod>( this.ToRef() );
 }

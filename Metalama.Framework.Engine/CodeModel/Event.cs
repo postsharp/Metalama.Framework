@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -108,5 +109,7 @@ namespace Metalama.Framework.Engine.CodeModel
         IType IHasType.Type => this.Type;
 
         public IMember? OverriddenMember => this.OverriddenEvent;
+
+        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IEvent>( this.ToRef() );
     }
 }
