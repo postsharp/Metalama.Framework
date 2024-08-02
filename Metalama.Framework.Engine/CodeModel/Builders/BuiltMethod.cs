@@ -49,6 +49,8 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
+    public IRef<IMethod> ToRef() => this._methodBuilder.BoxedRef;
+
     [Memo]
     public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation );
 

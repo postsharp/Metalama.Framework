@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
+using IPropertyOrIndexer = Metalama.Framework.Code.IPropertyOrIndexer;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 
@@ -48,6 +49,14 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
     public override MemberInfo ToMemberInfo() => this.ToPropertyInfo();
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
+
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => this.ToPropertyOrIndexerRef();
+
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.ToFieldOrPropertyOrIndexerRef();
+
+    protected abstract IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef();
+
+    protected abstract IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef();
 
     public override string ToString() => this.PropertySymbol.ToString().AssertNotNull();
 

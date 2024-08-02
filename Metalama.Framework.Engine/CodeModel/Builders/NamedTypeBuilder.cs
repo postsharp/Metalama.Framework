@@ -98,6 +98,8 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public INamespace ContainingNamespace { get; }
 
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     INamespace INamedType.ContainingNamespace => this.ContainingNamespace;
@@ -250,5 +252,12 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
 
-    public override IRef<IDeclaration> ToIRef() => new BoxedRef<INamedType>( this.ToRef() );
+    [Memo]
+    public BoxedRef<INamedType> BoxedRef => new BoxedRef<INamedType>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

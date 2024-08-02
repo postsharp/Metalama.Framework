@@ -24,11 +24,14 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
 
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
-    public INamedType? DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
+    public INamedType? DeclaringType
+        => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.MemberOrNamedTypeBuilder.ToMemberOrNamedTypeRef();
 }

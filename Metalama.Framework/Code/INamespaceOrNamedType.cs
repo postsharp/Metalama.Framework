@@ -31,4 +31,6 @@ public interface INamespaceOrNamedType : INamedDeclaration
     /// (i.e. ig <see cref="INamespace.IsGlobalNamespace"/> is <c>true</c>).
     /// </summary>
     INamespace? ContainingNamespace { get; }
+
+    new IRef<INamespaceOrNamedType> ToRef();
 }

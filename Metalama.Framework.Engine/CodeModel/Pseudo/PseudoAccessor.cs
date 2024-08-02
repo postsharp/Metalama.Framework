@@ -91,9 +91,20 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
-    IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+    [Memo]
+    private BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.BoxedRef;
+
+    IRef<IMember> IMember.ToRef() => this.BoxedRef;
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this.BoxedRef;
+
+    IRef<IDeclaration> IDeclaration.ToRef() => this.BoxedRef;
 
     public SerializableDeclarationId ToSerializableId() => this.DeclaringMember.GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
 
@@ -151,7 +162,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public ISymbol? Symbol => null;
 
-    public Ref<IDeclaration> ToRef() => Ref.PseudoAccessor( this );
+    public Ref<IDeclaration> ToValueTypedRef() => Ref.PseudoAccessor( this );
 
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

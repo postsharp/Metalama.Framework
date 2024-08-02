@@ -48,7 +48,11 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
 
     IParameterBuilderList IHasParametersBuilder.Parameters => this.Parameters;
 
+    public abstract IRef<IMethodBase> ToMethodBaseRef();
+
     public abstract System.Reflection.MethodBase ToMethodBase();
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this.ToMethodBaseRef();
 
     protected MethodBaseBuilder(
         Advice advice,

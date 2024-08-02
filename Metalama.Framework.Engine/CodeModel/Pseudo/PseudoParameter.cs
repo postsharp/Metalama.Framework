@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -73,9 +74,9 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public bool IsReturnParameter => this.Index < 0;
 
-        internal override Ref<IDeclaration> ToRef() => Ref.PseudoParameter( this );
+        internal override Ref<IDeclaration> ToValueTypedRef() => Ref.PseudoParameter( this );
 
-        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IParameter>( this.ToRef() );
+        private protected override IRef<IDeclaration> ToDeclarationRef() => new BoxedRef<IParameter>( this.ToValueTypedRef() );
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -109,5 +110,12 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
         public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
+
+        [Memo]
+        private BoxedRef<IParameter> BoxedRef => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+
+        IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
+
+        IRef<IDeclaration> IDeclaration.ToRef() => this.BoxedRef;
     }
 }

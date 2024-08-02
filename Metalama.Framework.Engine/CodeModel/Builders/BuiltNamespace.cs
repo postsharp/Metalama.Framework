@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -26,17 +27,21 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 
     public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
 
+    IRef<INamespace> INamespace.ToRef() => this._namespaceBuilder.BoxedRef;
+
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this._namespaceBuilder.BoxedRef;
+
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this._namespaceBuilder.ToRef().As<INamespaceOrNamedType>() ) );
+            this.Compilation.GetNamedTypeCollection( this._namespaceBuilder.ToValueTypedRef().As<INamespaceOrNamedType>() ) );
 
     public INamespaceCollection Namespaces
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._namespaceBuilder.ToRef().As<INamespace>() ) );
+            this.Compilation.GetNamespaceCollection( this._namespaceBuilder.ToValueTypedRef().As<INamespace>() ) );
 
     public bool IsPartial
     {
@@ -55,8 +60,8 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
         }
     }
 
-    public INamespace GetDescendant( string ns ) => throw new System.NotImplementedException();
+    public INamespace GetDescendant( string ns ) => throw new NotImplementedException();
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = DerivedTypesOptions.Default )
-        => throw new System.NotSupportedException();
+        => throw new NotSupportedException();
 }

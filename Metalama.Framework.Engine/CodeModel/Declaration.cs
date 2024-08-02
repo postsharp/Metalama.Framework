@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
 
-        internal override Ref<IDeclaration> ToRef()
+        internal override Ref<IDeclaration> ToValueTypedRef()
         {
             this.OnUsingDeclaration();
 

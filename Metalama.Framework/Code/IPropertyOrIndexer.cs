@@ -13,4 +13,6 @@ public interface IPropertyOrIndexer : IFieldOrPropertyOrIndexer
     /// <returns>A <see cref="PropertyInfo"/> that can be used only in run-time code.</returns>
     [CompileTimeReturningRunTime]
     PropertyInfo ToPropertyInfo();
+
+    new IRef<IPropertyOrIndexer> ToRef();
 }

@@ -62,5 +62,18 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
-    internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IIndexer>( this.ToRef() );
+    [Memo]
+    private BoxedRef<IIndexer> BoxedRef => new BoxedRef<IIndexer>( this.ToValueTypedRef() );
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+    IRef<IIndexer> IIndexer.ToRef() => this.BoxedRef;
+
+    protected override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+
+    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
+
+    protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
+    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

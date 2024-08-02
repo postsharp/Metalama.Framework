@@ -41,9 +41,9 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
 
     ICompilation ICompilationElement.Compilation => this._sourceMember.Compilation;
 
-    IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+    IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this._sourceMember.DeclaringSyntaxReferences;
 
@@ -53,9 +53,13 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
 
     public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
-    public Ref<IDeclaration> ToRef() => Ref.FromSubstitutedDeclaration( this );
+    public Ref<IDeclaration> ToValueTypedRef() => Ref.FromSubstitutedDeclaration( this );
 
     // TODO: test
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => ((IMemberOrNamedType) this._sourceMember).ToRef();
+
+    IRef<IMember> IMember.ToRef() => ((IMember) this._sourceMember).ToRef();
+
     public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
     public IAssembly DeclaringAssembly => this._sourceMember.DeclaringAssembly;

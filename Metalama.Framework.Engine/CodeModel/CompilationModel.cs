@@ -564,7 +564,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.CompilationContext ).As<IDeclaration>();
+        internal override Ref<IDeclaration> ToValueTypedRef() => Ref.Compilation( this.CompilationContext ).As<IDeclaration>();
+
+        [Memo]
+        private BoxedRef<ICompilation> BoxedRef => new BoxedRef<ICompilation>( this.ToValueTypedRef() );
+
+        IRef<ICompilation> ICompilation.ToRef() => this.BoxedRef;
+
+        IRef<IDeclaration> IDeclaration.ToRef() => this.BoxedRef;
+
+        IRef<IAssembly> IAssembly.ToRef() => this.BoxedRef;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -626,6 +635,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool BelongsToCurrentProject => true;
 
-        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<ICompilation>( this.ToRef() );
+        private protected override IRef<IDeclaration> ToDeclarationRef() => new BoxedRef<ICompilation>( this.ToValueTypedRef() );
     }
 }

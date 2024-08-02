@@ -22,6 +22,8 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public INamespace? ContainingNamespace { get; }
 
+    public IRef<INamespaceOrNamedType> ToRef() => this.BoxedRef;
+
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     [Memo]
@@ -55,5 +57,10 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
-    public override IRef<IDeclaration> ToIRef() => new BoxedRef<INamespace>( this.ToRef() );
+    [Memo]
+    public BoxedRef<INamespace> BoxedRef => new BoxedRef<INamespace>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<INamespace> INamespace.ToRef() => this.BoxedRef;
 }

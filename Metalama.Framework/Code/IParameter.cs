@@ -38,5 +38,7 @@ namespace Metalama.Framework.Code
         ParameterInfo ToParameterInfo();
 
         bool IsReturnParameter { get; }
+
+        new IRef<IParameter> ToRef();
     }
 }

@@ -93,6 +93,11 @@ namespace Metalama.Framework.Engine.CodeModel
                     ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                     true ) );
 
-        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IParameter>( this.ToRef() );
+        [Memo]
+        private IRef<IParameter> Ref => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+
+        IRef<IParameter> IParameter.ToRef() => this.Ref;
     }
 }

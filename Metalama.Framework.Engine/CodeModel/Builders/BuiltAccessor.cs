@@ -69,6 +69,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     IMethod IMethod.Definition => this;
 
+    IRef<IMember> IMember.ToRef() => this._accessorBuilder.BoxedRef;
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this._accessorBuilder.BoxedRef;
+
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
     IMember IMember.Definition => this;
@@ -115,6 +119,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this._builtMember;
 
     public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
+
+    IRef<IMethod> IMethod.ToRef() => this._accessorBuilder.BoxedRef;
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this._accessorBuilder.BoxedRef;
 
     public MemberInfo ToMemberInfo() => this._accessorBuilder.ToMemberInfo();
 

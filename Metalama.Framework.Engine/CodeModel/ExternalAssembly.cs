@@ -60,5 +60,10 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
 
     public override bool BelongsToCurrentProject => false;
 
-    internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IAssembly>( this.ToRef() );
+    [Memo]
+    private IRef<IAssembly> Ref => new BoxedRef<IAssembly>( this.ToValueTypedRef() );
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+
+    IRef<IAssembly> IAssembly.ToRef() => this.Ref;
 }

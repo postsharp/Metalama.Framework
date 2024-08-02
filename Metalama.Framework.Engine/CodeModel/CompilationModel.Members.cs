@@ -42,7 +42,7 @@ public sealed partial class CompilationModel
 
     internal bool Contains( FieldBuilder fieldBuilder )
         => (this._fields.TryGetValue( fieldBuilder.DeclaringType.ToTypedRef(), out var fields ) && fields.Contains( fieldBuilder.ToTypedRef<IField>() ))
-           || this.TryGetRedirectedDeclaration( fieldBuilder.ToRef(), out _ );
+           || this.TryGetRedirectedDeclaration( fieldBuilder.ToValueTypedRef(), out _ );
 
     internal bool Contains( MethodBuilder methodBuilder )
         => methodBuilder switch

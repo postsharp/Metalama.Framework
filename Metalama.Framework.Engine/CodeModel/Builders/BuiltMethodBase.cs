@@ -20,4 +20,6 @@ internal abstract class BuiltMethodBase : BuiltMember, IMethodBaseImpl
             this.GetCompilationModel().GetParameterCollection( this.MethodBaseBuilder.ToTypedRef<IHasParameters>() ) );
 
     public abstract System.Reflection.MethodBase ToMethodBase();
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this.MethodBaseBuilder.ToMethodBaseRef();
 }

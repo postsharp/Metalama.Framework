@@ -47,7 +47,7 @@ internal static class SubstitutedMemberFactory
                 {
                     var substitutedMember = Create( builtDeclaration, targetType );
 
-                    return substitutedMember.ToRef().As<T>();
+                    return substitutedMember.ToValueTypedRef().As<T>();
                 }
 
             default:

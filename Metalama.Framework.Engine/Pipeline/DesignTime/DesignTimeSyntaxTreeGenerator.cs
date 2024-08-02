@@ -262,7 +262,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext )
         {
-            var finalConstructor = constructorBuilder.ToRef().As<IConstructor>().GetTarget( finalCompilationModel );
+            var finalConstructor = constructorBuilder.ToValueTypedRef().As<IConstructor>().GetTarget( finalCompilationModel );
 
             foreach ( var member in injectedMembers )
             {

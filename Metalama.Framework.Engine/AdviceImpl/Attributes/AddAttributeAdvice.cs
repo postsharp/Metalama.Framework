@@ -55,7 +55,7 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
                                 this ) );
 
                     case OverrideStrategy.Ignore:
-                        return new AddAttributeAdviceResult( AdviceOutcome.Ignore, existingAttribute.GetReference() );
+                        return new AddAttributeAdviceResult( AdviceOutcome.Ignore, existingAttribute.ToRef() );
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(

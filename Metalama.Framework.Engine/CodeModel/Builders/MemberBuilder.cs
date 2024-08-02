@@ -69,6 +69,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
     IMember IMember.Definition => this;
 
+    IRef<IMember> IMember.ToRef() => this.ToMemberRef();
+
     public bool HasImplementation => true;
 
     public bool IsDesignTime => !this.IsOverride && !this.IsNew;
@@ -79,6 +81,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
     public abstract IMember? OverriddenMember { get; }
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
+
+    public abstract IRef<IMember> ToMemberRef();
 
     private bool TryExpandInitializerTemplate<T>(
         Advice advice,

@@ -17,12 +17,6 @@ namespace Metalama.Framework.Code
     [PublicAPI]
     public static class DeclarationExtensions
     {
-#pragma warning disable CS0618 // Type or member is obsolete
-        public static IRef<T> GetReference<T>( this T declaration )
-            where T : class, IDeclaration
-            => declaration.ToRef().As<T>();
-#pragma warning restore CS0618 // Type or member is obsolete
-
         /// <summary>
         /// Determines if a given declaration is a child of another given declaration, using the <see cref="IDeclaration.ContainingDeclaration"/>
         /// relationship for all declarations except for named type, where the parent namespace is considered.
