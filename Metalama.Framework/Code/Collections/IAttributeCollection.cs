@@ -23,6 +23,14 @@ namespace Metalama.Framework.Code.Collections
 
         IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate );
 
+        /// <summary>
+        /// Gets the constructed attributes of a given type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IEnumerable<T> OfAttributeType<T>()
+            where T : Attribute;
+
         bool Any( IType type );
 
         bool Any( IType type, ConversionKind conversionKind );

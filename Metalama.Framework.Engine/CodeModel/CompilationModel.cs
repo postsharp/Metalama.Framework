@@ -433,7 +433,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( includeDerivedTypes )
             {
-                return this._derivedTypes.Value.GetDerivedTypes( type ).SelectMany( GetAllAttributesOfExactType );
+                return this._derivedTypes.Value.GetDerivedTypes( type ).Append( type ).SelectMany( GetAllAttributesOfExactType );
             }
             else
             {

@@ -123,7 +123,7 @@ namespace Metalama.Framework.Aspects
         /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
         /// </remarks>
         new IAspectReceiver<INamedType> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
-        
+
         /// <summary>
         /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="INamedType"/>. 
         /// </summary>
@@ -136,6 +136,9 @@ namespace Metalama.Framework.Aspects
         /// Filters the set of declarations based on a predicate.
         /// </summary>
         new IAspectReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
+
+        new IAspectReceiver<TOut> OfType<TOut>()
+            where TOut : class, IDeclaration;
 
         /// <summary>
         /// Sets options for the declarations in the current set of declarations by supplying a <see cref="Func{TResult}"/>.
@@ -158,7 +161,7 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         void SetOptions<TOptions>( TOptions options )
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
-        
+
         /// <summary>
         /// Projects the declarations in the current set by adding a tag for each declaration, and returns a <see cref="IValidatorReceiver{TDeclaration,TTag}"/>.
         /// Methods of this interface have overloads that accept this tag. 
@@ -236,7 +239,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         new IAspectReceiver<TMember, TTag> Select<TMember>( Func<TDeclaration, TMember> selector )
             where TMember : class, IDeclaration;
-        
+
         /// <summary>
         /// Projects each declaration of the current set into a new declaration.
         /// This overload does supplies the tag to the <paramref name="selector"/> delegate.
@@ -264,7 +267,7 @@ namespace Metalama.Framework.Aspects
         /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
         /// </remarks>
         new IAspectReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options = DerivedTypesOptions.Default );
-        
+
         /// <summary>
         /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="Type"/>. 
         /// </summary>
@@ -283,6 +286,9 @@ namespace Metalama.Framework.Aspects
         /// This overload does supplies the tag to the <paramref name="predicate"/> delegate.
         /// </summary>
         new IAspectReceiver<TDeclaration, TTag> Where( Func<TDeclaration, TTag, bool> predicate );
+
+        new IAspectReceiver<TOut, TTag> OfType<TOut>()
+            where TOut : class, IDeclaration;
 
         /// <summary>
         /// Sets options for the declarations in the current set of declarations by supplying a <see cref="Func{TResult}"/>.
