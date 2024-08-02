@@ -204,7 +204,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
                                       }
                                   }
 
-                                  class A {}
+                                  public class A {}
                                   """;
 
         const string dependentCode = """

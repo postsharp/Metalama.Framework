@@ -62,7 +62,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 
     public ReferenceKinds ReferenceKinds { get; private set; }
 
-    internal bool IncludeDerivedTypes { get; }
+    public bool IncludeDerivedTypes { get; }
 
     public object Object { get; private set; }
 
@@ -70,14 +70,14 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 
     public string? MethodName { get; private set; }
 
-    internal string DiagnosticSourceDescription { get; }
+    public string DiagnosticSourceDescription { get; }
 
 #pragma warning disable CS0612 // Type or member is obsolete
-    internal ReferenceGranularity Granularity { get; private set; } =
+    public ReferenceGranularity Granularity { get; private set; } =
         ReferenceGranularity.SyntaxNode; // Default value for backward compatibility with serialized values.
 #pragma warning restore CS0612           // Type or member is obsolete
 
-    internal ValidatorDriver GetReferenceValidatorDriver()
+    public ValidatorDriver GetReferenceValidatorDriver()
     {
         var type = this.Object.GetType();
 

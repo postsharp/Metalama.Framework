@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -276,8 +277,8 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         var introducedTrees = introducedSyntaxTreeBuilder?.ToImmutable() ?? this.IntroducedSyntaxTrees;
         var inheritableAspects = inheritableAspectsBuilder?.ToImmutable() ?? this._inheritableAspects;
 
-        var validators = validatorsBuilder?.ToImmutable( projectVersion.ReferencedValidatorCollections )
-                         ?? this.ReferenceValidators.WithChildCollections( projectVersion.ReferencedValidatorCollections );
+        var validators = validatorsBuilder?.ToImmutable( this.GetReferencedDesignTimeValidatorCollections( compilation, projectVersion ) )
+                         ?? this.ReferenceValidators.WithChildCollections( this.GetReferencedDesignTimeValidatorCollections( compilation, projectVersion ) );
 
         var inheritableOptions = inheritableOptionsBuilder?.ToImmutable() ?? this.InheritableOptions;
         var annotations = annotationsBuilder?.ToImmutable() ?? this.Annotations;
@@ -292,6 +293,45 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             inheritableOptions,
             annotations,
             aspectInstancesHashCode );
+    }
+
+    public IEnumerable<DesignTimeReferenceValidatorCollection> GetReferencedDesignTimeValidatorCollections( PartialCompilation compilation, DesignTimeProjectVersion projectVersion)
+    {
+        foreach(var reference in projectVersion.References)
+        {
+            if (reference.TransitiveAspectsManifest is AspectPipelineResult aspectPipelineResult)
+            {
+                // This is a reference to the current version.
+                yield return aspectPipelineResult.ReferenceValidators;
+            }
+            else
+            {
+                // This is a deserialized manifest that comes from a different version.
+                var builder = DesignTimeReferenceValidatorCollection.Empty.ToBuilder();
+
+                foreach(var validator in reference.TransitiveAspectsManifest.ReferenceValidators)
+                {
+                    var validatedDeclarationSymbol = validator.ValidatedDeclaration.GetSymbol( compilation.Compilation );
+
+                    if (validatedDeclarationSymbol == null)
+                    {
+                        continue;
+                    }
+
+                    builder.Add(
+                        new DesignTimeReferenceValidatorInstance(
+                            validator.ValidatedDeclaration.GetSymbol(compilation.Compilation),
+                            validator.ReferenceKinds, 
+                            validator.IncludeDerivedTypes,
+                            validator.GetReferenceValidatorDriver(),
+                            ValidatorImplementation.Create( validator.Object, validator.State ),
+                            validator.DiagnosticSourceDescription,
+                            validator.Granularity ) );
+                }
+
+                yield return builder.ToImmutable( [] );
+            }
+        }
     }
 
     /// <summary>

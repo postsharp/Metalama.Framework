@@ -10,6 +10,7 @@ using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
 public sealed class DiagnosticAnalyzerTests : UnitTestClass
 {
-    private async Task<List<Diagnostic>> RunAnalyzer( string code )
+    private async Task<List<Diagnostic>> RunAnalyzer( string code, string? dependencyCode = null )
     {
         var additionalServices = new AdditionalServiceCollection();
         additionalServices.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService() );
@@ -28,10 +29,24 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
         var workspaceProvider = new TestWorkspaceProvider( testContext.ServiceProvider );
-        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = code } );
+
+        string[]? references = null;
+
+        if ( dependencyCode != null )
+        {
+            workspaceProvider.AddOrUpdateProject( "dependency_project", new Dictionary<string, string>() { ["dependency_code.cs"] = dependencyCode } );
+            references = ["dependency_project"];
+            var dependencyCompilation = await workspaceProvider.GetProject( "dependency_project" ).GetCompilationAsync();
+            var dependencyDiagnostics = dependencyCompilation!.GetDiagnostics();
+            Assert.Empty( dependencyDiagnostics.Where( x => x.Severity == DiagnosticSeverity.Error ) );
+        }
+
+        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = code }, references );
         var compilation = await workspaceProvider.GetProject( "project" ).GetCompilationAsync();
         var syntaxTree = await workspaceProvider.GetDocument( "project", "code.cs" ).GetSyntaxTreeAsync();
         var semanticModel = compilation!.GetSemanticModel( syntaxTree! );
+        var diagnostics = compilation!.GetDiagnostics();
+        Assert.Empty( diagnostics.Where( x => x.Severity == DiagnosticSeverity.Error ) );
 
         var analyzer = new TheDiagnosticAnalyzer( pipelineFactory.ServiceProvider );
         var analysisContext = new TestSemanticModelAnalysisContext( semanticModel, testContext.ProjectOptions );
@@ -238,6 +253,48 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
                             """;
 
         var diagnostics = await this.RunAnalyzer( code );
+        Assert.Single( diagnostics, d => d.Id == "MY001" );
+    }
+
+    [Fact]
+    public async Task ReferenceValidatorCrossProject()
+    {
+        const string code = """
+                            class B
+                            {
+                              void M()
+                              {
+                               A a;
+                              }
+                            }
+                            """;
+
+        const string dependencyCode =
+                            """
+                            using System;
+                            using Metalama.Framework.Fabrics;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Validation;
+                            using Metalama.Framework.Diagnostics;
+                            
+                            public class Fabric : ProjectFabric
+                            {
+                                static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+                                public override void AmendProject( IProjectAmender amender )
+                                {
+                                    amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                }
+                            
+                                private void ValidateReference( in ReferenceValidationContext context )
+                                {
+                                    context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+                                }
+                            }
+                            
+                            public class A {}
+                            """;
+
+        var diagnostics = await this.RunAnalyzer( code, dependencyCode );
         Assert.Single( diagnostics, d => d.Id == "MY001" );
     }
 }
