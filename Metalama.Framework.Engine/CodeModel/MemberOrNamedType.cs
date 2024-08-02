@@ -177,5 +177,9 @@ namespace Metalama.Framework.Engine.CodeModel
         protected abstract IMemberOrNamedType GetDefinition();
 
         IMemberOrNamedType IMemberOrNamedType.Definition => this.GetDefinition();
+
+        IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.ToMemberOrNamedTypeRef();
+
+        protected abstract IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef();
     }
 }

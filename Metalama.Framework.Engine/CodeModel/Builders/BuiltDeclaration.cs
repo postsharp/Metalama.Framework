@@ -48,7 +48,9 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
     public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
-    internal override Ref<IDeclaration> ToRef() => this.Builder.ToRef();
+    internal override Ref<IDeclaration> ToValueTypedRef() => this.Builder.ToValueTypedRef();
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Builder.ToIRef();
 
     public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 

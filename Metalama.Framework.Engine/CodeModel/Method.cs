@@ -93,6 +93,8 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
 
+    protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
     [Memo]
     public override bool IsAsync
         => this.MethodSymbol.MetadataToken == 0
@@ -157,4 +159,15 @@ internal sealed class Method : MethodBase, IMethodImpl
             return base.Sources;
         }
     }
+
+    [Memo]
+    private BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+
+    protected override IRef<IMethodBase> GetMethodBaseRef() => this.BoxedRef;
+
+    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

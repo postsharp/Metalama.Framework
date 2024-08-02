@@ -77,5 +77,7 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating whether the method has a non-managed implementation, i.e. has the <c>extern</c> modifier.
         /// </summary>
         bool IsExtern { get; }
+
+        new IRef<IMethod> ToRef();
     }
 }

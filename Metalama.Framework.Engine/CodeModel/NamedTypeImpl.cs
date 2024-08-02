@@ -300,6 +300,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     [Memo]
     public INamespace ContainingNamespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+
     [Memo]
     public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
 
@@ -632,4 +634,13 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public bool Equals( INamedType? other ) => this.Equals( other, TypeComparison.Default );
 
     public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.TypeSymbol );
+
+    [Memo]
+    private BoxedRef<INamedType> BoxedRef => new BoxedRef<INamedType>( this.ToValueTypedRef() );
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+    IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+
+    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

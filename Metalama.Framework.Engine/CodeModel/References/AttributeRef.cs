@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._declaringDeclaration.GetClosestSymbol( compilation );
 
+        DeclarationRefTargetKind IRefImpl.TargetKind => DeclarationRefTargetKind.Default;
+
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
             // Find the parent declaration.
@@ -112,6 +114,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             return attribute;
         }
+
+        public IRef<TOut> As<TOut>()
+            where TOut : class, ICompilationElement
+            => this as IRef<TOut> ?? throw new InvalidCastException();
 
         private AttributeSyntax? Syntax
             => this.Target switch
@@ -231,6 +237,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             return true;
         }
+
+        bool IEquatable<IRef<ICompilationElement>>.Equals( IRef<ICompilationElement>? other )
+            => other is AttributeRef otherAttributeRef && this.Equals( otherAttributeRef );
+        
+        bool IRef<IAttribute>.Equals( IRef<ICompilationElement>? other, bool includeNullability )
+            => other is AttributeRef otherAttributeRef && this.Equals( otherAttributeRef );
 
         public override int GetHashCode()
         {

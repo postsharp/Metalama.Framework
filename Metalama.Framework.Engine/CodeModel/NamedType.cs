@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -234,6 +235,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        [Memo]
+        private BoxedRef<INamedType> BoxedRef => new BoxedRef<INamedType>( this.ToValueTypedRef() );
+        
+        IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+
+        IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+
         INamedTypeCollection INamedType.NestedTypes => this.Types;
 
         public string FullName
@@ -448,6 +456,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
+        private protected override IRef<IDeclaration> ToDeclarationRef() => ((IDeclaration) this.Implementation).ToRef();
+
         public bool IsSubclassOf( INamedType type )
         {
             this.OnUsingDeclaration();
@@ -467,6 +477,8 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.TypeSymbol.Equals( this.TypeSymbol.OriginalDefinition )
                 ? this
                 : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
+
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.UnderlyingType.ToRef();
 
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 

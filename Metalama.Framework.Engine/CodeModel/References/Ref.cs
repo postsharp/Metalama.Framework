@@ -202,6 +202,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         internal DeclarationRefTargetKind TargetKind { get; }
 
+        DeclarationRefTargetKind IRefImpl.TargetKind => this.TargetKind;
+
         public SerializableDeclarationId ToSerializableId()
         {
             if ( this.Target is IDeclaration declaration )
@@ -515,8 +517,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
             where TOut : class, ICompilationElement
             => new( this.Target, this._compilationContext, this.TargetKind );
 
+        IRef<TOut> IRef<T>.As<TOut>() => new Ref<TOut>( this.Target, this._compilationContext, this.TargetKind );
+
         public override int GetHashCode() => RefEqualityComparer<T>.Default.GetHashCode( this );
 
         public bool Equals( Ref<T> other ) => RefEqualityComparer<T>.Default.Equals( this, other );
+
+        bool IEquatable<IRef<ICompilationElement>>.Equals( IRef<ICompilationElement>? other ) => RefEqualityComparer.Default.Equals( this, other );
+
+        bool IRef<T>.Equals( IRef<ICompilationElement>? other, bool includeNullability )
+            => RefEqualityComparer.GetInstance( includeNullability ).Equals( this, other );
     }
 }

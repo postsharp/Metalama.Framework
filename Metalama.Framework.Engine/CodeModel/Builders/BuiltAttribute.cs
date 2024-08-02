@@ -21,6 +21,8 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 
     IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
+    IRef<IAttribute> IAttribute.ToRef() => this._attributeBuilder.ToAttributeRef();
+
     public override DeclarationBuilder Builder => this._attributeBuilder;
 
     [Memo]

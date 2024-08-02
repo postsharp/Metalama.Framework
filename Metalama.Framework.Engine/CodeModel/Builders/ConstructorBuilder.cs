@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -46,12 +47,14 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         this.InitializerArguments = new List<(IExpression Expression, string? ParameterName)>();
     }
 
-    public override Ref<IDeclaration> ToRef()
+    public override Ref<IDeclaration> ToValueTypedRef()
 
         // Replacement of implicit constructor should use the implicit constructor as Ref.
         => !this.ReplacedImplicit.IsDefault
             ? this.ReplacedImplicit.As<IDeclaration>()
-            : base.ToRef();
+            : base.ToValueTypedRef();
+
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 
     public void AddInitializerArgument( IExpression expression, string? parameterName )
     {
@@ -63,6 +66,8 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     bool IConstructor.IsPrimary => false;
 
     public override IMember? OverriddenMember => null;
+
+    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
 
     public override bool IsExplicitInterfaceImplementation => false;
 
@@ -86,6 +91,8 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     IConstructor IConstructor.Definition => this;
 
+    public override IRef<IMethodBase> ToMethodBaseRef() => this.BoxedRef;
+
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
@@ -94,9 +101,19 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public IObjectCreationExpression CreateInvokeExpression() => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IObjectCreationExpression CreateInvokeExpression( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public IObjectCreationExpression CreateInvokeExpression( params object?[] args )
+        => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args )
+        => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
+        => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+
+    [Memo]
+    public BoxedRef<IConstructor> BoxedRef => new BoxedRef<IConstructor>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<IConstructor> IConstructor.ToRef() => this.BoxedRef;
 }

@@ -25,5 +25,7 @@ namespace Metalama.Framework.Code
         /// a generic type instance, this returns the property in the generic type definition. Otherwise, it returns the current instance.
         /// </summary>
         new IProperty Definition { get; }
+
+        new IRef<IProperty> ToRef();
     }
 }

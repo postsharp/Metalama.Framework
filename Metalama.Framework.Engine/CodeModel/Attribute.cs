@@ -35,8 +35,12 @@ internal sealed class Attribute : IAttributeImpl
 
     public AttributeData AttributeData { get; }
 
-    IRef<IDeclaration> IDeclaration.ToRef()
-        => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToTypedRef(), this.Compilation.CompilationContext );
+    [Memo]
+    private IRef<IAttribute> Ref => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToTypedRef(), this.Compilation.CompilationContext );
+
+    IRef<IAttribute> IAttribute.ToRef() => this.Ref;
+
+    IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
 
     public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
@@ -134,7 +138,7 @@ internal sealed class Attribute : IAttributeImpl
 
     Ref<ICompilationElement> ICompilationElementImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
-    Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+    Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
     public bool Equals( IDeclaration? other ) => other is Attribute attribute && this.AttributeData == attribute.AttributeData;
 

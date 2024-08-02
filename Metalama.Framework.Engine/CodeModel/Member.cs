@@ -18,6 +18,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IMember IMember.Definition => (IMember) this.GetDefinition();
 
+        IRef<IMember> IMember.ToRef() => this.ToMemberRef();
+
+        protected abstract IRef<IMember> ToMemberRef();
+
         public abstract bool IsAsync { get; }
 
         public bool IsVirtual => this.Symbol.IsVirtual;

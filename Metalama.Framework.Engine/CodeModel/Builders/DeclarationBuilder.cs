@@ -101,13 +101,15 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public virtual void Freeze() => this.IsFrozen = true;
 
-    public virtual Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
+    public virtual Ref<IDeclaration> ToValueTypedRef() => Ref.FromBuilder( this );
+
+    public abstract IRef<IDeclaration> ToIRef();
 
     public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
-    IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+    IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 

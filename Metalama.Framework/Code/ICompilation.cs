@@ -74,5 +74,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         [Hidden]
         IDeclarationCache Cache { get; }
+
+        new IRef<ICompilation> ToRef();
     }
 }

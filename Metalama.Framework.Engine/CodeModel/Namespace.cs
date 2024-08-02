@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -44,6 +45,8 @@ internal sealed class Namespace : Declaration, INamespace
             }
         }
     }
+
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
     [Memo]
     public override IAssembly DeclaringAssembly
@@ -131,4 +134,11 @@ internal sealed class Namespace : Declaration, INamespace
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
     public override SyntaxTree? PrimarySyntaxTree => null;
+
+    [Memo]
+    private IRef<INamespace> Ref => new BoxedRef<INamespace>( this.ToValueTypedRef() );
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+
+    IRef<INamespace> INamespace.ToRef() => this.Ref;
 }

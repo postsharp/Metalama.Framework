@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -76,11 +78,17 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
 
     bool IType.Equals( SpecialType specialType ) => false;
 
-    bool IEquatable<IType>.Equals( IType? other )
-        => this.Equals( other, TypeComparison.Default );
+    bool IEquatable<IType>.Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
     public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
+
+    [Memo]
+    public BoxedRef<ITypeParameter> BoxedRef => new BoxedRef<ITypeParameter>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<ITypeParameter> ITypeParameter.ToRef() => this.BoxedRef;
 }
