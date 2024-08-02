@@ -14,5 +14,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <returns>A <see cref="MethodBase"/> that can be used only in run-time code.</returns>
         MethodBase ToMethodBase();
+
+        new IRef<IMethodBase> ToRef();
     }
 }

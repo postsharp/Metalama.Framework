@@ -26,4 +26,6 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters, IIndexerInvoker
     /// a generic type instance, this returns the indexer in the generic type definition. Otherwise, it returns the current instance.
     /// </summary>
     new IIndexer Definition { get; }
+
+    new IRef<IIndexer> ToRef();
 }

@@ -53,9 +53,15 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     [Memo]
     public IMethod SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
 
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.BoxedRef;
+
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.BoxedRef;
+
     public override bool IsExplicitInterfaceImplementation => false;
 
     public override IMember? OverriddenMember => null;
+
+    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
 
     public IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
 
@@ -121,5 +127,12 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
-    public override IRef<IDeclaration> ToIRef() => new BoxedRef<IField>( this.ToRef() );
+    [Memo]
+    public BoxedRef<IField> BoxedRef => new BoxedRef<IField>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<IField> IField.ToRef() => this.BoxedRef;
+
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

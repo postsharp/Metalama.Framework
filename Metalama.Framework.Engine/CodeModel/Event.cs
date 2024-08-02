@@ -102,6 +102,8 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
         public override bool IsAsync => false;
 
         public override MemberInfo ToMemberInfo() => this.ToEventInfo();
@@ -110,6 +112,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IMember? OverriddenMember => this.OverriddenEvent;
 
-        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IEvent>( this.ToRef() );
+        [Memo]
+        private BoxedRef<IEvent> BoxedRef => new BoxedRef<IEvent>( this.ToValueTypedRef() );
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+        IRef<IEvent> IEvent.ToRef() => this.BoxedRef;
+
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
     }
 }

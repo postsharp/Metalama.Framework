@@ -14,7 +14,7 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 {
     private readonly IndexerBuilder _indexerBuilder;
 
-    public BuiltIndexer( CompilationModel compilation, IndexerBuilder builder ) : base( compilation ) 
+    public BuiltIndexer( CompilationModel compilation, IndexerBuilder builder ) : base( compilation )
     {
         this._indexerBuilder = builder;
     }
@@ -39,6 +39,8 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
     public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
 
     IIndexer IIndexer.Definition => this;
+
+    IRef<IIndexer> IIndexer.ToRef() => this._indexerBuilder.BoxedRef;
 
     public IIndexerInvoker With( InvokerOptions options ) => this._indexerBuilder.With( options );
 

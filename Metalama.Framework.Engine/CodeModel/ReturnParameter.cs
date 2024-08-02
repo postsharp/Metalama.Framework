@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -36,7 +37,7 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
 
     public virtual bool IsReturnParameter => true;
 
-    internal override Ref<IDeclaration> ToRef()
+    internal override Ref<IDeclaration> ToValueTypedRef()
         => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertSymbolNotNull(), this.GetCompilationModel().CompilationContext );
 
     public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
@@ -78,5 +79,10 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
 
     public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
-    internal sealed override IRef<IDeclaration> ToIRef() => new BoxedRef<IParameter>( this.ToRef() );
+    [Memo]
+    private BoxedRef<IParameter> BoxedRef => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+    IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
 }

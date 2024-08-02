@@ -25,5 +25,7 @@ namespace Metalama.Framework.Code
         /// a generic type instance, this returns the field in the generic type definition. Otherwise, it returns the current instance.
         /// </summary>
         new IField Definition { get; }
+
+        new IRef<IField> ToRef();
     }
 }

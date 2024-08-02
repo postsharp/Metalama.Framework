@@ -31,7 +31,7 @@ internal sealed class ApplyAspectCodeAction<TTarget> : ICodeAction
     {
         var compilation = context.Compilation;
 
-        var targetSymbol = this.TargetDeclaration.GetReference().GetSymbol( compilation.Compilation );
+        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation.Compilation );
 
         if ( targetSymbol == null )
         {

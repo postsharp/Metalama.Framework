@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -22,6 +23,10 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
     public IMethodBuilder? GetMethod { get; }
 
     public IMethodBuilder? SetMethod { get; }
+
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.ToFieldOrPropertyOrIndexerRef();
+
+    protected abstract IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef();
 
     public abstract Writeability Writeability { get; set; }
 
@@ -85,6 +90,8 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
         }
     }
 
+    public abstract IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef();
+
     public sealed override void Freeze()
     {
         base.Freeze();
@@ -94,4 +101,6 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
     }
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
+
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => throw new NotImplementedException();
 }

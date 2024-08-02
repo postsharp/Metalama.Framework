@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -84,5 +85,10 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
 
     public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
 
-    public override IRef<IDeclaration> ToIRef() => new BoxedRef<ITypeParameter>( this.ToRef() );
+    [Memo]
+    public BoxedRef<ITypeParameter> BoxedRef => new BoxedRef<ITypeParameter>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<ITypeParameter> ITypeParameter.ToRef() => this.BoxedRef;
 }

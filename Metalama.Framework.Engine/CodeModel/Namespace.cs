@@ -46,6 +46,8 @@ internal sealed class Namespace : Declaration, INamespace
         }
     }
 
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
+
     [Memo]
     public override IAssembly DeclaringAssembly
         => this.Compilation.Factory.GetAssembly(
@@ -133,5 +135,10 @@ internal sealed class Namespace : Declaration, INamespace
 
     public override SyntaxTree? PrimarySyntaxTree => null;
 
-    internal override IRef<IDeclaration> ToIRef() => new BoxedRef<INamespace>( this.ToRef() );
+    [Memo]
+    private IRef<INamespace> Ref => new BoxedRef<INamespace>( this.ToValueTypedRef() );
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+
+    IRef<INamespace> INamespace.ToRef() => this.Ref;
 }

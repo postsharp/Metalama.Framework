@@ -59,6 +59,10 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.Writeability}." )
             };
 
+        IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.BoxedRef;
+
+        IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.BoxedRef;
+
         public Writeability Writeability
             => this._symbol switch
             {
@@ -147,6 +151,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsExplicitInterfaceImplementation => false;
 
+        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
         public override bool IsAsync => false;
 
         public IMember? OverriddenMember => null;
@@ -182,6 +188,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
-        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IField>( this.ToRef() );
+        [Memo]
+        private BoxedRef<IField> BoxedRef => new BoxedRef<IField>( this.ToValueTypedRef() );
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+        IRef<IField> IField.ToRef() => this.BoxedRef;
+
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
     }
 }

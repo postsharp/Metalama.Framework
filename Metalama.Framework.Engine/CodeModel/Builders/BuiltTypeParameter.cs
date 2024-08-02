@@ -49,6 +49,8 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public bool HasDefaultConstructorConstraint => this._typeParameterBuilder.HasDefaultConstructorConstraint;
 
+    IRef<ITypeParameter> ITypeParameter.ToRef() => this._typeParameterBuilder.BoxedRef;
+
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
     public override int GetHashCode() => this._typeParameterBuilder.GetHashCode();

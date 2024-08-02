@@ -27,7 +27,18 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        internal override IRef<IDeclaration> ToIRef() => new BoxedRef<IConstructor>( this.ToRef() );
+        [Memo]
+        private BoxedRef<IConstructor> BoxedRef => new BoxedRef<IConstructor>( this.ToValueTypedRef() );
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+        IRef<IConstructor> IConstructor.ToRef() => this.BoxedRef;
+
+        protected override IRef<IMethodBase> GetMethodBaseRef() => this.BoxedRef;
+
+        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 
         [Memo]
         public ConstructorInitializerKind InitializerKind

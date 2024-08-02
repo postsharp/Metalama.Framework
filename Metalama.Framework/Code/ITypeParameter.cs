@@ -40,5 +40,7 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating whether the generic parameter has the <c>new()</c> constraint.
         /// </summary>
         bool HasDefaultConstructorConstraint { get; }
+
+        new IRef<ITypeParameter> ToRef();
     }
 }

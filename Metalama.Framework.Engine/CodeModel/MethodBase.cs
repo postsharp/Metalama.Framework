@@ -67,6 +67,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract System.Reflection.MethodBase ToMethodBase();
 
+        IRef<IMethodBase> IMethodBase.ToRef() => this.GetMethodBaseRef();
+
+        protected abstract IRef<IMethodBase> GetMethodBaseRef();
+
         public override MemberInfo ToMemberInfo() => this.ToMethodBase();
     }
 }

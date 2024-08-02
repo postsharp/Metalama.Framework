@@ -35,6 +35,8 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     public override IDeclaration ContainingDeclaration { get; }
 
+    IRef<IAttribute> IAttribute.ToRef() => this.ToAttributeRef();
+
     IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
@@ -66,13 +68,13 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     int IAspectPredecessor.PredecessorDegree => 0;
 
-    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.GetReference();
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
 
-    public override Ref<IDeclaration> ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+    public override Ref<IDeclaration> ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
     public AttributeRef ToAttributeRef() => this._attributeRef ??= new AttributeRef( this );
 
