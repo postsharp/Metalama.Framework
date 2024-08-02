@@ -123,7 +123,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     {
         Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} )" );
 
-        var resultsByTree = SplitResultsByTree( compilation, pipelineResults );
+        var (resultsByTree, externalValidators) = SplitResultsByTree( compilation, pipelineResults );
 
         var syntaxTreeResultBuilder = this.SyntaxTreeResults.ToBuilder();
 
@@ -277,8 +277,23 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         var introducedTrees = introducedSyntaxTreeBuilder?.ToImmutable() ?? this.IntroducedSyntaxTrees;
         var inheritableAspects = inheritableAspectsBuilder?.ToImmutable() ?? this._inheritableAspects;
 
-        var validators = validatorsBuilder?.ToImmutable( this.GetReferencedDesignTimeValidatorCollections( compilation, projectVersion ) )
-                         ?? this.ReferenceValidators.WithChildCollections( this.GetReferencedDesignTimeValidatorCollections( compilation, projectVersion ) );
+        if ( externalValidators != null )
+        {
+            validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
+
+            foreach ( var externalValidator in externalValidators )
+            {
+                if (externalValidator == null)
+                {
+                    continue;
+                }
+
+                validatorsBuilder.Add( externalValidator );
+            }
+        }
+
+        var validators = validatorsBuilder?.ToImmutable( projectVersion.ReferencedValidatorCollections )
+                         ?? this.ReferenceValidators.WithChildCollections( projectVersion.ReferencedValidatorCollections );
 
         var inheritableOptions = inheritableOptionsBuilder?.ToImmutable() ?? this.InheritableOptions;
         var annotations = annotationsBuilder?.ToImmutable() ?? this.Annotations;
@@ -295,50 +310,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             aspectInstancesHashCode );
     }
 
-    public IEnumerable<DesignTimeReferenceValidatorCollection> GetReferencedDesignTimeValidatorCollections( PartialCompilation compilation, DesignTimeProjectVersion projectVersion)
-    {
-        foreach(var reference in projectVersion.References)
-        {
-            if (reference.TransitiveAspectsManifest is AspectPipelineResult aspectPipelineResult)
-            {
-                // This is a reference to the current version.
-                yield return aspectPipelineResult.ReferenceValidators;
-            }
-            else
-            {
-                // This is a deserialized manifest that comes from a different version.
-                var builder = DesignTimeReferenceValidatorCollection.Empty.ToBuilder();
-
-                foreach(var validator in reference.TransitiveAspectsManifest.ReferenceValidators)
-                {
-                    var validatedDeclarationSymbol = validator.ValidatedDeclaration.GetSymbol( compilation.Compilation );
-
-                    if (validatedDeclarationSymbol == null)
-                    {
-                        continue;
-                    }
-
-                    builder.Add(
-                        new DesignTimeReferenceValidatorInstance(
-                            validator.ValidatedDeclaration.GetSymbol(compilation.Compilation),
-                            validator.ReferenceKinds, 
-                            validator.IncludeDerivedTypes,
-                            validator.GetReferenceValidatorDriver(),
-                            ValidatorImplementation.Create( validator.Object, validator.State ),
-                            validator.DiagnosticSourceDescription,
-                            validator.Granularity ) );
-                }
-
-                yield return builder.ToImmutable( [] );
-            }
-        }
-    }
-
     /// <summary>
     /// Splits a <see cref="DesignTimePipelineExecutionResult"/>, which includes data for several syntax trees, into
     /// a list of <see cref="SyntaxTreePipelineResult"/> which each have information related to a single syntax tree.
     /// </summary>
-    private static IEnumerable<SyntaxTreePipelineResult> SplitResultsByTree(
+    private static (IEnumerable<SyntaxTreePipelineResult> Results, IReadOnlyList<DesignTimeReferenceValidatorInstance>? ExternalValidators) SplitResultsByTree(
         PartialCompilation compilation,
         DesignTimePipelineExecutionResult pipelineResults )
     {
@@ -635,7 +611,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             resultBuilders[""] = emptySyntaxTreeResult;
         }
 
-        return resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) );
+        return (resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) ), externalValidators);
     }
 
     public Invalidator ToInvalidator() => new( this );

@@ -16,7 +16,8 @@ internal sealed class DesignTimeProjectVersion : ITransitiveAspectManifestProvid
 
     public IProjectVersion ProjectVersion { get; }
 
-    public IEnumerable<DesignTimeProjectReference> References => this._references.Values;
+    public IEnumerable<DesignTimeReferenceValidatorCollection> ReferencedValidatorCollections
+        => this._references.Values.Select( r => (r.TransitiveAspectsManifest as AspectPipelineResult)?.ReferenceValidators ).WhereNotNull();
 
     public DesignTimeProjectVersion(
         IProjectVersion projectVersion,

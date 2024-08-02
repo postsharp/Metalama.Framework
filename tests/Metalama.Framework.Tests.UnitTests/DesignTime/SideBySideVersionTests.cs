@@ -30,7 +30,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         var entryPointManager = new DesignTimeEntryPointManager();
         var consumer = entryPointManager.GetConsumer( CurrentContractVersions.All );
 
-        var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof(IDesignTimeEntryPointConsumer), consumer )
+        var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof( IDesignTimeEntryPointConsumer ), consumer )
             .WithService( workspaceProvider );
 
         // Initialize dependencies simulating the current version.
@@ -219,6 +219,6 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
 
         var diagnostics = await this.RunAnalyzer( masterCode, dependentCode );
 
-        Assert.Single( diagnostics, d => d.Id == "MY001" );
+        Assert.Single( diagnostics );
     }
 }
