@@ -9,7 +9,8 @@ namespace Metalama.Framework.Code
 {
     /// <summary>
     /// A compile-time representation of a run-time expression.
-    /// To create an expression, use <see cref="ExpressionFactory"/> or <see cref="ExpressionBuilder"/>.
+    /// To create an expression, use <see cref="ExpressionFactory"/> or <see cref="ExpressionBuilder"/>. Note that
+    /// <see cref="IField"/>, <see cref="IProperty"/> and <see cref="IParameter"/> also implement the <see cref="IExpression"/> interface.
     /// </summary>
     [CompileTime]
     [InternalImplement]

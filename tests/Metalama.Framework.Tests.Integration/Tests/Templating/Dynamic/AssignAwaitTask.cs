@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignAwaitTask
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.AssignAwaitTas
         [TestTemplate]
         private async Task<dynamic?> Template()
         {
-            var x = TypeFactory.GetType( SpecialType.Int32 ).DefaultValue();
+            var x = meta.Default( SpecialType.Int32 );
 
             x = await meta.ProceedAsync();
             x += await meta.ProceedAsync();

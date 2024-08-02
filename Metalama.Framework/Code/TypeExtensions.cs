@@ -75,7 +75,8 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
-        public static dynamic? DefaultValue( this IType type ) => ((ICompilationInternal) type.Compilation).Factory.DefaultValue( type );
+        [Obsolete( "Use meta.Default(IType)." )]
+        public static dynamic? DefaultValue( this IType type ) => meta.Default( type );
 
         /// <summary>
         /// Gets the <see cref="AsyncInfo"/> for a type.

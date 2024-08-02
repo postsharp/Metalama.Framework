@@ -5,10 +5,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ReturnDefaultErrors;
 
@@ -22,7 +24,7 @@ internal sealed class IgnoreExceptionAttribute : OverrideMethodAspect
         }
         catch
         {
-            return meta.Target.Method.GetAsyncInfo().ResultType.DefaultValue();
+            return meta.Default( meta.Target.Method.GetAsyncInfo().ResultType );
         }
     }
 }

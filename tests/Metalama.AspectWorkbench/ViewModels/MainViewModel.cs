@@ -120,6 +120,9 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
+            // License tests are not supported.
+            testInput.Options.LicenseKeyProviderType = null;
+            
             var testRunner = TestRunnerFactory.CreateTestRunner(
                 testInput,
                 serviceProvider,

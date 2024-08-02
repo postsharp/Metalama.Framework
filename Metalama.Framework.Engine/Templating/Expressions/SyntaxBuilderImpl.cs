@@ -31,6 +31,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     private readonly CompilationModel _compilation;
     private readonly SyntaxGenerationContext _syntaxGenerationContext;
     private readonly INamedType? _currentType;
+    private readonly IType _targetTypedExpressionType;
 
     public ICompilation Compilation => this._compilation;
 
@@ -41,6 +42,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         this._compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
         this._currentType = currentType;
+
+        // The IExpression interface does not allow to represent target-typed expressions (such as `null` or `default`), so we use `object` instead.
+        this._targetTypedExpressionType = compilation.Factory.GetSpecialType( SpecialType.Object );
     }
 
     public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationOptions syntaxGenerationOptions, INamedType? currentType )
@@ -119,18 +123,45 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         ExpressionSyntax expression;
 
+        if ( specialType == SpecialType.None )
+        {
+            // If we didn't get the specialType, resolve it dynamically.
+            specialType = value switch
+            {
+                null => SpecialType.String,
+                byte => SpecialType.Byte,
+                sbyte => SpecialType.SByte,
+                string => SpecialType.String,
+                char => SpecialType.Char,
+                int => SpecialType.Int32,
+                uint => SpecialType.UInt32,
+                long => SpecialType.Int64,
+                ulong => SpecialType.UInt64,
+                short => SpecialType.Int16,
+                ushort => SpecialType.UInt16,
+                double => SpecialType.Double,
+                float => SpecialType.Single,
+                decimal => SpecialType.Decimal,
+                bool => SpecialType.Boolean,
+                _ => throw new ArgumentOutOfRangeException( nameof(value), $"{value.GetType().Name} is not a literal type." )
+            };
+        }
+
+        INamedType type;
+
         if ( value == null )
         {
             expression = stronglyTyped
                 ? SyntaxFactory.DefaultExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) )
                 : SyntaxFactoryEx.Null;
+
+            type = this._compilation.Factory.GetSpecialType( SpecialType.String ).ToNullableType();
         }
         else
         {
             expression = this.GetLiteralImpl( value, specialType, stronglyTyped );
+            type = this._compilation.Factory.GetSpecialType( specialType );
         }
-
-        IType type = this._compilation.Factory.GetSpecialType( specialType );
 
         return new SyntaxUserExpression( expression, type );
     }
@@ -189,6 +220,21 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases ) => new SwitchStatement( expression, cases );
 
     public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
+
+    public IExpression NullExpression( IType? type )
+        => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullableType() ?? this._targetTypedExpressionType );
+
+    public IExpression DefaultExpression( IType? type )
+    {
+        if ( type != null )
+        {
+            return new TypedDefaultUserExpression( type );
+        }
+        else
+        {
+            return new SyntaxUserExpression( SyntaxFactoryEx.Default, this._targetTypedExpressionType );
+        }
+    }
 
     public IStatementList UnwrapBlock( IStatement statement ) => new UnwrappedBlockStatementList( statement );
 
