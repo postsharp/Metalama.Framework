@@ -307,7 +307,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     foreach ( var baseTypeNode in node.BaseList.Types )
                     {
-                        var baseType = (INamedTypeSymbol?) ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol;
+                        var baseType = ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol as INamedTypeSymbol;
 
                         if ( baseType == null )
                         {
