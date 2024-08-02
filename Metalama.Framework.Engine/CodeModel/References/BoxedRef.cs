@@ -48,4 +48,6 @@ internal class BoxedRef<T> : IRefImpl<T>
         => RefEqualityComparer.GetInstance( includeNullability ).Equals( this, other );
 
     public override int GetHashCode() => RefEqualityComparer.Default.GetHashCode( this );
+
+    public override string ToString() => this._underlying.ToString();
 }
