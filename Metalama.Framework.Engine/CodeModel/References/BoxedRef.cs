@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -11,13 +12,18 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// during type conversions.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-internal class BoxedRef<T> : IRefImpl<T>
+internal sealed class BoxedRef<T> : IRefImpl<T>
     where T : class, ICompilationElement
 {
     private readonly Ref<IDeclaration> _underlying;
 
     public BoxedRef( in Ref<IDeclaration> underlying )
     {
+        if ( underlying.IsDefault )
+        {
+            throw new ArgumentNullException( nameof(underlying) );
+        }
+        
         this._underlying = underlying;
     }
 
