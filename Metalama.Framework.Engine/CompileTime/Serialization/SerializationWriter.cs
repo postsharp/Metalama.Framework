@@ -760,7 +760,7 @@ internal sealed class SerializationWriter
 
         public CompilationContext CompilationContext => this._serializer.CompilationContext;
 
-        public Dictionary<string, object?> ContextProperties => this._contextProperties ??= new Dictionary<string, object>( StringComparer.Ordinal );
+        public Dictionary<string, object?> ContextProperties => this._contextProperties ??= new Dictionary<string, object?>( StringComparer.Ordinal );
     }
 
     private sealed class ThrowingArguments : IArgumentsWriter
