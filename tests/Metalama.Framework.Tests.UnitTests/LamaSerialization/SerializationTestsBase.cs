@@ -2,9 +2,12 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime.Serialization;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Services;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections;
 using System.IO;
@@ -12,7 +15,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public abstract class SerializationTestsBase
+    public abstract partial class SerializationTestsBase : UnitTestClass
     {
         protected ProjectServiceProvider ServiceProvider { get; }
 
@@ -27,13 +30,27 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             this.ServiceProvider = serviceProvider;
         }
 
+        protected override void ConfigureServices( IAdditionalServiceCollection services )
+        {
+            base.ConfigureServices( services );
+            services.AddProjectService( new SyntaxGenerationOptions( CodeFormattingOptions.Formatted ) );
+        }
+
+        protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
+            => new SerializationTestContext( contextOptions, services );
+
+        protected new SerializationTestContext CreateTestContext() => (SerializationTestContext) base.CreateTestContext();
+
+        protected SerializationTestContext CreateTestContext( string code )
+            => (SerializationTestContext) base.CreateTestContext( new SerializationTestContextOptions { Code = code } );
+
         protected T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( instance, memoryStream );
+            testContext.Serializer.Serialize( instance, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (T?) formatter.Deserialize( memoryStream );
+            var deserializedObject = (T?) testContext.Serializer.Deserialize( memoryStream );
 
             var newCol = deserializedObject as ICollection;
 
@@ -55,13 +72,19 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
         protected T SerializeDeserialize<T>( T value )
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
+
+            return SerializeDeserialize( value, testContext );
+        }
+
+        protected static T SerializeDeserialize<T>( T value, SerializationTestContext testContext )
+        {
             var memoryStream = new MemoryStream();
 
-            formatter.Serialize( value!, memoryStream );
+            testContext.Serializer.Serialize( value!, memoryStream );
 
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserialized = (T) formatter.Deserialize( memoryStream ).AssertNotNull();
+            var deserialized = (T) testContext.Serializer.Deserialize( memoryStream ).AssertNotNull();
 
             return deserialized;
         }

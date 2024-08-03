@@ -20,8 +20,7 @@ internal sealed class ClassifyingCompilationContextFactory : IProjectService, ID
 
     public ClassifyingCompilationContext GetInstance( Compilation compilation ) => this._instances.GetOrAdd( compilation, this.GetInstanceCore );
 
-    private ClassifyingCompilationContext GetInstanceCore( Compilation compilation )
-        => new( this._serviceProvider, CompilationContextFactory.GetInstance( compilation ) );
+    private ClassifyingCompilationContext GetInstanceCore( Compilation compilation ) => new( this._serviceProvider, compilation.GetCompilationContext() );
 
     public void Dispose() => this._instances.Dispose();
 }

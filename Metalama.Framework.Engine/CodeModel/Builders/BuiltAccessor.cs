@@ -61,7 +61,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this._accessorBuilder.ToTypedRef<IHasParameters>() ) );
+            this.GetCompilationModel().GetParameterCollection( this._accessorBuilder.ToValueTypedRef<IHasParameters>() ) );
 
     public MethodKind MethodKind => this._accessorBuilder.MethodKind;
 

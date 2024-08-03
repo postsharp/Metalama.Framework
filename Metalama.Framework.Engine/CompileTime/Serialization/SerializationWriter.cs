@@ -7,6 +7,7 @@ using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -82,7 +83,7 @@ internal sealed class SerializationWriter
 
             var serializer = type.IsArray ? null : this._formatter.SerializerProvider.GetSerializer( type );
 
-            objectInfo = new ObjectInfo( obj, this._objects.Count + 1 );
+            objectInfo = new ObjectInfo( this._formatter, obj, this._objects.Count + 1 );
 
             if ( !type.IsArray )
             {
@@ -555,7 +556,7 @@ internal sealed class SerializationWriter
     {
         var type = value.GetType();
         var serializer = this._formatter.SerializerProvider.GetSerializer( type );
-        var arguments = new Arguments();
+        var arguments = new Arguments( this._formatter );
 
         this.TrySerialize( serializer, value, arguments, ThrowingArguments.Instance, cause );
 
@@ -713,10 +714,10 @@ internal sealed class SerializationWriter
 
         public bool InitializationArgumentsWritten { get; set; }
 
-        public ObjectInfo( object o, int objectId )
+        public ObjectInfo( CompileTimeSerializer serializer, object o, int objectId )
         {
-            this.InitializationArguments = new Arguments();
-            this.ConstructorArguments = new Arguments();
+            this.InitializationArguments = new Arguments( serializer );
+            this.ConstructorArguments = new Arguments( serializer );
             this.Object = o;
             this.ObjectId = objectId;
         }
@@ -729,11 +730,15 @@ internal sealed class SerializationWriter
         public int GetHashCode( object obj ) => RuntimeHelpers.GetHashCode( obj );
     }
 
-    private sealed class Arguments : IArgumentsWriter
+    private sealed class Arguments : IArgumentsWriter, ISerializationContext
     {
-#pragma warning disable SA1401 // Fields should be private
-        public readonly Dictionary<string, object?> Values = new( StringComparer.Ordinal );
-#pragma warning restore SA1401 // Fields should be private
+        private readonly CompileTimeSerializer _serializer;
+        private Dictionary<string, object?>? _values;
+
+        public Arguments( CompileTimeSerializer serializer )
+        {
+            this._serializer = serializer;
+        }
 
         public void SetValue( string name, object? value, string? scope = null )
         {
@@ -747,8 +752,14 @@ internal sealed class SerializationWriter
                 name = scope + "." + name;
             }
 
-            this.Values[name] = value;
+            this._values ??= new Dictionary<string, object?>( StringComparer.Ordinal );
+            this._values[name] = value;
         }
+
+        public IReadOnlyDictionary<string, object?> Values
+            => (IReadOnlyDictionary<string, object?>?) this._values ?? ImmutableDictionary<string, object?>.Empty;
+
+        public CompilationContext CompilationContext => this._serializer.CompilationContext;
     }
 
     private sealed class ThrowingArguments : IArgumentsWriter

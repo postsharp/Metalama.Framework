@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal abstract Ref<IDeclaration> ToValueTypedRef();
 
-        Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
+        Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
         Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => this.ToValueTypedRef().As<IDeclaration>();
 

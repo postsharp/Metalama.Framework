@@ -7,10 +7,10 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization;
 
 internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializationBinder
 {
-    private readonly CompileTimeProject _project;
+    private readonly CompileTimeProject? _project;
     private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();
 
-    public CompileTimeSerializationBinder( in ProjectServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
+    public CompileTimeSerializationBinder( in ProjectServiceProvider serviceProvider, CompileTimeProject? project ) : base( serviceProvider )
     {
         this._project = project;
     }
@@ -25,7 +25,7 @@ internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializat
             // can change according to random factors like the max path or the framework name, which would not be safe accross
             // versions, machines and frameworks.
 
-            if ( this._project.TryGetProjectByCompileTimeAssemblyName( typeAssemblyName, out var project ) )
+            if ( this._project != null && this._project.TryGetProjectByCompileTimeAssemblyName( typeAssemblyName, out var project ) )
             {
                 typeName = type.FullName.AssertNotNull();
                 assemblyName = project.RunTimeIdentity.Name;
@@ -51,7 +51,7 @@ internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializat
             assemblyName = _systemAssemblyName;
         }
 
-        if ( this._project.TryGetType( typeName, assemblyName, out var type ) )
+        if ( this._project != null && this._project.TryGetType( typeName, assemblyName, out var type ) )
         {
             return type;
         }

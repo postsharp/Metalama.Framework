@@ -55,6 +55,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 
-        public Ref<ICompilationElement> ToRef() => this.Symbol.ToTypedRef<ICompilationElement>( this.Compilation.CompilationContext );
+        public Ref<ICompilationElement> ToValueTypedRef() => this.Symbol.ToValueTypedRef<ICompilationElement>( this.Compilation.CompilationContext );
     }
 }

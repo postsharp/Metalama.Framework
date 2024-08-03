@@ -38,7 +38,7 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
     public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
     [Memo]
-    private BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+    private BoxedRef<IMethod> BoxedRef => new( this.ToValueTypedRef() );
 
     IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
 
@@ -139,10 +139,10 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
 
-        Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
+        Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
         [Memo]
-        private BoxedRef<IParameter> BoxedRef => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+        private BoxedRef<IParameter> BoxedRef => new( this.ToValueTypedRef() );
 
         IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
 

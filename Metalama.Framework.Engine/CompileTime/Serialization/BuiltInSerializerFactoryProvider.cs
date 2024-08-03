@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
@@ -49,6 +50,9 @@ internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvid
         this.AddSerializer( typeof(Ref<>), typeof(RefSerializer<>) );
         this.AddSerializer( typeof(SerializableDeclarationId), typeof(SerializableDeclarationIdSerializer) );
         this.AddSerializer( typeof(SerializableTypeId), typeof(SerializableTypeIdSerializer) );
+        this.AddSerializer<AttributeRef, AttributeRefSerializer>();
+        this.AddSerializer<TypedConstantRef, TypedConstantRefSerializer>();
+        this.AddSerializer<AttributeSerializationData, AttributeSerializationDataSerializer>();
 
         this.MakeReadOnly();
     }

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Serialization
     public interface IArgumentsReader
     {
         /// <summary>
-        /// Attempts to read a value from the collection, and does not throw an exception if the value does not exist.
+        /// Attempts to read a value from the collection, and does not throw an exception if the value does not exist or is <c>null</c>.
         /// </summary>
         /// <typeparam name="T">Value type.</typeparam>
         /// <param name="name">Argument name.</param>
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Serialization
         bool TryGetValue<T>( string name, [MaybeNullWhen( false )] out T value, string? scope = null );
 
         /// <summary>
-        /// Reads a value from the collection, and throws an exception if the value does not exist.
+        /// Reads a value from the collection, and returns <c>null</c> if the value does not exist.
         /// </summary>
         /// <typeparam name="T">Value type.</typeparam>
         /// <param name="name">Argument name.</param>

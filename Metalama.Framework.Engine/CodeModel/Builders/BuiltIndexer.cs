@@ -33,7 +33,7 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this._indexerBuilder.ToTypedRef<IHasParameters>() ) );
+            this.GetCompilationModel().GetParameterCollection( this._indexerBuilder.ToValueTypedRef<IHasParameters>() ) );
 
     [Memo]
     public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );

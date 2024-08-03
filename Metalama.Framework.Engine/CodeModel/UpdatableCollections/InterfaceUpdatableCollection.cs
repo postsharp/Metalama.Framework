@@ -24,7 +24,7 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
     public void Add( IntroduceInterfaceTransformation introduction )
     {
         this.EnsureComplete();
-        this.AddItem( introduction.InterfaceType.ToTypedRef() );
+        this.AddItem( introduction.InterfaceType.ToValueTypedRef() );
 
         this.Introductions = this.Introductions.Add( introduction );
     }
@@ -49,7 +49,7 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
             case INamedTypeBuilder builder:
                 foreach ( var i in builder.ImplementedInterfaces )
                 {
-                    action( i.ToTypedRef() );
+                    action( i.ToValueTypedRef() );
                 }
 
                 break;

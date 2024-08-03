@@ -24,6 +24,7 @@ internal sealed class SerializationReader
     private readonly string _assemblyName;
     private readonly SerializationBinaryReader _binaryReader;
     private readonly CompileTimeTypeFactory? _compileTimeTypeFactory;
+    private readonly InstanceFields _emptyInstanceFields;
 
     internal SerializationReader(
         in ProjectServiceProvider serviceProvider,
@@ -37,6 +38,7 @@ internal sealed class SerializationReader
         this._assemblyName = assemblyName;
         this._binaryReader = new SerializationBinaryReader( new BinaryReader( stream ) );
         this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
+        this._emptyInstanceFields = new InstanceFields( formatter );
     }
 
     public object? Deserialize()
@@ -162,7 +164,7 @@ internal sealed class SerializationReader
 
         if ( fieldCount == 0 )
         {
-            return InstanceFields.Empty;
+            return this._emptyInstanceFields;
         }
 
         var fields = new InstanceFields( type, this._formatter, fieldCount );
@@ -367,7 +369,7 @@ internal sealed class SerializationReader
                         if ( genericType is CompileTimeType || genericArguments.OfType<CompileTimeType>().Any() )
                         {
                             var compilation = this._formatter.Compilation.AssertNotNull();
-                            var mapper = CompilationContextFactory.GetInstance( compilation ).ReflectionMapper;
+                            var mapper = compilation.GetCompilationContext().ReflectionMapper;
 
                             var genericTypeSymbol = (INamedTypeSymbol) mapper.GetTypeSymbol( genericType );
 
@@ -700,20 +702,18 @@ internal sealed class SerializationReader
         return new AssemblyTypeName( typeName, assemblyName );
     }
 
-    private sealed class InstanceFields : IArgumentsReader
+    private sealed class InstanceFields : IArgumentsReader, ISerializationContext
     {
-        public static readonly InstanceFields Empty = new();
-
         private readonly Type? _type;
 
         public Dictionary<string, object?>? Values { get; }
 
-        private readonly CompileTimeSerializer? _formatter;
+        private readonly CompileTimeSerializer _formatter;
 
-        private InstanceFields()
+        public InstanceFields( CompileTimeSerializer formatter )
         {
             this._type = null;
-            this._formatter = null;
+            this._formatter = formatter;
             this.Values = null;
         }
 
@@ -756,7 +756,7 @@ internal sealed class SerializationReader
 
             if ( !typeof(T).HasElementType )
             {
-                this._formatter!.SerializerProvider.TryGetSerializer( typeof(T), out serializer );
+                this._formatter.SerializerProvider.TryGetSerializer( typeof(T), out serializer );
             }
 
             try
@@ -821,8 +821,7 @@ internal sealed class SerializationReader
             return value;
         }
 
-        // TODO: Remove
-        // public IMetadataDispenser MetadataDispenser { get { return this.formatter.MetadataDispenser;} }
+        public CompilationContext CompilationContext => this._formatter.CompilationContext;
     }
 
     private sealed class ObjRef

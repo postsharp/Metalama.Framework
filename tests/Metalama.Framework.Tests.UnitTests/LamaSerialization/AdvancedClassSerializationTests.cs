@@ -21,6 +21,8 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void CyclicGraph_Classes()
         {
+            using var testContext = this.CreateTestContext();
+
             var mother = new Parent( "no name" );
             var ch1 = new Child { Mother = mother, Name = "ch1" };
             var ch2 = new Child { Mother = mother, Name = "ch2" };
@@ -30,11 +32,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             mother.Children[1] = ch2;
             mother.Children[2] = ch3;
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
-            formatter.Serialize( mother, memoryStream );
+            testContext.Serializer.Serialize( mother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Parent?) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Parent?) testContext.Serializer.Deserialize( memoryStream );
 
             Assert.Equal( mother.Name, deserializedObject!.Name );
             Assert.Equal( mother.Children.Length, deserializedObject.Children!.Length );
@@ -46,16 +47,17 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void CyclicGraph_Arrays()
         {
+            using var testContext = this.CreateTestContext();
+
             var brother = new Child { Sibling = new Child[1], Name = "James" };
             var sister = new Child { Sibling = new Child[1], Name = "Joan" };
             brother.Sibling[0] = sister;
             sister.Sibling[0] = brother;
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
-            formatter.Serialize( brother, memoryStream );
+            testContext.Serializer.Serialize( brother, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Child?) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Child?) testContext.Serializer.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
             Assert.Equal( brother.Name, deserializedObject.Name );
@@ -68,6 +70,8 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void CyclicGraph_RelatedObjectsInArray_Arrays()
         {
+            using var testContext = this.CreateTestContext();
+
             var children = new Child[2];
             var brother = new Child { Sibling = new Child[1], Name = "James" };
             var sister = new Child { Sibling = new Child[1], Name = "Joan" };
@@ -76,11 +80,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             children[0] = brother;
             children[1] = sister;
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
-            formatter.Serialize( children, memoryStream );
+            testContext.Serializer.Serialize( children, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Child[]?) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Child[]?) testContext.Serializer.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
             Assert.Equal( children.Length, deserializedObject.Length );
@@ -100,14 +103,15 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void CyclicGraph_ToSelf()
         {
+            using var testContext = this.CreateTestContext();
+
             var spouse1 = new Parent( "Mono" );
             spouse1.Spouse = spouse1;
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
-            formatter.Serialize( spouse1, memoryStream );
+            testContext.Serializer.Serialize( spouse1, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (Parent?) formatter.Deserialize( memoryStream );
+            var deserializedObject = (Parent?) testContext.Serializer.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
             Assert.NotNull( deserializedObject.Spouse );

@@ -69,11 +69,11 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 
         if ( lastParam is { Target: IParameterSymbol { IsParams: true } } )
         {
-            this.InsertItem( this.Count - 1, parameterBuilder.ToTypedRef<IParameter>() );
+            this.InsertItem( this.Count - 1, parameterBuilder.ToValueTypedRef<IParameter>() );
         }
         else
         {
-            this.AddItem( parameterBuilder.ToTypedRef<IParameter>() );
+            this.AddItem( parameterBuilder.ToValueTypedRef<IParameter>() );
         }
     }
 }

@@ -36,7 +36,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
             // Missing implicit ctor.
             var builder = new ConstructorBuilder( this, constructor.DeclaringType )
             {
-                ReplacedImplicit = constructor.ToTypedRef(), Accessibility = Accessibility.Public
+                ReplacedImplicit = constructor.ToValueTypedRef(), Accessibility = Accessibility.Public
             };
 
             addTransformation( builder.ToTransformation() );

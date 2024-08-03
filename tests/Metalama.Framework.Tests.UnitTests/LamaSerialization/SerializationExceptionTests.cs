@@ -32,12 +32,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Write } } }
             };
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
 
             try
             {
-                formatter.Serialize( references, memoryStream );
+                testContext.Serializer.Serialize( references, memoryStream );
             }
             catch ( CompileTimeSerializationException ex )
             {
@@ -56,14 +56,14 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Read } } }
             };
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( references, memoryStream );
+            testContext.Serializer.Serialize( references, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
 
             try
             {
-                formatter.Deserialize( memoryStream );
+                testContext.Serializer.Deserialize( memoryStream );
             }
             catch ( CompileTimeSerializationException ex )
             {
@@ -76,12 +76,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void TestFormatterSerializeFail()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             Child.NSerialized = 0;
 
             try
             {
-                formatter.Serialize( new Child { Fail = Fail.Write }, Stream.Null );
+                testContext.Serializer.Serialize( new Child { Fail = Fail.Write }, Stream.Null );
             }
             catch ( CompileTimeSerializationException ex )
             {
@@ -93,24 +93,24 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void TestFormatterSerializeSuccess()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             Child.NSerialized = 0;
 
-            formatter.Serialize( new Child { Fail = Fail.None }, Stream.Null );
+            testContext.Serializer.Serialize( new Child { Fail = Fail.None }, Stream.Null );
             Assert.Equal( 1, Child.NSerialized );
         }
 
         [Fact]
         public void TestFormatterDeserializeFail()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var stream = new SeekCountingMemoryStream();
-            formatter.Serialize( new Child { Fail = Fail.Read }, stream );
+            testContext.Serializer.Serialize( new Child { Fail = Fail.Read }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
 
             try
             {
-                formatter.Deserialize( stream );
+                testContext.Serializer.Deserialize( stream );
             }
             catch ( CompileTimeSerializationException ex )
             {
@@ -124,12 +124,12 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         [Fact]
         public void TestFormatterDeserializeSuccess()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var stream = new SeekCountingMemoryStream();
-            formatter.Serialize( new Child { Fail = Fail.None }, stream );
+            testContext.Serializer.Serialize( new Child { Fail = Fail.None }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
 
-            formatter.Deserialize( stream );
+            testContext.Serializer.Deserialize( stream );
 
             // Just one seek to deserialize.
             Assert.Equal( 1, stream.SeekCount );

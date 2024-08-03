@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -16,7 +17,7 @@ public sealed class ScopedSuppression : IScopedSuppression
 {
     public ISuppression Suppression { get; }
 
-    public ISymbol? GetScopeSymbolOrNull( Compilation compilation ) => this.Declaration.GetSymbol();
+    public ISymbol? GetScopeSymbolOrNull( CompilationContext compilationContext ) => this.Declaration.GetSymbol();
 
     public IDeclaration Declaration { get; }
 
@@ -91,5 +92,5 @@ public interface IScopedSuppression
 {
     ISuppression Suppression { get; }
 
-    ISymbol? GetScopeSymbolOrNull( Compilation compilation );
+    ISymbol? GetScopeSymbolOrNull( CompilationContext compilationContext );
 }

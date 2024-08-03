@@ -29,7 +29,7 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 
     protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome = AdviceOutcome.Default, TIntroduced? member = null )
     {
-        var memberRef = member != null ? member.ToTypedRef().As<TIntroduced>() : ((TIntroduced) (IDeclaration) this.Builder).ToTypedRef();
+        var memberRef = member != null ? member.ToValueTypedRef().As<TIntroduced>() : ((TIntroduced) (IDeclaration) this.Builder).ToValueTypedRef();
 
         return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, memberRef, null );
     }
@@ -38,8 +38,8 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
         => new(
             this.AdviceKind,
             AdviceOutcome.Ignore,
-            existingMember is TIntroduced typedMember ? typedMember.ToTypedRef() : null,
-            existingMember.ToTypedRef() );
+            existingMember is TIntroduced typedMember ? typedMember.ToValueTypedRef() : null,
+            existingMember.ToValueTypedRef() );
 
     public override string ToString() => $"Introduce {this.Builder}";
 }

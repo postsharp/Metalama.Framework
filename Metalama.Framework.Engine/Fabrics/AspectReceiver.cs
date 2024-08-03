@@ -1067,7 +1067,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             context2.Collector.AddAspectRequirement(
                                 new AspectRequirement(
-                                    declaration.ToTypedRef<IDeclaration>(),
+                                    declaration.ToValueTypedRef<IDeclaration>(),
                                     this.Parent.AspectPredecessor.Instance ) );
 
                             return Task.CompletedTask;

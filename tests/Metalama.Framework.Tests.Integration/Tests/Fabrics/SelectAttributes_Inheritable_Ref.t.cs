@@ -1,2 +1,7 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
-
+public class DerivedClass : BaseClass
+{
+  public override void Introduced()
+  {
+    global::System.Console.WriteLine("Marker: The Marker");
+  }
+}

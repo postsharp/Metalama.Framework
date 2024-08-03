@@ -464,7 +464,7 @@ internal sealed partial class ContextualSyntaxGenerator
         {
             return this._typeSyntaxCache.AssertNotNull()
                 .GetOrAdd(
-                    type.ToTypedRef(),
+                    type.ToValueTypedRef(),
                     static ( _, x ) => x.This.TypeCore( x.Type ),
                     (This: this, Type: type) );
         }
@@ -479,7 +479,7 @@ internal sealed partial class ContextualSyntaxGenerator
         if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
             return this._typeSyntaxCache.GetOrAdd(
-                symbol.ToTypedRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
+                symbol.ToValueTypedRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
                 static ( _, x ) => x.This.TypeCore( x.Type ),
                 (This: this, Type: symbol) );
         }
@@ -730,7 +730,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 break;
         }
 
-        syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToTypedRef<IDeclaration>(), compilation ) );
+        syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToValueTypedRef<IDeclaration>(), compilation ) );
 
         return syntax;
     }
@@ -755,7 +755,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public ParameterSyntax Parameter( IParameter parameter, CompilationModel compilation, bool removeDefaultValue )
         => SyntaxFactory.Parameter(
-            this.AttributesForDeclaration( parameter.ToTypedRef<IDeclaration>(), compilation ),
+            this.AttributesForDeclaration( parameter.ToValueTypedRef<IDeclaration>(), compilation ),
             parameter.GetSyntaxModifierList(),
             this.Type( parameter.Type ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
             Identifier( parameter.Name ),

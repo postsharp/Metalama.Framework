@@ -25,7 +25,7 @@ internal sealed class AllInterfaceUpdatableCollection : UpdatableDeclarationColl
     public void Add( IntroduceInterfaceTransformation introduction )
     {
         this.EnsureComplete();
-        this.AddItem( introduction.InterfaceType.ToTypedRef() );
+        this.AddItem( introduction.InterfaceType.ToValueTypedRef() );
 
         this.Introductions = this.Introductions.Add( introduction );
     }

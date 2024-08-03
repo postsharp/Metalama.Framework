@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         private CompileTimeReturnParameterInfo( IParameter returnParameter )
         {
-            this.Target = returnParameter.ToTypedRef();
+            this.Target = returnParameter.ToValueTypedRef();
         }
 
         public static ParameterInfo Create( IParameter returnParameter )

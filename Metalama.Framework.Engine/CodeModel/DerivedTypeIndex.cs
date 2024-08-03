@@ -65,7 +65,7 @@ public sealed partial class DerivedTypeIndex
         };
 
     internal IEnumerable<INamedType> GetDerivedTypes( INamedType baseType )
-        => this.GetDerivedTypesCore( baseType.ToTypedRef() )
+        => this.GetDerivedTypesCore( baseType.ToValueTypedRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetDerivedTypesCore( Ref<INamedType> baseType )
@@ -73,7 +73,7 @@ public sealed partial class DerivedTypeIndex
             .SelectManyRecursiveDistinct( t => this._relationships[t], this._processedTypes.KeyComparer );
 
     private IEnumerable<INamedType> GetAllDerivedTypes( INamedType baseType )
-        => this.GetAllDerivedTypesCore( baseType.ToTypedRef() )
+        => this.GetAllDerivedTypesCore( baseType.ToValueTypedRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetAllDerivedTypesCore( Ref<INamedType> baseType )
@@ -81,7 +81,7 @@ public sealed partial class DerivedTypeIndex
             .Where( this.IsContainedInCurrentCompilation );
 
     private IEnumerable<INamedType> GetDirectlyDerivedTypes( INamedType baseType )
-        => this.GetDirectlyDerivedTypesCore( baseType.ToTypedRef() )
+        => this.GetDirectlyDerivedTypesCore( baseType.ToValueTypedRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetDirectlyDerivedTypesCore( Ref<INamedType> baseType )
@@ -96,7 +96,7 @@ public sealed partial class DerivedTypeIndex
     }
 
     private IEnumerable<INamedType> GetFirstLevelDerivedTypes( INamedType baseType )
-        => this.GetFirstLevelDerivedTypesCore( baseType.ToTypedRef() )
+        => this.GetFirstLevelDerivedTypesCore( baseType.ToValueTypedRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetFirstLevelDerivedTypesCore( Ref<INamedType> baseType )
@@ -135,7 +135,7 @@ public sealed partial class DerivedTypeIndex
             if ( !introducedInterface.DeclaringAssembly.GetSymbol().Equals( this._compilationContext.Compilation.Assembly ) )
             {
                 // The type may not have been analyzed yet.
-                builder.AnalyzeType( introducedInterface.ToTypedRef() );
+                builder.AnalyzeType( introducedInterface.ToValueTypedRef() );
             }
 
             builder.AddDerivedType( introducedInterface, transformation.TargetType );
@@ -197,7 +197,7 @@ public sealed partial class DerivedTypeIndex
 
         foreach ( var type in types )
         {
-            if ( !this._processedTypes.Contains( type.ToTypedRef<INamedType>( this._compilationContext ) ) )
+            if ( !this._processedTypes.Contains( type.ToValueTypedRef<INamedType>( this._compilationContext ) ) )
             {
                 builder ??= new Builder( this );
                 builder.AnalyzeType( type );
@@ -220,10 +220,10 @@ public sealed partial class DerivedTypeIndex
 
         foreach ( var type in types )
         {
-            if ( !this._processedTypes.Contains( type.ToTypedRef() ) )
+            if ( !this._processedTypes.Contains( type.ToValueTypedRef() ) )
             {
                 builder ??= new Builder( this );
-                builder.AnalyzeType( type.ToTypedRef() );
+                builder.AnalyzeType( type.ToValueTypedRef() );
             }
         }
 
