@@ -16,7 +16,7 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
 
     public ImmutableArray<IntroduceInterfaceTransformation> Introductions { get; private set; } = ImmutableArray<IntroduceInterfaceTransformation>.Empty;
 
-    public InterfaceUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation )
+    public InterfaceUpdatableCollection( CompilationModel compilation, in Ref<INamedType> declaringType ) : base( compilation )
     {
         this._declaringType = declaringType;
     }

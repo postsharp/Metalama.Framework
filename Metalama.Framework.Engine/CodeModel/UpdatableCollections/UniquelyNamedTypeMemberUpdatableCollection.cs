@@ -45,7 +45,7 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
         };
 
-    protected UniquelyNamedTypeMemberUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base(
+    protected UniquelyNamedTypeMemberUpdatableCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringType ) : base(
         compilation,
         declaringType ) { }
 }

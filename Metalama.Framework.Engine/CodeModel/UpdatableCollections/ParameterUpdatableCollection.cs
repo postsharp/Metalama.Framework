@@ -12,7 +12,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 {
     private readonly Ref<IHasParameters> _parent;
 
-    public ParameterUpdatableCollection( CompilationModel compilation, Ref<IHasParameters> parent ) : base( compilation )
+    public ParameterUpdatableCollection( CompilationModel compilation, in Ref<IHasParameters> parent ) : base( compilation )
     {
         this._parent = parent;
     }

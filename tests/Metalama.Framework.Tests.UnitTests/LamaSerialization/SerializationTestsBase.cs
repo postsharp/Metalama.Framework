@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         protected SerializationTestContext CreateTestContext( string code )
             => (SerializationTestContext) base.CreateTestContext( new SerializationTestContextOptions { Code = code } );
 
-        protected T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
+        protected T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null, bool testEquality = true )
         {
             using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
@@ -60,13 +60,16 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             {
                 assert( instance, deserializedObject );
             }
-            else if ( instance is ICollection orgCol )
+            else if ( testEquality )
             {
-                Assert.Equal( orgCol, newCol );
-            }
-            else
-            {
-                Assert.Equal( instance, deserializedObject );
+                if ( instance is ICollection orgCol )
+                {
+                    Assert.Equal( orgCol, newCol );
+                }
+                else
+                {
+                    Assert.Equal( instance, deserializedObject );
+                }
             }
 
             return deserializedObject;

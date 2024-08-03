@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationCollection<T>, ISourceMemberCollection<T>
     where T : class, INamedDeclaration
 {
-    protected UpdatableMemberCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation )
+    protected UpdatableMemberCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringType ) : base( compilation )
     {
         this.DeclaringTypeOrNamespace = declaringType;
     }

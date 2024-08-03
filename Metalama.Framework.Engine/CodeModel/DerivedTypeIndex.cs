@@ -68,7 +68,7 @@ public sealed partial class DerivedTypeIndex
         => this.GetDerivedTypesCore( baseType.ToValueTypedRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-    private IEnumerable<Ref<INamedType>> GetDerivedTypesCore( Ref<INamedType> baseType )
+    private IEnumerable<Ref<INamedType>> GetDerivedTypesCore( in Ref<INamedType> baseType )
         => this._relationships[baseType]
             .SelectManyRecursiveDistinct( t => this._relationships[t], this._processedTypes.KeyComparer );
 
@@ -76,7 +76,7 @@ public sealed partial class DerivedTypeIndex
         => this.GetAllDerivedTypesCore( baseType.ToValueTypedRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-    private IEnumerable<Ref<INamedType>> GetAllDerivedTypesCore( Ref<INamedType> baseType )
+    private IEnumerable<Ref<INamedType>> GetAllDerivedTypesCore( in Ref<INamedType> baseType )
         => this.GetDerivedTypesCore( baseType )
             .Where( this.IsContainedInCurrentCompilation );
 
@@ -99,14 +99,14 @@ public sealed partial class DerivedTypeIndex
         => this.GetFirstLevelDerivedTypesCore( baseType.ToValueTypedRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-    private IEnumerable<Ref<INamedType>> GetFirstLevelDerivedTypesCore( Ref<INamedType> baseType )
+    private IEnumerable<Ref<INamedType>> GetFirstLevelDerivedTypesCore( in Ref<INamedType> baseType )
     {
         var set = new HashSet<Ref<INamedType>>( RefEqualityComparer<INamedType>.Default );
         GetDerivedTypesRecursive( baseType );
 
         return set;
 
-        void GetDerivedTypesRecursive( Ref<INamedType> parentType )
+        void GetDerivedTypesRecursive( in Ref<INamedType> parentType )
         {
             foreach ( var type in this._relationships[parentType] )
             {

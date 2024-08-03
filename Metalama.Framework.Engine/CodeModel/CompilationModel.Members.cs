@@ -204,14 +204,14 @@ public sealed partial class CompilationModel
         return collection;
     }
 
-    internal FieldUpdatableCollection GetFieldCollection( Ref<INamedType> declaringType, bool mutable = false )
+    internal FieldUpdatableCollection GetFieldCollection( in Ref<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IField, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
             ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
-    internal ISourceMemberCollection<IMethod> GetMethodCollection( Ref<INamedType> declaringType, bool mutable = false )
+    internal ISourceMemberCollection<IMethod> GetMethodCollection( in Ref<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IMethod, ISourceMemberCollection<IMethod>>(
             ref this._methods,
             mutable,
@@ -219,42 +219,42 @@ public sealed partial class CompilationModel
             ( c, t ) => new MethodUpdatableCollection( c, t ),
             ( s, t ) => new MemberSubstitutedCollection<IMethod>( s, t ) );
 
-    internal ConstructorUpdatableCollection GetConstructorCollection( Ref<INamedType> declaringType, bool mutable = false )
+    internal ConstructorUpdatableCollection GetConstructorCollection( in Ref<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IConstructor, ConstructorUpdatableCollection>(
             ref this._constructors,
             mutable,
             declaringType,
             ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
 
-    internal PropertyUpdatableCollection GetPropertyCollection( Ref<INamedType> declaringType, bool mutable = false )
+    internal PropertyUpdatableCollection GetPropertyCollection( in Ref<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IProperty, PropertyUpdatableCollection>(
             ref this._properties,
             mutable,
             declaringType,
             ( c, t ) => new PropertyUpdatableCollection( c, t ) );
 
-    internal IndexerUpdatableCollection GetIndexerCollection( Ref<INamedType> declaringType, bool mutable = false )
+    internal IndexerUpdatableCollection GetIndexerCollection( in Ref<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IIndexer, IndexerUpdatableCollection>(
             ref this._indexers,
             mutable,
             declaringType,
             ( c, t ) => new IndexerUpdatableCollection( c, t ) );
 
-    internal EventUpdatableCollection GetEventCollection( Ref<INamedType> declaringType, bool mutable = false )
+    internal EventUpdatableCollection GetEventCollection( in Ref<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IEvent, EventUpdatableCollection>(
             ref this._events,
             mutable,
             declaringType,
             ( c, t ) => new EventUpdatableCollection( c, t ) );
 
-    internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( Ref<INamedType> declaringType, bool mutable )
+    internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( in Ref<INamedType> declaringType, bool mutable )
         => this.GetMemberCollection<INamedType, INamedType, InterfaceUpdatableCollection>(
             ref this._interfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
 
-    internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( Ref<INamedType> declaringType, bool mutable )
+    internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( in Ref<INamedType> declaringType, bool mutable )
         => this.GetMemberCollection<INamedType, INamedType, AllInterfaceUpdatableCollection>(
             ref this._allInterfaceImplementations,
             mutable,
@@ -294,7 +294,7 @@ public sealed partial class CompilationModel
         return value;
     }
 
-    internal TypeUpdatableCollection GetNamedTypeCollection( Ref<INamespaceOrNamedType> declaringNamespaceOrType, bool mutable = false )
+    internal TypeUpdatableCollection GetNamedTypeCollection( in Ref<INamespaceOrNamedType> declaringNamespaceOrType, bool mutable = false )
     {
         if ( mutable && !this.IsMutable )
         {
@@ -327,7 +327,7 @@ public sealed partial class CompilationModel
         return collection;
     }
 
-    internal NamespaceUpdatableCollection GetNamespaceCollection( Ref<INamespace> declaringNamespace, bool mutable = false )
+    internal NamespaceUpdatableCollection GetNamespaceCollection( in Ref<INamespace> declaringNamespace, bool mutable = false )
     {
         if ( mutable && !this.IsMutable )
         {

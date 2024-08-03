@@ -35,7 +35,7 @@ public partial class DerivedTypeIndex
             this._processedTypes = immutable._processedTypes.ToBuilder();
         }
 
-        public void AnalyzeType( Ref<INamedType> type )
+        public void AnalyzeType( in Ref<INamedType> type )
         {
             switch ( type.Target )
             {

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableCollection<INamespace>
 {
-    public NamespaceUpdatableCollection( CompilationModel compilation, Ref<INamespace> declaringNamespace ) : base(
+    public NamespaceUpdatableCollection( CompilationModel compilation, in Ref<INamespace> declaringNamespace ) : base(
         compilation,
         declaringNamespace.As<INamespaceOrNamedType>() ) { }
 

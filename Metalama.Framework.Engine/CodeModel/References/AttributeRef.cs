@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._containingDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilationContext );
         }
 
-        public AttributeRef( Ref<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
+        public AttributeRef( in Ref<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
         {
             this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
