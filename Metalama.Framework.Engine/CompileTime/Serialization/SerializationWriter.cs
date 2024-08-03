@@ -44,7 +44,7 @@ internal sealed class SerializationWriter
         this._binaryWriter.WriteCompressedInteger( SerializationProtocol.CurrentVersion );
 
         // Assertion was added after importing code from PostSharp.
-        var cause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.AssertNotNull().GetType() ) : null;
+        var cause = this._shouldReportExceptionCause ? SerializationCause.Root( obj.AssertNotNull().GetType() ) : null;
 
         this._serializationQueue.Enqueue( new SerializationQueueItem<object>( obj, cause ) );
 
@@ -81,7 +81,7 @@ internal sealed class SerializationWriter
         {
             CallOnSerialization( obj );
 
-            var serializer = type.IsArray ? null : this._formatter.SerializerProvider.GetSerializer( type );
+            var serializer = type.IsArray ? null : this._formatter.SerializerProvider.GetSerializer( type, cause );
 
             objectInfo = new ObjectInfo( this._formatter, obj, this._objects.Count + 1 );
 
@@ -113,7 +113,7 @@ internal sealed class SerializationWriter
         }
         catch ( Exception exception )
         {
-            throw CompileTimeSerializationException.CreateWithCause( "Serialization", obj.GetType(), exception, cause );
+            throw CompileTimeSerializationException.CreateWithCause( $"Serialization of object '{obj}'", cause, exception );
         }
     }
 
@@ -555,7 +555,7 @@ internal sealed class SerializationWriter
     private void WriteStruct( object value, SerializationCause? cause )
     {
         var type = value.GetType();
-        var serializer = this._formatter.SerializerProvider.GetSerializer( type );
+        var serializer = this._formatter.SerializerProvider.GetSerializer( type, cause );
         var arguments = new Arguments( this._formatter );
 
         this.TrySerialize( serializer, value, arguments, ThrowingArguments.Instance, cause );
@@ -592,9 +592,7 @@ internal sealed class SerializationWriter
 
                 this._binaryWriter.WriteDottedString( argument.Key );
 
-                var newCause = this._shouldReportExceptionCause
-                    ? SerializationCause.WithTypedValue( cause, argument.Key, owningType )
-                    : cause;
+                var newCause = cause?.WithFieldAccess( owningType, argument.Key );
 
                 this.WriteTypedValue( argument.Value, writeInitializationArgumentsInline, newCause );
             }
@@ -681,7 +679,7 @@ internal sealed class SerializationWriter
                 var value = array.GetValue( indices );
 
                 // shouldn’t structs be written with type (inheritance is possible) 
-                var newCause = this._shouldReportExceptionCause ? SerializationCause.WithIndices( cause, i ) : cause;
+                var newCause = cause?.WithArrayAccess( i );
 
                 if ( elementType.IsValueType )
                 {

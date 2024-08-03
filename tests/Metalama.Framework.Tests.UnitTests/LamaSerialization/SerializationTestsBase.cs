@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Formatting;
@@ -41,6 +42,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
         protected new SerializationTestContext CreateTestContext() => (SerializationTestContext) base.CreateTestContext();
 
+        [MustDisposeResource]
         protected SerializationTestContext CreateTestContext( string code )
             => (SerializationTestContext) base.CreateTestContext( new SerializationTestContextOptions { Code = code } );
 

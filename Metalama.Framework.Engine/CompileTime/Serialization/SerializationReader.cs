@@ -154,7 +154,7 @@ internal sealed class SerializationReader
         }
         catch ( CompileTimeSerializationException exception )
         {
-            throw CompileTimeSerializationException.CreateWithCause( "Deserialization", value.GetType(), exception, cause );
+            throw CompileTimeSerializationException.CreateWithCause( $"Deserialization of fields for type '{value.GetType()}' failed.", cause, exception );
         }
     }
 
@@ -173,7 +173,7 @@ internal sealed class SerializationReader
         {
             string fieldName = this._binaryReader.ReadDottedString();
 
-            var newCause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( cause, fieldName, type ) : null;
+            var newCause = cause?.WithFieldAccess( type, fieldName );
             var value = this.ReadTypedValue( initializeObjects, newCause );
 
             fields.Values!.Add( fieldName, value );
@@ -387,7 +387,7 @@ internal sealed class SerializationReader
                 }
 
             default:
-                throw new CompileTimeSerializationException();
+                throw new CompileTimeSerializationException( "Cannot decode named type: invalid flag." );
         }
     }
 
@@ -579,7 +579,7 @@ internal sealed class SerializationReader
             {
                 indices[currentDimension] = i;
 
-                var newCause = this._shouldReportExceptionCause ? SerializationCause.WithIndices( cause, indices ) : null;
+                var newCause = cause?.WithArrayAccess( indices );
 
                 if ( elementIntrinsicType.IsPrimitiveIntrinsic() )
                 {
@@ -614,7 +614,7 @@ internal sealed class SerializationReader
         {
             // This is the root.
             // Assertion on nullability was added after the code import from PostSharp.
-            cause = SerializationCause.WithTypedValue( null, "root", type.AssertNotNull() );
+            cause = SerializationCause.Root( type.AssertNotNull() );
         }
 
         if ( type == null )
@@ -643,7 +643,7 @@ internal sealed class SerializationReader
         else if ( intrinsicType is SerializationIntrinsicType.Class or SerializationIntrinsicType.Struct )
         {
             var fields = this.ReadInstanceFields( type, true, cause );
-            serializer = this._formatter.SerializerProvider.GetSerializer( type );
+            serializer = this._formatter.SerializerProvider.GetSerializer( type, cause );
 
             value = TryCreateInstance( serializer, type, fields, cause );
         }
@@ -676,7 +676,7 @@ internal sealed class SerializationReader
         }
         catch ( CompileTimeSerializationException exception )
         {
-            throw CompileTimeSerializationException.CreateWithCause( "Deserialization", type, exception, cause );
+            throw CompileTimeSerializationException.CreateWithCause( $"Deserialization of type '{type}' failed.", cause, exception );
         }
     }
 
@@ -684,7 +684,7 @@ internal sealed class SerializationReader
     {
         var fields = this.ReadInstanceFields( type, true, cause );
 
-        var serializer = this._formatter.SerializerProvider.GetSerializer( type );
+        var serializer = this._formatter.SerializerProvider.GetSerializer( type, cause );
 
         var value = TryCreateInstance( serializer, type, fields, cause );
 

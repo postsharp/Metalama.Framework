@@ -68,16 +68,19 @@ namespace Metalama.Testing.UnitTesting
             return new AdditionalServiceCollection( services );
         }
 
+        [MustDisposeResource]
         protected TestContext CreateTestContext() => this.CreateTestContext( null, null );
 
         /// <summary>
         /// Creates a test context with a collection of additional services or mocks.
         /// </summary>
+        [MustDisposeResource]
         protected TestContext CreateTestContext( IAdditionalServiceCollection service ) => this.CreateTestContext( null, service );
 
         /// <summary>
         /// Creates a test context, optionally with a non-default <see cref="TestContextOptions"/> or a collection of additional services or mocks.
         /// </summary>
+        [MustDisposeResource]
         protected TestContext CreateTestContext( TestContextOptions? contextOptions, IAdditionalServiceCollection? services = null )
             => this.CreateTestContextCore(
                 contextOptions ?? this.GetDefaultTestContextOptions(),

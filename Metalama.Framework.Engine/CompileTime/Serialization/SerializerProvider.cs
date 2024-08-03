@@ -35,12 +35,13 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        public ISerializer GetSerializer( Type objectType )
+        public ISerializer GetSerializer( Type objectType, SerializationCause? cause )
         {
             if ( !this.TryGetSerializer( objectType, out var serializer ) )
             {
-                throw new CompileTimeSerializationException(
-                    string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
+                throw CompileTimeSerializationException.CreateWithCause(
+                    string.Format( CultureInfo.InvariantCulture, "The type '{0}' is not serializable.", objectType ),
+                    cause );
             }
 
             return serializer.AssertNotNull();

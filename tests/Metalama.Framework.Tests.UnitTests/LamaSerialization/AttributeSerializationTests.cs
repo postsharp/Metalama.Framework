@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using System.Linq;
 using Xunit;
 
@@ -41,7 +42,7 @@ public class AttributeSerializationTests : SerializationTestsBase
 
                             """;
 
-        var testContext = this.CreateTestContext( code );
+        using var testContext = this.CreateTestContext( code );
 
         var attribute = testContext.Compilation.Types.OfName( "C" ).Single().Attributes.Single();
 
@@ -51,5 +52,8 @@ public class AttributeSerializationTests : SerializationTestsBase
         Assert.Equal( attribute.Constructor, roundtrip.Constructor );
         Assert.Equal( attribute.ConstructorArguments, roundtrip.ConstructorArguments );
         Assert.Equal( attribute.NamedArguments, roundtrip.NamedArguments );
+
+        // Non-ref serialization must fail.
+        Assert.Throws<CompileTimeSerializationException>( () => SerializeDeserialize( attribute, testContext ) );
     }
 }
