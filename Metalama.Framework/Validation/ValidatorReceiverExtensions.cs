@@ -23,15 +23,6 @@ public static class ValidatorReceiverExtensions
         => receiver.SelectMany( c => c.ReferencedAssemblies.OfName( assemblyName ) );
 
     /// <summary>
-    /// Selects all custom attributes of a given type in the current compilation.
-    /// </summary>
-    public static IValidatorReceiver<IDeclaration> SelectDeclarationsWithAttribute(
-        this IValidatorReceiver<ICompilation> receiver,
-        Type attributeType,
-        bool includeDerivedTypes = true )
-        => receiver.SelectMany( c => c.GetDeclarationsWithAttribute( attributeType, includeDerivedTypes ) );
-
-    /// <summary>
     /// Selects all custom attributes of a given type in the current compilation. This generic overloads constructs the attribute
     /// and accepts an optional predicate to filter the attribute.
     /// </summary>

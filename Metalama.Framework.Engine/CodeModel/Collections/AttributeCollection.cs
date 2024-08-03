@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         public IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate )
             => this.GetItems( this.Source.Where( a => predicate( a.AttributeType.GetTarget( this.Compilation ) ) ) );
 
-        public IEnumerable<T> OfAttributeType<T>()
+        public IEnumerable<T> GetConstructedAttributesOfType<T>()
             where T : System.Attribute
             => this.OfAttributeType( typeof(T) ).Select( a => a.Construct<T>() );
 

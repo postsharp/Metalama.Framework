@@ -7,26 +7,25 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Serialization;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Fabrics.SelectAttributes_Inheritable;
+namespace Metalama.Framework.Tests.Integration.Tests.Fabrics.SelectAttributes_Inheritable_Ref;
 
 public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.SelectDeclarationsWithAttribute<Marker>()
+        amender.SelectDeclarationsWithAttribute( typeof(Marker) )
             .OfType<INamedType>()
             .AddAspectIfEligible<TheAspect>(
                 m =>
                 {
-                    var attribute = m.Attributes.GetConstructedAttributesOfType<Marker>().Single();
+                    var attribute = m.Attributes.OfAttributeType( typeof(Marker) ).Single();
 
-                    return new TheAspect( attribute );
+                    return new TheAspect( attribute.ToRef() );
                 } );
     }
 }
 
-[RunTimeOrCompileTime]
-public class Marker : Attribute, ICompileTimeSerializable
+public class Marker : Attribute
 {
     public Marker( string value )
     {
@@ -39,17 +38,20 @@ public class Marker : Attribute, ICompileTimeSerializable
 [Inheritable]
 public class TheAspect : TypeAspect
 {
-    private readonly Marker? _marker;
+    private IRef<IAttribute> _attribute;
 
-    public TheAspect( Marker marker )
+    public TheAspect( IRef<IAttribute> attribute )
     {
-        _marker = marker;
+        _attribute = attribute;
     }
 
     [Introduce( WhenExists = OverrideStrategy.Override )]
     public virtual void Introduced()
     {
-        Console.WriteLine( $"Marker: {_marker.Value}" );
+        var attribute = _attribute.GetTarget( meta.Target.Compilation );
+        var value = (string)attribute.ConstructorArguments[0].Value;
+
+        Console.WriteLine( $"Marker: {value}" );
     }
 }
 

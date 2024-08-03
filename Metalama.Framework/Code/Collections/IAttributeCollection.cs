@@ -28,7 +28,7 @@ namespace Metalama.Framework.Code.Collections
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IEnumerable<T> OfAttributeType<T>()
+        IEnumerable<T> GetConstructedAttributesOfType<T>()
             where T : Attribute;
 
         bool Any( IType type );

@@ -15,7 +15,7 @@ public class Fabric : ProjectFabric
             .AddAspectIfEligible<TheAspect>(
                 m =>
                 {
-                    var attribute = m.Attributes.OfAttributeType<Marker>().Single();
+                    var attribute = m.Attributes.GetConstructedAttributesOfType<Marker>().Single();
 
                     return new TheAspect( attribute.Value );
                 } );
@@ -56,6 +56,6 @@ public class C
     [Marker( Value = "TheMarker" )]
     public void MarkedMethod() { }
 
-    [DerivedMarker( Value = "DerivedMarker")]
+    [DerivedMarker( Value = "DerivedMarker" )]
     public void DerivedMethod() { }
 }

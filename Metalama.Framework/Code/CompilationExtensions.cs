@@ -8,14 +8,6 @@ namespace Metalama.Framework.Code;
 
 public static class CompilationExtensions
 {
-    public static IEnumerable<IDeclaration> GetDeclarationsWithAttribute(
-        this ICompilation compilation,
-        Type attributeType,
-        bool includeDerivedTypes = true )
-        => ((ICompilationInternal) compilation).GetAllAttributesOfType( attributeType, includeDerivedTypes )
-            .Select( a => a.ContainingDeclaration )
-            .Distinct();
-
     public static IEnumerable<IDeclaration> GetDeclarationsWithAttribute<TAttribute>(
         this ICompilation compilation,
         Func<TAttribute, bool>? predicate = null,

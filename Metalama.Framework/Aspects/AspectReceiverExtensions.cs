@@ -16,15 +16,6 @@ namespace Metalama.Framework.Aspects;
 public static class AspectReceiverExtensions
 {
     /// <summary>
-    /// Selects all custom attributes of a given type in the current compilation.
-    /// </summary>
-    public static IAspectReceiver<IDeclaration> SelectDeclarationsWithAttribute(
-        this IAspectReceiver<ICompilation> receiver,
-        Type attributeType,
-        bool includeDerivedTypes = true )
-        => receiver.SelectMany( c => c.GetDeclarationsWithAttribute( attributeType, includeDerivedTypes ) );
-
-    /// <summary>
     /// Selects all custom attributes of a given type in the current compilation. This generic overloads constructs the attribute
     /// and accepts an optional predicate to filter the attribute.
     /// </summary>
