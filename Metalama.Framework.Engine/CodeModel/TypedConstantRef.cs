@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
