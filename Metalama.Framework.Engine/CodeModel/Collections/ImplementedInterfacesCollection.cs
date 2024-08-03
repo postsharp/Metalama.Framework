@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
     {
         public ImplementedInterfacesCollection( INamedType declaringType, InterfaceUpdatableCollection source ) : base( declaringType, source ) { }
 
-        public bool Contains( INamedType namedType ) => ((InterfaceUpdatableCollection) this.Source).Contains( namedType.ToTypedRef() );
+        public bool Contains( INamedType namedType ) => ((InterfaceUpdatableCollection) this.Source).Contains( namedType.ToValueTypedRef() );
 
         public bool Contains( Type type )
         {

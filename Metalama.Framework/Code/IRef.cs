@@ -7,11 +7,11 @@ using System;
 namespace Metalama.Framework.Code
 {
     /// <summary>
-    /// Represents a reference to a declaration that can be resolved using <see cref="GetTarget"/>,
-    /// given an compilation, or using the <see cref="RefExtensions.GetTarget{T}"/> extension method
-    /// for the compilation of the current context.
+    /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
+    /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
+    /// given an compilation, or using the <see cref="RefExtensions.GetTarget{T}"/> extension method for the compilation of the current context.
     /// </summary>
-    /// <typeparam name="T">The type of the target object of the declaration.</typeparam>
+    /// <typeparam name="T">The type of the target object of the declaration or type.</typeparam>
     [CompileTime]
     [InternalImplement]
     public interface IRef<out T> : IEquatable<IRef<ICompilationElement>>
@@ -26,13 +26,13 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
+        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
         /// </summary>
         T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default );
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
+        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
         /// </summary>
         T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default );
 

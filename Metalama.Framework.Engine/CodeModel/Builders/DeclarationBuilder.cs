@@ -109,7 +109,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
+    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 
@@ -140,7 +140,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         declaration ??= this;
 
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-            declaration.ToTypedRef(),
+            declaration.ToValueTypedRef(),
             context.Compilation,
             this.AttributeTargetSyntaxKind );
 
@@ -148,7 +148,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         {
             attributes = attributes.AddRange(
                 context.SyntaxGenerator.AttributesForDeclaration(
-                    method.ReturnParameter.ToTypedRef<IDeclaration>(),
+                    method.ReturnParameter.ToValueTypedRef<IDeclaration>(),
                     context.Compilation,
                     SyntaxKind.ReturnKeyword ) );
 
@@ -156,7 +156,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
             {
                 attributes = attributes.AddRange(
                     context.SyntaxGenerator.AttributesForDeclaration(
-                        method.Parameters[0].ToTypedRef<IDeclaration>(),
+                        method.Parameters[0].ToValueTypedRef<IDeclaration>(),
                         context.Compilation,
                         SyntaxKind.ParamKeyword ) );
             }

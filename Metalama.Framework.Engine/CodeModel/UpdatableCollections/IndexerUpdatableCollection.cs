@@ -9,7 +9,9 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class IndexerUpdatableCollection : NonUniquelyNamedMemberUpdatableCollection<IIndexer>
 {
-    public IndexerUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation, declaringType.As<INamespaceOrNamedType>() ) { }
+    public IndexerUpdatableCollection( CompilationModel compilation, in Ref<INamedType> declaringType ) : base(
+        compilation,
+        declaringType.As<INamespaceOrNamedType>() ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol )
         => symbol.Kind == SymbolKind.Property && ((IPropertySymbol) symbol).Parameters.Length > 0 && base.IsSymbolIncluded( symbol );

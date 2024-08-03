@@ -35,7 +35,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
         this._storeTypeName = serviceProvider.GetRequiredService<IProjectOptions>().IsTest;
 
-        this._symbolEqualityComparer = CompilationContextFactory.GetInstance( this.PartialCompilation.Compilation ).SymbolComparer;
+        this._symbolEqualityComparer = this.PartialCompilation.Compilation.GetCompilationContext().SymbolComparer;
         this.IndexReferencedProjects( projectVersion );
     }
 

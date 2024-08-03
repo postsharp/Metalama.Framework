@@ -60,6 +60,20 @@ namespace Metalama.Framework.Code
             return ((ICompilationInternal) attribute.Compilation).Helpers.TryConstructAttribute( attribute, diagnosticSink, out constructedAttribute );
         }
 
+        public static bool TryConstruct(
+            this IAttribute attribute,
+            [NotNullWhen( true )] out Attribute? constructedAttribute )
+        {
+            return ((ICompilationInternal) attribute.Compilation).Helpers.TryConstructAttribute( attribute, default, out constructedAttribute );
+        }
+
+        public static Attribute Construct( this IAttribute attribute )
+            => ((ICompilationInternal) attribute.Compilation).Helpers.ConstructAttribute( attribute );
+
+        public static T Construct<T>( this IAttribute attribute )
+            where T : Attribute
+            => (T) ((ICompilationInternal) attribute.Compilation).Helpers.ConstructAttribute( attribute );
+
         internal static object? GetNamedArgumentValue( this IAttribute attribute, string name )
         {
             if ( attribute.TryGetNamedArgument( name, out var value ) )

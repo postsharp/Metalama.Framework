@@ -68,7 +68,7 @@ internal readonly struct TemplateMemberRef
         if ( !templateAttributeFactory
                 .TryGetTemplateAttribute(
                     this._templateMember.TemplateInfo.Id,
-                    compilation.RoslynCompilation,
+                    compilation.CompilationContext,
                     ThrowingDiagnosticAdder.Instance,
                     out var attribute ) )
         {

@@ -206,24 +206,24 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public SerializableDeclarationId ToSerializableId()
         {
-            if ( this.Target is IDeclaration declaration )
+            switch ( this.Target )
             {
-                return declaration.GetSerializableId( this.TargetKind );
+                case IDeclaration declaration:
+                    return declaration.GetSerializableId( this.TargetKind );
+
+                case string id when IsDeclarationId( id ) && this.TargetKind == DeclarationRefTargetKind.Default:
+                    return new SerializableDeclarationId( id );
+
+                default:
+                    if ( this._compilationContext == null )
+                    {
+                        throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
+                    }
+
+                    var symbol = this.GetSymbolIgnoringKind( this._compilationContext, true );
+
+                    return symbol.GetSerializableId( this.TargetKind );
             }
-
-            if ( this.Target is string id && IsDeclarationId( id ) && this.TargetKind == DeclarationRefTargetKind.Default )
-            {
-                return new SerializableDeclarationId( id );
-            }
-
-            if ( this._compilationContext == null )
-            {
-                throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
-            }
-
-            var symbol = this.GetSymbolIgnoringKind( this._compilationContext, true );
-
-            return symbol.GetSerializableId( this.TargetKind );
         }
 
         private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolverForSymbol.Prefix[0];
@@ -303,7 +303,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         }
 
         ISymbol ISdkRef<T>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey )
-            => this.GetSymbol( CompilationContextFactory.GetInstance( compilation ), ignoreAssemblyKey );
+            => this.GetSymbol( compilation.GetCompilationContext(), ignoreAssemblyKey );
 
         private ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
             => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilationContext, ignoreAssemblyKey ) );
@@ -324,7 +324,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
                         if ( IsDeclarationId( id ) )
                         {
-                            symbol = new SerializableDeclarationId( id ).ResolveToSymbolOrNull( compilationContext.Compilation );
+                            symbol = new SerializableDeclarationId( id ).ResolveToSymbolOrNull( compilationContext );
                         }
                         else if ( IsTypeId( id ) )
                         {
@@ -422,6 +422,18 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 }
             }
 
+            if ( this.IsDefault )
+            {
+                if ( throwIfMissing )
+                {
+                    throw new InvalidOperationException( "Trying to resolve an unitialized reference." );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
             switch ( reference )
             {
                 case null:
@@ -498,11 +510,16 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public override string ToString()
         {
+            if ( this.IsDefault )
+            {
+                return "<uninitialized>";
+            }
+
             var value = this.Target switch
             {
-                null => "null",
+                null => "<null>",
                 ISymbol symbol => MetalamaStringFormatter.Instance.Format( symbol ),
-                _ => this.Target.ToString() ?? "null"
+                _ => this.Target.ToString() ?? "<error>"
             };
 
             if ( this.TargetKind != DeclarationRefTargetKind.Default )

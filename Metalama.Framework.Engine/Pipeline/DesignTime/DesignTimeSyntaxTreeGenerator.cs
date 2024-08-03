@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                 IConstructor constructor => constructor.DeclaringType,
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
                             } )
-                    .ToDictionary( g => g.Key.ToTypedRef(), g => g.AsEnumerable() );
+                    .ToDictionary( g => g.Key.ToValueTypedRef(), g => g.AsEnumerable() );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
@@ -102,10 +102,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                              DeclarationBuilder: INamedType namedTypeBuilder
                          } introduceDeclarationTransformation
                          && !transformationsByTarget.ContainsKey(
-                             introduceDeclarationTransformation.DeclarationBuilder.ToTypedRef().As<INamespaceOrNamedType>() ) )
+                             introduceDeclarationTransformation.DeclarationBuilder.ToValueTypedRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
-                        ProcessTransformationsOnType( namedTypeBuilder.ToTypedRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
+                        ProcessTransformationsOnType( namedTypeBuilder.ToValueTypedRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
                     }
                 }
             }
@@ -329,7 +329,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Additionally, add all introduced constructors to the list.
             foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
             {
-                var constructorBuilder = introducedConstructor.ToTypedRef().Target as ConstructorBuilder;
+                var constructorBuilder = introducedConstructor.ToValueTypedRef().Target as ConstructorBuilder;
 
                 if ( constructorBuilder is null or { ReplacedImplicit.IsDefault: false } )
                 {

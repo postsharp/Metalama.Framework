@@ -43,7 +43,7 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
+    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this._sourceMember.DeclaringSyntaxReferences;
 

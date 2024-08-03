@@ -40,7 +40,7 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
                 references: this._compilation.References.OfType<PortableExecutableReference>(),
                 options: (CSharpCompilationOptions?) this._compilation.Options.WithMetadataImportOptions( MetadataImportOptions.All ) );
 
-            return new CacheableContext( compilation, this );
+            return new CacheableContext( compilation.GetCompilationContext(), this );
         }
         else
         {
@@ -57,20 +57,22 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
         private readonly CacheableTemplateDiscoveryContextProvider _parent;
         private readonly Lazy<CompilationModel> _compilationModel;
 
-        public CacheableContext( Compilation compilation, CacheableTemplateDiscoveryContextProvider parent )
+        public CacheableContext( CompilationContext compilationContext, CacheableTemplateDiscoveryContextProvider parent )
         {
             this._parent = parent;
-            this.Compilation = compilation;
+            this.CompilationContext = compilationContext;
 
             this._compilationModel = new Lazy<CompilationModel>(
                 () => CompilationModel.CreateInitialInstance(
-                    new ProjectModel( compilation, parent._serviceProvider ),
+                    new ProjectModel( compilationContext.Compilation, parent._serviceProvider ),
                     this.Compilation,
                     new CompilationModelOptions( true ),
                     "CacheableTemplateDiscoveryContextProvider" ) );
         }
 
-        public Compilation Compilation { get; }
+        public Compilation Compilation => this.CompilationContext.Compilation;
+
+        public CompilationContext CompilationContext { get; }
 
         public CompilationModel GetCompilationModel( ICompilation sourceCompilation ) => this._compilationModel.Value;
 

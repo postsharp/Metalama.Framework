@@ -92,11 +92,11 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
     [Memo]
-    private BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+    private BoxedRef<IMethod> BoxedRef => new( this.ToValueTypedRef() );
 
     IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToValueTypedRef().As<ICompilationElement>();
+    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
     IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.BoxedRef;
 

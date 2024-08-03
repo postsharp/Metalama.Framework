@@ -253,11 +253,13 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
         };
 
     [Memo]
-    public BoxedRef<INamedType> BoxedRef => new BoxedRef<INamedType>( this.ToValueTypedRef() );
+    public BoxedRef<INamedType> BoxedRef => new( this.ToValueTypedRef() );
 
     public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
 
     IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+
+    IRef<IType> IType.ToRef() => this.BoxedRef;
 
     public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

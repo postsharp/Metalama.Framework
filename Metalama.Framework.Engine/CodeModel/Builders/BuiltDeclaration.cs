@@ -44,7 +44,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     public override IAttributeCollection Attributes
         => new AttributeCollection(
             this,
-            this.GetCompilationModel().GetAttributeCollection( this.ToTypedRef<IDeclaration>() ) );
+            this.GetCompilationModel().GetAttributeCollection( this.ToValueTypedRef<IDeclaration>() ) );
 
     public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 

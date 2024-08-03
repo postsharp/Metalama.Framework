@@ -19,7 +19,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
     // This field is set only when _parent is the ISourceAssemblySymbol.
     private readonly IModuleSymbol? _moduleSymbol;
 
-    public AttributeUpdatableCollection( CompilationModel compilation, Ref<IDeclaration> parent, IModuleSymbol? moduleSymbol ) : base( compilation )
+    public AttributeUpdatableCollection( CompilationModel compilation, in Ref<IDeclaration> parent, IModuleSymbol? moduleSymbol ) : base( compilation )
     {
         this._parent = parent;
         this._moduleSymbol = moduleSymbol;

@@ -14,7 +14,7 @@ public class Aspect : TypeAspect
             {
                 var typeParameter = methodBuilder.AddTypeParameter( "T" );
                 typeParameter.TypeKindConstraint = TypeKindConstraint.Struct;
-                var typeParameterArray = TypeFactory.MakeArrayType( typeParameter );
+                var typeParameterArray = typeParameter.MakeArrayType();
                 methodBuilder.AddParameter( "arg", typeParameterArray );
             } );
     }

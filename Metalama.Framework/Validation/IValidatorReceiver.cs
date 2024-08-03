@@ -174,6 +174,9 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// </summary>
     IValidatorReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
 
+    IValidatorReceiver<TOut> OfType<TOut>()
+        where TOut : class, IDeclaration;
+
     /// <summary>
     /// Projects the declarations in the current set by adding a tag for each declaration, and returns a <see cref="IValidatorReceiver{TDeclaration,TTag}"/>.
     /// Methods of this interface have overloads that accept this tag. 
@@ -298,6 +301,9 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// This overload does supplies the tag to the <paramref name="predicate"/> delegate.
     /// </summary>
     IValidatorReceiver<TDeclaration, TTag> Where( Func<TDeclaration, TTag, bool> predicate );
+
+    new IValidatorReceiver<TOut, TTag> OfType<TOut>()
+        where TOut : class, IDeclaration;
 
     /// <summary>
     /// Projects the declarations in the current set by replacing the tag of each declaration.

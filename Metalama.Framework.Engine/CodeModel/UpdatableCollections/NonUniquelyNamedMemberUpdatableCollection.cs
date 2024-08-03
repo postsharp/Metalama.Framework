@@ -44,6 +44,6 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
         };
 
-    protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType )
+    protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringType )
         : base( compilation, declaringType ) { }
 }

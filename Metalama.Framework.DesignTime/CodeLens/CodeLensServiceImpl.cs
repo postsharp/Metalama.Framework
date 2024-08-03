@@ -71,7 +71,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return null;
         }
 
-        var nullableSymbol = symbolId.ResolveToSymbolOrNull( compilation );
+        var nullableSymbol = symbolId.ResolveToSymbolOrNull( compilation.GetCompilationContext() );
 
         if ( nullableSymbol == null )
         {

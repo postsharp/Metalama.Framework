@@ -83,17 +83,17 @@ public static class DeclarationExtensions
                 IHasAccessors member => member.Accessors,
                 _ => Enumerable.Empty<IDeclaration>()
             } );
-    
-    internal static Ref<ICompilationElement> ToTypedRef( this ISymbol symbol, CompilationContext compilationContext )
+
+    internal static Ref<ICompilationElement> ToValueTypedRef( this ISymbol symbol, CompilationContext compilationContext )
         => Ref.FromSymbol( symbol, compilationContext );
 
-    internal static Ref<TCompilationElement> ToTypedRef<TCompilationElement>( this ISymbol symbol, CompilationContext compilationContext )
+    internal static Ref<TCompilationElement> ToValueTypedRef<TCompilationElement>( this ISymbol symbol, CompilationContext compilationContext )
         where TCompilationElement : class, ICompilationElement
         => Ref.FromSymbol( symbol, compilationContext ).As<TCompilationElement>();
 
-    internal static Ref<TCompilationElement> ToTypedRef<TCompilationElement>( this TCompilationElement compilationElement )
+    internal static Ref<TCompilationElement> ToValueTypedRef<TCompilationElement>( this TCompilationElement compilationElement )
         where TCompilationElement : class, ICompilationElement
-        => ((ICompilationElementImpl) compilationElement).ToRef().As<TCompilationElement>();
+        => ((ICompilationElementImpl) compilationElement).ToValueTypedRef().As<TCompilationElement>();
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
         => declaration.GetSymbol() is { } symbol
@@ -102,7 +102,7 @@ public static class DeclarationExtensions
 
     internal static MemberRef<T> ToMemberRef<T>( this T member )
         where T : class, INamedDeclaration
-        => new( member.ToTypedRef<IDeclaration>() );
+        => new( member.ToValueTypedRef<IDeclaration>() );
 
     internal static Location? GetDiagnosticLocation( this IDeclaration declaration )
         => declaration switch

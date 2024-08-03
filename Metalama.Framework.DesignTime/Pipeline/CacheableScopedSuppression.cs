@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
@@ -15,7 +16,7 @@ internal sealed class CacheableScopedSuppression : IScopedSuppression
 {
     public ISuppression Suppression { get; }
 
-    ISymbol? IScopedSuppression.GetScopeSymbolOrNull( Compilation compilation ) => this.DeclarationId.ResolveToSymbolOrNull( compilation );
+    ISymbol? IScopedSuppression.GetScopeSymbolOrNull( CompilationContext compilationContext ) => this.DeclarationId.ResolveToSymbolOrNull( compilationContext );
 
     public SerializableDeclarationId DeclarationId { get; }
 

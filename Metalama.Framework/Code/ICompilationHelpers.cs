@@ -25,5 +25,7 @@ namespace Metalama.Framework.Code
         bool DerivesFrom( INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default );
 
         bool TryConstructAttribute( IAttribute attribute, ScopedDiagnosticSink diagnosticSink, [NotNullWhen( true )] out Attribute? constructedAttribute );
+
+        Attribute ConstructAttribute( IAttribute attribute );
     }
 }

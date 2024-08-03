@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, ICompilationElementImpl
 {
-    Ref<IDeclaration> ToValueTypedRef();
+    new Ref<IDeclaration> ToValueTypedRef();
 
     /// <summary>
     /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxReference"/> syntaxes that declare the current declaration.

@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Aspects
         [Memo]
         public IAspectReceiver<T> Outbound
             => new RootAspectReceiver<T>(
-                this.Target.ToTypedRef(),
+                this.Target.ToValueTypedRef(),
                 this,
                 CompilationModelVersion.Current );
 

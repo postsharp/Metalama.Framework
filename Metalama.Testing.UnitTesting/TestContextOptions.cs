@@ -14,7 +14,7 @@ namespace Metalama.Testing.UnitTesting;
 /// method.
 /// </summary>
 [PublicAPI]
-public sealed record TestContextOptions
+public record TestContextOptions
 {
     public bool RequiresExclusivity { get; init; }
 

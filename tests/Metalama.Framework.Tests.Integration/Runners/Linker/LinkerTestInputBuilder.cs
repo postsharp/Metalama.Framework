@@ -271,7 +271,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         {
                             // This is replaced source element.
                             A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMember>( replacedMemberSymbol, CompilationContextFactory.GetInstance( inputCompilation ) ) );
+                                .Returns( new MemberRef<IMember>( replacedMemberSymbol, inputCompilation.GetCompilationContext() ) );
                         }
                         else
                         {

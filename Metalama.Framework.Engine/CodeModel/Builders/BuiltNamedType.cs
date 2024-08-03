@@ -38,7 +38,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(
             this,
-            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeBuilder.ToTypedRef<INamedType>(), false ) );
+            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeBuilder.ToValueTypedRef<INamedType>(), false ) );
 
     public IImplementedInterfaceCollection ImplementedInterfaces
         => new ImplementedInterfacesCollection(
@@ -50,6 +50,8 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public INamespace ContainingNamespace => this.TypeBuilder.ContainingNamespace;
 
     IRef<INamedType> INamedType.ToRef() => this.TypeBuilder.BoxedRef;
+
+    IRef<IType> IType.ToRef() => this.TypeBuilder.BoxedRef;
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.TypeBuilder.BoxedRef;
 

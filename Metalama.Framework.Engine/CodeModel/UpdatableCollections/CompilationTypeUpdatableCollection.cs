@@ -16,7 +16,7 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 {
     private readonly bool _includeNestedTypes;
 
-    public CompilationTypeUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType, bool includeNestedTypes ) : base(
+    public CompilationTypeUpdatableCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringType, bool includeNestedTypes ) : base(
         compilation,
         declaringType )
     {

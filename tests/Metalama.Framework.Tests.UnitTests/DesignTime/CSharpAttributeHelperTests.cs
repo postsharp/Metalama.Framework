@@ -586,7 +586,8 @@ namespace Test
             var semanticModel = await this._testFileDocument!.GetSemanticModelAsync();
             var symbolToBeDecorated = semanticModel!.GetDeclaredSymbol( syntaxNodeToBeDecorated );
 
-            var context = CompilationContextFactory.GetInstance( semanticModel.Compilation ).GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, syntaxNodeToBeDecorated );
+            var context = semanticModel.Compilation.GetCompilationContext()
+                .GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, syntaxNodeToBeDecorated );
 
             var resultSolution = await CSharpAttributeHelper.AddAttributeAsync(
                 this._testFileDocument,

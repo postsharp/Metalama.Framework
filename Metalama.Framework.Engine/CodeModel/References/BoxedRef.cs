@@ -15,15 +15,17 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal sealed class BoxedRef<T> : IRefImpl<T>
     where T : class, ICompilationElement
 {
-    private readonly Ref<IDeclaration> _underlying;
+    private readonly Ref<ICompilationElement> _underlying;
 
-    public BoxedRef( in Ref<IDeclaration> underlying )
+    public BoxedRef( in Ref<IDeclaration> underlying ) : this( underlying.As<ICompilationElement>() ) { }
+
+    public BoxedRef( in Ref<ICompilationElement> underlying )
     {
         if ( underlying.IsDefault )
         {
             throw new ArgumentNullException( nameof(underlying) );
         }
-        
+
         this._underlying = underlying;
     }
 

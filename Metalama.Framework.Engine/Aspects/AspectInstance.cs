@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Aspects
             ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = targetDeclaration.ToTypedRef();
+            this.TargetDeclaration = targetDeclaration.ToValueTypedRef();
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
             this.TargetDeclarationDepth = targetDeclaration.Depth;
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Aspects
             ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = targetDeclaration.ToTypedRef();
+            this.TargetDeclaration = targetDeclaration.ToValueTypedRef();
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
             this.TargetDeclarationDepth = targetDeclaration.GetCompilationModel().GetDepth( targetDeclaration );
@@ -201,6 +201,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         [Memo]
         public ImmutableArray<SyntaxTree> PredecessorTreeClosure
-            => this.Predecessors.SelectMany( p => (p.Instance as IAspectPredecessorImpl)?.PredecessorTreeClosure ?? ImmutableArray<SyntaxTree>.Empty ).Distinct().ToImmutableArray();
+            => this.Predecessors.SelectMany( p => (p.Instance as IAspectPredecessorImpl)?.PredecessorTreeClosure ?? ImmutableArray<SyntaxTree>.Empty )
+                .Distinct()
+                .ToImmutableArray();
     }
 }

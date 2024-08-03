@@ -9,6 +9,7 @@ namespace Metalama.Framework.Engine.Services
     {
         private static readonly WeakCache<Compilation, CompilationContext> _instances = new();
 
-        public static CompilationContext GetInstance( Compilation compilation ) => _instances.GetOrAdd( compilation, c => new CompilationContext( c ) );
+        public static CompilationContext GetCompilationContext( this Compilation compilation )
+            => _instances.GetOrAdd( compilation, c => new CompilationContext( c ) );
     }
 }

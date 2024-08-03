@@ -86,9 +86,11 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
     public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
 
     [Memo]
-    public BoxedRef<ITypeParameter> BoxedRef => new BoxedRef<ITypeParameter>( this.ToValueTypedRef() );
+    public BoxedRef<ITypeParameter> BoxedRef => new( this.ToValueTypedRef() );
 
     public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
 
     IRef<ITypeParameter> ITypeParameter.ToRef() => this.BoxedRef;
+
+    IRef<IType> IType.ToRef() => this.BoxedRef;
 }

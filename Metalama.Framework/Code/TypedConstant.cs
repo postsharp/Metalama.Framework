@@ -15,7 +15,7 @@ namespace Metalama.Framework.Code
     /// for instance <see cref="IParameter.DefaultValue"/>, or attribute arguments.
     /// </summary>
     [CompileTime]
-    public readonly struct TypedConstant : IExpression
+    public readonly struct TypedConstant : IExpression, IEquatable<TypedConstant>
     {
         // ReSharper disable once UnassignedReadonlyField
 
@@ -88,6 +88,8 @@ namespace Metalama.Framework.Code
                 return this._value;
             }
         }
+
+        public bool IsArray => this.Value is ImmutableArray<TypedConstant>;
 
         public ImmutableArray<TypedConstant> Values => (this.Value as ImmutableArray<TypedConstant>?).GetValueOrDefault();
 
@@ -254,7 +256,25 @@ namespace Metalama.Framework.Code
             return true;
         }
 
-        public override string ToString() => this._type != null ? this._value?.ToString() ?? "default" : "(uninitialized)";
+        public override string ToString()
+        {
+            if ( !this.IsInitialized )
+            {
+                return "<uninitialized>";
+            }
+            else if ( this._value == null )
+            {
+                return $"({this._type}) null";
+            }
+            else if ( this._value is ImmutableArray<TypedConstant> array )
+            {
+                return $"({this._type}) [" + string.Join( ", ", array ) + "]";
+            }
+            else
+            {
+                return $"({this._type}) {this._value}";
+            }
+        }
 
         private static IType GetIType( Type type ) => TypeFactory.GetType( FixRuntimeType( type ) );
 
@@ -277,10 +297,22 @@ namespace Metalama.Framework.Code
 
         public static TypedConstant Create( object? value ) => Create( value, GetValueType( value ) );
 
-        public static TypedConstant Create( object? value, Type type ) => Create( value, GetIType( type ) );
-
-        public static TypedConstant Create( object? value, IType type )
+        public static TypedConstant Create( object? value, Type? type )
         {
+            if ( type == null )
+            {
+                return Create( value, GetValueType( value ) );
+            }
+            else
+            {
+                return Create( value, GetIType( type ) );
+            }
+        }
+
+        public static TypedConstant Create( object? value, IType? type )
+        {
+            type ??= GetIType( GetValueType( value ) );
+
             var fixedValue = FixValue( value );
 
             CheckAcceptableType( type, fixedValue, true, ((ICompilationInternal) type.Compilation).Factory );
@@ -315,5 +347,100 @@ namespace Metalama.Framework.Code
                 };
             }
         }
+
+        public bool Equals( TypedConstant other )
+        {
+            if ( !this.IsInitialized && !other.IsInitialized )
+            {
+                return true;
+            }
+            else if ( !this.IsInitialized || !other.IsInitialized )
+            {
+                return false;
+            }
+
+            if ( !this._type!.Equals( other._type ) )
+            {
+                return false;
+            }
+
+            if ( this.Value == null && other.Value == null )
+            {
+                return true;
+            }
+
+            if ( this.Value == null || other.Value == null )
+            {
+                return false;
+            }
+
+            switch ( this.Value )
+            {
+                case ImmutableArray<TypedConstant> valueArray:
+                    if ( other.Value is ImmutableArray<TypedConstant> otherValueArray )
+                    {
+                        if ( valueArray.Length != otherValueArray.Length )
+                        {
+                            return false;
+                        }
+
+                        for ( var i = 0; i < valueArray.Length; i++ )
+                        {
+                            if ( !valueArray[i].Equals( otherValueArray[i] ) )
+                            {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                case IType type:
+                    return other.Value is IType otherType && type.Equals( otherType );
+
+                default:
+                    return this.Value.Equals( other.Value );
+            }
+        }
+
+        public override bool Equals( object? obj ) => obj is TypedConstant other && this.Equals( other );
+
+        public override int GetHashCode()
+        {
+            if ( !this.IsInitialized )
+            {
+                return 0;
+            }
+
+            var hashCode = HashCode.Combine( this._type );
+
+            switch ( this.Value )
+            {
+                case null:
+                    return hashCode;
+
+                case ImmutableArray<TypedConstant> valueArray:
+                    foreach ( var value in valueArray )
+                    {
+                        hashCode = HashCode.Combine( hashCode, value.GetHashCode() );
+                    }
+
+                    return hashCode;
+
+                case IType type:
+                    return type.GetHashCode();
+
+                default:
+                    return this.Value.GetHashCode();
+            }
+        }
+
+        public static bool operator ==( TypedConstant left, TypedConstant right ) => left.Equals( right );
+
+        public static bool operator !=( TypedConstant left, TypedConstant right ) => !left.Equals( right );
     }
 }
