@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     return true;
 
                 case AttributeSerializationData serializationData:
-                    attribute = new DeserializedAttribute( serializationData, compilation );
+                    attribute = compilation.Factory.GetDeserializedAttribute( serializationData );
 
                     return true;
 
@@ -194,7 +194,48 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        public bool TryGetAttributeSerializationData( CompilationContext compilationContext, out AttributeSerializationData? serializationData )
+        public bool TryGetAttributeSerializationDataKey( CompilationContext compilationContext, [NotNullWhen( true )] out object? serializationDataKey )
+        {
+            switch ( this.Target )
+            {
+                case null:
+                    // This happens when ResolveAttributeData was already called but was unsuccessful.
+
+                    serializationDataKey = null;
+
+                    return false;
+
+                case AttributeSyntax attributeSyntax:
+                    {
+                        var resolved = this.ResolveAttributeData( attributeSyntax, compilationContext );
+
+                        if ( resolved.Attribute == null || resolved.Parent == null )
+                        {
+                            serializationDataKey = null;
+
+                            return false;
+                        }
+
+                        serializationDataKey = resolved.Attribute;
+
+                        return true;
+                    }
+
+                case AttributeData:
+                case AttributeBuilder:
+                case AttributeSerializationData:
+                    serializationDataKey = this.Target;
+
+                    return true;
+
+                default:
+                    throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
+            }
+        }
+
+        public bool TryGetAttributeSerializationData(
+            CompilationContext compilationContext,
+            [NotNullWhen( true )] out AttributeSerializationData? serializationData )
         {
             switch ( this.Target )
             {

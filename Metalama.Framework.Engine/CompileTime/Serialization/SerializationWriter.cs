@@ -732,6 +732,7 @@ internal sealed class SerializationWriter
     {
         private readonly CompileTimeSerializer _serializer;
         private Dictionary<string, object?>? _values;
+        private Dictionary<string, object?>? _contextProperties;
 
         public Arguments( CompileTimeSerializer serializer )
         {
@@ -758,6 +759,8 @@ internal sealed class SerializationWriter
             => (IReadOnlyDictionary<string, object?>?) this._values ?? ImmutableDictionary<string, object?>.Empty;
 
         public CompilationContext CompilationContext => this._serializer.CompilationContext;
+
+        public Dictionary<string, object?> ContextProperties => this._contextProperties ??= new Dictionary<string, object>( StringComparer.Ordinal );
     }
 
     private sealed class ThrowingArguments : IArgumentsWriter

@@ -1,6 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime.Serialization;
+using Metalama.Framework.Engine.Services;
+using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
 
@@ -55,5 +59,40 @@ public class AttributeSerializationTests : SerializationTestsBase
 
         // Non-ref serialization must fail.
         Assert.Throws<CompileTimeSerializationException>( () => SerializeDeserialize( attribute, testContext ) );
+    }
+
+    [Fact]
+    public void AttributeDataFromDifferentCompilationModelsAreSame()
+    {
+        // This is to test that two models of the same compilation have identical attribute serialization keys.
+
+        var code = """
+                   public class TheAttribute : System.Attribute;
+
+                   [TheAttribute]
+                   public class C;
+
+                   """;
+
+        using var testContext = this.CreateTestContext( code );
+
+        var compilationModel1 = testContext.Compilation;
+        var attribute1 = compilationModel1.Types.OfName( "C" ).Single().Attributes.Single();
+
+        Assert.True( ((AttributeRef) attribute1.ToRef()).TryGetAttributeSerializationDataKey( compilationModel1.CompilationContext, out var attributeKey1 ) );
+
+        var compilationModel2 = testContext.CreateCompilationModel( testContext.Compilation.RoslynCompilation );
+        var attribute2 = compilationModel1.Types.OfName( "C" ).Single().Attributes.Single();
+
+        Assert.True( ((AttributeRef) attribute2.ToRef()).TryGetAttributeSerializationDataKey( compilationModel2.CompilationContext, out var attributeKey2 ) );
+
+        // Test that two serialization keys of the same attribute in two models resolve are identical. 
+        Assert.Same( attributeKey1, attributeKey2 );
+
+        // Test that two references to the same attribute resolve to the same IAttribute.
+        var array = new[] { attribute1.ToRef(), attribute1.ToRef() };
+        var roundtripArray = TestSerialization( testContext, array, testEquality: false );
+
+        Assert.Same( roundtripArray[0].GetTarget( compilationModel1 ), roundtripArray[1].GetTarget( compilationModel1 ) );
     }
 }

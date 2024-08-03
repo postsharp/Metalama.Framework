@@ -709,6 +709,7 @@ internal sealed class SerializationReader
         public Dictionary<string, object?>? Values { get; }
 
         private readonly CompileTimeSerializer _formatter;
+        private Dictionary<string, object?>? _contextProperties;
 
         public InstanceFields( CompileTimeSerializer formatter )
         {
@@ -822,6 +823,8 @@ internal sealed class SerializationReader
         }
 
         public CompilationContext CompilationContext => this._formatter.CompilationContext;
+
+        public Dictionary<string, object?> ContextProperties => this._contextProperties ??= new Dictionary<string, object?>( StringComparer.Ordinal );
     }
 
     private sealed class ObjRef

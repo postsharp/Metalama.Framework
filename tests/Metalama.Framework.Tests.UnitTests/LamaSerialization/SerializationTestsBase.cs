@@ -49,6 +49,16 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         protected T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null, bool testEquality = true )
         {
             using var testContext = this.CreateTestContext();
+
+            return TestSerialization( testContext, instance, assert, testEquality );
+        }
+
+        protected static T? TestSerialization<T>(
+            SerializationTestContext testContext,
+            T? instance,
+            Func<T?, T?, bool>? assert = null,
+            bool testEquality = true )
+        {
             var memoryStream = new MemoryStream();
             testContext.Serializer.Serialize( instance, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );

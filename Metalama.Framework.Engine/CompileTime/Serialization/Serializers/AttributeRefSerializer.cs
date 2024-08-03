@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Serialization;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 
@@ -18,11 +19,35 @@ public class AttributeRefSerializer : ReferenceTypeSerializer
     public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
     {
         var attributeRef = (AttributeRef) obj;
-        var compilationContext = ((ISerializationContext) constructorArguments).CompilationContext.AssertNotNull();
+        var serializationContext = (ISerializationContext) constructorArguments;
+        var compilationContext = serializationContext.CompilationContext.AssertNotNull();
 
-        if ( !attributeRef.TryGetAttributeSerializationData( compilationContext, out var serializationData ) )
+        // We're trying to deduplicate instances of the AttributeSerializationData class.
+
+        if ( !attributeRef.TryGetAttributeSerializationDataKey( compilationContext, out var serializationDataKey ) )
         {
             throw new AssertionFailedException( $"Cannot serialize the attribute '{attributeRef}'." );
+        }
+
+        const string contextProperty = "AttributeRefSerializer.Instances";
+        Dictionary<object, AttributeSerializationData> instances;
+
+        if ( serializationContext.ContextProperties.TryGetValue( contextProperty, out var attributeSerializationDataInstancesObj ) )
+        {
+            instances = (Dictionary<object, AttributeSerializationData>) attributeSerializationDataInstancesObj!;
+        }
+        else
+        {
+            instances = new Dictionary<object, AttributeSerializationData>();
+            serializationContext.ContextProperties.Add( contextProperty, instances );
+        }
+
+        if ( !instances.TryGetValue( serializationDataKey, out var serializationData ) )
+        {
+            if ( !attributeRef.TryGetAttributeSerializationData( compilationContext, out serializationData ) )
+            {
+                throw new AssertionFailedException( $"Cannot serialize the attribute '{attributeRef}'." );
+            }
         }
 
         constructorArguments.SetValue( "data", serializationData );

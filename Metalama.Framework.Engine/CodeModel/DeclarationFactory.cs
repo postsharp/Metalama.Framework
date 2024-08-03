@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -34,6 +35,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
     private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache;
+
+    private readonly ConcurrentDictionary<AttributeSerializationData, DeserializedAttribute> _deserializedAttributes = new();
 
     private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
     private readonly INamedType?[] _internalSpecialTypes = new INamedType?[(int) InternalSpecialType.Count];
@@ -812,4 +815,10 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             return this.GetAssembly( assemblySymbol );
         }
     }
+
+    internal DeserializedAttribute GetDeserializedAttribute( AttributeSerializationData serializationData )
+        => this._deserializedAttributes.GetOrAdd(
+            serializationData,
+            static ( data, compilation ) => new DeserializedAttribute( data, compilation ),
+            this._compilationModel );
 }
