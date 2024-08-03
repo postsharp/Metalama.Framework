@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -27,6 +28,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
+
+        [Memo]
+        private IRef<IType> BoxedRef => new BoxedRef<IType>( Ref.FromSymbol<ICompilationElement>( this.Symbol, this.Compilation.CompilationContext ) );
+
+        IRef<IType> IType.ToRef() => this.BoxedRef;
 
         public abstract TypeKind TypeKind { get; }
 

@@ -16,14 +16,14 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the target of the reference for the current execution context, or throws an exception if the reference cannot be resolved.
         /// </summary>
-        public static T GetTarget<T>( this IRef<T> reference, ReferenceResolutionOptions options )
+        public static T GetTarget<T>( this IRef<T> reference, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
             where T : class, ICompilationElement
             => reference.GetTarget( MetalamaExecutionContext.Current.Compilation, options );
 
         /// <summary>
         /// Gets the target of the reference for the current execution context, or returns <c>null</c> if the reference cannot be resolved.
         /// </summary>
-        public static T? GetTargetOrNull<T>( this IRef<T> reference, ReferenceResolutionOptions options )
+        public static T? GetTargetOrNull<T>( this IRef<T> reference, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
             where T : class, ICompilationElement
             => reference.GetTargetOrNull( MetalamaExecutionContext.Current.Compilation, options );
     }

@@ -51,6 +51,8 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     IRef<INamedType> INamedType.ToRef() => this.TypeBuilder.BoxedRef;
 
+    IRef<IType> IType.ToRef() => this.TypeBuilder.BoxedRef;
+
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.TypeBuilder.BoxedRef;
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;

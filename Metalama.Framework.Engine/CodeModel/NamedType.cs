@@ -236,9 +236,11 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private BoxedRef<INamedType> BoxedRef => new BoxedRef<INamedType>( this.ToValueTypedRef() );
-        
+        private BoxedRef<INamedType> BoxedRef => new( this.ToValueTypedRef() );
+
         IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+
+        IRef<IType> IType.ToRef() => this.BoxedRef;
 
         IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
 

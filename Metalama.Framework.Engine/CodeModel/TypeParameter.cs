@@ -115,10 +115,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 
         [Memo]
-        private BoxedRef<ITypeParameter> BoxedRef => new BoxedRef<ITypeParameter>( this.ToValueTypedRef() );
+        private BoxedRef<ITypeParameter> BoxedRef => new( this.ToValueTypedRef() );
 
         private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
 
         IRef<ITypeParameter> ITypeParameter.ToRef() => this.BoxedRef;
+
+        IRef<IType> IType.ToRef() => this.BoxedRef;
     }
 }

@@ -648,5 +648,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
 
+    IRef<IType> IType.ToRef() => this.BoxedRef;
+
     protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }
