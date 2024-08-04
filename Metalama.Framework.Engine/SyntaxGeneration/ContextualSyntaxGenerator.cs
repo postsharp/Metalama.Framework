@@ -393,13 +393,13 @@ internal sealed partial class ContextualSyntaxGenerator
         {
             return this.EnumValueExpression( enumType, typedConstant.Value! );
         }
-        else if ( typedConstant.Value is ImmutableArray<TypedConstant> immutableArray )
+        else if ( typedConstant.IsArray )
         {
             var elementType = typedConstant.Type.AssertCast<IArrayType>().ElementType;
 
             return this.ArrayCreationExpression(
                 this.Type( elementType ),
-                immutableArray.SelectAsReadOnlyList( item => this.TypedConstant( item ) ) );
+                typedConstant.Values.SelectAsReadOnlyList( item => this.TypedConstant( item ) ) );
         }
         else
         {
@@ -665,7 +665,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 case IArrayType arrayType:
                     return this.ArrayCreationExpression(
                         this.Type( arrayType.ElementType ),
-                        ((ImmutableArray<TypedConstant>) value).Select( x => GetValue( x.Value, x.Type ) ) );
+                        ((ImmutableArray<TypedConstant>) value).Select( x => GetValue( x.RawValue, x.Type ) ) );
 
                 default:
                     switch ( value )
@@ -695,7 +695,7 @@ internal sealed partial class ContextualSyntaxGenerator
             }
         }
 
-        return GetValue( typedConstant.Value, typedConstant.Type );
+        return GetValue( typedConstant.RawValue, typedConstant.Type );
     }
 
     public TypeParameterListSyntax? TypeParameterList( IMethod method, CompilationModel compilation )

@@ -24,7 +24,8 @@ namespace Metalama.Framework.Code
     {
         /// <summary>
         /// Gets a reference to the compilation, which can be used to identify the current declaration
-        /// in a different revision of the compilation.
+        /// in a different revision of the compilation. The reference object is compile-time serializable. It is guaranteed to
+        /// be deserializable in a different process, even with a different version of Metalama.
         /// </summary>
         /// <returns></returns>
         IRef<IDeclaration> ToRef();
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Code
         /// Gets a serializable identifier for the current declaration. This identifier is guaranteed to
         /// be deserializable in a different process, even with a different version of Metalama.
         /// </summary>
-        /// <returns></returns>
+        /// <seealso cref="ToRef"/>
         SerializableDeclarationId ToSerializableId();
 
         /// <summary>
