@@ -69,17 +69,15 @@ namespace Metalama.Framework.Code
         ref dynamic? IExpression.Value => ref RefHelper.Wrap( SyntaxBuilder.CurrentImplementation.TypedConstant( this ) );
 
         /// <summary>
-        /// Gets the default value.
+        /// Gets the raw value of the <see cref="TypedConstant"/>. If <see cref="IsArray"/> is <c>true</c>, this
+        /// property returns an <c>ImmutableArray&lt;TypedConstant&gt;</c>.
         /// </summary>
         /// <remarks>
         /// <para>
         /// For enum values, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the enum.
         /// </para>
-        /// <para>
-        /// The type <c>ImmutableArray&lt;TypedConstant&gt;</c> is used to represent an array. The <see cref="Values"/> is also set in this case.
-        /// </para>
         /// </remarks>
-        public object? Value
+        public object? RawValue
         {
             get
             {
@@ -89,9 +87,29 @@ namespace Metalama.Framework.Code
             }
         }
 
-        public bool IsArray => this.Value is ImmutableArray<TypedConstant>;
+        public bool IsArray => this.Type is { TypeKind: TypeKind.Array };
 
-        public ImmutableArray<TypedConstant> Values => (this.Value as ImmutableArray<TypedConstant>?).GetValueOrDefault();
+        public ImmutableArray<TypedConstant> Values
+        {
+            get
+            {
+                var values = this._value as ImmutableArray<TypedConstant>? ?? default;
+
+                if ( !values.IsDefault )
+                {
+                    return values;
+                }
+                else if ( !this.IsArray )
+                {
+                    throw new InvalidOperationException( "The TypedConstant does not represent an array." );
+                }
+                else
+                {
+                    // We have a null array.
+                    return default;
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypedConstant"/> struct that represents the fact that the value
@@ -325,6 +343,61 @@ namespace Metalama.Framework.Code
         internal static TypedConstant UnwrapOrCreate( object? value, IType type )
             => value is TypedConstant typedConstant ? typedConstant : new TypedConstant( value, type );
 
+        /// <summary>
+        /// Gets the <see cref="Value"/> for non-array types. For array types, get an array of a primitive type (e.g. <c>int[]</c>)
+        /// instead of an array of <see cref="TypedConstant"/>.
+        /// </summary>
+        public object? Value
+        {
+            get
+            {
+                this.CheckInitialized();
+
+                if ( this._value == null )
+                {
+                    return null;
+                }
+
+                if ( !this.IsArray )
+                {
+                    return this._value;
+                }
+                else
+                {
+                    var elementType = ((IArrayType) this.Type).ElementType;
+
+                    if ( elementType is { TypeKind: TypeKind.Enum } )
+                    {
+                        elementType = ((INamedType) elementType).UnderlyingType;
+                    }
+
+                    var array = (ImmutableArray<TypedConstant>) this._value!;
+
+                    return elementType.SpecialType switch
+                    {
+                        SpecialType.Boolean => GetTypedArray<bool>( array ),
+                        SpecialType.Byte => GetTypedArray<byte>( array ),
+                        SpecialType.SByte => GetTypedArray<sbyte>( array ),
+                        SpecialType.Int16 => GetTypedArray<short>( array ),
+                        SpecialType.UInt16 => GetTypedArray<ushort>( array ),
+                        SpecialType.Int32 => GetTypedArray<int>( array ),
+                        SpecialType.UInt32 => GetTypedArray<uint>( array ),
+                        SpecialType.Int64 => GetTypedArray<long>( array ),
+                        SpecialType.UInt64 => GetTypedArray<ulong>( array ),
+                        SpecialType.String => GetTypedArray<string>( array ),
+                        SpecialType.Double => GetTypedArray<double>( array ),
+                        SpecialType.Single => GetTypedArray<float>( array ),
+                        _ => GetTypedArray<object>( array )
+                    };
+
+                    static T[] GetTypedArray<T>( ImmutableArray<TypedConstant> values )
+                    {
+                        return values.Select( x => (T) x.RawValue! ).ToArray();
+                    }
+                }
+            }
+        }
+
         public TypedConstant ForCompilation( ICompilation compilation )
         {
             if ( !this.IsInitialized )
@@ -337,13 +410,13 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                return this.Value switch
+                return this._value switch
                 {
                     IType type => Create( type.ForCompilation( compilation ), this.Type.ForCompilation( compilation ) ),
                     ImmutableArray<TypedConstant> array => Create(
                         array.Select( i => i.ForCompilation( compilation ) ).ToImmutableArray(),
                         this.Type.ForCompilation( compilation ) ),
-                    _ => Create( this.Value, this.Type.ForCompilation( compilation ) )
+                    _ => Create( this._value, this.Type.ForCompilation( compilation ) )
                 };
             }
         }
@@ -364,20 +437,20 @@ namespace Metalama.Framework.Code
                 return false;
             }
 
-            if ( this.Value == null && other.Value == null )
+            if ( this._value == null && other._value == null )
             {
                 return true;
             }
 
-            if ( this.Value == null || other.Value == null )
+            if ( this._value == null || other._value == null )
             {
                 return false;
             }
 
-            switch ( this.Value )
+            switch ( this._value )
             {
                 case ImmutableArray<TypedConstant> valueArray:
-                    if ( other.Value is ImmutableArray<TypedConstant> otherValueArray )
+                    if ( other._value is ImmutableArray<TypedConstant> otherValueArray )
                     {
                         if ( valueArray.Length != otherValueArray.Length )
                         {
@@ -400,10 +473,10 @@ namespace Metalama.Framework.Code
                     }
 
                 case IType type:
-                    return other.Value is IType otherType && type.Equals( otherType );
+                    return other._value is IType otherType && type.Equals( otherType );
 
                 default:
-                    return this.Value.Equals( other.Value );
+                    return this._value.Equals( other._value );
             }
         }
 
@@ -418,7 +491,7 @@ namespace Metalama.Framework.Code
 
             var hashCode = HashCode.Combine( this._type );
 
-            switch ( this.Value )
+            switch ( this._value )
             {
                 case null:
                     return hashCode;
@@ -435,7 +508,7 @@ namespace Metalama.Framework.Code
                     return type.GetHashCode();
 
                 default:
-                    return this.Value.GetHashCode();
+                    return this._value.GetHashCode();
             }
         }
 

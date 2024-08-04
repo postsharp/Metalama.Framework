@@ -11,7 +11,7 @@ internal class TypedConstantRefSerializer : ValueTypeSerializer<TypedConstantRef
 {
     public override void SerializeObject( TypedConstantRef obj, IArgumentsWriter constructorArguments )
     {
-        constructorArguments.SetValue( "value", obj.Value );
+        constructorArguments.SetValue( "value", obj.RawValue );
         constructorArguments.SetValue( "type", obj.Type );
     }
 

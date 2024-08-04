@@ -45,6 +45,59 @@ namespace Metalama.Framework.Code
         }
 
         /// <summary>
+        /// Tries to gets the value of an argument given its name, considering both <see cref="IAttributeData.NamedArguments"/> and <see cref="IAttributeData.ConstructorArguments"/>.
+        /// For constructor arguments, the name of the corresponding parameter is taken into account. Comparisons are case-insensitive.
+        /// In case of ambiguity, the first match wins.
+        /// </summary>
+        public static T? GetArgumentValue<T>( this IAttribute attribute, string name, T? defaultValue = default )
+        {
+            if ( attribute.TryGetArgumentValue( name, out T? value ) )
+            {
+                return value;
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// Tries to gets the value of an argument given its name, considering both <see cref="IAttributeData.NamedArguments"/> and <see cref="IAttributeData.ConstructorArguments"/>.
+        /// For constructor arguments, the name of the corresponding parameter is taken into account. Comparisons are case-insensitive.
+        /// In case of ambiguity, the first match wins.
+        /// </summary>
+        public static bool TryGetArgumentValue<T>( this IAttribute attribute, string name, [MaybeNullWhen( false )] out T value )
+        {
+            foreach ( var argument in attribute.NamedArguments )
+            {
+                if ( string.Equals( argument.Key, name, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    value = (T) argument.Value.Value!;
+
+                    return true;
+                }
+            }
+
+            for ( var index = 0; index < attribute.ConstructorArguments.Length; index++ )
+            {
+                var parameter = attribute.Constructor.Parameters[index];
+
+                if ( string.Equals( parameter.Name, name, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    var argument = attribute.ConstructorArguments[index];
+
+                    value = (T) argument.Value!;
+
+                    return true;
+                }
+            }
+
+            value = default;
+
+            return false;
+        }
+
+        /// <summary>
         /// Tries to construct an instance of the attribute represented by the current <see cref="IAttribute"/>. The attribute type
         /// must not be a run-time-only type.
         /// </summary>
