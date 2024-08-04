@@ -4,10 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Diagnostics;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 
 namespace Metalama.Framework.Code
 {
@@ -50,11 +47,8 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Tries to gets the value of an argument given its name, considering both <see cref="IAttributeData.NamedArguments"/> and <see cref="IAttributeData.ConstructorArguments"/>.
         /// For constructor arguments, the name of the corresponding parameter is taken into account. Comparisons are case-insensitive.
-        /// In case of ambiguity, the first match wins. T
+        /// In case of ambiguity, the first match wins.
         /// </summary>
-        /// <param name="attribute"></param>
-        /// <param name="name"></param>
-        /// <returns>The value, or <c>null</c> if it was not found.</returns>
         public static T? GetArgumentValue<T>( this IAttribute attribute, string name, T? defaultValue = default )
         {
             if ( attribute.TryGetArgumentValue( name, out T? value ) )
@@ -72,9 +66,6 @@ namespace Metalama.Framework.Code
         /// For constructor arguments, the name of the corresponding parameter is taken into account. Comparisons are case-insensitive.
         /// In case of ambiguity, the first match wins.
         /// </summary>
-        /// <param name="attribute"></param>
-        /// <param name="name"></param>
-        /// <returns><c>true</c> if an argument named <paramref name="name"/> was found and was of type <see cref="T"/>, otherwise <c>false</c>.</returns>
         public static bool TryGetArgumentValue<T>( this IAttribute attribute, string name, [MaybeNullWhen( false )] out T value )
         {
             foreach ( var argument in attribute.NamedArguments )
