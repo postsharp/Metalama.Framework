@@ -88,51 +88,69 @@ internal sealed partial class ProjectVersionProvider : IGlobalService, IDisposab
                     return;
                 }
 
-                if ( dependencyGraph.DependenciesByMasterProject.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
+                if ( !dependencyGraph.DependenciesByMasterProject.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
                 {
-                    // Process syntax trees.
-                    foreach ( var syntaxTreeChangeEntry in currentCompilationChanges.SyntaxTreeChanges )
+                    // There is no dependency on this compilation, but we still process it in case there are global attributes.
+                    dependenciesOfCompilation = new( currentCompilationChanges.ProjectKey );
+                }
+
+                var invalidatedAllTrees = false;
+
+                // Process syntax trees.
+                foreach ( var (_, syntaxTreeChange) in currentCompilationChanges.SyntaxTreeChanges )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if ( syntaxTreeChange.SyntaxTreeChangeKind == SyntaxTreeChangeKind.Removed )
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
+                        dependencyGraphBuilder.RemoveDependentSyntaxTree( syntaxTreeChange.FilePath );
+                    }
 
-                        var syntaxTreeChange = syntaxTreeChangeEntry.Value;
+                    if ( invalidatedAllTrees )
+                    {
+                        continue;
+                    }
 
-                        if ( syntaxTreeChange.SyntaxTreeChangeKind is SyntaxTreeChangeKind.Changed or SyntaxTreeChangeKind.Removed )
+                    if ( syntaxTreeChange.EitherHasGlobalAttributes )
+                    {
+                        // Changing file that contains or contained global attributes causes invalidation of all syntax trees.
+                        // We could instead limit this to only the trees that access compilation attributes or use options,
+                        // but editing a file with global attributes should be relatively rare, so that's probably not worth it.
+                        foreach ( var tree in currentCompilationChanges.NewProjectVersion.Compilation.SyntaxTrees )
                         {
-                            if ( dependenciesOfCompilation.DependenciesByMasterFilePath.TryGetValue(
-                                    syntaxTreeChange.FilePath,
-                                    out var dependenciesOfSyntaxTree ) )
-                            {
-                                foreach ( var dependentSyntaxTree in dependenciesOfSyntaxTree.DependentFilePaths )
-                                {
-                                    invalidateAction( dependentSyntaxTree );
-                                }
-                            }
-
-                            if ( syntaxTreeChange.SyntaxTreeChangeKind == SyntaxTreeChangeKind.Removed )
-                            {
-                                dependencyGraphBuilder.RemoveDependentSyntaxTree( syntaxTreeChange.FilePath );
-                            }
+                            invalidateAction( tree.FilePath );
                         }
 
-                        // Process partial types.
-                        foreach ( var partialTypeChange in syntaxTreeChange.PartialTypeChanges )
+                        invalidatedAllTrees = true;
+                        continue;
+                    }
+
+                    if ( syntaxTreeChange.SyntaxTreeChangeKind is SyntaxTreeChangeKind.Changed or SyntaxTreeChangeKind.Removed )
+                    {
+                        if ( dependenciesOfCompilation.DependenciesByMasterFilePath.TryGetValue(
+                                syntaxTreeChange.FilePath,
+                                out var dependenciesOfSyntaxTree ) )
                         {
-                            if ( dependenciesOfCompilation.DependenciesByMasterPartialType.TryGetValue(
-                                    partialTypeChange.Type,
-                                    out var dependenciesOfPartialType ) )
+                            foreach ( var dependentSyntaxTree in dependenciesOfSyntaxTree.DependentFilePaths )
                             {
-                                foreach ( var dependentSyntaxTree in dependenciesOfPartialType.DependentFilePaths )
-                                {
-                                    invalidateAction( dependentSyntaxTree );
-                                }
+                                invalidateAction( dependentSyntaxTree );
                             }
                         }
                     }
-                }
-                else
-                {
-                    // There is no dependency on this compilation, but there may be on recursively referenced compilations.
+
+                    // Process partial types.
+                    foreach ( var partialTypeChange in syntaxTreeChange.PartialTypeChanges )
+                    {
+                        if ( dependenciesOfCompilation.DependenciesByMasterPartialType.TryGetValue(
+                                partialTypeChange.Type,
+                                out var dependenciesOfPartialType ) )
+                        {
+                            foreach ( var dependentSyntaxTree in dependenciesOfPartialType.DependentFilePaths )
+                            {
+                                invalidateAction( dependentSyntaxTree );
+                            }
+                        }
+                    }
                 }
 
                 // Process references.

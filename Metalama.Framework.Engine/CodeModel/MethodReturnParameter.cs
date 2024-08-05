@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol? Symbol => null;
 
-        internal override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().CompilationContext );
+        internal override Ref<IDeclaration> ToValueTypedRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().CompilationContext );
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
             => this.DeclaringMethod.GetDerivedDeclarations( options ).Select( d => ((IMethod) d).ReturnParameter );
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => new AttributeCollection(
                 this,
                 this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new AttributeRef( a, this.ToRef(), this.Compilation.CompilationContext ) )
+                    .Select( a => new AttributeRef( a, this.ToValueTypedRef(), this.Compilation.CompilationContext ) )
                     .ToReadOnlyList() );
 
         public override bool IsReturnParameter => true;

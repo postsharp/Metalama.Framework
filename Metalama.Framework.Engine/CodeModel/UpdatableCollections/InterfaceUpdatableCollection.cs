@@ -16,7 +16,7 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
 
     public ImmutableArray<IntroduceInterfaceTransformation> Introductions { get; private set; } = ImmutableArray<IntroduceInterfaceTransformation>.Empty;
 
-    public InterfaceUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation )
+    public InterfaceUpdatableCollection( CompilationModel compilation, in Ref<INamedType> declaringType ) : base( compilation )
     {
         this._declaringType = declaringType;
     }
@@ -24,7 +24,7 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
     public void Add( IntroduceInterfaceTransformation introduction )
     {
         this.EnsureComplete();
-        this.AddItem( introduction.InterfaceType.ToTypedRef() );
+        this.AddItem( introduction.InterfaceType.ToValueTypedRef() );
 
         this.Introductions = this.Introductions.Add( introduction );
     }
@@ -49,7 +49,7 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
             case INamedTypeBuilder builder:
                 foreach ( var i in builder.ImplementedInterfaces )
                 {
-                    action( i.ToTypedRef() );
+                    action( i.ToValueTypedRef() );
                 }
 
                 break;

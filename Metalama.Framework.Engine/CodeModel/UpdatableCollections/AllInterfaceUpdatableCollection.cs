@@ -17,7 +17,7 @@ internal sealed class AllInterfaceUpdatableCollection : UpdatableDeclarationColl
     // TODO: This property is written but never read.
     private ImmutableArray<IntroduceInterfaceTransformation> Introductions { get; set; } = ImmutableArray<IntroduceInterfaceTransformation>.Empty;
 
-    public AllInterfaceUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation )
+    public AllInterfaceUpdatableCollection( CompilationModel compilation, in Ref<INamedType> declaringType ) : base( compilation )
     {
         this._declaringType = declaringType;
     }
@@ -25,7 +25,7 @@ internal sealed class AllInterfaceUpdatableCollection : UpdatableDeclarationColl
     public void Add( IntroduceInterfaceTransformation introduction )
     {
         this.EnsureComplete();
-        this.AddItem( introduction.InterfaceType.ToTypedRef() );
+        this.AddItem( introduction.InterfaceType.ToValueTypedRef() );
 
         this.Introductions = this.Introductions.Add( introduction );
     }

@@ -40,5 +40,7 @@ namespace Metalama.Framework.Code
 
         [Obsolete( "Use ContainingNamespace." )]
         INamespace? ParentNamespace { get; }
+
+        new IRef<INamespace> ToRef();
     }
 }

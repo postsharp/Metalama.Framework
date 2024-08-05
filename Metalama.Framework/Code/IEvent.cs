@@ -57,5 +57,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <returns>An <see cref="EventInfo"/> that can be used only in run-time code.</returns>
         EventInfo ToEventInfo();
+
+        new IRef<IEvent> ToRef();
     }
 }

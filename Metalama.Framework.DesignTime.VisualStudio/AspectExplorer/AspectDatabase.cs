@@ -38,7 +38,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
 
         var aspectClasses = await analysisProcessApi.GetAspectClassesAsync( projectKey, cancellationToken );
 
-        var typeIdResolver = CompilationContextFactory.GetInstance( compilation ).SerializableTypeIdResolver;
+        var typeIdResolver = compilation.GetCompilationContext().SerializableTypeIdResolver;
 
         INamedTypeSymbol? ResolveOrNull( string serializableTypeId )
         {
@@ -99,7 +99,11 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
 
         var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetAspectInstancesAsync), cancellationToken );
 
-        var aspectInstances = await analysisProcessApi.GetAspectInstancesAsync( projectKey, aspectClass.ContainingAssembly.Name, aspectClass.GetSerializableTypeId().Id, cancellationToken );
+        var aspectInstances = await analysisProcessApi.GetAspectInstancesAsync(
+            projectKey,
+            aspectClass.ContainingAssembly.Name,
+            aspectClass.GetSerializableTypeId().Id,
+            cancellationToken );
 
         result[0] = GetAspectInstances().ToArray();
 
@@ -132,7 +136,12 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
                 var transformedDeclaration = ResolveToSymbol( transformation.TransformedDeclarationId, out var transformedDeclarationKind );
                 Invariant.Assert( transformedDeclarationKind == default );
 
-                yield return new AspectExplorerAspectTransformation2( targetDeclaration, targetDeclarationKind, transformation.Description, transformedDeclaration, transformation.FilePath );
+                yield return new AspectExplorerAspectTransformation2(
+                    targetDeclaration,
+                    targetDeclarationKind,
+                    transformation.Description,
+                    transformedDeclaration,
+                    transformation.FilePath );
             }
         }
 
@@ -145,7 +154,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
                 return null;
             }
 
-            var symbol = new SerializableDeclarationId( id ).ResolveToSymbolOrNull( compilation, out var isReturnParameter );
+            var symbol = new SerializableDeclarationId( id ).ResolveToSymbolOrNull( compilation.GetCompilationContext(), out var isReturnParameter );
 
             kind = isReturnParameter ? AspectExplorerDeclarationKind.ReturnParameter : AspectExplorerDeclarationKind.Default;
 

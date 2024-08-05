@@ -19,7 +19,7 @@ internal sealed class PromotedField : PropertyBuilder
 {
     internal IFieldImpl Field { get; }
 
-    public override Ref<IDeclaration> ToRef() => this.Field.ToRef();
+    public override Ref<IDeclaration> ToValueTypedRef() => this.Field.ToValueTypedRef();
 
     public override Writeability Writeability
         => this.Field.Writeability switch

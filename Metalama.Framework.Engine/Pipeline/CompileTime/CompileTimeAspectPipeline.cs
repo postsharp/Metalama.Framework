@@ -225,7 +225,7 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                     inheritableOptions,
                     annotations );
 
-                var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider, compilation.Compilation );
+                var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider, compilation.CompilationContext );
                 additionalResources = additionalResources.Add( resource );
             }
 

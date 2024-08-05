@@ -7,6 +7,7 @@ using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -43,7 +44,7 @@ internal sealed class SerializationWriter
         this._binaryWriter.WriteCompressedInteger( SerializationProtocol.CurrentVersion );
 
         // Assertion was added after importing code from PostSharp.
-        var cause = this._shouldReportExceptionCause ? SerializationCause.WithTypedValue( null, "root", obj.AssertNotNull().GetType() ) : null;
+        var cause = this._shouldReportExceptionCause ? SerializationCause.Root( obj.AssertNotNull().GetType() ) : null;
 
         this._serializationQueue.Enqueue( new SerializationQueueItem<object>( obj, cause ) );
 
@@ -80,9 +81,9 @@ internal sealed class SerializationWriter
         {
             CallOnSerialization( obj );
 
-            var serializer = type.IsArray ? null : this._formatter.SerializerProvider.GetSerializer( type );
+            var serializer = type.IsArray ? null : this._formatter.SerializerProvider.GetSerializer( type, cause );
 
-            objectInfo = new ObjectInfo( obj, this._objects.Count + 1 );
+            objectInfo = new ObjectInfo( this._formatter, obj, this._objects.Count + 1 );
 
             if ( !type.IsArray )
             {
@@ -112,7 +113,7 @@ internal sealed class SerializationWriter
         }
         catch ( Exception exception )
         {
-            throw CompileTimeSerializationException.CreateWithCause( "Serialization", obj.GetType(), exception, cause );
+            throw CompileTimeSerializationException.CreateWithCause( $"Serialization of object '{obj}'", cause, exception );
         }
     }
 
@@ -554,8 +555,8 @@ internal sealed class SerializationWriter
     private void WriteStruct( object value, SerializationCause? cause )
     {
         var type = value.GetType();
-        var serializer = this._formatter.SerializerProvider.GetSerializer( type );
-        var arguments = new Arguments();
+        var serializer = this._formatter.SerializerProvider.GetSerializer( type, cause );
+        var arguments = new Arguments( this._formatter );
 
         this.TrySerialize( serializer, value, arguments, ThrowingArguments.Instance, cause );
 
@@ -591,9 +592,7 @@ internal sealed class SerializationWriter
 
                 this._binaryWriter.WriteDottedString( argument.Key );
 
-                var newCause = this._shouldReportExceptionCause
-                    ? SerializationCause.WithTypedValue( cause, argument.Key, owningType )
-                    : cause;
+                var newCause = cause?.WithFieldAccess( owningType, argument.Key );
 
                 this.WriteTypedValue( argument.Value, writeInitializationArgumentsInline, newCause );
             }
@@ -680,7 +679,7 @@ internal sealed class SerializationWriter
                 var value = array.GetValue( indices );
 
                 // shouldn’t structs be written with type (inheritance is possible) 
-                var newCause = this._shouldReportExceptionCause ? SerializationCause.WithIndices( cause, i ) : cause;
+                var newCause = cause?.WithArrayAccess( i );
 
                 if ( elementType.IsValueType )
                 {
@@ -713,10 +712,10 @@ internal sealed class SerializationWriter
 
         public bool InitializationArgumentsWritten { get; set; }
 
-        public ObjectInfo( object o, int objectId )
+        public ObjectInfo( CompileTimeSerializer serializer, object o, int objectId )
         {
-            this.InitializationArguments = new Arguments();
-            this.ConstructorArguments = new Arguments();
+            this.InitializationArguments = new Arguments( serializer );
+            this.ConstructorArguments = new Arguments( serializer );
             this.Object = o;
             this.ObjectId = objectId;
         }
@@ -729,11 +728,16 @@ internal sealed class SerializationWriter
         public int GetHashCode( object obj ) => RuntimeHelpers.GetHashCode( obj );
     }
 
-    private sealed class Arguments : IArgumentsWriter
+    private sealed class Arguments : IArgumentsWriter, ISerializationContext
     {
-#pragma warning disable SA1401 // Fields should be private
-        public readonly Dictionary<string, object?> Values = new( StringComparer.Ordinal );
-#pragma warning restore SA1401 // Fields should be private
+        private readonly CompileTimeSerializer _serializer;
+        private Dictionary<string, object?>? _values;
+        private Dictionary<string, object?>? _contextProperties;
+
+        public Arguments( CompileTimeSerializer serializer )
+        {
+            this._serializer = serializer;
+        }
 
         public void SetValue( string name, object? value, string? scope = null )
         {
@@ -747,8 +751,16 @@ internal sealed class SerializationWriter
                 name = scope + "." + name;
             }
 
-            this.Values[name] = value;
+            this._values ??= new Dictionary<string, object?>( StringComparer.Ordinal );
+            this._values[name] = value;
         }
+
+        public IReadOnlyDictionary<string, object?> Values
+            => (IReadOnlyDictionary<string, object?>?) this._values ?? ImmutableDictionary<string, object?>.Empty;
+
+        public CompilationContext CompilationContext => this._serializer.CompilationContext;
+
+        public Dictionary<string, object?> ContextProperties => this._contextProperties ??= new Dictionary<string, object?>( StringComparer.Ordinal );
     }
 
     private sealed class ThrowingArguments : IArgumentsWriter

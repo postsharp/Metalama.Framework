@@ -17,14 +17,13 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             this.Description = description;
         }
 
-        public static SerializationCause WithTypedValue( SerializationCause? parent, string fieldName, Type type )
-        {
-            return new SerializationCause( $"{(parent != null ? "." : "")}{type.Name}::{fieldName}", parent );
-        }
+        public static SerializationCause Root( Type type ) => new( type.Name, null );
 
-        public static SerializationCause WithIndices( SerializationCause? parent, params int[] indices )
+        public SerializationCause WithFieldAccess( Type type, string fieldName ) => new( "." + fieldName, this );
+
+        public SerializationCause WithArrayAccess( params int[] indices )
         {
-            return new SerializationCause( string.Join( "", indices.SelectAsImmutableArray( i => $"[{i}]" ) ), parent );
+            return new SerializationCause( string.Join( "", indices.SelectAsImmutableArray( i => $"[{i}]" ) ), this );
         }
     }
 }

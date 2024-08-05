@@ -10,11 +10,21 @@ internal sealed class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
     where T : class, ICompilationElement
 {
     public override void SerializeObject( Ref<T> obj, IArgumentsWriter constructorArguments )
-        => constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
+    {
+        if ( !obj.IsDefault )
+        {
+            constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
+        }
+    }
 
     public override Ref<T> DeserializeObject( IArgumentsReader constructorArguments )
     {
-        var id = constructorArguments.GetValue<string>( "id" ).AssertNotNull();
+        var id = constructorArguments.GetValue<string>( "id" );
+
+        if ( id == null )
+        {
+            return default;
+        }
 
         return Ref.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
     }

@@ -20,6 +20,8 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public interface IType : ICompilationElement, IDisplayable, IEquatable<IType>
     {
+        IRef<IType> ToRef();
+
         /// <summary>
         /// Gets the kind of type.
         /// </summary>

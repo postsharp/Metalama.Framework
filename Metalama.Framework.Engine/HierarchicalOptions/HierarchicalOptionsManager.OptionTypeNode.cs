@@ -243,7 +243,7 @@ public sealed partial class HierarchicalOptionsManager
         private DeclarationNode GetOrAddDeclarationNode( IDeclaration declaration )
         {
             return this._optionsByDeclaration.GetOrAdd(
-                declaration.ToTypedRef(),
+                declaration.ToValueTypedRef(),
                 static ( _, ctx ) =>
                 {
                     var node = new DeclarationNode();
@@ -291,7 +291,7 @@ public sealed partial class HierarchicalOptionsManager
             bool createNodeIfEmpty = false )
         {
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToTypedRef(), out var node ) )
+            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToValueTypedRef(), out var node ) )
             {
                 if ( !declaration.BelongsToCurrentProject
                      && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out _ ) == true )
@@ -326,7 +326,7 @@ public sealed partial class HierarchicalOptionsManager
             // options may be project-dependency.
             var compilationOptions = this._defaultOptions;
 
-            if ( this._optionsByDeclaration.TryGetValue( compilation.ToTypedRef<IDeclaration>(), out var compilationNode )
+            if ( this._optionsByDeclaration.TryGetValue( compilation.ToValueTypedRef<IDeclaration>(), out var compilationNode )
                  && compilationNode.DirectOptions != null )
             {
                 compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation )

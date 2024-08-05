@@ -12,7 +12,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 {
     private readonly Ref<IHasParameters> _parent;
 
-    public ParameterUpdatableCollection( CompilationModel compilation, Ref<IHasParameters> parent ) : base( compilation )
+    public ParameterUpdatableCollection( CompilationModel compilation, in Ref<IHasParameters> parent ) : base( compilation )
     {
         this._parent = parent;
     }
@@ -69,11 +69,11 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 
         if ( lastParam is { Target: IParameterSymbol { IsParams: true } } )
         {
-            this.InsertItem( this.Count - 1, parameterBuilder.ToTypedRef<IParameter>() );
+            this.InsertItem( this.Count - 1, parameterBuilder.ToValueTypedRef<IParameter>() );
         }
         else
         {
-            this.AddItem( parameterBuilder.ToTypedRef<IParameter>() );
+            this.AddItem( parameterBuilder.ToValueTypedRef<IParameter>() );
         }
     }
 }

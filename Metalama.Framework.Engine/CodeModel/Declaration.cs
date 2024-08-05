@@ -34,12 +34,12 @@ namespace Metalama.Framework.Engine.CodeModel
         private IAttributeCollection AttributesImpl
             => new AttributeCollection(
                 this,
-                this.Compilation.GetAttributeCollection( this.ToTypedRef<IDeclaration>() ) );
+                this.Compilation.GetAttributeCollection( this.ToValueTypedRef<IDeclaration>() ) );
 
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
 
-        internal override Ref<IDeclaration> ToRef()
+        internal override Ref<IDeclaration> ToValueTypedRef()
         {
             this.OnUsingDeclaration();
 

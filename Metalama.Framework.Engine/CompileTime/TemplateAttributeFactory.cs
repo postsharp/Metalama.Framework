@@ -33,7 +33,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
     public bool TryGetTemplateAttribute(
         SerializableDeclarationId memberId,
-        Compilation compilation,
+        CompilationContext compilationContext,
         IDiagnosticAdder diagnosticAdder,
         [NotNullWhen( true )] out IAdviceAttribute? adviceAttribute )
     {
@@ -47,22 +47,22 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
                 memberId,
                 static ( m, ctx ) =>
                 {
-                    _ = ctx.me.TryGetTemplateAttributeById( m, ctx.compilation, ctx.diagnosticAdder, out var attribute );
+                    _ = ctx.me.TryGetTemplateAttributeById( m, ctx.compilationContext, ctx.diagnosticAdder, out var attribute );
 
                     return attribute;
                 },
-                (me: this, compilation, diagnosticAdder) );
+                (me: this, compilationContext, diagnosticAdder) );
 
         return adviceAttribute != null;
     }
 
     private bool TryGetTemplateAttributeById(
         SerializableDeclarationId memberId,
-        Compilation compilation,
+        CompilationContext compilationContext,
         IDiagnosticAdder diagnosticAdder,
         out IAdviceAttribute? adviceAttribute )
     {
-        var member = memberId.ResolveToSymbolOrNull( compilation );
+        var member = memberId.ResolveToSymbolOrNull( compilationContext );
 
         if ( member == null )
         {

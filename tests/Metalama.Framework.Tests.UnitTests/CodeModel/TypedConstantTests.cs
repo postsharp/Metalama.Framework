@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
     public sealed class TypedConstantTests : UnitTestClass
     {
         protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Formatted );
-        
+
         [Fact]
         public void Unassigned()
         {
@@ -105,12 +105,12 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var c = TypedConstant.Create( value );
 
-            Assert.Equal( immutableValue, c.Value );
+            Assert.Equal( immutableValue, c.RawValue );
             Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( value.GetType() ), c.Type );
 
             var ci = TypedConstant.Create( immutableValue, value.GetType() );
 
-            Assert.Equal( immutableValue, ci.Value );
+            Assert.Equal( immutableValue, ci.RawValue );
             Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( value.GetType() ), ci.Type );
         }
 
@@ -194,7 +194,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             array.SetValue( value, 0 );
             var c = TypedConstant.Create( array );
 
-            Assert.Equal( array.Cast<object>().Select( TypedConstant.Create ).ToImmutableArray(), c.Value );
+            Assert.Equal( array.Cast<object>().Select( TypedConstant.Create ).ToImmutableArray(), c.RawValue );
             Assert.Equal( emptyCompilation.Factory.GetTypeByReflectionType( array.GetType() ), c.Type );
         }
 
@@ -264,6 +264,31 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var ex = Assert.Throws<ArgumentException>( () => TypedConstant.Create( new object(), type ) );
             Assert.Contains( "The value should be of type", ex.Message, StringComparison.Ordinal );
+        }
+
+        [Theory]
+        [InlineData( (byte) 1 )]
+        [InlineData( (sbyte) 1 )]
+        [InlineData( (short) 1 )]
+        [InlineData( (ushort) 1 )]
+        [InlineData( 1 )]
+        [InlineData( (uint) 1 )]
+        [InlineData( (long) 1 )]
+        [InlineData( (ulong) 1 )]
+        [InlineData( (string) "1" )]
+        [InlineData( [new int[] { 1, 2, 3 }] )]
+        [InlineData( [new object?[] { 4, 5, null }] )]
+        public void RoundtripValue( object? value )
+        {
+            using var testContext = this.CreateTestContext();
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var typedConstant = TypedConstant.Create( value );
+            var roundtrip = typedConstant.Value;
+
+            Assert.Equal( value, roundtrip );
+            Assert.Equal( value.GetType(), roundtrip.GetType() );
         }
     }
 }

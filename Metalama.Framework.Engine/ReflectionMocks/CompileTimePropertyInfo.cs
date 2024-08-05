@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         private CompileTimePropertyInfo( IPropertyOrIndexer property )
         {
-            this.Target = property.ToTypedRef();
+            this.Target = property.ToValueTypedRef();
         }
 
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "PropertyInfo" );

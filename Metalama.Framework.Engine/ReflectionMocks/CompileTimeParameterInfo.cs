@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         private CompileTimeParameterInfo( IParameter parameter )
         {
-            this.Target = parameter.ToTypedRef();
+            this.Target = parameter.ToValueTypedRef();
         }
 
         public static ParameterInfo Create( IParameter parameter ) => new CompileTimeParameterInfo( parameter );

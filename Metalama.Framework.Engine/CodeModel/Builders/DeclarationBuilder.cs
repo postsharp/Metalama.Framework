@@ -101,13 +101,15 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public virtual void Freeze() => this.IsFrozen = true;
 
-    public virtual Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
+    public virtual Ref<IDeclaration> ToValueTypedRef() => Ref.FromBuilder( this );
+
+    public abstract IRef<IDeclaration> ToIRef();
 
     public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
-    IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+    IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 
@@ -138,7 +140,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         declaration ??= this;
 
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-            declaration.ToTypedRef(),
+            declaration.ToValueTypedRef(),
             context.Compilation,
             this.AttributeTargetSyntaxKind );
 
@@ -146,7 +148,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         {
             attributes = attributes.AddRange(
                 context.SyntaxGenerator.AttributesForDeclaration(
-                    method.ReturnParameter.ToTypedRef<IDeclaration>(),
+                    method.ReturnParameter.ToValueTypedRef<IDeclaration>(),
                     context.Compilation,
                     SyntaxKind.ReturnKeyword ) );
 
@@ -154,7 +156,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
             {
                 attributes = attributes.AddRange(
                     context.SyntaxGenerator.AttributesForDeclaration(
-                        method.Parameters[0].ToTypedRef<IDeclaration>(),
+                        method.Parameters[0].ToValueTypedRef<IDeclaration>(),
                         context.Compilation,
                         SyntaxKind.ParamKeyword ) );
             }

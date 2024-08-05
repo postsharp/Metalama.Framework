@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( declaration.BelongsToCurrentProject )
             {
-                return this.Annotations[declaration.ToTypedRef()].Select( i => i.Annotation as T ).WhereNotNull();
+                return this.Annotations[declaration.ToValueTypedRef()].Select( i => i.Annotation as T ).WhereNotNull();
             }
             else if ( this.ExternalAnnotationProvider != null )
             {
@@ -174,7 +174,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._debugLabel = debugLabel;
             this.ExternalAnnotationProvider = externalAnnotationProvider;
 
-            this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
+            this.CompilationContext = partialCompilation.Compilation.GetCompilationContext();
 
             this._staticConstructors =
                 ImmutableDictionary<Ref<INamedType>, IConstructorBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
@@ -367,7 +367,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 new CompilationTypeUpdatableCollection(
                     this,
-                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
+                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToValueTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
                     false ) );
 
         public INamedTypeCollection AllTypes
@@ -375,7 +375,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 new CompilationTypeUpdatableCollection(
                     this,
-                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
+                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToValueTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
                     true ) );
 
         [Memo]
@@ -433,7 +433,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( includeDerivedTypes )
             {
-                return this._derivedTypes.Value.GetDerivedTypes( type ).SelectMany( GetAllAttributesOfExactType );
+                return this._derivedTypes.Value.GetDerivedTypes( type ).Append( type ).SelectMany( GetAllAttributesOfExactType );
             }
             else
             {
@@ -442,7 +442,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             IEnumerable<IAttribute> GetAllAttributesOfExactType( INamedType t )
             {
-                return this._allMemberAttributesByType[t.ToTypedRef()]
+                return this._allMemberAttributesByType[t.ToValueTypedRef()]
                     .Select(
                         a =>
                         {
@@ -456,7 +456,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal int GetDepth( IDeclaration declaration )
         {
-            var reference = declaration.ToTypedRef();
+            var reference = declaration.ToValueTypedRef();
 
             if ( this._depthsCache.TryGetValue( reference, out var value ) )
             {
@@ -515,7 +515,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return 0;
             }
 
-            var reference = namedType.ToTypedRef<IDeclaration>();
+            var reference = namedType.ToValueTypedRef<IDeclaration>();
 
             if ( this._depthsCache.TryGetValue( reference, out var depth ) )
             {
@@ -564,7 +564,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.CompilationContext ).As<IDeclaration>();
+        internal override Ref<IDeclaration> ToValueTypedRef() => Ref.Compilation( this.CompilationContext ).As<IDeclaration>();
+
+        [Memo]
+        private BoxedRef<ICompilation> BoxedRef => new( this.ToValueTypedRef() );
+
+        IRef<ICompilation> ICompilation.ToRef() => this.BoxedRef;
+
+        IRef<IDeclaration> IDeclaration.ToRef() => this.BoxedRef;
+
+        IRef<IAssembly> IAssembly.ToRef() => this.BoxedRef;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -625,5 +634,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
 
         public override bool BelongsToCurrentProject => true;
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => new BoxedRef<ICompilation>( this.ToValueTypedRef() );
     }
 }

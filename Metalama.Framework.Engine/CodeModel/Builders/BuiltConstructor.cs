@@ -29,6 +29,8 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
+    IRef<IConstructor> IConstructor.ToRef() => this._constructorBuilder.BoxedRef;
+
     public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 
     bool IConstructor.IsPrimary => false;

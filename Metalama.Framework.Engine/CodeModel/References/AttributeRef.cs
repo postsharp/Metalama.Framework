@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 {
     internal sealed class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
-        private readonly Ref<IDeclaration> _declaringDeclaration;
+        private readonly Ref<IDeclaration> _containingDeclaration;
 
         private readonly object _originalTarget;
 
@@ -25,13 +26,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         bool IRefImpl.IsDefault => false;
 
-        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._declaringDeclaration.GetClosestSymbol( compilation );
+        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._containingDeclaration.GetClosestSymbol( compilation );
+
+        DeclarationRefTargetKind IRefImpl.TargetKind => DeclarationRefTargetKind.Default;
 
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
             // Find the parent declaration.
             var (attributes, symbol) =
-                this._declaringDeclaration.GetAttributeData( compilation );
+                this._containingDeclaration.GetAttributeData( compilation );
 
             // In the parent, find the AttributeData corresponding to the current item.
 
@@ -50,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return (attributeData, symbol);
         }
 
-        public AttributeRef( AttributeData attributeData, Ref<IDeclaration> declaringDeclaration, CompilationContext compilationContext )
+        public AttributeRef( AttributeData attributeData, Ref<IDeclaration> containingDeclaration, CompilationContext compilationContext )
         {
             // Note that Roslyn can return an AttributeData that does not belong to the same compilation
             // as the parent symbol, probably because of some bug or optimisation.
@@ -62,7 +65,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     .TranslateIfNecessary( compilationContext ),
                 compilationContext );
 
-            this._declaringDeclaration = declaringDeclaration;
+            this._containingDeclaration = containingDeclaration;
         }
 
         public AttributeRef(
@@ -74,21 +77,28 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
-            this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilationContext );
+            this._containingDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilationContext );
         }
 
-        public AttributeRef( Ref<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
+        public AttributeRef( in Ref<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
         {
             this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
-            this._declaringDeclaration = Ref.FromSymbol<IDeclaration>( declaration, compilationContext );
+            this._containingDeclaration = Ref.FromSymbol<IDeclaration>( declaration, compilationContext );
         }
 
         public AttributeRef( AttributeBuilder builder )
         {
-            this.AttributeType = builder.Constructor.DeclaringType.ToTypedRef();
+            this.AttributeType = builder.Constructor.DeclaringType.ToValueTypedRef();
             this.Target = this._originalTarget = builder;
-            this._declaringDeclaration = builder.ContainingDeclaration.ToTypedRef();
+            this._containingDeclaration = builder.ContainingDeclaration.ToValueTypedRef();
+        }
+
+        public AttributeRef( AttributeSerializationData serializationData )
+        {
+            this.Target = this._originalTarget = serializationData;
+            this.AttributeType = serializationData.Type;
+            this._containingDeclaration = serializationData.ContainingDeclaration;
         }
 
         public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
@@ -112,6 +122,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             return attribute;
         }
+
+        public IRef<TOut> As<TOut>()
+            where TOut : class, ICompilationElement
+            => this as IRef<TOut> ?? throw new InvalidCastException();
 
         private AttributeSyntax? Syntax
             => this.Target switch
@@ -147,7 +161,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         attribute = new Attribute(
                             resolved.Attribute,
                             compilation,
-                            compilation.Factory.GetDeclaration( resolved.Parent, this._declaringDeclaration.TargetKind ) );
+                            compilation.Factory.GetDeclaration( resolved.Parent, this._containingDeclaration.TargetKind ) );
 
                         return true;
                     }
@@ -161,12 +175,116 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         return false;
                     }
 
-                    attribute = new Attribute( attributeData, compilation, this._declaringDeclaration.GetTarget( compilation ) );
+                    attribute = new Attribute( attributeData, compilation, this._containingDeclaration.GetTarget( compilation ) );
 
                     return true;
 
                 case AttributeBuilder builder:
                     attribute = new BuiltAttribute( builder, compilation );
+
+                    return true;
+
+                case AttributeSerializationData serializationData:
+                    attribute = compilation.Factory.GetDeserializedAttribute( serializationData );
+
+                    return true;
+
+                default:
+                    throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
+            }
+        }
+
+        public bool TryGetAttributeSerializationDataKey( CompilationContext compilationContext, [NotNullWhen( true )] out object? serializationDataKey )
+        {
+            switch ( this.Target )
+            {
+                case null:
+                    // This happens when ResolveAttributeData was already called but was unsuccessful.
+
+                    serializationDataKey = null;
+
+                    return false;
+
+                case AttributeSyntax attributeSyntax:
+                    {
+                        var resolved = this.ResolveAttributeData( attributeSyntax, compilationContext );
+
+                        if ( resolved.Attribute == null || resolved.Parent == null )
+                        {
+                            serializationDataKey = null;
+
+                            return false;
+                        }
+
+                        serializationDataKey = resolved.Attribute;
+
+                        return true;
+                    }
+
+                case AttributeData:
+                case AttributeBuilder:
+                case AttributeSerializationData:
+                    serializationDataKey = this.Target;
+
+                    return true;
+
+                default:
+                    throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
+            }
+        }
+
+        public bool TryGetAttributeSerializationData(
+            CompilationContext compilationContext,
+            [NotNullWhen( true )] out AttributeSerializationData? serializationData )
+        {
+            switch ( this.Target )
+            {
+                case null:
+                    // This happens when ResolveAttributeData was already called but was unsuccessful.
+
+                    serializationData = null;
+
+                    return false;
+
+                case AttributeSyntax attributeSyntax:
+                    {
+                        var resolved = this.ResolveAttributeData( attributeSyntax, compilationContext );
+
+                        if ( resolved.Attribute == null || resolved.Parent == null )
+                        {
+                            serializationData = null;
+
+                            return false;
+                        }
+
+                        serializationData = new AttributeSerializationData( resolved.Parent, resolved.Attribute, compilationContext );
+
+                        return true;
+                    }
+
+                case AttributeData attributeData:
+                    if ( !attributeData.IsValid() )
+                    {
+                        // Only return fully valid attributes.
+                        serializationData = null;
+
+                        return false;
+                    }
+
+                    serializationData = new AttributeSerializationData(
+                        this._containingDeclaration.GetSymbol( compilationContext.Compilation ).AssertSymbolNotNull(),
+                        attributeData,
+                        compilationContext );
+
+                    return true;
+
+                case AttributeBuilder builder:
+                    serializationData = new AttributeSerializationData( builder );
+
+                    return true;
+
+                case AttributeSerializationData mySerializationData:
+                    serializationData = mySerializationData;
 
                     return true;
 
@@ -224,13 +342,19 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget.GetType()}'." );
             }
 
-            if ( !RefEqualityComparer<IDeclaration>.Default.Equals( this._declaringDeclaration, other._declaringDeclaration ) )
+            if ( !RefEqualityComparer<IDeclaration>.Default.Equals( this._containingDeclaration, other._containingDeclaration ) )
             {
                 return false;
             }
 
             return true;
         }
+
+        bool IEquatable<IRef<ICompilationElement>>.Equals( IRef<ICompilationElement>? other )
+            => other is AttributeRef otherAttributeRef && this.Equals( otherAttributeRef );
+
+        bool IRef<IAttribute>.Equals( IRef<ICompilationElement>? other, bool includeNullability )
+            => other is AttributeRef otherAttributeRef && this.Equals( otherAttributeRef );
 
         public override int GetHashCode()
         {
@@ -242,7 +366,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 _ => throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget.GetType()}'." )
             };
 
-            return HashCode.Combine( targetHashCode, RefEqualityComparer<IDeclaration>.Default.GetHashCode( this._declaringDeclaration ) );
+            return HashCode.Combine( targetHashCode, RefEqualityComparer<IDeclaration>.Default.GetHashCode( this._containingDeclaration ) );
         }
     }
 }

@@ -38,5 +38,5 @@ internal abstract class ContractAdvice<T> : Advice<AddContractAdviceResult<T>>
     public override AdviceKind AdviceKind => AdviceKind.AddContract;
 
     // TODO: the conversion on the next line will not work with fields.
-    protected static AddContractAdviceResult<T> CreateSuccessResult( T member ) => new( member.ToTypedRef() );
+    protected static AddContractAdviceResult<T> CreateSuccessResult( T member ) => new( member.ToValueTypedRef() );
 }

@@ -52,6 +52,8 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 
     public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
+    IRef<IEvent> IEvent.ToRef() => this.EventBuilder.BoxedRef;
+
     public IEventInvoker With( InvokerOptions options ) => this.EventBuilder.With( options );
 
     public IEventInvoker With( object? target, InvokerOptions options = default ) => this.EventBuilder.With( target, options );

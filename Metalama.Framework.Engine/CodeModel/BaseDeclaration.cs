@@ -24,7 +24,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToDeclarationRef();
+
+        /// <summary>
+        /// Returns a <see cref="BoxedRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
+        /// but <see cref="IMethod"/>, <see cref="INamedType"/>, ... 
+        /// </summary>
+        /// <returns></returns>
+        private protected abstract IRef<IDeclaration> ToDeclarationRef();
+
+        internal abstract Ref<IDeclaration> ToValueTypedRef();
+
+        Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
+
+        Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => this.ToValueTypedRef().As<IDeclaration>();
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
@@ -33,12 +46,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract bool CanBeInherited { get; }
 
         public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default );
-
-        internal abstract Ref<IDeclaration> ToRef();
-
-        Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
-
-        Ref<IDeclaration> IDeclarationImpl.ToRef() => this.ToRef().As<IDeclaration>();
 
         public abstract IAssembly DeclaringAssembly { get; }
 

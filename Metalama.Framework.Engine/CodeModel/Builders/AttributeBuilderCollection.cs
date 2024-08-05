@@ -21,6 +21,10 @@ internal sealed class AttributeBuilderCollection : List<AttributeBuilder>, IAttr
 
     public IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate ) => throw new NotImplementedException();
 
+    public IEnumerable<T> GetConstructedAttributesOfType<T>()
+        where T : System.Attribute
+        => throw new NotImplementedException();
+
     public bool Any( IType type ) => throw new NotImplementedException();
 
     public bool Any( IType type, ConversionKind conversionKind ) => throw new NotImplementedException();

@@ -34,6 +34,8 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     public Compilation Compilation { get; }
 
+    CompilationContext ITemplateReflectionContext.CompilationContext => this;
+
     CompilationModel ITemplateReflectionContext.GetCompilationModel( ICompilation sourceCompilation )
         =>
 
