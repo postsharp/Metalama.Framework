@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -191,9 +192,9 @@ public sealed class ReferenceIndexerOptions
             return false;
         }
 
-        if ( identifier.RawKind != 0 && (this._kindsSupportingIdentifierFiltering & kind) != 0 )
+        if ( !identifier.IsKind( SyntaxKind.None ) && (this._kindsSupportingIdentifierFiltering & kind) != 0 )
         {
-            var identifierText = identifier.Text;
+            var identifierText = identifier.ValueText;
 
             if ( identifierText != "var" )
             {

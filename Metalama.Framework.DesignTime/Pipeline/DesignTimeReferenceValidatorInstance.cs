@@ -46,7 +46,12 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
         this._description = description;
         this.Granularity = granularity;
         this.Implementation = implementation;
-        this.ValidatedIdentifier = validatedDeclaration.Name;
+
+        this.ValidatedIdentifier = validatedDeclaration switch
+        {
+            IMethodSymbol method when method.MethodKind == Microsoft.CodeAnalysis.MethodKind.Constructor => method.ContainingType.Name,
+            _ => validatedDeclaration.Name
+        };
     }
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
