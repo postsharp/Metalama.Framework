@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -283,11 +282,6 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
             foreach ( var externalValidator in externalValidators )
             {
-                if (externalValidator == null)
-                {
-                    continue;
-                }
-
                 validatorsBuilder.Add( externalValidator );
             }
         }
@@ -630,13 +624,13 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     {
         if ( this._serializedTransitiveAspectManifest == null )
         {
+            var compilationContext = compilation.GetCompilationContext();
             var manifest = TransitiveAspectsManifest.Create(
                 this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
-                this.ReferenceValidators.ToTransitiveValidatorInstances( CompilationContextFactory.GetInstance( compilation ) ),
+                this.ReferenceValidators.ToTransitiveValidatorInstances( compilationContext ),
                 this.InheritableOptions,
                 this.Annotations );
 
-            var compilationContext = compilation.GetCompilationContext();
             this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilationContext );
         }
 
