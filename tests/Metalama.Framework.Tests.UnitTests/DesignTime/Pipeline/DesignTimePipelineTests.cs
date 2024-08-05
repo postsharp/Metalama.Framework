@@ -1804,4 +1804,102 @@ class D{version}
             return new( pipeline );
         }
     }
+
+    [Fact]
+    public void AssemblyAttributeOptionsAdded()
+    {
+        const string options = """
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Options;
+            using System;
+            using System.Collections.Generic;
+
+            class MyOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<ICompilation>
+            {
+                public bool? IsEnabled { get; init; }
+
+                public object ApplyChanges(object changes, in ApplyChangesContext context)
+                {
+                    var other = (MyOptions)changes;
+
+                    return new MyOptions { IsEnabled = other.IsEnabled ?? this.IsEnabled };
+                }
+
+                public IHierarchicalOptions? GetDefaultOptions(OptionsInitializationContext context) => null;
+            }
+
+            [AttributeUsage(AttributeTargets.Assembly)]
+            class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
+            {
+                public bool IsEnabled { get; init; }
+
+                public IEnumerable<IHierarchicalOptions> GetOptions(in OptionsProviderContext context)
+                {
+                    return [new MyOptions { IsEnabled = this.IsEnabled }];
+                }
+            }
+            """;
+
+        const string aspect = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Diagnostics;
+
+            class Aspect : MethodAspect
+            {
+                static DiagnosticDefinition notEnabledWarning = new("NE", Severity.Warning, "Not enabled.");
+
+                public override void BuildAspect(IAspectBuilder<IMethod> builder)
+                {
+                    var options = builder.Target.Enhancements().GetOptions<MyOptions>();
+
+                    if (options.IsEnabled != true)
+                    {
+                        builder.Diagnostics.Report(notEnabledWarning);
+                    }
+                }
+            }
+            """;
+
+        const string optionsAttribute = """[assembly: MyOptions(IsEnabled = true)]""";
+
+        const string target = """
+            class Target
+            {
+                [Aspect]
+                void M() { }
+            }
+            """;
+
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>
+        {
+            ["options.cs"] = options,
+            ["aspect.cs"] = aspect,
+            ["optionsAttribute.cs"] = "",
+            ["target.cs"] = target,
+#if NETFRAMEWORK
+            ["isexternalinit.cs"] = "namespace System.Runtime.CompilerServices { internal static class IsExternalInit; }"
+#endif
+        };
+
+        var compilation = CreateCSharpCompilation( code, assemblyName: "test" );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+
+        var warning = Assert.Single( result.GetAllDiagnostics() );
+
+        Assert.Equal( "Not enabled.", warning.GetMessage( null ) );
+
+        code["optionsAttribute.cs"] = optionsAttribute;
+
+        var updatedCompilation = CreateCSharpCompilation( code, assemblyName: "test" );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResult ) );
+
+        Assert.Empty( updatedResult.GetAllDiagnostics() );
+    }
 }

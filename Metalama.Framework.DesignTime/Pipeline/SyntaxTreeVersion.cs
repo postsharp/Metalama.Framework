@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -8,8 +10,8 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal readonly record struct SyntaxTreeVersion(
     SyntaxTree SyntaxTree,
-    bool HasCompileTimeCode = false,
-    ulong DeclarationHash = 0,
+    bool HasCompileTimeCode,
+    ulong DeclarationHash,
     ImmutableArray<TypeDependencyKey> PartialTypes = default,
     int PartialTypesHash = 0 )
 {
@@ -19,22 +21,29 @@ internal readonly record struct SyntaxTreeVersion(
 
     public bool IsDefault => this._syntaxTree == null;
 
+    public bool HasGlobalAttributes => this._syntaxTree?.ContainsGlobalAttributes() == true;
+
     public SyntaxTreeVersion( SyntaxTree syntaxTree, in SyntaxTreeVersionData data ) : this(
         syntaxTree,
         data.HasCompileTimeCode,
         data.DeclarationHash,
         data.PartialTypes,
-        data.PartialTypesHash ) { }
+        data.PartialTypesHash )
+    {
+        Invariant.Assert( syntaxTree.ContainsGlobalAttributes() == data.HasGlobalAttributes );
+    }
 }
 
 internal readonly record struct SyntaxTreeVersionData(
-    bool HasCompileTimeCode = false,
-    ulong DeclarationHash = 0,
+    bool HasCompileTimeCode,
+    bool HasGlobalAttributes,
+    ulong DeclarationHash,
     ImmutableArray<TypeDependencyKey> PartialTypes = default,
     int PartialTypesHash = 0 )
 {
     public SyntaxTreeVersionData( in SyntaxTreeVersion version ) : this(
         version.HasCompileTimeCode,
+        version.HasGlobalAttributes,
         version.DeclarationHash,
         version.PartialTypes,
         version.PartialTypesHash ) { }
