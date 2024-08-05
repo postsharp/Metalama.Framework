@@ -22,10 +22,6 @@ namespace Metalama.Framework.Engine.Diagnostics
             switch ( diagnostic.Severity )
             {
                 case DiagnosticSeverity.Error:
-                    this._logger.Error?.Log( diagnostic.ToString() );
-
-                    break;
-
                 case DiagnosticSeverity.Warning:
                     this._logger.Warning?.Log( diagnostic.ToString() );
 
