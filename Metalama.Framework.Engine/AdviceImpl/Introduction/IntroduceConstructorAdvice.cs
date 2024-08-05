@@ -29,7 +29,15 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         OverrideStrategy overrideStrategy,
         Action<IConstructorBuilder>? buildAction,
         IObjectReader tags )
-        : base( parameters, null, template.TemplateMember, IntroductionScope.Instance, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null )
+        : base(
+            parameters,
+            null,
+            template.TemplateMember,
+            IntroductionScope.Instance,
+            overrideStrategy,
+            buildAction,
+            tags,
+            explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
 
@@ -89,7 +97,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             if ( existingImplicitConstructor != null && this.Builder.Parameters.Count == 0 )
             {
                 // Redirect if the builder has no parameters and the existing constructor is implicit.
-                this.Builder.ReplacedImplicit = existingImplicitConstructor.ToTypedRef();
+                this.Builder.ReplacedImplicit = existingImplicitConstructor.ToValueTypedRef();
             }
 
             // There is no existing declaration, we will introduce and override the introduced.

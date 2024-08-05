@@ -35,7 +35,7 @@ public partial class DerivedTypeIndex
             this._processedTypes = immutable._processedTypes.ToBuilder();
         }
 
-        public void AnalyzeType( Ref<INamedType> type )
+        public void AnalyzeType( in Ref<INamedType> type )
         {
             switch ( type.Target )
             {
@@ -56,7 +56,7 @@ public partial class DerivedTypeIndex
 
         public void AnalyzeType( INamedTypeSymbol type )
         {
-            if ( !this._processedTypes.Add( type.ToTypedRef<INamedType>( this._compilationContext ) ) )
+            if ( !this._processedTypes.Add( type.ToValueTypedRef<INamedType>( this._compilationContext ) ) )
             {
                 return;
             }
@@ -64,7 +64,11 @@ public partial class DerivedTypeIndex
             if ( type.BaseType != null && type.BaseType.Kind != SymbolKind.ErrorType )
             {
                 var baseType = type.BaseType.OriginalDefinition;
-                this._relationships.Add( baseType.ToTypedRef<INamedType>( this._compilationContext ), type.ToTypedRef<INamedType>( this._compilationContext ) );
+
+                this._relationships.Add(
+                    baseType.ToValueTypedRef<INamedType>( this._compilationContext ),
+                    type.ToValueTypedRef<INamedType>( this._compilationContext ) );
+
                 this.AnalyzeType( baseType );
             }
 
@@ -78,8 +82,8 @@ public partial class DerivedTypeIndex
                 var interfaceType = interfaceImpl.OriginalDefinition;
 
                 this._relationships.Add(
-                    interfaceType.ToTypedRef<INamedType>( this._compilationContext ),
-                    type.ToTypedRef<INamedType>( this._compilationContext ) );
+                    interfaceType.ToValueTypedRef<INamedType>( this._compilationContext ),
+                    type.ToValueTypedRef<INamedType>( this._compilationContext ) );
 
                 this.AnalyzeType( interfaceType );
             }
@@ -99,7 +103,7 @@ public partial class DerivedTypeIndex
                 return;
             }
 
-            if ( !this._processedTypes.Add( type.ToTypedRef<INamedType>() ) )
+            if ( !this._processedTypes.Add( type.ToValueTypedRef<INamedType>() ) )
             {
                 return;
             }
@@ -107,8 +111,8 @@ public partial class DerivedTypeIndex
             if ( type.BaseType != null && type.BaseType.TypeKind != MetalamaTypeKind.Error )
             {
                 var baseType = type.BaseType.Definition;
-                this._relationships.Add( baseType.ToTypedRef(), type.ToTypedRef<INamedType>() );
-                this.AnalyzeType( baseType.ToTypedRef() );
+                this._relationships.Add( baseType.ToValueTypedRef(), type.ToValueTypedRef<INamedType>() );
+                this.AnalyzeType( baseType.ToValueTypedRef() );
             }
 
             foreach ( var interfaceImpl in type.ImplementedInterfaces )
@@ -119,22 +123,23 @@ public partial class DerivedTypeIndex
                 }
 
                 var interfaceType = interfaceImpl.Definition;
-                this._relationships.Add( interfaceType.ToTypedRef(), type.ToTypedRef<INamedType>() );
-                this.AnalyzeType( interfaceType.ToTypedRef() );
+                this._relationships.Add( interfaceType.ToValueTypedRef(), type.ToValueTypedRef<INamedType>() );
+                this.AnalyzeType( interfaceType.ToValueTypedRef() );
             }
 
             foreach ( var nestedType in type.Types )
             {
-                this.AnalyzeType( nestedType.ToTypedRef() );
+                this.AnalyzeType( nestedType.ToValueTypedRef() );
             }
         }
 
         public void AddDerivedType( INamedTypeSymbol baseType, INamedTypeSymbol derivedType )
             => this._relationships.Add(
-                baseType.ToTypedRef<INamedType>( this._compilationContext ),
-                derivedType.ToTypedRef<INamedType>( this._compilationContext ) );
+                baseType.ToValueTypedRef<INamedType>( this._compilationContext ),
+                derivedType.ToValueTypedRef<INamedType>( this._compilationContext ) );
 
-        public void AddDerivedType( INamedType baseType, INamedType derivedType ) => this._relationships.Add( baseType.ToTypedRef(), derivedType.ToTypedRef() );
+        public void AddDerivedType( INamedType baseType, INamedType derivedType )
+            => this._relationships.Add( baseType.ToValueTypedRef(), derivedType.ToValueTypedRef() );
 
         public DerivedTypeIndex ToImmutable()
         {

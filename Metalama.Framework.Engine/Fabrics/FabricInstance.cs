@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public FabricInstance( FabricDriver driver, IDeclaration targetDeclaration )
         {
             this.Driver = driver;
-            this.TargetDeclaration = targetDeclaration.ToTypedRef();
+            this.TargetDeclaration = targetDeclaration.ToValueTypedRef();
             this.TargetDeclarationDepth = targetDeclaration.Depth;
 
             this.ValidatorDriverFactory = ValidatorDriverFactory.GetInstance( driver.Fabric.GetType() );

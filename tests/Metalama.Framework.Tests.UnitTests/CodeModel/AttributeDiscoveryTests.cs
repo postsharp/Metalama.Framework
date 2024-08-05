@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
@@ -93,6 +94,32 @@ class C< [MyAttribute(4)]T>
 
             var compilation = testContext.CreateCompilationModel( mainCode, dependentCode );
             Assert.Single( compilation.GetAllAttributesOfType( typeof(IDisposable), true ) );
+        }
+
+        [Fact]
+        public void ExtensionMethodTests()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = """
+                                public class MyAttribute( System.DayOfWeek dayOfWeek ) : System.Attribute{  }
+
+                                [MyAttribute( System.DayOfWeek.Monday )] class C;
+                                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var attribute = compilation.Types.OfName( "C" ).Single().Attributes.Single();
+
+            Assert.True( attribute.TryGetArgumentValue<DayOfWeek>( "DayOfWeek", out var dayOfWeek ) );
+            Assert.Equal( DayOfWeek.Monday, dayOfWeek );
+
+            Assert.True( attribute.TryGetArgumentValue<int>( "DayOfWeek", out var intDayOfWeek ) );
+            Assert.Equal( (int) DayOfWeek.Monday, intDayOfWeek );
+
+            Assert.Equal( DayOfWeek.Monday, attribute.GetArgumentValue<DayOfWeek>( "DayOfWeek" ) );
+
+            Assert.Equal( DayOfWeek.Wednesday, attribute.GetArgumentValue<DayOfWeek>( "X", DayOfWeek.Wednesday ) );
         }
     }
 }

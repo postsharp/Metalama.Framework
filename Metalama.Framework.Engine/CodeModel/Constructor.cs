@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -25,6 +26,19 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw new ArgumentOutOfRangeException( nameof(symbol), "The Constructor class must be used only with constructors." );
             }
         }
+
+        [Memo]
+        private BoxedRef<IConstructor> BoxedRef => new BoxedRef<IConstructor>( this.ToValueTypedRef() );
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+        IRef<IConstructor> IConstructor.ToRef() => this.BoxedRef;
+
+        protected override IRef<IMethodBase> GetMethodBaseRef() => this.BoxedRef;
+
+        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 
         [Memo]
         public ConstructorInitializerKind InitializerKind
@@ -113,6 +127,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
 
-        public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
+        public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
+            => new ConstructorInvoker( this ).CreateInvokeExpression( args );
     }
 }

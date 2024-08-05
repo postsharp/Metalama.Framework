@@ -14,7 +14,7 @@ public class Aspect : TypeAspect
             {
                 var typeParameter = methodBuilder.AddTypeParameter( "T" );
                 typeParameter.TypeKindConstraint = TypeKindConstraint.Struct;
-                var typeParameterPointer = TypeFactory.MakePointerType( typeParameter );
+                var typeParameterPointer = typeParameter.MakePointerType();
                 methodBuilder.AddParameter( "arg", typeParameterPointer );
             } );
     }

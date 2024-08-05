@@ -598,7 +598,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         var manifest = TransitiveAspectsManifest.Deserialize(
                             new MemoryStream( result.Manifest! ),
                             configuration.Value.ServiceProvider,
-                            compilation,
+                            compilation.GetCompilationContext(),
                             reference.Compilation.AssemblyName );
 
                         compilationReferences.Add(
@@ -904,7 +904,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         // We are not implementing this method as an enumerator for the ease of debugging.
         var result = new List<AspectClass>();
 
-        var compilationContext = CompilationContextFactory.GetInstance( compilation );
+        var compilationContext = compilation.GetCompilationContext();
 
         var currentAspectInstances = this.GetAspectInstancesOnSymbol( symbol )
                                      ?? Array.Empty<DesignTimeAspectInstance>();

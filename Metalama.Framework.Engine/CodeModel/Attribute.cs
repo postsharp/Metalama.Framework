@@ -35,8 +35,12 @@ internal sealed class Attribute : IAttributeImpl
 
     public AttributeData AttributeData { get; }
 
-    IRef<IDeclaration> IDeclaration.ToRef()
-        => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToTypedRef(), this.Compilation.CompilationContext );
+    [Memo]
+    private IRef<IAttribute> Ref => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToValueTypedRef(), this.Compilation.CompilationContext );
+
+    IRef<IAttribute> IAttribute.ToRef() => this.Ref;
+
+    IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
 
     public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
@@ -76,28 +80,15 @@ internal sealed class Attribute : IAttributeImpl
             true );
 
     [Memo]
-    public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+    public ImmutableArray<TypedConstant> ConstructorArguments
+        => this.AttributeData.ConstructorArguments.Select( x => x.ToOurTypedConstant( this.Compilation ) ).ToImmutableArray();
 
     [Memo]
     public INamedArgumentList NamedArguments
         => new NamedArgumentList(
-            this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
+            this.AttributeData.NamedArguments
+                .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, kvp.Value.ToOurTypedConstant( this.Compilation ) ) )
                 .ToReadOnlyList() );
-
-    private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
-    {
-        var type = this.Compilation.Factory.GetIType( constant.Type.AssertSymbolNotNull() );
-
-        var value = constant.Kind switch
-        {
-            TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
-            TypedConstantKind.Type => constant.Value == null ? null : this.Compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
-            TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
-            _ => throw new ArgumentException( nameof(constant) )
-        };
-
-        return TypedConstant.CreateUnchecked( value, type );
-    }
 
     public override string? ToString() => this.AttributeData.ToString();
 
@@ -132,9 +123,9 @@ internal sealed class Attribute : IAttributeImpl
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => Enumerable.Empty<IDeclaration>();
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
-    Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+    Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
     public bool Equals( IDeclaration? other ) => other is Attribute attribute && this.AttributeData == attribute.AttributeData;
 

@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -81,19 +82,46 @@ public static class SerializableDeclarationIdProvider
                     return false;
                 }
 
-            default:
-                var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
+            case INamedTypeSymbol:
+                goto default;
 
-                if ( targetKind == DeclarationRefTargetKind.Default )
-                {
-                    id = new SerializableDeclarationId( documentationId );
-                }
-                else
-                {
-                    id = new SerializableDeclarationId( $"{documentationId};{targetKind}" );
-                }
+            case ITypeSymbol typeSymbol:
+                id = new SerializableDeclarationId( typeSymbol.GetSerializableTypeId().Id );
 
                 return true;
+
+            default:
+                switch ( symbol.Kind )
+                {
+                    case SymbolKind.NamedType:
+                    case SymbolKind.Method:
+                    case SymbolKind.Field:
+                    case SymbolKind.Assembly:
+                    case SymbolKind.Event:
+                    case SymbolKind.Namespace:
+                    case SymbolKind.Parameter:
+                    case SymbolKind.Property:
+                    case SymbolKind.TypeParameter:
+                        {
+                            var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
+
+                            if ( targetKind == DeclarationRefTargetKind.Default )
+                            {
+                                id = new SerializableDeclarationId( documentationId );
+                            }
+                            else
+                            {
+                                id = new SerializableDeclarationId( $"{documentationId};{targetKind}" );
+                            }
+
+                            return true;
+                        }
+
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(symbol),
+                            $"Cannot create a SerializableDeclarationId for '{symbol}' because it is a {symbol.Kind}." );
+                }
         }
     }
 
@@ -196,11 +224,11 @@ public static class SerializableDeclarationIdProvider
         => declaration.GetSymbol()?.GetSerializableId() ?? declaration.ToSerializableId();
 
     [PublicAPI]
-    public static ISymbol ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
+    public static ISymbol ResolveToSymbol( this SerializableDeclarationId id, CompilationContext compilationContext )
     {
         // Note that the symbol resolution can fail for methods when the method signature contains a type from a missing assembly.
 
-        var symbol = id.ResolveToSymbolOrNull( compilation );
+        var symbol = id.ResolveToSymbolOrNull( compilationContext );
 
         if ( symbol == null )
         {
@@ -210,16 +238,18 @@ public static class SerializableDeclarationIdProvider
         return symbol;
     }
 
-    public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, Compilation compilation )
+    public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, CompilationContext compilationContext )
     {
-        var symbol = id.ResolveToSymbolOrNull( compilation, out var isReturnParameter );
+        var symbol = id.ResolveToSymbolOrNull( compilationContext, out var isReturnParameter );
 
         return isReturnParameter ? null : symbol;
     }
 
     /// <remarks>This overload is only used for aspect targets, so it doesn't need to handle the other target kinds.</remarks>
-    public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, Compilation compilation, out bool isReturnParameter )
+    public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, CompilationContext compilationContext, out bool isReturnParameter )
     {
+        var compilation = compilationContext.Compilation;
+
         isReturnParameter = false;
 
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
@@ -275,6 +305,17 @@ public static class SerializableDeclarationIdProvider
             if ( id.Id == "N:" )
             {
                 return compilation.Assembly.GlobalNamespace;
+            }
+            else if ( id.Id.StartsWith( SerializableTypeIdResolverForSymbol.Prefix, StringComparison.Ordinal ) )
+            {
+                if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( id.Id ), out var typeSymbol ) )
+                {
+                    return null;
+                }
+                else
+                {
+                    return typeSymbol;
+                }
             }
 
             return DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );

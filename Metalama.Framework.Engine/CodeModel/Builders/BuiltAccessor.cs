@@ -54,19 +54,24 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool IsAsync => this._accessorBuilder.IsAsync;
 
-    public override bool IsImplicitlyDeclared => this is { MethodKind: MethodKind.PropertySet, ContainingDeclaration: IProperty { Writeability: Writeability.ConstructorOnly } };
+    public override bool IsImplicitlyDeclared
+        => this is { MethodKind: MethodKind.PropertySet, ContainingDeclaration: IProperty { Writeability: Writeability.ConstructorOnly } };
 
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this._accessorBuilder.ToTypedRef<IHasParameters>() ) );
+            this.GetCompilationModel().GetParameterCollection( this._accessorBuilder.ToValueTypedRef<IHasParameters>() ) );
 
     public MethodKind MethodKind => this._accessorBuilder.MethodKind;
 
     public OperatorKind OperatorKind => this._accessorBuilder.OperatorKind;
 
     IMethod IMethod.Definition => this;
+
+    IRef<IMember> IMember.ToRef() => this._accessorBuilder.BoxedRef;
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this._accessorBuilder.BoxedRef;
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
@@ -114,6 +119,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this._builtMember;
 
     public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
+
+    IRef<IMethod> IMethod.ToRef() => this._accessorBuilder.BoxedRef;
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this._accessorBuilder.BoxedRef;
 
     public MemberInfo ToMemberInfo() => this._accessorBuilder.ToMemberInfo();
 

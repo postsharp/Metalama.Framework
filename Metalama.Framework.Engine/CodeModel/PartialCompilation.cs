@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             this.ModifiedSyntaxTrees = modifiedTreeBuilder.ToImmutable();
-            this.CompilationContext = CompilationContextFactory.GetInstance( compilation );
+            this.CompilationContext = compilation.GetCompilationContext();
             this.Resources = newResources.IsDefault ? ImmutableArray<ManagedResource>.Empty : newResources;
         }
 
@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
         /// </summary>
         public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ManagedResource> resources = default )
-            => CreateComplete( CompilationContextFactory.GetInstance( compilation ), resources );
+            => CreateComplete( compilation.GetCompilationContext(), resources );
 
         private static PartialCompilation CreateComplete( CompilationContext compilationContext, ImmutableArray<ManagedResource> resources = default )
             => new CompleteImpl( compilationContext, new Lazy<DerivedTypeIndex>( () => GetDerivedTypeIndex( compilationContext.Compilation ) ), resources );
@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine.CodeModel
             SyntaxTree syntaxTree,
             ImmutableArray<ManagedResource> resources = default )
         {
-            var compilationContext = CompilationContextFactory.GetInstance( compilation );
+            var compilationContext = compilation.GetCompilationContext();
             var syntaxTrees = new[] { syntaxTree };
             var closure = GetClosure( compilationContext, syntaxTrees );
 
@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.CodeModel
             ImmutableHashSet<string>? observedSyntaxTreePaths = null,
             ImmutableArray<ManagedResource> resources = default )
         {
-            var compilationContext = CompilationContextFactory.GetInstance( compilation );
+            var compilationContext = compilation.GetCompilationContext();
             var closure = GetClosure( compilationContext, syntaxTrees );
 
             return new PartialImpl(
@@ -350,7 +350,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )
         {
-            var compilationContext = CompilationContextFactory.GetInstance( compilation );
+            var compilationContext = compilation.GetCompilationContext();
             DerivedTypeIndex.Builder builder = new( compilationContext );
 
             foreach ( var type in compilation.Assembly.GetTypes() )

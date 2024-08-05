@@ -245,7 +245,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
 
-        var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
+        var compileTimeCompilationContext = compileTimeCompilation.GetCompilationContext();
 
         var templateSymbolManifestBuilder = new TemplateProjectManifestBuilder( compilationContext.SourceCompilation );
         var templateCompiler = new TemplateCompiler( this._serviceProvider, compilationContext, templateSymbolManifestBuilder );

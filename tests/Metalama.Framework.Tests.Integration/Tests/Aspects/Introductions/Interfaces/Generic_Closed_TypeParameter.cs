@@ -25,8 +25,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
             aspectBuilder
                 .ImplementInterface(
-                    ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments(
-                        TypeFactory.MakeArrayType( aspectBuilder.Target.TypeParameters[0] ) ) );
+                    ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( aspectBuilder.Target.TypeParameters[0].MakeArrayType() ) );
 
             aspectBuilder
                 .ImplementInterface(

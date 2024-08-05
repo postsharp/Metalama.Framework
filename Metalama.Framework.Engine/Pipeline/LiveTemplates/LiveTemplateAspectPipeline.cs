@@ -46,7 +46,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
 
     private protected override PipelineContributorSources CreatePipelineContributorSources(
         AspectPipelineConfiguration configuration,
-        Compilation compilation,
+        CompilationContext compilationContext,
         CancellationToken cancellationToken )
     {
         var aspectClass = this._aspectSelector( configuration );
@@ -84,7 +84,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
                                      && !licenseVerifier.VerifyCanApplyLiveTemplate( serviceProvider, aspectClass, diagnosticAdder ) )
             {
                 licenseVerifier.DetectToastNotifications();
-                
+
                 diagnosticAdder.Report(
                     LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
                         aspectInstance.TargetDeclaration.GetSymbol( result.Value.LastCompilation.Compilation )
@@ -134,7 +134,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
                 ((AspectClass) aspectClass).CreateAspectInstance(
                     targetDeclaration,
                     (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),
-                    new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToTypedRef() ) ) ) );
+                    new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToValueTypedRef() ) ) ) );
 
             return Task.CompletedTask;
         }

@@ -20,36 +20,30 @@ internal sealed class CompileTimeSerializer
     /// </summary>
     internal BaseCompileTimeSerializationBinder Binder { get; }
 
-    internal Compilation? Compilation { get; }
+    internal Compilation Compilation => this.CompilationContext.Compilation;
+
+    internal CompilationContext CompilationContext { get; }
 
     internal SerializerProvider SerializerProvider { get; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CompileTimeSerializer"/> class.
-    /// </summary>
-    private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, Compilation? compilation = null )
-        : this( serviceProvider, new BaseCompileTimeSerializationBinder( serviceProvider ), compilation ) { }
-
-    private CompileTimeSerializer( CompileTimeProject project, in ProjectServiceProvider serviceProvider, Compilation compilation ) : this(
+    private CompileTimeSerializer( CompileTimeProject? project, in ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : this(
         serviceProvider,
         new CompileTimeSerializationBinder( serviceProvider, project ),
-        compilation ) { }
+        compilationContext ) { }
 
-    public static CompileTimeSerializer CreateTestInstance( in ProjectServiceProvider serviceProvider ) => new( serviceProvider );
-
-    public static CompileTimeSerializer CreateInstance( in ProjectServiceProvider serviceProvider, Compilation compilation )
-        => new( serviceProvider.GetRequiredService<CompileTimeProject>(), serviceProvider, compilation );
+    public static CompileTimeSerializer CreateInstance( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+        => new( serviceProvider.GetService<CompileTimeProject>(), serviceProvider, compilationContext );
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CompileTimeSerializer"/> class.
     /// </summary>
     /// <param name="serviceProvider"></param>
     /// <param name="binder">A <see cref="BaseCompileTimeSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
-    private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, BaseCompileTimeSerializationBinder binder, Compilation? compilation )
+    private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, BaseCompileTimeSerializationBinder binder, CompilationContext compilationContext )
     {
         this._serviceProvider = serviceProvider;
         this.Binder = binder;
-        this.Compilation = compilation;
+        this.CompilationContext = compilationContext;
         this.SerializerProvider = new SerializerProvider( serviceProvider.GetRequiredService<ISerializerFactoryProvider>() );
     }
 
@@ -80,7 +74,7 @@ internal sealed class CompileTimeSerializer
     public object? Deserialize( Stream stream, string? assemblyName = null )
     {
         assemblyName ??= "unknown";
-        
+
         try
         {
             var serializationReader = new SerializationReader( this._serviceProvider, stream, this, false, assemblyName );

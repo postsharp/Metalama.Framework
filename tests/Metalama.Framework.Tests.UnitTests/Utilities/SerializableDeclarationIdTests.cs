@@ -113,22 +113,56 @@ class C<T>
 
         if ( symbol != null )
         {
-            var symbolDeclarationId = symbol.GetSerializableId();
-            var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetRoslynCompilation() );
+            Roundtrip( compilation, symbol );
+        }
+    }
 
-            if ( symbol is INamespaceSymbol nss )
-            {
-                Assert.Equal( nss.GetFullName(), (symbolRoundtrip as INamespaceSymbol)?.GetFullName() );
-            }
-            else
-            {
-                Assert.Same( symbol, symbolRoundtrip );
-            }
+    private static void Roundtrip( ICompilation compilation, ISymbol symbol, bool requireSameInstance = true )
+    {
+        var symbolDeclarationId = symbol.GetSerializableId();
+        var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetCompilationModel().CompilationContext );
 
-            var symbolRoundtripFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
-                .GetSymbol( compilation.GetRoslynCompilation() );
+        if ( symbol is INamespaceSymbol nss )
+        {
+            Assert.Equal( nss.GetFullName(), (symbolRoundtrip as INamespaceSymbol)?.GetFullName() );
+        }
+        else if ( requireSameInstance )
+        {
+            Assert.Same( symbol, symbolRoundtrip );
+        }
+        else
+        {
+            Assert.Equal( symbol, symbolRoundtrip, SymbolEqualityComparer.Default );
+        }
 
+        // Also test a Ref roundtrip.
+        var symbolRoundtripFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
+            .GetSymbol( compilation.GetRoslynCompilation() );
+
+        if ( requireSameInstance )
+        {
             Assert.Same( symbol, symbolRoundtripFromRef );
         }
+        else
+        {
+            Assert.Equal( symbol, symbolRoundtripFromRef, SymbolEqualityComparer.Default );
+        }
+    }
+
+    [Fact]
+    public void TestNonNamedTyped()
+    {
+        const string code = @"
+class C 
+{
+  public int[] F;
+}
+";
+
+        using var testContext = this.CreateTestContext();
+        var compilation = testContext.CreateCompilation( code );
+        var field = compilation.Types.Single().Fields.Single();
+
+        Roundtrip( compilation, field.Type.GetSymbol(), false );
     }
 }

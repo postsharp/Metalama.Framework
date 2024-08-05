@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -112,5 +113,14 @@ namespace Metalama.Framework.Engine.CodeModel
         public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
+
+        [Memo]
+        private BoxedRef<ITypeParameter> BoxedRef => new( this.ToValueTypedRef() );
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+        IRef<ITypeParameter> ITypeParameter.ToRef() => this.BoxedRef;
+
+        IRef<IType> IType.ToRef() => this.BoxedRef;
     }
 }

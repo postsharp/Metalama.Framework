@@ -152,6 +152,8 @@ namespace Metalama.Framework.Code
         /// </summary>
         Char,
 
+        Type,
+
         // Must be last.
 
         /// <summary>

@@ -37,7 +37,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 #endif
         this.AspectInstance = parameters.AspectInstance;
         this.TemplateInstance = parameters.TemplateInstance;
-        this.TargetDeclaration = parameters.TargetDeclaration.AssertNotNull().ToTypedRef();
+        this.TargetDeclaration = parameters.TargetDeclaration.AssertNotNull().ToValueTypedRef();
         this.SourceCompilation = parameters.SourceCompilation;
         this.AspectLayerId = new AspectLayerId( this.AspectInstance.AspectClass, parameters.LayerName );
     }

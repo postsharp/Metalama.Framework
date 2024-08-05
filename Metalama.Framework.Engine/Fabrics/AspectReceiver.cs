@@ -418,6 +418,14 @@ namespace Metalama.Framework.Engine.Fabrics
         IAspectReceiver<TDeclaration, TTag> IAspectReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
             => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
+        IAspectReceiver<TOut, TTag> IAspectReceiver<TDeclaration, TTag>.OfType<TOut>() => this.OfType<TOut>();
+
+        IAspectReceiver<TOut> IAspectReceiver<TDeclaration>.OfType<TOut>() => this.OfType<TOut>();
+
+        IValidatorReceiver<TOut, TTag> IValidatorReceiver<TDeclaration, TTag>.OfType<TOut>() => this.OfType<TOut>();
+
+        IValidatorReceiver<TOut> IValidatorReceiver<TDeclaration>.OfType<TOut>() => this.OfType<TOut>();
+
         IAspectReceiver<TDeclaration, TTag1> IAspectReceiver<TDeclaration>.Tag<TTag1>( Func<TDeclaration, TTag1> getTag )
             => this.Tag( ( declaration, _ ) => getTag( declaration ) );
 
@@ -651,6 +659,27 @@ namespace Metalama.Framework.Engine.Fabrics
                             if ( predicate( declaration, tag ) )
                             {
                                 return action( declaration, tag, context2 );
+                            }
+                            else
+                            {
+                                return Task.CompletedTask;
+                            }
+                        } ) ) );
+
+        public IAspectReceiver<TOut, TTag> OfType<TOut>()
+            where TOut : class, IDeclaration
+            => this.AddChild(
+                new ChildAspectReceiver<TOut, TTag>(
+                    this._containingDeclaration,
+                    this.Parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            if ( declaration is TOut outDeclaration )
+                            {
+                                return action( outDeclaration, tag, context2 );
                             }
                             else
                             {
@@ -1038,7 +1067,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             context2.Collector.AddAspectRequirement(
                                 new AspectRequirement(
-                                    declaration.ToTypedRef<IDeclaration>(),
+                                    declaration.ToValueTypedRef<IDeclaration>(),
                                     this.Parent.AspectPredecessor.Instance ) );
 
                             return Task.CompletedTask;

@@ -37,6 +37,13 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
 
     public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
+    [Memo]
+    private BoxedRef<IMethod> BoxedRef => new( this.ToValueTypedRef() );
+
+    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this.BoxedRef;
+
     public IGenericParameterList TypeParameters => this.SourceMethod.TypeParameters;
 
     public IReadOnlyList<IType> TypeArguments => this.SourceMethod.TypeArguments;
@@ -128,11 +135,16 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
             => ((IParameterImpl) this._sourceParameter).GetDerivedDeclarations( options )
                 .Select( d => SubstitutedMemberFactory.Substitute( d, this._targetMethod.GenericMap ).GetTarget( ReferenceResolutionOptions.Default ) );
 
-        public Ref<IDeclaration> ToRef() => Ref.FromDeclarationId<IDeclaration>( this.GetSerializableId() );
+        public Ref<IDeclaration> ToValueTypedRef() => Ref.FromDeclarationId<IDeclaration>( this.GetSerializableId() );
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
 
-        Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+        Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
+
+        [Memo]
+        private BoxedRef<IParameter> BoxedRef => new( this.ToValueTypedRef() );
+
+        IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 

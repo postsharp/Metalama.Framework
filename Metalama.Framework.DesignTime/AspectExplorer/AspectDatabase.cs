@@ -148,7 +148,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             this._aspectInstanceCache.TryAdd( compilation, aspectInstances );
         }
 
-        var compilationContext = CompilationContextFactory.GetInstance( compilation );
+        var compilationContext = compilation.GetCompilationContext();
         var typeIdResolver = compilationContext.SerializableTypeIdResolver;
 
         if ( !typeIdResolver.TryResolveId( aspectClass, out var aspectTypeSymbol ) )

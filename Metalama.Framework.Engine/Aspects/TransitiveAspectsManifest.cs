@@ -67,26 +67,26 @@ public sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
             options,
             annotations );
 
-    private void Serialize( Stream stream, in ProjectServiceProvider serviceProvider, Compilation compilation )
+    private void Serialize( Stream stream, in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
         using var deflate = new DeflateStream( stream, CompressionLevel.Optimal, true );
-        var formatter = CompileTimeSerializer.CreateInstance( serviceProvider, compilation );
+        var formatter = CompileTimeSerializer.CreateInstance( serviceProvider, compilationContext );
         formatter.Serialize( this, deflate );
         deflate.Flush();
         stream.Flush();
     }
 
-    public byte[] ToBytes( in ProjectServiceProvider serviceProvider, Compilation compilation )
+    public byte[] ToBytes( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
         var stream = new MemoryStream();
-        this.Serialize( stream, serviceProvider, compilation );
+        this.Serialize( stream, serviceProvider, compilationContext );
 
         return stream.ToArray();
     }
 
-    internal ManagedResource ToResource( in ProjectServiceProvider serviceProvider, Compilation compilation )
+    internal ManagedResource ToResource( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
-        var bytes = this.ToBytes( serviceProvider, compilation );
+        var bytes = this.ToBytes( serviceProvider, compilationContext );
 
         return new ManagedResource(
             CompileTimeConstants.InheritableAspectManifestResourceName,
@@ -97,12 +97,12 @@ public sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
     public static TransitiveAspectsManifest Deserialize(
         Stream stream,
         in ProjectServiceProvider serviceProvider,
-        Compilation compilation,
+        CompilationContext compilationContext,
         string? assemblyName )
     {
         using var deflate = new DeflateStream( stream, CompressionMode.Decompress );
 
-        var formatter = CompileTimeSerializer.CreateInstance( serviceProvider, compilation );
+        var formatter = CompileTimeSerializer.CreateInstance( serviceProvider, compilationContext );
 
         return (TransitiveAspectsManifest) formatter.Deserialize( deflate, assemblyName ).AssertNotNull();
     }

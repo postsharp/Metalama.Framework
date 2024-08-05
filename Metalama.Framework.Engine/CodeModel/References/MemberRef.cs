@@ -9,11 +9,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-/// <summary>
-/// The implementation of <see cref="IMemberRef{T}"/>.
-/// </summary>
-/// <typeparam name="T"></typeparam>
-internal readonly struct MemberRef<T> : IMemberRef<T>, IEquatable<MemberRef<T>>
+internal readonly struct MemberRef<T> : IEquatable<MemberRef<T>>
     where T : class, INamedDeclaration
 {
     private readonly Ref<T> _underlying;
@@ -44,7 +40,7 @@ internal readonly struct MemberRef<T> : IMemberRef<T>, IEquatable<MemberRef<T>>
     public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default )
         => this._underlying.GetTargetOrNull( compilation, options );
 
-    public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
+    public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey = false ) => this._underlying.GetSymbol( compilation, ignoreAssemblyKey );
 
     public Ref<T> ToRef() => this._underlying;
 

@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Linq;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -26,9 +27,9 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
     }
 
     public bool Equals( IDeclaration? x, IDeclaration? y )
-        => (x == null && y == null) || (x != null && y != null && this._innerComparer.Equals( x.ToTypedRef(), y.ToTypedRef() ));
+        => (x == null && y == null) || (x != null && y != null && this._innerComparer.Equals( x.ToValueTypedRef(), y.ToValueTypedRef() ));
 
-    public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToTypedRef() );
+    public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToValueTypedRef() );
 
     public bool Equals( IType? x, IType? y )
         => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralDeclarationComparer.Equals( x, y ));
@@ -92,8 +93,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
         return this._conversions.HasConversion( left, right, kind );
     }
 
-    public bool Is( MemberRef<INamedType> left, IType right, ConversionKind kind )
-        => this.Is( left.GetTarget( right.Compilation ), right, kind );
+    public bool Is( MemberRef<INamedType> left, IType right, ConversionKind kind ) => this.Is( left.GetTarget( right.Compilation ), right, kind );
 
     public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
 
@@ -181,7 +181,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
             return true;
         }
 
-        if ( typeDefinition.TypeKind == Code.TypeKind.Interface )
+        if ( typeDefinition.TypeKind == TypeKind.Interface )
         {
             // When searching for an interface, we should consider interfaces defined by the evaluated type.
             if ( type.GetImplementedInterfaces().Any( i => this.IsOfTypeDefinition( i, typeDefinition ) ) )

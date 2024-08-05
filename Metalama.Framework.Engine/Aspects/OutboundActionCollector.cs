@@ -59,7 +59,7 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
         aspectInstances.Enqueue( aspectInstance );
     }
 
-    public void AddExclusion( Ref<IDeclaration> exclusion )
+    public void AddExclusion( in Ref<IDeclaration> exclusion )
     {
         var exclusions = this._exclusions;
 

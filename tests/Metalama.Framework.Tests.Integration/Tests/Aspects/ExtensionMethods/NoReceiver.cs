@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.No
 [RunTimeOrCompileTime]
 internal static class Outer
 {
-    internal static List<T> MyToList<T>( this IEnumerable<T> source ) => Enumerable.ToList( source );
+    internal static List<T> MyToList<T>( this IEnumerable<T> source ) => source.ToList();
 
     internal class ReturnNumbers : OverrideMethodAspect
     {
