@@ -1,1 +1,1 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Warning MY001 on `Foo`: `Reference constraint of type 'OverrideMember' in declaration 'DerivedReferencedClass.Foo' (SyntaxKind=PropertyDeclaration).`
