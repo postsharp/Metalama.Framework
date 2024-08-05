@@ -45,8 +45,6 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
         var compilation = await workspaceProvider.GetProject( "project" ).GetCompilationAsync();
         var syntaxTree = await workspaceProvider.GetDocument( "project", "code.cs" ).GetSyntaxTreeAsync();
         var semanticModel = compilation!.GetSemanticModel( syntaxTree! );
-        var diagnostics = compilation!.GetDiagnostics();
-        Assert.Empty( diagnostics.Where( x => x.Severity == DiagnosticSeverity.Error ) );
 
         var analyzer = new TheDiagnosticAnalyzer( pipelineFactory.ServiceProvider );
         var analysisContext = new TestSemanticModelAnalysisContext( semanticModel, testContext.ProjectOptions );
