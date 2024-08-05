@@ -4,7 +4,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal interface ISyntaxTreeTransformation : ITransformation
+internal interface ISyntaxTreeTransformation : ITransformation, ISyntaxTreeTransformationBase;
+
+public interface ISyntaxTreeTransformationBase : ITransformationBase
 {
     SyntaxTree TransformedSyntaxTree { get; }
 }

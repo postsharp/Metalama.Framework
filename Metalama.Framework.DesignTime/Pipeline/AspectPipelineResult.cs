@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -133,85 +134,101 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder? annotationsBuilder = null;
         var aspectInstancesHashCode = this.AspectInstancesHashCode;
 
+        foreach ( var (filePath, oldResult) in this._invalidSyntaxTreeResults )
+        {
+            UnindexOldTree( filePath, oldResult );
+        }
+
         foreach ( var result in resultsByTree )
         {
             var filePath = result.SyntaxTreePath ?? "";
 
             // Un-index the old tree.
-            if ( syntaxTreeResultBuilder.TryGetValue( filePath, out var oldSyntaxTreeResult ) ||
-                 this._invalidSyntaxTreeResults.TryGetValue( filePath, out oldSyntaxTreeResult ) )
+            if ( syntaxTreeResultBuilder.TryGetValue( filePath, out var oldSyntaxTreeResult ) )
             {
-                if ( !oldSyntaxTreeResult.Introductions.IsEmpty )
-                {
-                    introducedSyntaxTreeBuilder ??= this.IntroducedSyntaxTrees.ToBuilder();
-
-                    foreach ( var introducedTree in oldSyntaxTreeResult.Introductions )
-                    {
-                        Logger.DesignTime.Trace?.Log(
-                            $"CompilationPipelineResult.Update( id = {this._id} ): removing introduced tree '{introducedTree.Name}'." );
-
-                        introducedSyntaxTreeBuilder.Remove( introducedTree.Name );
-                    }
-                }
-
-                if ( !oldSyntaxTreeResult.InheritableAspects.IsEmpty )
-                {
-                    inheritableAspectsBuilder ??= this._inheritableAspects.ToBuilder();
-
-                    foreach ( var x in oldSyntaxTreeResult.InheritableAspects )
-                    {
-                        Logger.DesignTime.Trace?.Log(
-                            $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable aspect of type '{x.AspectClass.ShortName}'." );
-
-                        inheritableAspectsBuilder.Remove( x.AspectClass.FullName, x );
-                    }
-                }
-
-                if ( !oldSyntaxTreeResult.ReferenceValidators.IsEmpty )
-                {
-                    validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
-
-                    foreach ( var validator in oldSyntaxTreeResult.ReferenceValidators )
-                    {
-                        Logger.DesignTime.Trace?.Log(
-                            $"CompilationPipelineResult.Update( id = {this._id} ): removing validator `{validator}` from syntax tree '{filePath}'." );
-
-                        validatorsBuilder.Remove( validator );
-                    }
-                }
-
-                if ( !oldSyntaxTreeResult.InheritableOptions.IsDefault )
-                {
-                    inheritableOptionsBuilder ??= this.InheritableOptions.ToBuilder();
-
-                    foreach ( var optionItem in oldSyntaxTreeResult.InheritableOptions )
-                    {
-                        Logger.DesignTime.Trace?.Log(
-                            $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable option of type `{optionItem.Key.OptionType}` on `{optionItem.Key.DeclarationId}` from syntax tree '{filePath}'." );
-
-                        inheritableOptionsBuilder.Remove( optionItem.Key );
-                    }
-                }
-
-                if ( !oldSyntaxTreeResult.Annotations.IsEmpty )
-                {
-                    annotationsBuilder ??= this.Annotations.ToBuilder();
-
-                    foreach ( var annotation in oldSyntaxTreeResult.Annotations )
-                    {
-                        annotationsBuilder.Remove( annotation.Key, annotation );
-                    }
-                }
-
-                aspectInstancesHashCode ^= oldSyntaxTreeResult.AspectInstancesHashCode;
+                UnindexOldTree( filePath, oldSyntaxTreeResult );
             }
 
             // Index the new tree.
-            if ( !result.Introductions.IsEmpty )
+            IndexNewTree( filePath, result );
+
+            syntaxTreeResultBuilder[filePath] = result;
+        }
+
+        void UnindexOldTree( string filePath, SyntaxTreePipelineResult oldSyntaxTreeResult )
+        {
+            if ( !oldSyntaxTreeResult.Introductions.IsEmpty )
             {
                 introducedSyntaxTreeBuilder ??= this.IntroducedSyntaxTrees.ToBuilder();
 
-                foreach ( var introducedTree in result.Introductions )
+                foreach ( var introducedTree in oldSyntaxTreeResult.Introductions )
+                {
+                    Logger.DesignTime.Trace?.Log(
+                        $"CompilationPipelineResult.Update( id = {this._id} ): removing introduced tree '{introducedTree.Name}'." );
+
+                    introducedSyntaxTreeBuilder.Remove( introducedTree.Name );
+                }
+            }
+
+            if ( !oldSyntaxTreeResult.InheritableAspects.IsEmpty )
+            {
+                inheritableAspectsBuilder ??= this._inheritableAspects.ToBuilder();
+
+                foreach ( var x in oldSyntaxTreeResult.InheritableAspects )
+                {
+                    Logger.DesignTime.Trace?.Log(
+                        $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable aspect of type '{x.AspectClass.ShortName}'." );
+
+                    inheritableAspectsBuilder.Remove( x.AspectClass.FullName, x );
+                }
+            }
+
+            if ( !oldSyntaxTreeResult.ReferenceValidators.IsEmpty )
+            {
+                validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
+
+                foreach ( var validator in oldSyntaxTreeResult.ReferenceValidators )
+                {
+                    Logger.DesignTime.Trace?.Log(
+                        $"CompilationPipelineResult.Update( id = {this._id} ): removing validator `{validator}` from syntax tree '{filePath}'." );
+
+                    validatorsBuilder.Remove( validator );
+                }
+            }
+
+            if ( !oldSyntaxTreeResult.InheritableOptions.IsDefault )
+            {
+                inheritableOptionsBuilder ??= this.InheritableOptions.ToBuilder();
+
+                foreach ( var optionItem in oldSyntaxTreeResult.InheritableOptions )
+                {
+                    Logger.DesignTime.Trace?.Log(
+                        $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable option of type `{optionItem.Key.OptionType}` on `{optionItem.Key.DeclarationId}` from syntax tree '{filePath}'." );
+
+                    inheritableOptionsBuilder.Remove( optionItem.Key );
+                }
+            }
+
+            if ( !oldSyntaxTreeResult.Annotations.IsEmpty )
+            {
+                annotationsBuilder ??= this.Annotations.ToBuilder();
+
+                foreach ( var annotation in oldSyntaxTreeResult.Annotations )
+                {
+                    annotationsBuilder.Remove( annotation.Key, annotation );
+                }
+            }
+
+            aspectInstancesHashCode ^= oldSyntaxTreeResult.AspectInstancesHashCode;
+        }
+
+        void IndexNewTree( string filePath, SyntaxTreePipelineResult newSyntaxTreeResult )
+        {
+            if ( !newSyntaxTreeResult.Introductions.IsEmpty )
+            {
+                introducedSyntaxTreeBuilder ??= this.IntroducedSyntaxTrees.ToBuilder();
+
+                foreach ( var introducedTree in newSyntaxTreeResult.Introductions )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding introduced syntax tree '{introducedTree.Name}'." );
@@ -220,11 +237,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if ( !result.InheritableAspects.IsEmpty )
+            if ( !newSyntaxTreeResult.InheritableAspects.IsEmpty )
             {
                 inheritableAspectsBuilder ??= this._inheritableAspects.ToBuilder();
 
-                foreach ( var x in result.InheritableAspects )
+                foreach ( var x in newSyntaxTreeResult.InheritableAspects )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable aspect of type '{x.AspectClass.ShortName}'." );
@@ -233,22 +250,22 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if ( !result.ReferenceValidators.IsDefaultOrEmpty )
+            if ( !newSyntaxTreeResult.ReferenceValidators.IsDefaultOrEmpty )
             {
                 validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
 
-                foreach ( var validator in result.ReferenceValidators )
+                foreach ( var validator in newSyntaxTreeResult.ReferenceValidators )
                 {
                     Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} ): adding validator `{validator}` to '{filePath}'." );
                     validatorsBuilder.Add( validator );
                 }
             }
 
-            if ( !result.InheritableOptions.IsDefaultOrEmpty )
+            if ( !newSyntaxTreeResult.InheritableOptions.IsDefaultOrEmpty )
             {
                 inheritableOptionsBuilder ??= this.InheritableOptions.ToBuilder();
 
-                foreach ( var optionItem in result.InheritableOptions )
+                foreach ( var optionItem in newSyntaxTreeResult.InheritableOptions )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable options of type `{optionItem.Key.OptionType}`." );
@@ -257,19 +274,17 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if ( !result.Annotations.IsEmpty )
+            if ( !newSyntaxTreeResult.Annotations.IsEmpty )
             {
                 annotationsBuilder ??= this.Annotations.ToBuilder();
 
-                foreach ( var annotationGroup in result.Annotations )
+                foreach ( var annotationGroup in newSyntaxTreeResult.Annotations )
                 {
                     annotationsBuilder.Add( annotationGroup.Key, annotationGroup );
                 }
             }
 
-            aspectInstancesHashCode ^= result.AspectInstancesHashCode;
-
-            syntaxTreeResultBuilder[filePath] = result;
+            aspectInstancesHashCode ^= newSyntaxTreeResult.AspectInstancesHashCode;
         }
 
         // Make immutable and return.
@@ -317,9 +332,6 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         var resultBuilders = pipelineResults
             .InputSyntaxTrees
             .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResult.Builder( syntaxTree.Value ) );
-
-        // TODO: This selects a single syntax tree and uses it as input tree of all "independent" introduced syntax trees.
-        var inputSyntaxTreeForDetached = pipelineResults.InputSyntaxTrees.First().Value;
 
         List<DesignTimeReferenceValidatorInstance>? externalValidators = null;
 
@@ -386,21 +398,28 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split introductions by original syntax tree.
         foreach ( var introduction in pipelineResults.IntroducedSyntaxTrees )
         {
-            var syntaxTree = introduction.SourceSyntaxTree ?? inputSyntaxTreeForDetached;
-            var filePath = syntaxTree.FilePath;
+            SyntaxTreePipelineResult.Builder? builder;
 
-            if ( !resultBuilders.TryGetValue( filePath, out var builder ) )
+            if ( introduction.SourceSyntaxTree is { } syntaxTree )
             {
-                // This happens when the source tree is not dirty, so it's not part of the PartialCompilation.
-                builder = resultBuilders[filePath] = new SyntaxTreePipelineResult.Builder( syntaxTree );
+                var filePath = syntaxTree.FilePath;
+
+                if ( !resultBuilders.TryGetValue( filePath, out builder ) )
+                {
+                    // This happens when the source tree is not dirty, so it's not part of the PartialCompilation.
+                    builder = resultBuilders[filePath] = new SyntaxTreePipelineResult.Builder( syntaxTree );
+                }
+            }
+            else
+            {
+                builder = emptySyntaxTreeResult ??= new SyntaxTreePipelineResult.Builder( null );
             }
 
             builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
 
             if ( introduction.SourceSyntaxTree == null )
             {
-                // TODO: This is a temporary hack until we have a proper way to handle "independent" introduced syntax trees.
-                builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, inputSyntaxTreeForDetached, introduction.GeneratedSyntaxTree ) );
+                builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, null, introduction.GeneratedSyntaxTree ) );
 
                 continue;
             }
@@ -516,17 +535,13 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split transformations by syntax tree.
         foreach ( var transformation in pipelineResults.Transformations )
         {
-            var targetSymbol = transformation.TargetDeclaration.GetSymbol();
-            var primarySyntaxReference = targetSymbol?.GetPrimarySyntaxReference();
+            var filePath = (transformation as ISyntaxTreeTransformationBase)?.TransformedSyntaxTree.FilePath;
 
-            var filePath = primarySyntaxReference?.SyntaxTree.FilePath;
-
-            if ( filePath == null || !resultBuilders.ContainsKey( filePath ) )
+            if ( filePath == null || !resultBuilders.TryGetValue( filePath, out var builder ) )
             {
-                filePath = inputSyntaxTreeForDetached.FilePath;
+                builder = emptySyntaxTreeResult ??= new SyntaxTreePipelineResult.Builder( null );
             }
 
-            var builder = resultBuilders[filePath];
             builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
             builder.Transformations.Add(
@@ -587,7 +602,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             builder.Annotations.Add( annotationsOnDeclaration.Key.ToSerializableId(), exportedAnnotations );
         }
 
-        // Add syntax trees with empty output to it gets cached too.
+        // Add syntax trees with empty output so they get cached too.
         var inputTreesWithoutOutput = compilation.SyntaxTrees.ToBuilder();
 
         foreach ( var path in resultBuilders.Keys )
