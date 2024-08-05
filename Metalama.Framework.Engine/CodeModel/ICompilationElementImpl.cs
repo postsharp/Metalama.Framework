@@ -9,5 +9,5 @@ internal interface ICompilationElementImpl : ICompilationElement
 {
     new CompilationModel Compilation { get; }
 
-    Ref<ICompilationElement> ToRef();
+    Ref<ICompilationElement> ToValueTypedRef();
 }

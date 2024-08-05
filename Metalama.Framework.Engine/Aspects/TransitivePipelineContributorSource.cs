@@ -34,7 +34,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
     public TransitivePipelineContributorSource(
-        Compilation compilation,
+        CompilationContext compilationContext,
         ImmutableArray<IAspectClass> aspectClasses,
         ProjectServiceProvider serviceProvider )
     {
@@ -47,7 +47,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
 
         var aspectClassesByName = aspectClasses.ToDictionary( t => t.FullName, t => t );
 
-        foreach ( var reference in compilation.References )
+        foreach ( var reference in compilationContext.Compilation.References )
         {
             // Get the manifest of the reference.
             ITransitiveAspectsManifest? manifest = null;
@@ -63,7 +63,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
                             manifest = TransitiveAspectsManifest.Deserialize(
                                 new MemoryStream( bytes ),
                                 serviceProvider,
-                                compilation,
+                                compilationContext,
                                 filePath );
 
                             assemblyIdentity = metadataInfo.AssemblyIdentity;

@@ -29,7 +29,11 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
     public IMethod? SetMethod
         => this.PropertyOrIndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.SetMethod ) : null;
 
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.PropertyOrIndexerBuilder.ToPropertyOrIndexerRef();
+
     public PropertyInfo ToPropertyInfo() => this.PropertyOrIndexerBuilder.ToPropertyInfo();
+
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => this.PropertyOrIndexerBuilder.ToPropertyOrIndexerRef();
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

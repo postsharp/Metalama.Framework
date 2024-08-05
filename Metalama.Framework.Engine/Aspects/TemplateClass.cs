@@ -51,7 +51,7 @@ public abstract class TemplateClass : IDiagnosticSource
         this._symbolClassificationService = serviceProvider.GetRequiredService<ITemplateInfoService>();
         this._templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
         this._baseClass = baseClass;
-        this.Members = this.GetMembers( typeSymbol, templateReflectionContext.Compilation, diagnosticAdder );
+        this.Members = this.GetMembers( typeSymbol, templateReflectionContext.CompilationContext, diagnosticAdder );
         this.ShortName = shortName;
 
         if ( templateReflectionContext.IsCacheable )
@@ -125,7 +125,7 @@ public abstract class TemplateClass : IDiagnosticSource
 
     private ImmutableDictionary<string, TemplateClassMember> GetMembers(
         INamedTypeSymbol type,
-        Compilation compilation,
+        CompilationContext compilationContext,
         IDiagnosticAdder diagnosticAdder )
     {
         var members = ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
@@ -170,7 +170,7 @@ public abstract class TemplateClass : IDiagnosticSource
 
             if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute(
                     templateInfo.Id,
-                    compilation,
+                    compilationContext,
                     diagnosticAdder,
                     out attribute ) )
             {
@@ -359,7 +359,7 @@ public abstract class TemplateClass : IDiagnosticSource
     {
         var compilationModelForTemplateReflection = this._templateReflectionContext?.GetCompilationModel( compilation ) ?? compilation;
 
-        return this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
+        return this.GetDeclarativeAdvice( serviceProvider, compilation.CompilationContext )
             .Select(
                 x => TemplateMemberFactory.Create(
                     (IMemberOrNamedType) compilationModelForTemplateReflection.Factory.GetDeclaration(
@@ -372,11 +372,12 @@ public abstract class TemplateClass : IDiagnosticSource
     private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, Compilation SymbolCompilation, DeclarativeAdviceAttribute Attribute)>
         GetDeclarativeAdvice(
             ProjectServiceProvider serviceProvider,
-            Compilation compilation )
+            CompilationContext compilationContext )
     {
         TemplateAttributeFactory? templateAttributeFactory = null;
 
-        var templateReflectionCompilation = this._templateReflectionContext?.Compilation ?? compilation;
+        var templateReflectionCompilationContext = this._templateReflectionContext?.CompilationContext ?? compilationContext;
+        var templateReflectionCompilation = templateReflectionCompilationContext.Compilation;
 
         // We are sorting the declarative advice by symbol name and not by source order because the source is not available
         // if the aspect library is a compiled assembly.
@@ -386,7 +387,7 @@ public abstract class TemplateClass : IDiagnosticSource
             .Select(
                 m =>
                 {
-                    var symbol = m.Value.DeclarationId.ResolveToSymbol( templateReflectionCompilation );
+                    var symbol = m.Value.DeclarationId.ResolveToSymbol( templateReflectionCompilationContext );
 
                     return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
                 } )
@@ -399,7 +400,7 @@ public abstract class TemplateClass : IDiagnosticSource
 
             if ( !templateAttributeFactory.TryGetTemplateAttribute(
                     declarationId,
-                    templateReflectionCompilation,
+                    templateReflectionCompilationContext,
                     ThrowingDiagnosticAdder.Instance,
                     out var attribute ) )
             {

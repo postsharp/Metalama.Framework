@@ -25,5 +25,5 @@ internal abstract class OverrideMemberAdvice<TInput, TOutput> : Advice<OverrideM
     public override string ToString() => $"Override {this.TargetDeclaration}";
 
     protected OverrideMemberAdviceResult<TOutput> CreateSuccessResult( TOutput? member = null )
-        => new( member?.ToTypedRef() ) { AdviceKind = this.AdviceKind, Outcome = AdviceOutcome.Default };
+        => new( member?.ToValueTypedRef() ) { AdviceKind = this.AdviceKind, Outcome = AdviceOutcome.Default };
 }

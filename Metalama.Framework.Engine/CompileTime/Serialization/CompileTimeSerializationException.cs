@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// </summary>
         /// <param name="message">Message.</param>
         /// <param name="inner">Inner exception.</param>
-        public CompileTimeSerializationException( string message, Exception inner ) : base( message, inner ) { }
+        public CompileTimeSerializationException( string message, Exception? inner ) : base( message, inner ) { }
 
         // ReSharper disable once UnusedMember.Local
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             SerializationInfo info,
             StreamingContext context ) : base( info, context ) { }
 
-        internal static CompileTimeSerializationException CreateWithCause( string operation, Type type, Exception innerException, SerializationCause? cause )
+        internal static CompileTimeSerializationException CreateWithCause( string description, SerializationCause? cause, Exception? innerException = null )
         {
             var causes = new List<string>();
 
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
             causes.Reverse();
 
-            var message = $"{operation} of {type.Name} failed. The order of deserialization was as follows:\n" + string.Join( "", causes.ToArray() );
+            var message = $"{description} The serialization path is: '" + string.Join( "", causes ) + "'.";
 
             return new CompileTimeSerializationException( message, innerException );
         }

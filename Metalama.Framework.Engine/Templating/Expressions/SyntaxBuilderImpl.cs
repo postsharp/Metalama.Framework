@@ -143,6 +143,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
                 float => SpecialType.Single,
                 decimal => SpecialType.Decimal,
                 bool => SpecialType.Boolean,
+                Type => SpecialType.Type,
                 _ => throw new ArgumentOutOfRangeException( nameof(value), $"{value.GetType().Name} is not a literal type." )
             };
         }

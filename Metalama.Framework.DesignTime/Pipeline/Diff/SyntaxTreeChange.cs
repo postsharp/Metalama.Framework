@@ -69,9 +69,14 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public ulong NewHash => this.NewSyntaxTreeVersion.DeclarationHash;
 
         /// <summary>
-        /// Gets a value indicating whether the new syntax tree contain compile-time code.
+        /// Gets a value indicating whether the new syntax tree contains compile-time code.
         /// </summary>
         public bool HasCompileTimeCode => this.NewSyntaxTreeVersion.HasCompileTimeCode;
+
+        /// <summary>
+        /// Gets a value indicating whether the old syntax tree or the new syntax tree contain global attributes.
+        /// </summary>
+        public bool EitherHasGlobalAttributes => this._oldSyntaxTreeVersionData.HasGlobalAttributes || this.NewSyntaxTreeVersion.HasGlobalAttributes;
 
         public static SyntaxTreeChange NonIncremental( in SyntaxTreeVersion syntaxTreeVersion )
             => new(

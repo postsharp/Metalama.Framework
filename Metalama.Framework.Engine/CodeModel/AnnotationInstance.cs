@@ -14,7 +14,7 @@ public readonly struct AnnotationInstance
 
     public bool Export { get; }
 
-    internal AnnotationInstance( IAnnotation annotation, bool export, Ref<IDeclaration> targetDeclaration )
+    internal AnnotationInstance( IAnnotation annotation, bool export, in Ref<IDeclaration> targetDeclaration )
     {
         this.Annotation = annotation;
         this.Export = export;

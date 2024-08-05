@@ -55,7 +55,7 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
                                 this ) );
 
                     case OverrideStrategy.Ignore:
-                        return new AddAttributeAdviceResult( AdviceOutcome.Ignore, (IRef<IAttribute>) existingAttribute.ToRef() );
+                        return new AddAttributeAdviceResult( AdviceOutcome.Ignore, existingAttribute.ToRef() );
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
@@ -85,7 +85,7 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
                 addTransformation(
                     new ConstructorBuilder( this, constructor.DeclaringType )
                     {
-                        ReplacedImplicit = constructor.ToTypedRef(), Accessibility = Accessibility.Public
+                        ReplacedImplicit = constructor.ToValueTypedRef(), Accessibility = Accessibility.Public
                     }.ToTransformation() );
             }
 

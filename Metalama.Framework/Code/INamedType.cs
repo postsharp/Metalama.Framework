@@ -186,5 +186,7 @@ namespace Metalama.Framework.Code
         /// Gets the underlying type of an enum, the non-nullable type of a nullable reference type, or the current type.
         /// </summary>
         INamedType UnderlyingType { get; }
+
+        new IRef<INamedType> ToRef();
     }
 }

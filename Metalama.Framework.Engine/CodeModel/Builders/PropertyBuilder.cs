@@ -8,8 +8,10 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -24,6 +26,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     private TemplateMember<IProperty>? _initializerTemplate;
 
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
+
+    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
 
     public override Writeability Writeability
     {
@@ -56,6 +60,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     IProperty IProperty.Definition => this;
 
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.BoxedRef;
+
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
     public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IProperty>();
@@ -63,6 +69,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     public override IMember? OverriddenMember => this.OverriddenProperty;
+
+    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
 
     public virtual IInjectMemberTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
 
@@ -147,4 +155,15 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
             this.InitializerTags,
             out initializerExpression,
             out initializerMethod );
+
+    [Memo]
+    public BoxedRef<IProperty> BoxedRef => new BoxedRef<IProperty>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+
+    IRef<IProperty> IProperty.ToRef() => this.BoxedRef;
+
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

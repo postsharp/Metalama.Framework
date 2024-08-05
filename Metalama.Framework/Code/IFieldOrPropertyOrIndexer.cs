@@ -25,4 +25,6 @@ public interface IFieldOrPropertyOrIndexer : IHasAccessors
     /// this property returns a pseudo-method that can be the target of aspects and advice, as if the field were a property.
     /// </summary>
     IMethod? SetMethod { get; }
+
+    new IRef<IFieldOrPropertyOrIndexer> ToRef();
 }

@@ -346,12 +346,12 @@ public abstract class AspectPipeline : IDisposable
     // ReSharper disable UnusedParameter.Global
     private protected virtual PipelineContributorSources CreatePipelineContributorSources(
         AspectPipelineConfiguration configuration,
-        Compilation compilation,
+        CompilationContext compilationContext,
         CancellationToken cancellationToken )
     {
         var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
-        var transitiveAspectSource = new TransitivePipelineContributorSource( compilation, aspectClasses, configuration.ServiceProvider );
+        var transitiveAspectSource = new TransitivePipelineContributorSource( compilationContext, aspectClasses, configuration.ServiceProvider );
 
         var aspectSources = ImmutableArray.Create<IAspectSource>(
             new CompilationAspectSource( configuration.ServiceProvider, aspectClasses ),
@@ -403,7 +403,9 @@ public abstract class AspectPipeline : IDisposable
 
         // We need to overridde execution scenario in this service provider as well.
         var executionScenario = this.ServiceProvider.GetRequiredService<ExecutionScenario>();
-        pipelineConfiguration = pipelineConfiguration.WithServiceProvider( pipelineConfiguration.ServiceProvider.WithService( executionScenario, allowOverride: true ) );
+
+        pipelineConfiguration =
+            pipelineConfiguration.WithServiceProvider( pipelineConfiguration.ServiceProvider.WithService( executionScenario, allowOverride: true ) );
 
         // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
         // we need to substitute the code fix filter.
@@ -418,7 +420,7 @@ public abstract class AspectPipeline : IDisposable
                 pipelineConfiguration );
         }
 
-        var contributorSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
+        var contributorSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.CompilationContext, cancellationToken );
 
         var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 

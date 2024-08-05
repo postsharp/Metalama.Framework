@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             this.Visit(
                 compilation.Assembly,
                 0,
-                ImmutableHashSet<IAssemblySymbol>.Empty.WithComparer( CompilationContextFactory.GetInstance( compilation ).SymbolComparer ) );
+                ImmutableHashSet<IAssemblySymbol>.Empty.WithComparer( compilation.GetCompilationContext().SymbolComparer ) );
         }
 
         public (int Min, int Max) GetDepth( IAssemblySymbol assembly ) => this._depth[assembly];

@@ -636,7 +636,8 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 this.InheritableOptions,
                 this.Annotations );
 
-            this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilation );
+            var compilationContext = compilation.GetCompilationContext();
+            this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilationContext );
         }
 
         return this._serializedTransitiveAspectManifest;

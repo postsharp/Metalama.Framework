@@ -12,7 +12,7 @@ internal sealed class AllImplementedInterfacesCollection : DeclarationCollection
 {
     public AllImplementedInterfacesCollection( INamedTypeImpl declaringType, AllInterfaceUpdatableCollection source ) : base( declaringType, source ) { }
 
-    public bool Contains( INamedType namedType ) => ((AllInterfaceUpdatableCollection) this.Source).Contains( namedType.ToTypedRef() );
+    public bool Contains( INamedType namedType ) => ((AllInterfaceUpdatableCollection) this.Source).Contains( namedType.ToValueTypedRef() );
 
     public bool Contains( Type type )
     {

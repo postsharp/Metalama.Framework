@@ -222,7 +222,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
 
         // Replace wildcard AssemblyVersionAttribute with actual version.
-        var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
+        var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToValueTypedRef() );
         var assemblyVersionAttributeType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
         var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionAttributeType ).FirstOrDefault();
 

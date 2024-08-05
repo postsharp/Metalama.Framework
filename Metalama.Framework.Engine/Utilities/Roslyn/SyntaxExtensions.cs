@@ -342,4 +342,10 @@ public static class SyntaxExtensions
             .WithTrailingTrivia( node.GetTrailingTrivia().AddRange( fromTrailing ) );
     }
 #pragma warning restore LAMA0832
+
+    /// <summary>
+    /// Returns true when the tree contains assembly or module attributes.
+    /// </summary>
+    public static bool ContainsGlobalAttributes( this SyntaxTree tree )
+        => tree.GetCompilationUnitRoot().AttributeLists.Any( list => list.Attributes.Any() );
 }

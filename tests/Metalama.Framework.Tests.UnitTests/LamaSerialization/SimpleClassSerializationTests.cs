@@ -269,13 +269,13 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             var anotherSerializedClass = new SimpleExplicitlySerializedClass<DateTime>( DateTime.Today.AddMonths( -10 ) );
             var array = new[] { serializedClass, anotherSerializedClass };
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( array, memoryStream );
+            testContext.Serializer.Serialize( array, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
 
             var deserializedObject =
-                (SimpleExplicitlySerializedClass<DateTime>[]?) formatter.Deserialize( memoryStream );
+                (SimpleExplicitlySerializedClass<DateTime>[]?) testContext.Serializer.Deserialize( memoryStream );
 
             Assert.NotNull( deserializedObject );
             Assert.Equal( 2, deserializedObject.Length );
@@ -286,11 +286,11 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         private void TestSimpleExplicitlySerializedClass<T>( T value )
         {
             var initialObject = new SimpleExplicitlySerializedClass<T>( value );
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( initialObject, memoryStream );
+            testContext.Serializer.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
-            var deserializedObject = (SimpleExplicitlySerializedClass<T>?) formatter.Deserialize( memoryStream );
+            var deserializedObject = (SimpleExplicitlySerializedClass<T>?) testContext.Serializer.Deserialize( memoryStream );
 
             if ( typeof(T).IsArray )
             {
@@ -305,13 +305,13 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         private void TestExplicitlySerializedClass<TForCtor, TForField>( TForCtor value, TForField property )
         {
             var initialObject = new ExplicitlySerializedClass<TForCtor, TForField>( value ) { Field = property };
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( initialObject, memoryStream );
+            testContext.Serializer.Serialize( initialObject, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
 
             var deserializedObject =
-                (ExplicitlySerializedClass<TForCtor, TForField>?) formatter.Deserialize( memoryStream );
+                (ExplicitlySerializedClass<TForCtor, TForField>?) testContext.Serializer.Deserialize( memoryStream );
 
             Assert.Equal( initialObject.Value, deserializedObject!.Value );
             Assert.Equal( initialObject.Field, deserializedObject.Field );

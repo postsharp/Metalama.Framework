@@ -13,7 +13,8 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
 {
     private ImmutableDictionary<string, MemberRef<T>>? _dictionary;
 
-    protected UniquelyNamedUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation, declaringType ) { }
+    protected UniquelyNamedUpdatableCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringType ) :
+        base( compilation, declaringType ) { }
 
     private ImmutableDictionary<string, MemberRef<T>> GetInitializedDictionary()
         => this._dictionary ??= ImmutableDictionary<string, MemberRef<T>>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );

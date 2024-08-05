@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                     break;
 
                 default:
-                    throw new CompileTimeSerializationException();
+                    throw new CompileTimeSerializationException( "Cannot decode a compressed integer." );
             }
 
             return new Integer( value, isNegative );

@@ -24,6 +24,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         bool IsDefault { get; }
 
         ISymbol GetClosestSymbol( CompilationContext compilationContext );
+
+        DeclarationRefTargetKind TargetKind { get; }
     }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl

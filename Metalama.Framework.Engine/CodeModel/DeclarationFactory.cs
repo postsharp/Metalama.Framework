@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -34,6 +35,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
     private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache;
+
+    private readonly ConcurrentDictionary<AttributeSerializationData, DeserializedAttribute> _deserializedAttributes = new();
 
     private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
     private readonly INamedType?[] _internalSpecialTypes = new INamedType?[(int) InternalSpecialType.Count];
@@ -79,13 +82,13 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
         => (INamespace) this._defaultCache.GetOrAdd(
-            namespaceSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            namespaceSymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( l, c ) => new Namespace( (INamespaceSymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
         => (IAssembly) this._defaultCache.GetOrAdd(
-            assemblySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            assemblySymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( l, c )
                 => !((IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull()).Identity.Equals( c.RoslynCompilation.Assembly.Identity )
                     ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c )
@@ -152,26 +155,26 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         methodSymbol = methodSymbol.PartialDefinitionPart ?? methodSymbol;
 
         return (IMethod) this._defaultCache.GetOrAdd(
-            methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            methodSymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
     }
 
     public IProperty GetProperty( IPropertySymbol propertySymbol )
         => (IProperty) this._defaultCache.GetOrAdd(
-            propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            propertySymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Property( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IIndexer GetIndexer( IPropertySymbol propertySymbol )
         => (IIndexer) this._defaultCache.GetOrAdd(
-            propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            propertySymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Indexer( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IField GetField( IFieldSymbol fieldSymbol )
         => (IField) this._defaultCache.GetOrAdd(
-            fieldSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            fieldSymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Field( (IFieldSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
@@ -183,26 +186,26 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         }
 
         return (IConstructor) this._defaultCache.GetOrAdd(
-            methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            methodSymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Constructor( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
     }
 
     public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
         => (IMethod) this._defaultCache.GetOrAdd(
-            finalizerSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            finalizerSymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IParameter GetParameter( IParameterSymbol parameterSymbol )
         => (IParameter) this._defaultCache.GetOrAdd(
-            parameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            parameterSymbol.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Parameter( (IParameterSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IEvent GetEvent( IEventSymbol @event )
         => (IEvent) this._defaultCache.GetOrAdd(
-            @event.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            @event.ToValueTypedRef( this.CompilationContext ).As<ICompilationElement>(),
             static ( ms, c ) => new Event( (IEventSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
@@ -419,6 +422,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                     SpecialType.ValueTask_T => (INamedType) this.GetTypeByReflectionType( typeof(ValueTask<>) ),
                     SpecialType.Task => (INamedType) this.GetTypeByReflectionType( typeof(Task) ),
                     SpecialType.Task_T => (INamedType) this.GetTypeByReflectionType( typeof(Task<>) ),
+                    SpecialType.Type => (INamedType) this.GetTypeByReflectionType( typeof(Type) ),
                     SpecialType.IAsyncEnumerable_T => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerable`1" ),
                     SpecialType.IAsyncEnumerator_T => this.GetTypeByReflectionName( "System.Collections.Generic.IAsyncEnumerator`1" ),
                     _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
@@ -457,7 +461,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             switch ( compilationElement )
             {
                 case IDeclaration declaration:
-                    return (T?) declaration.ToTypedRef().GetTargetOrNull( this._compilationModel, options );
+                    return (T?) declaration.ToValueTypedRef().GetTargetOrNull( this._compilationModel, options );
 
                 case IType type:
                     var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate(
@@ -783,7 +787,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         }
         else
         {
-            return declaration.ToTypedRef().GetTarget( this._compilationModel, options );
+            return declaration.ToValueTypedRef().GetTarget( this._compilationModel, options );
         }
     }
 
@@ -811,4 +815,10 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             return this.GetAssembly( assemblySymbol );
         }
     }
+
+    internal DeserializedAttribute GetDeserializedAttribute( AttributeSerializationData serializationData )
+        => this._deserializedAttributes.GetOrAdd(
+            serializationData,
+            static ( data, compilation ) => new DeserializedAttribute( data, compilation ),
+            this._compilationModel );
 }

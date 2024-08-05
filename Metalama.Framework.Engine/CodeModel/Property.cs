@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -57,6 +58,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 ? this
                 : this.Compilation.Factory.GetProperty( this.PropertySymbol.OriginalDefinition );
 
+        IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.BoxedRef;
+
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
         public IMember? OverriddenMember => this.OverriddenProperty;
@@ -97,5 +100,20 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+        [Memo]
+        private BoxedRef<IProperty> BoxedRef => new BoxedRef<IProperty>( this.ToValueTypedRef() );
+
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+
+        IRef<IProperty> IProperty.ToRef() => this.BoxedRef;
+
+        protected override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+
+        protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
+
+        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
     }
 }

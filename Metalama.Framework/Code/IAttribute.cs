@@ -14,5 +14,7 @@ namespace Metalama.Framework.Code
         /// Gets the declaration that owns the custom attribute.
         /// </summary>
         new IDeclaration ContainingDeclaration { get; }
+
+        new IRef<IAttribute> ToRef();
     }
 }

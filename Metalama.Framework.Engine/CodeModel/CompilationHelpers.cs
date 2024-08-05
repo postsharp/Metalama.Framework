@@ -144,6 +144,22 @@ internal sealed class CompilationHelpers : ICompilationHelpers
         // The service is not always available in tests, so we get it lazily.
         this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
 
-        return this._attributeDeserializer.TryCreateAttribute( attribute, (IDiagnosticAdder) diagnosticSink.Sink, out constructedAttribute );
+        return this._attributeDeserializer.TryCreateAttribute(
+            attribute,
+            (IDiagnosticAdder?) diagnosticSink.Sink ?? NullDiagnosticAdder.Instance,
+            out constructedAttribute );
+    }
+
+    public System.Attribute ConstructAttribute( IAttribute attribute )
+    {
+        // The service is not always available in tests, so we get it lazily.
+        this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
+
+        if ( this._attributeDeserializer.TryCreateAttribute( attribute, ThrowingDiagnosticAdder.Instance, out var constructedAttribute ) )
+        {
+            return constructedAttribute;
+        }
+
+        throw new AssertionFailedException( "The attribute construction failed, but no error message was reported." );
     }
 }

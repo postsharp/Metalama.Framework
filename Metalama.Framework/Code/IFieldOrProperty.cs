@@ -40,5 +40,7 @@ namespace Metalama.Framework.Code
         /// exposes a <see cref="TypedConstant"/> when possible.
         /// </summary>
         IExpression? InitializerExpression { get; }
+
+        new IRef<IFieldOrProperty> ToRef();
     }
 }

@@ -7,8 +7,10 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,6 +107,8 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
             _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {this.DeclarationKind}." )
         };
 
+    public override IRef<IMethodBase> ToMethodBaseRef() => this.BoxedRef;
+
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
@@ -176,5 +180,16 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
+    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+
     public IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
+
+    [Memo]
+    public BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
 }

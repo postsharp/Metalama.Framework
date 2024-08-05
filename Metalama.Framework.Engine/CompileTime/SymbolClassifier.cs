@@ -115,7 +115,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
         IAttributeDeserializer attributeDeserializer,
         ReferenceAssemblyLocator referenceAssemblyLocator )
     {
-        var compilationContext = CompilationContextFactory.GetInstance( compilation );
+        var compilationContext = compilation.GetCompilationContext();
 
         this._compilationContext = compilationContext;
 

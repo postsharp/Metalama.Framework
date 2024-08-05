@@ -19,6 +19,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 {
+    private AttributeRef? _attributeRef;
+
     internal IAttributeData AttributeConstruction { get; }
 
     public AttributeBuilder( Advice advice, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base( advice )
@@ -32,6 +34,8 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     public override bool CanBeInherited => false;
 
     public override IDeclaration ContainingDeclaration { get; }
+
+    IRef<IAttribute> IAttribute.ToRef() => this.ToAttributeRef();
 
     IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
@@ -70,9 +74,9 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
 
-    public override Ref<IDeclaration> ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+    public override Ref<IDeclaration> ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
-    IRef<IDeclaration> IDeclaration.ToRef() => this.ToAttributeRef();
+    public AttributeRef ToAttributeRef() => this._attributeRef ??= new AttributeRef( this );
 
-    public AttributeRef ToAttributeRef() => new( this );
+    public override IRef<IDeclaration> ToIRef() => this.ToAttributeRef();
 }

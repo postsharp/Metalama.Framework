@@ -271,7 +271,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         {
                             // This is replaced source element.
                             A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMember>( replacedMemberSymbol, CompilationContextFactory.GetInstance( inputCompilation ) ) );
+                                .Returns( new MemberRef<IMember>( replacedMemberSymbol, inputCompilation.GetCompilationContext() ) );
                         }
                         else
                         {
@@ -460,7 +460,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         {
             A.CallTo( () => observableTransformation.TargetDeclaration ).Returns( containingDeclaration );
 
-            A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
+            A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToValueTypedRef() )
                 .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
 
             A.CallTo( () => ((IInjectMemberTransformation) observableTransformation).InsertPosition )

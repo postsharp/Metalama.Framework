@@ -856,7 +856,7 @@ internal abstract partial class BaseTestRunner
                 // Check if any suppression applies to this diagnostic.
                 if ( suppressions.Any(
                         s => s.Suppression.Definition.SuppressedDiagnosticId == diagnostic.Id
-                             && s.GetScopeSymbolOrNull( compilationWithDesignTimeTrees )
+                             && s.GetScopeSymbolOrNull( compilationWithDesignTimeTrees.GetCompilationContext() )
                                  ?.DeclaringSyntaxReferences.Any(
                                      r =>
                                          r.SyntaxTree == diagnostic.Location.SourceTree &&

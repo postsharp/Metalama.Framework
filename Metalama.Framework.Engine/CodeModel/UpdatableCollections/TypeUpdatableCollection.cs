@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>, INamedTypeCollectionImpl
 {
-    public TypeUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringTypeOrNamespace ) : base(
+    public TypeUpdatableCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringTypeOrNamespace ) : base(
         compilation,
         declaringTypeOrNamespace ) { }
 

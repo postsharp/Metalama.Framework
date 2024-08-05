@@ -32,18 +32,16 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Write } } }
             };
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
 
             try
             {
-                formatter.Serialize( references, memoryStream );
+                testContext.Serializer.Serialize( references, memoryStream );
             }
             catch ( CompileTimeSerializationException ex )
             {
-                Assert.Contains( "Child", ex.Message, StringComparison.Ordinal );
-                Assert.Contains( "ReferenceToChildren[]::root[1].ReferenceToChildren::Children", ex.Message, StringComparison.Ordinal );
-                Assert.EndsWith( "[1]", ex.Message, StringComparison.Ordinal ); // Second child fails.
+                Assert.Contains( "ReferenceToChildren[][1].Children._[1]", ex.Message, StringComparison.Ordinal );
             }
         }
 
@@ -56,80 +54,63 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 new ReferenceToChildren { Children = { new Child { Fail = Fail.None }, new Child { Fail = Fail.Read } } }
             };
 
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var memoryStream = new MemoryStream();
-            formatter.Serialize( references, memoryStream );
+            testContext.Serializer.Serialize( references, memoryStream );
             memoryStream.Seek( 0, SeekOrigin.Begin );
 
-            try
-            {
-                formatter.Deserialize( memoryStream );
-            }
-            catch ( CompileTimeSerializationException ex )
-            {
-                Assert.Contains( "Child", ex.Message, StringComparison.Ordinal );
-                Assert.Contains( "ReferenceToChildren[]::root[1].ReferenceToChildren::Children", ex.Message, StringComparison.Ordinal );
-                Assert.EndsWith( "[1]", ex.Message, StringComparison.Ordinal ); // Second child fails.
-            }
+            var exception = Assert.Throws<CompileTimeSerializationException>( () => testContext.Serializer.Deserialize( memoryStream ) );
+            Assert.Contains( "'ReferenceToChildren[][1].Children._[1]'", exception.Message, StringComparison.Ordinal );
         }
 
         [Fact]
         public void TestFormatterSerializeFail()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             Child.NSerialized = 0;
 
-            try
-            {
-                formatter.Serialize( new Child { Fail = Fail.Write }, Stream.Null );
-            }
-            catch ( CompileTimeSerializationException ex )
-            {
-                Assert.EndsWith( "Child::root", ex.Message, StringComparison.Ordinal );
-                Assert.Equal( 2, Child.NSerialized );
-            }
+            var exception = Assert.Throws<CompileTimeSerializationException>(
+                () => testContext.Serializer.Serialize( new Child { Fail = Fail.Write }, Stream.Null ) );
+
+            Assert.Contains( "'Child'", exception.Message, StringComparison.Ordinal );
+            Assert.Equal( 2, Child.NSerialized );
         }
 
         [Fact]
         public void TestFormatterSerializeSuccess()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             Child.NSerialized = 0;
 
-            formatter.Serialize( new Child { Fail = Fail.None }, Stream.Null );
+            testContext.Serializer.Serialize( new Child { Fail = Fail.None }, Stream.Null );
             Assert.Equal( 1, Child.NSerialized );
         }
 
         [Fact]
         public void TestFormatterDeserializeFail()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var stream = new SeekCountingMemoryStream();
-            formatter.Serialize( new Child { Fail = Fail.Read }, stream );
+            testContext.Serializer.Serialize( new Child { Fail = Fail.Read }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
 
-            try
-            {
-                formatter.Deserialize( stream );
-            }
-            catch ( CompileTimeSerializationException ex )
-            {
-                Assert.EndsWith( "Child::root", ex.Message, StringComparison.Ordinal );
+            var exception = Assert.Throws<CompileTimeSerializationException>( () => testContext.Serializer.Deserialize( stream ) );
 
-                // One seek to deserialize, another one happens inside to restart the process.
-                Assert.Equal( 2, stream.SeekCount );
-            }
+            Assert.Contains( "'Child'", exception.Message, StringComparison.Ordinal );
+
+            // One seek to deserialize, another one happens inside to restart the process.
+            Assert.Equal( 2, stream.SeekCount );
         }
 
         [Fact]
         public void TestFormatterDeserializeSuccess()
         {
-            var formatter = CompileTimeSerializer.CreateTestInstance( this.ServiceProvider );
+            using var testContext = this.CreateTestContext();
             var stream = new SeekCountingMemoryStream();
-            formatter.Serialize( new Child { Fail = Fail.None }, stream );
+            testContext.Serializer.Serialize( new Child { Fail = Fail.None }, stream );
             stream.Seek( 0, SeekOrigin.Begin );
 
-            formatter.Deserialize( stream );
+            testContext.Serializer.Deserialize( stream );
 
             // Just one seek to deserialize.
             Assert.Equal( 1, stream.SeekCount );

@@ -189,7 +189,7 @@ namespace Metalama.Framework.DesignTime
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var symbol = suppression.GetScopeSymbolOrNull( compilation );
+                    var symbol = suppression.GetScopeSymbolOrNull( compilation.GetCompilationContext() );
 
                     if ( symbol != null )
                     {

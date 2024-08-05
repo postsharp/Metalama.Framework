@@ -156,13 +156,13 @@ class TestAttribute : Attribute
             var namedArguments = attribute.NamedArguments;
             Assert.Equal( 2, namedArguments.Count );
             Assert.Equal( 1, attribute.GetNamedArgumentValue( "E" ) );
-            var types = Assert.IsAssignableFrom<IReadOnlyList<TypedConstant>>( attribute.GetNamedArgumentValue( "Types" ) );
-            Assert.Equal( 5, types.Count );
-            var type0 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 0 ).Value );
+            var types = Assert.IsAssignableFrom<object[]>( attribute.GetNamedArgumentValue( "Types" ) );
+            Assert.Equal( 5, types.Length );
+            var type0 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 0 ) );
             Assert.Equal( "E", type0.FullName );
-            var type1 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 1 ).Value );
+            var type1 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 1 ) );
             Assert.Equal( "System.Action", type1.FullName );
-            Assert.Null( types.ElementAt( 2 ).Value );
+            Assert.Null( types.ElementAt( 2 ) );
         }
 
         [Fact]

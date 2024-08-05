@@ -44,5 +44,7 @@ namespace Metalama.Framework.Code
         bool AreInternalsVisibleFrom( IAssembly assembly );
 
         IAssemblyCollection ReferencedAssemblies { get; }
+
+        new IRef<IAssembly> ToRef();
     }
 }

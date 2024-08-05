@@ -41,4 +41,6 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
     }
 
     IMember IMember.Definition => this;
+
+    IRef<IMember> IMember.ToRef() => this.MemberBuilder.ToMemberRef();
 }

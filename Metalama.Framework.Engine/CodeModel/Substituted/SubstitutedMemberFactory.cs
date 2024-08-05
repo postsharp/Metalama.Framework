@@ -20,7 +20,7 @@ internal static class SubstitutedMemberFactory
         {
             IParameter parameter => ((T) Substitute( parameter.DeclaringMember, genericMap )
                 .GetTarget( ReferenceResolutionOptions.Default )
-                .Parameters[parameter.Index]).ToTypedRef(),
+                .Parameters[parameter.Index]).ToValueTypedRef(),
             IMemberOrNamedType member => Substitute( member, genericMap, null ).As<T>(),
             _ => throw new AssertionFailedException( $"Unexpected declaration of type {sourceDeclaration.GetType()}" )
         };
@@ -47,7 +47,7 @@ internal static class SubstitutedMemberFactory
                 {
                     var substitutedMember = Create( builtDeclaration, targetType );
 
-                    return substitutedMember.ToRef().As<T>();
+                    return substitutedMember.ToValueTypedRef().As<T>();
                 }
 
             default:

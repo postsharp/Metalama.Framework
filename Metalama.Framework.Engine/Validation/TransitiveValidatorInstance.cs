@@ -18,7 +18,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         var implementation = instance.Implementation;
         var properties = instance.Properties;
 
-        this.ValidatedDeclaration = instance.ValidatedDeclaration.ToTypedRef();
+        this.ValidatedDeclaration = instance.ValidatedDeclaration.ToValueTypedRef();
         this.ReferenceKinds = properties.ReferenceKinds;
         this.IncludeDerivedTypes = properties.IncludeDerivedTypes;
         this.MethodName = instance.Driver.MethodName;

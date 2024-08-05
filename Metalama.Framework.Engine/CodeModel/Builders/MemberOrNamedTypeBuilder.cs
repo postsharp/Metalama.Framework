@@ -91,8 +91,7 @@ internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMem
         }
     }
 
-    public override IDeclaration ContainingDeclaration
-        => this.DeclaringType.AssertNotNull( "Declaring type should not be null (missing override?)." );
+    public override IDeclaration ContainingDeclaration => this.DeclaringType.AssertNotNull( "Declaring type should not be null (missing override?)." );
 
     protected MemberOrNamedTypeBuilder( Advice advice, INamedType? declaringType, string name ) : base( advice, name )
     {
@@ -101,4 +100,8 @@ internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMem
     }
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.ToMemberOrNamedTypeRef();
+
+    public abstract IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef();
 }

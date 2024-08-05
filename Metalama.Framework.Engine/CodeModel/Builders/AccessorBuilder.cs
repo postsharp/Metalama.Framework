@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -105,6 +106,10 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public OperatorKind OperatorKind => OperatorKind.None;
 
     IMethod IMethod.Definition => this;
+
+    IRef<IMember> IMember.ToRef() => this.BoxedRef;
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.BoxedRef;
 
     IMember IMember.Definition => this;
 
@@ -281,6 +286,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
+    IRef<IMethodBase> IMethodBase.ToRef() => this.BoxedRef;
+
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
@@ -291,4 +298,11 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
+
+    [Memo]
+    public BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+
+    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+
+    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
 }

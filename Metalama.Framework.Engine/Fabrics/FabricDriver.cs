@@ -63,7 +63,7 @@ internal abstract partial class FabricDriver : IComparable<FabricDriver>
         }
         else
         {
-            symbol = (INamedTypeSymbol) CompilationContextFactory.GetInstance( runTimeCompilation )
+            symbol = (INamedTypeSymbol) runTimeCompilation.GetCompilationContext()
                 .ReflectionMapper
                 .GetTypeSymbol( fabric.GetType() );
         }

@@ -837,7 +837,7 @@ internal sealed partial class LinkerInjectionStep
                                 : ReturnStatement(
                                     Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
                                     targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
-                                    Token( SyntaxKind.SemicolonToken ) ),
+                                    Token( SyntaxKind.SemicolonToken ) )
                     };
 
                 return
@@ -1369,7 +1369,7 @@ internal sealed partial class LinkerInjectionStep
             List<SyntaxTrivia> outputTrivias = new();
 
             this.RewriteAttributeLists(
-                this._compilation.ToTypedRef<IDeclaration>(),
+                this._compilation.ToValueTypedRef<IDeclaration>(),
                 SyntaxKind.AssemblyKeyword,
                 node,
                 node.AttributeLists,
