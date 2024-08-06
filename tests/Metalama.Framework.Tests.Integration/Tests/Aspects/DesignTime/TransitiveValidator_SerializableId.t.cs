@@ -1,0 +1,1 @@
+// Warning MY001 on `Foo`: `Reference constraint of type 'OverrideMember' in declaration 'DerivedReferencedClass.Foo' (SyntaxKind=PropertyDeclaration).`

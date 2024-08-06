@@ -3,6 +3,7 @@
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
@@ -66,7 +67,7 @@ internal sealed class DesignTimeReferenceValidatorCollection
 
     public Builder ToBuilder() => new( this._ownValidators.ToBuilder() );
 
-    public ImmutableArray<TransitiveValidatorInstance> ToTransitiveValidatorInstances()
+    public ImmutableArray<TransitiveValidatorInstance> ToTransitiveValidatorInstances( CompilationContext compilationContext )
     {
         var builder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
 
@@ -74,7 +75,7 @@ internal sealed class DesignTimeReferenceValidatorCollection
         {
             foreach ( var validator in this._ownValidators[key] )
             {
-                builder.Add( validator.ToTransitiveValidatorInstance() );
+                builder.Add( validator.ToTransitiveValidatorInstance( compilationContext ) );
             }
         }
 

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Validation;
@@ -64,9 +65,9 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
             this._description,
             this.Granularity );
 
-    public TransitiveValidatorInstance ToTransitiveValidatorInstance()
+    public TransitiveValidatorInstance ToTransitiveValidatorInstance( CompilationContext compilationContext )
         => new(
-            this.ValidatedDeclaration.ToRef(),
+            this.ValidatedDeclaration.ToRef( compilationContext ),
             this.ReferenceKinds,
             this.IncludeDerivedTypes,
             this.Implementation.Implementation,

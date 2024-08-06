@@ -100,9 +100,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 } );
         }
 
-        public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
+        public static Ref<T> FromSymbolId<T>( SymbolId symbolKey, CompilationContext? compilationContext = null )
             where T : class, ICompilationElement
-            => new( symbolKey );
+            => new( symbolKey, compilationContext );
 
         public static Ref<T> FromDeclarationId<T>( SerializableDeclarationId id )
             where T : class, ICompilationElement
@@ -177,11 +177,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilationContext = compilationContext;
         }
 
-        internal Ref( SymbolId symbolKey )
+        internal Ref( SymbolId symbolKey, CompilationContext? compilationContext )
         {
             this.Target = symbolKey.ToString();
             this.TargetKind = DeclarationRefTargetKind.Default;
-            this._compilationContext = null;
+            this._compilationContext = compilationContext;
         }
 
         internal Ref( string id )

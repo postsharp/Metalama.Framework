@@ -122,7 +122,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     {
         Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} )" );
 
-        var resultsByTree = SplitResultsByTree( compilation, pipelineResults );
+        var (resultsByTree, externalValidators) = SplitResultsByTree( compilation, pipelineResults );
 
         var syntaxTreeResultBuilder = this.SyntaxTreeResults.ToBuilder();
 
@@ -276,6 +276,16 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         var introducedTrees = introducedSyntaxTreeBuilder?.ToImmutable() ?? this.IntroducedSyntaxTrees;
         var inheritableAspects = inheritableAspectsBuilder?.ToImmutable() ?? this._inheritableAspects;
 
+        if ( externalValidators != null )
+        {
+            validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
+
+            foreach ( var externalValidator in externalValidators )
+            {
+                validatorsBuilder.Add( externalValidator );
+            }
+        }
+
         var validators = validatorsBuilder?.ToImmutable( projectVersion.ReferencedValidatorCollections )
                          ?? this.ReferenceValidators.WithChildCollections( projectVersion.ReferencedValidatorCollections );
 
@@ -298,7 +308,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     /// Splits a <see cref="DesignTimePipelineExecutionResult"/>, which includes data for several syntax trees, into
     /// a list of <see cref="SyntaxTreePipelineResult"/> which each have information related to a single syntax tree.
     /// </summary>
-    private static IEnumerable<SyntaxTreePipelineResult> SplitResultsByTree(
+    private static (IEnumerable<SyntaxTreePipelineResult> Results, IReadOnlyList<DesignTimeReferenceValidatorInstance>? ExternalValidators) SplitResultsByTree(
         PartialCompilation compilation,
         DesignTimePipelineExecutionResult pipelineResults )
     {
@@ -595,7 +605,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             resultBuilders[""] = emptySyntaxTreeResult;
         }
 
-        return resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) );
+        return (resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) ), externalValidators);
     }
 
     public Invalidator ToInvalidator() => new( this );
@@ -614,13 +624,13 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     {
         if ( this._serializedTransitiveAspectManifest == null )
         {
+            var compilationContext = compilation.GetCompilationContext();
             var manifest = TransitiveAspectsManifest.Create(
                 this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
-                this.ReferenceValidators.ToTransitiveValidatorInstances(),
+                this.ReferenceValidators.ToTransitiveValidatorInstances( compilationContext ),
                 this.InheritableOptions,
                 this.Annotations );
 
-            var compilationContext = compilation.GetCompilationContext();
             this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider, compilationContext );
         }
 
