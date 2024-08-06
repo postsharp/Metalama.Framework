@@ -64,7 +64,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
 
     private async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> RunPipeline( string masterCode, string dependentCode )
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
         var (pipelineFactory, dependentCompilation, _) = await this.PreparePipeline( testContext, masterCode, dependentCode );
 
         return await pipelineFactory.ExecuteAsync( dependentCompilation!, AsyncExecutionContext.Get() );
@@ -72,7 +72,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
 
     private async Task<List<Diagnostic>> RunAnalyzer( string masterCode, string dependentCode )
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
         var (pipelineFactory, dependentCompilation, dependentSyntaxTree) = await this.PreparePipeline( testContext, masterCode, dependentCode );
 
         var semanticModel = dependentCompilation!.GetSemanticModel( dependentSyntaxTree! );
