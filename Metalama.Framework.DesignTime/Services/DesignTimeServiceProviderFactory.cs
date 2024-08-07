@@ -79,6 +79,8 @@ public abstract class DesignTimeServiceProviderFactory
 
                     _sharedServiceProvider = factory.GetServiceProvider( serviceProvider );
                     _sharedFactory = factory;
+
+                    DesignTimeServices.Start( _sharedServiceProvider );
                 }
             }
         }

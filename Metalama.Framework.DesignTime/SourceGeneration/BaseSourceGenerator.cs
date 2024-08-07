@@ -3,7 +3,9 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -60,7 +62,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 var source =
                     context.AnalyzerConfigOptionsProvider.Select(
-                            ( x, _ ) =>
+                            ( x, ct ) =>
                             {
                                 var projectOptions = this._projectOptionsFactory.GetProjectOptions( x );
                                 this._logger.Trace?.Log( $"Roslyn asks the generated source for '{projectOptions.AssemblyName}'." );

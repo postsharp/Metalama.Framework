@@ -2,6 +2,8 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Compiler;
+using Metalama.Framework.DesignTime.Services;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime;
@@ -20,5 +22,11 @@ internal static class DesignTimeServices
             {
                 AddSupportServices = true, AddUserInterface = true, AddLicensing = true
             } );
+    }
+
+    public static void Start( GlobalServiceProvider serviceProvider )
+    {
+        // TODO: make this work outside of VS
+        _ = serviceProvider.GetService<SourceGeneratorTouchFileWatcher>()?.StartAsync();
     }
 }

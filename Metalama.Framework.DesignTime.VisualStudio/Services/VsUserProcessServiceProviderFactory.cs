@@ -20,5 +20,6 @@ internal sealed class VsUserProcessServiceProviderFactory : DesignTimeUserProces
     protected override ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
         => base.AddServices( serviceProvider )
             .WithService( sp => UserProcessServiceHubEndpoint.GetInstance( sp ) )
+            .WithService( sp => new SourceGeneratorTouchFileWatcher( sp ) )
             .WithService( sp => new LocalWorkspaceProvider( sp ) );
 }

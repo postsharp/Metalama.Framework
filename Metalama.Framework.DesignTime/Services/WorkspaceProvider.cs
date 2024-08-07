@@ -21,7 +21,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
         this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "WorkspaceProvider" );
     }
 
-    protected abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default );
+    public abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default );
 
     internal bool TryGetWorkspace( [NotNullWhen( true )] out Workspace? workspace )
     {
