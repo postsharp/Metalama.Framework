@@ -48,13 +48,13 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         workspaceProvider.AddOrUpdateProject(
             "master",
             new Dictionary<string, string>() { ["master.cs"] = masterCode },
-            preprocessorSymbols: new[] { "METALAMA", TestMetalamaProjectClassifier.OtherMetalamaVersionPreprocessorSymbol } );
+            preprocessorSymbols: ["METALAMA", TestMetalamaProjectClassifier.OtherMetalamaVersionPreprocessorSymbol] );
 
         var dependentProjectKey = workspaceProvider.AddOrUpdateProject(
             "dependent",
             new Dictionary<string, string>() { ["dependent.cs"] = dependentCode },
-            projectReferences: new[] { "master" },
-            preprocessorSymbols: new[] { "METALAMA" } );
+            projectReferences: ["master"],
+            preprocessorSymbols: ["METALAMA"] );
 
         var dependentCompilation = await workspaceProvider.GetCompilationAsync( dependentProjectKey );
         var dependentCodeSyntaxTree = await workspaceProvider.GetDocument( "dependent", "dependent.cs" ).GetSyntaxTreeAsync();
@@ -88,34 +88,25 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
     [Fact]
     public async Task Inheritance()
     {
-        const string masterCode = """
-                                  using System;
-                                  using Metalama.Framework.Advising;
-                                  using Metalama.Framework.Advising;
-                                  using Metalama.Framework.Aspects;
+        const string masterCode =
+            """
+            using System;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Advising;
+            using Metalama.Framework.Aspects;
 
-                                  [Inheritable]
-                                  public class TheAspect : TypeAspect
-                                  {
-                                   [Introduce( WhenExists = OverrideStrategy.New )]
-                                    public void IntroducedMethod() {}
-                                  }
+            [Inheritable]
+            public class TheAspect : TypeAspect
+            {
+                [Introduce( WhenExists = OverrideStrategy.New )]
+                public void IntroducedMethod() {}
+            }
 
-                                  [TheAspect]
-                                  public interface TheInterface
-                                  {
+            [TheAspect]
+            public interface TheInterface;
+            """;
 
-                                  }
-
-                                  """;
-
-        const string dependentCode = """
-                                     public class TheClass : TheInterface
-                                     {
-                                        
-                                     }
-
-                                     """;
+        const string dependentCode = "public class TheClass : TheInterface;";
 
         var result = await this.RunPipeline( masterCode, dependentCode );
 

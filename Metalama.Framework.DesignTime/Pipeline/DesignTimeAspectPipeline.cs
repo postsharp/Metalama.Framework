@@ -719,7 +719,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                     if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                     {
-                        PartialCompilation? partialCompilation;
+                        PartialCompilation partialCompilation;
 
                         if ( this.Status == DesignTimeAspectPipelineStatus.Default )
                         {
@@ -729,49 +729,39 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         {
                             var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
 
-                            if ( dirtySyntaxTrees.Count == 0 )
-                            {
-                                this.Logger.Trace?.Log( "There is no dirty tree." );
-                                partialCompilation = null;
-                            }
-                            else
-                            {
-                                partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
-                            }
+                            // Even if there is no dirty syntax tree, we may need to update the cache, e.g. because of removed trees.
+                            partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
                         }
 
-                        // Execute the pipeline if required, and update the cache.
-                        if ( partialCompilation != null )
+                        // Execute the pipeline, and update the cache.
+                        Interlocked.Increment( ref this._pipelineExecutionCount );
+
+                        var executionResult = await this.ExecutePartialAsync(
+                            partialCompilation,
+                            projectVersion.Value,
+                            executionContext,
+                            cancellationToken );
+
+                        if ( !executionResult.IsSuccessful )
                         {
-                            Interlocked.Increment( ref this._pipelineExecutionCount );
+                            compilationResult = FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( executionResult.Diagnostics );
 
-                            var executionResult = await this.ExecutePartialAsync(
-                                partialCompilation,
-                                projectVersion.Value,
-                                executionContext,
-                                cancellationToken );
-
-                            if ( !executionResult.IsSuccessful )
+                            if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                             {
-                                compilationResult = FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( executionResult.Diagnostics );
-
-                                if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
-                                {
-                                    // TODO: there seems to be some race which I cannot solve, but it is better not to fail in this case.
-                                    this.Logger.Warning?.Log( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
-                                }
-
-                                return compilationResult;
+                                // TODO: there seems to be some race which I cannot solve, but it is better not to fail in this case.
+                                this.Logger.Warning?.Log( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
                             }
 
-                            // Publish a change notification.
-                            var notification = new CompilationResultChangedEventArgs(
-                                this.ProjectKey,
-                                partialCompilation.IsPartial,
-                                partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectAsImmutableArray( t => t.Key ) : default );
-
-                            this._eventHub.PublishCompilationResultChangedNotification( notification );
+                            return compilationResult;
                         }
+
+                        // Publish a change notification.
+                        var notification = new CompilationResultChangedEventArgs(
+                            this.ProjectKey,
+                            partialCompilation.IsPartial,
+                            partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectAsImmutableArray( t => t.Key ) : default );
+
+                        this._eventHub.PublishCompilationResultChangedNotification( notification );
 
                         // Return the result from the cache.
                         compilationResult = new AspectPipelineResultAndState(
