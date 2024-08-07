@@ -202,14 +202,40 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                 (IProjectOptions? Options, Compilation Compilation, string? TouchId) x,
                 (IProjectOptions? Options, Compilation Compilation, string? TouchId) y )
             {
-                var equals = x.TouchId == y.TouchId;
+                var additionalFileTouchIdEquals = x.TouchId == y.TouchId;
 
-                this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') '{x.TouchId}' {(equals ? "==" : "!=")} '{y.TouchId}'" );
+                this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') '{x.TouchId}' {(additionalFileTouchIdEquals ? "==" : "!=")} '{y.TouchId}'" );
 
-                return equals;
+                var updatedTouchFileSet = false;
+
+                // Note that this means this comparer breaks the invariants of IEqualityComparer<T>.
+                // That hopefully shouldn't be a problem for IncrementalValueProvider, just don't use this type in a hash table.
+                if ( y.Options?.SourceGeneratorTouchFile is { } touchFilePath )
+                {
+                    // If the touch file is marked as updated, consider the touch IDs different and reset the flag.
+                    if ( TouchFileWatcher.GetIsUpdatedAndReset( touchFilePath ) )
+                    {
+                        updatedTouchFileSet = true;
+
+                        this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') marked as updated in-process." );
+                    }
+                }
+
+                return additionalFileTouchIdEquals && !updatedTouchFileSet;
             }
 
-            public int GetHashCode( (IProjectOptions? Options, Compilation Compilation, string? TouchId) obj ) => obj.TouchId?.GetHashCodeOrdinal() ?? 0;
+            public int GetHashCode( (IProjectOptions? Options, Compilation Compilation, string? TouchId) obj )
+            {
+                var hash = obj.TouchId?.GetHashCodeOrdinal() ?? 0;
+
+                if ( obj.Options?.SourceGeneratorTouchFile is { } touchFilePath
+                    && TouchFileWatcher.GetIsUpdated( touchFilePath ) )
+                {
+                    hash++;
+                }
+
+                return hash;
+            }
         }
 
         private static string GetTouchId(
