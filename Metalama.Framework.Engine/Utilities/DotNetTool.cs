@@ -28,12 +28,14 @@ public sealed class DotNetTool
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
-            RedirectStandardError = true,
-
-            // We must avoid passing the following environment variables to the child process, otherwise there can be a mismatch
-            // between SDK versions and the build will fail.
-            Environment = { { "DOTNET_ROOT_X64", null }, { "MSBUILD_EXE_PATH", null }, { "MSBuildSDKsPath", null } }
+            RedirectStandardError = true
         };
+        
+        // We must avoid passing the following environment variables to the child process, otherwise there can be a mismatch
+        // between SDK versions and the build will fail.
+        startInfo.Environment.Remove( "DOTNET_ROOT_X64" );
+        startInfo.Environment.Remove( "MSBUILD_EXE_PATH" );
+        startInfo.Environment.Remove( "MSBuildSDKsPath" );
 
         var process = new Process() { StartInfo = startInfo };
 
