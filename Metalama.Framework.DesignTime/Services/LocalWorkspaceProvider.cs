@@ -48,6 +48,13 @@ public sealed class SourceGeneratorTouchFileWatcher( GlobalServiceProvider servi
     {
         // TODO: need to figure out how to get the workspace here
         // probably use WorkspaceProvider, ignoring remote workspaces and overriding it in VS to get VisualStudioWorkspace using VS APIs
+
+        // TODO: explain
+        if ( this._workspaceProvider is RemoteWorkspaceProvider )
+        {
+            return;
+        }
+
         var workspace = await this._workspaceProvider.GetWorkspaceAsync();
 
         // TODO: is this necessary for all IDEs?
@@ -58,7 +65,7 @@ public sealed class SourceGeneratorTouchFileWatcher( GlobalServiceProvider servi
 
         foreach ( var project in workspace.CurrentSolution.Projects )
         {
-            await this.ProcessProjectAsync( project );
+            _ = this.ProcessProjectAsync( project );
         }
     }
 
