@@ -48,7 +48,7 @@ internal sealed class SerializationReader
         if ( v is > SerializationProtocol.CurrentVersion or < SerializationProtocol.LastSupportedVersion )
         {
             throw new NotSupportedException(
-                $"The assembly '{this._assemblyName}' was compiled with an incompatible version of Metalama (protocol version: {v}) and must be recompiled." );
+                $"The assembly '{this._assemblyName}' was compiled with an incompatible version of Metalama (protocol version: {v}) and must be recompiled (for your projects) or upgraded (for NuGet packages)." );
         }
 
         var instanceId = 1;
