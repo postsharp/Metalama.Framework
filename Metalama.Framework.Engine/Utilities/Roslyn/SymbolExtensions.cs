@@ -172,8 +172,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => false
             };
 
+        // This won't return the correct result for invalid code where multiple properties have the same name,
+        // but I think that's fine.
         internal static IFieldSymbol? GetBackingField( this IPropertySymbol property )
-            => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
+            => property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" )
+                .OfType<IFieldSymbol>()
+                .FirstOrDefault();
 
         // ReSharper disable once UnusedParameter.Global
 
