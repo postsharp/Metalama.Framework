@@ -340,8 +340,8 @@ public static class DeclarationExtensions
                     sr =>
                         sr.GetSyntax() switch
                         {
-                            BasePropertyDeclarationSyntax { AccessorList: not null } propertyDecl when
-                                propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) => true,
+                            BasePropertyDeclarationSyntax { AccessorList.Accessors: { Count: > 0 } accessors } when
+                                accessors.All( a => a.Body == null && a.ExpressionBody == null ) => true,
                             ParameterSyntax => true,
                             _ => false
                         } ),
@@ -356,19 +356,17 @@ public static class DeclarationExtensions
             { IsAbstract: true } => false,
             { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
                 syntaxReferences.All(
-                    sr =>
-                        sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
+                    sr => sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
             _ => symbol.IsCompilerGenerated()
         };
 
     internal static bool? IsEventField( this IEventSymbol symbol )
         => symbol switch
         {
-            // TODO: partial events.
             { IsAbstract: true } => false,
             { DeclaringSyntaxReferences.Length: > 0 } =>
                 symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax ),
-            { AddMethod: { } getMethod, RemoveMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
+            { AddMethod: { } addMethod, RemoveMethod: { } removeMethod } => addMethod.IsCompilerGenerated() && removeMethod.IsCompilerGenerated(),
             _ => null
         };
 
