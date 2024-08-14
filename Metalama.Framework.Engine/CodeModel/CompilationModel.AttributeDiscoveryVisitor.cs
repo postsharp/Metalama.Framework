@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                     switch ( parentDeclaration )
                     {
-                        case IncompleteMemberSyntax:
+                        case IncompleteMemberSyntax or StatementSyntax:
                             // This happens at design time when we have an invalid syntax.
                             break;
 
