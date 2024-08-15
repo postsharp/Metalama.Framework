@@ -530,11 +530,11 @@ internal sealed partial class ContextualSyntaxGenerator
 
         IEnumerable<AttributeArgumentSyntax> constructorArguments;
 
-        if ( lastParameter is { IsParams: true } )
+        if ( lastParameter is { IsParams: true }
+            && attribute.ConstructorArguments[^1] is { Values.IsDefault: false } lastArray )
         {
             // Use the more compact syntax.
             var constructorArgumentValues = attribute.ConstructorArguments.ToMutableList();
-            var lastArray = constructorArgumentValues[^1];
             constructorArgumentValues.RemoveAt( constructorArgumentValues.Count - 1 );
             constructorArgumentValues.AddRange( lastArray.Values );
             constructorArguments = constructorArgumentValues.SelectAsReadOnlyCollection( a => AttributeArgument( this.AttributeValueExpression( a ) ) );

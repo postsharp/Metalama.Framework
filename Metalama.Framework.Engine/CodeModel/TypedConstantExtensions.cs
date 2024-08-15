@@ -23,7 +23,7 @@ internal static class TypedConstantExtensions
         {
             RoslynTypedConstantKind.Primitive or RoslynTypedConstantKind.Enum => constant.Value,
             RoslynTypedConstantKind.Type => constant.Value == null ? null : compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
-            RoslynTypedConstantKind.Array => constant.Values.Select( x => ToOurTypedConstant( x, compilation ) ).ToImmutableArray(),
+            RoslynTypedConstantKind.Array => constant.Values.IsDefault ? null : constant.Values.Select( x => ToOurTypedConstant( x, compilation ) ).ToImmutableArray(),
             _ => throw new ArgumentException( nameof(constant) )
         };
 
