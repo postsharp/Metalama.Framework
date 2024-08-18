@@ -1987,18 +1987,29 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 
-public class MyAspect : MethodAspect
+[Inheritable]
+public class MyAspect : TypeAspect
 {
 }
 ";
 
-        const string dependencyCode = "";
+        const string leftCode = @"
+[MyAspect]
+public class Left
+{
+}
+";
+
+        const string rightCode = @"
+[MyAspect]
+public class Right
+{
+}
+";
 
         const string targetCode = @"
-class C
-{
-   void M() {}
-}
+class C : Left {}
+class D : Right {}
 ";
 
         const string expectedResult = @"
@@ -2019,12 +2030,12 @@ Target.cs:
             name: aspect2AssemblyName );
 
         var leftCompilation = TestCompilationFactory.CreateCSharpCompilation(
-            new Dictionary<string, string>() { { "Left.cs", aspectCode } },
+            new Dictionary<string, string>() { { "Left.cs", leftCode } },
             name: leftAssemblyName,
             additionalReferences: new[] { aspect1Compilation.ToMetadataReference() } );
 
         var rightCompilation = TestCompilationFactory.CreateCSharpCompilation(
-            new Dictionary<string, string>() { { "Right.cs", aspectCode } },
+            new Dictionary<string, string>() { { "Right.cs", rightCode } },
             name: rightAssemblyName,
             additionalReferences: new[] { aspect2Compilation.ToMetadataReference() } );
 
