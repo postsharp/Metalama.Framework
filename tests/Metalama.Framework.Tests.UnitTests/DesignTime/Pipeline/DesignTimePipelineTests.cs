@@ -54,7 +54,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                 .AddReferences(
                     new[] { "netstandard", "System.Runtime" }
                         .SelectAsImmutableArray(
-                            r => (MetadataReference) MetadataReference.CreateFromFile(
+                            r => (MetadataReference)MetadataReference.CreateFromFile(
                                 Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
@@ -75,7 +75,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                     path: c.Key,
                     options: SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( "METALAMA" ) ) ) );
 
-        if ( !acceptErrors )
+        if (!acceptErrors)
         {
             Assert.Empty( compilation.GetDiagnostics().Where( d => d.Severity == DiagnosticSeverity.Error ) );
         }
@@ -97,7 +97,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         // Diagnostics
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
 
-        foreach ( var diagnostic in syntaxTreeResult.Diagnostics )
+        foreach (var diagnostic in syntaxTreeResult.Diagnostics)
         {
             stringBuilder.AppendLineInvariant(
                 $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage( CultureInfo.CurrentCulture )}`" );
@@ -106,7 +106,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         // Suppressions
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
 
-        foreach ( var suppression in syntaxTreeResult.Suppressions )
+        foreach (var suppression in syntaxTreeResult.Suppressions)
         {
             stringBuilder.AppendLineInvariant( $"   {suppression}" );
         }
@@ -114,7 +114,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         // Introductions
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
-        foreach ( var introduction in syntaxTreeResult.Introductions.OrderBy( i => i.Name ) )
+        foreach (var introduction in syntaxTreeResult.Introductions.OrderBy( i => i.Name ))
         {
             stringBuilder.AppendLine( introduction.GeneratedSyntaxTree.ToString() );
         }
@@ -126,9 +126,9 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         var i = 0;
 
-        foreach ( var syntaxTreeResult in results.Result.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTreePath ) )
+        foreach (var syntaxTreeResult in results.Result.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTreePath ))
         {
-            if ( i > 0 )
+            if (i > 0)
             {
                 stringBuilder.AppendLine( "----------------------------------------------------------" );
             }
@@ -807,29 +807,29 @@ class C
     {
         var output = await this.PipelineConfigurationDoesNotKeepReferenceToCompilationCore();
 
-        for ( var i = 0; i < 10; i++ )
+        for (var i = 0; i < 10; i++)
         {
             var hasDanglingRef = false;
 
-            if ( output.DependentCompilationRef.IsAlive )
+            if (output.DependentCompilationRef.IsAlive)
             {
                 hasDanglingRef = true;
                 this.TestOutput.WriteLine( "Reference to the dependent compilation." );
             }
 
-            if ( output.MasterCompilationRef.IsAlive )
+            if (output.MasterCompilationRef.IsAlive)
             {
                 hasDanglingRef = true;
                 this.TestOutput.WriteLine( "Reference to the master compilation." );
             }
 
-            if ( output.SyntaxTreeRefs.Any( r => r.IsAlive ) )
+            if (output.SyntaxTreeRefs.Any( r => r.IsAlive ))
             {
                 hasDanglingRef = true;
                 this.TestOutput.WriteLine( "Reference to a syntax tree." );
             }
 
-            if ( !hasDanglingRef )
+            if (!hasDanglingRef)
             {
                 this.TestOutput.WriteLine( "No more dangling reference." );
 
@@ -882,7 +882,7 @@ class C
 
         Assert.Same( pipeline.LastProjectVersion!.Compilation, dependentCompilation2 );
 
-        return (new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline);
+        return ( new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline );
     }
 
     private static ( CSharpCompilation Master, CSharpCompilation Dependent ) CreateCompilations( int version )
@@ -936,7 +936,7 @@ class D{version}
             name: "Dependent",
             additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
 
-        return (masterCompilation, dependentCompilation);
+        return ( masterCompilation, dependentCompilation );
     }
 
 #if NET6_0_OR_GREATER
@@ -1652,26 +1652,26 @@ class D{version}
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = """
-                using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects;
 
-                class MyAspect : TypeAspect
-                {
-                   [Introduce]
-                   void IntroducedMethod() {}
-                }
-                """,
+                            class MyAspect : TypeAspect
+                            {
+                               [Introduce]
+                               void IntroducedMethod() {}
+                            }
+                            """,
             ["target.cs"] = """
-                using Metalama.Framework.Fabrics;
+                            using Metalama.Framework.Fabrics;
 
-                class C
-                {
-                    class Fabric : TypeFabric
-                    {
-                        public override void AmendType( ITypeAmender amender )
-                            => amender.AddAspect<MyAspect>();
-                    } 
-                }
-                """
+                            class C
+                            {
+                                class Fabric : TypeFabric
+                                {
+                                    public override void AmendType( ITypeAmender amender )
+                                        => amender.AddAspect<MyAspect>();
+                                } 
+                            }
+                            """
         };
 
         var compilation = CreateCSharpCompilation( code );
@@ -1689,21 +1689,21 @@ class D{version}
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = """
-                using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects;
 
-                class MyAspect : MethodAspect
-                {
-                }
-                """,
+                            class MyAspect : MethodAspect
+                            {
+                            }
+                            """,
             ["target.cs"] = """
-                class Target
-                {
-                    [MyAspect]
-                    void M()
-                    {
-                    }
-                }
-                """
+                            class Target
+                            {
+                                [MyAspect]
+                                void M()
+                                {
+                                }
+                            }
+                            """
         };
 
         var compilation = CreateCSharpCompilation( code, assemblyName: "test" );
@@ -1731,42 +1731,42 @@ class D{version}
         var libraryCode = new Dictionary<string, string>
         {
             ["introduceDependency.cs"] = """
-                using Metalama.Framework.Aspects;
-                using Metalama.Framework.Code;
-                using Metalama.Framework.Diagnostics;
+                                         using Metalama.Framework.Aspects;
+                                         using Metalama.Framework.Code;
+                                         using Metalama.Framework.Diagnostics;
 
-                public class IntroduceDependencyAttribute : DeclarativeAdviceAttribute
-                {
-                    internal static readonly SuppressionDefinition NonNullableFieldMustContainValue = new( "CS8618" );
-
-                    public sealed override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
-                    {
-                        builder.Diagnostics.Suppress( NonNullableFieldMustContainValue, templateMember );
-                    }
-                }
-                """,
+                                         public class IntroduceDependencyAttribute : DeclarativeAdviceAttribute
+                                         {
+                                             internal static readonly SuppressionDefinition NonNullableFieldMustContainValue = new( "CS8618" );
+                                         
+                                             public sealed override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+                                             {
+                                                 builder.Diagnostics.Suppress( NonNullableFieldMustContainValue, templateMember );
+                                             }
+                                         }
+                                         """,
             ["aspect.cs"] = """
-                using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Aspects;
 
-                public interface ILogger;
+                            public interface ILogger;
 
-                public class LogAttribute : MethodAspect
-                {
-                    [IntroduceDependency]
-                    private readonly ILogger _logger;
-                }
-                """
+                            public class LogAttribute : MethodAspect
+                            {
+                                [IntroduceDependency]
+                                private readonly ILogger _logger;
+                            }
+                            """
         };
 
         var targetCode = new Dictionary<string, string>
         {
             ["target.cs"] = """
-                class C
-                {
-                    [Log]
-                    void M() {}
-                }
-                """
+                            class C
+                            {
+                                [Log]
+                                void M() {}
+                            }
+                            """
         };
 
         var libraryCompilation = CreateCSharpCompilation( libraryCode );
@@ -1809,67 +1809,67 @@ class D{version}
     public void AssemblyAttributeOptionsAdded()
     {
         const string options = """
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Options;
-            using System;
-            using System.Collections.Generic;
+                               using Metalama.Framework.Code;
+                               using Metalama.Framework.Options;
+                               using System;
+                               using System.Collections.Generic;
 
-            class MyOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<ICompilation>
-            {
-                public bool? IsEnabled { get; init; }
+                               class MyOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<ICompilation>
+                               {
+                                   public bool? IsEnabled { get; init; }
+                               
+                                   public object ApplyChanges(object changes, in ApplyChangesContext context)
+                                   {
+                                       var other = (MyOptions)changes;
+                               
+                                       return new MyOptions { IsEnabled = other.IsEnabled ?? this.IsEnabled };
+                                   }
+                               
+                                   public IHierarchicalOptions? GetDefaultOptions(OptionsInitializationContext context) => null;
+                               }
 
-                public object ApplyChanges(object changes, in ApplyChangesContext context)
-                {
-                    var other = (MyOptions)changes;
-
-                    return new MyOptions { IsEnabled = other.IsEnabled ?? this.IsEnabled };
-                }
-
-                public IHierarchicalOptions? GetDefaultOptions(OptionsInitializationContext context) => null;
-            }
-
-            [AttributeUsage(AttributeTargets.Assembly)]
-            class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
-            {
-                public bool IsEnabled { get; init; }
-
-                public IEnumerable<IHierarchicalOptions> GetOptions(in OptionsProviderContext context)
-                {
-                    return [new MyOptions { IsEnabled = this.IsEnabled }];
-                }
-            }
-            """;
+                               [AttributeUsage(AttributeTargets.Assembly)]
+                               class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
+                               {
+                                   public bool IsEnabled { get; init; }
+                               
+                                   public IEnumerable<IHierarchicalOptions> GetOptions(in OptionsProviderContext context)
+                                   {
+                                       return [new MyOptions { IsEnabled = this.IsEnabled }];
+                                   }
+                               }
+                               """;
 
         const string aspect = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Diagnostics;
+                              using Metalama.Framework.Aspects;
+                              using Metalama.Framework.Code;
+                              using Metalama.Framework.Diagnostics;
 
-            class Aspect : MethodAspect
-            {
-                static DiagnosticDefinition notEnabledWarning = new("NE", Severity.Warning, "Not enabled.");
-
-                public override void BuildAspect(IAspectBuilder<IMethod> builder)
-                {
-                    var options = builder.Target.Enhancements().GetOptions<MyOptions>();
-
-                    if (options.IsEnabled != true)
-                    {
-                        builder.Diagnostics.Report(notEnabledWarning);
-                    }
-                }
-            }
-            """;
+                              class Aspect : MethodAspect
+                              {
+                                  static DiagnosticDefinition notEnabledWarning = new("NE", Severity.Warning, "Not enabled.");
+                              
+                                  public override void BuildAspect(IAspectBuilder<IMethod> builder)
+                                  {
+                                      var options = builder.Target.Enhancements().GetOptions<MyOptions>();
+                              
+                                      if (options.IsEnabled != true)
+                                      {
+                                          builder.Diagnostics.Report(notEnabledWarning);
+                                      }
+                                  }
+                              }
+                              """;
 
         const string optionsAttribute = """[assembly: MyOptions(IsEnabled = true)]""";
 
         const string target = """
-            class Target
-            {
-                [Aspect]
-                void M() { }
-            }
-            """;
+                              class Target
+                              {
+                                  [Aspect]
+                                  void M() { }
+                              }
+                              """;
 
         using var testContext = this.CreateTestContext();
 
@@ -1901,5 +1901,92 @@ class D{version}
         Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResult ) );
 
         Assert.Empty( updatedResult.GetAllDiagnostics() );
+    }
+
+    [Fact]
+    public async Task IntroducedSyntaxTreeConflictAndChange()
+    {
+        // Tests a situation when designtime pipeline generated a syntax tree with undeterministic name.
+        // Removing a type caused names to change in such a way that invalidated syntax trees were not correctly cleaned from AspectPipelineResult,
+        // causing an exception.
+        // For the user it happened quite reliably when trying to cut-paste a type.
+        var aspectAssemblyName = "aspect_" + RandomIdGenerator.GenerateId();
+        var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
+
+        const string aspectCode = @"
+using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+public class TestAspect : TypeAspect
+{
+    [Introduce]
+    public void Foo() {}
+}
+";
+
+        const string targetCodeA1 = @"
+[TestAspect]
+public partial class A
+{
+}
+
+[TestAspect]
+public partial class A<T>
+{
+}
+";
+
+        const string targetCodeB1 = @"
+[TestAspect]
+public partial class A<T,U>
+{
+}
+";
+
+        const string targetCodeA2 = @"
+[TestAspect]
+public partial class A
+{
+}
+";
+
+        const string targetCodeB2 = @"
+[TestAspect]
+public partial class A<T,U>
+{
+}
+";
+
+        const string expectedResult = @"
+Target.cs:
+0 diagnostic(s):
+0 suppression(s):
+0 introductions(s):
+";
+
+        using var testContext = this.CreateTestContext();
+
+        var aspectCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Aspect.cs", aspectCode } },
+            name: aspectAssemblyName );
+
+        var targetCompilation1 = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "TargetA.cs", targetCodeA1 }, { "TargetB.cs", targetCodeB1 } },
+            name: targetAssemblyName,
+            additionalReferences: new[] { aspectCompilation.ToMetadataReference() } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+        var aspectProjectPipeline = factory.CreatePipeline( aspectCompilation );
+        var targetProjectPipeline = factory.CreatePipeline( targetCompilation1 );
+
+        factory.TryExecute( testContext.ProjectOptions, targetCompilation1, default, out var results1 );
+
+        var targetCompilation2 = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "TargetA.cs", targetCodeA2 }, { "TargetB.cs", targetCodeB2 } },
+            name: targetAssemblyName,
+            additionalReferences: new[] { aspectCompilation.ToMetadataReference() } );
+
+        factory.TryExecute( testContext.ProjectOptions, targetCompilation2, default, out var results2 );
     }
 }
