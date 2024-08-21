@@ -1907,7 +1907,7 @@ class D{version}
     public void DirectReferenceAspectConflict()
     {
         // Simulates situation where two aspects of the same name are directly visible through aliases.
-        // This is not something we want to support but should not cause a crash.
+        // This is not something we want to support but should not cause a crash. In reality this 
         var aspectAssemblyName1 = "aspect1_" + RandomIdGenerator.GenerateId();
         var aspectAssemblyName2 = "aspect2_" + RandomIdGenerator.GenerateId();
         var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
@@ -1971,7 +1971,7 @@ Target.cs:
     }
 
     [Fact]
-    public async Task IndirectReferenceAspectConflict()
+    public void IndirectReferenceAspectConflict()
     {
         // Simulates situation where two aspects of the same name are indirectly visible through two separate references.
         // This simulates the situation which occurs while renaming a project in Visual Studio.
