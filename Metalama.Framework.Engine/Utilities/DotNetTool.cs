@@ -5,7 +5,9 @@ using Metalama.Backstage.Infrastructure;
 using Metalama.Framework.Engine.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities;
 
@@ -19,7 +21,7 @@ public sealed class DotNetTool
         this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
     }
 
-    public void Execute( string arguments, string? workingDirectory = null, int timeout = 30_000 )
+    public void Execute( string arguments, string? workingDirectory = null, int timeout = 30_000, Func<KeyValuePair<string, string>, bool>? environmentVariableFilter = null )
     {
         var startInfo = new ProcessStartInfo( this._platformInfo.DotNetExePath, arguments )
         {
@@ -36,6 +38,18 @@ public sealed class DotNetTool
         startInfo.Environment.Remove( "DOTNET_ROOT_X64" );
         startInfo.Environment.Remove( "MSBUILD_EXE_PATH" );
         startInfo.Environment.Remove( "MSBuildSDKsPath" );
+
+        if ( environmentVariableFilter != null )
+        {
+            // If we have a filter delegate, update the startInto accordingly.
+            foreach ( var envVar in startInfo.Environment.ToArray() )
+            {
+                if (!environmentVariableFilter(envVar))
+                {
+                    startInfo.Environment.Remove( envVar.Key );
+                }
+            }
+        }
 
         var process = new Process() { StartInfo = startInfo };
 

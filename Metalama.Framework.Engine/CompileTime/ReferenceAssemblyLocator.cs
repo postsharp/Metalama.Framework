@@ -383,7 +383,13 @@ internal sealed class ReferenceAssemblyLocator
 
             this._logger.Trace?.Log( $"Building with restore timeout {this._restoreTimeout}." );
 
-            this._dotNetTool.Execute( arguments, this._cacheDirectory, this._restoreTimeout );
+            // Remove configuration environment variable to avoid having different output directory than Debug.
+            // Build scripts may rely on env var to set the configuration in MSBuild.
+            this._dotNetTool.Execute( 
+                arguments, 
+                this._cacheDirectory, 
+                this._restoreTimeout, 
+                envVar => !StringComparer.OrdinalIgnoreCase.Equals(envVar.Key, "configuration") );
 
             var assemblies = File.ReadAllLines( assembliesListPath );
 
