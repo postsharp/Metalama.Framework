@@ -268,7 +268,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     RenderName( sb, current.DeclaringType );
                     sb.Append( "-" );
                 }
-                else
+                else if ( current.ContainingNamespace.FullName != "" )
                 {
                     sb.Append( current.ContainingNamespace.FullName );
                     sb.Append( "." );
