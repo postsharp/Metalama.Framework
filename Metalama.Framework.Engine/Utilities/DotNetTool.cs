@@ -5,7 +5,6 @@ using Metalama.Backstage.Infrastructure;
 using Metalama.Framework.Engine.Services;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 
@@ -21,7 +20,7 @@ public sealed class DotNetTool
         this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
     }
 
-    public void Execute( string arguments, string? workingDirectory = null, int timeout = 30_000, Func<KeyValuePair<string, string>, bool>? environmentVariableFilter = null )
+    public void Execute( string arguments, string? workingDirectory = null, int timeout = 30_000, Func<KeyValuePair<string, string?>, bool>? environmentVariableFilter = null )
     {
         var startInfo = new ProcessStartInfo( this._platformInfo.DotNetExePath, arguments )
         {
@@ -44,7 +43,7 @@ public sealed class DotNetTool
             // If we have a filter delegate, update the startInto accordingly.
             foreach ( var envVar in startInfo.Environment.ToArray() )
             {
-                if (!environmentVariableFilter(envVar))
+                if ( !environmentVariableFilter( envVar ) )
                 {
                     startInfo.Environment.Remove( envVar.Key );
                 }
