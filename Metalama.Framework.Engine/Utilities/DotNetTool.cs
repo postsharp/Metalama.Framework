@@ -40,7 +40,7 @@ public sealed class DotNetTool
 
         if ( environmentVariableFilter != null )
         {
-            // If we have a filter delegate, update the startInto accordingly.
+            // If we have a filter delegate, update the startInfo accordingly.
             foreach ( var envVar in startInfo.Environment.ToArray() )
             {
                 if ( !environmentVariableFilter( envVar ) )
