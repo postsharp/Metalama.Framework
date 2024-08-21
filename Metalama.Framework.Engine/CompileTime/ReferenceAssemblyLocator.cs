@@ -385,13 +385,12 @@ internal sealed class ReferenceAssemblyLocator
 
             // Remove configuration environment variable to avoid having different output directory than Debug.
             // Build scripts may rely on env var to set the configuration in MSBuild.
-            this._dotNetTool.Execute( 
-                arguments, 
-                this._cacheDirectory, 
-                this._restoreTimeout, 
-
-                // Case insensitive comparison needed because MSBuild is case insensitive.
-                envVar => !StringComparer.OrdinalIgnoreCase.Equals(envVar.Key, "configuration") );
+            // Case insensitive comparison needed because MSBuild is case insensitive.
+            this._dotNetTool.Execute(
+                arguments,
+                this._cacheDirectory,
+                this._restoreTimeout,
+                envVar => !StringComparer.OrdinalIgnoreCase.Equals( envVar.Key, "configuration" ) );
 
             var assemblies = File.ReadAllLines( assembliesListPath );
 
