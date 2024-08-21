@@ -389,6 +389,8 @@ internal sealed class ReferenceAssemblyLocator
                 arguments, 
                 this._cacheDirectory, 
                 this._restoreTimeout, 
+
+                // Case insensitive comparison needed because MSBuild is case insensitive.
                 envVar => !StringComparer.OrdinalIgnoreCase.Equals(envVar.Key, "configuration") );
 
             var assemblies = File.ReadAllLines( assembliesListPath );
