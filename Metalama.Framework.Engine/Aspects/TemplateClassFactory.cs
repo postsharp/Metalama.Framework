@@ -65,7 +65,7 @@ internal abstract class TemplateClassFactory<T>
                         if ( typeSymbol == null )
                         {
                             // Two conflicting aspect types may be in aliased references.
-                            // This is an edge case, but is used in tests to reproduce design-time problems.
+                            // This is an edge case, but is used in tests to reproduce design-time problems, see below.
                             typeSymbol =
                                 templateDiscoveryContext.Compilation.GetTypesByMetadataName( item.TypeName )
                                 .FirstOrDefault( s => s.ContainingAssembly.Identity.Equals( item.Project.RunTimeIdentity ) );
@@ -98,7 +98,8 @@ internal abstract class TemplateClassFactory<T>
         foreach (var aspectType in aspectTypeData)
         {
             // IMPORTANT: At design time, when a project is being renamed, we can get duplicate aspect types while project dependency tree is being updated.
-            //            Two dependency projects referencing the same assembly are not synchronized, causing two CompileTimeProjects to exist for one assembly.
+            //            Two dependency projects referencing the same assembly may not be synchronized.
+            //            Causing two CompileTimeProjects to exist for one assembly (same aspects, two different assembly names).
             if ( !aspectTypeDataDictionary.ContainsKey( aspectType.TypeName ) )
             {
                 aspectTypeDataDictionary.Add( aspectType.TypeName, aspectType );
