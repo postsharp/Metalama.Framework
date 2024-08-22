@@ -597,9 +597,18 @@ internal sealed class AspectReferenceResolver
                         {
                             ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax memberAccess }]
                         } invocationExpression:
-
+                            var symbolInfo = semanticModel.GetSymbolInfo( memberAccess );
+                            
                             rootNode = invocationExpression;
-                            targetSymbol = semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();
+
+                            targetSymbol =
+                                symbolInfo switch
+                                {
+                                    { Symbol: { } symbol } => symbol,
+                                    { CandidateSymbols: [ { } symbol ] } => symbol,
+                                    _ => throw new AssertionFailedException( $"Invalid symbol info: {symbolInfo}" ),
+                                };
+
                             targetSymbolSource = memberAccess;
 
                             return;
