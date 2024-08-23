@@ -99,7 +99,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         Logger.DesignTime.Trace?.Log(
             $"CompilationPipelineResult {this._id} created with {this.SyntaxTreeResults.Count} syntax trees and {this._invalidSyntaxTreeResults.Count} introduced syntax trees." );
 
-        if (!this.IsEmpty && configuration == null)
+        if ( !this.IsEmpty && configuration == null )
         {
             throw new AssertionFailedException();
         }
@@ -134,17 +134,17 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder? annotationsBuilder = null;
         var aspectInstancesHashCode = this.AspectInstancesHashCode;
 
-        foreach (var (filePath, oldResult) in this._invalidSyntaxTreeResults)
+        foreach ( var (filePath, oldResult) in this._invalidSyntaxTreeResults )
         {
             UnindexOldTree( filePath, oldResult );
         }
 
-        foreach (var result in resultsByTree)
+        foreach ( var result in resultsByTree )
         {
             var filePath = result.SyntaxTreePath ?? "";
 
             // Un-index the old tree.
-            if (syntaxTreeResultBuilder.TryGetValue( filePath, out var oldSyntaxTreeResult ))
+            if ( syntaxTreeResultBuilder.TryGetValue( filePath, out var oldSyntaxTreeResult ) )
             {
                 UnindexOldTree( filePath, oldSyntaxTreeResult );
             }
@@ -157,11 +157,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
         void UnindexOldTree( string filePath, SyntaxTreePipelineResult oldSyntaxTreeResult )
         {
-            if (!oldSyntaxTreeResult.Introductions.IsEmpty)
+            if ( !oldSyntaxTreeResult.Introductions.IsEmpty )
             {
                 introducedSyntaxTreeBuilder ??= this.IntroducedSyntaxTrees.ToBuilder();
 
-                foreach (var introducedTree in oldSyntaxTreeResult.Introductions)
+                foreach ( var introducedTree in oldSyntaxTreeResult.Introductions )
                 {
                     Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} ): removing introduced tree '{introducedTree.Name}'." );
 
@@ -169,11 +169,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if (!oldSyntaxTreeResult.InheritableAspects.IsEmpty)
+            if ( !oldSyntaxTreeResult.InheritableAspects.IsEmpty )
             {
                 inheritableAspectsBuilder ??= this._inheritableAspects.ToBuilder();
 
-                foreach (var x in oldSyntaxTreeResult.InheritableAspects)
+                foreach ( var x in oldSyntaxTreeResult.InheritableAspects )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable aspect of type '{x.AspectClass.ShortName}'." );
@@ -182,11 +182,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if (!oldSyntaxTreeResult.ReferenceValidators.IsEmpty)
+            if ( !oldSyntaxTreeResult.ReferenceValidators.IsEmpty )
             {
                 validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
 
-                foreach (var validator in oldSyntaxTreeResult.ReferenceValidators)
+                foreach ( var validator in oldSyntaxTreeResult.ReferenceValidators )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): removing validator `{validator}` from syntax tree '{filePath}'." );
@@ -195,11 +195,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if (!oldSyntaxTreeResult.InheritableOptions.IsDefault)
+            if ( !oldSyntaxTreeResult.InheritableOptions.IsDefault )
             {
                 inheritableOptionsBuilder ??= this.InheritableOptions.ToBuilder();
 
-                foreach (var optionItem in oldSyntaxTreeResult.InheritableOptions)
+                foreach ( var optionItem in oldSyntaxTreeResult.InheritableOptions )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable option of type `{optionItem.Key.OptionType}` on `{optionItem.Key.DeclarationId}` from syntax tree '{filePath}'." );
@@ -208,11 +208,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if (!oldSyntaxTreeResult.Annotations.IsEmpty)
+            if ( !oldSyntaxTreeResult.Annotations.IsEmpty )
             {
                 annotationsBuilder ??= this.Annotations.ToBuilder();
 
-                foreach (var annotation in oldSyntaxTreeResult.Annotations)
+                foreach ( var annotation in oldSyntaxTreeResult.Annotations )
                 {
                     annotationsBuilder.Remove( annotation.Key, annotation );
                 }
@@ -223,16 +223,16 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
         void IndexNewTree( string filePath, SyntaxTreePipelineResult newSyntaxTreeResult )
         {
-            if (!newSyntaxTreeResult.Introductions.IsEmpty)
+            if ( !newSyntaxTreeResult.Introductions.IsEmpty )
             {
                 introducedSyntaxTreeBuilder ??= this.IntroducedSyntaxTrees.ToBuilder();
 
-                foreach (var introducedTree in newSyntaxTreeResult.Introductions)
+                foreach ( var introducedTree in newSyntaxTreeResult.Introductions )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding introduced syntax tree '{introducedTree.Name}'." );
 
-                    if (!introducedSyntaxTreeBuilder.TryAdd( introducedTree.Name, introducedTree ))
+                    if ( !introducedSyntaxTreeBuilder.TryAdd( introducedTree.Name, introducedTree ) )
                     {
                         // This can happen when the introduced syntax tree name is not deterministic.
                         throw new AssertionFailedException(
@@ -241,11 +241,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if (!newSyntaxTreeResult.InheritableAspects.IsEmpty)
+            if ( !newSyntaxTreeResult.InheritableAspects.IsEmpty )
             {
                 inheritableAspectsBuilder ??= this._inheritableAspects.ToBuilder();
 
-                foreach (var x in newSyntaxTreeResult.InheritableAspects)
+                foreach ( var x in newSyntaxTreeResult.InheritableAspects )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable aspect of type '{x.AspectClass.ShortName}'." );
@@ -254,27 +254,27 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if (!newSyntaxTreeResult.ReferenceValidators.IsDefaultOrEmpty)
+            if ( !newSyntaxTreeResult.ReferenceValidators.IsDefaultOrEmpty )
             {
                 validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
 
-                foreach (var validator in newSyntaxTreeResult.ReferenceValidators)
+                foreach ( var validator in newSyntaxTreeResult.ReferenceValidators )
                 {
                     Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} ): adding validator `{validator}` to '{filePath}'." );
                     validatorsBuilder.Add( validator );
                 }
             }
 
-            if (!newSyntaxTreeResult.InheritableOptions.IsDefaultOrEmpty)
+            if ( !newSyntaxTreeResult.InheritableOptions.IsDefaultOrEmpty )
             {
                 inheritableOptionsBuilder ??= this.InheritableOptions.ToBuilder();
 
-                foreach (var optionItem in newSyntaxTreeResult.InheritableOptions)
+                foreach ( var optionItem in newSyntaxTreeResult.InheritableOptions )
                 {
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable options of type `{optionItem.Key.OptionType}`." );
 
-                    if (!inheritableOptionsBuilder.TryAdd( optionItem.Key, optionItem.Options ))
+                    if ( !inheritableOptionsBuilder.TryAdd( optionItem.Key, optionItem.Options ) )
                     {
                         // This seems theoretically possible, but reproducing it was not successful.
                         throw new AssertionFailedException(
@@ -284,11 +284,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
             }
 
-            if (!newSyntaxTreeResult.Annotations.IsEmpty)
+            if ( !newSyntaxTreeResult.Annotations.IsEmpty )
             {
                 annotationsBuilder ??= this.Annotations.ToBuilder();
 
-                foreach (var annotationGroup in newSyntaxTreeResult.Annotations)
+                foreach ( var annotationGroup in newSyntaxTreeResult.Annotations )
                 {
                     annotationsBuilder.Add( annotationGroup.Key, annotationGroup );
                 }
@@ -301,11 +301,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         var introducedTrees = introducedSyntaxTreeBuilder?.ToImmutable() ?? this.IntroducedSyntaxTrees;
         var inheritableAspects = inheritableAspectsBuilder?.ToImmutable() ?? this._inheritableAspects;
 
-        if (externalValidators != null)
+        if ( externalValidators != null )
         {
             validatorsBuilder ??= this.ReferenceValidators.ToBuilder();
 
-            foreach (var externalValidator in externalValidators)
+            foreach ( var externalValidator in externalValidators )
             {
                 validatorsBuilder.Add( externalValidator );
             }
@@ -346,13 +346,13 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         List<DesignTimeReferenceValidatorInstance>? externalValidators = null;
 
         // Split diagnostic by syntax tree.
-        foreach (var diagnostic in pipelineResults.Diagnostics.ReportedDiagnostics)
+        foreach ( var diagnostic in pipelineResults.Diagnostics.ReportedDiagnostics )
         {
             var filePath = diagnostic.Location.SourceTree?.FilePath;
 
-            if (filePath != null)
+            if ( filePath != null )
             {
-                if (resultBuilders.TryGetValue( filePath, out var builder ))
+                if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                 {
                     builder.Diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
                     builder.Diagnostics.Add( diagnostic );
@@ -365,13 +365,13 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
 
         // Split suppressions by syntax tree.
-        foreach (var suppression in pipelineResults.Diagnostics.DiagnosticSuppressions)
+        foreach ( var suppression in pipelineResults.Diagnostics.DiagnosticSuppressions )
         {
             void AddSuppression( string? path )
             {
-                if (!string.IsNullOrEmpty( path ))
+                if ( !string.IsNullOrEmpty( path ) )
                 {
-                    if (resultBuilders.TryGetValue( path, out var builder ))
+                    if ( resultBuilders.TryGetValue( path, out var builder ) )
                     {
                         builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
                         builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
@@ -385,7 +385,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
             var declaringSyntaxes = suppression.Declaration.GetDeclaringSyntaxReferences();
 
-            switch (declaringSyntaxes.Length)
+            switch ( declaringSyntaxes.Length )
             {
                 case 0:
                     continue;
@@ -396,7 +396,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     break;
 
                 default:
-                    foreach (var filePath in declaringSyntaxes.Select( p => p.SyntaxTree.FilePath ).Distinct())
+                    foreach ( var filePath in declaringSyntaxes.Select( p => p.SyntaxTree.FilePath ).Distinct() )
                     {
                         AddSuppression( filePath );
                     }
@@ -406,15 +406,15 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
 
         // Split introductions by original syntax tree.
-        foreach (var introduction in pipelineResults.IntroducedSyntaxTrees)
+        foreach ( var introduction in pipelineResults.IntroducedSyntaxTrees )
         {
             SyntaxTreePipelineResult.Builder? builder;
 
-            if (introduction.SourceSyntaxTree is { } syntaxTree)
+            if ( introduction.SourceSyntaxTree is { } syntaxTree )
             {
                 var filePath = syntaxTree.FilePath;
 
-                if (!resultBuilders.TryGetValue( filePath, out builder ))
+                if ( !resultBuilders.TryGetValue( filePath, out builder ) )
                 {
                     // This happens when the source tree is not dirty, so it's not part of the PartialCompilation.
                     builder = resultBuilders[filePath] = new SyntaxTreePipelineResult.Builder( syntaxTree );
@@ -427,7 +427,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
             builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
 
-            if (introduction.SourceSyntaxTree == null)
+            if ( introduction.SourceSyntaxTree == null )
             {
                 builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, null, introduction.GeneratedSyntaxTree ) );
 
@@ -440,11 +440,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         var compilationContext = compilation.CompilationContext;
 
         // Split inheritable aspects by syntax tree.
-        foreach (var inheritableAspectInstance in pipelineResults.InheritableAspects)
+        foreach ( var inheritableAspectInstance in pipelineResults.InheritableAspects )
         {
             var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilationContext );
 
-            if (syntaxTree == null)
+            if ( syntaxTree == null )
             {
                 continue;
             }
@@ -456,11 +456,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
 
         // Split validators by syntax tree.
-        foreach (var validator in pipelineResults.ReferenceValidators)
+        foreach ( var validator in pipelineResults.ReferenceValidators )
         {
             var syntaxTree = validator.ValidatedDeclaration.GetPrimarySyntaxTree();
 
-            if (syntaxTree == null)
+            if ( syntaxTree == null )
             {
                 continue;
             }
@@ -469,7 +469,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
             var validatedDeclarationSymbol = validator.ValidatedDeclaration.GetSymbol();
 
-            if (validatedDeclarationSymbol != null)
+            if ( validatedDeclarationSymbol != null )
             {
                 var designTimeValidator = new DesignTimeReferenceValidatorInstance(
                     validatedDeclarationSymbol,
@@ -480,7 +480,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     validator.DiagnosticSourceDescription,
                     validator.Granularity );
 
-                if (resultBuilders.TryGetValue( filePath, out var builder ))
+                if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                 {
                     builder.Validators ??= ImmutableArray.CreateBuilder<DesignTimeReferenceValidatorInstance>();
                     builder.Validators.Add( designTimeValidator );
@@ -499,12 +499,12 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
 
         // Split aspect instances by syntax tree.
-        foreach (var aspectInstance in pipelineResults.AspectInstances)
+        foreach ( var aspectInstance in pipelineResults.AspectInstances )
         {
             var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilationContext );
 
             // No continue here to handle even aspect instances without a syntax tree.
-            if (syntaxTree == null && !resultBuilders.ContainsKey( string.Empty ))
+            if ( syntaxTree == null && !resultBuilders.ContainsKey( string.Empty ) )
             {
                 resultBuilders.Add( string.Empty, new SyntaxTreePipelineResult.Builder( null ) );
             }
@@ -512,9 +512,9 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             var targetDeclarationId = aspectInstance.TargetDeclaration.ToSerializableId();
             SerializableDeclarationId? predecessorDeclarationId = null;
 
-            if (aspectInstance.Predecessors is [var predecessor, ..])
+            if ( aspectInstance.Predecessors is [var predecessor, ..] )
             {
-                var reflectionMapper = ( (ICompilationServices)compilationContext ).ReflectionMapper;
+                var reflectionMapper = ((ICompilationServices) compilationContext).ReflectionMapper;
 
                 var predecessorDeclarationSymbol = predecessor.Instance switch
                 {
@@ -523,7 +523,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     // Can't use fabricInstance.Fabric.GetType() here, because for type fabrics,
                     // we need the original type (e.g. C.Fabric), not the rewritten type (e.g. C_Fabric).
                     IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName(
-                        ( (IFabricInstanceInternal)fabricInstance ).FabricTypeFullName ),
+                        ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
                     _ => null
                 };
 
@@ -543,11 +543,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
 
         // Split transformations by syntax tree.
-        foreach (var transformation in pipelineResults.Transformations)
+        foreach ( var transformation in pipelineResults.Transformations )
         {
-            var filePath = ( transformation as ISyntaxTreeTransformationBase )?.TransformedSyntaxTree.FilePath;
+            var filePath = (transformation as ISyntaxTreeTransformationBase)?.TransformedSyntaxTree.FilePath;
 
-            if (filePath == null || !resultBuilders.TryGetValue( filePath, out var builder ))
+            if ( filePath == null || !resultBuilders.TryGetValue( filePath, out var builder ) )
             {
                 builder = emptySyntaxTreeResult ??= new SyntaxTreePipelineResult.Builder( null );
             }
@@ -562,12 +562,12 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
 
         // Split options by syntax tree.
-        foreach (var optionItem in pipelineResults.InheritableOptions)
+        foreach ( var optionItem in pipelineResults.InheritableOptions )
         {
             SyntaxTreePipelineResult.Builder builder;
             var syntaxTreePath = optionItem.Key.SyntaxTreePath;
 
-            if (syntaxTreePath != null)
+            if ( syntaxTreePath != null )
             {
                 builder = resultBuilders[syntaxTreePath];
             }
@@ -581,7 +581,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
 
         // Split annotations by syntax tree.
-        foreach (var annotationsOnDeclaration in pipelineResults.Annotations)
+        foreach ( var annotationsOnDeclaration in pipelineResults.Annotations )
         {
             // Annotations in AspectPipelineResults are only used for the cross-project scenario, so we only index exported annotations.
             var exportedAnnotations = annotationsOnDeclaration
@@ -589,7 +589,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 .Select( x => x.Annotation )
                 .ToImmutableArray();
 
-            if (exportedAnnotations.IsEmpty)
+            if ( exportedAnnotations.IsEmpty )
             {
                 continue;
             }
@@ -598,7 +598,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
             SyntaxTreePipelineResult.Builder builder;
 
-            if (syntaxTree == null)
+            if ( syntaxTree == null )
             {
                 builder = emptySyntaxTreeResult ??= new SyntaxTreePipelineResult.Builder( null );
             }
@@ -615,22 +615,22 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Add syntax trees with empty output so they get cached too.
         var inputTreesWithoutOutput = compilation.SyntaxTrees.ToBuilder();
 
-        foreach (var path in resultBuilders.Keys)
+        foreach ( var path in resultBuilders.Keys )
         {
             inputTreesWithoutOutput.Remove( path );
         }
 
-        foreach (var empty in inputTreesWithoutOutput)
+        foreach ( var empty in inputTreesWithoutOutput )
         {
             resultBuilders.Add( empty.Key, new SyntaxTreePipelineResult.Builder( empty.Value ) );
         }
 
-        if (emptySyntaxTreeResult != null)
+        if ( emptySyntaxTreeResult != null )
         {
             resultBuilders[""] = emptySyntaxTreeResult;
         }
 
-        return ( resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) ), externalValidators );
+        return (resultBuilders.SelectAsReadOnlyCollection( b => b.Value.ToImmutable( compilation.Compilation ) ), externalValidators);
     }
 
     public Invalidator ToInvalidator() => new( this );
@@ -647,7 +647,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
     public byte[] GetSerializedTransitiveAspectManifest( in ProjectServiceProvider serviceProvider, Compilation compilation )
     {
-        if (this._serializedTransitiveAspectManifest == null)
+        if ( this._serializedTransitiveAspectManifest == null )
         {
             var compilationContext = compilation.GetCompilationContext();
 

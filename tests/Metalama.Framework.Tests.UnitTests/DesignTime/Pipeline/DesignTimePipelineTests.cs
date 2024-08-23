@@ -54,7 +54,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                 .AddReferences(
                     new[] { "netstandard", "System.Runtime" }
                         .SelectAsImmutableArray(
-                            r => (MetadataReference)MetadataReference.CreateFromFile(
+                            r => (MetadataReference) MetadataReference.CreateFromFile(
                                 Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
@@ -75,7 +75,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                     path: c.Key,
                     options: SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( "METALAMA" ) ) ) );
 
-        if (!acceptErrors)
+        if ( !acceptErrors )
         {
             Assert.Empty( compilation.GetDiagnostics().Where( d => d.Severity == DiagnosticSeverity.Error ) );
         }
@@ -97,7 +97,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         // Diagnostics
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
 
-        foreach (var diagnostic in syntaxTreeResult.Diagnostics)
+        foreach ( var diagnostic in syntaxTreeResult.Diagnostics )
         {
             stringBuilder.AppendLineInvariant(
                 $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage( CultureInfo.CurrentCulture )}`" );
@@ -106,7 +106,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         // Suppressions
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
 
-        foreach (var suppression in syntaxTreeResult.Suppressions)
+        foreach ( var suppression in syntaxTreeResult.Suppressions )
         {
             stringBuilder.AppendLineInvariant( $"   {suppression}" );
         }
@@ -114,7 +114,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         // Introductions
         stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
-        foreach (var introduction in syntaxTreeResult.Introductions.OrderBy( i => i.Name ))
+        foreach ( var introduction in syntaxTreeResult.Introductions.OrderBy( i => i.Name ) )
         {
             stringBuilder.AppendLine( introduction.GeneratedSyntaxTree.ToString() );
         }
@@ -126,9 +126,9 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         var i = 0;
 
-        foreach (var syntaxTreeResult in results.Result.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTreePath ))
+        foreach ( var syntaxTreeResult in results.Result.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTreePath ) )
         {
-            if (i > 0)
+            if ( i > 0 )
             {
                 stringBuilder.AppendLine( "----------------------------------------------------------" );
             }
@@ -807,29 +807,29 @@ class C
     {
         var output = await this.PipelineConfigurationDoesNotKeepReferenceToCompilationCore();
 
-        for (var i = 0; i < 10; i++)
+        for ( var i = 0; i < 10; i++ )
         {
             var hasDanglingRef = false;
 
-            if (output.DependentCompilationRef.IsAlive)
+            if ( output.DependentCompilationRef.IsAlive )
             {
                 hasDanglingRef = true;
                 this.TestOutput.WriteLine( "Reference to the dependent compilation." );
             }
 
-            if (output.MasterCompilationRef.IsAlive)
+            if ( output.MasterCompilationRef.IsAlive )
             {
                 hasDanglingRef = true;
                 this.TestOutput.WriteLine( "Reference to the master compilation." );
             }
 
-            if (output.SyntaxTreeRefs.Any( r => r.IsAlive ))
+            if ( output.SyntaxTreeRefs.Any( r => r.IsAlive ) )
             {
                 hasDanglingRef = true;
                 this.TestOutput.WriteLine( "Reference to a syntax tree." );
             }
 
-            if (!hasDanglingRef)
+            if ( !hasDanglingRef )
             {
                 this.TestOutput.WriteLine( "No more dangling reference." );
 
@@ -882,7 +882,7 @@ class C
 
         Assert.Same( pipeline.LastProjectVersion!.Compilation, dependentCompilation2 );
 
-        return ( new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline );
+        return (new WeakReference( masterCompilation ), new WeakReference( dependentCompilation ), syntaxTreeRefs, configuration.Value, pipeline);
     }
 
     private static ( CSharpCompilation Master, CSharpCompilation Dependent ) CreateCompilations( int version )
@@ -936,7 +936,7 @@ class D{version}
             name: "Dependent",
             additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
 
-        return ( masterCompilation, dependentCompilation );
+        return (masterCompilation, dependentCompilation);
     }
 
 #if NET6_0_OR_GREATER

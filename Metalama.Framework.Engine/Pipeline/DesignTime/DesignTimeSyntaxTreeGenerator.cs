@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         t =>
                             t.TargetDeclaration switch
                             {
-                                INamespace @namespace => (INamespaceOrNamedType)@namespace,
+                                INamespace @namespace => (INamespaceOrNamedType) @namespace,
                                 INamedType namedType => namedType,
                                 IConstructor constructor => constructor.DeclaringType,
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 var target = transformationGroup.Key.GetTarget( finalCompilationModel );
 
-                switch (target)
+                switch ( target )
                 {
                     case INamedType namedType:
                         ProcessTransformationsOnType( namedType, transformationGroup.Value );
@@ -95,14 +95,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 var orderedTransformations = namespaceTransformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
 
-                foreach (var transformation in orderedTransformations)
+                foreach ( var transformation in orderedTransformations )
                 {
-                    if (transformation is IIntroduceDeclarationTransformation
-                        {
-                            DeclarationBuilder: INamedType namedTypeBuilder
-                        } introduceDeclarationTransformation
-                        && !transformationsByTarget.ContainsKey(
-                            introduceDeclarationTransformation.DeclarationBuilder.ToValueTypedRef().As<INamespaceOrNamedType>() ))
+                    if ( transformation is IIntroduceDeclarationTransformation
+                         {
+                             DeclarationBuilder: INamedType namedTypeBuilder
+                         } introduceDeclarationTransformation
+                         && !transformationsByTarget.ContainsKey(
+                             introduceDeclarationTransformation.DeclarationBuilder.ToValueTypedRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
                         ProcessTransformationsOnType( namedTypeBuilder.ToValueTypedRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (declaringType is { IsPartial: false, Origin.Kind: not DeclarationOriginKind.Aspect })
+                if ( declaringType is { IsPartial: false, Origin.Kind: not DeclarationOriginKind.Aspect } )
                 {
                     // If the type is not marked as partial, we can emit a diagnostic and a code fix, but not a partial class itself.
                     diagnostics.Report(
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     return;
                 }
 
-                if (IsInNonPartialSourceType( declaringType ))
+                if ( IsInNonPartialSourceType( declaringType ) )
                 {
                     // If the declaring type is not located in a partial source type, we need to skip it. The warning is needed because it was done for the parent type.
                     return;
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     var currentType = declaringType;
 
                     // Go to the closest type that does not originate in an aspect.
-                    while (currentType.Origin.Kind is DeclarationOriginKind.Aspect && currentType.DeclaringType != null)
+                    while ( currentType.Origin.Kind is DeclarationOriginKind.Aspect && currentType.DeclaringType != null )
                     {
                         currentType = currentType.DeclaringType;
                     }
@@ -150,11 +150,11 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 var members = List<MemberDeclarationSyntax>();
                 var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, true );
 
-                foreach (var transformation in orderedTransformations)
+                foreach ( var transformation in orderedTransformations )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    switch (transformation)
+                    switch ( transformation )
                     {
                         case IInjectMemberTransformation injectMemberTransformation:
                             // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
@@ -171,10 +171,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
                                 .Select( m => m.Syntax );
 
-                            if (injectMemberTransformation is IIntroduceDeclarationTransformation
+                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation
                                 {
                                     DeclarationBuilder: ConstructorBuilder constructorBuilder
-                                })
+                                } )
                             {
                                 injectedMembers = AddIntroducedConstructorParameters(
                                     injectedMembers,
@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                     syntaxGenerationContext );
                             }
 
-                            if (injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: NamedTypeBuilder })
+                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: NamedTypeBuilder } )
                             {
                                 // TODO: This is not optimal - the injected member should be skipped instead.
                                 //       However, determining whether the type should be injected as a member depends on transformations after this
@@ -210,9 +210,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 var classDeclaration = CreatePartialType( declaringType, baseList, members );
 
                 // Add the class to its nesting type.
-                var topDeclaration = (MemberDeclarationSyntax)classDeclaration;
+                var topDeclaration = (MemberDeclarationSyntax) classDeclaration;
 
-                for (var containingType = declaringType.DeclaringType; containingType != null; containingType = containingType.DeclaringType)
+                for ( var containingType = declaringType.DeclaringType; containingType != null; containingType = containingType.DeclaringType )
                 {
                     topDeclaration = CreatePartialType(
                         containingType,
@@ -221,7 +221,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 // Add the class to a namespace.
-                if (!declaringType.ContainingNamespace.IsGlobalNamespace)
+                if ( !declaringType.ContainingNamespace.IsGlobalNamespace )
                 {
                     topDeclaration = NamespaceDeclaration(
                         ParseName( declaringType.ContainingNamespace.FullName ),
@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 // Choose the best syntax tree
-                var originalSyntaxTree = ( (IDeclarationImpl)declaringType ).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
+                var originalSyntaxTree = ((IDeclarationImpl) declaringType).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
                     .OrderBy( s => s.FilePath.Length )
                     .First();
 
@@ -242,9 +242,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 var safeTypeName = GetUniqueFilenameForType( declaringType );
                 var syntaxTreeName = safeTypeName + ".cs";
 
-                if (!additionalSyntaxTreeDictionary.TryAdd(
+                if ( !additionalSyntaxTreeDictionary.TryAdd(
                         syntaxTreeName,
-                        new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) ))
+                        new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) ) )
                 {
                     throw new AssertionFailedException( $"Duplicate generated syntax tree for type {declaringType}." );
                 }
@@ -263,7 +263,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             static void RenderName( StringBuilder sb, INamedType current )
             {
-                if (current.DeclaringType != null)
+                if ( current.DeclaringType != null )
                 {
                     RenderName( sb, current.DeclaringType );
                     sb.Append( "-" );
@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 sb.Append( current.Name );
 
-                if (current.IsGeneric)
+                if ( current.IsGeneric )
                 {
                     sb.Append( "{" );
                     sb.Append( current.TypeParameters.Count );
@@ -293,16 +293,16 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
         {
             var finalConstructor = constructorBuilder.ToValueTypedRef().As<IConstructor>().GetTarget( finalCompilationModel );
 
-            foreach (var member in injectedMembers)
+            foreach ( var member in injectedMembers )
             {
-                if (member is not ConstructorDeclarationSyntax constructorDeclaration)
+                if ( member is not ConstructorDeclarationSyntax constructorDeclaration )
                 {
                     yield return member;
 
                     continue;
                 }
 
-                for (var index = constructorBuilder.Parameters.Count; index < finalConstructor.Parameters.Count; index++)
+                for ( var index = constructorBuilder.Parameters.Count; index < finalConstructor.Parameters.Count; index++ )
                 {
                     constructorDeclaration =
                         constructorDeclaration.AddParameterListParameters(
@@ -318,10 +318,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
         private static IEnumerable<MemberDeclarationSyntax> AddPartialModifierToTypes( IEnumerable<MemberDeclarationSyntax> injectedMembers )
         {
-            foreach (var member in injectedMembers)
+            foreach ( var member in injectedMembers )
             {
-                if (member is TypeDeclarationSyntax typeDeclaration
-                    && typeDeclaration.Modifiers.All( m => !m.IsKind( SyntaxKind.PartialKeyword ) ))
+                if ( member is TypeDeclarationSyntax typeDeclaration
+                     && typeDeclaration.Modifiers.All( m => !m.IsKind( SyntaxKind.PartialKeyword ) ) )
                 {
                     yield return
                         member.WithModifiers( member.Modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.PartialKeyword, TriviaList() ) ) );
@@ -347,20 +347,20 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var existingSignatures = new HashSet<(ISymbol Type, RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
 
             // Go through all types that will get generated constructors and index existing constructors.
-            foreach (var constructor in initialType.Constructors)
+            foreach ( var constructor in initialType.Constructors )
             {
                 existingSignatures.Add(
                     constructor.Parameters.SelectAsArray(
-                        p => ( (ISymbol)p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
-                               p.RefKind ) ) );
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                              p.RefKind) ) );
             }
 
             // Additionally, add all introduced constructors to the list.
-            foreach (var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ))
+            foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
             {
                 var constructorBuilder = introducedConstructor.ToValueTypedRef().Target as ConstructorBuilder;
 
-                if (constructorBuilder is null or { ReplacedImplicit.IsDefault: false })
+                if ( constructorBuilder is null or { ReplacedImplicit.IsDefault: false } )
                 {
                     // Skip introduced constructors that are replacements.
                     continue;
@@ -368,18 +368,18 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 existingSignatures.Add(
                     introducedConstructor.Parameters.SelectAsArray(
-                        p => ( (ISymbol)p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
-                               p.RefKind ) ) );
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                              p.RefKind) ) );
             }
 
-            foreach (var constructor in type.Constructors)
+            foreach ( var constructor in type.Constructors )
             {
-                if (!constructor.TryForCompilation( initialCompilationModel, out var initialConstructor ))
+                if ( !constructor.TryForCompilation( initialCompilationModel, out var initialConstructor ) )
                 {
                     continue;
                 }
 
-                if (initialConstructor is BuiltDeclaration)
+                if ( initialConstructor is BuiltDeclaration )
                 {
                     continue;
                 }
@@ -391,11 +391,11 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
 
-                if (!existingSignatures.Add(
+                if ( !existingSignatures.Add(
                         finalParameters.SelectAsArray(
                             p => (
-                                (ISymbol)p.Type.GetSymbol()
-                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind ) ) ))
+                                (ISymbol) p.Type.GetSymbol()
+                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) ) )
                 {
                     continue;
                 }
@@ -422,7 +422,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                                     IdentifierName( p.Name ) ) ) ) ) ),
                         Block() ) );
 
-                if (initialConstructor.Parameters.Any( p => p.DefaultValue != null ))
+                if ( initialConstructor.Parameters.Any( p => p.DefaultValue != null ) )
                 {
                     // Target constructor has optional parameters.
                     // If there is no constructor without optional parameters, we need to generate it to avoid ambiguous match.
@@ -430,12 +430,12 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
                     var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
 
-                    if (existingSignatures.Add(
+                    if ( existingSignatures.Add(
                             nonOptionalParameters.SelectAsArray(
                                 p => (
-                                    (ISymbol)p.Type.GetSymbol()
+                                    (ISymbol) p.Type.GetSymbol()
                                         .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
-                                    p.RefKind ) ) ))
+                                    p.RefKind) ) ) )
                     {
                         constructors.Add(
                             ConstructorDeclaration(
@@ -537,7 +537,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
         private static TypeParameterListSyntax? CreateTypeParameters( INamedType type )
         {
-            if (!type.IsGeneric)
+            if ( !type.IsGeneric )
             {
                 return null;
             }
@@ -633,24 +633,24 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             public bool Equals( (ISymbol Type, RefKind RefKind)[]? x, (ISymbol Type, RefKind RefKind)[]? y )
             {
-                if (x == null || y == null)
+                if ( x == null || y == null )
                 {
                     return x == null && y == null;
                 }
 
-                if (x.Length != y.Length)
+                if ( x.Length != y.Length )
                 {
                     return false;
                 }
 
-                for (var i = 0; i < x.Length; i++)
+                for ( var i = 0; i < x.Length; i++ )
                 {
-                    if (x[i].RefKind != y[i].RefKind)
+                    if ( x[i].RefKind != y[i].RefKind )
                     {
                         return false;
                     }
 
-                    if (!this._symbolComparer.Equals( x[i].Type, y[i].Type ))
+                    if ( !this._symbolComparer.Equals( x[i].Type, y[i].Type ) )
                     {
                         return false;
                     }
@@ -663,9 +663,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 var hashCode = obj.Length;
 
-                for (var i = 0; i < obj.Length; i++)
+                for ( var i = 0; i < obj.Length; i++ )
                 {
-                    hashCode = HashCode.Combine( hashCode, this._symbolComparer.GetHashCode( obj[i].Type ), (int)obj[i].RefKind );
+                    hashCode = HashCode.Combine( hashCode, this._symbolComparer.GetHashCode( obj[i].Type ), (int) obj[i].RefKind );
                 }
 
                 return hashCode;
