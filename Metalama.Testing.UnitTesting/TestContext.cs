@@ -8,11 +8,14 @@ using Metalama.Backstage.Infrastructure;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.UserCode;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -112,35 +115,49 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         this._isRoot = true;
 
         this.ProjectOptions = new TestProjectOptions( contextOptions );
-        this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
-        var platformInfo = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IPlatformInfo>();
+        try
+        {
 
-        // We intentionally replace (override) backstage services by ours.
-        var backstageServices = ServiceProvider<IBackstageService>.Empty
-            .WithService( this )
-            .WithService( platformInfo )
-            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() )
-            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<BackstageBackgroundTasksService>() );
+            this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
-        var licenseConsumptionService = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
+            var platformInfo = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IPlatformInfo>();
 
-        backstageServices = backstageServices.WithService( licenseConsumptionService );
-        backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
+            // We intentionally replace (override) backstage services by ours.
+            var backstageServices = ServiceProvider<IBackstageService>.Empty
+                .WithService( this )
+                .WithService( platformInfo )
+                .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() )
+                .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<BackstageBackgroundTasksService>() );
 
-        var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
-        typedAdditionalServices.GlobalServices.Add( sp => sp.WithServiceConditional<IGlobalOptions>( _ => new TestGlobalOptions() ) );
-        typedAdditionalServices.GlobalServices.Add( sp => sp.WithService<IProjectOptionsFactory>( _ => new TestProjectOptionsFactory( this.ProjectOptions ) ) );
+            var licenseConsumptionService = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 
-        backstageServices = typedAdditionalServices.BackstageServices.Build( backstageServices );
+            backstageServices = backstageServices.WithService( licenseConsumptionService );
+            backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
-        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
+            var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
+            typedAdditionalServices.GlobalServices.Add( sp => sp.WithServiceConditional<IGlobalOptions>( _ => new TestGlobalOptions() ) );
 
-        serviceProvider = serviceProvider
-            .WithService( this.ProjectOptions.DomainObserver );
+            typedAdditionalServices.GlobalServices.Add(
+                sp => sp.WithService<IProjectOptionsFactory>( _ => new TestProjectOptionsFactory( this.ProjectOptions ) ) );
 
-        this.ServiceProvider = serviceProvider
-            .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
+            backstageServices = typedAdditionalServices.BackstageServices.Build( backstageServices );
+
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
+
+            serviceProvider = serviceProvider
+                .WithService( this.ProjectOptions.DomainObserver );
+
+            this.ServiceProvider = serviceProvider
+                .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
+        }
+        catch
+        {
+            // Avoid a misleading exception thrown by the finalizer.
+            GC.SuppressFinalize( this );
+
+            throw;
+        }
     }
 
     private TestContext( TestContext prototype, IEnumerable<PortableExecutableReference> newReferences )
@@ -271,6 +288,17 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 #endif
 
     internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
+
+    /// <summary>
+    /// Switches the <see cref="MetalamaExecutionContext"/> to a test context for a given <see cref="ICompilation"/>.
+    /// This allows compile-time unit tests to use facilities such as <see cref="ExpressionFactory"/>.
+    /// </summary>
+    /// <param name="compilation"></param>
+    /// <param name="description"></param>
+    /// <returns></returns>
+    [MustDisposeResource]
+    public IDisposable WithExecutionContext( ICompilation compilation, string? description = null )
+        => UserCodeExecutionContext.WithContext( this.ServiceProvider, (CompilationModel) compilation, description ?? "executing test method" );
 
     string ITempFileManager.GetTempDirectory( string directory, CleanUpStrategy cleanUpStrategy, string? subdirectory, TempFileVersionScope versionScope )
     {

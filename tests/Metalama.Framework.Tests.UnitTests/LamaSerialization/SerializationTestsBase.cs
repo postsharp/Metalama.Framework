@@ -30,13 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             this.ServiceProvider = serviceProvider;
         }
-
-        protected override void ConfigureServices( IAdditionalServiceCollection services )
-        {
-            base.ConfigureServices( services );
-            services.AddProjectService( new SyntaxGenerationOptions( CodeFormattingOptions.Formatted ) );
-        }
-
+        
         protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
             => new SerializationTestContext( contextOptions, services );
 
