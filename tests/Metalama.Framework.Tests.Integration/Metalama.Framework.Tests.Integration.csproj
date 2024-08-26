@@ -46,6 +46,9 @@
         <Compile Update="Tests\Fabrics\SelectAttributesWithPredicate.cs">
           <SubType>Code</SubType>
         </Compile>
+        <Compile Update="Tests\Aspects\Subtemplates\Subexpression_Intorduced_Error_Imperative.cs">
+          <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
