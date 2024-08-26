@@ -342,12 +342,14 @@ internal sealed class ReferenceAssemblyLocator
 
             var projectText =
                 $"""
-                 <Project>
+                 <Project InitialTargets="_WarnOfImports">
                    <PropertyGroup>
                      <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
                      <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
                      <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
                    </PropertyGroup>
+                   <Import Project="$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props" Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props')" />
+                   <Import Project="$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props" Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props')" />
                    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
                    <PropertyGroup>
                      <TargetFrameworks>{targetFrameworks}</TargetFrameworks>
@@ -363,7 +365,15 @@ internal sealed class ReferenceAssemblyLocator
                    <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
                      <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
                    </Target>
+                   <Target Name="_WarnOfImports">
+                     <Warning Text="'$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props' imported." Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props')" />
+                     <Warning Text="'$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props' imported." Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props')" />
+                     <Warning Text="'$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets' imported." Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets')" />
+                     <Warning Text="'$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets' imported." Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets')" />
+                   </Target>
                    <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+                   <Import Project="$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets" Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets')" />
+                   <Import Project="$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets" Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets')" />
                  </Project>
                  """;
 
