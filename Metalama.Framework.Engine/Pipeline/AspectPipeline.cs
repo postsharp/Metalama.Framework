@@ -224,7 +224,7 @@ public abstract class AspectPipeline : IDisposable
         // Set NormalizeWhitespace setting for the compilation.
 
         projectServiceProviderWithProject =
-            projectServiceProviderWithProject.WithService( this.GetSyntaxGenerationOptions() );
+            projectServiceProviderWithProject.WithService( this.GetSyntaxGenerationOptions(), true );
 
         // Add MetricsManager.
         projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );

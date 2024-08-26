@@ -32,8 +32,6 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public sealed class CodeModelTests : UnitTestClass
     {
-        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Formatted );
-
         [Fact]
         public void ObjectIdentity()
         {
@@ -758,7 +756,7 @@ class C<TC>
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
+            using var userCodeContext = testContext.WithExecutionContext( compilation );
 
             var type = Assert.Single( compilation.Types );
 
@@ -796,7 +794,7 @@ class Class<T>
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
+            using var userCodeContext = testContext.WithExecutionContext( compilation );
 
             var openType = compilation.Types.Single();
             var typeInstance = openType.WithTypeArguments( typeof(string) );
@@ -832,7 +830,7 @@ class Parent<TParent>
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
+            using var userCodeContext = testContext.WithExecutionContext( compilation );
 
             // Find the different types and check the IsGeneric and IsOpenGeneric properties.
             var openParentType = Assert.Single( compilation.Types );

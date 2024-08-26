@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Services;
 using System.Collections.Immutable;
 using Xunit.Abstractions;
@@ -56,7 +57,13 @@ namespace Metalama.Testing.UnitTesting
         /// </summary>
         protected virtual void ConfigureServices( IAdditionalServiceCollection services )
         {
+            this.AddSyntaxGenerationOptions( services );
             this.AddXunitLogging( services );
+        }
+
+        protected virtual void AddSyntaxGenerationOptions( IAdditionalServiceCollection services )
+        {
+            services.AddProjectService( SyntaxGenerationOptions.Formatted );
         }
 
         /// <summary>

@@ -25,4 +25,6 @@ public sealed record SyntaxGenerationOptions : IProjectService
     /// Gets options for creation of fully formatted code.
     /// </summary>
     public static SyntaxGenerationOptions Formatted { get; } = new( CodeFormattingOptions.Formatted );
+    
+    public static SyntaxGenerationOptions Unformatted { get; } = new( CodeFormattingOptions.None );
 }
