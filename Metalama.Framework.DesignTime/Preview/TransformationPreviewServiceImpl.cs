@@ -53,7 +53,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
         return SerializablePreviewTransformationResult.Success( JsonSerializationHelper.CreateSerializableSyntaxTree( transformedSyntaxTree ), null );
     }
 
-    Task<SerializablePreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(
+    public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
         CancellationToken cancellationToken )

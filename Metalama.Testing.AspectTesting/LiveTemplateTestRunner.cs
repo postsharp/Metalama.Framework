@@ -49,7 +49,7 @@ namespace Metalama.Testing.AspectTesting
             foreach ( var syntaxTree in partialCompilation.SyntaxTrees.Values )
             {
                 var semanticModel = partialCompilation.Compilation.GetCachedSemanticModel( syntaxTree );
-                new TargetAttributeWalker( semanticModel, targets.Add ).Visit( syntaxTree.GetRoot() );
+                new TargetAttributeWalker( semanticModel, targets.Add ).Visit( await syntaxTree.GetRootAsync() );
             }
 
             switch ( targets.Count )
@@ -102,11 +102,10 @@ namespace Metalama.Testing.AspectTesting
             }
         }
 
-        private class TargetAttributeWalker : CSharpSyntaxWalker
+        private sealed class TargetAttributeWalker : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
-
-            public Action<(ISymbol Target, INamedTypeSymbol AspectType)> _addTarget;
+            private readonly Action<(ISymbol Target, INamedTypeSymbol AspectType)> _addTarget;
 
             public TargetAttributeWalker( SemanticModel semanticModel, Action<(ISymbol Target, INamedTypeSymbol AspectType)> addTarget )
             {

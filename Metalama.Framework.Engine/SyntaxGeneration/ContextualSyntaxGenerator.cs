@@ -23,6 +23,7 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
+using WorkspaceHelper = Metalama.Framework.Engine.Utilities.Roslyn.WorkspaceHelper;
 
 namespace Metalama.Framework.Engine.SyntaxGeneration;
 
@@ -531,7 +532,7 @@ internal sealed partial class ContextualSyntaxGenerator
         IEnumerable<AttributeArgumentSyntax> constructorArguments;
 
         if ( lastParameter is { IsParams: true }
-            && attribute.ConstructorArguments[^1] is { Values.IsDefault: false } lastArray )
+             && attribute.ConstructorArguments[^1] is { Values.IsDefault: false } lastArray )
         {
             // Use the more compact syntax.
             var constructorArgumentValues = attribute.ConstructorArguments.ToMutableList();

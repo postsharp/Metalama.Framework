@@ -42,7 +42,7 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 /// The design-time implementation of <see cref="AspectPipeline"/>.
 /// </summary>
 /// Must be public because of testing.
-internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+public sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
@@ -52,7 +52,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly IDesignTimeAspectPipelineObserver? _observer;
     private readonly SemaphoreSlim _sync = new( 1, 1 );
     private readonly IDesignTimeEntryPointConsumer? _entryPointConsumer;
-    private readonly AnalysisProcessEventHub _eventHub;
+    private readonly AnalysisProcessEventHub? _eventHub;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ITaskRunner _taskRunner;
     private readonly ProjectVersionProvider _projectVersionProvider;
@@ -97,9 +97,14 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._entryPointConsumer = (IDesignTimeEntryPointConsumer?) this.ServiceProvider.Global.Underlying.GetService( typeof(IDesignTimeEntryPointConsumer) );
         this._projectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
         this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
-        this._eventHub = this.ServiceProvider.Global.GetRequiredService<AnalysisProcessEventHub>();
-        this._eventHub.CompilationResultChangedEvent.RegisterHandler( this.OnOtherPipelineCompilationResultChanged );
-        this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
+        this._eventHub = this.ServiceProvider.Global.GetService<AnalysisProcessEventHub>();
+
+        if ( this._eventHub != null )
+        {
+            this._eventHub.CompilationResultChangedEvent.RegisterHandler( this.OnOtherPipelineCompilationResultChanged );
+            this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
+        }
+
         this._taskRunner = this.ServiceProvider.Global.GetRequiredService<ITaskRunner>();
         this._userDiagnosticsRegistrationService = this.ServiceProvider.Global.GetService<IUserDiagnosticRegistrationService>();
 
@@ -159,7 +164,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         if ( !args.IsPartialCompilation || args.SyntaxTreePaths.Any( p => dependenciesInThisProject.DependenciesByMasterFilePath.ContainsKey( p ) ) )
         {
             this.Logger.Trace?.Log( $"Processing change notification from dependent project '{args.ProjectKey}': the current project may be affected." );
-            this._eventHub.OnProjectDirty( this.ProjectKey );
+            this._eventHub?.OnProjectDirty( this.ProjectKey );
         }
         else
         {
@@ -215,7 +220,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         this._currentState = state;
 
-        if ( oldStatus != state.Status )
+        if ( oldStatus != state.Status && this._eventHub != null )
         {
             await this._eventHub.OnPipelineStatusChangedEventAsync( new DesignTimePipelineStatusChangedEventArgs( this, oldStatus, state.Status ) );
         }
@@ -229,7 +234,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         if ( newAspectClassesHashCode != 0 && this._aspectClassesHashCode != newAspectClassesHashCode )
         {
             this._aspectClassesHashCode = newAspectClassesHashCode;
-            this._eventHub.OnAspectClassesChanged( this.ProjectKey );
+            this._eventHub?.OnAspectClassesChanged( this.ProjectKey );
         }
 
         var newAspectInstancesHashCode = state.PipelineResult.AspectInstancesHashCode;
@@ -237,7 +242,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         if ( newAspectInstancesHashCode != 0 && this._aspectInstancesHashCode != newAspectInstancesHashCode )
         {
             this._aspectInstancesHashCode = newAspectInstancesHashCode;
-            this._eventHub.OnAspectInstancesChanged( this.ProjectKey );
+            this._eventHub?.OnAspectInstancesChanged( this.ProjectKey );
         }
     }
 
@@ -284,7 +289,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             await this.ResumeAsync( AsyncExecutionContext.Get(), false, CancellationToken.None );
 
             // Raise the event.
-            await this._eventHub.OnExternalBuildCompletedEventAsync( this.ProjectKey );
+            if ( this._eventHub != null )
+            {
+                await this._eventHub.OnExternalBuildCompletedEventAsync( this.ProjectKey );
+            }
         }
         catch ( Exception exception )
         {
@@ -334,7 +342,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     true,
                     this._currentState.CompileTimeSyntaxTrees.Keys.ToImmutableArray() );
 
-                this._eventHub.PublishCompilationResultChangedNotification( notification );
+                this._eventHub?.PublishCompilationResultChangedNotification( notification );
             }
         }
 
@@ -345,7 +353,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._jobQueue.Enqueue(
             _ =>
             {
-                this._eventHub.OnProjectDirty( this.ProjectKey );
+                this._eventHub?.OnProjectDirty( this.ProjectKey );
 
                 return default;
             } );
@@ -385,15 +393,19 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    public bool MustReportPausedPipelineAsErrors => !this._eventHub.IsUserInterfaceAttached;
+    public bool MustReportPausedPipelineAsErrors => this._eventHub == null || !this._eventHub.IsUserInterfaceAttached;
 
     protected override void Dispose( bool disposing )
     {
         base.Dispose( disposing );
         this._fileSystemWatcher?.Dispose();
         this._sync.Dispose();
-        this._eventHub.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChangedAsync );
-        this._eventHub.CompilationResultChangedEvent.UnregisterHandler( this.OnOtherPipelineCompilationResultChanged );
+
+        if ( this._eventHub != null )
+        {
+            this._eventHub.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChangedAsync );
+            this._eventHub.CompilationResultChangedEvent.UnregisterHandler( this.OnOtherPipelineCompilationResultChanged );
+        }
     }
 
     private async ValueTask<ProjectVersion> InvalidateCacheAsync(
@@ -419,7 +431,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             {
                 await this.SetStateAsync( this._currentState.Reset(), executionContext );
 
-                this._eventHub.OnProjectDirty( this.ProjectKey );
+                this._eventHub?.OnProjectDirty( this.ProjectKey );
             }
             finally
             {
@@ -452,11 +464,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    public FallibleResultWithDiagnostics<AspectPipelineResultAndState> Execute( Compilation compilation, TestableCancellationToken cancellationToken = default )
+    internal FallibleResultWithDiagnostics<AspectPipelineResultAndState> Execute(
+        Compilation compilation,
+        TestableCancellationToken cancellationToken = default )
         => this._taskRunner.RunSynchronously( () => this.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken ), cancellationToken );
 
     // This method is for testing only.
-    public bool TryExecute(
+    internal bool TryExecute(
         Compilation compilation,
         TestableCancellationToken cancellationToken,
         [NotNullWhen( true )] out AspectPipelineResultAndState? compilationResult )
@@ -626,13 +640,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         return new DesignTimeProjectVersion( compilationVersion, compilationReferences, pipelineStatus );
     }
 
-    public ValueTask<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
+    internal ValueTask<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken = default )
         => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
 
-    public async ValueTask<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
+    internal async ValueTask<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         bool autoResumePipeline,
         AsyncExecutionContext executionContext,
@@ -761,7 +775,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                             partialCompilation.IsPartial,
                             partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectAsImmutableArray( t => t.Key ) : default );
 
-                        this._eventHub.PublishCompilationResultChangedNotification( notification );
+                        this._eventHub?.PublishCompilationResultChangedNotification( notification );
 
                         // Return the result from the cache.
                         compilationResult = new AspectPipelineResultAndState(
@@ -1178,7 +1192,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    public AspectPipelineResult AspectPipelineResult => this._currentState.PipelineResult;
+    internal AspectPipelineResult AspectPipelineResult => this._currentState.PipelineResult;
 
     protected override bool TryInitialize(
         IDiagnosticAdder diagnosticAdder,

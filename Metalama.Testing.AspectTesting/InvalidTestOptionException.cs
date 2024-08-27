@@ -13,12 +13,3 @@ public sealed class InvalidTestOptionException : Exception
     private InvalidTestOptionException( SerializationInfo info, StreamingContext context )
         : base( info, context ) { }
 }
-
-[Serializable]
-public sealed class InvalidTestTargetException : Exception
-{
-    public InvalidTestTargetException( string message ) : base( message ) { }
-
-    private InvalidTestTargetException( SerializationInfo info, StreamingContext context )
-        : base( info, context ) { }
-}
