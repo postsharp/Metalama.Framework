@@ -44,6 +44,10 @@ namespace Metalama.Testing.AspectTesting
         /// This value indicates that a live template preview should be applied.
         /// To enable this option in a test, add this comment to your test file: <c>// @TestScenario(PreviewLiveTemplate)</c>.
         /// </summary>
-        PreviewLiveTemplate
+        PreviewLiveTemplate,
+
+        DesignTime,
+
+        Preview
     }
 }

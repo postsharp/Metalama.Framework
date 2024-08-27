@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @DesignTime
+// @TestScenario(DesignTime)
 #endif
 
 using Metalama.Framework.Advising;
@@ -22,10 +22,7 @@ public class ConstructorIntroductionAttribute : TypeAspect
     {
         builder.IntroduceConstructor(
             nameof(Template),
-            buildConstructor: c => 
-            {
-                c.AddParameter("x", typeof(int) );
-            } );
+            buildConstructor: c => { c.AddParameter( "x", typeof(int) ); } );
     }
 
     [Template]
@@ -36,8 +33,8 @@ public class ParameterIntroductionAttribute : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.IntroduceParameter("introduced1", typeof(int), TypedConstant.Create(42));
-        builder.IntroduceParameter("introduced2", typeof(string), TypedConstant.Create("42"));
+        builder.IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+        builder.IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
     }
 }
 
@@ -46,5 +43,5 @@ public class ParameterIntroductionAttribute : ConstructorAspect
 internal partial class TestClass
 {
     [ParameterIntroduction]
-    public TestClass(int param, int optParam = 42) { }
+    public TestClass( int param, int optParam = 42 ) { }
 }

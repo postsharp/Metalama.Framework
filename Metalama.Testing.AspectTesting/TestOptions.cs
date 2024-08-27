@@ -521,12 +521,6 @@ public class TestOptions
 
                     break;
 
-                case "DesignTime":
-                    this.TestRunnerFactoryType =
-                        "Metalama.Testing.AspectTesting.DesignTimeTestRunnerFactory, Metalama.Testing.AspectTesting";
-
-                    break;
-
                 case "TestScenario":
                     if ( Enum.TryParse<TestScenario>( optionArg, out var testScenario ) )
                     {
