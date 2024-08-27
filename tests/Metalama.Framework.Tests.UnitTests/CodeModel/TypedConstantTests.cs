@@ -71,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var c = TypedConstant.Create( value );
 
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var immutableValue = value.Cast<object>().Select( TypedConstant.Create ).ToImmutableArray();
 
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var c = TypedConstant.Create( ConsoleColor.Blue );
 
@@ -136,7 +136,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var c = TypedConstant.Create( typeof(int) );
 
@@ -162,7 +162,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var c = TypedConstant.Create( value, type );
 
@@ -188,7 +188,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var array = Array.CreateInstance( type, 1 );
             array.SetValue( value, 0 );
@@ -215,7 +215,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var c = TypedConstant.Create( value, type );
 
@@ -228,7 +228,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var emptyCompilation = testContext.CreateCompilationModel( "" );
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             const decimal value = 2013.0m;
 
@@ -243,7 +243,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var emptyCompilation = testContext.CreateCompilationModel( "" );
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             Assert.Throws<ArgumentException>( () => TypedConstant.Create( "", typeof(object) ) );
             Assert.Throws<ArgumentException>( () => TypedConstant.Create( new DateTime( 2023, 5, 3 ) ) );
@@ -260,7 +260,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var emptyCompilation = testContext.CreateCompilationModel( "" );
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var ex = Assert.Throws<ArgumentException>( () => TypedConstant.Create( new object(), type ) );
             Assert.Contains( "The value should be of type", ex.Message, StringComparison.Ordinal );
@@ -282,7 +282,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var emptyCompilation = testContext.CreateCompilationModel( "" );
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+            using var userCodeContext = testContext.WithExecutionContext( emptyCompilation );
 
             var typedConstant = TypedConstant.Create( value );
             var roundtrip = typedConstant.Value;

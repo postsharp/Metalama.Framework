@@ -316,6 +316,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         {
             INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
             INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
+            null => throw new AssertionFailedException( $"Null containing symbol for type symbol {this.TypeSymbol} ({this.TypeSymbol.Kind})." ), // #35362 - would fail on the next line.
             _ => throw new AssertionFailedException( $"Unexpected containing symbol kind: {this.TypeSymbol.ContainingSymbol.Kind}." )
         };
 
