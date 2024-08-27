@@ -70,22 +70,24 @@ internal sealed partial class LinkerAnalysisStep
                 };
 
                 var symbolInfo = this._semanticModel.GetSymbolInfo( nodeWithSymbol );
-                var referencedSymbol = symbolInfo.Symbol;
+
+                var referencedSymbol =
+                    symbolInfo switch
+                    {
+                        // Normal situation with valid symbol.
+                        { Symbol: { } symbol } => symbol,
+
+                        // In most invalid code situations, there is one candidate symbol.
+                        { CandidateSymbols: [{ } symbol] } => symbol,
+
+                        // Otherwise we will skip this reference completely, which will cause it not to be transformed.
+                        _ => null,
+                    };
 
                 if ( referencedSymbol == null )
                 {
-                    // This is a workaround for a problem I don't fully understand.
-                    // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
-                    // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
-
-                    if ( symbolInfo.CandidateSymbols.Length == 1 )
-                    {
-                        referencedSymbol = symbolInfo.CandidateSymbols[0];
-                    }
-                    else
-                    {
-                        return;
-                    }
+                    // Return if we could not resolve the symbol.
+                    return;
                 }
 
                 IMethodSymbol? localFunction = null;

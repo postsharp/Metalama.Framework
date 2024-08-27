@@ -483,6 +483,12 @@ internal sealed partial class LinkerRewritingDriver
     /// </summary>
     public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol, SyntaxGenerationContext generationContext )
     {
+        if ( LinkerSyntaxHelper.IsUnsupportedMemberSyntax( syntax) )
+        {
+            // If there is unsupported symbol, we will not rewrite the member.
+            return new[] { syntax };
+        }
+
         if ( this.AnalysisRegistry.HasAnyUnsupportedOverride( symbol ) )
         {
             // If there is unsupported code in overrides, we will not rewrite the member.

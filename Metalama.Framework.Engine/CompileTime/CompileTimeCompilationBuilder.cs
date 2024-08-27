@@ -349,8 +349,14 @@ internal sealed partial class CompileTimeCompilationBuilder
     private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
     {
         var assemblyLocator = this._serviceProvider.GetReferenceAssemblyLocator();
+        var preprocessorServiceProvider = this._serviceProvider.GetService<ICompileTimePreprocessorSymbolProvider>();
 
-        var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" }, languageVersion: SupportedCSharpVersions.Default );
+        var preprocessorSymbols =
+            preprocessorServiceProvider != null
+            ? preprocessorServiceProvider.PreprocessorSymbols.Concat( "NETSTANDARD_2_0" )
+            : ["NETSTANDARD_2_0"];
+
+        var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols, languageVersion: SupportedCSharpVersions.Default );
 
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
