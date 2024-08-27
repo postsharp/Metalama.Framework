@@ -597,9 +597,24 @@ internal sealed class AspectReferenceResolver
                         {
                             ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax memberAccess }]
                         } invocationExpression:
-
+                            var symbolInfo = semanticModel.GetSymbolInfo( memberAccess );
+                            
                             rootNode = invocationExpression;
-                            targetSymbol = semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();
+
+                            // This should match AspectReferenceWalker's VisitCore method as it does the same symbol resolution.
+                            targetSymbol =
+                                symbolInfo switch
+                                {
+                                    // Normal situation with valid symbol.
+                                    { Symbol: { } symbol } => symbol,
+
+                                    // When the code is invalid, there are usually 
+                                    { CandidateSymbols: [{ } symbol] } => symbol,
+
+                                    // We should not get here because this reference would be skipped by AspectReferenceWalker.
+                                    _ => throw new AssertionFailedException( $"Invalid symbol info: {symbolInfo}" ),
+                                };
+
                             targetSymbolSource = memberAccess;
 
                             return;

@@ -193,6 +193,29 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             Assert.Equal( expectedOutputSyntax, codeModelOutput );
         }
 
+        [Fact]
+        public void ParamsAttributeValue()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = """
+                using System;
+                
+                class MyAttribute( params int[] Values ) : Attribute;
+
+                [MyAttribute( null )]
+                class C;
+                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
+            var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
+            var type = compilation.Types.OfName( "C" ).Single();
+            var attribute = type.Attributes.Single();
+            var codeModelOutput = syntaxGenerator.Attribute( attribute ).ArgumentList!.Arguments[0].NormalizeWhitespace().ToFullString();
+            Assert.Equal( "default(global::System.Int32[])", codeModelOutput );
+        }
+
         [Theory]
         [InlineData( "", "" )]
         [InlineData( "where T : notnull", "where T : notnull" )]

@@ -134,7 +134,7 @@ internal sealed partial class ProjectVersionProvider
 
             foreach ( var reference in newProjectReferences )
             {
-                ReferencedProjectChange changes;
+                ReferencedProjectChange? changes;
                 IProjectVersion projectVersion;
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -158,10 +158,17 @@ internal sealed partial class ProjectVersionProvider
                             ReferenceChangeKind.Modified,
                             compilationChanges );
                     }
+                    else if ( oldReferenceCompilation != reference.Compilation )
+                    {
+                        changes = new ReferencedProjectChange(
+                            oldReferenceCompilation,
+                            reference.Compilation,
+                            ReferenceChangeKind.None );
+                    }
                     else
                     {
-                        // No change.
-                        changes = default;
+                        // No change, not even compilation instances.
+                        changes = null;
                     }
                 }
                 else
@@ -171,9 +178,9 @@ internal sealed partial class ProjectVersionProvider
                     projectVersion = await this.GetCompilationVersionCoreAsync( null, reference.Compilation, cancellationToken );
                 }
 
-                if ( changes.ChangeKind != ReferenceChangeKind.None )
+                if ( changes != null )
                 {
-                    changeListBuilder.Add( assemblyIdentity, changes );
+                    changeListBuilder.Add( assemblyIdentity, changes.Value );
                 }
 
                 referenceListBuilder.Add( assemblyIdentity, projectVersion );
@@ -321,6 +328,10 @@ internal sealed partial class ProjectVersionProvider
                         closestIncrementalChanges,
                         changesFromClosestCompilation,
                         cancellationToken );
+
+                    // MergeCompilationChangesAsync requires that the oldCompilation is not collected by the GC.
+                    // This is technically not necessary, since oldCompilation is also used afterwards, but it's here to make that requirement explicit.
+                    GC.KeepAlive( oldCompilation );
 
                     if ( this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
                     {
@@ -510,7 +521,15 @@ internal sealed partial class ProjectVersionProvider
                             referencedCompilationChange.Value,
                             cancellationToken );
 
-                        mergedReferencedCompilationBuilder[referencedCompilationChange.Key] = merged;
+                        if ( merged == null )
+                        {
+                            // First change added the reference, second change removed it, so it's as if it was never there.
+                            mergedReferencedCompilationBuilder.Remove( referencedCompilationChange.Key );
+                        }
+                        else
+                        {
+                            mergedReferencedCompilationBuilder[referencedCompilationChange.Key] = merged.Value;
+                        }
                     }
                 }
 
@@ -531,7 +550,14 @@ internal sealed partial class ProjectVersionProvider
                             oldChange,
                             referencedPortableExecutableChange.Value );
 
-                        mergedReferencedPortableExecutablesBuilder[referencedPortableExecutableChange.Key] = merged;
+                        if ( merged == ReferenceChangeKind.None )
+                        {
+                            mergedReferencedPortableExecutablesBuilder.Remove( referencedPortableExecutableChange.Key );
+                        }
+                        else
+                        {
+                            mergedReferencedPortableExecutablesBuilder[referencedPortableExecutableChange.Key] = merged;
+                        }
                     }
                 }
 
@@ -547,7 +573,7 @@ internal sealed partial class ProjectVersionProvider
             }
         }
 
-        private async ValueTask<ReferencedProjectChange> MergeReferencedProjectChangesAsync(
+        private async ValueTask<ReferencedProjectChange?> MergeReferencedProjectChangesAsync(
             ReferencedProjectChange first,
             ReferencedProjectChange second,
             TestableCancellationToken cancellationToken = default )
@@ -559,10 +585,10 @@ internal sealed partial class ProjectVersionProvider
             switch (first.ChangeKind, second.ChangeKind)
             {
                 case (_, ReferenceChangeKind.None):
-                    return first;
+                    return new( firstOldCompilation, second.NewCompilation, first.ChangeKind, first.Changes );
 
                 case (ReferenceChangeKind.None, _):
-                    return second;
+                    return new( firstOldCompilation, second.NewCompilation, second.ChangeKind, second.Changes );
 
                 case (ReferenceChangeKind.Removed, ReferenceChangeKind.Added):
                     {
@@ -571,7 +597,7 @@ internal sealed partial class ProjectVersionProvider
                             second.NewCompilation.AssertNotNull(),
                             cancellationToken );
 
-                        return new ReferencedProjectChange(
+                        return new(
                             firstOldCompilation,
                             second.NewCompilation,
                             ReferenceChangeKind.Modified,
@@ -579,26 +605,26 @@ internal sealed partial class ProjectVersionProvider
                     }
 
                 case (ReferenceChangeKind.Added, ReferenceChangeKind.Removed):
-                    return new ReferencedProjectChange( first.NewCompilation, firstOldCompilation, ReferenceChangeKind.None );
+                    return null;
 
                 case (ReferenceChangeKind.Modified, ReferenceChangeKind.Modified):
                     {
                         var changes = await this.MergeCompilationChangesAsync( first.Changes!.ToHandle(), second.Changes!, cancellationToken );
 
                         return changes.HasChange
-                            ? new ReferencedProjectChange(
+                            ? new(
                                 firstOldCompilation,
-                                first.NewCompilation,
+                                second.NewCompilation,
                                 ReferenceChangeKind.Modified,
                                 changes )
-                            : new ReferencedProjectChange( first.NewCompilation, firstOldCompilation, ReferenceChangeKind.None );
+                            : new( firstOldCompilation, second.NewCompilation, ReferenceChangeKind.None );
                     }
 
                 case (ReferenceChangeKind.Added, ReferenceChangeKind.Modified):
-                    return first;
+                    return new( null, second.NewCompilation, ReferenceChangeKind.Added );
 
                 case (ReferenceChangeKind.Modified, ReferenceChangeKind.Removed):
-                    return second;
+                    return new( firstOldCompilation, null, ReferenceChangeKind.Removed );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected combination: ({first.ChangeKind}, {second.ChangeKind})" );
@@ -618,16 +644,16 @@ internal sealed partial class ProjectVersionProvider
                     return second;
 
                 case (ReferenceChangeKind.Removed, ReferenceChangeKind.Added):
-                    return default;
+                    return ReferenceChangeKind.None;
 
                 case (ReferenceChangeKind.Added, ReferenceChangeKind.Removed):
-                    return default;
+                    return ReferenceChangeKind.None;
 
                 case (ReferenceChangeKind.Added, ReferenceChangeKind.Modified):
-                    return first;
+                    return ReferenceChangeKind.Added;
 
                 case (ReferenceChangeKind.Modified, ReferenceChangeKind.Removed):
-                    return second;
+                    return ReferenceChangeKind.Removed;
 
                 default:
                     throw new AssertionFailedException( $"Unexpected combination: ({first}, {second})" );

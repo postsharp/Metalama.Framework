@@ -448,7 +448,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     if ( this.IsInTemplate )
                     {
-                        if ( this._isDesignTime )
+                        if ( this._isDesignTime && !node.IsKind(SyntaxKind.UnknownAccessorDeclaration) )
                         {
                             this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._compilationContext );
                             _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );

@@ -106,7 +106,10 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 hasCompileTimeCodeChange: false,
                 isIncremental: oldCompilation != null );
 
-        public bool HasChange => this.HasCompileTimeCodeChange || this.SyntaxTreeChanges.Count > 0 || this.ReferencedCompilationChanges.Count > 0;
+        public bool HasChange => this.HasCompileTimeCodeChange
+            || this.SyntaxTreeChanges.Count > 0
+            || this.ReferencedCompilationChanges.Count > 0
+            || this.ReferencedPortableExecutableChanges.Count > 0;
 
         public bool IsIncremental { get; }
 

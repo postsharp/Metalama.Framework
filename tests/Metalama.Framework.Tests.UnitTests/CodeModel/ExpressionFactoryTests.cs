@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Testing.UnitTesting;
 using System;
 using Xunit;
@@ -19,11 +18,10 @@ public sealed class ExpressionFactoryTests : UnitTestClass
     private static readonly SyntaxGenerationOptions _syntaxGenerationOptions = new( new CodeFormattingOptions() );
 
     private sealed record ExpressionInfo( string Syntax, IType? Type );
-
-    protected override void ConfigureServices( IAdditionalServiceCollection services )
+    
+    protected override void AddSyntaxGenerationOptions( IAdditionalServiceCollection services )
     {
-        base.ConfigureServices( services );
-        services.AddProjectService( _syntaxGenerationOptions );
+        services.AddProjectService( SyntaxGenerationOptions.Unformatted );
     }
 
     private ExpressionInfo GetExpression( Func<IExpression> f, string code = "" )
@@ -31,7 +29,7 @@ public sealed class ExpressionFactoryTests : UnitTestClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+        using ( testContext.WithExecutionContext( compilation ) )
         {
             var syntaxGenerationContext =
                 new SyntaxSerializationContext( compilation, _syntaxGenerationOptions );

@@ -163,8 +163,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
                 foreach ( var introducedTree in oldSyntaxTreeResult.Introductions )
                 {
-                    Logger.DesignTime.Trace?.Log(
-                        $"CompilationPipelineResult.Update( id = {this._id} ): removing introduced tree '{introducedTree.Name}'." );
+                    Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} ): removing introduced tree '{introducedTree.Name}'." );
 
                     introducedSyntaxTreeBuilder.Remove( introducedTree.Name );
                 }
@@ -233,7 +232,12 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding introduced syntax tree '{introducedTree.Name}'." );
 
-                    introducedSyntaxTreeBuilder.Add( introducedTree.Name, introducedTree );
+                    if ( !introducedSyntaxTreeBuilder.TryAdd( introducedTree.Name, introducedTree ) )
+                    {
+                        // This can happen when the introduced syntax tree name is not deterministic.
+                        throw new AssertionFailedException(
+                            $"CompilationPipelineResult.Update( id = {this._id} ): Attempting to add duplicate syntax tree '{introducedTree.Name}'." );
+                    }
                 }
             }
 
@@ -270,7 +274,13 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     Logger.DesignTime.Trace?.Log(
                         $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable options of type `{optionItem.Key.OptionType}`." );
 
-                    inheritableOptionsBuilder.Add( optionItem.Key, optionItem.Options );
+                    if ( !inheritableOptionsBuilder.TryAdd( optionItem.Key, optionItem.Options ) )
+                    {
+                        // This seems theoretically possible, but reproducing it was not successful.
+                        throw new AssertionFailedException(
+                            $"Attempting to add duplicate inheritable options of type " +
+                            $"'{optionItem.Key.OptionType}' on '{optionItem.Key.DeclarationId}' in '{optionItem.Key.SyntaxTreePath}'." );
+                    }
                 }
             }
 
@@ -643,6 +653,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         if ( this._serializedTransitiveAspectManifest == null )
         {
             var compilationContext = compilation.GetCompilationContext();
+
             var manifest = TransitiveAspectsManifest.Create(
                 this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
                 this.ReferenceValidators.ToTransitiveValidatorInstances( compilationContext ),

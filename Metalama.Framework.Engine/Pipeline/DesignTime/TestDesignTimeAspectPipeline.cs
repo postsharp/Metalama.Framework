@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -21,6 +22,20 @@ public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         var diagnosticList = new DiagnosticBag();
 
         var partialCompilation = PartialCompilation.CreateComplete( inputCompilation );
+
+        // Run the validator, which is run in design-time and may crash on invalid code.
+        foreach ( var syntaxTree in partialCompilation.SyntaxTrees.Values )
+        {
+            var semanticModel = partialCompilation.Compilation.GetSemanticModel( syntaxTree );
+
+            TemplatingCodeValidator.Validate(
+                this.ServiceProvider,
+                semanticModel,
+                diagnosticList.Report,
+                false,
+                true,
+                CancellationToken.None );
+        }
 
         if ( !this.TryInitialize( diagnosticList, partialCompilation.Compilation, null, null, CancellationToken.None, out var configuration ) )
         {
