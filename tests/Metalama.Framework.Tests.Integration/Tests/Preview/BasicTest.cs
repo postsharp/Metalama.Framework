@@ -1,8 +1,9 @@
-﻿using System;
-using Metalama.Framework.Aspects;
-#if TEST_OPTIONS
+﻿#if TEST_OPTIONS
 // @TestScenario(Preview)
 #endif
+
+using System;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Preview.BasicTest;
 

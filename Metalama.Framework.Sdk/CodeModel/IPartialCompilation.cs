@@ -27,15 +27,6 @@ public interface IPartialCompilation
     ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
     /// <summary>
-    /// Returns whether the specified syntax tree should be considered observed for the purpose of executing transformation.
-    /// </summary>
-    /// <remarks>
-    /// This method can return different values even for paths that are not part of the compilation,
-    /// so that the partial compilation can decide whether an introduced syntax tree is observed.
-    /// </remarks>
-    bool IsSyntaxTreeObserved( string syntaxTreePath );
-
-    /// <summary>
     /// Gets a value indicating whether the current <see cref="IPartialCompilation"/> is actually partial, or represents a complete compilation.
     /// </summary>
     bool IsPartial { get; }

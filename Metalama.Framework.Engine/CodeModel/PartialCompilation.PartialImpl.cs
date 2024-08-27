@@ -41,6 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             private PartialImpl(
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
+                ImmutableHashSet<string>? observedSyntaxTreePaths,
                 ImmutableHashSet<INamedTypeSymbol>? types,
                 PartialCompilation baseCompilation,
                 IReadOnlyCollection<SyntaxTreeTransformation>? modifications,
@@ -49,7 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this._types = types;
                 this.SyntaxTrees = syntaxTrees;
-                this._observedSyntaxTreePaths = null;
+                this._observedSyntaxTreePaths = observedSyntaxTreePaths;
 
 #if DEBUG
                 this.CheckTrees();
@@ -78,6 +79,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 => this._observedSyntaxTreePaths == null || this._observedSyntaxTreePaths.Contains( syntaxTreePath );
 
             public override bool IsPartial => true;
+
+            internal override bool HasObservabilityFilter => this._observedSyntaxTreePaths != null;
 
             internal override PartialCompilation Update(
                 IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
@@ -119,7 +122,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
 
                 // TODO: when the compilation is modified, we should update the set of types and derived types.
-                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, transformations, resources );
+                return new PartialImpl( syntaxTrees.ToImmutable(), this._observedSyntaxTreePaths, null, this, transformations, resources );
             }
         }
     }
