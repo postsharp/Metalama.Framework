@@ -215,6 +215,9 @@ public sealed partial class CodeFormatter : IProjectService
         return modifiedSolution;
     }
 
+    public Task<PartialCompilation> FormatAsync( IPartialCompilation compilation, CancellationToken cancellationToken = default )
+        => this.FormatAsync( (PartialCompilation) compilation, cancellationToken );
+
     internal async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
     {
         var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );

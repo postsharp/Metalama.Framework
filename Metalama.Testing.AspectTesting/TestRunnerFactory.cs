@@ -85,6 +85,12 @@ namespace Metalama.Testing.AspectTesting
 
                         break;
 
+                    case TestScenario.PreviewLiveTemplate:
+                    case TestScenario.ApplyLiveTemplate:
+                        testRunnerFactory = new LiveTemplateTestRunnerFactory();
+
+                        break;
+
                     default:
                         testRunnerFactory = new AspectTestRunnerFactory();
 

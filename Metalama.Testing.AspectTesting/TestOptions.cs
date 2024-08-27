@@ -525,21 +525,6 @@ public class TestOptions
                     if ( Enum.TryParse<TestScenario>( optionArg, out var testScenario ) )
                     {
                         this.TestScenario = testScenario;
-
-                        switch ( testScenario )
-                        {
-                            case AspectTesting.TestScenario.PreviewLiveTemplate:
-                                this.TestRunnerFactoryType =
-                                    "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
-
-                                break;
-
-                            case AspectTesting.TestScenario.ApplyLiveTemplate:
-                                this.TestRunnerFactoryType =
-                                    "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
-
-                                break;
-                        }
                     }
                     else
                     {

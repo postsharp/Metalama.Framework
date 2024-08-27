@@ -5,6 +5,7 @@
 using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.LiveTemplates.LiveTemplate
 {
@@ -21,6 +22,7 @@ namespace Metalama.Framework.IntegrationTests.LiveTemplates.LiveTemplate
     // <target>
     internal class TargetClass
     {
+        [TestLiveTemplate(typeof(TestAspect))]
         public void TargetMethod()
         {
             Console.WriteLine( "This is the original method." );
