@@ -239,21 +239,50 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     .WithMembers( SingletonList( AddHeader( topDeclaration ) ) );
 
                 var generatedSyntaxTree = SyntaxTree( compilationUnit.NormalizeWhitespace(), encoding: Encoding.UTF8 );
-                var syntaxTreeName = declaringType.FullName + ".cs";
+                var safeTypeName = GetUniqueFilenameForType( declaringType );
+                var syntaxTreeName = safeTypeName + ".cs";
 
-                // TODO: This deduplication is may lead to non-deterministic results.
-                var index = 1;
-
-                while ( !additionalSyntaxTreeDictionary.TryAdd(
-                           syntaxTreeName,
-                           new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) ) )
+                if ( !additionalSyntaxTreeDictionary.TryAdd(
+                        syntaxTreeName,
+                        new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) ) )
                 {
-                    index++;
-                    syntaxTreeName = $"{declaringType.FullName}_{index}.cs";
+                    throw new AssertionFailedException( $"Duplicate generated syntax tree for type {declaringType}." );
                 }
             }
 
             return additionalSyntaxTreeDictionary.Values.AsReadOnly();
+        }
+
+        private static string GetUniqueFilenameForType( INamedType type )
+        {
+            var sb = new StringBuilder();
+
+            RenderName( sb, type );
+
+            return sb.ToString();
+
+            static void RenderName( StringBuilder sb, INamedType current )
+            {
+                if ( current.DeclaringType != null )
+                {
+                    RenderName( sb, current.DeclaringType );
+                    sb.Append( "-" );
+                }
+                else if ( current.ContainingNamespace.FullName != "" )
+                {
+                    sb.Append( current.ContainingNamespace.FullName );
+                    sb.Append( "." );
+                }
+
+                sb.Append( current.Name );
+
+                if ( current.IsGeneric )
+                {
+                    sb.Append( "{" );
+                    sb.Append( current.TypeParameters.Count );
+                    sb.Append( "}" );
+                }
+            }
         }
 
         private static IEnumerable<MemberDeclarationSyntax> AddIntroducedConstructorParameters(
