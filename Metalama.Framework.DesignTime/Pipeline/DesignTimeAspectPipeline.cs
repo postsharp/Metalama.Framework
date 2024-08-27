@@ -42,7 +42,7 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 /// The design-time implementation of <see cref="AspectPipeline"/>.
 /// </summary>
 /// Must be public because of testing.
-public sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 

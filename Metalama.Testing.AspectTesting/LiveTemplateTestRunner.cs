@@ -36,7 +36,7 @@ namespace Metalama.Testing.AspectTesting
             TestResult testResult,
             TestContext testContext )
         {
-            Assert.True( testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
+            Assert.True( testInput.Options.TestScenario is TestScenario.LiveTemplate or TestScenario.LiveTemplatePreview );
 
             await base.RunAsync( testInput, testResult, testContext );
 
@@ -71,7 +71,7 @@ namespace Metalama.Testing.AspectTesting
                 partialCompilation,
                 target.Target,
                 testResult.PipelineDiagnostics,
-                testInput.Options.TestScenario == TestScenario.PreviewLiveTemplate );
+                testInput.Options.TestScenario == TestScenario.LiveTemplatePreview );
 
             if ( result.IsSuccessful )
             {

@@ -231,7 +231,7 @@ public class TestOptions
 
     /// <summary>
     /// Gets or sets the zero-based index of the code fix to be applied
-    /// when <see cref="TestScenario"/> is set to <see cref="Metalama.Testing.AspectTesting.TestScenario.ApplyCodeFix"/> or <see cref="Metalama.Testing.AspectTesting.TestScenario.PreviewCodeFix"/>.
+    /// when <see cref="TestScenario"/> is set to <see cref="AspectTesting.TestScenario.CodeFix"/> or <see cref="AspectTesting.TestScenario.CodeFixPreview"/>.
     /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
     /// </summary>
     public int? AppliedCodeFixIndex { get; set; }

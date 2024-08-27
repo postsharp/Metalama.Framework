@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-public readonly record struct SyntaxTreeVersion(
+internal readonly record struct SyntaxTreeVersion(
     SyntaxTree SyntaxTree,
     bool HasCompileTimeCode,
     ulong DeclarationHash,

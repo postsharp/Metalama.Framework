@@ -91,8 +91,8 @@ internal class AspectTestRunner : BaseTestRunner
 
         var isLicensingRequiredForCompilation = testScenario switch
         {
-            TestScenario.ApplyCodeFix => false,
-            TestScenario.PreviewCodeFix => false,
+            TestScenario.CodeFix => false,
+            TestScenario.CodeFixPreview => false,
             TestScenario.Default => true,
             _ => throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" )
         };
@@ -112,8 +112,8 @@ internal class AspectTestRunner : BaseTestRunner
         {
             switch ( testScenario )
             {
-                case TestScenario.ApplyCodeFix:
-                case TestScenario.PreviewCodeFix:
+                case TestScenario.CodeFix:
+                case TestScenario.CodeFixPreview:
                     {
                         // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
                         if ( !await ApplyCodeFixAsync(
@@ -121,7 +121,7 @@ internal class AspectTestRunner : BaseTestRunner
                                 testResult,
                                 testContext.Domain,
                                 serviceProviderForThisTestWithLicensing,
-                                testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
+                                testInput.Options.TestScenario == TestScenario.CodeFixPreview ) )
                         {
                             return;
                         }

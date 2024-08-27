@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// A weak equality key to identify types, where some collisions are acceptable.
 /// </summary>
-public readonly struct TypeDependencyKey : IEquatable<TypeDependencyKey>
+internal readonly struct TypeDependencyKey : IEquatable<TypeDependencyKey>
 {
     private readonly int _hashCode;
     private readonly string? _text;

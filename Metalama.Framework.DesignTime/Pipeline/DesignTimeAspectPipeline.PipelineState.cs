@@ -27,7 +27,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-public sealed partial class DesignTimeAspectPipeline
+internal sealed partial class DesignTimeAspectPipeline
 {
     internal readonly struct PipelineState
     {

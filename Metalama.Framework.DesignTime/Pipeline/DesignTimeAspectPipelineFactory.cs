@@ -94,7 +94,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
     /// <summary>
     /// Gets the pipeline for a given project, and creates it if necessary.
     /// </summary>
-    public DesignTimeAspectPipeline? GetOrCreatePipeline(
+    internal DesignTimeAspectPipeline? GetOrCreatePipeline(
         Microsoft.CodeAnalysis.Project project,
         TestableCancellationToken cancellationToken = default )
     {
@@ -113,7 +113,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
     /// <summary>
     /// Gets the pipeline for a given compilation, and creates it if necessary.
     /// </summary>
-    public DesignTimeAspectPipeline? GetOrCreatePipeline(
+    internal DesignTimeAspectPipeline? GetOrCreatePipeline(
         IProjectOptions projectOptions,
         Compilation compilation,
         TestableCancellationToken cancellationToken = default )
@@ -233,7 +233,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
         return false;
     }
 
-    public virtual async ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
+    internal virtual async ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
         IProjectVersion projectVersion,
         TestableCancellationToken cancellationToken )
     {
@@ -384,7 +384,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
         this.Domain.Dispose();
     }
 
-    public virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
+    internal virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
     {
         var projectKey = compilation.GetProjectKey();
 
@@ -418,7 +418,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
         return pipeline;
     }
 
-    public bool TryGetPipeline( ProjectKey projectKey, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
+    internal bool TryGetPipeline( ProjectKey projectKey, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
     {
         if ( !this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
         {

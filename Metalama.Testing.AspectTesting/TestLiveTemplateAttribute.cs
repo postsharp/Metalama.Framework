@@ -5,7 +5,7 @@ using System;
 namespace Metalama.Testing.AspectTesting;
 
 /// <summary>
-/// A custom that must be used in the <see cref="TestScenario.ApplyLiveTemplate"/> and <see cref="TestScenario.PreviewLiveTemplate"/>
+/// A custom that must be used in the <see cref="TestScenario.LiveTemplate"/> and <see cref="TestScenario.LiveTemplatePreview"/>
 /// to mark the declaration to which the aspect must be applied. The presence of this attribute simulates the use of the refactoring
 /// context menu.
 /// </summary>

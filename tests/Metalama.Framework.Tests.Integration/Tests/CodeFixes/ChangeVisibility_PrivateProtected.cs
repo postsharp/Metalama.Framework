@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @TestScenario(ApplyCodeFix)
+// @TestScenario(CodeFix)
 #endif
 
 using System;

@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @TestScenario(ApplyCodeFix)
+// @TestScenario(CodeFix)
 // @LicenseKey(MetalamaUltimateBusiness)
 // @Include(_CodeFix.cs);
 #endif
