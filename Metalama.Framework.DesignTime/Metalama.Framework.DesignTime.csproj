@@ -6,8 +6,8 @@
         <TargetFrameworks>net472;net6.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <IsPackable>false</IsPackable>
         <AssemblyName>Metalama.Framework.DesignTime.$(ThisRoslynVersionNoPreview)</AssemblyName>
+        <PackageId>Metalama.Framework.DesignTime</PackageId>
         <PackageDescription>The design-time logic of implementation of Metalama.Framework. It should normally never be referenced in any user project.</PackageDescription>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
@@ -28,10 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="README.md">
-        <Pack>true</Pack>
-        <PackagePath>/</PackagePath>
-      </None>
+        <None Include="README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
 </Project>
