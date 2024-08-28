@@ -214,6 +214,56 @@ public static class TestCompilationFactory
         return mainRoslynCompilation;
     }
 
+    public static SyntaxTree[] ParseCSharpSyntaxTrees( IReadOnlyDictionary<string, string> code, IEnumerable<string>? preprocessorSymbols = null )
+    {
+        var parseOptions = GetParseOptions( preprocessorSymbols );
+        return code.SelectAsArray( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) );
+    }
+
+    public static CSharpCompilation ReplaceSyntaxTrees( CSharpCompilation compilation, IReadOnlyDictionary<string, string> code, IEnumerable<string>? preprocessorSymbols = null )
+    {
+        HashSet<SyntaxTree> originalSyntaxTrees = new( compilation.SyntaxTrees );
+
+        foreach (var syntaxTree in ParseCSharpSyntaxTrees(code, preprocessorSymbols))
+        {
+            var originalSyntaxTree = originalSyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTree.FilePath );
+
+            if ( originalSyntaxTree != null )
+            {
+                compilation = compilation.ReplaceSyntaxTree( originalSyntaxTree, syntaxTree );
+                originalSyntaxTrees.Remove( originalSyntaxTree );
+            }
+            else
+            {
+                compilation = compilation.AddSyntaxTrees( syntaxTree );
+            }
+        }
+
+        return compilation.RemoveSyntaxTrees( originalSyntaxTrees );
+    }
+
+    public static CSharpCompilation ReplaceReferences( CSharpCompilation compilation, IReadOnlyList<MetadataReference> references )
+    {
+        HashSet<MetadataReference> originalReferences = new( compilation.References );
+
+        foreach ( var reference in references )
+        {
+            var originalReference = originalReferences.FirstOrDefault( r => r .Display== reference.Display );
+
+            if ( originalReference != null )
+            {
+                compilation = compilation.ReplaceReference( originalReference, reference );
+                originalReferences.Remove( reference );
+            }
+            else
+            {
+                compilation = compilation.AddReferences( reference );
+            }
+        }
+
+        return compilation;
+    }
+
     private static void AssertNoError( CSharpCompilation mainRoslynCompilation )
     {
         var diagnostics = mainRoslynCompilation.GetDiagnostics();
