@@ -98,6 +98,8 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual bool IsTest => false;
 
+    public virtual string? AssemblyLocatorHooksDirectory => null;
+
     public virtual string? TemplateLanguageVersion => null;
 
     public virtual bool? DebugTransformedCode => null;

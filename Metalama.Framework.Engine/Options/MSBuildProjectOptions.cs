@@ -156,6 +156,9 @@ public partial class MSBuildProjectOptions : DefaultProjectOptions
     [Memo]
     public override bool? WriteTransformedFiles => this.GetBooleanOption( MSBuildPropertyNames.MetalamaEmitCompilerTransformedFiles );
 
+    [Memo]
+    public override string? AssemblyLocatorHooksDirectory => this.GetStringOption( MSBuildPropertyNames.MetalamaAssemblyLocatorHooksDirectory );
+
     public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
     {
         value = this.GetStringOption( name );

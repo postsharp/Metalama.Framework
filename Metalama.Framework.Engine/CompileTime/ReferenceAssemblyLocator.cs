@@ -68,6 +68,7 @@ internal sealed class ReferenceAssemblyLocator
     private readonly DotNetTool _dotNetTool;
     private readonly int _restoreTimeout;
     private readonly ImmutableArray<string> _targetFrameworks;
+    private readonly string? _hooksDirectory;
 
     /// <summary>
     /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.
@@ -205,6 +206,8 @@ internal sealed class ReferenceAssemblyLocator
 
         this.AdditionalCompileTimeAssemblyPaths =
             additionalCompileTimeAssemblies.Where( p => !p.EndsWith( "TempProject.dll", StringComparison.OrdinalIgnoreCase ) ).ToImmutableArray();
+        
+        this._hooksDirectory = serviceProvider.GetRequiredService<IProjectOptions>().AssemblyLocatorHooksDirectory;
     }
 
     private string GetAdditionalCompileTimeAssembliesDirectory()
@@ -337,19 +340,46 @@ internal sealed class ReferenceAssemblyLocator
 
             GlobalJsonHelper.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
 
+            var initialTargets = "";
+            var hooksPropsImport = "";
+            var hooksTargetsImport = "";
+            var hooksImportWarnings = "";
+
+            if ( this._hooksDirectory != null )
+            {
+                var hooksDirectory = this._hooksDirectory.Replace( '\\', '/' ).Trim().TrimEnd( '/' );
+
+                if ( !Path.IsPathRooted( hooksDirectory ) )
+                {
+                    hooksDirectory = $"$(MSBuildThisFileDirectory){hooksDirectory}";
+                }
+                
+                initialTargets = " InitialTargets=\"_WarnOfImports\"";
+
+                hooksPropsImport = $@"
+  <Import Project=""{hooksDirectory}/Metalama.AssemblyLocator.Build.props"" Condition=""Exists('{hooksDirectory}/Metalama.AssemblyLocator.Build.props')"" />";
+                
+                hooksTargetsImport = $@"
+  <Import Project=""{{hooksDirectory}}/Metalama.AssemblyLocator.Build.targets"" Condition=""Exists('{{hooksDirectory}}/Metalama.AssemblyLocator.Build.targets')"" />";
+
+                hooksImportWarnings = $@"
+  <Target Name=""_WarnOfImports"">
+    <Warning Text=""'{hooksDirectory}/Metalama.AssemblyLocator.Build.props' imported."" Condition=""Exists('{hooksDirectory}/Metalama.AssemblyLocator.Build.props')"" />
+    <Warning Text=""'{hooksDirectory}/Metalama.AssemblyLocator.Build.targets' imported."" Condition=""Exists('{hooksDirectory}/Metalama.AssemblyLocator.Build.targets')"" />
+  </Target>";
+            }
+
             // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
             // dynamic code at compile time. We prefer compilation errors.
 
             var projectText =
                 $"""
-                 <Project InitialTargets="_WarnOfImports">
+                 <Project{initialTargets}>
                    <PropertyGroup>
                      <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
                      <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
                      <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
-                   </PropertyGroup>
-                   <Import Project="$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props" Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props')" />
-                   <Import Project="$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props" Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props')" />
+                   </PropertyGroup>{hooksPropsImport}
                    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
                    <PropertyGroup>
                      <TargetFrameworks>{targetFrameworks}</TargetFrameworks>
@@ -364,16 +394,8 @@ internal sealed class ReferenceAssemblyLocator
                    </ItemGroup>
                    <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
                      <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
-                   </Target>
-                   <Target Name="_WarnOfImports">
-                     <Warning Text="'$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props' imported." Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.props')" />
-                     <Warning Text="'$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props' imported." Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.props')" />
-                     <Warning Text="'$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets' imported." Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets')" />
-                     <Warning Text="'$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets' imported." Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets')" />
-                   </Target>
-                   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-                   <Import Project="$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets" Condition="Exists('$(MSBuildThisFileDirectory)../../Metalama.AssemblyLocator.Build.targets')" />
-                   <Import Project="$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets" Condition="Exists('$(MSBuildThisFileDirectory)../Metalama.AssemblyLocator.Build.targets')" />
+                   </Target>{hooksImportWarnings}
+                   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />{hooksTargetsImport}
                  </Project>
                  """;
 
