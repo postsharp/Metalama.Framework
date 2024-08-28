@@ -147,6 +147,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
         else
         {
+            // If there is observability filter, we need to always include all transformation of a partial type that has an observable part.
             syntaxTreeTransformations = GetObservableTransformationClosure( input );
         }
 
@@ -180,19 +181,17 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         static IEnumerable<ISyntaxTreeTransformation> GetObservableTransformationClosure( AspectLinkerInput input )
         {
-            // If there is observability filter, we need to always include all transformation of a partial type that has an observable part.
-            var transformedSyntaxTreesWithCanonicalSyntaxTree = input.Transformations
-                .OfType<ISyntaxTreeTransformation>()
-                .Select( t => (t.TransformedSyntaxTree, CanonicalDeclaration: GetCanonicalTargetDeclaration( t.TargetDeclaration )) );
-
             var observedCanonicalTargetDeclarations = new HashSet<IDeclaration>( input.CompilationModel.Comparers.Default );
 
             // Mark all transformed canonical declarations with an observable part as observable.
-            foreach ( var (transformedSyntaxTree, canonicalDeclaration) in transformedSyntaxTreesWithCanonicalSyntaxTree )
+            foreach ( var transformation in input.Transformations.OfType<ISyntaxTreeTransformation>() )
             {
+                var transformedSyntaxTree = transformation.TransformedSyntaxTree;
+
                 if ( input.CompilationModel.PartialCompilation.IsSyntaxTreeObserved( transformedSyntaxTree.FilePath ) )
                 {
-                    observedCanonicalTargetDeclarations.Add( canonicalDeclaration );
+                    var canonicalTargetDeclaration = GetCanonicalTargetDeclaration( transformation.TargetDeclaration );
+                    observedCanonicalTargetDeclarations.Add( canonicalTargetDeclaration );
                 }
             }
 

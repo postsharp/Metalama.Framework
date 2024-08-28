@@ -8,6 +8,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -54,21 +55,10 @@ internal sealed class PreviewTestRunner : BaseTestRunner
         var primarySyntaxTree = inputCompilation.SyntaxTrees.OrderBy( t => t.FilePath.Length ).First();
         var primarySyntaxTreeName = primarySyntaxTree.FilePath;
 
-        SyntaxTree targetSyntaxTree;
-        string targetSyntaxTreeName;
-
-        if ( testInput.Options.TargetSyntaxTreeSuffix != null )
-        {
-#if NET6_0_OR_GREATER
-            targetSyntaxTreeName = primarySyntaxTreeName.Replace( ".cs", $".{testInput.Options.TargetSyntaxTreeSuffix}.cs", System.StringComparison.Ordinal );
-#else
-            targetSyntaxTreeName = primarySyntaxTreeName.Replace( ".cs", testInput.Options.TargetSyntaxTreeSuffix + ".cs" );
-#endif
-        }
-        else
-        {
-            targetSyntaxTreeName = primarySyntaxTreeName;
-        }
+        var targetSyntaxTreeName =
+            testInput.Options.TargetSyntaxTreeSuffix != null
+                ? primarySyntaxTreeName.ReplaceOrdinal( ".cs", $".{testInput.Options.TargetSyntaxTreeSuffix}.cs" )
+                : primarySyntaxTreeName;
 
         var previewResult = await previewService.PreviewTransformationAsync(
             projectKey,
