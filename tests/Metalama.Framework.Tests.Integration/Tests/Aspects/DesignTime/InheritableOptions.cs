@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @DesignTime
+// @TestScenario(DesignTime)
 // @AcceptInvalidInput
 #endif
 
