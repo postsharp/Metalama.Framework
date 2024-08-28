@@ -2237,4 +2237,81 @@ partial class A<T, U>
         Assert.Equal( 2, targetProjectPipeline.PipelineExecutionCount );
         Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
     }
+
+    [Fact]
+    public void IncompleteClassWithAspect()
+    {
+        const string aspect = """
+            using Metalama.Framework.Aspects;
+            
+            class Aspect : TypeAspect
+            {
+            }
+            """;
+
+        const string target = """
+            [Aspect]
+            public partial c
+            """;
+
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = aspect,
+            ["target.cs"] = target
+        };
+
+        var compilation = CreateCSharpCompilation( code, assemblyName: "test", acceptErrors: true );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+    }
+
+    [Fact]
+    public void TopLevelStatementWithInvalidAttribute()
+    {
+        const string attribute = "class MyAttribute : System.Attribute;";
+
+        const string program = """
+            [MyAttribute]
+            System.Console.WriteLine();
+            """;
+
+        const string aspect = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+
+            [assembly: Aspect]
+
+            class Aspect : CompilationAspect
+            {
+                public override void BuildAspect(IAspectBuilder<ICompilation> builder)
+                {
+                    foreach (var attribute in builder.Target.GetAllAttributesOfType(typeof(MyAttribute)))
+                    {
+                        _ = attribute.ContainingDeclaration;
+                    }
+                }
+            }
+            """;
+
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>
+        {
+            ["attribute.cs"] = attribute,
+            ["program.cs"] = program,
+            ["aspect.cs"] = aspect
+        };
+
+        var compilation = CreateCSharpCompilation( code, assemblyName: "test", acceptErrors: true );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+
+        Assert.Empty( result.GetAllDiagnostics() );
+    }
 }

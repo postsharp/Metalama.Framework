@@ -348,20 +348,23 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split diagnostic by syntax tree.
         foreach ( var diagnostic in pipelineResults.Diagnostics.ReportedDiagnostics )
         {
-            var filePath = diagnostic.Location.SourceTree?.FilePath;
+            SyntaxTreePipelineResult.Builder? builder;
 
-            if ( filePath != null )
+            if ( diagnostic.Location.SourceTree?.FilePath is { } filePath )
             {
-                if ( resultBuilders.TryGetValue( filePath, out var builder ) )
-                {
-                    builder.Diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
-                    builder.Diagnostics.Add( diagnostic );
-                }
-                else
+                if ( !resultBuilders.TryGetValue( filePath, out builder ) )
                 {
                     // This can happen when a CS error is reported in the aspect. These errors can be ignored.
+                    continue;
                 }
             }
+            else
+            {
+                builder = emptySyntaxTreeResult ??= new SyntaxTreePipelineResult.Builder( null );
+            }
+
+            builder.Diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
+            builder.Diagnostics.Add( diagnostic );
         }
 
         // Split suppressions by syntax tree.
@@ -430,11 +433,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             if ( introduction.SourceSyntaxTree == null )
             {
                 builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, null, introduction.GeneratedSyntaxTree ) );
-
-                continue;
             }
-
-            builder.Introductions.Add( introduction );
+            else
+            {
+                builder.Introductions.Add( introduction );
+            }
         }
 
         var compilationContext = compilation.CompilationContext;
