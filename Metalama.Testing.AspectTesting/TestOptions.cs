@@ -230,7 +230,7 @@ public class TestOptions
     public TestScenario? TestScenario { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indication the target syntax tree suffix. This is currently valid only for <see cref="TestScenario.Preview"/> scenario.
+    /// Gets or sets a value indicating the target syntax tree suffix. This allows the selection of a different syntax tree for the test scenario. This is currently valid only for <see cref="TestScenario.Preview"/> scenario.
     /// </summary>
     public string? TargetSyntaxTreeSuffix { get; set; }
 
