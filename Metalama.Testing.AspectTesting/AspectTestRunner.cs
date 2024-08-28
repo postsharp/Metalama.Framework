@@ -12,6 +12,7 @@ using Metalama.Testing.AspectTesting.Licensing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -82,7 +83,8 @@ internal class AspectTestRunner : BaseTestRunner
 
         // Execute the pipeline with text formatting options.
         var serviceProviderForThisTestWithoutLicensing = testContext.ServiceProvider
-            .WithService( new Observer( testContext.ServiceProvider, testResult ) );
+            .WithService( new Observer( testContext.ServiceProvider, testResult ) )
+            .WithService( new CompileTimePreprocessorSymbolProvider() );
 
         var serviceProviderForThisTestWithLicensing = serviceProviderForThisTestWithoutLicensing
             .AddLicenseConsumptionManagerForTest( testInput, this.LicenseKeyProvider );
@@ -589,5 +591,10 @@ internal class AspectTestRunner : BaseTestRunner
             this.ExpectedProgramOutputText = expectedProgramOutputText;
             this.ExpectedProgramOutputPath = expectedProgramOutputPath;
         }
+    }
+
+    private sealed class CompileTimePreprocessorSymbolProvider : ICompileTimePreprocessorSymbolProvider
+    {
+        public IReadOnlyList<string> PreprocessorSymbols => ["TESTRUNNER"];
     }
 }

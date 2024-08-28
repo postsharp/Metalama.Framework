@@ -53,8 +53,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
                     switch ( parentDeclaration )
                     {
-                        case IncompleteMemberSyntax:
-                            // This happens at design time when we have an invalid syntax.
+                        case IncompleteMemberSyntax or (StatementSyntax and not LocalFunctionStatementSyntax):
+                            // This happens at design time when we have an invalid syntax. Local functions are skipped to produce correct errors later.
                             break;
 
                         case BaseFieldDeclarationSyntax field:

@@ -579,12 +579,16 @@ internal static class TemplateBindingHelper
         var compileTimeArguments = template.TemplateArguments ?? ObjectReader.Empty;
 
         var templateArguments = new List<object?>();
+        var templateOptionalArguments = new List<object?>();
 
         // Add arguments for template parameters.
-        AddTemplateParameters( template.TemplateMember, compileTimeArguments, runTimeParameterMapping, templateArguments );
+        AddTemplateParameters( template.TemplateMember, compileTimeArguments, runTimeParameterMapping, templateArguments, templateOptionalArguments );
 
         // Add already prepared arguments for template type parameters.
         templateArguments.AddRange( template.TypeArguments );
+
+        // Add arguments for optional parameters to the end.
+        templateArguments.AddRange( templateOptionalArguments );
 
         VerifyArguments( template.TemplateMember, compileTimeArguments );
 
@@ -604,12 +608,16 @@ internal static class TemplateBindingHelper
         compileTimeArguments ??= ObjectReader.Empty;
 
         var templateArguments = new List<object?>();
+        var templateOptionalArguments = new List<object?>();
 
         // Add arguments for template parameters.
-        AddTemplateParameters( template, compileTimeArguments, runTimeParameterMapping, templateArguments );
+        AddTemplateParameters( template, compileTimeArguments, runTimeParameterMapping, templateArguments, templateOptionalArguments );
 
         // Add arguments for template type parameters.
         AddTemplateTypeParameters( template, compileTimeArguments, templateArguments );
+
+        // Add arguments for optional parameters to the end.
+        templateArguments.AddRange( templateOptionalArguments );
 
         VerifyArguments( template, compileTimeArguments );
 
@@ -620,7 +628,8 @@ internal static class TemplateBindingHelper
         TemplateMember<IMethod> template,
         IObjectReader compileTimeArguments,
         ImmutableDictionary<string, ExpressionSyntax> runTimeParameterMapping,
-        List<object?> templateArguments )
+        List<object?> templateArguments,
+        List<object?> templateOptionalArguments )
     {
         foreach ( var parameter in template.TemplateClassMember.Parameters )
         {
@@ -628,12 +637,19 @@ internal static class TemplateBindingHelper
             {
                 if ( compileTimeArguments.TryGetValue( parameter.Name, out var parameterValue ) )
                 {
-                    templateArguments.Add( parameterValue );
+                    if ( !parameter.HasDefaultValue )
+                    {
+                        templateArguments.Add( parameterValue );
+                    }
+                    else
+                    {
+                        templateOptionalArguments.Add( parameterValue );
+                    }
                 }
                 else if ( parameter.HasDefaultValue )
                 {
                     // Note that DefaultValue is null for default(SomeValueType), but MethodInfo.Invoke changes that back to default(SomeValueType).
-                    templateArguments.Add( parameter.DefaultValue );
+                    templateOptionalArguments.Add( parameter.DefaultValue );
                 }
                 else
                 {
@@ -648,7 +664,14 @@ internal static class TemplateBindingHelper
                     ? mapped
                     : IdentifierName( parameter.Name );
 
-                templateArguments.Add( expression );
+                if ( !parameter.HasDefaultValue )
+                {
+                    templateArguments.Add( expression );
+                }
+                else
+                {
+                    templateOptionalArguments.Add( expression );
+                }
             }
         }
     }
