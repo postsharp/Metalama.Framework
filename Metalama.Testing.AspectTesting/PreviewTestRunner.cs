@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
