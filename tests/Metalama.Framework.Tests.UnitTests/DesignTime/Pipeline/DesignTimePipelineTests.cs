@@ -1651,7 +1651,8 @@ class D{version}
 
         var code = new Dictionary<string, string>()
         {
-            ["aspect.cs"] = """
+            ["aspect.cs"] =
+                """
                 using Metalama.Framework.Aspects;
 
                 class MyAspect : TypeAspect
@@ -1660,7 +1661,8 @@ class D{version}
                    void IntroducedMethod() {}
                 }
                 """,
-            ["target.cs"] = """
+            ["target.cs"] =
+                """
                 using Metalama.Framework.Fabrics;
 
                 class C
@@ -1688,14 +1690,16 @@ class D{version}
 
         var code = new Dictionary<string, string>()
         {
-            ["aspect.cs"] = """
+            ["aspect.cs"] =
+                """
                 using Metalama.Framework.Aspects;
 
                 class MyAspect : MethodAspect
                 {
                 }
                 """,
-            ["target.cs"] = """
+            ["target.cs"] =
+                """
                 class Target
                 {
                     [MyAspect]
@@ -1730,7 +1734,8 @@ class D{version}
 
         var libraryCode = new Dictionary<string, string>
         {
-            ["introduceDependency.cs"] = """
+            ["introduceDependency.cs"] =
+                """
                 using Metalama.Framework.Aspects;
                 using Metalama.Framework.Code;
                 using Metalama.Framework.Diagnostics;
@@ -1738,14 +1743,15 @@ class D{version}
                 public class IntroduceDependencyAttribute : DeclarativeAdviceAttribute
                 {
                     internal static readonly SuppressionDefinition NonNullableFieldMustContainValue = new( "CS8618" );
-
+                
                     public sealed override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
                     {
                         builder.Diagnostics.Suppress( NonNullableFieldMustContainValue, templateMember );
                     }
                 }
                 """,
-            ["aspect.cs"] = """
+            ["aspect.cs"] =
+                """
                 using Metalama.Framework.Aspects;
 
                 public interface ILogger;
@@ -1760,7 +1766,8 @@ class D{version}
 
         var targetCode = new Dictionary<string, string>
         {
-            ["target.cs"] = """
+            ["target.cs"] =
+                """
                 class C
                 {
                     [Log]
@@ -1808,7 +1815,8 @@ class D{version}
     [Fact]
     public void AssemblyAttributeOptionsAdded()
     {
-        const string options = """
+        const string options =
+            """
             using Metalama.Framework.Code;
             using Metalama.Framework.Options;
             using System;
@@ -1817,14 +1825,14 @@ class D{version}
             class MyOptions : IHierarchicalOptions<IMethod>, IHierarchicalOptions<ICompilation>
             {
                 public bool? IsEnabled { get; init; }
-
+            
                 public object ApplyChanges(object changes, in ApplyChangesContext context)
                 {
                     var other = (MyOptions)changes;
-
+            
                     return new MyOptions { IsEnabled = other.IsEnabled ?? this.IsEnabled };
                 }
-
+            
                 public IHierarchicalOptions? GetDefaultOptions(OptionsInitializationContext context) => null;
             }
 
@@ -1832,7 +1840,7 @@ class D{version}
             class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
             {
                 public bool IsEnabled { get; init; }
-
+            
                 public IEnumerable<IHierarchicalOptions> GetOptions(in OptionsProviderContext context)
                 {
                     return [new MyOptions { IsEnabled = this.IsEnabled }];
@@ -1840,7 +1848,8 @@ class D{version}
             }
             """;
 
-        const string aspect = """
+        const string aspect =
+            """
             using Metalama.Framework.Aspects;
             using Metalama.Framework.Code;
             using Metalama.Framework.Diagnostics;
@@ -1848,11 +1857,11 @@ class D{version}
             class Aspect : MethodAspect
             {
                 static DiagnosticDefinition notEnabledWarning = new("NE", Severity.Warning, "Not enabled.");
-
+            
                 public override void BuildAspect(IAspectBuilder<IMethod> builder)
                 {
                     var options = builder.Target.Enhancements().GetOptions<MyOptions>();
-
+            
                     if (options.IsEnabled != true)
                     {
                         builder.Diagnostics.Report(notEnabledWarning);
@@ -1863,7 +1872,8 @@ class D{version}
 
         const string optionsAttribute = """[assembly: MyOptions(IsEnabled = true)]""";
 
-        const string target = """
+        const string target =
+            """
             class Target
             {
                 [Aspect]
@@ -1901,5 +1911,407 @@ class D{version}
         Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResult ) );
 
         Assert.Empty( updatedResult.GetAllDiagnostics() );
+    }
+
+    [Fact]
+    public void DirectReferenceAspectConflict()
+    {
+        // Simulates situation where two aspects of the same name are directly visible through aliases.
+        // This is not something we want to support but should not cause a crash. In reality this 
+        var aspectAssemblyName1 = "aspect1_" + RandomIdGenerator.GenerateId();
+        var aspectAssemblyName2 = "aspect2_" + RandomIdGenerator.GenerateId();
+        var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
+
+        const string aspectCode = @"
+using Metalama.Framework.Aspects; 
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
+
+public class MyAspect : MethodAspect
+{
+}
+";
+
+        const string targetCode = @"
+extern alias aspects1;
+extern alias aspects2;
+
+class C
+{
+   [aspects1::MyAspect]
+   [aspects2::MyAspect]
+   void M() {}
+}
+";
+
+        const string expectedResult = @"
+Target.cs:
+0 diagnostic(s):
+0 suppression(s):
+0 introductions(s):
+";
+
+        using var testContext = this.CreateTestContext();
+
+        var aspectCompilation1 = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Aspect.cs", aspectCode } },
+            name: aspectAssemblyName1 );
+
+        var aspectCompilation2 = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Aspect.cs", aspectCode } },
+            name: aspectAssemblyName2 );
+
+        var targetCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Target.cs", targetCode } },
+            name: targetAssemblyName,
+            additionalReferences: new[] { aspectCompilation1.ToMetadataReference( ["aspects1"] ), aspectCompilation2.ToMetadataReference( ["aspects2"] ) } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+        var aspectProjectPipeline1 = factory.CreatePipeline( aspectCompilation1 );
+        var aspectProjectPipeline2 = factory.CreatePipeline( aspectCompilation2 );
+        var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
+
+        // Execute the pipeline.
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results ) );
+        var dumpedResults = DumpResults( results );
+
+        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults );
+        Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
+    }
+
+    [Fact]
+    public void IndirectReferenceAspectConflict()
+    {
+        // Simulates situation where two aspects of the same name are indirectly visible through two separate references.
+        // This simulates the situation which occurs while renaming a project in Visual Studio.
+        var aspect1AssemblyName = "aspect1_" + RandomIdGenerator.GenerateId();
+        var aspect2AssemblyName = "aspect2_" + RandomIdGenerator.GenerateId();
+        var leftAssemblyName = "left_" + RandomIdGenerator.GenerateId();
+        var rightAssemblyName = "right_" + RandomIdGenerator.GenerateId();
+        var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
+
+        const string aspectCode = @"
+using Metalama.Framework.Aspects; 
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
+
+[Inheritable]
+public class MyAspect : TypeAspect
+{
+}
+";
+
+        const string leftCode = @"
+[MyAspect]
+public class Left
+{
+}
+";
+
+        const string rightCode = @"
+[MyAspect]
+public class Right
+{
+}
+";
+
+        const string targetCode = @"
+class C : Left {}
+class D : Right {}
+";
+
+        const string expectedResult = @"
+Target.cs:
+0 diagnostic(s):
+0 suppression(s):
+0 introductions(s):
+";
+
+        using var testContext = this.CreateTestContext();
+
+        var aspect1Compilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Aspect.cs", aspectCode } },
+            name: aspect1AssemblyName );
+
+        var aspect2Compilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Aspect.cs", aspectCode } },
+            name: aspect2AssemblyName );
+
+        var leftCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Left.cs", leftCode } },
+            name: leftAssemblyName,
+            additionalReferences: new[] { aspect1Compilation.ToMetadataReference() } );
+
+        var rightCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Right.cs", rightCode } },
+            name: rightAssemblyName,
+            additionalReferences: new[] { aspect2Compilation.ToMetadataReference() } );
+
+        var targetCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Target.cs", targetCode } },
+            name: targetAssemblyName,
+            additionalReferences: new[] { leftCompilation.ToMetadataReference(), rightCompilation.ToMetadataReference() } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+        var aspect1ProjectPipeline = factory.CreatePipeline( aspect1Compilation );
+        var aspect2ProjectPipeline = factory.CreatePipeline( aspect2Compilation );
+        var leftProjectPipeline = factory.CreatePipeline( leftCompilation );
+        var rightProjectPipeline = factory.CreatePipeline( rightCompilation );
+        var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
+
+        // First execution of the pipeline.
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results ) );
+        var dumpedResults = DumpResults( results );
+
+        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults );
+        Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
+
+        // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results2 ) );
+        var dumpedResults2 = DumpResults( results2 );
+        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults2 );
+        Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
+    }
+
+    [Fact]
+    public async Task IntroducedSyntaxTreeConflictAndChange()
+    {
+        // Tests a situation when designtime pipeline generated a syntax tree with undeterministic name.
+        // Removing a type caused names to change in such a way that invalidated syntax trees were not correctly cleaned from AspectPipelineResult,
+        // causing an exception.
+        // For the user it happened quite reliably when trying to cut-paste a type.
+        var aspectAssemblyName = "aspect_" + RandomIdGenerator.GenerateId();
+        var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
+
+        const string aspectCode = @"
+using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+public class TestAspect : TypeAspect
+{
+    [Introduce]
+    public void Foo() {}
+}
+";
+
+        const string targetCodeA1 = @"
+[TestAspect]
+public partial class A
+{
+}
+
+[TestAspect]
+public partial class A<T>
+{
+}
+";
+
+        const string targetCodeB1 = @"
+[TestAspect]
+public partial class A<T,U>
+{
+}
+";
+
+        const string targetCodeA2 = @"
+[TestAspect]
+public partial class A
+{
+}
+";
+
+        const string targetCodeB2 = @"
+[TestAspect]
+public partial class A<T,U>
+{
+}
+";
+
+        const string expectedResult1 = @"
+TargetA.cs:
+0 diagnostic(s):
+0 suppression(s):
+2 introductions(s):
+/// <generated>
+/// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+/// </generated>
+partial class A
+{
+    public void Foo()
+    {
+    }
+}
+/// <generated>
+/// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+/// </generated>
+partial class A<T>
+{
+    public void Foo()
+    {
+    }
+}
+----------------------------------------------------------
+TargetB.cs:
+0 diagnostic(s):
+0 suppression(s):
+1 introductions(s):
+/// <generated>
+/// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+/// </generated>
+partial class A<T, U>
+{
+    public void Foo()
+    {
+    }
+}
+";
+
+        const string expectedResult2 = @"
+TargetA.cs:
+0 diagnostic(s):
+0 suppression(s):
+1 introductions(s):
+/// <generated>
+/// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+/// </generated>
+partial class A
+{
+    public void Foo()
+    {
+    }
+}
+----------------------------------------------------------
+TargetB.cs:
+0 diagnostic(s):
+0 suppression(s):
+1 introductions(s):
+/// <generated>
+/// Generated by Metalama to support the code editing experience. This is NOT the code that gets executed.
+/// </generated>
+partial class A<T, U>
+{
+    public void Foo()
+    {
+    }
+}
+";
+
+        using var testContext = this.CreateTestContext();
+
+        var aspectCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "Aspect.cs", aspectCode } },
+            name: aspectAssemblyName );
+
+        var targetCompilation1 = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "TargetA.cs", targetCodeA1 }, { "TargetB.cs", targetCodeB1 } },
+            name: targetAssemblyName,
+            additionalReferences: new[] { aspectCompilation.ToMetadataReference() } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+        var aspectProjectPipeline = factory.CreatePipeline( aspectCompilation );
+        var targetProjectPipeline = factory.CreatePipeline( targetCompilation1 );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation1, default, out var results1 ) );
+        var dumpedResults1 = DumpResults( results1 );
+
+        AssertEx.EolInvariantEqual( expectedResult1.Trim(), dumpedResults1 );
+        Assert.Equal( 1, aspectProjectPipeline.PipelineExecutionCount );
+        Assert.Equal( 1, aspectProjectPipeline.PipelineInitializationCount );
+        Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
+        Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
+
+        var targetCompilation2 = TestCompilationFactory.CreateCSharpCompilation(
+            new Dictionary<string, string>() { { "TargetA.cs", targetCodeA2 }, { "TargetB.cs", targetCodeB2 } },
+            name: targetAssemblyName,
+            additionalReferences: new[] { aspectCompilation.ToMetadataReference() } );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation2, default, out var results2 ) );
+        var dumpedResults2 = DumpResults( results2 );
+
+        AssertEx.EolInvariantEqual( expectedResult2.Trim(), dumpedResults2 );
+        Assert.Equal( 1, aspectProjectPipeline.PipelineExecutionCount );
+        Assert.Equal( 1, aspectProjectPipeline.PipelineInitializationCount );
+        Assert.Equal( 2, targetProjectPipeline.PipelineExecutionCount );
+        Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
+    }
+
+    [Fact]
+    public void IncompleteClassWithAspect()
+    {
+        const string aspect = """
+            using Metalama.Framework.Aspects;
+            
+            class Aspect : TypeAspect
+            {
+            }
+            """;
+
+        const string target = """
+            [Aspect]
+            public partial c
+            """;
+
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>
+        {
+            ["aspect.cs"] = aspect,
+            ["target.cs"] = target
+        };
+
+        var compilation = CreateCSharpCompilation( code, assemblyName: "test", acceptErrors: true );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+    }
+
+    [Fact]
+    public void TopLevelStatementWithInvalidAttribute()
+    {
+        const string attribute = "class MyAttribute : System.Attribute;";
+
+        const string program = """
+            [MyAttribute]
+            System.Console.WriteLine();
+            """;
+
+        const string aspect = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+
+            [assembly: Aspect]
+
+            class Aspect : CompilationAspect
+            {
+                public override void BuildAspect(IAspectBuilder<ICompilation> builder)
+                {
+                    foreach (var attribute in builder.Target.GetAllAttributesOfType(typeof(MyAttribute)))
+                    {
+                        _ = attribute.ContainingDeclaration;
+                    }
+                }
+            }
+            """;
+
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>
+        {
+            ["attribute.cs"] = attribute,
+            ["program.cs"] = program,
+            ["aspect.cs"] = aspect
+        };
+
+        var compilation = CreateCSharpCompilation( code, assemblyName: "test", acceptErrors: true );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+
+        Assert.Empty( result.GetAllDiagnostics() );
     }
 }

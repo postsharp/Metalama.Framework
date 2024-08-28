@@ -115,7 +115,7 @@ class C
 
         var compilation = testContext.CreateCompilationModel( code );
 
-        using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+        using ( testContext.WithExecutionContext( compilation ) )
         {
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -140,7 +140,7 @@ class C
 
         var compilation = testContext.CreateCompilationModel( code );
 
-        using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+        using ( testContext.WithExecutionContext( compilation ) )
         {
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -165,7 +165,7 @@ class C
 
         var compilation = testContext.CreateCompilationModel( code );
 
-        using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+        using ( testContext.WithExecutionContext( compilation ) )
         {
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -255,7 +255,7 @@ class C
 
         var compilation = testContext.CreateCompilationModel( code );
 
-        using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+        using ( testContext.WithExecutionContext( compilation ) )
         {
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -280,7 +280,7 @@ class C
 
         var compilation = testContext.CreateCompilationModel( code );
 
-        using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+        using ( testContext.WithExecutionContext( compilation ) )
         {
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 

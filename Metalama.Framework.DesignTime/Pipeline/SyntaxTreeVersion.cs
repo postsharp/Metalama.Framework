@@ -23,7 +23,7 @@ internal readonly record struct SyntaxTreeVersion(
 
     public bool HasGlobalAttributes => this._syntaxTree?.ContainsGlobalAttributes() == true;
 
-    public SyntaxTreeVersion( SyntaxTree syntaxTree, in SyntaxTreeVersionData data ) : this(
+    internal SyntaxTreeVersion( SyntaxTree syntaxTree, in SyntaxTreeVersionData data ) : this(
         syntaxTree,
         data.HasCompileTimeCode,
         data.DeclarationHash,

@@ -52,7 +52,7 @@ internal abstract class TemplateClassFactory<T>
         var frameworkAspectClasses = this.GetFrameworkClasses();
 
         // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
-        var aspectTypeDataDictionary =
+        var aspectTypeData =
             compileTimeProject.ClosureProjects
                 .SelectMany( p => this.GetTypeNames( p ).Select( t => (Project: p, TypeName: t) ) )
                 .Select(
@@ -64,12 +64,26 @@ internal abstract class TemplateClassFactory<T>
 
                         if ( typeSymbol == null )
                         {
-                            diagnosticAdder.Report(
+#if ROSLYN_4_4_0_OR_GREATER
+                            // Two conflicting aspect types may be in aliased references.
+                            // This is an edge case, but is used in tests to reproduce design-time problems, see below.
+                            typeSymbol =
+                                templateDiscoveryContext.Compilation.GetTypesByMetadataName( item.TypeName )
+                                .FirstOrDefault( s => s.ContainingAssembly.Identity.Equals( item.Project.RunTimeIdentity ) );
+
+                            if ( typeSymbol == null )
+                            {
+                                diagnosticAdder.Report(
                                 TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateRoslynDiagnostic(
                                     Location.None,
                                     (item.TypeName, item.Project.RunTimeIdentity.Name) ) );
 
+                                return null;
+                            }
+#else
+                            // There is no GetTypesByMetadataName in Roslyn 4.0.1, so just ignore the edge case.
                             return null;
+#endif
                         }
 
                         var typeName = typeSymbol.GetReflectionFullName();
@@ -82,10 +96,17 @@ internal abstract class TemplateClassFactory<T>
                             templateDiscoveryContext );
                     } )
                 .WhereNotNull()
-                .Concat( frameworkAspectClasses )
-                .ToDictionary(
-                    item => item.TypeName,
-                    item => item );
+                .Concat( frameworkAspectClasses );
+
+        var aspectTypeDataDictionary = new Dictionary<string, TemplateClassData>();
+
+        foreach (var aspectType in aspectTypeData)
+        {
+            // IMPORTANT: At design time, when a project is being renamed, we can get duplicate aspect types while project dependency tree is being updated.
+            //            Two dependency projects referencing the same assembly may not be synchronized, causing two CompileTimeProjects to exist
+            //            for one assembly (same aspects, two different assembly names).
+            aspectTypeDataDictionary[aspectType.TypeName] = aspectType;
+        }
 
         return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, serviceProvider );
     }
@@ -131,7 +152,7 @@ internal abstract class TemplateClassFactory<T>
             ITemplateReflectionContext templateDiscoveryContext,
             [NotNullWhen( true )] out T? metadata )
         {
-            if ( this._classes.TryGetValue( templateTypeSymbol.GetFullName().AssertNotNull(), out var existingValue ) )
+            if ( this._classes.TryGetValue( templateTypeSymbol.GetReflectionFullName().AssertNotNull(), out var existingValue ) )
             {
                 metadata = existingValue;
 
@@ -177,7 +198,7 @@ internal abstract class TemplateClassFactory<T>
                 return false;
             }
 
-            this._classes.Add( templateTypeSymbol.GetFullName().AssertNotNull(), metadata );
+            this._classes.Add( templateTypeSymbol.GetReflectionFullName().AssertNotNull(), metadata );
 
             return true;
         }

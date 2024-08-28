@@ -35,14 +35,14 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
 /// cache invalidation methods as appropriate.
 /// </summary>
-internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider
+public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider
 {
     private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
     private readonly ILogger _logger;
     private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
     private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
     private readonly IMetalamaProjectClassifier _projectClassifier;
-    private readonly AnalysisProcessEventHub _eventHub;
+    private readonly AnalysisProcessEventHub? _eventHub;
     private readonly IProjectOptionsFactory _projectOptionsFactory;
     private readonly ITaskRunner _taskRunner;
 
@@ -59,9 +59,14 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
 
-        this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
-        this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
-        this._eventHub.ExternalBuildCompletedEvent.RegisterHandler( this.OnExternalBuildCompletedAsync );
+        this._eventHub = serviceProvider.GetService<AnalysisProcessEventHub>();
+
+        if ( this._eventHub != null )
+        {
+            this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
+            this._eventHub.ExternalBuildCompletedEvent.RegisterHandler( this.OnExternalBuildCompletedAsync );
+        }
+
         serviceProvider = serviceProvider.WithServices( new ProjectVersionProvider( serviceProvider ) );
 
         this.Domain = domain;
@@ -89,7 +94,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     /// <summary>
     /// Gets the pipeline for a given project, and creates it if necessary.
     /// </summary>
-    public DesignTimeAspectPipeline? GetOrCreatePipeline(
+    internal DesignTimeAspectPipeline? GetOrCreatePipeline(
         Microsoft.CodeAnalysis.Project project,
         TestableCancellationToken cancellationToken = default )
     {
@@ -204,15 +209,17 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
                     if ( !projectOptions.Equals( pipelineOptions ) )
                     {
                         var jsonSettings = new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
-                        
+
                         trace.Log(
                             $"Recreating pipeline because project options were not equal. Old: {JsonConvert.SerializeObject( pipelineOptions, jsonSettings )}. New: {JsonConvert.SerializeObject( projectOptions, jsonSettings )}." );
                     }
                     else
                     {
-                        static string Format( ImmutableArray<PortableExecutableReference> references ) => string.Join( ", ", references.Select( r => r.FilePath ) );
+                        static string Format( ImmutableArray<PortableExecutableReference> references )
+                            => string.Join( ", ", references.Select( r => r.FilePath ) );
 
-                        trace.Log( $"Recreating pipeline because references were not equal. Old: {Format( pipeline.MetadataReferences )}. New: {Format( references )}" );
+                        trace.Log(
+                            $"Recreating pipeline because references were not equal. Old: {Format( pipeline.MetadataReferences )}. New: {Format( references )}" );
                     }
                 }
 
@@ -226,7 +233,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         return false;
     }
 
-    public virtual async ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
+    internal virtual async ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
         IProjectVersion projectVersion,
         TestableCancellationToken cancellationToken )
     {
@@ -285,17 +292,17 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
 
         // In case the event hub got out of sync (which should not happen), we reset its status.
-        this._eventHub.ResetIsEditingCompileTimeCode();
+        this._eventHub?.ResetIsEditingCompileTimeCode();
     }
 
-    public bool TryExecute(
+    internal bool TryExecute(
         IProjectOptions options,
         Compilation compilation,
         TestableCancellationToken cancellationToken,
         [NotNullWhen( true )] out AspectPipelineResultAndState? compilationResult )
         => this.TryExecute( options, compilation, cancellationToken, out compilationResult, out _ );
 
-    public bool TryExecute(
+    internal bool TryExecute(
         IProjectOptions options,
         Compilation compilation,
         TestableCancellationToken cancellationToken,
@@ -372,12 +379,12 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             designTimeAspectPipeline.Dispose();
         }
 
-        this._eventHub.ExternalBuildCompletedEvent.UnregisterHandler( this.OnExternalBuildCompletedAsync );
+        this._eventHub?.ExternalBuildCompletedEvent.UnregisterHandler( this.OnExternalBuildCompletedAsync );
         this._pipelinesByProjectKey.Clear();
         this.Domain.Dispose();
     }
 
-    public virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
+    internal virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
     {
         var projectKey = compilation.GetProjectKey();
 
@@ -411,7 +418,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         return pipeline;
     }
 
-    public bool TryGetPipeline( ProjectKey projectKey, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
+    internal bool TryGetPipeline( ProjectKey projectKey, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
     {
         if ( !this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
         {

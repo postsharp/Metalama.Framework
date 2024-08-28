@@ -47,6 +47,8 @@ namespace Metalama.Testing.AspectTesting
             }
 
             // Create the ITestRunnerFactory.
+            ITestRunnerFactory testRunnerFactory;
+
             if ( !string.IsNullOrEmpty( testInput.Options.TestRunnerFactoryType ) )
             {
                 Type? factoryType;
@@ -67,24 +69,41 @@ namespace Metalama.Testing.AspectTesting
                     throw new InvalidOperationException( $"Cannot instantiate the type '{testInput.Options.TestRunnerFactoryType}': {e.Message}" );
                 }
 
-                var testRunnerFactory = (ITestRunnerFactory) Activator.CreateInstance( factoryType )!;
-
-                return testRunnerFactory.CreateTestRunner(
-                    serviceProvider,
-                    testInput.ProjectDirectory,
-                    references,
-                    logger,
-                    licenseKeyProvider );
+                testRunnerFactory = (ITestRunnerFactory) Activator.CreateInstance( factoryType )!;
             }
             else
             {
-                return new AspectTestRunner(
-                    serviceProvider,
-                    testInput.ProjectDirectory,
-                    references,
-                    logger,
-                    licenseKeyProvider );
+                switch ( testInput.Options.TestScenario )
+                {
+                    case TestScenario.DesignTime:
+                        testRunnerFactory = new DesignTimeTestRunnerFactory();
+
+                        break;
+
+                    case TestScenario.Preview:
+                        testRunnerFactory = new PreviewTestRunnerFactory();
+
+                        break;
+
+                    case TestScenario.LiveTemplatePreview:
+                    case TestScenario.LiveTemplate:
+                        testRunnerFactory = new LiveTemplateTestRunnerFactory();
+
+                        break;
+
+                    default:
+                        testRunnerFactory = new AspectTestRunnerFactory();
+
+                        break;
+                }
             }
+
+            return testRunnerFactory.CreateTestRunner(
+                serviceProvider,
+                testInput.ProjectDirectory,
+                references,
+                logger,
+                licenseKeyProvider );
         }
     }
 }

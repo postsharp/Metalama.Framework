@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @DesignTime
+// @TestScenario(DesignTime)
 # endif
 
 using Metalama.Framework.Advising;
@@ -11,7 +11,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.InvalidCode.TransitiveVali
 
 public class TestClass
 {
-    public void Foo(DerivedReferencedClass x)
+    public void Foo( DerivedReferencedClass x )
     {
         _ = x.Foo;
     }

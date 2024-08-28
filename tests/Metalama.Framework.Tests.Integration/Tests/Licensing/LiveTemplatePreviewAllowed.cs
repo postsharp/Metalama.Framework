@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @TestScenario(PreviewLiveTemplate)
+// @TestScenario(LiveTemplatePreview)
 // @LicenseKey(MetalamaFreePersonal)
 // @Include(_LiveTemplate.cs);
 #endif

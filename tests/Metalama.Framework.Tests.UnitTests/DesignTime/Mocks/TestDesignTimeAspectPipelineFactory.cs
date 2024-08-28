@@ -46,12 +46,12 @@ internal sealed class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipe
         this.EventHub = this.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
     }
 
-    public override ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
+    internal override ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
         IProjectVersion projectVersion,
         TestableCancellationToken cancellationToken )
         => new( this.GetOrCreatePipeline( this._projectOptions, projectVersion.Compilation ) );
 
-    public override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
+    internal override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         => new( this.GetOrCreatePipeline( this._projectOptions, compilation ) );
 
     public override bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )

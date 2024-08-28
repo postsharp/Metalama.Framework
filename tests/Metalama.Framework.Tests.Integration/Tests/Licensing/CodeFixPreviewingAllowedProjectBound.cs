@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @TestScenario(PreviewCodeFix)
+// @TestScenario(CodeFixPreview)
 // @LicenseKey(MetalamaUltimatePersonalProjectBound)
 // @Include(_CodeFix.cs);
 #endif

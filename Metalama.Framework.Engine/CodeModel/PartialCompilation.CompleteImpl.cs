@@ -42,6 +42,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override bool IsPartial => false;
 
+            internal override bool HasObservabilityFilter => false;
+
             internal override PartialCompilation Update(
                 IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
                 ImmutableArray<ManagedResource> resources = default )

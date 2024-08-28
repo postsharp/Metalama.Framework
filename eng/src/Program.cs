@@ -58,6 +58,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
         "Metalama.Framework.Engine.$(PackageVersion).nupkg",
+        "Metalama.Framework.DesignTime.$(PackageVersion).nupkg",
         "Metalama.Framework.CompileTimeContracts.$(PackageVersion).nupkg",
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
