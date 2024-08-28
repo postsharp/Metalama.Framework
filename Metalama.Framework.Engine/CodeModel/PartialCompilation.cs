@@ -62,6 +62,11 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a value indicating whether the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
         /// </summary>
         public abstract bool IsPartial { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether <see cref="IsSyntaxTreeObserved"/> may return a different value than <c>true</c>.
+        /// </summary>
+        internal abstract bool HasObservabilityFilter { get; }
 
         internal LanguageOptions LanguageOptions
         {

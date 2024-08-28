@@ -145,16 +145,18 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     var transformations = aspectResult.Transformations;
                     var partialCompilation = this.Parent.FirstCompilation.PartialCompilation;
 
-                    // Filter out transformations that are not considered observed by the partial compilation.
-                    if ( partialCompilation.IsPartial )
+                    // Filter out transformations that are not considered observed by the partial compilation
+                    // or by any other aspect.
+                    if ( partialCompilation.HasObservabilityFilter )
                     {
                         // ReSharper disable once AccessToModifiedClosure
                         transformations = transformations.Where(
-                                t => t is not ISyntaxTreeTransformation syntaxTreeTransformation
-                                     || partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) )
+                                t => t.Observability != TransformationObservability.None ||
+                                     t is not ISyntaxTreeTransformation syntaxTreeTransformation || 
+                                     partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) )
                             .ToImmutableArray();
                     }
-
+                    
                     this.Parent.AddTransformations( transformations );
 
                     foreach ( var transformation in transformations )

@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @DesignTime
+// @TestScenario(DesignTime)
 #endif
 
 #pragma warning disable CS0169

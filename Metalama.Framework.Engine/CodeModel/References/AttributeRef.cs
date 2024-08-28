@@ -30,22 +30,16 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         DeclarationRefTargetKind IRefImpl.TargetKind => DeclarationRefTargetKind.Default;
 
-        private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
+        private (AttributeData? Attribute, ISymbol Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
             // Find the parent declaration.
-            var (attributes, symbol) =
-                this._containingDeclaration.GetAttributeData( compilation );
+            var (attributes, symbol) = this._containingDeclaration.GetAttributeData( compilation );
 
             // In the parent, find the AttributeData corresponding to the current item.
 
             var attributeData = attributes.SingleOrDefault(
                 a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span
                                                           && a.ApplicationSyntaxReference.SyntaxTree == attributeSyntax.SyntaxTree );
-
-            if ( attributeData == null )
-            {
-                // This should not happen in a valid compilation and it's a good place to add a breakpoint.
-            }
 
             // Save the resolved AttributeData.
             this.Target = attributeData;

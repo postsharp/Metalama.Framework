@@ -12,6 +12,7 @@ using Metalama.Testing.AspectTesting.Licensing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -82,7 +83,8 @@ internal class AspectTestRunner : BaseTestRunner
 
         // Execute the pipeline with text formatting options.
         var serviceProviderForThisTestWithoutLicensing = testContext.ServiceProvider
-            .WithService( new Observer( testContext.ServiceProvider, testResult ) );
+            .WithService( new Observer( testContext.ServiceProvider, testResult ) )
+            .WithService( new CompileTimePreprocessorSymbolProvider() );
 
         var serviceProviderForThisTestWithLicensing = serviceProviderForThisTestWithoutLicensing
             .AddLicenseConsumptionManagerForTest( testInput, this.LicenseKeyProvider );
@@ -91,8 +93,8 @@ internal class AspectTestRunner : BaseTestRunner
 
         var isLicensingRequiredForCompilation = testScenario switch
         {
-            TestScenario.ApplyCodeFix => false,
-            TestScenario.PreviewCodeFix => false,
+            TestScenario.CodeFix => false,
+            TestScenario.CodeFixPreview => false,
             TestScenario.Default => true,
             _ => throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" )
         };
@@ -112,8 +114,8 @@ internal class AspectTestRunner : BaseTestRunner
         {
             switch ( testScenario )
             {
-                case TestScenario.ApplyCodeFix:
-                case TestScenario.PreviewCodeFix:
+                case TestScenario.CodeFix:
+                case TestScenario.CodeFixPreview:
                     {
                         // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
                         if ( !await ApplyCodeFixAsync(
@@ -121,7 +123,7 @@ internal class AspectTestRunner : BaseTestRunner
                                 testResult,
                                 testContext.Domain,
                                 serviceProviderForThisTestWithLicensing,
-                                testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
+                                testInput.Options.TestScenario == TestScenario.CodeFixPreview ) )
                         {
                             return;
                         }
@@ -589,5 +591,10 @@ internal class AspectTestRunner : BaseTestRunner
             this.ExpectedProgramOutputText = expectedProgramOutputText;
             this.ExpectedProgramOutputPath = expectedProgramOutputPath;
         }
+    }
+
+    private sealed class CompileTimePreprocessorSymbolProvider : ICompileTimePreprocessorSymbolProvider
+    {
+        public IReadOnlyList<string> PreprocessorSymbols => ["TESTRUNNER"];
     }
 }

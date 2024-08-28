@@ -1,5 +1,6 @@
 internal class TargetClass
 {
+  [TestLiveTemplate(typeof(TestAspect))]
   public void TargetMethod()
   {
     Console.WriteLine("This is the overriding method.");

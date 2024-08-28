@@ -139,10 +139,22 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             }
         }
 
+        IEnumerable<ISyntaxTreeTransformation> syntaxTreeTransformations;
+
+        if ( !input.CompilationModel.PartialCompilation.HasObservabilityFilter )
+        {
+            syntaxTreeTransformations = input.Transformations.OfType<ISyntaxTreeTransformation>();
+        }
+        else
+        {
+            // If there is observability filter, we need to always include all transformation of a partial type that has an observable part.
+            syntaxTreeTransformations = GetObservableTransformationClosure( input );
+        }
+
         // It's imperative that order of transformations is preserved while grouping by syntax tree.
         // The syntax tree we group by must be the main syntax tree of the enclosing type. We should never run transformations
         // of a partial type in parallel.
-        var transformationsByCanonicalSyntaxTree = input.Transformations.OfType<ISyntaxTreeTransformation>().GroupBy( GetCanonicalSyntaxTree );
+        var transformationsByCanonicalSyntaxTree = syntaxTreeTransformations.GroupBy( GetCanonicalSyntaxTree );
 
         static SyntaxTree GetCanonicalSyntaxTree( ISyntaxTreeTransformation syntaxTreeTransformation )
         {
@@ -152,19 +164,40 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 ICompilation => syntaxTreeTransformation.TransformedSyntaxTree,
                 var d => throw new AssertionFailedException( $"Unsupported: {d}" )
             };
+        }
 
-            static IDeclaration GetCanonicalTargetDeclaration( IDeclaration declaration )
+        static IDeclaration GetCanonicalTargetDeclaration( IDeclaration declaration )
+        {
+            return declaration switch
             {
-                return declaration switch
+                IMember member => member.DeclaringType,
+                INamedType type => type,
+                IParameter parameter => GetCanonicalTargetDeclaration( parameter.ContainingDeclaration.AssertNotNull() ),
+                INamespace @namespace => @namespace.Compilation,
+                ICompilation compilation => compilation,
+                var d => throw new AssertionFailedException( $"Unsupported: {d}" )
+            };
+        }
+
+        static IEnumerable<ISyntaxTreeTransformation> GetObservableTransformationClosure( AspectLinkerInput input )
+        {
+            var observedCanonicalTargetDeclarations = new HashSet<IDeclaration>( input.CompilationModel.Comparers.Default );
+
+            // Mark all transformed canonical declarations with an observable part as observable.
+            foreach ( var transformation in input.Transformations.OfType<ISyntaxTreeTransformation>() )
+            {
+                var transformedSyntaxTree = transformation.TransformedSyntaxTree;
+
+                if ( input.CompilationModel.PartialCompilation.IsSyntaxTreeObserved( transformedSyntaxTree.FilePath ) )
                 {
-                    IMember member => member.DeclaringType,
-                    INamedType type => type,
-                    IParameter parameter => GetCanonicalTargetDeclaration( parameter.ContainingDeclaration.AssertNotNull() ),
-                    INamespace @namespace => @namespace.Compilation,
-                    ICompilation compilation => compilation,
-                    var d => throw new AssertionFailedException( $"Unsupported: {d}" )
-                };
+                    var canonicalTargetDeclaration = GetCanonicalTargetDeclaration( transformation.TargetDeclaration );
+                    observedCanonicalTargetDeclarations.Add( canonicalTargetDeclaration );
+                }
             }
+
+            // Include all transformation with observable canonical target declaration.
+            return input.Transformations.OfType<ISyntaxTreeTransformation>()
+                .Where( t => observedCanonicalTargetDeclarations.Contains( GetCanonicalTargetDeclaration( t.TargetDeclaration ) ) );
         }
 
         await this._concurrentTaskRunner.RunConcurrentlyAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );

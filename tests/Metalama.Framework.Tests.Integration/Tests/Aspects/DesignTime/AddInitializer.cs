@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @DesignTime
+// @TestScenario(DesignTime)
 // @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 #endif
 

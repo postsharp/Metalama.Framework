@@ -2,10 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Comparers;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
@@ -15,8 +12,6 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public sealed class CodeModelINamedTypeCollectionOfTypeDefinitionTests : UnitTestClass
     {
-        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Formatted );
-
         [Fact]
         public void NonGeneric()
         {
@@ -327,7 +322,7 @@ class D
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
+            using var userCodeContext = testContext.WithExecutionContext( compilation );
 
             var type = compilation.Types.Single( t => t.Name == "C" ).WithTypeArguments( typeof(int) );
 

@@ -2,10 +2,9 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine.Services;
-using Metalama.Testing.AspectTesting;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.Integration.Runners
+namespace Metalama.Testing.AspectTesting
 {
     [UsedImplicitly]
     internal class LiveTemplateTestRunnerFactory : ITestRunnerFactory

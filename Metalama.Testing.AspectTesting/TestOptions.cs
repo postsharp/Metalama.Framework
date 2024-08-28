@@ -230,8 +230,13 @@ public class TestOptions
     public TestScenario? TestScenario { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating the target syntax tree suffix. This allows the selection of a different syntax tree for the test scenario. This is currently valid only for <see cref="TestScenario.Preview"/> scenario.
+    /// </summary>
+    public string? TargetSyntaxTreeSuffix { get; set; }
+
+    /// <summary>
     /// Gets or sets the zero-based index of the code fix to be applied
-    /// when <see cref="TestScenario"/> is set to <see cref="Metalama.Testing.AspectTesting.TestScenario.ApplyCodeFix"/> or <see cref="Metalama.Testing.AspectTesting.TestScenario.PreviewCodeFix"/>.
+    /// when <see cref="TestScenario"/> is set to <see cref="AspectTesting.TestScenario.CodeFix"/> or <see cref="AspectTesting.TestScenario.CodeFixPreview"/>.
     /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
     /// </summary>
     public int? AppliedCodeFixIndex { get; set; }
@@ -414,6 +419,8 @@ public class TestOptions
 
         this.TestScenario ??= baseOptions.TestScenario;
 
+        this.TargetSyntaxTreeSuffix ??= baseOptions.TargetSyntaxTreeSuffix;
+
         this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
         this.AppliedCodeFixIndex ??= baseOptions.AppliedCodeFixIndex;
@@ -521,37 +528,21 @@ public class TestOptions
 
                     break;
 
-                case "DesignTime":
-                    this.TestRunnerFactoryType =
-                        "Metalama.Testing.AspectTesting.DesignTimeTestRunnerFactory, Metalama.Testing.AspectTesting";
-
-                    break;
-
                 case "TestScenario":
                     if ( Enum.TryParse<TestScenario>( optionArg, out var testScenario ) )
                     {
                         this.TestScenario = testScenario;
-
-                        switch ( testScenario )
-                        {
-                            case AspectTesting.TestScenario.PreviewLiveTemplate:
-                                this.TestRunnerFactoryType =
-                                    "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
-
-                                break;
-
-                            case AspectTesting.TestScenario.ApplyLiveTemplate:
-                                this.TestRunnerFactoryType =
-                                    "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
-
-                                break;
-                        }
                     }
                     else
                     {
                         throw new InvalidTestOptionException(
                             $"'{optionArg} is not a TestScenario value in '{path}'. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
                     }
+
+                    break;
+
+                case "TargetSyntaxTreeSuffix":
+                    this.TargetSyntaxTreeSuffix = optionArg;
 
                     break;
 

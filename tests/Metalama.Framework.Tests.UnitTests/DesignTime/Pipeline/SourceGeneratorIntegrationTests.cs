@@ -69,7 +69,10 @@ partial class C : BaseClass
         BlockingCollection<ProjectKey> dirtyProjectNotifications = new();
 
         // ReSharper disable once AccessToDisposedClosure
-        factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, testContext.CancellationToken );
+        if ( factory.EventHub != null )
+        {
+            factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, testContext.CancellationToken );
+        }
 
         Assert.Single( results1.Result.IntroducedSyntaxTrees );
 

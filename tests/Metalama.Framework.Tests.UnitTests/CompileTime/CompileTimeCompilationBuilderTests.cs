@@ -1220,7 +1220,7 @@ Intentional syntax error.
 #endif
 ";
 
-            var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "METALAMA", "SYMBOL" } );
+            var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code1, preprocessorSymbols: ["METALAMA", "SYMBOL"] );
 
             using var domain1 = testContext1.Domain;
             var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, domain1 );

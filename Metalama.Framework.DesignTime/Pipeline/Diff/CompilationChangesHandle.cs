@@ -2,4 +2,4 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal record struct CompilationChangesHandle( CompilationChanges? Value, ProjectVersion? OldProjectVersion );
+internal readonly record struct CompilationChangesHandle( CompilationChanges? Value, ProjectVersion? OldProjectVersion );

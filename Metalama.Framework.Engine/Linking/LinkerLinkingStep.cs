@@ -70,6 +70,11 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var syntaxTree = modifiedSyntaxTree.NewTree.AssertNotNull();
 
+                    if ( !input.IntermediateCompilation.IsSyntaxTreeObserved( syntaxTree.FilePath ) )
+                    {
+                        return;
+                    }
+
                     // Run the linking rewriter for this tree.
                     var linkedRoot =
                         new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )

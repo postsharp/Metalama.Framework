@@ -1123,6 +1123,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 var compiledTemplateName = TemplateNameHelper.GetCompiledTemplateName( symbol );
 
                 var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
+                var transformedOptionalArguments = new List<ArgumentSyntax>();
 
                 foreach ( var argument in node.ArgumentList.Arguments )
                 {
@@ -1158,7 +1159,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         modifiedArgument = argument.WithExpression( this.CreateRunTimeExpression( argument.Expression ) );
                     }
 
-                    transformedArguments.Add( this.VisitArgument( modifiedArgument ).AssertCast<ArgumentSyntax>() );
+                    if ( !parameter.IsOptional )
+                    {
+                        transformedArguments.Add( this.VisitArgument( modifiedArgument ).AssertCast<ArgumentSyntax>() );
+                    }
+                    else
+                    {
+                        transformedOptionalArguments.Add( this.VisitArgument( modifiedArgument ).AssertCast<ArgumentSyntax>() );
+                    }
                 }
 
                 var (receiver, name) = node.Expression switch
@@ -1205,6 +1213,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                         i++;
                     }
+                }
+
+                foreach ( var transformedOptionalArgument in transformedOptionalArguments )
+                {
+                    transformedArguments.Add( transformedOptionalArgument );
                 }
 
                 ExpressionSyntax compiledTemplateExpression =
@@ -1385,8 +1398,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 this.CreateTemplateSyntaxFactoryParameter()
             };
 
+        var templateOptionalParameters = new List<ParameterSyntax>();
         var templateParameterDefaultStatements = new List<StatementSyntax>();
 
+        // Add non-optional parameters.
         foreach ( var parameter in node.ParameterList.Parameters )
         {
             var templateParameter = parameter;
@@ -1401,8 +1416,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         .WithModifiers( TokenList() )
                         .WithAttributeLists( default );
 
-                if ( parameter.Default != null )
+                if ( !parameterSymbol.IsOptional )
                 {
+                    templateParameters.Add( templateParameter );
+                }
+                else
+                {
+                    // Optional parameters are added to the end of the signature.
                     templateParameter =
                         templateParameter.WithDefault( EqualsValueClause( SyntaxFactoryEx.Null ) );
 
@@ -1412,13 +1432,25 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                             AssignmentExpression(
                                 SyntaxKind.CoalesceAssignmentExpression,
                                 IdentifierName( parameter.Identifier ),
-                                this.TransformExpression( parameter.Default.Value ) ) ) );
+                                this.TransformExpression( parameter.Default.AssertNotNull().Value ) ) ) );
+
+                    templateOptionalParameters.Add( templateParameter );
                 }
             }
-
-            templateParameters.Add( templateParameter );
+            else
+            {
+                if ( !parameterSymbol.IsOptional )
+                {
+                    templateParameters.Add( templateParameter );
+                }
+                else
+                {
+                    templateOptionalParameters.Add( templateParameter );
+                }
+            }
         }
 
+        // Add type parameters between non-optional and optional parameters.
         if ( node.TypeParameterList != null )
         {
             foreach ( var parameter in node.TypeParameterList.Parameters )
@@ -1433,6 +1465,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     templateParameters.Add( Parameter( default, default, this._templateTypeArgumentType, parameter.Identifier, null ) );
                 }
             }
+        }
+
+        // Add optional parameters last.
+        foreach ( var templateOptionalParameter in templateOptionalParameters )
+        {
+            templateParameters.Add( templateOptionalParameter );
         }
 
         // Build the template body.

@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @DesignTime
+// @TestScenario(DesignTime)
 #endif
 
 using Metalama.Framework.Advising;
@@ -10,11 +10,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeWithInterfa
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.IntroduceAutomaticProperty("TestProperty", typeof(int));
-        var introducedType = builder.IntroduceClass("TestType");
-        introducedType.ImplementInterface(typeof(ITestInterface));
+        builder.IntroduceAutomaticProperty( "TestProperty", typeof(int) );
+        var introducedType = builder.IntroduceClass( "TestType" );
+        introducedType.ImplementInterface( typeof(ITestInterface) );
     }
 }
 
