@@ -68,7 +68,6 @@ internal sealed class ReferenceAssemblyLocator
     private readonly DotNetTool _dotNetTool;
     private readonly int _restoreTimeout;
     private readonly ImmutableArray<string> _targetFrameworks;
-    private readonly string? _hooksDirectory;
 
     /// <summary>
     /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.
@@ -166,7 +165,8 @@ internal sealed class ReferenceAssemblyLocator
         this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest(
             targetFrameworksString,
             additionalPackageReferences,
-            additionalNugetSources );
+            additionalNugetSources,
+            projectOptions.AssemblyLocatorHooksDirectory );
 
         this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
@@ -206,8 +206,6 @@ internal sealed class ReferenceAssemblyLocator
 
         this.AdditionalCompileTimeAssemblyPaths =
             additionalCompileTimeAssemblies.Where( p => !p.EndsWith( "TempProject.dll", StringComparison.OrdinalIgnoreCase ) ).ToImmutableArray();
-        
-        this._hooksDirectory = serviceProvider.GetRequiredService<IProjectOptions>().AssemblyLocatorHooksDirectory;
     }
 
     private string GetAdditionalCompileTimeAssembliesDirectory()
@@ -297,7 +295,8 @@ internal sealed class ReferenceAssemblyLocator
     private ReferenceAssembliesManifest GetReferenceAssembliesManifest(
         string targetFrameworks,
         string additionalPackageReferences,
-        string? additionalNugetSources )
+        string? additionalNugetSources,
+        string? hooksDirectory )
     {
         using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
         {
@@ -345,9 +344,9 @@ internal sealed class ReferenceAssemblyLocator
             var hooksTargetsImport = "";
             var hooksImportWarnings = "";
 
-            if ( this._hooksDirectory != null )
+            if ( hooksDirectory != null )
             {
-                var hooksDirectory = this._hooksDirectory.Replace( '\\', '/' ).Trim().TrimEnd( '/' );
+                hooksDirectory = hooksDirectory.Replace( '\\', '/' ).Trim().TrimEnd( '/' );
 
                 if ( !Path.IsPathRooted( hooksDirectory ) )
                 {
