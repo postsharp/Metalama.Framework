@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @DesignTime
+// @TestScenario(DesignTime)
 #endif
 
 using System;
@@ -11,19 +11,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceConstr
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.IntroduceConstructor(nameof(Constructor));
+        builder.IntroduceConstructor( nameof(Constructor) );
     }
 
     [Template]
-    public void Constructor(int x)
-    {
-    }
+    public void Constructor( int x ) { }
 }
 
 // <target>
 [Introduction]
-internal partial class TargetClass
-{
-}
+internal partial class TargetClass { }

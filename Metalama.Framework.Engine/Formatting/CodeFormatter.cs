@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -15,7 +16,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using RoslynProject = Microsoft.CodeAnalysis.Project;
 
 namespace Metalama.Framework.Engine.Formatting;
 
@@ -215,9 +215,12 @@ public sealed partial class CodeFormatter : IProjectService
         return modifiedSolution;
     }
 
+    public Task<PartialCompilation> FormatAsync( IPartialCompilation compilation, CancellationToken cancellationToken = default )
+        => this.FormatAsync( (PartialCompilation) compilation, cancellationToken );
+
     internal async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
     {
-        var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
+        var (project, syntaxTreeMap) = await WorkspaceHelper.CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
 
         List<SyntaxTreeTransformation> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
 
@@ -238,39 +241,12 @@ public sealed partial class CodeFormatter : IProjectService
         return compilation.Update( syntaxTreeReplacements );
     }
 
-    internal async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+    public async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
     {
-        var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );
+        var (project, syntaxTreeMap) = await WorkspaceHelper.CreateProjectFromCompilationAsync( compilation, cancellationToken );
 
         var formattedSolution = await this.FormatAsync( project.Solution, syntaxTreeMap.Values, null, true, cancellationToken );
 
         return (await formattedSolution.Projects.Single().GetCompilationAsync( cancellationToken )).AssertNotNull();
-    }
-
-    private static async Task<(RoslynProject Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilationAsync(
-        Compilation compilation,
-        CancellationToken cancellationToken )
-    {
-        Dictionary<SyntaxTree, DocumentId> syntaxTreeMap = new();
-        var workspace = new AdhocWorkspace();
-
-        var project = workspace.AddProject(
-            ProjectInfo.Create(
-                ProjectId.CreateNewId( compilation.AssemblyName ),
-                VersionStamp.Default,
-                compilation.AssemblyName!,
-                compilation.AssemblyName!,
-                compilation.Language,
-                compilationOptions: compilation.Options,
-                metadataReferences: compilation.References ) );
-
-        foreach ( var syntaxTree in compilation.SyntaxTrees )
-        {
-            var document = project.AddDocument( syntaxTree.FilePath, await syntaxTree.GetRootAsync( cancellationToken ) );
-            project = document.Project;
-            syntaxTreeMap.Add( syntaxTree, document.Id );
-        }
-
-        return (project, syntaxTreeMap);
     }
 }

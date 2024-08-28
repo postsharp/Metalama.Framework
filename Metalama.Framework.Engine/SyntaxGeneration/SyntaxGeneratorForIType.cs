@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -45,7 +45,7 @@ internal partial class SyntaxGeneratorForIType
             var additionalAnnotation = type.IsNullable switch
             {
                 null => NullableSyntaxAnnotationEx.Oblivious,
-                true or false => NullableSyntaxAnnotationEx.AnnotatedOrNotAnnotated,
+                true or false => NullableSyntaxAnnotationEx.AnnotatedOrNotAnnotated
             };
 
             if ( additionalAnnotation is not null )

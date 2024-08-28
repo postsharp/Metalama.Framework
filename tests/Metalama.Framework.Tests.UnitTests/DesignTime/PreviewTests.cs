@@ -61,7 +61,7 @@ public sealed class PreviewTests : DesignTimeTestBase
         if ( dependencyCode != null )
         {
             workspace.AddOrUpdateProject( "dependency", dependencyCode );
-            references = new[] { "dependency" };
+            references = ["dependency"];
         }
         else
         {
@@ -73,7 +73,7 @@ public sealed class PreviewTests : DesignTimeTestBase
         var service = new TransformationPreviewServiceImpl( serviceProvider );
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
 
-        Assert.Empty( result.ErrorMessages ?? Array.Empty<string>() );
+        Assert.Empty( result.ErrorMessages ?? [] );
         Assert.True( result.IsSuccessful );
         Assert.NotNull( result.TransformedSyntaxTree );
 

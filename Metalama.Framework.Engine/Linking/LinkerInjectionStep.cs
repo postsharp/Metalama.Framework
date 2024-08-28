@@ -142,7 +142,15 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // It's imperative that order of transformations is preserved while grouping by syntax tree.
         // The syntax tree we group by must be the main syntax tree of the enclosing type. We should never run transformations
         // of a partial type in parallel.
-        var transformationsByCanonicalSyntaxTree = input.Transformations.OfType<ISyntaxTreeTransformation>().GroupBy( GetCanonicalSyntaxTree );
+        var transformationsByCanonicalSyntaxTree =
+            input.Transformations.OfType<ISyntaxTreeTransformation>()
+                .GroupBy( GetCanonicalSyntaxTree );
+
+        if ( input.CompilationModel.PartialCompilation.HasObservabilityFilter )
+        {
+            transformationsByCanonicalSyntaxTree = transformationsByCanonicalSyntaxTree
+                .Where( group => input.CompilationModel.PartialCompilation.IsSyntaxTreeObserved( group.Key.FilePath ) );
+        }
 
         static SyntaxTree GetCanonicalSyntaxTree( ISyntaxTreeTransformation syntaxTreeTransformation )
         {

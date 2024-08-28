@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="../Metalama.Framework.Sdk/Metalama.Framework.Sdk.csproj" />
         <ProjectReference Include="../Metalama.Framework/Metalama.Framework.csproj" />
         <ProjectReference Include="../Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix)/Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix).csproj" />

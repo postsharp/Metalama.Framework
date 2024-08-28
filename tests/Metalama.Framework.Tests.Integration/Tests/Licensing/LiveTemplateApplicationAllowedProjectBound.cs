@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @TestScenario(ApplyLiveTemplate)
+// @TestScenario(LiveTemplate)
 // @LicenseKey(MetalamaUltimatePersonalProjectBound)
 // @Include(_LiveTemplate.cs);
 // @ProjectName(ProjectBoundTestsProject)

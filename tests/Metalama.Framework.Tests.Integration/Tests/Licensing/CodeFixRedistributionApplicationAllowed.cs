@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @TestScenario(ApplyCodeFix)
+// @TestScenario(CodeFix)
 // @LicenseKey(MetalamaFreePersonal)
 // @DependencyLicenseKey(MetalamaUltimateOpenSourceRedistributionForIntegrationTests)
 // @Include(_CodeFixRedistribution.cs);

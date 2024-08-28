@@ -15,7 +15,7 @@ public sealed class LocalWorkspaceProvider : WorkspaceProvider
 
     public LocalWorkspaceProvider( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default )
+    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default )
     {
         if ( !this._workspace.Task.IsCompleted )
         {
@@ -25,5 +25,5 @@ public sealed class LocalWorkspaceProvider : WorkspaceProvider
         return this._workspace.Task.WithCancellation( cancellationToken );
     }
 
-    internal void TrySetWorkspace( Workspace workspace ) => this._workspace.TrySetResult( workspace );
+    public bool TrySetWorkspace( Workspace workspace ) => this._workspace.TrySetResult( workspace );
 }

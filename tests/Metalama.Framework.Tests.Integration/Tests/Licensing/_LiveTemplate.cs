@@ -1,6 +1,7 @@
 ﻿using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplate
 {
@@ -18,6 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplate
     // <target>
     internal class TargetClass
     {
+        [TestLiveTemplate( typeof(TestAspect) )]
         private int TargetMethod( int a )
         {
             return a;
