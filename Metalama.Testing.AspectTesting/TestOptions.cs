@@ -230,6 +230,11 @@ public class TestOptions
     public TestScenario? TestScenario { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating the target syntax tree suffix. This allows the selection of a different syntax tree for the test scenario. This is currently valid only for <see cref="TestScenario.Preview"/> scenario.
+    /// </summary>
+    public string? TargetSyntaxTreeSuffix { get; set; }
+
+    /// <summary>
     /// Gets or sets the zero-based index of the code fix to be applied
     /// when <see cref="TestScenario"/> is set to <see cref="AspectTesting.TestScenario.CodeFix"/> or <see cref="AspectTesting.TestScenario.CodeFixPreview"/>.
     /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
@@ -414,6 +419,8 @@ public class TestOptions
 
         this.TestScenario ??= baseOptions.TestScenario;
 
+        this.TargetSyntaxTreeSuffix ??= baseOptions.TargetSyntaxTreeSuffix;
+
         this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
         this.AppliedCodeFixIndex ??= baseOptions.AppliedCodeFixIndex;
@@ -531,6 +538,11 @@ public class TestOptions
                         throw new InvalidTestOptionException(
                             $"'{optionArg} is not a TestScenario value in '{path}'. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
                     }
+
+                    break;
+
+                case "TargetSyntaxTreeSuffix":
+                    this.TargetSyntaxTreeSuffix = optionArg;
 
                     break;
 

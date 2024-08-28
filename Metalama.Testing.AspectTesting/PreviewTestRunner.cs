@@ -8,6 +8,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
@@ -50,12 +51,21 @@ internal sealed class PreviewTestRunner : BaseTestRunner
 
         var projectKey = ProjectKeyFactory.FromProject( project )!;
 
-        var syntaxTree = inputCompilation.SyntaxTrees.OrderBy( t => t.FilePath.Length ).First();
-        var syntaxTreeName = syntaxTree.FilePath;
+        var primarySyntaxTree = 
+            inputCompilation.SyntaxTrees
+            .Where( t => t.FilePath == $"{testInput.TestName}.cs" )
+            .Single();
+
+        var primarySyntaxTreeName = primarySyntaxTree.FilePath;
+
+        var targetSyntaxTreeName =
+            testInput.Options.TargetSyntaxTreeSuffix != null
+                ? primarySyntaxTreeName.ReplaceOrdinal( ".cs", $".{testInput.Options.TargetSyntaxTreeSuffix}.cs" )
+                : primarySyntaxTreeName;
 
         var previewResult = await previewService.PreviewTransformationAsync(
             projectKey,
-            syntaxTreeName,
+            targetSyntaxTreeName,
             testContext.CancellationToken );
 
         if ( !previewResult.IsSuccessful )
@@ -65,7 +75,8 @@ internal sealed class PreviewTestRunner : BaseTestRunner
             Assert.Fail( "The preview was not successful, but no message was reported." );
         }
 
-        var transformedSyntaxTree = previewResult.TransformedSyntaxTree!.ToSyntaxTree( (CSharpParseOptions) syntaxTree.Options );
+        var transformedSyntaxTree = previewResult.TransformedSyntaxTree!.ToSyntaxTree( (CSharpParseOptions) primarySyntaxTree.Options )
+            .WithFilePath( primarySyntaxTreeName );
 
         // In production code, the formatting is done by the caller, so we need to format here.
         var resultingCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation( "result" ).AddSyntaxTrees( transformedSyntaxTree );
