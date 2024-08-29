@@ -392,8 +392,12 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         _ = await compilationVersionProvider.GetCompilationChangesAsync( dependentCompilation1, dependentCompilation2 );
     }
 
-    [Fact]
-    public async Task DependencyChangePermutations()
+    public static IEnumerable<object[]> DependencyChangePermutationsData
+        => GetPermutations( Enumerable.Range( 0, 5 ) ).Select( s => new object[] { s.ToArray() } );
+
+    [Theory]
+    [MemberData( nameof( DependencyChangePermutationsData ) )]
+    public async Task DependencyChangePermutations( int[] dependencyOrder )
     {
         // Tests different permutations of dependency changes.
         var observer = new DifferObserver();
@@ -424,37 +428,32 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         var dependentCode = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; public class D { public T X; }" } };
 
         CSharpCompilation[] compilations = [dependencyCompilation1, dependencyCompilation2, dependencyCompilation3, dependencyCompilation4, dependencyCompilation5];
+        var permutation = Enumerable.Range( 0, 5 ).Select( i => compilations[dependencyOrder[i]] ).ToArray();
 
-        // Go through all permutations of subsets of compilations.
-        foreach ( var permutation in GetSubsets( compilations ).Where( x => x.Any() ).SelectMany( s => GetPermutations( s ) ) )
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
+
+        var currentDependency = permutation[0];
+        var currentDependent =
+            TestCompilationFactory.CreateCSharpCompilation(
+                dependentCode,
+                name: "dependent",
+                additionalReferences: new[] { currentDependency.ToMetadataReference() } );
+
+        await compilationVersionProvider.GetCompilationVersionAsync( currentDependency );
+        await compilationVersionProvider.GetCompilationVersionAsync( currentDependent );
+
+        foreach ( var compilation in permutation.Skip( 1 ) )
         {
-            var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
+            var dependencyChanges = await compilationVersionProvider.GetCompilationChangesAsync( currentDependency, compilation );
 
-            var permutationArray = permutation.ToArray();
+            var dependentCompilationUpdated = TestCompilationFactory.ReplaceReferences( currentDependent, [compilation.ToMetadataReference()] );
+            var dependentChanges = await compilationVersionProvider.GetCompilationChangesAsync( currentDependent, dependentCompilationUpdated );
 
-            var currentDependency = permutationArray[0];
-            var currentDependent =
-                TestCompilationFactory.CreateCSharpCompilation(
-                    dependentCode,
-                    name: "dependent",
-                    additionalReferences: new[] { currentDependency.ToMetadataReference() } );
+            // Assert that exactly the same changes are observed in the dependent compilation.
+            Assert.Equal( dependencyChanges.SyntaxTreeChanges, dependentChanges.ReferencedCompilationChanges.Single().Value.Changes.SyntaxTreeChanges );
 
-            await compilationVersionProvider.GetCompilationVersionAsync( currentDependency );
-            await compilationVersionProvider.GetCompilationVersionAsync( currentDependent );
-
-            foreach ( var compilation in permutationArray.Skip( 1 ) )
-            {
-                var dependencyChanges = await compilationVersionProvider.GetCompilationChangesAsync( currentDependency, compilation );
-
-                var dependentCompilationUpdated = TestCompilationFactory.ReplaceReferences( currentDependent, [compilation.ToMetadataReference()] );
-                var dependentChanges = await compilationVersionProvider.GetCompilationChangesAsync( currentDependent, dependentCompilationUpdated );
-
-                // Assert that exactly the same changes are observed in the dependent compilation.
-                Assert.Equal( dependencyChanges.SyntaxTreeChanges, dependentChanges.ReferencedCompilationChanges.Single().Value.Changes.SyntaxTreeChanges );
-
-                currentDependency = compilation;
-                currentDependent = dependentCompilationUpdated;
-            }
+            currentDependency = compilation;
+            currentDependent = dependentCompilationUpdated;
         }
     }
 
@@ -808,10 +807,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
 
     private static IEnumerable<IEnumerable<T>> GetPermutations<T>( IEnumerable<T> items, int? length = null )
     {
-        if ( length == null )
-        {
-            length = items.Count();
-        }
+        length ??= items.Count();
 
         if ( length == 1 )
         {
