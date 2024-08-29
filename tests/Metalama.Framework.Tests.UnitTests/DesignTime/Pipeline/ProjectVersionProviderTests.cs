@@ -475,8 +475,8 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         var topDependencyCompilation1 = TestCompilationFactory.CreateCSharpCompilation( topDependencyCode1, name: "dependency" );
 
         // Rename the syntax tree.
-        var topDdependencyCode2= new Dictionary<string, string> { { "code_top.2.cs", "using Metalama.Framework.Aspects; public class T {}" } };
-        var topDependencyCompilation2 = TestCompilationFactory.ReplaceSyntaxTrees( topDependencyCompilation1, topDdependencyCode2 );
+        var topDependencyCode2= new Dictionary<string, string> { { "code_top.2.cs", "using Metalama.Framework.Aspects; public class T {}" } };
+        var topDependencyCompilation2 = TestCompilationFactory.ReplaceSyntaxTrees( topDependencyCompilation1, topDependencyCode2 );
 
         // Change renamed syntax tree.
         var topDependencyCode3 = new Dictionary<string, string> { { "code_top.2.cs", "using Metalama.Framework.Aspects; public class T { public int TT; }" } };
@@ -503,7 +503,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
 
         var topDependencyObservationHashSet = topDependencyObservations.ToHashSet();
 
-        // We will try different combinations of updating left and right dependencies.
+        // We will try different combinations of updating the top dependency.
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
@@ -754,17 +754,6 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
             {
                 dependent = TestCompilationFactory.ReplaceReferences( currentDependent, [leftDependency.ToMetadataReference(), rightDependency.ToMetadataReference(), topDependency.ToMetadataReference()] );
                 var dependentChanges = await compilationVersionProvider.GetCompilationChangesAsync( currentDependent, dependent );
-
-                //Assert.Equal(
-                //    topDependencyChanges.SyntaxTreeChanges,
-                //    dependentChanges.ReferencedCompilationChanges.First().Value.Changes.ReferencedCompilationChanges.Single().Value.Changes.SyntaxTreeChanges );
-
-                //if ( updateLeft && updateRight )
-                //{
-                //    Assert.Equal(
-                //        topDependencyChanges.SyntaxTreeChanges,
-                //        dependentChanges.ReferencedCompilationChanges.Last().Value.Changes.ReferencedCompilationChanges.Single().Value.Changes.SyntaxTreeChanges );
-                //}
             }
             else
             {
