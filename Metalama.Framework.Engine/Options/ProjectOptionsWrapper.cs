@@ -79,6 +79,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool IsTest => this.Wrapped.IsTest;
 
+    public virtual string? AssemblyLocatorHooksDirectory => this.Wrapped.AssemblyLocatorHooksDirectory;
+
     public virtual bool RoslynIsCompileTimeOnly => this.Wrapped.RoslynIsCompileTimeOnly;
 
     public virtual string? CompileTimeTargetFrameworks => this.Wrapped.CompileTimeTargetFrameworks;

@@ -180,4 +180,10 @@ public interface IProjectOptions : IProjectService, IEquatable<IProjectOptions>
     bool? WriteTransformedFiles { get; }
 
     bool IsTest { get; }
+    
+    /// <summary>
+    /// Gets the path to the directory where the Metalama.AssemblyLocator.Build.props
+    /// and/or Metalama.AssemblyLocator.Build.targets files are stored.
+    /// </summary>
+    string? AssemblyLocatorHooksDirectory { get; }
 }

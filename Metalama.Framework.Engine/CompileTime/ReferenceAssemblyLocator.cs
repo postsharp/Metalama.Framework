@@ -165,7 +165,8 @@ internal sealed class ReferenceAssemblyLocator
         this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest(
             targetFrameworksString,
             additionalPackageReferences,
-            additionalNugetSources );
+            additionalNugetSources,
+            projectOptions.AssemblyLocatorHooksDirectory );
 
         this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
@@ -294,7 +295,8 @@ internal sealed class ReferenceAssemblyLocator
     private ReferenceAssembliesManifest GetReferenceAssembliesManifest(
         string targetFrameworks,
         string additionalPackageReferences,
-        string? additionalNugetSources )
+        string? additionalNugetSources,
+        string? hooksDirectory )
     {
         using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
         {
@@ -337,17 +339,46 @@ internal sealed class ReferenceAssemblyLocator
 
             GlobalJsonHelper.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
 
+            var initialTargets = "";
+            var hooksPropsImport = "";
+            var hooksTargetsImport = "";
+            var hooksImportWarnings = "";
+
+            if ( hooksDirectory != null )
+            {
+                hooksDirectory = hooksDirectory.Replace( '\\', '/' ).Trim().TrimEnd( '/' );
+
+                if ( !Path.IsPathRooted( hooksDirectory ) )
+                {
+                    hooksDirectory = $"$(MSBuildThisFileDirectory){hooksDirectory}";
+                }
+                
+                initialTargets = " InitialTargets=\"_WarnOfImports\"";
+
+                hooksPropsImport = $@"
+  <Import Project=""{hooksDirectory}/Metalama.AssemblyLocator.Build.props"" Condition=""Exists('{hooksDirectory}/Metalama.AssemblyLocator.Build.props')"" />";
+                
+                hooksTargetsImport = $@"
+  <Import Project=""{{hooksDirectory}}/Metalama.AssemblyLocator.Build.targets"" Condition=""Exists('{{hooksDirectory}}/Metalama.AssemblyLocator.Build.targets')"" />";
+
+                hooksImportWarnings = $@"
+  <Target Name=""_WarnOfImports"">
+    <Warning Text=""'{hooksDirectory}/Metalama.AssemblyLocator.Build.props' imported."" Condition=""Exists('{hooksDirectory}/Metalama.AssemblyLocator.Build.props')"" />
+    <Warning Text=""'{hooksDirectory}/Metalama.AssemblyLocator.Build.targets' imported."" Condition=""Exists('{hooksDirectory}/Metalama.AssemblyLocator.Build.targets')"" />
+  </Target>";
+            }
+
             // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
             // dynamic code at compile time. We prefer compilation errors.
 
             var projectText =
                 $"""
-                 <Project>
+                 <Project{initialTargets}>
                    <PropertyGroup>
                      <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
                      <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
                      <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
-                   </PropertyGroup>
+                   </PropertyGroup>{hooksPropsImport}
                    <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
                    <PropertyGroup>
                      <TargetFrameworks>{targetFrameworks}</TargetFrameworks>
@@ -362,8 +393,8 @@ internal sealed class ReferenceAssemblyLocator
                    </ItemGroup>
                    <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
                      <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
-                   </Target>
-                   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+                   </Target>{hooksImportWarnings}
+                   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />{hooksTargetsImport}
                  </Project>
                  """;
 
