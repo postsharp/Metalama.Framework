@@ -587,7 +587,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
             {
                 dependent = TestCompilationFactory.ReplaceReferences( currentDependent, [leftDependency.ToMetadataReference(), rightDependency.ToMetadataReference()] );
                 var dependentChanges = await compilationVersionProvider.GetCompilationChangesAsync( currentDependent, dependent );
-
+                // There is no consistent way to compare the changes in the dependent project.
             }
             else
             {
@@ -624,7 +624,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
     [MemberData( nameof( DependencyChangeTwoLevelsDirectData ) )]
     public async Task DependencyChangeTwoLevelsDirect( (int Index, int DependencyToUpdate)[] topDependencyObservations )
     {
-        // Tests interleavings of change observations through two dependency levels.
+        // Tests interleavings of change observations through two dependency levels including a direct reference to the dependent project.
         var observer = new DifferObserver();
         var mocks = new AdditionalServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
@@ -754,6 +754,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
             {
                 dependent = TestCompilationFactory.ReplaceReferences( currentDependent, [leftDependency.ToMetadataReference(), rightDependency.ToMetadataReference(), topDependency.ToMetadataReference()] );
                 var dependentChanges = await compilationVersionProvider.GetCompilationChangesAsync( currentDependent, dependent );
+                // There is no consistent way to compare the changes in the dependent project.
             }
             else
             {
