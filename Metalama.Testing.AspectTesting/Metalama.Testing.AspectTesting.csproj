@@ -24,6 +24,10 @@
         
         <!-- Validate that we do not expose internal APIs -->
         <ProjectReference Include="../Metalama.Framework.Engine.Analyzers/Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
+        <!-- Explicitly add Microsoft.VisualStudio.Threading and StreamJsonRpc because the reference to Metalama.Framework.DesignTime must have PrivateAssets="all" -->
+        <PackageReference Include="Microsoft.VisualStudio.Threading" />
+        <PackageReference Include="StreamJsonRpc" />
     </ItemGroup>
 
     <ItemGroup>
