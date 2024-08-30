@@ -39,6 +39,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(RoslynVersion)"/>
     <!-- This version is also used in Metalama.Framework.Private\Directory.Packages.props. -->
     <!-- The version of Microsoft.VisualStudio.Threading must match the one used by StreamJsonRpc -->
+    <PackageVersion Include="Microsoft.VisualStudio.Threading" Version="16.8.55" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.8.55" />
     <!-- We should match the versions used by the lowest version of Roslyn we support.-->
     <PackageVersion Include="Newtonsoft.Json" Version="12.0.1" />
