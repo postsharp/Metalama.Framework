@@ -106,6 +106,6 @@ added because the package already contains file 'analyzers/dotnet/cs/Metalama.Fr
         <ItemGroup>
             <TfmSpecificPackageFile Include="$(MSBuildProjectDirectory)/../Metalama.Framework.Engine.Analyzers/bin/$(Configuration)/netstandard2.0/Metalama.Framework.Engine.Analyzers.dll" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
-
     </Target>
+    
 </Project>
