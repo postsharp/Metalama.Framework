@@ -274,7 +274,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             RetryHelper.Retry( () => File.WriteAllText( touchFile, newGuid ) );
         }
 
-        this.TouchIdOverride = newGuid;
+        this.LastTouchId = newGuid;
 
         this._observer?.OnTouchFileWritten( this.ProjectKey, newGuid );
     }

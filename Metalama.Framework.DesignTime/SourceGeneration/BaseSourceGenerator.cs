@@ -109,7 +109,16 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
             var projectKey = args.Compilation.GetProjectKey();
 
-            if ( !this._projectHandlers.TryGetValue( projectKey, out var handler ) || handler?.TouchIdOverride is not { } touchId )
+            // Read the touch ID from the handler instead of the touch file in AdditionalTexts, when possible.
+            //
+            // This is done this way for two reasons:
+            // 1. Roslyn in VS has a bug (https://github.com/dotnet/roslyn/issues/74716) where the touch file is not correctly watched for changes.
+            // 2. Rider does not currently watch the touch file for changes (https://youtrack.jetbrains.com/issue/RIDER-75959).
+            // In both cases, the touch file in AdditionalTexts does not change when the touch file on disk is updated.
+            //
+            // Note that this approach can't trigger running the generator, which means that changes will become visible only once the user types something in some C# file in the project.
+
+            if ( !this._projectHandlers.TryGetValue( projectKey, out var handler ) || handler?.LastTouchId is not { } touchId )
             {
                 touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
             }
