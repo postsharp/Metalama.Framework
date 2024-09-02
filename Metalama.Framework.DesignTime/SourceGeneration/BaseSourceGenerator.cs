@@ -107,7 +107,12 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
             this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken.ToTestable() );
 
-            var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
+            var projectKey = args.Compilation.GetProjectKey();
+
+            if ( !this._projectHandlers.TryGetValue( projectKey, out var handler ) || handler?.TouchIdOverride is not { } touchId )
+            {
+                touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
+            }
 
             this._logger.Trace?.Log( $"OnGeneratedSourceRequested('{args.Compilation.AssemblyName}'): touchId = '{touchId}'" );
 
@@ -115,7 +120,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         }
 
         /// <summary>
-        /// This method is called every time the source generator is called. If must decide if the cached result can be served. It must also, if necessary, schedule
+        /// This method is called every time the source generator is called. It must decide if the cached result can be served. It must also, if necessary, schedule
         /// a background computation of the compilation.
         /// </summary>
         protected abstract void OnGeneratedSourceRequested(
@@ -202,40 +207,14 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                 (IProjectOptions? Options, Compilation Compilation, string? TouchId) x,
                 (IProjectOptions? Options, Compilation Compilation, string? TouchId) y )
             {
-                var additionalFileTouchIdEquals = x.TouchId == y.TouchId;
+                var equals = x.TouchId == y.TouchId;
 
-                this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') '{x.TouchId}' {(additionalFileTouchIdEquals ? "==" : "!=")} '{y.TouchId}'" );
+                this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') '{x.TouchId}' {(equals ? "==" : "!=")} '{y.TouchId}'" );
 
-                var updatedTouchFileSet = false;
-
-                // Note that this means this comparer breaks the invariants of IEqualityComparer<T>.
-                // That hopefully shouldn't be a problem for IncrementalValueProvider, just don't use this type in a hash table.
-                if ( y.Options?.SourceGeneratorTouchFile is { } touchFilePath )
-                {
-                    // If the touch file is marked as updated, consider the touch IDs different and reset the flag.
-                    if ( TouchFileWatcher.GetIsUpdatedAndReset( touchFilePath ) )
-                    {
-                        updatedTouchFileSet = true;
-
-                        this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') marked as updated in-process." );
-                    }
-                }
-
-                return additionalFileTouchIdEquals && !updatedTouchFileSet;
+                return equals;
             }
 
-            public int GetHashCode( (IProjectOptions? Options, Compilation Compilation, string? TouchId) obj )
-            {
-                var hash = obj.TouchId?.GetHashCodeOrdinal() ?? 0;
-
-                if ( obj.Options?.SourceGeneratorTouchFile is { } touchFilePath
-                    && TouchFileWatcher.GetIsUpdated( touchFilePath ) )
-                {
-                    hash++;
-                }
-
-                return hash;
-            }
+            public int GetHashCode( (IProjectOptions? Options, Compilation Compilation, string? TouchId) obj ) => obj.TouchId?.GetHashCodeOrdinal() ?? 0;
         }
 
         private static string GetTouchId(
