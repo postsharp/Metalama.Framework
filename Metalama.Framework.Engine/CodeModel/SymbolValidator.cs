@@ -90,8 +90,7 @@ internal sealed class SymbolValidator
                && symbol.TypeParameters.All( this._validator.IsValid );
 
         public override bool VisitNamedType( INamedTypeSymbol symbol )
-            => symbol.Kind != SymbolKind.ErrorType 
-               && symbol.TypeKind != TypeKind.Error)
+            => symbol.TypeKind != TypeKind.Error
                && (symbol.BaseType == null || this._validator.IsValid( symbol.BaseType ))
                && (!this._recursion || symbol.AllInterfaces.All( this._validator.IsValidNoRecursion ))
                && symbol.TypeArguments.All( this._validator.IsValid );
@@ -99,12 +98,10 @@ internal sealed class SymbolValidator
         public override bool VisitParameter( IParameterSymbol symbol ) => this._validator.IsValid( symbol.Type );
 
         public override bool VisitPointerType( IPointerTypeSymbol symbol )
-            => symbol.TypeKind != TypeKind.Error
-               && this._validator.IsValid( symbol.PointedAtType );
+            => this._validator.IsValid( symbol.PointedAtType );
 
         public override bool VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol )
-            => symbol.TypeKind != TypeKind.Error
-               && this._validator.IsValid( symbol.Signature );
+            => this._validator.IsValid( symbol.Signature );
 
         public override bool VisitProperty( IPropertySymbol symbol )
             => this._validator.IsValid( symbol.Type )
@@ -113,8 +110,7 @@ internal sealed class SymbolValidator
         public override bool VisitRangeVariable( IRangeVariableSymbol symbol ) => true;
 
         public override bool VisitTypeParameter( ITypeParameterSymbol symbol )
-            => symbol.TypeKind != TypeKind.Error
-               && (!this._recursion || symbol.ConstraintTypes.All( this._validator.IsValidNoRecursion ));
+            => !this._recursion || symbol.ConstraintTypes.All( this._validator.IsValidNoRecursion );
 
         public override bool Visit( ISymbol? symbol ) => symbol == null || base.Visit( symbol );
     }
