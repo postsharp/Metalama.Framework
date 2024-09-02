@@ -41,10 +41,8 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     protected SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
-    public AnalysisProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
-        serviceProvider,
-        projectOptions,
-        projectKey )
+    public AnalysisProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey )
+        : base( serviceProvider, projectOptions, projectKey )
     {
         var options = serviceProvider.GetRequiredService<IGlobalOptions>();
 
@@ -275,6 +273,8 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         {
             RetryHelper.Retry( () => File.WriteAllText( touchFile, newGuid ) );
         }
+
+        this.LastTouchId = newGuid;
 
         this._observer?.OnTouchFileWritten( this.ProjectKey, newGuid );
     }

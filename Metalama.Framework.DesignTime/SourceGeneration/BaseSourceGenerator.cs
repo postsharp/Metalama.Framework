@@ -107,7 +107,21 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
             this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken.ToTestable() );
 
-            var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
+            var projectKey = args.Compilation.GetProjectKey();
+
+            // Read the touch ID from the handler instead of the touch file in AdditionalTexts, when possible.
+            //
+            // This is done this way for two reasons:
+            // 1. Roslyn in VS has a bug (https://github.com/dotnet/roslyn/issues/74716) where the touch file is not correctly watched for changes.
+            // 2. Rider does not currently watch the touch file for changes (https://youtrack.jetbrains.com/issue/RIDER-75959).
+            // In both cases, the touch file in AdditionalTexts does not change when the touch file on disk is updated.
+            //
+            // Note that this approach can't trigger running the generator, which means that changes will become visible only once the user types something in some C# file in the project.
+
+            if ( !this._projectHandlers.TryGetValue( projectKey, out var handler ) || handler?.LastTouchId is not { } touchId )
+            {
+                touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
+            }
 
             this._logger.Trace?.Log( $"OnGeneratedSourceRequested('{args.Compilation.AssemblyName}'): touchId = '{touchId}'" );
 
@@ -115,7 +129,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         }
 
         /// <summary>
-        /// This method is called every time the source generator is called. If must decide if the cached result can be served. It must also, if necessary, schedule
+        /// This method is called every time the source generator is called. It must decide if the cached result can be served. It must also, if necessary, schedule
         /// a background computation of the compilation.
         /// </summary>
         protected abstract void OnGeneratedSourceRequested(

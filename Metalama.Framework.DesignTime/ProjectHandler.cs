@@ -26,6 +26,12 @@ public abstract class ProjectHandler : IDisposable
 
     protected ILogger Logger { get; }
 
+    /// <summary>
+    /// Gets the latest touch ID for the current project, which should usually be equivalent to the contents of the touch file.
+    /// Returns <see langword="null" /> when the touch ID was not yet set by the current process.
+    /// </summary>
+    internal string? LastTouchId { get; private protected set; }
+
     protected ProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey )
     {
         this.ServiceProvider = serviceProvider;
@@ -42,7 +48,7 @@ public abstract class ProjectHandler : IDisposable
     {
         if ( disposing )
         {
-            this._taskRunner.RunSynchronously( () => this.PendingTasks.WaitAllAsync() );
+            this._taskRunner.RunSynchronously( this.PendingTasks.WaitAllAsync );
         }
     }
 
