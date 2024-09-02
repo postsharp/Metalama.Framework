@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -58,6 +59,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                                 Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof(ImmutableArray).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(Console).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(Enumerable).Assembly.Location ),
@@ -1885,10 +1887,7 @@ class D{version}
 
         var code = new Dictionary<string, string>
         {
-            ["options.cs"] = options,
-            ["aspect.cs"] = aspect,
-            ["optionsAttribute.cs"] = "",
-            ["target.cs"] = target,
+            ["options.cs"] = options, ["aspect.cs"] = aspect, ["optionsAttribute.cs"] = "", ["target.cs"] = target,
 #if NETFRAMEWORK
             ["isexternalinit.cs"] = "namespace System.Runtime.CompilerServices { internal static class IsExternalInit; }"
 #endif
@@ -2242,25 +2241,21 @@ partial class A<T, U>
     public void IncompleteClassWithAspect()
     {
         const string aspect = """
-            using Metalama.Framework.Aspects;
-            
-            class Aspect : TypeAspect
-            {
-            }
-            """;
+                              using Metalama.Framework.Aspects;
+
+                              class Aspect : TypeAspect
+                              {
+                              }
+                              """;
 
         const string target = """
-            [Aspect]
-            public partial c
-            """;
+                              [Aspect]
+                              public partial c
+                              """;
 
         using var testContext = this.CreateTestContext();
 
-        var code = new Dictionary<string, string>
-        {
-            ["aspect.cs"] = aspect,
-            ["target.cs"] = target
-        };
+        var code = new Dictionary<string, string> { ["aspect.cs"] = aspect, ["target.cs"] = target };
 
         var compilation = CreateCSharpCompilation( code, assemblyName: "test", acceptErrors: true );
 
@@ -2275,36 +2270,31 @@ partial class A<T, U>
         const string attribute = "class MyAttribute : System.Attribute;";
 
         const string program = """
-            [MyAttribute]
-            System.Console.WriteLine();
-            """;
+                               [MyAttribute]
+                               System.Console.WriteLine();
+                               """;
 
         const string aspect = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
+                              using Metalama.Framework.Aspects;
+                              using Metalama.Framework.Code;
 
-            [assembly: Aspect]
+                              [assembly: Aspect]
 
-            class Aspect : CompilationAspect
-            {
-                public override void BuildAspect(IAspectBuilder<ICompilation> builder)
-                {
-                    foreach (var attribute in builder.Target.GetAllAttributesOfType(typeof(MyAttribute)))
-                    {
-                        _ = attribute.ContainingDeclaration;
-                    }
-                }
-            }
-            """;
+                              class Aspect : CompilationAspect
+                              {
+                                  public override void BuildAspect(IAspectBuilder<ICompilation> builder)
+                                  {
+                                      foreach (var attribute in builder.Target.GetAllAttributesOfType(typeof(MyAttribute)))
+                                      {
+                                          _ = attribute.ContainingDeclaration;
+                                      }
+                                  }
+                              }
+                              """;
 
         using var testContext = this.CreateTestContext();
 
-        var code = new Dictionary<string, string>
-        {
-            ["attribute.cs"] = attribute,
-            ["program.cs"] = program,
-            ["aspect.cs"] = aspect
-        };
+        var code = new Dictionary<string, string> { ["attribute.cs"] = attribute, ["program.cs"] = program, ["aspect.cs"] = aspect };
 
         var compilation = CreateCSharpCompilation( code, assemblyName: "test", acceptErrors: true );
 
@@ -2313,5 +2303,80 @@ partial class A<T, U>
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
 
         Assert.Empty( result.GetAllDiagnostics() );
+    }
+
+    [Fact]
+    public void IncompleteGenericArgumentInTransformationTarget()
+    {
+        const string aspect = """
+                              using Metalama.Framework.Advising;
+                              using Metalama.Framework.Aspects;
+                              using Metalama.Framework.Code;
+
+                              public class TestAspect : ConstructorAspect
+                              {
+                                  public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+                                  {
+                                      builder.IntroduceParameter("TestParameter", typeof(int), TypedConstant.Create(1));
+                                  }
+                              }
+                              """;
+
+        const string target1 = """
+                               using System.Collections.Generic;
+
+                               public partial class TargetCode
+                               {
+                                   [TestAspect]
+                                   public TargetCode(List<int> x)
+                                   {
+                                   }
+                               }
+                               """;
+
+        const string target2 = """
+                               using System.Collections.Generic;
+
+                               public partial class TargetCode
+                               {
+                                   [TestAspect]
+                                   public TargetCode(List<List<>> x)
+                                   {
+                                   }
+                               }
+                               """;
+
+        const string target3 = """
+                               using System.Collections.Generic;
+
+                               public partial class TargetCode
+                               {
+                                   [TestAspect]
+                                   public TargetCode(List<List<int>> x)
+                                   {
+                                   }
+                               }
+                               """;
+
+        using var testContext = this.CreateTestContext();
+
+        var code1 = new Dictionary<string, string> { ["aspect.cs"] = aspect, ["target.cs"] = target1 };
+        var code2 = new Dictionary<string, string> { ["aspect.cs"] = aspect, ["target.cs"] = target2 };
+        var code3 = new Dictionary<string, string> { ["aspect.cs"] = aspect, ["target.cs"] = target3 };
+
+        var compilation1 = CreateCSharpCompilation( code1, assemblyName: "test", acceptErrors: true );
+        var compilation2 = CreateCSharpCompilation( code2, assemblyName: "test", acceptErrors: true );
+        var compilation3 = CreateCSharpCompilation( code3, assemblyName: "test", acceptErrors: true );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        //Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out var result1 ) );
+        //Assert.Single( result1.Result.IntroducedSyntaxTrees);
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out var result2 ) );
+        Assert.Single( result2.Result.IntroducedSyntaxTrees );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation3, default, out var result3 ) );
+        Assert.Single( result3.Result.IntroducedSyntaxTrees );
     }
 }
