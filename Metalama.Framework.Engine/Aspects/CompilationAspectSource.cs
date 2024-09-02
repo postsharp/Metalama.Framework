@@ -89,6 +89,13 @@ internal sealed class CompilationAspectSource : IAspectSource
             if ( this._attributeDeserializer.TryCreateAttribute( attributeData, context.Collector, out var attributeInstance ) )
             {
                 var targetDeclaration = attribute.ContainingDeclaration;
+                var targetSymbol = targetDeclaration.GetSymbol();
+
+                if ( targetSymbol != null && !compilation.CompilationContext.SymbolValidator.IsValid( targetSymbol ) )
+                {
+                    // Aspects on declarations with invalid symbols are skipped.
+                    return;
+                }
 
                 var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
                     (IAspect) attributeInstance,

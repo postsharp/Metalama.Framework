@@ -18,7 +18,7 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
             INamedTypeSymbol symbol =>
                 symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
                     .GetMembers( name )
-                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Where( x => this.IsSymbolIncluded( x ) && this.Compilation.CompilationContext.SymbolValidator.IsValid( x ) )
                     .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
             INamespaceOrNamedType =>
@@ -34,7 +34,7 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
             INamedTypeSymbol symbol =>
                 symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
                     .GetMembers()
-                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Where( x => this.IsSymbolIncluded( x ) && this.Compilation.CompilationContext.SymbolValidator.IsValid( x ) )
                     .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
             INamespaceOrNamedType =>

@@ -238,6 +238,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
     {
+        Invariant.Assert( this.CompilationContext.SymbolValidator.IsValid( symbol ) );
+
         switch ( symbol.Kind )
         {
             case SymbolKind.Local:

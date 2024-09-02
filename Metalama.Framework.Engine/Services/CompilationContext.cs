@@ -61,6 +61,9 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     public SafeSymbolComparer SymbolComparer => new( this );
 
     [Memo]
+    internal SymbolValidator SymbolValidator => new( this );
+
+    [Memo]
     internal IEqualityComparer<ISymbol> SymbolComparerIncludingNullability => new SafeSymbolComparer( this, SymbolEqualityComparer.IncludeNullability );
 
     [Memo]

@@ -152,6 +152,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             return false;
                         }
 
+                        if (!compilation.CompilationContext.SymbolValidator.IsValid(resolved.Parent))
+                        {
+                            attribute = null;
+
+                            return false;
+                        }
+
                         attribute = new Attribute(
                             resolved.Attribute,
                             compilation,

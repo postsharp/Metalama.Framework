@@ -37,7 +37,7 @@ internal sealed class AllInterfaceUpdatableCollection : UpdatableDeclarationColl
             case INamedTypeSymbol namedTypeSymbol:
                 foreach ( var i in namedTypeSymbol.AllInterfaces )
                 {
-                    if ( !SymbolValidator.Instance.Visit( i ) )
+                    if ( !this.Compilation.CompilationContext.SymbolValidator.IsValid( i ) )
                     {
                         continue;
                     }

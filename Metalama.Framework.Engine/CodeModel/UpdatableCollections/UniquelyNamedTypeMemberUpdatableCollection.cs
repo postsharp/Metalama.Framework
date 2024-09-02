@@ -20,7 +20,7 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
         {
             INamespaceOrTypeSymbol symbol =>
                 symbol.GetMembers( name )
-                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Where( x => this.IsSymbolIncluded( x ) && this.Compilation.CompilationContext.SymbolValidator.IsValid( x ) )
                     .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .FirstOrDefault(),
             INamespaceOrNamedType =>
@@ -35,7 +35,7 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
         {
             INamespaceOrTypeSymbol symbol =>
                 symbol.GetMembers()
-                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Where( x => this.IsSymbolIncluded( x ) && this.Compilation.CompilationContext.SymbolValidator.IsValid( x ) )
                     .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
             INamespaceOrNamedType =>
