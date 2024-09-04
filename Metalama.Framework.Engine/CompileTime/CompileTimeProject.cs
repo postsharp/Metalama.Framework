@@ -95,7 +95,7 @@ internal sealed class CompileTimeProject : IProjectService
 
     [Memo]
     private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByRunTimeAssemblyName
-        => this.ClosureProjects.ToDictionary( p => p.RunTimeIdentity.Name, p => p );
+        => this.CreateClosureProjectsByRuntimeAssemblyName();
 
     [Memo]
     private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByCompileTimeAssemblyName
@@ -488,6 +488,22 @@ internal sealed class CompileTimeProject : IProjectService
         type = project.GetTypeOrNull( reflectionName );
 
         return type != null;
+    }
+
+    private IReadOnlyDictionary<string, CompileTimeProject> CreateClosureProjectsByRuntimeAssemblyName()
+    {
+        var result = new Dictionary<string, CompileTimeProject>();
+
+        foreach (var project in this.ClosureProjects )
+        {
+            if (!result.TryGetValue(project.RunTimeIdentity.Name, out var existing )
+                || existing.RunTimeIdentity.Version < project.RunTimeIdentity.Version )
+            {
+                result[project.RunTimeIdentity.Name] = project;
+            }
+        }
+
+        return result;
     }
 
     public Type GetType( string reflectionName )
