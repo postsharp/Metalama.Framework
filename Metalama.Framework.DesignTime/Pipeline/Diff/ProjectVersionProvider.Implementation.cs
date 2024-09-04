@@ -150,23 +150,19 @@ internal sealed partial class ProjectVersionProvider
 
                     projectVersion = compilationChanges.NewProjectVersion;
 
-                    if ( compilationChanges.HasChange )
+                    if ( oldReferenceCompilation != reference.Compilation )
                     {
+                        // We store the changes object even if there is no change, because of project versions.
                         changes = new ReferencedProjectChange(
                             oldReferenceCompilation,
                             reference.Compilation,
-                            ReferenceChangeKind.Modified,
+                            compilationChanges.HasChange ? ReferenceChangeKind.Modified : ReferenceChangeKind.None,
                             compilationChanges );
-                    }
-                    else if ( oldReferenceCompilation != reference.Compilation )
-                    {
-                        changes = new ReferencedProjectChange(
-                            oldReferenceCompilation,
-                            reference.Compilation,
-                            ReferenceChangeKind.None );
                     }
                     else
                     {
+                        Invariant.Assert( !compilationChanges.HasChange );
+
                         // No change, not even compilation instances.
                         changes = null;
                     }
@@ -344,8 +340,8 @@ internal sealed partial class ProjectVersionProvider
                     }
                     else
                     {
-                        // For some (unknown) reason, the compilation was added somewhere else, while adding the cache. 
-                        // I don't have an explanation at the moment of why this may happen.
+                        // This happens when the new compilation was already in the cache, but change to it from the old compilation was not.
+                        // This means there will be multiple ProjectVersion objects for the same Compilation instance, but that shouldn't cause any issues here.
                     }
 
                     return incrementalChanges;
@@ -585,10 +581,38 @@ internal sealed partial class ProjectVersionProvider
             switch (first.ChangeKind, second.ChangeKind)
             {
                 case (_, ReferenceChangeKind.None):
-                    return new( firstOldCompilation, second.NewCompilation, first.ChangeKind, first.Changes );
+                    {
+                        var changes = first.Changes == null
+                            ? null
+                            : new CompilationChanges(
+                                first.Changes.OldProjectVersionDangerous,
+                                second.Changes.AssertNotNull().NewProjectVersion,
+                                first.Changes.SyntaxTreeChanges,
+                                first.Changes.ReferencedCompilationChanges,
+                                first.Changes.ReferencedPortableExecutableChanges,
+                                first.Changes.AssemblyIdentityChanged,
+                                first.Changes.HasCompileTimeCodeChange,
+                                first.Changes.IsIncremental );
+
+                        return new( firstOldCompilation, second.NewCompilation, first.ChangeKind, changes );
+                    }
 
                 case (ReferenceChangeKind.None, _):
-                    return new( firstOldCompilation, second.NewCompilation, second.ChangeKind, second.Changes );
+                    {
+                        var changes = second.Changes == null
+                            ? null
+                            : new CompilationChanges(
+                                first.Changes.AssertNotNull().OldProjectVersionDangerous,
+                                second.Changes.NewProjectVersion,
+                                second.Changes.SyntaxTreeChanges,
+                                second.Changes.ReferencedCompilationChanges,
+                                second.Changes.ReferencedPortableExecutableChanges,
+                                second.Changes.AssemblyIdentityChanged,
+                                second.Changes.HasCompileTimeCodeChange,
+                                second.Changes.IsIncremental );
+
+                        return new( firstOldCompilation, second.NewCompilation, second.ChangeKind, changes );
+                    }
 
                 case (ReferenceChangeKind.Removed, ReferenceChangeKind.Added):
                     {
@@ -611,13 +635,11 @@ internal sealed partial class ProjectVersionProvider
                     {
                         var changes = await this.MergeCompilationChangesAsync( first.Changes!.ToHandle(), second.Changes!, cancellationToken );
 
-                        return changes.HasChange
-                            ? new(
-                                firstOldCompilation,
-                                second.NewCompilation,
-                                ReferenceChangeKind.Modified,
-                                changes )
-                            : new( firstOldCompilation, second.NewCompilation, ReferenceChangeKind.None );
+                        return new(
+                            firstOldCompilation,
+                            second.NewCompilation,
+                            changes.HasChange ? ReferenceChangeKind.Modified : ReferenceChangeKind.None,
+                            changes );
                     }
 
                 case (ReferenceChangeKind.Added, ReferenceChangeKind.Modified):
