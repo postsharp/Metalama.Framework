@@ -325,24 +325,19 @@ namespace Metalama.Framework.Engine.Templating
                 case ArgumentSyntax argument:
                     var invocation = node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
 
-                    if ( invocation != null )
+                    if ( invocation != null && this.GetSymbol( invocation.Expression ) is IMethodSymbol invokedMethod )
                     {
-                        var invokedMethod = (IMethodSymbol?) this.GetSymbol( invocation.Expression );
+                        var parameterIndex = invocation.ArgumentList.Arguments.IndexOf( argument );
 
-                        if ( invokedMethod != null )
+                        if ( parameterIndex > 0 )
                         {
-                            var parameterIndex = invocation.ArgumentList.Arguments.IndexOf( argument );
-
-                            if ( parameterIndex > 0 )
+                            if ( parameterIndex < invokedMethod.Parameters.Length )
                             {
-                                if ( parameterIndex < invokedMethod.Parameters.Length )
-                                {
-                                    return invokedMethod.Parameters[parameterIndex].Type;
-                                }
-                                else if ( invokedMethod.Parameters.Last().IsParams )
-                                {
-                                    return ((IArrayTypeSymbol) invokedMethod.Parameters.Last().Type).ElementType;
-                                }
+                                return invokedMethod.Parameters[parameterIndex].Type;
+                            }
+                            else if ( invokedMethod.Parameters.Last().IsParams )
+                            {
+                                return ((IArrayTypeSymbol) invokedMethod.Parameters.Last().Type).ElementType;
                             }
                         }
                     }
