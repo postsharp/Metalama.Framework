@@ -1,6 +1,11 @@
+#if TEST_OPTIONS
+// @TestScenario(DesignTime)
+#endif
+
 using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.DesignTimeInvalidCode.ErrorTypedConstantInAttribute;
 
@@ -8,7 +13,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.DesignTimeInvalidCode.
  * Tests that errorneous expression in aspect attribute does not cause an exception.
  */
 
-internal class Aspect : OverrideFieldOrPropertyAspect
+internal class Aspect : TypeAspect
 {
     private int constructorValue;
 
@@ -21,33 +26,27 @@ internal class Aspect : OverrideFieldOrPropertyAspect
     {
     }
 
-    public int PropertyValue { get; }
+    public int PropertyValue { get; set; }
 
-    public override dynamic? OverrideProperty
+    public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        get
-        {
-            Console.WriteLine($"ConstructorValue: {this.constructorValue}");
-            Console.WriteLine($"PropertyValue: {this.PropertyValue}");
-            return meta.Proceed();
-        }
-        set
-        {
-            meta.Proceed();
-        }
+        builder.IntroduceField("ConstructorValueWas_" + this.constructorValue, typeof(int));
+        builder.IntroduceField("PropertyValueWas_" + this.PropertyValue, typeof(int));
     }
 }
 
 // <target>
-internal class TargetCode
+#if TESTRUNNER
+[Aspect(int.Parse("42"))]
+#endif
+internal partial class TargetCode1
 {
-#if TESTRUNNER
-    [Aspect(int.Parse("42"))]
-#endif
-    public int Foo { get; set; }
+}
 
+// <target>
 #if TESTRUNNER
-    [Aspect(PropertyValue = int.Parse("42"))]
+[Aspect(PropertyValue = int.Parse("42"))]
 #endif
-    public int Bar { get; set; }
+internal partial class TargetCode2
+{
 }
