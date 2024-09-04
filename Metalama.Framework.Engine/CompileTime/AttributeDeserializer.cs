@@ -260,8 +260,10 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
         switch ( typedConstant.Kind )
         {
             case TypedConstantKind.Error:
-                // We should never get here if there is an invalid value.
-                throw new AssertionFailedException( "Got an invalid attribute argument value. " );
+                // This expresses when invalid expression is used in an attribute, e.g.: int.Parse("42").
+                translatedValue = null;
+
+                return false;
 
             case TypedConstantKind.Array when typedConstant.Values.IsDefault:
                 translatedValue = null;
