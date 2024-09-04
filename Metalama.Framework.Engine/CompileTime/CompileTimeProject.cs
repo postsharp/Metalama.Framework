@@ -494,9 +494,11 @@ internal sealed class CompileTimeProject : IProjectService
     {
         var result = new Dictionary<string, CompileTimeProject>();
 
-        foreach (var project in this.ClosureProjects )
+        foreach ( var project in this.ClosureProjects )
         {
-            if (!result.TryGetValue(project.RunTimeIdentity.Name, out var existing )
+            // When two versions of the same assembly are referenced, we get two references with the same assembly name.
+            // This selects the higher version, which would be the one that should be used in this scenario.
+            if ( !result.TryGetValue( project.RunTimeIdentity.Name, out var existing )
                 || existing.RunTimeIdentity.Version < project.RunTimeIdentity.Version )
             {
                 result[project.RunTimeIdentity.Name] = project;
