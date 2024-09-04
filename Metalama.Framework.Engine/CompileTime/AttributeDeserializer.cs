@@ -265,7 +265,6 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
 
                 return false;
 
-
             case TypedConstantKind.Array when typedConstant.Values.IsDefault:
                 translatedValue = null;
 
