@@ -10,9 +10,8 @@
         <PackageReference Include="Metalama.Framework" />
     </ItemGroup>
 
-
     <ItemGroup>
-        <Reference Include="dependency" HintPath="..\Dependency1\bin\Debug\net8.0\dependency.dll" />
+        <Reference Include="dependency, version=1.0.0.0" HintPath="..\Dependency1\bin\$(Configuration)\net8.0\dependency.dll" />
     </ItemGroup>
 
 </Project>

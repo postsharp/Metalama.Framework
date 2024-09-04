@@ -1,5 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
+using System.Reflection;
+
+[assembly: AssemblyVersion( "1.1.0.0" )]
 
 namespace Dependency;
 

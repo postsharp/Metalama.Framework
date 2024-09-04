@@ -12,6 +12,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="dependency" HintPath="..\Dependency2\bin\Debug\net8.0\dependency.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Middle1\Middle1.csproj" />
         <ProjectReference Include="..\Middle2\Middle2.csproj" />
     </ItemGroup>

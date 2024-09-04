@@ -5,11 +5,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AssemblyName>dependency</AssemblyName>
-        <AssemblyVersion>1.0.0.0</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Metalama.Framework" Version="2024.2.20" />
+        <PackageReference Include="Metalama.Framework" />
     </ItemGroup>
 
 </Project>
