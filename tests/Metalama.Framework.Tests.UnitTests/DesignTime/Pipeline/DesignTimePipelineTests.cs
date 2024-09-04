@@ -2318,6 +2318,10 @@ partial class A<T, U>
     [Fact]
     public void IncompleteGenericArgumentInTransformationTarget()
     {
+        // This is test of #35362.
+        // This bug only occured when the pipeline had a valid state and the compilation got into invalid state, during AspectPipelineResult.Update.
+        // It happened during the second TryExecute because the representation of ErrorTypeSymbol was throwing exceptions.
+        // The third step is there just for completeness, so that the pipeline manages to recover from the error.
         const string aspect =
             """
             using Metalama.Framework.Advising;
@@ -2384,8 +2388,8 @@ partial class A<T, U>
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
-        //Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out var result1 ) );
-        //Assert.Single( result1.Result.IntroducedSyntaxTrees);
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out var result1 ) );
+        Assert.Single( result1.Result.IntroducedSyntaxTrees );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out var result2 ) );
         Assert.Single( result2.Result.IntroducedSyntaxTrees );
