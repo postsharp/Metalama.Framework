@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -266,5 +267,42 @@ public sealed partial class CompilationChangesTests
         Assert.Equal( ReferenceChangeKind.Removed, dependencyChange.ChangeKind );
         Assert.Same( dependencyCompilation1, dependencyChange.OldCompilationDangerous );
         Assert.Null( dependencyChange.NewCompilation );
+    }
+
+    [Fact]
+    public async Task IncorrectDependencyMerge()
+    {
+        // Regression test for issue #35359 in MergeReferencedProjectChangesAsync with ReferenceChangeKind.None.
+
+        using var testContext = this.CreateTestContext();
+        var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
+
+        var code = new Dictionary<string, string> { { "code.cs", "class C;" } };
+        var dependencyCompilation1 = CreateCSharpCompilation( code, name: "Dependency" );
+        var mainCompilation1 = CreateEmptyCSharpCompilation( "Main", [dependencyCompilation1.ToMetadataReference()] );
+
+        var code3 = new Dictionary<string, string> { { "code.cs", "class C3;" } };
+        var dependencyCompilation3 = CreateCSharpCompilation( code3, name: "Dependency" );
+        var mainCompilation3 = CreateEmptyCSharpCompilation( "Main", [dependencyCompilation3.ToMetadataReference()] );
+
+        var code4 = new Dictionary<string, string> { { "code.cs", "class C4;" } };
+        var dependencyCompilation4 = CreateCSharpCompilation( code4, name: "Dependency" );
+        var mainCompilation4 = CreateEmptyCSharpCompilation( "Main", [dependencyCompilation4.ToMetadataReference()] );
+
+        async Task Impl()
+        {
+            var dependencyCompilation2 = CreateCSharpCompilation( code, name: "Dependency" );
+            var mainCompilation2 = CreateEmptyCSharpCompilation( "Main", [dependencyCompilation2.ToMetadataReference()] );
+
+            await projectVersionProvider.GetCompilationChangesAsync( mainCompilation1, mainCompilation2 );
+
+            await projectVersionProvider.GetCompilationChangesAsync( mainCompilation1, mainCompilation3 );
+        }
+
+        await Impl();
+
+        GC.Collect();
+
+        await projectVersionProvider.GetCompilationChangesAsync( mainCompilation1, mainCompilation4 );
     }
 }

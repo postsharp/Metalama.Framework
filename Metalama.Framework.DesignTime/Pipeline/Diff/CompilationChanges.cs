@@ -14,7 +14,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// </summary>
     internal sealed class CompilationChanges
     {
-        private readonly WeakReference<ProjectVersion>? _oldCompilationVersionRef;
+        private readonly WeakReference<ProjectVersion>? _oldProjectVersionRef;
 
         public ImmutableDictionary<string, SyntaxTreeChange> SyntaxTreeChanges { get; }
 
@@ -22,27 +22,27 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         {
             get
             {
-                if ( this._oldCompilationVersionRef == null )
+                if ( this._oldProjectVersionRef == null )
                 {
                     return null;
                 }
 
-                if ( this._oldCompilationVersionRef.TryGetTarget( out var version ) )
+                if ( this._oldProjectVersionRef.TryGetTarget( out var version ) )
                 {
                     return version;
                 }
 
-                throw new InvalidOperationException( "The old compilation that is no longer alive." );
+                throw new InvalidOperationException( "The old compilation is no longer alive." );
             }
         }
 
         public CompilationChangesHandle ToHandle()
         {
-            if ( this._oldCompilationVersionRef == null )
+            if ( this._oldProjectVersionRef == null )
             {
                 return new CompilationChangesHandle( this, null );
             }
-            else if ( this._oldCompilationVersionRef.TryGetTarget( out var version ) )
+            else if ( this._oldProjectVersionRef.TryGetTarget( out var version ) )
             {
                 return new CompilationChangesHandle( this, version );
             }
@@ -68,7 +68,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public bool HasCompileTimeCodeChange { get; }
 
         public CompilationChanges(
-            ProjectVersion? oldCompilationVersion,
+            ProjectVersion? oldProjectVersion,
             ProjectVersion newProjectVersion,
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
@@ -77,13 +77,13 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             bool hasCompileTimeCodeChange,
             bool isIncremental )
         {
-            if ( isIncremental != (oldCompilationVersion != null) )
+            if ( isIncremental != (oldProjectVersion != null) )
             {
                 throw new AssertionFailedException( "IsIncremental is not consistent." );
             }
 
             this.SyntaxTreeChanges = syntaxTreeChanges;
-            this._oldCompilationVersionRef = oldCompilationVersion == null ? null : new WeakReference<ProjectVersion>( oldCompilationVersion );
+            this._oldProjectVersionRef = oldProjectVersion == null ? null : new WeakReference<ProjectVersion>( oldProjectVersion );
             this.NewProjectVersion = newProjectVersion;
             this.ReferencedCompilationChanges = referencedCompilationChanges;
             this.ReferencedPortableExecutableChanges = referencedPortableExecutableChanges;
@@ -95,16 +95,16 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// <summary>
         /// Gets a <see cref="CompilationChanges"/> object that represents the absence of change.
         /// </summary>
-        public static CompilationChanges Empty( ProjectVersion? oldCompilation, ProjectVersion newProject )
+        public static CompilationChanges Empty( ProjectVersion? oldProject, ProjectVersion newProject )
             => new(
-                oldCompilation,
+                oldProject,
                 newProject,
                 ImmutableDictionary<string, SyntaxTreeChange>.Empty,
                 ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
                 ImmutableDictionary<string, ReferenceChangeKind>.Empty,
                 assemblyIdentityChanged: false,
                 hasCompileTimeCodeChange: false,
-                isIncremental: oldCompilation != null );
+                isIncremental: oldProject != null );
 
         public bool HasChange => this.HasCompileTimeCodeChange
             || this.SyntaxTreeChanges.Count > 0
