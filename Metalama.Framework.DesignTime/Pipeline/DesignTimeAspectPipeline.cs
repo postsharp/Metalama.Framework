@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Licensing.Consumption.Sources;
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
@@ -886,7 +887,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             return null;
         }
 
-        var symbolId = symbol.GetSerializableId();
+        if ( symbol.TryGetSerializableId( out var symbolId ) )
+        {
+            return null;
+        }
 
         if ( !this._currentState.PipelineResult.SyntaxTreeResults.TryGetValue( filePath, out var result ) )
         {

@@ -41,6 +41,7 @@ public static class SerializableDeclarationIdProvider
         {
             case null:
             case ILocalSymbol:
+            case { Kind: SymbolKind.Alias }:
             case IMethodSymbol
             {
                 MethodKind: RoslynMethodKind.LocalFunction or RoslynMethodKind.AnonymousFunction
