@@ -141,6 +141,13 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                if ( !syntaxRoot.Span.Contains( context.Span ) )
+                {
+                    this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync('{context.Document.Project.Name}'): requested span out-of-bounds in '{context.Document.Name}'." );
+
+                    return;
+                }
+
                 var node = syntaxRoot.FindNode( context.Span );
 
                 var invocationContext = new CodeActionInvocationContext(
@@ -178,6 +185,11 @@ namespace Metalama.Framework.DesignTime
                 var syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
 
                 if ( syntaxRoot == null )
+                {
+                    return document;
+                }
+
+                if ( !syntaxRoot.Span.Contains( span ) )
                 {
                     return document;
                 }
