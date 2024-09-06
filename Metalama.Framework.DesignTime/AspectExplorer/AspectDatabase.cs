@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Pipeline;
@@ -30,6 +31,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly WorkspaceProvider _workspaceProvider;
     private readonly AnalysisProcessEventHub _eventHub;
+    private readonly IExceptionReporter? _exceptionReporter;
 
     private readonly WeakCache<Compilation, ImmutableArray<IIntrospectionAspectInstance>> _aspectInstanceCache = new();
 
@@ -39,6 +41,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._workspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
+        this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
     }
 
     private async Task<(DesignTimeAspectPipeline Pipeline, Compilation Compilation)?> GetPipelineAndCompilationAsync(
@@ -140,7 +143,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             }
             catch ( Exception ex )
             {
-                DesignTimeExceptionHandler.ReportException( ex );
+                DesignTimeExceptionHandler.ReportException( ex, this._exceptionReporter );
 
                 aspectInstances = ImmutableArray<IIntrospectionAspectInstance>.Empty;
             }

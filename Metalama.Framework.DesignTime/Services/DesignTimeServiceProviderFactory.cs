@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Telemetry;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
@@ -94,7 +96,7 @@ public abstract class DesignTimeServiceProviderFactory
     internal ServiceProvider<IGlobalService> GetServiceProvider( ServiceProvider<IGlobalService> serviceProvider )
     {
         // Add the services that may be required by the CompilerServiceProvider.
-        serviceProvider = serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );
+        serviceProvider = serviceProvider.WithUntypedService( typeof( IRpcExceptionHandler ), new RpcExceptionHandler( serviceProvider ) );
 
         // Create a CompilerServiceProvider.
         var compilerServiceProvider = this.CreateCompilerServiceProvider();
@@ -116,6 +118,13 @@ public abstract class DesignTimeServiceProviderFactory
 
     private sealed class RpcExceptionHandler : IRpcExceptionHandler
     {
-        public void OnException( Exception e, ILogger logger ) => DesignTimeExceptionHandler.ReportException( e, logger );
+        private readonly IExceptionReporter? _exceptionReporter;
+
+        public RpcExceptionHandler( ServiceProvider<IGlobalService> serviceProvider )
+        {
+            this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
+        }
+
+        public void OnException( Exception e, ILogger logger ) => DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
     }
 }

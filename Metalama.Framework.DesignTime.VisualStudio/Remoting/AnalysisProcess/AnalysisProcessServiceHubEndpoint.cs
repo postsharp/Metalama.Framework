@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Telemetry;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
@@ -12,6 +13,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
 internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi>, IServiceHubApiProvider
 {
+    private readonly IExceptionReporter? _exceptionReporter;
     private readonly AnalysisProcessEventHub _eventHub;
 
     public AnalysisProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base(
@@ -21,6 +23,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
     {
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChangedEvent.RegisterHandler( this.OnCompilationResultChanged );
+        this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
     }
 
 #pragma warning disable VSTHRD100
@@ -35,7 +38,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
         }
         catch ( Exception e )
         {
-            DesignTimeExceptionHandler.ReportException( e );
+            DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
         }
     }
 #pragma warning restore VSTHRD100
@@ -103,7 +106,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
                 }
                 catch ( Exception e )
                 {
-                    DesignTimeExceptionHandler.ReportException( e, this.Logger );
+                    DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter, this.Logger );
                 }
             } );
 #pragma warning restore VSTHRD110

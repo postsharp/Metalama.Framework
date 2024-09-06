@@ -297,7 +297,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
         catch ( Exception exception )
         {
-            DesignTimeExceptionHandler.ReportException( exception );
+            DesignTimeExceptionHandler.ReportException( exception, this.ServiceProvider.Global.GetBackstageService<IExceptionReporter>() );
         }
     }
 #pragma warning restore VSTHRD100
@@ -887,7 +887,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             return null;
         }
 
-        if ( symbol.TryGetSerializableId( out var symbolId ) )
+        if ( !symbol.TryGetSerializableId( out var symbolId ) )
         {
             return null;
         }

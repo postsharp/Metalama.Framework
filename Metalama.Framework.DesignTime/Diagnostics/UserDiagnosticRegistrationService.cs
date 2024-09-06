@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Configuration;
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Diagnostics;
@@ -20,9 +21,11 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         // Multiple instances are needed for testing.
         private readonly UserDiagnosticsConfiguration _registrationFile;
         private readonly IConfigurationManager _configurationManager;
+        private readonly IExceptionReporter? _exceptionReporter;
 
         public UserDiagnosticRegistrationService( GlobalServiceProvider serviceProvider )
         {
+            this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
             this._configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
             this._registrationFile = this._configurationManager.Get<UserDiagnosticsConfiguration>();
         }
@@ -67,7 +70,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             {
                 // We swallow exceptions because we don't want to fail the pipeline in case of error here.
                 this._configurationManager.Logger.Error?.Log( $"Cannot register user diagnostics and registrations: {e.Message}." );
-                DesignTimeExceptionHandler.ReportException( e );
+                DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
             }
         }
 

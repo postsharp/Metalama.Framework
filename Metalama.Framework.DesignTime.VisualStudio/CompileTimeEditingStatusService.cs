@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.DesignTime.Contracts.Diagnostics;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Utilities;
@@ -21,7 +22,7 @@ internal sealed class CompileTimeEditingStatusService : ICompileTimeEditingStatu
     public CompileTimeEditingStatusService( GlobalServiceProvider serviceProvider )
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
-        this._pendingTasks = new TaskBag( logger );
+        this._pendingTasks = new TaskBag( logger, serviceProvider.GetBackstageService<IExceptionReporter>() );
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this._userProcessEndpoint.EndpointAdded += this.OnEndpointAdded;
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;

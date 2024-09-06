@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Diagnostics;
@@ -41,6 +42,7 @@ namespace Metalama.Framework.DesignTime
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
         private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly IExceptionReporter? _exceptionReporter;
 
         static TheDiagnosticSuppressor()
         {
@@ -60,10 +62,11 @@ namespace Metalama.Framework.DesignTime
                 this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
                 this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
                 this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+                this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
 
                 throw;
             }
@@ -203,7 +206,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
             }
         }
 

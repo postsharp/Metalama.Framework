@@ -5,6 +5,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Services;
+using System;
 using System.Collections.Immutable;
 using Xunit.Abstractions;
 
@@ -14,7 +15,7 @@ namespace Metalama.Testing.UnitTesting
     /// A base class for all Metalama unit tests that require Metalama services. Exposes a <see cref="CreateTestContext(IAdditionalServiceCollection)"/>
     /// that creates a context with all services. The next step is typically to call one of the methods or properties of the returned <see cref="TestContext"/>.
     /// </summary>
-    public abstract class UnitTestClass
+    public abstract class UnitTestClass : IDisposable
     {
         static UnitTestClass()
         {
@@ -33,6 +34,8 @@ namespace Metalama.Testing.UnitTesting
             this._testOutputHelper = testOutputHelper;
             this._injectLoggingService = injectLoggingService;
         }
+
+        public virtual void Dispose() { }
 
         /// <summary>
         /// Gets an object allowing to write to the test output. 

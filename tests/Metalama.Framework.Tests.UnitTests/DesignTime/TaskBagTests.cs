@@ -14,7 +14,7 @@ public sealed class TaskBagTests
     [Fact]
     public async Task NonYielding()
     {
-        var bag = new TaskBag( NullLogger.Instance );
+        var bag = new TaskBag( NullLogger.Instance, null );
 
         for ( var i = 0; i < 1000; i++ )
         {
@@ -30,7 +30,7 @@ public sealed class TaskBagTests
     [Fact]
     public async Task Yielding()
     {
-        var bag = new TaskBag( NullLogger.Instance );
+        var bag = new TaskBag( NullLogger.Instance, null );
 
         for ( var i = 0; i < 1000; i++ )
         {

@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Telemetry;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.Utilities
@@ -19,7 +20,7 @@ namespace Metalama.Framework.DesignTime.Utilities
                 _ => true
             };
 
-        public static void ReportException( Exception e, ILogger? logger = null )
+        public static void ReportException( Exception e, IExceptionReporter? exceptionReporter, ILogger? logger = null )
         {
             logger ??= Logger.DesignTime;
 
@@ -27,7 +28,9 @@ namespace Metalama.Framework.DesignTime.Utilities
             {
                 logger.Error?.Log( e.ToString() );
 
-                BackstageServiceFactory.ServiceProvider.GetBackstageService<IExceptionReporter>()?.ReportException( e );
+                exceptionReporter ??= BackstageServiceFactory.ServiceProvider.GetBackstageService<IExceptionReporter>();
+
+                exceptionReporter?.ReportException( e );
             }
             else
             {

@@ -18,53 +18,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.CodeActions;
 
 #pragma warning disable VSTHRD200, CA1307
 
-public sealed class CodeFixTests : UnitTestClass
+public sealed class CodeFixTests : CodeFixTestClassBase
 {
-    protected override void ConfigureServices( IAdditionalServiceCollection services )
-    {
-        base.ConfigureServices( services );
-        services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
-        services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService( shouldWrapUnsupportedDiagnostics: true ) );
-    }
-
-    private static async Task<(ImmutableArray<Diagnostic> diagnostics, GlobalServiceProvider serviceProvider)> ExecutePipeline(
-        TestContext testContext, TestWorkspaceProvider workspace, TestDesignTimeAspectPipelineFactory pipelineFactory )
-    {
-        var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
-
-        serviceProvider = serviceProvider.WithServices(
-            new CodeActionExecutionService( serviceProvider ),
-            new CodeRefactoringDiscoveryService( serviceProvider ) );
-
-        var project = workspace.GetProject( "target" );
-        var pipeline = pipelineFactory.GetOrCreatePipeline( project )!;
-        var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
-        Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
-
-        return (diagnostics, serviceProvider);
-    }
-
-    private static async Task<(TestCodeFixContext codeFixContext, TestCodeRefactoringContext riderRefactoringContext)> QueryCodeFixes(
-        TestWorkspaceProvider workspace, GlobalServiceProvider serviceProvider, ImmutableArray<Diagnostic> diagnostics, string targetTokenText )
-    {
-        var document = workspace.GetDocument( "target", "code.cs" );
-        var syntaxRoot = await document.GetSyntaxRootAsync();
-        var span = syntaxRoot.DescendantTokens().Single( t => t.Text == targetTokenText ).Span;
-
-        var codeFixProvider = new RiderCodeFixProvider( serviceProvider );
-        var codeFixContext = new TestCodeFixContext( document, diagnostics, span );
-
-        await codeFixProvider.RegisterCodeFixesAsync( codeFixContext );
-
-        var codeRefactoringProvider = new RiderCodeRefactoringProvider( serviceProvider );
-        var codeRefactoringContext = new TestCodeRefactoringContext( document, span );
-
-        await codeRefactoringProvider.ComputeRefactoringsAsync( codeRefactoringContext );
-
-        return (codeFixContext, codeRefactoringContext);
-    }
-
     [Fact]
     public async Task RiderHiddenDiagnosticCodeFixTest()
     {

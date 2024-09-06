@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Services;
@@ -44,6 +45,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeActionExecutionService _codeActionExecutionService;
         private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
+        private readonly IExceptionReporter? _exceptionReporter;
 
         public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetSharedServiceProvider() ) { }
 
@@ -66,6 +68,7 @@ namespace Metalama.Framework.DesignTime
 
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
             this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
+            this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
         }
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context ) => this.RegisterCodeFixesAsync( new CodeFixContextAdapter( context ) );
@@ -107,7 +110,7 @@ namespace Metalama.Framework.DesignTime
                 context.RegisterCodeFix(
                     CodeAction.Create(
                         "Make partial",
-                        cancellationToken => GetFixedDocumentAsync( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ),
+                        cancellationToken => this.GetFixedDocumentAsync( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ),
                         _makePartialKey ),
                     context.Diagnostics );
             }
@@ -171,7 +174,7 @@ namespace Metalama.Framework.DesignTime
         // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
         public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
-        private static async Task<Document> GetFixedDocumentAsync( Document document, TextSpan span, CancellationToken cancellationToken )
+        private async Task<Document> GetFixedDocumentAsync( Document document, TextSpan span, CancellationToken cancellationToken )
         {
             try
             {
@@ -198,7 +201,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
 
                 return document;
             }

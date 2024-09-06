@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.Utilities;
@@ -38,7 +39,7 @@ public abstract class ProjectHandler : IDisposable
         this.ProjectOptions = projectOptions;
         this.ProjectKey = projectKey;
         this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
-        this.PendingTasks = new TaskBag( this.Logger );
+        this.PendingTasks = new TaskBag( this.Logger, serviceProvider.GetBackstageService<IExceptionReporter>() );
         this._taskRunner = this.ServiceProvider.GetRequiredService<ITaskRunner>();
     }
 

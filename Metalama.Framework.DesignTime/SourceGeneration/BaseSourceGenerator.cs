@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
@@ -84,7 +86,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                DesignTimeExceptionHandler.ReportException( e, this.ServiceProvider.GetBackstageService<IExceptionReporter>() );
 
                 // We rethrow the exception because it is important that the user knows that there was a problem,
                 // given that the compilation may be broken.
