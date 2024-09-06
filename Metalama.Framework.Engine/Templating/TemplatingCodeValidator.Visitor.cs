@@ -2,8 +2,10 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -570,6 +572,17 @@ namespace Metalama.Framework.Engine.Templating
                 if ( diagnostic.Severity == DiagnosticSeverity.Error )
                 {
                     this.HasError = true;
+                }
+
+                if ( this._isDesignTime && diagnostic.Location.IsInSource && !this._semanticModel.Compilation.ContainsSyntaxTree( diagnostic.Location.SourceTree ) )
+                {
+                    // At design-time, we have to report diagnostics on the correct tree instance.
+                    // (At compile-time, Metalama Compiler ignores which tree object a diagnostic is reported on.)
+
+                    var targetTree = this._semanticModel.SyntaxTree;
+
+                    // It is a hack to use manifest code here, but it already does what we need.
+                    diagnostic = new CompileTimeDiagnosticManifest( diagnostic, new() { { targetTree.FilePath, 0 } } ).ToDiagnostic( [targetTree] );
                 }
 
                 this._reportDiagnostic( diagnostic );
