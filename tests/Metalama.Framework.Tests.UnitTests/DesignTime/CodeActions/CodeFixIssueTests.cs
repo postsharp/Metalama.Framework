@@ -40,4 +40,29 @@ public sealed class CodeFixIssueTests : CodeFixTestClassBase
         Assert.Empty( codeFixContext.RegisteredCodeFixes );
         Assert.Empty( codeRefactoringContext.RegisteredRefactorings );
     }
+
+    [Fact]
+    public async Task OutOfBoundsSpanDoesNotCauseError()
+    {
+        using var testContext = this.CreateTestContext();
+        const string code =
+            """
+            void Foo() {}
+            """;
+
+        // Initialize the workspace.
+        var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
+        workspace.AddOrUpdateProject( "target", new Dictionary<string, string> { ["code.cs"] = code } );
+
+        // Execute the pipeline to get diagnostics.
+        using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
+
+        // Query code fixes and refactorings.
+        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, TextSpan.FromBounds( 100, 101 ) );
+
+        Assert.Empty( codeFixContext.RegisteredCodeFixes );
+        Assert.Empty( codeRefactoringContext.RegisteredRefactorings );
+    }
 }
