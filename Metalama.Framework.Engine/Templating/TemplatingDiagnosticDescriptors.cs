@@ -616,5 +616,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity.",
                 Error,
                 "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity." );
+
+        internal static readonly DiagnosticDefinition<ITypeSymbol> TemplateAttributeOnLocalFunction
+            = new(
+                "LAMA0285",
+                "Template attribute is not allowed on a local function.",
+                "The attribute {0} is not allowed on a local function.",
+                _category,
+                Error );
     }
 }

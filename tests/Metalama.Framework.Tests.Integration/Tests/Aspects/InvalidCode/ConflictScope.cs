@@ -3,7 +3,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.ConflictScope
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.InvalidCode.ConflictScope
 {
     internal class Aspect : OverrideMethodAspect
     {
