@@ -1009,11 +1009,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var expression = this.Transform( node.Expression );
 
-        var toArrayStatementExpression = InvocationExpression(
+        var toStatementExpression = InvocationExpression(
             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ToStatement) ),
             ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
-        return toArrayStatementExpression;
+        return toStatementExpression;
     }
 
     public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
