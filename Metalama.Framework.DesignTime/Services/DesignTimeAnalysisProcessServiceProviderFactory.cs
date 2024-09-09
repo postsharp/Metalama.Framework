@@ -47,8 +47,7 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
     protected override ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
     {
         // Initialize exception reporter.
-        serviceProvider = base.AddServices( serviceProvider )
-            .WithService( new DesignTimeExceptionHandler( serviceProvider ) );
+        serviceProvider = base.AddServices( serviceProvider );
 
         // Initialize the event hub.
         serviceProvider = serviceProvider

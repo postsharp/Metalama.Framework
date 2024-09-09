@@ -94,7 +94,11 @@ public abstract class DesignTimeServiceProviderFactory
     internal ServiceProvider<IGlobalService> GetServiceProvider( ServiceProvider<IGlobalService> serviceProvider )
     {
         // Add the services that may be required by the CompilerServiceProvider.
-        serviceProvider = serviceProvider.WithUntypedService( typeof( IRpcExceptionHandler ), new RpcExceptionHandler( serviceProvider ) );
+        serviceProvider = serviceProvider
+            .WithService( sp => new DesignTimeExceptionHandler( sp ) );
+
+        serviceProvider = serviceProvider
+            .WithUntypedService( typeof( IRpcExceptionHandler ), new RpcExceptionHandler( serviceProvider ) );
 
         // Create a CompilerServiceProvider.
         var compilerServiceProvider = this.CreateCompilerServiceProvider();
