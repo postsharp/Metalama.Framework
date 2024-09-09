@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -27,9 +28,38 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
     }
 
     public bool Equals( IDeclaration? x, IDeclaration? y )
-        => (x == null && y == null) || (x != null && y != null && this._innerComparer.Equals( x.ToValueTypedRef(), y.ToValueTypedRef() ));
+    {
+        if ( x == null && y == null )
+        {
+            return true;
+        }
 
-    public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToValueTypedRef() );
+        if ( x == null || y == null )
+        {
+            return false;
+        }
+
+        var xAttribute = x as IAttribute;
+        var yAttribute = y as IAttribute;
+
+        if ( xAttribute != null || yAttribute != null )
+        {
+            // For now, use reference equality for attributes. If proper structural equality is needed, that can be added later.
+            return ReferenceEquals( xAttribute, yAttribute );
+        }
+
+        return this._innerComparer.Equals( x.ToValueTypedRef(), y.ToValueTypedRef() );
+    }
+
+    public int GetHashCode( IDeclaration obj )
+    {
+        if ( obj is IAttribute attribute )
+        {
+            return RuntimeHelpers.GetHashCode( attribute );
+        }
+
+        return this._innerComparer.GetHashCode( obj.ToValueTypedRef() );
+    }
 
     public bool Equals( IType? x, IType? y )
         => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralDeclarationComparer.Equals( x, y ));
