@@ -7,7 +7,6 @@ using PostSharp.Engineering.BuildTools.Build.Solutions;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
-using Spectre.Console.Cli;
 using System.IO;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_1;
 
@@ -92,11 +91,7 @@ var product = new Product( MetalamaDependencies.Metalama )
 
 product.PrepareCompleted += OnPrepareCompleted;
 
-var commandApp = new CommandApp();
-
-commandApp.AddProductCommands( product );
-
-return commandApp.Run( args );
+return new EngineeringApp( product ).Run( args );
 
 static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
 {
