@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="dependency" HintPath="..\Dependency2\bin\Debug\net8.0\dependency.dll" />
+        <Reference Include="dependency" HintPath="..\Dependency2\bin\$(Configuration)\net8.0\dependency.dll" />
     </ItemGroup>
 
     <ItemGroup>
