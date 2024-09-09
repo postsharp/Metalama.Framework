@@ -300,7 +300,14 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     INamespace INamedType.Namespace => this.ContainingNamespace;
 
     [Memo]
-    public INamespace ContainingNamespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
+    public INamespace ContainingNamespace
+        =>
+
+            // Empty error type symbols (like unspecified type parameter) have null namespace.
+            // Other error types usually have assembly-specific global namespace.
+            this.TypeSymbol.ContainingNamespace != null
+                ? this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace )
+                : this.Compilation.GlobalNamespace;
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
 
@@ -316,7 +323,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         {
             INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
             INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
-            null => throw new AssertionFailedException( $"Null containing symbol for type symbol {this.TypeSymbol} ({this.TypeSymbol.Kind})." ), // #35362 - would fail on the next line.
+            null => this.Compilation, // Empty error type symbol goes here. Other error types return a namespace, which we handle above.
             _ => throw new AssertionFailedException( $"Unexpected containing symbol kind: {this.TypeSymbol.ContainingSymbol.Kind}." )
         };
 
