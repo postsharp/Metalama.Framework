@@ -74,6 +74,8 @@ namespace Metalama.Framework.DesignTime
 
         internal async Task RegisterCodeFixesAsync( ICodeFixContext context )
         {
+            try
+            {
             this._localWorkspaceProvider?.TrySetWorkspace( context.Document.Project.Solution.Workspace );
 
             this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' )" );
@@ -143,6 +145,13 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                    if ( !syntaxRoot.Span.Contains( context.Span ) )
+                    {
+                        this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync('{context.Document.Project.Name}'): requested span out-of-bounds in '{context.Document.Name}'." );
+
+                        return;
+                    }
+
                 var node = syntaxRoot.FindNode( context.Span );
 
                 var invocationContext = new CodeActionInvocationContext(
@@ -169,6 +178,11 @@ namespace Metalama.Framework.DesignTime
                     "TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no relevant diagnostic ID detected" );
             }
         }
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
+            {
+                DesignTimeExceptionHandler.ReportException( e );
+            }
+        }
 
         // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
         public sealed override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
@@ -180,6 +194,11 @@ namespace Metalama.Framework.DesignTime
                 var syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
 
                 if ( syntaxRoot == null )
+                {
+                    return document;
+                }
+
+                if ( !syntaxRoot.Span.Contains( span ) )
                 {
                     return document;
                 }
