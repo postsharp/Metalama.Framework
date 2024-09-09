@@ -46,6 +46,13 @@ internal sealed class RiderCodeRefactoringProvider : TheCodeRefactoringProvider
                 concurrentAnalysis: true,
                 logAnalyzerExecutionTime: false ) );
 
+        var syntaxRoot = await semanticModel.SyntaxTree.GetRootAsync();
+
+        if ( !syntaxRoot.Span.Contains( context.Span ) )
+        {
+            return;
+        }
+
         var diagnostics =
             await compilationWithAnalyzer.GetAnalyzerSemanticDiagnosticsAsync( semanticModel, filterSpan: context.Span, context.CancellationToken );
 
