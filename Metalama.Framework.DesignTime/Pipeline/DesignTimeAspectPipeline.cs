@@ -887,10 +887,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             return null;
         }
 
-        if ( symbol.TryGetSerializableId( out var symbolId ) )
-        {
-            return null;
-        }
+        var symbolId = symbol.GetSerializableId();
 
         if ( !this._currentState.PipelineResult.SyntaxTreeResults.TryGetValue( filePath, out var result ) )
         {
