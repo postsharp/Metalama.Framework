@@ -76,74 +76,74 @@ namespace Metalama.Framework.DesignTime
         {
             try
             {
-            this._localWorkspaceProvider?.TrySetWorkspace( context.Document.Project.Solution.Workspace );
+                this._localWorkspaceProvider?.TrySetWorkspace( context.Document.Project.Solution.Workspace );
 
-            this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' )" );
-
-            this._logger.Trace?.Log(
-                $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): input diagnostics = {context.Diagnostics.Select( x => x.Id ).Distinct()}" );
-
-            var projectKey = ProjectKeyFactory.FromProject( context.Document.Project );
-
-            if ( projectKey == null || !projectKey.IsMetalamaEnabled )
-            {
-                this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
-
-                return;
-            }
-
-            var projectOptions = this._projectOptionsFactory.GetProjectOptions( context.Document.Project );
-
-            if ( !projectOptions.IsFrameworkEnabled )
-            {
-                this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
-
-                return;
-            }
-
-            if ( context.Diagnostics.Any( d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id ) )
-            {
-                // This is a hard-coded code fix. It may need to be refactored with our framework.
+                this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' )" );
 
                 this._logger.Trace?.Log(
-                    $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): registering 'make partial'" );
+                    $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): input diagnostics = {context.Diagnostics.Select( x => x.Id ).Distinct()}" );
 
-                context.RegisterCodeFix(
-                    CodeAction.Create(
-                        "Make partial",
-                        cancellationToken => this.GetFixedDocumentAsync( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ),
-                        _makePartialKey ),
-                    context.Diagnostics );
-            }
+                var projectKey = ProjectKeyFactory.FromProject( context.Document.Project );
 
-            if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixTitles.DiagnosticPropertyKey ) ) )
-            {
-                // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
-                // the actual code fixes.
-
-                this._logger.Trace?.Log(
-                    $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): relevant diagnostic ID detected." );
-
-                var codeFixes = this.ProvideCodeFixes(
-                    context.Diagnostics,
-                    context.CancellationToken );
-
-                if ( codeFixes.IsDefault )
+                if ( projectKey == null || !projectKey.IsMetalamaEnabled )
                 {
-                    // This means the call was not successful.
+                    this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
+
                     return;
                 }
 
-                // Find the declaring node.
-                var syntaxRoot = await context.Document.GetSyntaxRootAsync( context.CancellationToken );
+                var projectOptions = this._projectOptionsFactory.GetProjectOptions( context.Document.Project );
 
-                if ( syntaxRoot == null )
+                if ( !projectOptions.IsFrameworkEnabled )
                 {
+                    this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
+
+                    return;
+                }
+
+                if ( context.Diagnostics.Any( d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id ) )
+                {
+                    // This is a hard-coded code fix. It may need to be refactored with our framework.
+
                     this._logger.Trace?.Log(
-                        $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no syntax root for '{context.Document.Name}'." );
+                        $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): registering 'make partial'" );
 
-                    return;
+                    context.RegisterCodeFix(
+                        CodeAction.Create(
+                            "Make partial",
+                            cancellationToken => this.GetFixedDocumentAsync( context.Document, context.Span, cancellationToken.IgnoreIfDebugging() ),
+                            _makePartialKey ),
+                        context.Diagnostics );
                 }
+
+                if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixTitles.DiagnosticPropertyKey ) ) )
+                {
+                    // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
+                    // the actual code fixes.
+
+                    this._logger.Trace?.Log(
+                        $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): relevant diagnostic ID detected." );
+
+                    var codeFixes = this.ProvideCodeFixes(
+                        context.Diagnostics,
+                        context.CancellationToken );
+
+                    if ( codeFixes.IsDefault )
+                    {
+                        // This means the call was not successful.
+                        return;
+                    }
+
+                    // Find the declaring node.
+                    var syntaxRoot = await context.Document.GetSyntaxRootAsync( context.CancellationToken );
+
+                    if ( syntaxRoot == null )
+                    {
+                        this._logger.Trace?.Log(
+                            $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no syntax root for '{context.Document.Name}'." );
+
+                        return;
+                    }
 
                     if ( !syntaxRoot.Span.Contains( context.Span ) )
                     {
@@ -152,35 +152,35 @@ namespace Metalama.Framework.DesignTime
                         return;
                     }
 
-                var node = syntaxRoot.FindNode( context.Span );
+                    var node = syntaxRoot.FindNode( context.Span );
 
-                var invocationContext = new CodeActionInvocationContext(
-                    this._codeActionExecutionService,
-                    context.Document,
-                    node,
-                    this._logger,
-                    projectKey );
+                    var invocationContext = new CodeActionInvocationContext(
+                        this._codeActionExecutionService,
+                        context.Document,
+                        node,
+                        this._logger,
+                        projectKey );
 
-                foreach ( var fix in codeFixes )
-                {
-                    foreach ( var codeAction in ((CodeActionBaseModel) fix.CodeAction).ToCodeActions( invocationContext ) )
+                    foreach ( var fix in codeFixes )
                     {
-                        this._logger.Trace?.Log(
-                            $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): registering '{codeAction.Title}'." );
+                        foreach ( var codeAction in ((CodeActionBaseModel) fix.CodeAction).ToCodeActions( invocationContext ) )
+                        {
+                            this._logger.Trace?.Log(
+                                $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): registering '{codeAction.Title}'." );
 
-                        context.RegisterCodeFix( codeAction, fix.Diagnostic );
+                            context.RegisterCodeFix( codeAction, fix.Diagnostic );
+                        }
                     }
                 }
+                else
+                {
+                    this._logger.Trace?.Log(
+                        "TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no relevant diagnostic ID detected" );
+                }
             }
-            else
+            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
             {
-                this._logger.Trace?.Log(
-                    "TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no relevant diagnostic ID detected" );
-            }
-        }
-            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
-            {
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
             }
         }
 
