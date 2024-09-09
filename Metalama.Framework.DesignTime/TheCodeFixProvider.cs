@@ -87,7 +87,8 @@ namespace Metalama.Framework.DesignTime
 
                 if ( projectKey == null || !projectKey.IsMetalamaEnabled )
                 {
-                    this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
+                    this._logger.Trace?.Log(
+                        $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
 
                     return;
                 }
@@ -96,7 +97,8 @@ namespace Metalama.Framework.DesignTime
 
                 if ( !projectOptions.IsFrameworkEnabled )
                 {
-                    this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
+                    this._logger.Trace?.Log(
+                        $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
 
                     return;
                 }
@@ -147,7 +149,8 @@ namespace Metalama.Framework.DesignTime
 
                     if ( !syntaxRoot.Span.Contains( context.Span ) )
                     {
-                        this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync('{context.Document.Project.Name}'): requested span out-of-bounds in '{context.Document.Name}'." );
+                        this._logger.Trace?.Log(
+                            $"TheCodeFixProvider.RegisterCodeFixesAsync('{context.Document.Project.Name}'): requested span out-of-bounds in '{context.Document.Name}'." );
 
                         return;
                     }
@@ -175,12 +178,12 @@ namespace Metalama.Framework.DesignTime
                 else
                 {
                     this._logger.Trace?.Log(
-                        "TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no relevant diagnostic ID detected" );
+                        $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no relevant diagnostic ID detected" );
                 }
             }
             catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
             {
-                this._exceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e, this._logger );
             }
         }
 
@@ -195,11 +198,17 @@ namespace Metalama.Framework.DesignTime
 
                 if ( syntaxRoot == null )
                 {
+                    this._logger.Trace?.Log(
+                        $"TheCodeFixProvider.GetFixedDocumentAsync( project='{document.Project.Name}' ): no syntax root for '{document.Name}'." );
+
                     return document;
                 }
 
                 if ( !syntaxRoot.Span.Contains( span ) )
                 {
+                    this._logger.Trace?.Log(
+                        $"TheCodeFixProvider.GetFixedDocumentAsync( project='{document.Project.Name}' ): requested span out-of-bounds in '{document.Name}'." );
+
                     return document;
                 }
 
@@ -208,6 +217,8 @@ namespace Metalama.Framework.DesignTime
 
                 if ( typeDeclaration == null )
                 {
+                    this._logger.Trace?.Log( $"TheCodeFixProvider.GetFixedDocumentAsync( project='{document.Project.Name}' ): not in a type declaration." );
+
                     return document;
                 }
 
@@ -219,7 +230,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e )
             {
-                this._exceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e, this._logger );
 
                 return document;
             }
