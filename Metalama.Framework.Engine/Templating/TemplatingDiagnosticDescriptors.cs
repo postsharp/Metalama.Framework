@@ -620,8 +620,8 @@ namespace Metalama.Framework.Engine.Templating
         internal static readonly DiagnosticDefinition<ITypeSymbol> TemplateAttributeOnLocalFunction
             = new(
                 "LAMA0285",
-                "Template attribute is not allowed on a local function.",
-                "The attribute {0} is not allowed on a local function.",
+                "Template and scope attributes are not allowed on local functions.",
+                "The '{0}' attribute is not allowed on a local function.",
                 _category,
                 Error );
     }

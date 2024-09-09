@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
@@ -2298,7 +2297,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             {
                 var attributeTypeSymbol = (this._syntaxTreeAnnotationMap.GetSymbol( attribute.Name ) as IMethodSymbol)?.ContainingType;
 
-                if ( attributeTypeSymbol != null && attributeTypeSymbol.AllInterfaces.Any( i => i.Name == nameof(ITemplateAttribute) ) )
+                if ( attributeTypeSymbol != null
+                     && (attributeTypeSymbol.AllInterfaces.Any( i => i.GetFullName() == "Metalama.Framework.Advising.ITemplateAttribute" )
+                         || attributeTypeSymbol.AnyBaseType( b => b.GetFullName() == "Metalama.Framework.Aspects.ScopeAttribute" )) )
                 {
                     this.ReportDiagnostic( TemplatingDiagnosticDescriptors.TemplateAttributeOnLocalFunction, attribute, attributeTypeSymbol );
                 }
