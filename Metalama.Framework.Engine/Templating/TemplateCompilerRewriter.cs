@@ -2501,6 +2501,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     ? this.WithCallToAddSimplifierAnnotation( this.Transform( nameExpression ) )
                     : nameExpression;
 
+                // Keep the annotations if this type is in the typeof expression. Creating runtime expression afterwards needs that.
+                if ( node.Parent.IsKind( SyntaxKind.TypeOfExpression ) )
+                {
+                    transformedNode = node.CopyAnnotationsTo( transformedNode );
+                }
+
                 return true;
 
             default:
