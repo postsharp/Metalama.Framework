@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
@@ -38,6 +36,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         private readonly ConcurrentDictionary<ProjectKey, ProjectHandler?> _projectHandlers = new();
         private readonly TouchIdComparer _touchIdComparer;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         protected BaseSourceGenerator( ServiceProvider<IGlobalService> serviceProvider )
         {
@@ -45,6 +44,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
             this._touchIdComparer = new TouchIdComparer( this._logger );
             this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
         }
 
         protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey );
@@ -84,9 +84,9 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 this._logger.Trace?.Log( $"Initialize(): completed." );
             }
-            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
+            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e, this.ServiceProvider.GetBackstageService<IExceptionReporter>() );
+                this._exceptionHandler.ReportException( e );
 
                 // We rethrow the exception because it is important that the user knows that there was a problem,
                 // given that the compilation may be broken.

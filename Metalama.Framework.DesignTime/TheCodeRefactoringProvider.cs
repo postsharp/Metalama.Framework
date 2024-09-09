@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Telemetry;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
@@ -37,7 +36,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeActionExecutionService _codeActionExecutionService;
         private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
-        private readonly IExceptionReporter? _exceptionReporter;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetSharedServiceProvider() ) { }
 
@@ -48,7 +47,7 @@ namespace Metalama.Framework.DesignTime
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
             this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
-            this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
         }
 
         public sealed override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
@@ -161,9 +160,9 @@ namespace Metalama.Framework.DesignTime
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no refactoring available." );
                 }
             }
-            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
+            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
+                this._exceptionHandler.ReportException( e );
             }
         }
     }

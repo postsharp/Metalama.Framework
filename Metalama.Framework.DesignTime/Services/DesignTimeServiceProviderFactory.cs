@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Telemetry;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
@@ -118,13 +116,13 @@ public abstract class DesignTimeServiceProviderFactory
 
     private sealed class RpcExceptionHandler : IRpcExceptionHandler
     {
-        private readonly IExceptionReporter? _exceptionReporter;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         public RpcExceptionHandler( ServiceProvider<IGlobalService> serviceProvider )
         {
-            this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
+            this._exceptionHandler = serviceProvider.GetService<DesignTimeExceptionHandler>() ?? throw new InvalidOperationException("DesignTimeExceptionHandler is required.");
         }
 
-        public void OnException( Exception e, ILogger logger ) => DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
+        public void OnException( Exception e, ILogger logger ) => this._exceptionHandler.ReportException( e );
     }
 }

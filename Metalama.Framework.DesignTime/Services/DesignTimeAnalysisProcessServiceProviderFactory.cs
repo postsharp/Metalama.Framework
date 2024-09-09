@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.AspectExplorer;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
@@ -45,8 +46,12 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
 
     protected override ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
     {
-        // Initialize the event hub.
+        // Initialize exception reporter.
         serviceProvider = base.AddServices( serviceProvider )
+            .WithService( new DesignTimeExceptionHandler( serviceProvider ) );
+
+        // Initialize the event hub.
+        serviceProvider = serviceProvider
             .WithServices( new AnalysisProcessEventHub( serviceProvider ) );
 
         serviceProvider = serviceProvider

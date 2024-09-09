@@ -3,7 +3,6 @@
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Telemetry;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
@@ -46,7 +45,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
     private readonly AnalysisProcessEventHub? _eventHub;
     private readonly IProjectOptionsFactory _projectOptionsFactory;
     private readonly ITaskRunner _taskRunner;
-    private readonly IExceptionReporter? _exceptionReporter;
+    private readonly DesignTimeExceptionHandler _exceptionHandler;
 
     public ServiceProvider<IGlobalService> ServiceProvider { get; }
 
@@ -54,7 +53,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
 
     public DesignTimeAspectPipelineFactory( ServiceProvider<IGlobalService> serviceProvider, CompileTimeDomain domain )
     {
-        this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
+        this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         serviceProvider = serviceProvider.WithService( this );
 
@@ -89,7 +88,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
         }
         catch ( Exception e )
         {
-            DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter, this._logger );
+            this._exceptionHandler.ReportException( e, this._logger );
         }
     }
 #pragma warning restore VSTHRD100

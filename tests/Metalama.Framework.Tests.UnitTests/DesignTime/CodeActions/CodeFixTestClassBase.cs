@@ -17,6 +17,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Metalama.Framework.DesignTime.Utilities;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.CodeActions;
 
@@ -38,6 +39,7 @@ public abstract class CodeFixTestClassBase : UnitTestClass
     {
         base.ConfigureServices( services );
         ((AdditionalServiceCollection) services).BackstageServices.Add( this._exceptionReporter );
+        services.AddGlobalService( provider => new DesignTimeExceptionHandler( provider ) );
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
         services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService( shouldWrapUnsupportedDiagnostics: true ) );
     }

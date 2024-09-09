@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Services;
@@ -37,8 +36,8 @@ namespace Metalama.Framework.DesignTime
     {
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
-        private readonly ILogger _logger;
-        private readonly IExceptionReporter? _exceptionReporter;
+        private readonly ILogger _logger; 
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
 #if DEBUG
         private readonly ConcurrentDictionary<string, object> _locks = new();
@@ -53,7 +52,7 @@ namespace Metalama.Framework.DesignTime
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
-            this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
         }
 
         public override void Initialize( AnalysisContext context )
@@ -213,7 +212,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e )
             {
-                DesignTimeExceptionHandler.ReportException( e, this._exceptionReporter );
+                this._exceptionHandler.ReportException( e );
             }
             finally
             {
