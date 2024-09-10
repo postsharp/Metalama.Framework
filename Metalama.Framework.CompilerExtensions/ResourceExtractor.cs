@@ -82,7 +82,6 @@ public static class ResourceExtractor
                     ExtractEmbeddedAssemblies( currentAssembly );
 
                     // Load assemblies from the temp directory.
-
                     foreach ( var file in Directory.GetFiles( _snapshotDirectory, "*.dll" ) )
                     {
                         // We don't load assemblies using Assembly.LoadFile here, because the assemblies may be loaded in
@@ -205,121 +204,153 @@ public static class ResourceExtractor
         var cleanupJsonFilePath = Path.Combine( _snapshotDirectory, "cleanup.json" );
         var mutexName = "Global\\Metalama_Extract_" + _buildId;
 
-        if ( !File.Exists( completedFilePath ) )
+        var deleteCompletedFile = false;
+
+        if ( File.Exists( completedFilePath ) )
         {
-            // We cannot use MutexHelper because of dependencies on an embedded assembly.
+            var allExpectedFilesExist = GetEmbeddedAssemblies( currentAssembly ).All( x => File.Exists( x.FilePath ) );
 
-            using var extractMutex = new Mutex( false, mutexName );
-
-            try
+            if ( allExpectedFilesExist )
             {
-                extractMutex.WaitOne();
-            }
-            catch ( AbandonedMutexException )
-            {
-                // Another process crashed while holding the mutex.
-                // This situation can be ignored because the presence of the `.completed` file alone says
-                // that the extraction was successful.
-            }
-
-            StreamWriter? log = null;
-
-            try
-            {
-                if ( !File.Exists( completedFilePath ) )
+                if ( File.GetLastWriteTime( cleanupJsonFilePath ) < DateTime.Now.AddHours( -1 ) )
                 {
-                    if ( !Directory.Exists( _snapshotDirectory ) )
+                    // Touch the cleanup.json file so the periodic cleanup script does not remove it.
+
+                    try
                     {
-                        Directory.CreateDirectory( _snapshotDirectory );
-
-                        // Mark the directory for automatic clean up when unused.
-                        File.WriteAllText( cleanupJsonFilePath, "{\"Strategy\":2}" );
+                        File.SetLastAccessTime( cleanupJsonFilePath, DateTime.Now );
                     }
-
-                    log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
-
-                    log.WriteLine( $"Extracting resources..." );
-
-                    var process = Process.GetCurrentProcess();
-                    log.WriteLine( $"Process Name: {process.ProcessName}" );
-                    log.WriteLine( $"Process Id: {process.Id}" );
-                    log.WriteLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
-                    log.WriteLine( $"Command Line: {Environment.CommandLine}" );
-                    log.WriteLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
-                    log.WriteLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
-                    log.WriteLine( $"Mutex name: '{mutexName}'" );
-                    log.WriteLine( "----" );
-
-                    foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
-                    {
-                        var prefix = "Metalama.Framework.CompilerExtensions.Resources." + (_isNetFramework ? "Desktop" : "Core") + ".";
-
-                        if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) &&
-                             resourceName.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
-                        {
-                            var fileName = resourceName.Substring( prefix.Length );
-                            var filePath = Path.Combine( _snapshotDirectory, fileName );
-
-                            log.WriteLine( $"Extracting resource '{resourceName}' to '{filePath}'." );
-
-                            // Extract the file to disk.
-                            using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
-
-                            // ReSharper disable once InconsistentNaming
-                            const uint ERROR_SHARING_VIOLATION = 0x80070020;
-
-                            try
-                            {
-                                using var outputStream = File.Create( filePath );
-
-                                stream.CopyTo( outputStream );
-                            }
-                            catch ( IOException ex ) when ( (uint) ex.HResult == ERROR_SHARING_VIOLATION )
-                            {
-                                // We couldn't write to the file, so try to read it instead and verify its content is correct.
-
-                                using var readStream = File.OpenRead( filePath );
-
-                                if ( !StreamsContentsAreEqual( stream, readStream ) )
-                                {
-                                    throw new InvalidOperationException(
-                                        $"Could not open file '{filePath}' for writing and its existing content is not correct",
-                                        ex );
-                                }
-                            }
-                        }
-                        else
-                        {
-                            log.WriteLine( $"Ignoring resource '{resourceName}'." );
-                        }
-                    }
-
-                    File.WriteAllText( completedFilePath, "completed" );
-
-                    log.WriteLine( "Extracting resources completed." );
+                    catch { }
                 }
-            }
-            catch ( Exception e )
-            {
-                log?.WriteLine( e.ToString() );
 
-                throw;
+                return;
             }
-            finally
+            else
             {
-                log?.Dispose();
-                extractMutex.ReleaseMutex();
+                // The .completed file exists, but not all expected files are present.
+                // This is an inconsistent state, so we will delete the .completed file and re-extract the resources.
+
+                deleteCompletedFile = true;
             }
         }
-        else if ( File.GetLastWriteTime( cleanupJsonFilePath ) < DateTime.Now.AddHours( -1 ) )
-        {
-            // Touch the cleanup.json file so the periodic cleanup script does not remove it.
 
-            try
+        // We cannot use MutexHelper because of dependencies on an embedded assembly.
+
+        using var extractMutex = new Mutex( false, mutexName );
+
+        try
+        {
+            extractMutex.WaitOne();
+        }
+        catch ( AbandonedMutexException )
+        {
+            // Another process crashed while holding the mutex.
+            // This situation can be ignored because the presence of the `.completed` file alone says
+            // that the extraction was successful.
+        }
+
+        StreamWriter? log = null;
+
+        try
+        {
+            if ( deleteCompletedFile )
             {
-                File.SetLastAccessTime( cleanupJsonFilePath, DateTime.Now );
+                File.Delete( completedFilePath );
             }
-            catch { }
+
+            if ( !File.Exists( completedFilePath ) )
+            {
+                if ( !Directory.Exists( _snapshotDirectory ) )
+                {
+                    Directory.CreateDirectory( _snapshotDirectory );
+
+                    // Mark the directory for automatic clean up when unused.
+                    File.WriteAllText( cleanupJsonFilePath, """{"Strategy":2}""" );
+                }
+
+                log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
+
+                log.WriteLine( $"Extracting resources..." );
+
+                var process = Process.GetCurrentProcess();
+                log.WriteLine( $"Process Name: {process.ProcessName}" );
+                log.WriteLine( $"Process Id: {process.Id}" );
+                log.WriteLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
+                log.WriteLine( $"Command Line: {Environment.CommandLine}" );
+                log.WriteLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
+                log.WriteLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
+                log.WriteLine( $"Mutex name: '{mutexName}'" );
+                log.WriteLine( "----" );
+
+                var prefix = $"Metalama.Framework.CompilerExtensions.Resources.{(_isNetFramework ? "Desktop" : "Core")}.";
+
+                foreach ( var (resourceName, filePath) in GetEmbeddedAssemblies( currentAssembly, log ) )
+                {
+                    log.WriteLine( $"Extracting resource '{resourceName}' to '{filePath}'." );
+
+                    // Extract the file to disk.
+                    using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
+
+                    // ReSharper disable once InconsistentNaming
+                    const uint ERROR_SHARING_VIOLATION = 0x80070020;
+
+                    try
+                    {
+                        using var outputStream = File.Create( filePath );
+
+                        stream.CopyTo( outputStream );
+                    }
+                    catch ( IOException ex ) when ( (uint) ex.HResult == ERROR_SHARING_VIOLATION )
+                    {
+                        // We couldn't write to the file, so try to read it instead and verify its content is correct.
+
+                        using var readStream = File.OpenRead( filePath );
+
+                        if ( !StreamsContentsAreEqual( stream, readStream ) )
+                        {
+                            throw new InvalidOperationException(
+                                $"Could not open file '{filePath}' for writing and its existing content is not correct",
+                                ex );
+                        }
+                    }
+                }
+
+                File.WriteAllText( completedFilePath, "completed" );
+
+                log.WriteLine( "Extracting resources completed." );
+            }
+        }
+        catch ( Exception e )
+        {
+            log?.WriteLine( e.ToString() );
+
+            throw;
+        }
+        finally
+        {
+            log?.Dispose();
+            extractMutex.ReleaseMutex();
+        }
+    }
+
+    private static IEnumerable<(string ResourceName, string FilePath)> GetEmbeddedAssemblies( Assembly currentAssembly, StreamWriter? log = null )
+    {
+        var prefix = $"Metalama.Framework.CompilerExtensions.Resources.{(_isNetFramework ? "Desktop" : "Core")}.";
+
+        foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
+        {
+            if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) &&
+                 resourceName.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
+            {
+                var fileName = resourceName.Substring( prefix.Length );
+                var filePath = Path.Combine( _snapshotDirectory, fileName );
+
+                yield return (resourceName, filePath);
+            }
+            else
+            {
+                log?.WriteLine( $"Ignoring resource '{resourceName}'." );
+            }
         }
     }
 
