@@ -2208,7 +2208,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         // The scope of a `while` statement is determined by its condition only.
 
         var annotatedCondition = this.Visit( node.Condition ).ReplaceScopeAnnotationIfUndetermined( RunTimeOnly );
-        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope();
+        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope( preferCompileTime: true );
 
         this.RequireLoopScope( node.Condition, conditionScope, "while" );
 
@@ -2234,7 +2234,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         // The scope of a `do ... while` statement is determined by its condition only.
 
         var annotatedCondition = this.Visit( node.Condition ).ReplaceScopeAnnotationIfUndetermined( RunTimeOnly );
-        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope();
+        var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope( preferCompileTime: true );
 
         this.RequireLoopScope( node.Condition, conditionScope, "do" );
 
