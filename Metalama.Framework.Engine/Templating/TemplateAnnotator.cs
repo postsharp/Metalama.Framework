@@ -316,8 +316,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     /// <summary>
     /// Determines if a symbol is a member of the current template class (or aspect class).
     /// </summary>
-    /// <param name="symbol"></param>
-    /// <returns></returns>
     private bool IsAspectMember( ISymbol symbol )
         => this._currentTemplateMember != null
            && symbol.ContainingType != null
@@ -342,15 +340,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     /// <summary>
     /// Gets the scope of a <see cref="SyntaxNode"/>.
     /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
     private TemplatingScope GetNodeScope( SyntaxNode? node ) => this.GetNodeScope( node, false );
 
     /// <summary>
     /// Gets the scope of a <see cref="SyntaxNode"/>.
     /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
     private TemplatingScope GetNodeScope( SyntaxNode? node, bool forAssignment )
     {
         if ( node == null )
@@ -2297,6 +2291,21 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     public override SyntaxNode VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
     {
+        foreach ( var attributeList in node.AttributeLists )
+        {
+            foreach ( var attribute in attributeList.Attributes )
+            {
+                var attributeTypeSymbol = (this._syntaxTreeAnnotationMap.GetSymbol( attribute.Name ) as IMethodSymbol)?.ContainingType;
+
+                if ( attributeTypeSymbol != null
+                     && (attributeTypeSymbol.AllInterfaces.Any( i => i.GetFullName() == "Metalama.Framework.Advising.ITemplateAttribute" )
+                         || attributeTypeSymbol.AnyBaseType( b => b.GetFullName() == "Metalama.Framework.Aspects.ScopeAttribute" )) )
+                {
+                    this.ReportDiagnostic( TemplatingDiagnosticDescriptors.TemplateAttributeOnLocalFunction, attribute, attributeTypeSymbol );
+                }
+            }
+        }
+
         var reason = $"local function '{node.Identifier.Text}'";
 
         var oldIsInLocalFunction = this._isInLocalFunction;

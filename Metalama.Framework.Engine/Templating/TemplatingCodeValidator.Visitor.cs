@@ -526,6 +526,14 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
+            public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+            {
+                using ( this.WithDeclaration( node ) )
+                {
+                    base.VisitLocalFunctionStatement( node );
+                }
+            }
+
             public override void VisitEventDeclaration( EventDeclarationSyntax node )
             {
                 using ( this.WithDeclaration( node ) )
