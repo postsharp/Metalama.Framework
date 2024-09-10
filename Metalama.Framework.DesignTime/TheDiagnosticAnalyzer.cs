@@ -126,6 +126,12 @@ namespace Metalama.Framework.DesignTime
 
                     this._logger.Trace?.Log( $"Reporting {FormatDiagnostic( diagnostic )}." );
 
+                    if ( diagnostic.Location.IsInSource && !context.SemanticModel.Compilation.ContainsSyntaxTree( diagnostic.Location.SourceTree ) )
+                    {
+                        // From the analyzer, we have to report diagnostics on the correct tree instance.
+                        diagnostic = diagnostic.WithSyntaxTreeInstance( context.SemanticModel.SyntaxTree );
+                    }
+
                     diagnosticCount++;
 
                     context.ReportDiagnostic( diagnostic );
