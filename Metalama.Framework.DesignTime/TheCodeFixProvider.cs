@@ -181,7 +181,7 @@ namespace Metalama.Framework.DesignTime
                         $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no relevant diagnostic ID detected" );
                 }
             }
-            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
                 this._exceptionHandler.ReportException( e, this._logger );
             }

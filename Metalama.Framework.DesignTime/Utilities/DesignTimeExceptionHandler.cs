@@ -20,13 +20,11 @@ namespace Metalama.Framework.DesignTime.Utilities
 
         // It is critical that OperationCanceledException is NOT handled, i.e. this exception should flow to the caller, otherwise VS will be satisfied
         // with the incomplete results it received, and cache them. 
-#pragma warning disable CA1822 // Mark members as static
-        internal bool MustHandle( Exception e )
-#pragma warning restore CA1822 // Mark members as static
+        internal static bool MustHandle( Exception e )
             => e switch
             {
                 OperationCanceledException => false,
-                AggregateException { InnerException: not null } => this.MustHandle( e.InnerException ),
+                AggregateException { InnerException: not null } => MustHandle( e.InnerException ),
                 _ => true
             };
 
@@ -34,7 +32,7 @@ namespace Metalama.Framework.DesignTime.Utilities
         {
             logger ??= Logger.DesignTime;
 
-            if ( this.MustHandle( e ) )
+            if ( MustHandle( e ) )
             {
                 logger.Error?.Log( e.ToString() );
 

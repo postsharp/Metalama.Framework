@@ -1,11 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Telemetry;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
@@ -32,10 +28,10 @@ public sealed class CodeFixIssueTests : CodeFixTestClassBase
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
+        var (diagnostics, serviceProvider) = await ExecutePipelineAsync( testContext, workspace, factory );
 
         // Query code fixes and refactorings.
-        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, TextSpan.FromBounds(0, 1) );
+        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixesAsync( workspace, serviceProvider, diagnostics, TextSpan.FromBounds(0, 1) );
 
         Assert.Empty( codeFixContext.RegisteredCodeFixes );
         Assert.Empty( codeRefactoringContext.RegisteredRefactorings );
@@ -57,10 +53,10 @@ public sealed class CodeFixIssueTests : CodeFixTestClassBase
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
+        var (diagnostics, serviceProvider) = await ExecutePipelineAsync( testContext, workspace, factory );
 
         // Query code fixes and refactorings.
-        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, TextSpan.FromBounds( 100, 101 ) );
+        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixesAsync( workspace, serviceProvider, diagnostics, TextSpan.FromBounds( 100, 101 ) );
 
         Assert.Empty( codeFixContext.RegisteredCodeFixes );
         Assert.Empty( codeRefactoringContext.RegisteredRefactorings );

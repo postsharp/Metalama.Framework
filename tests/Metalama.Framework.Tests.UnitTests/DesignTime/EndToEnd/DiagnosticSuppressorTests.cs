@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
 #pragma warning disable VSTHRD200
 
-public sealed class DiagnosticSuppressorTests : UnitTestClass
+public sealed class DiagnosticSuppressorTests : FrameworkBaseTestClass
 {
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {

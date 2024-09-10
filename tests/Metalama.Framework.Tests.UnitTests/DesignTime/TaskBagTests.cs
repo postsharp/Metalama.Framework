@@ -1,7 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
+using Metalama.Framework.Tests.UnitTests.TestFramework;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,12 +13,13 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public sealed class TaskBagTests
+public sealed class TaskBagTests : FrameworkBaseTestClass
 {
     [Fact]
     public async Task NonYielding()
     {
-        var bag = new TaskBag( NullLogger.Instance, null );
+        using var testContext = this.CreateTestContext();
+        var bag = new TaskBag( NullLogger.Instance, testContext.ServiceProvider.Global );
 
         for ( var i = 0; i < 1000; i++ )
         {
@@ -30,7 +35,8 @@ public sealed class TaskBagTests
     [Fact]
     public async Task Yielding()
     {
-        var bag = new TaskBag( NullLogger.Instance, null );
+        using var testContext = this.CreateTestContext();
+        var bag = new TaskBag( NullLogger.Instance, testContext.ServiceProvider.Global );
 
         for ( var i = 0; i < 1000; i++ )
         {

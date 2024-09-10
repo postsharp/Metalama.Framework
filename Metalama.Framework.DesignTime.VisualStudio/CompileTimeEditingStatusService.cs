@@ -21,7 +21,7 @@ internal sealed class CompileTimeEditingStatusService : ICompileTimeEditingStatu
     public CompileTimeEditingStatusService( GlobalServiceProvider serviceProvider )
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
-        this._pendingTasks = new TaskBag( logger, serviceProvider.GetRequiredService<DesignTimeExceptionHandler>() );
+        this._pendingTasks = new TaskBag( logger, serviceProvider );
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this._userProcessEndpoint.EndpointAdded += this.OnEndpointAdded;
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;

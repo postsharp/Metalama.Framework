@@ -84,7 +84,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 this._logger.Trace?.Log( $"Initialize(): completed." );
             }
-            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
                 this._exceptionHandler.ReportException( e );
 

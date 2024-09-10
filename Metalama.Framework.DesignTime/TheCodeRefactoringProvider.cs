@@ -167,7 +167,7 @@ namespace Metalama.Framework.DesignTime
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): no refactoring available." );
                 }
             }
-            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
                 this._exceptionHandler.ReportException( e );
             }

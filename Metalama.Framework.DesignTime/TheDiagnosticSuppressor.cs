@@ -64,7 +64,7 @@ namespace Metalama.Framework.DesignTime
                 this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
                 this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             }
-            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
                 this._exceptionHandler.ReportException( e );
 
@@ -204,7 +204,7 @@ namespace Metalama.Framework.DesignTime
                 this._logger.Trace?.Log(
                     $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
             }
-            catch ( Exception e ) when ( this._exceptionHandler.MustHandle( e ) )
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
                 this._exceptionHandler.ReportException( e );
             }

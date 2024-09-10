@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 {
-    public sealed class InheritableAspectTests : UnitTestClass
+    public sealed class InheritableAspectTests : FrameworkBaseTestClass
     {
         [Fact]
         public void InheritableAspectsMakeItToCompilationResult()
