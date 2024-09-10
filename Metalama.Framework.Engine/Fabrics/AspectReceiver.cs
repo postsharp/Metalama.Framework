@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -42,6 +43,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private readonly CompilationModelVersion _compilationModelVersion;
         private readonly Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> _adder;
+        private readonly ILogger _logger;
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
         // We track the number of children to know if we must cache results.
@@ -53,6 +55,7 @@ namespace Metalama.Framework.Engine.Fabrics
             CompilationModelVersion compilationModelVersion,
             Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
         {
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "AspectReceiver" );
             this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._containingDeclaration = containingDeclaration;
             this._compilationModelVersion = compilationModelVersion;
@@ -75,13 +78,16 @@ namespace Metalama.Framework.Engine.Fabrics
             return child;
         }
 
-        private AspectClass GetAspectClass<TAspect>()
+        private AspectClass? GetAspectClass<TAspect>()
             where TAspect : IAspect
             => this.GetAspectClass( typeof(TAspect) );
 
-        private AspectClass GetAspectClass( Type aspectType )
+        private AspectClass? GetAspectClass( Type aspectType )
         {
-            var aspectClass = this.Parent.AspectClasses[aspectType.FullName.AssertNotNull()];
+            if ( !this.Parent.AspectClasses.Dictionary.TryGetValue( aspectType.FullName.AssertNotNull(), out var aspectClass ) )
+            {
+                return null;
+            }
 
             if ( aspectClass.IsAbstract )
             {
@@ -784,6 +790,16 @@ namespace Metalama.Framework.Engine.Fabrics
         public void AddAspectIfEligible( Type aspectType, Func<TDeclaration, TTag, IAspect> createAspect, EligibleScenarios eligibility )
         {
             var aspectClass = this.GetAspectClass( aspectType );
+
+            if ( aspectClass == null )
+            {
+                // The aspect class was not found. We're going to assume that this happened because of an already-reported error and do nothing.
+
+                this._logger.Warning?.Log( $"The aspect type {aspectType} was not found when calling AddAspectIfEligible." );
+
+                return;
+            }
+
             var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
@@ -844,6 +860,15 @@ namespace Metalama.Framework.Engine.Fabrics
             where TAspect : class, IAspect<TDeclaration>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
+
+            if ( aspectClass == null )
+            {
+                // The aspect class was not found. We're going to assume that this happened because of an already-reported error and do nothing.
+
+                this._logger.Warning?.Log( $"The aspect type {typeof(TAspect)} was not found when calling AddAspectIfEligible." );
+
+                return;
+            }
 
             var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
@@ -1051,6 +1076,16 @@ namespace Metalama.Framework.Engine.Fabrics
             where TAspect : class, IAspect<TDeclaration>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
+
+            if ( aspectClass == null )
+            {
+                // The aspect class was not found. We're going to assume that this happened because of an already-reported error and do nothing.
+
+                this._logger.Warning?.Log( $"The aspect type {typeof(TAspect)} was not found when calling RequireAspect." );
+
+                return;
+            }
+
             var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
 
