@@ -8,7 +8,6 @@ using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Docker;
 using PostSharp.Engineering.BuildTools.Utilities;
-using Spectre.Console.Cli;
 using System.IO;
 using System.Runtime.InteropServices;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_2;
@@ -95,11 +94,7 @@ var product = new Product( MetalamaDependencies.Metalama )
 product.PrepareCompleted += OnPrepareCompleted;
 product.PrepareCompleted += args => TestLicenseKeyDownloader.Download( args.Context );
 
-var commandApp = new CommandApp();
-
-commandApp.AddProductCommands( product );
-
-return commandApp.Run( args );
+return new EngineeringApp( product ).Run( args );
 
 static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
 {
