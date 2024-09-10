@@ -140,16 +140,20 @@ namespace Metalama.Framework.Engine.Templating
                     }
 
                     // Cache semanticModel.GetTypeInfo.
-                    if ( typeInfo.Type != null )
+                    // Primarily use the actual type of the node, but fall back to the converted type for expressions that don't have a type themselves,
+                    // e.g. a tuple containing the default literal.
+                    var type = typeInfo.Type ?? typeInfo.ConvertedType;
+
+                    if ( type != null )
                     {
-                        if ( !this._map._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
+                        if ( !this._map._typeToAnnotationMap.TryGetValue( type, out var annotation ) )
                         {
                             annotation = TypeAnnotationMapper.GetOrCreateAnnotation(
                                 TypeAnnotationMapper.ExpressionTypeSymbolAnnotationKind,
-                                typeInfo.Type );
+                                type );
 
-                            this._map._typeToAnnotationMap[typeInfo.Type] = annotation;
-                            this._map._annotationToTypeMap[annotation] = typeInfo.Type;
+                            this._map._typeToAnnotationMap[type] = annotation;
+                            this._map._annotationToTypeMap[annotation] = type;
                         }
 
                         annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );

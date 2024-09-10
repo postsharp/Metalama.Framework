@@ -304,52 +304,6 @@ namespace Metalama.Framework.Engine.Templating
                 return this._annotationToTypeMap[annotation];
             }
 
-            // If we don't have a type annotation, we can try to find the type from the parent node.
-
-            switch ( node.Parent )
-            {
-                case ReturnStatementSyntax:
-                    var declaration = node.FirstAncestorOrSelf<MemberDeclarationSyntax>()
-                                      ?? (SyntaxNode?) node.FirstAncestorOrSelf<AccessorDeclarationSyntax>();
-
-                    if ( declaration != null && this.GetDeclaredSymbol( declaration ) is IMethodSymbol declarationSymbol )
-                    {
-                        return declarationSymbol.ReturnType;
-                    }
-
-                    break;
-
-                case AssignmentExpressionSyntax assignment when node == assignment.Right:
-                    return this.GetExpressionType( assignment.Left );
-
-                case ArgumentSyntax argument:
-                    var invocation = node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
-
-                    if ( invocation != null )
-                    {
-                        var invokedMethod = (IMethodSymbol?) this.GetSymbol( invocation.Expression );
-
-                        if ( invokedMethod != null )
-                        {
-                            var parameterIndex = invocation.ArgumentList.Arguments.IndexOf( argument );
-
-                            if ( parameterIndex > 0 )
-                            {
-                                if ( parameterIndex < invokedMethod.Parameters.Length )
-                                {
-                                    return invokedMethod.Parameters[parameterIndex].Type;
-                                }
-                                else if ( invokedMethod.Parameters.Last().IsParams )
-                                {
-                                    return ((IArrayTypeSymbol) invokedMethod.Parameters.Last().Type).ElementType;
-                                }
-                            }
-                        }
-                    }
-
-                    break;
-            }
-
             return null;
         }
     }
