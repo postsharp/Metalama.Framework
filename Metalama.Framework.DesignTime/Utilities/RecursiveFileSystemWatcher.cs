@@ -104,5 +104,8 @@ internal class RecursiveFileSystemWatcher : IDisposable
     {
         this._watcher?.Dispose();
         this._parentDirectoryWatcher?.Dispose();
+
+        this.Changed = null;
+        this.Created = null;
     }
 }
