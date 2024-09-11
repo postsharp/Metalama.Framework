@@ -1009,11 +1009,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var expression = this.Transform( node.Expression );
 
-        var toArrayStatementExpression = InvocationExpression(
+        var toStatementExpression = InvocationExpression(
             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ToStatement) ),
             ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
-        return toArrayStatementExpression;
+        return toStatementExpression;
     }
 
     public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -2500,6 +2500,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
                     ? this.WithCallToAddSimplifierAnnotation( this.Transform( nameExpression ) )
                     : nameExpression;
+
+                // Keep the annotations if this type is in a typeof expression. Creating the runtime expression afterwards requires the annotation.
+                if ( node.Parent.IsKind( SyntaxKind.TypeOfExpression ) )
+                {
+                    transformedNode = node.CopyAnnotationsTo( transformedNode );
+                }
 
                 return true;
 

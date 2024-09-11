@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
@@ -522,6 +523,14 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     this.VerifyModifiers( node.Modifiers );
                     base.VisitConversionOperatorDeclaration( node );
+                }
+            }
+
+            public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+            {
+                using ( this.WithDeclaration( node ) )
+                {
+                    base.VisitLocalFunctionStatement( node );
                 }
             }
 
