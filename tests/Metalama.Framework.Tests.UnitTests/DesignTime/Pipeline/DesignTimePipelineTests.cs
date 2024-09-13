@@ -1008,7 +1008,7 @@ class D{version}
 
                       public class Aspect : OverrideMethodAspect
                       {
-                          public override dynamic OverrideMethod()
+                          public override dynamic? OverrideMethod()
                           {
                               {{statement}}
                               return null;
@@ -1996,43 +1996,50 @@ Target.cs:
         var rightAssemblyName = "right_" + RandomIdGenerator.GenerateId();
         var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
 
-        const string aspectCode = @"
-using Metalama.Framework.Aspects; 
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Eligibility;
+        const string aspectCode = """
+            using Metalama.Framework.Aspects; 
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Diagnostics;
+            using Metalama.Framework.Eligibility;
 
-[Inheritable]
-public class MyAspect : TypeAspect
-{
-}
-";
+            [Inheritable]
+            public class MyAspect : TypeAspect
+            {
+            }
+            """;
 
-        const string leftCode = @"
-[MyAspect]
-public class Left
-{
-}
-";
+        const string leftCode = """
+            [MyAspect]
+            public class Left
+            {
+            }
+            """;
 
-        const string rightCode = @"
-[MyAspect]
-public class Right
-{
-}
-";
+        const string rightCode = """
+            [MyAspect]
+            public class Right
+            {
+            }
+            """;
 
-        const string targetCode = @"
-class C : Left {}
-class D : Right {}
-";
+        const string targetCode = """
+            class C : Left {}
+            class D : Right {}
+            """;
 
-        const string expectedResult = @"
-Target.cs:
-0 diagnostic(s):
-0 suppression(s):
-0 introductions(s):
-";
+        var expectedResult = $"""
+            :
+            2 diagnostic(s):
+               Error LAMA0113 on ``: `Cannot find in the current compilation the aspect type 'MyAspect' defined in the aspect library '{aspect1AssemblyName}'.`
+               Error LAMA0113 on ``: `Cannot find in the current compilation the aspect type 'MyAspect' defined in the aspect library '{aspect2AssemblyName}'.`
+            0 suppression(s):
+            0 introductions(s):
+            ----------------------------------------------------------
+            Target.cs:
+            0 diagnostic(s):
+            0 suppression(s):
+            0 introductions(s):
+            """;
 
         using var testContext = this.CreateTestContext();
 
@@ -2070,13 +2077,13 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results ) );
         var dumpedResults = DumpResults( results );
 
-        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults );
+        AssertEx.EolInvariantEqual( expectedResult, dumpedResults );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2 );
-        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults2 );
+        AssertEx.EolInvariantEqual( expectedResult, dumpedResults2 );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
     }
 
