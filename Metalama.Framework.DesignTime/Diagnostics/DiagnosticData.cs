@@ -12,11 +12,11 @@ public class DiagnosticData : IDiagnosticData
 {
     public DiagnosticData( Diagnostic diagnostic )
     {
-        this.Severity = diagnostic.Severity;
-        this.FilePath = diagnostic.Location.SourceTree?.FilePath;
-        this.Message = diagnostic.GetMessage( CultureInfo.CurrentCulture );
-
         var lineSpan = diagnostic.Location.GetLineSpan();
+
+        this.Severity = diagnostic.Severity;
+        this.FilePath = lineSpan.Path;
+        this.Message = diagnostic.GetMessage( CultureInfo.CurrentCulture );
         this.StartLine = lineSpan.StartLinePosition.Line;
         this.StartColumn = lineSpan.StartLinePosition.Character;
         this.EndLine = lineSpan.EndLinePosition.Line;

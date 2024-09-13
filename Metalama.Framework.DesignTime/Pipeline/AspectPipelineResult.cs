@@ -350,7 +350,8 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         {
             SyntaxTreePipelineResult.Builder? builder;
 
-            if ( diagnostic.Location.SourceTree?.FilePath is { } filePath )
+            // GetLineSpan() works even for "external" locations (i.e. not tree-based), which we use for exceptions.
+            if ( diagnostic.Location.GetLineSpan().Path is { } filePath )
             {
                 if ( !resultBuilders.TryGetValue( filePath, out builder ) )
                 {

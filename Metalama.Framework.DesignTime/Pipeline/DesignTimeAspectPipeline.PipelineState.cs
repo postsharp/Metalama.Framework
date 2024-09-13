@@ -471,8 +471,6 @@ internal sealed partial class DesignTimeAspectPipeline
             DesignTimeProjectVersion projectVersion,
             TestableCancellationToken cancellationToken )
         {
-            DiagnosticBag diagnosticBag = new();
-
             if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
             {
                 throw new InvalidOperationException();
@@ -499,6 +497,11 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 return (FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( getConfigurationResult.Diagnostics ), state);
             }
+
+            DiagnosticBag diagnosticBag = new();
+
+            // Report diagnostics from the configuration even if the configuration is successful.
+            diagnosticBag.Report( getConfigurationResult.Diagnostics );
 
             var configuration = getConfigurationResult.Value;
 
