@@ -1,4 +1,4 @@
 {
     "IgnoreExitCode": true,
-    "ErrorRegexes": [ "LAMA0800" ]
+    "SuccessRegexes": [ "LAMA0800" ]
 }

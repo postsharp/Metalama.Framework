@@ -11,12 +11,14 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 public static class RefExtensions
 {
-    // ReSharper disable once SuspiciousTypeConversion.Global
     public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference, CompilationContext compilationContext )
         where T : IRef<IDeclaration>
-        => ((IRefImpl) reference).GetClosestSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
+        => reference.GetClosestSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
 
-    // ReSharper disable once IdentifierTypo
+    internal static ISymbol GetClosestSymbol<T>( this T reference, CompilationContext compilationContext )
+        where T : IRef<IDeclaration>
+        => ((IRefImpl) reference).GetClosestSymbol( compilationContext );
+
     // ReSharper disable once UnusedMember.Global
     [return: NotNullIfNotNull( nameof(reference) )]
     internal static IRef<TTo>? As<TFrom, TTo>( this IRef<TFrom>? reference )

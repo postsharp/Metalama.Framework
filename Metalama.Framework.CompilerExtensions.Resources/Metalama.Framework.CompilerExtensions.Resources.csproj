@@ -9,6 +9,8 @@
 
         <!-- Disable warning: conflicting versions -->
         <NoWarn>$(NoWarn);MSB3277</NoWarn>
+        <!-- Referenced package has a known vulnerability; somehow, this warning is causing an exception in the ResolvePackageDependencies task, see https://github.com/dotnet/sdk/issues/16666. -->
+        <NoWarn>$(NoWarn);NU1903</NoWarn>
         <ResolveAssemblyReferencesSilent>True</ResolveAssemblyReferencesSilent>
     </PropertyGroup>
 

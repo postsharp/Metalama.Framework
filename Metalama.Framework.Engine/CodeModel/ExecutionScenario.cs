@@ -31,6 +31,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static ExecutionScenario Introspection { get; } = new( nameof(Introspection), false, true, true, false );
 
+        // Consider this to be design-time, since it's using partial compilations.
+        public static ExecutionScenario GeneratedCodeAnalyzer { get; } = new( nameof(GeneratedCodeAnalyzer), true, false, false, false );
+
         private ExecutionScenario(
             string name,
             bool isDesignTime,
