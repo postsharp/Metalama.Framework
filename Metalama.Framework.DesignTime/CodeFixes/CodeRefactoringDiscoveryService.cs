@@ -85,6 +85,12 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
             return ComputeRefactoringResult.Empty;
         }
 
+        if ( symbol is { Kind: SymbolKind.Alias } )
+        {
+            // Aliases never have any refactorings.
+            return ComputeRefactoringResult.Empty;
+        }
+
         var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, cancellationToken.ToTestable() );
 
         var licenseVerifier = pipeline.ServiceProvider.GetService<LicenseVerifier>();
