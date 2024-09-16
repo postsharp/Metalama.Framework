@@ -759,13 +759,20 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             return type;
         }
 
-        if ( type is ITypeImpl typeInternal )
-        {
-            return this.GetIType( typeInternal.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
-        }
+        var typeImpl = (ITypeImpl) type;
 
-        // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
-        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
+        if ( typeImpl.TypeSymbol != null )
+        {
+            return this.GetIType( typeImpl.TypeSymbol );
+        }
+        else if ( typeImpl is BuiltNamedType builtNamedType )
+        {
+            return this.GetNamedType( builtNamedType.TypeBuilder, ReferenceResolutionOptions.Default );
+        }
+        else
+        {
+            throw new AssertionFailedException( $"Constructions of introduced types are not supported." );
+        }
     }
 
     [return: NotNullIfNotNull( "declaration" )]
