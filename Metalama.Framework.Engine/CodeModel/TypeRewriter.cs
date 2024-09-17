@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
 using System;
 using System.Collections.Immutable;
 
@@ -13,20 +14,52 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         protected static TypeRewriter Null { get; } = new NullRewriter();
 
-        internal virtual ITypeImpl Visit( ArrayType arrayType ) => arrayType.WithElementType( this.Visit( arrayType.ElementType ) );
+        internal virtual IType Visit( IArrayType arrayType )
+        {
+            var elementType = this.Visit( arrayType.ElementType );
 
-        public virtual ITypeImpl Visit( IType elementType ) => ((ITypeImpl) elementType).Accept( this );
+            if ( elementType == arrayType.ElementType )
+            {
+                return arrayType;
+            }
+            else if ( arrayType is ArrayType sourceArrayType )
+            {
+                return sourceArrayType.WithElementType( elementType );    
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        internal virtual ITypeImpl Visit( DynamicType dynamicType ) => dynamicType;
+        public virtual IType Visit( IType elementType ) => ((ITypeImpl) elementType).Accept( this );
 
-        internal virtual ITypeImpl Visit( PointerType pointerType ) => pointerType.WithPointedAtType( this.Visit( pointerType.PointedAtType ) );
+        internal virtual IType Visit( IDynamicType dynamicType ) => dynamicType;
 
-        internal virtual ITypeImpl Visit( FunctionPointerType functionPointerType )
+        internal virtual IType Visit( IPointerType pointerType )
+        {
+            var pointedAtType = this.Visit( pointerType.PointedAtType );
+
+            if ( pointedAtType == pointerType.PointedAtType )
+            {
+                return pointerType;
+            }
+            else if ( pointerType is PointerType sourcePointerType )
+            {
+                return sourcePointerType.WithPointedAtType( pointedAtType );
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        internal virtual IType Visit( IFunctionPointerType functionPointerType )
         {
             throw new NotImplementedException( "Function pointers are not fully supported." );
         }
 
-        internal virtual ITypeImpl Visit( NamedType namedType )
+        internal virtual IType Visit( INamedType namedType )
         {
             if ( namedType.TypeArguments.Count == 0 )
             {
@@ -36,32 +69,50 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 var typeArguments = ImmutableArray.CreateBuilder<IType>( namedType.TypeArguments.Count );
 
+                var hasChange = false;
                 foreach ( var t in namedType.TypeArguments )
                 {
-                    typeArguments.Add( this.Visit( t ) );
+                    var argumentType = this.Visit( t );
+                    hasChange |= argumentType != t;
+                    typeArguments.Add( argumentType );
                 }
 
-                return namedType.WithTypeArguments( typeArguments.MoveToImmutable() );
+                if ( hasChange )
+                {
+                    if ( namedType is NamedType sourceNamedType )
+                    {
+                        return sourceNamedType.WithTypeArguments( typeArguments.MoveToImmutable() );        
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
+                }
+                else
+                {
+                    return namedType;
+                }
+                
             }
         }
 
-        internal virtual ITypeImpl Visit( TypeParameter typeParameter ) => typeParameter;
+        internal virtual IType Visit( ITypeParameter typeParameter ) => typeParameter;
 
         private sealed class NullRewriter : TypeRewriter
         {
-            public override ITypeImpl Visit( IType elementType ) => (ITypeImpl) elementType;
+            public override IType Visit( IType elementType ) => elementType;
 
-            internal override ITypeImpl Visit( ArrayType arrayType ) => arrayType;
+            internal override IType Visit( IArrayType arrayType ) => arrayType;
 
-            internal override ITypeImpl Visit( DynamicType dynamicType ) => dynamicType;
+            internal override IType Visit( IDynamicType dynamicType ) => dynamicType;
 
-            internal override ITypeImpl Visit( PointerType pointerType ) => pointerType;
+            internal override IType Visit( IPointerType pointerType ) => pointerType;
 
-            internal override ITypeImpl Visit( NamedType namedType ) => namedType;
+            internal override IType Visit( INamedType namedType ) => namedType;
 
-            internal override ITypeImpl Visit( TypeParameter typeParameter ) => typeParameter;
+            internal override IType Visit( ITypeParameter typeParameter ) => typeParameter;
 
-            internal override ITypeImpl Visit( FunctionPointerType functionPointerType ) => functionPointerType;
+            internal override IType Visit( IFunctionPointerType functionPointerType ) => functionPointerType;
         }
     }
 }

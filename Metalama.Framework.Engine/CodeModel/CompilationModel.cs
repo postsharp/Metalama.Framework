@@ -189,7 +189,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
                                  ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
 
-            this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers( project.ServiceProvider );
             this.Options = options ?? CompilationModelOptions.Default;
 
@@ -333,7 +332,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this.AspectRepository = prototype.AspectRepository;
             this.HierarchicalOptionsManager = prototype.HierarchicalOptionsManager;
             this.MetricManager = prototype.MetricManager;
-            this.EmptyGenericMap = prototype.EmptyGenericMap;
             this.SerializableTypeIdResolver = prototype.SerializableTypeIdResolver;
         }
 
@@ -603,9 +601,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private CompilationHelpers Helpers { get; }
 
         ICompilationHelpers ICompilationInternal.Helpers => this.Helpers;
-
-        internal GenericMap EmptyGenericMap { get; }
-
+        
         bool IAssembly.IsExternal => false;
 
         [Memo]

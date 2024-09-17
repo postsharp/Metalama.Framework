@@ -195,7 +195,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
         throw new NotSupportedException( "IsImplementationOfInterfaceMember on introduced types is not yet supported." );
     }
 
-    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor )
+    IType ITypeImpl.Accept( TypeRewriter visitor )
     {
         return visitor.Visit( this );
     }

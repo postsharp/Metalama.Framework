@@ -238,7 +238,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
+    IType ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 

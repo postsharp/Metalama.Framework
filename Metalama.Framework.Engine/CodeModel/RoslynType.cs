@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
 
-        public abstract ITypeImpl Accept( TypeRewriter visitor );
+        public abstract IType Accept( TypeRewriter visitor );
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 

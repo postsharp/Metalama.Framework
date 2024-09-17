@@ -17,9 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IType PointedAtType => this.Compilation.Factory.GetIType( this.Symbol.PointedAtType );
 
-        public override ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-        internal ITypeImpl WithPointedAtType( ITypeImpl pointedAtType )
+        internal ITypeImpl WithPointedAtType( IType pointedAtType )
         {
             if ( pointedAtType == this.PointedAtType )
             {

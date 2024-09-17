@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
             Invariant.Implies( typeSymbol.Rank == 1, typeSymbol.IsSZArray );
         }
 
-        internal ITypeImpl WithElementType( ITypeImpl elementType )
+        internal ITypeImpl WithElementType( IType elementType )
         {
             if ( elementType == this.ElementType )
             {
@@ -45,6 +45,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Rank => this.Symbol.Rank;
 
-        public override ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

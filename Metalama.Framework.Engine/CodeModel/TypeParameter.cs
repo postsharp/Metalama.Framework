@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
 
-        public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 

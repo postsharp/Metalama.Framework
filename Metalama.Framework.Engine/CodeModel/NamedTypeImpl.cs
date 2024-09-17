@@ -616,17 +616,19 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         return this._facade;
     }
 
-    private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
+    private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, in SymbolBasedGenericMap genericMap )
     {
+        var compilation = this.Compilation.RoslynCompilation;
+
         // Process the Roslyn type system.
         foreach ( var type in this.TypeSymbol.Interfaces )
         {
-            builder.Add( genericMap.Map( type ) );
+            builder.Add( genericMap.SubstituteSymbol( type , compilation ) );
         }
 
         if ( this.TypeSymbol.BaseType != null )
         {
-            var newGenericMap = genericMap.CreateBaseMap( this.TypeSymbol.BaseType.TypeArguments );
+            var newGenericMap = genericMap.SubstituteSymbols( this.TypeSymbol.BaseType.TypeArguments, compilation );
             ((NamedType) this.BaseType!).Implementation.PopulateAllInterfaces( builder, newGenericMap );
         }
 
@@ -636,12 +638,12 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
     {
         var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( this.Compilation.CompilationContext.SymbolComparer );
-        this.PopulateAllInterfaces( builder, this.Compilation.EmptyGenericMap );
+        this.PopulateAllInterfaces( builder, SymbolBasedGenericMap.Empty );
 
         return builder.ToImmutable();
     }
 
-    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor ) => throw new NotSupportedException();
+    IType ITypeImpl.Accept( TypeRewriter visitor ) => throw new NotSupportedException();
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 

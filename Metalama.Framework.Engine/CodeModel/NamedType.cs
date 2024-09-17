@@ -488,7 +488,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamedType UnderlyingType => this.Implementation.UnderlyingType;
 
-        public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public IReadOnlyList<IMember> GetOverridingMembers( IMember member )
         {

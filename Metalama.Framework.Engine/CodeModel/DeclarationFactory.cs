@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using K4os.Hash.xxHash;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -43,6 +44,9 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     private readonly CompilationModel _compilationModel;
     private readonly SystemTypeResolver _systemTypeResolver;
+    
+    private readonly ConcurrentDictionary<SubstitutedDeclarationKey, ISubstitutedDeclaration> _substitutedDeclarations = new ();
+
 
     internal DeclarationFactory( CompilationModel compilation )
     {
@@ -77,6 +81,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             return true;
         }
     }
+    
 
     public IType GetTypeByReflectionType( Type type ) => this.GetIType( this._compilationModel.CompilationContext.ReflectionMapper.GetTypeSymbol( type ) );
 
@@ -538,21 +543,45 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
-    internal IMethod GetMethod( SubstitutedMethod substitutedMethod )
-        => (IMethod) this._defaultCache.GetOrAdd(
+    internal IMethod Translate( SubstitutedMethod substitutedMethod )
+    {
+        if ( ReferenceEquals( substitutedMethod.Compilation, this._compilationModel ) )
+        {
+            return substitutedMethod;
+        }
+        
+        return (IMethod) this._defaultCache.GetOrAdd(
             Ref.FromSubstitutedDeclaration( substitutedMethod ).As<ICompilationElement>(),
-            static ( l, c ) =>
+            static ( l, me ) =>
             {
                 var original = (SubstitutedMethod) l.Target!;
 
                 return new SubstitutedMethod(
-                    original.SourceMethod,
-                    Ref.FromSymbol( original.SubstitutedType, original.GetCompilationModel().CompilationContext )
-                        .GetSymbol( c.RoslynCompilation )
-                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes )
-                        .AssertCast<INamedTypeSymbol>() );
+                    original.Definition,
+                    me.Translate( original.DeclaringType ).AssertNotNull() );
             },
-            this._compilationModel );
+            this );
+    }
+
+    internal IMethod GetSubstitutedMethod( IMethod methodDefinition, INamedType declaringType, GenericMap genericMap )
+    {
+        if ( !declaringType.IsGeneric )
+        {
+            return methodDefinition;
+        }
+        
+        var key = new SubstitutedDeclarationKey( methodDefinition, declaringType , genericMap );
+        
+        return (IMethod) this._substitutedDeclarations.GetOrAdd( 
+            key, 
+            static ( k, me ) => new SubstitutedMethod( (BuiltMethod) k.Definition, k.DeclaringType ),
+            this );
+    }
+    
+    internal IMember? GetSubstitutedDeclaration( IMember sourceOverriddenMember, INamedType declaringType, GenericMap genericMap )
+    {
+        throw new NotImplementedException();
+    }
 
     internal IMethod GetAccessor( AccessorBuilder methodBuilder, ReferenceResolutionOptions options )
         => (IMethod) this._defaultCache.GetOrAdd(
@@ -744,10 +773,10 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             _ => throw new AssertionFailedException( $"Cannot get a declaration for a {builder.GetType()}" )
         };
 
-    internal IDeclaration GetDeclaration( ISubstitutedDeclaration declaration )
+    internal IDeclaration Translate( ISubstitutedDeclaration declaration )
         => declaration switch
         {
-            SubstitutedMethod substitutedMethod => this.GetMethod( substitutedMethod ),
+            SubstitutedMethod substitutedMethod => this.Translate( substitutedMethod ),
 
             _ => throw new AssertionFailedException( $"Cannot get a declaration for a {declaration.GetType()}" )
         };
@@ -828,4 +857,9 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             serializationData,
             static ( data, compilation ) => new DeserializedAttribute( data, compilation ),
             this._compilationModel );
+    
+    
+    record struct  SubstitutedDeclarationKey( IMember Definition, INamedType DeclaringType, GenericMap GenericMap );
+
+    
 }

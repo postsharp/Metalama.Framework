@@ -4,7 +4,10 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel.Substituted;
 
+/// <summary>
+/// Represents a generic instance of a type or member.
+/// </summary>
 internal interface ISubstitutedDeclaration : IDeclaration
 {
-    GenericMap GenericMap { get; }
+    IDeclaration Definition { get; }
 }
