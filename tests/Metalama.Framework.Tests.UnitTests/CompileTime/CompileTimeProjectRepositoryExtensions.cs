@@ -9,12 +9,12 @@ internal static class CompileTimeProjectRepositoryExtensions
 {
     public static AttributeDeserializer CreateAttributeDeserializer(
         this CompileTimeProjectRepository repo,
-        in ProjectServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationContext compilationContext )
     {
-        var augmentedServiceProvider =
-            serviceProvider.WithService( new ProjectSpecificCompileTimeTypeResolver.Provider( serviceProvider.WithService( repo ) ) );
+        serviceProvider = serviceProvider.WithService( repo );
+        serviceProvider = serviceProvider.WithService( new ProjectSpecificCompileTimeTypeResolver.Provider( serviceProvider ) );
 
-        return new UserCodeAttributeDeserializer.Provider( augmentedServiceProvider ).Get( compilationContext );
+        return new UserCodeAttributeDeserializer.Provider( serviceProvider ).Get( compilationContext );
     }
 }

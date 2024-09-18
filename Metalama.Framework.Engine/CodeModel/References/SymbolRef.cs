@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -21,7 +22,7 @@ internal class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
     public override string Name => this.Symbol.Name;
 
-    public override SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
+    public override SerializableDeclarationId ToSerializableId() => this.Symbol.GetSerializableId();
 
     public SymbolRef( ISymbol symbol, CompilationContext compilationContext, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
     {

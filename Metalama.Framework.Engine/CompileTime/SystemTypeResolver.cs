@@ -44,11 +44,10 @@ internal class SystemTypeResolver : CurrentAppDomainTypeResolver
         }
     }
 
-    public class Provider : CompilationServiceProvider<CompileTimeTypeResolver>
+    public class Provider : CompilationServiceProvider<SystemTypeResolver>
     {
         public Provider( in ProjectServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-        protected override CompileTimeTypeResolver Create( CompilationContext compilationContext )
-            => new SystemTypeResolver( this.ServiceProvider, compilationContext );
+        protected override SystemTypeResolver Create( CompilationContext compilationContext ) => new( this.ServiceProvider, compilationContext );
     }
 }

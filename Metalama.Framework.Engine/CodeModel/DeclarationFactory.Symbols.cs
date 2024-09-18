@@ -239,6 +239,10 @@ public partial class DeclarationFactory
                     // The property itself.
                     DeclarationRefTargetKind.Default => propertyOrIndexer,
                     DeclarationRefTargetKind.Property => propertyOrIndexer,
+
+                    // The underlying field.
+                    DeclarationRefTargetKind.Field => this.GetField( propertySymbol.GetBackingField() ),
+
                     _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                 };
 

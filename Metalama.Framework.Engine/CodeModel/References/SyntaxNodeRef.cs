@@ -60,7 +60,8 @@ After:
             compilation );
     }
 
-    public override bool Equals( IRef? other ) => throw new NotImplementedException();
+    public override bool Equals( IRef? other )
+        => other is SyntaxNodeRef<T> nodeRef && nodeRef.SyntaxNode == this.SyntaxNode && nodeRef.TargetKind == this.TargetKind;
 
-    protected override int GetHashCodeCore() => throw new NotImplementedException();
+    protected override int GetHashCodeCore() => HashCode.Combine( this.SyntaxNode, this.TargetKind );
 }

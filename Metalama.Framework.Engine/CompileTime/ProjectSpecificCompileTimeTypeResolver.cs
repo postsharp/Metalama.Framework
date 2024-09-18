@@ -8,13 +8,13 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver
+internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver
 {
     private readonly CompileTimeTypeResolver _systemTypeResolver;
     private readonly CompileTimeProjectRepository _projectRepository;
 
-    private ProjectSpecificCompileTimeTypeResolver( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base(
-        compilationContext )
+    private ProjectSpecificCompileTimeTypeResolver( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) :
+        base( compilationContext )
     {
         this._projectRepository = serviceProvider.GetRequiredService<CompileTimeProjectRepository>();
         this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver.Provider>().Get( compilationContext );
@@ -54,11 +54,11 @@ internal class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver
         return compileTimeProject?.GetTypeOrNull( reflectionName );
     }
 
-    public class Provider : CompilationServiceProvider<CompileTimeTypeResolver>
+    public sealed class Provider : CompilationServiceProvider<ProjectSpecificCompileTimeTypeResolver>
     {
         public Provider( in ProjectServiceProvider serviceProvider ) : base( in serviceProvider ) { }
 
-        protected override CompileTimeTypeResolver Create( CompilationContext compilationContext )
-            => new ProjectSpecificCompileTimeTypeResolver( this.ServiceProvider, compilationContext );
+        protected override ProjectSpecificCompileTimeTypeResolver Create( CompilationContext compilationContext )
+            => new( this.ServiceProvider, compilationContext );
     }
 }

@@ -10,13 +10,13 @@ internal sealed class UserCodeAttributeDeserializer : AttributeDeserializer
         serviceProvider,
         resolver ) { }
 
-    public class Provider : CompilationServiceProvider<AttributeDeserializer>
+    public sealed class Provider : CompilationServiceProvider<UserCodeAttributeDeserializer>
     {
         public Provider( in ProjectServiceProvider serviceProvider ) : base( in serviceProvider ) { }
 
-        protected override AttributeDeserializer Create( CompilationContext compilationContext )
-            => new UserCodeAttributeDeserializer(
+        protected override UserCodeAttributeDeserializer Create( CompilationContext compilationContext )
+            => new(
                 this.ServiceProvider,
-                this.ServiceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver.Provider>().Get( compilationContext ) );
+                this.ServiceProvider.GetRequiredService<CompilationServiceProvider<ProjectSpecificCompileTimeTypeResolver>>().Get( compilationContext ) );
     }
 }

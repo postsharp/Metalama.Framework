@@ -30,6 +30,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         protected override void ConfigureServices( IAdditionalServiceCollection services )
         {
             base.ConfigureServices( services );
+
+            // services.AddProjectService<CompilationServiceProvider<CompileTimeTypeResolver>>( sp => new ProjectSpecificCompileTimeTypeResolver.Provider( sp ) );
             services.AddProjectService<SystemTypeResolver.Provider>( sp => new HackedSystemTypeResolver.Provider( sp ) );
         }
 
@@ -646,7 +648,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             {
                 public Provider( in ProjectServiceProvider serviceProvider ) : base( in serviceProvider ) { }
 
-                protected override CompileTimeTypeResolver Create( CompilationContext compilationContext )
+                protected override SystemTypeResolver Create( CompilationContext compilationContext )
                 {
                     return new HackedSystemTypeResolver( this.ServiceProvider, compilationContext );
                 }

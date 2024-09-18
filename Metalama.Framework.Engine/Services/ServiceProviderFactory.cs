@@ -157,7 +157,7 @@ public static class ServiceProviderFactory
     {
         return serviceProvider.Underlying
             .WithService( repository )
-            .WithService( sp => new ProjectSpecificCompileTimeTypeResolver.Provider( sp ) )
+            .WithService<CompilationServiceProvider<ProjectSpecificCompileTimeTypeResolver>>( sp => new ProjectSpecificCompileTimeTypeResolver.Provider( sp ) )
             .WithServiceConditional<UserCodeAttributeDeserializer.Provider>( sp => new UserCodeAttributeDeserializer.Provider( sp ) )
             .WithService<SymbolClassificationService>( _ => new SymbolClassificationService( repository ) )
             .WithServiceConditional<TemplateAttributeFactory>( sp => new TemplateAttributeFactory( sp ) );
