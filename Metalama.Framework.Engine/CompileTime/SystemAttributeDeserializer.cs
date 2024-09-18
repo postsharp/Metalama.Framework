@@ -10,7 +10,7 @@ internal sealed class SystemAttributeDeserializer : AttributeDeserializer
         serviceProvider,
         systemTypeResolver ) { }
 
-    public new class Provider : CompilationServiceProvider<AttributeDeserializer>
+    public class Provider : CompilationServiceProvider<AttributeDeserializer>
     {
         public Provider( in ProjectServiceProvider serviceProvider ) : base( in serviceProvider ) { }
 

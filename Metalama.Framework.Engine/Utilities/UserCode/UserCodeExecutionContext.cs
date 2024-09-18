@@ -38,8 +38,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     private readonly ISyntaxBuilderImpl? _syntaxBuilder;
     private readonly CompilationContext? _compilationContext;
     private bool _collectDependencyDisabled;
-    private CompileTimeTypeFactory? _compileTimeTypeFactory;
-
+    
     internal static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
     internal static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;

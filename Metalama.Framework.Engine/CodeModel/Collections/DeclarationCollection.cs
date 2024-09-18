@@ -29,12 +29,10 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             {
                 throw new ArgumentOutOfRangeException( nameof(containingDeclaration) );
             }
-
-            this._genericContext = containingDeclaration.GenericContext;
 #endif
-
+            
+            this._genericContext = containingDeclaration.GenericContext;
             this.Source = source;
-
             this.ContainingDeclaration = containingDeclaration;
         }
 

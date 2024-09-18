@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 {
     internal sealed class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
-        private readonly IRefImpl<IDeclaration> _containingDeclaration;
+        private readonly IRef<IDeclaration> _containingDeclaration;
 
         private readonly object _originalTarget;
 
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public IRef<INamedType> AttributeType { get; }
 
-        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._containingDeclaration.GetClosestSymbol( compilation );
+        public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._containingDeclaration.Unwrap().GetClosestSymbol( compilation );
 
         (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) IRefImpl.GetAttributeData( CompilationContext compilationContext )
             => throw new NotSupportedException();
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         private (AttributeData? Attribute, ISymbol Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
             // Find the parent declaration.
-            var (attributes, symbol) = this._containingDeclaration.GetAttributeData( compilation );
+            var (attributes, symbol) = this._containingDeclaration.Unwrap().GetAttributeData( compilation );
 
             // In the parent, find the AttributeData corresponding to the current item.
 
@@ -90,7 +91,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             this.AttributeType = builder.Constructor.DeclaringType.ToRef();
             this.Target = this._originalTarget = builder;
-            this._containingDeclaration = builder.ContainingDeclaration.ToRefImpl();
+            this._containingDeclaration = builder.ContainingDeclaration.ToRef();
         }
 
         public AttributeRef( AttributeSerializationData serializationData )

@@ -44,7 +44,7 @@ internal class SystemTypeResolver : CurrentAppDomainTypeResolver
         }
     }
 
-    public new class Provider : CompilationServiceProvider<CompileTimeTypeResolver>
+    public class Provider : CompilationServiceProvider<CompileTimeTypeResolver>
     {
         public Provider( in ProjectServiceProvider serviceProvider ) : base( serviceProvider ) { }
 

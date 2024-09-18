@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
@@ -551,7 +552,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             var transformations = pipelineResultValue?.Transformations ?? ImmutableArray<ITransformationBase>.Empty;
 
-            var annotations = pipelineResultValue?.Annotations ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty;
+            var annotations = pipelineResultValue?.Annotations ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty.WithKeyComparer( RefEqualityComparer<IDeclaration>.Default );
 
             var result = new DesignTimePipelineExecutionResult(
                 compilation.SyntaxTrees,

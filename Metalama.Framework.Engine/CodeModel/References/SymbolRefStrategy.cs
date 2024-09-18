@@ -193,7 +193,6 @@ internal class SymbolRefStrategy : IRefStrategy
                         return true;
                     }
 
-
                     foreach ( var i in t.AllInterfaces )
                     {
                         if ( IsOfTypeDefinitionRecursive( i ) )
@@ -213,7 +212,6 @@ internal class SymbolRefStrategy : IRefStrategy
                 {
                     return false;
                 }
-
 
             default:
                 throw new NotImplementedException( "This ConversionKind is not implemented." );
@@ -319,6 +317,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
     private static bool IsValidNamedType( ISymbol symbol, CompilationModel compilation )
         => symbol is INamedTypeSymbol namedTypeSymbol && IsValidNamedType( namedTypeSymbol, compilation );
+
     private static bool IsValidNamedType( INamedTypeSymbol symbol, CompilationModel compilation )
     {
         if ( !IsValidSymbol( symbol, compilation ) )

@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
@@ -140,7 +141,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.Configuration = configuration;
             this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
-            this.Annotations = annotations ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty;
+            this.Annotations = annotations ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Create( RefEqualityComparer<IDeclaration>.Default );
             this.HasDeclarationValidator = hasDeclarationValidator;
 
             this.ReferenceValidators =

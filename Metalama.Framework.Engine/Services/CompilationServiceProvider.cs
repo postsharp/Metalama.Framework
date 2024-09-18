@@ -2,12 +2,11 @@
 
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
+using System;
 
 namespace Metalama.Framework.Engine.Services;
 
-public interface ICompilationService;
-
-public abstract class CompilationServiceProvider<T> : IProjectService
+public abstract class CompilationServiceProvider<T> : IProjectService, IDisposable
     where T : ICompilationService
 {
     public ProjectServiceProvider ServiceProvider { get; }
@@ -25,4 +24,6 @@ public abstract class CompilationServiceProvider<T> : IProjectService
             c => this.Create( compilationContext ) );
 
     protected abstract T Create( CompilationContext compilationContext );
+
+    public void Dispose() => this._cache.Dispose();
 }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private sealed class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
             private readonly ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.Builder _builder =
-                ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.CreateBuilder();
+                ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.CreateBuilder(RefEqualityComparer<INamedType>.Default);
 
             private readonly CompilationContext _compilationContext;
 

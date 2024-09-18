@@ -133,8 +133,8 @@ namespace Metalama.Framework.Engine.CodeModel
         private ImmutableDictionary<IRef<ICompilationElement>, IRef<ICompilationElement>> _redirections =
             ImmutableDictionary.Create<IRef<ICompilationElement>, IRef<ICompilationElement>>( RefEqualityComparer<ICompilationElement>.Default );
 
-        private ImmutableDictionary<IRefImpl<IDeclaration>, int> _depthsCache =
-            ImmutableDictionary.Create<IRefImpl<IDeclaration>, int>( RefEqualityComparer<IDeclaration>.Default );
+        private ImmutableDictionary<IRef<IDeclaration>, int> _depthsCache =
+            ImmutableDictionary.Create<IRef<IDeclaration>, int>( RefEqualityComparer<IDeclaration>.Default );
 
         SemanticModel ISdkCompilation.GetCachedSemanticModel( SyntaxTree syntaxTree ) => this.RoslynCompilation.GetCachedSemanticModel( syntaxTree );
 
@@ -178,10 +178,13 @@ namespace Metalama.Framework.Engine.CodeModel
             this.CompilationContext = partialCompilation.Compilation.GetCompilationContext();
 
             this._staticConstructors =
-                ImmutableDictionary<IRef<INamedType>, IConstructorBuilder>.Empty;
+                ImmutableDictionary<IRef<INamedType>, IConstructorBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
-            this._finalizers = ImmutableDictionary<IRef<INamedType>, IMethodBuilder>.Empty;
-            this.Annotations = annotations ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty;
+            this._finalizers = ImmutableDictionary<IRef<INamedType>, IMethodBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
+
+            this.Annotations = annotations
+                               ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty.WithKeyComparer(
+                                   RefEqualityComparer<IDeclaration>.Default );
 
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
             this.HierarchicalOptionsManager = hierarchicalOptionsManager;
@@ -216,7 +219,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._parameters = ImmutableDictionary.Create<IRef<IHasParameters>, ParameterUpdatableCollection>( RefEqualityComparer<IHasParameters>.Default );
 
             this._attributes =
-                ImmutableDictionary<IRef<IDeclaration>, AttributeUpdatableCollection>.Empty;
+                ImmutableDictionary.Create<IRef<IDeclaration>, AttributeUpdatableCollection>( RefEqualityComparer<IDeclaration>.Default );
 
             this.Factory = new DeclarationFactory( this );
 
@@ -438,7 +441,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             IEnumerable<IAttribute> GetAllAttributesOfExactType( INamedType t )
             {
-                return this._allMemberAttributesByType[t.ToRefImpl()]
+                return this._allMemberAttributesByType[t.ToRef()]
                     .Select(
                         a =>
                         {
@@ -452,7 +455,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal int GetDepth( IDeclaration declaration )
         {
-            var reference = declaration.ToRefImpl();
+            var reference = declaration.ToRef();
 
             if ( this._depthsCache.TryGetValue( reference, out var value ) )
             {
@@ -511,7 +514,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return 0;
             }
 
-            var reference = namedType.ToRefImpl();
+            var reference = namedType.ToRef();
 
             if ( this._depthsCache.TryGetValue( reference, out var depth ) )
             {

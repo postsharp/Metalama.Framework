@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
@@ -24,7 +25,7 @@ internal sealed class IncrementalAspectRepository : AspectRepository
     }
 
     public IncrementalAspectRepository( CompilationModel compilation ) : this(
-        ImmutableDictionaryOfArray<IRef<IDeclaration>, IAspectInstance>.Empty,
+        ImmutableDictionaryOfArray<IRef<IDeclaration>, IAspectInstance>.Empty.WithKeyComparer( RefEqualityComparer<IDeclaration>.Default ),
         compilation ) { }
 
     private void VerifyDeclaration( IDeclaration declaration )

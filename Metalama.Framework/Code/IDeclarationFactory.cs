@@ -65,7 +65,7 @@ namespace Metalama.Framework.Code
         dynamic? Cast( IType type, object? value );
 
         /// <summary>
-        /// Gets a declaration from a serialized identifier generated to <see cref="IRef{T}.ToSerializableId"/>.
+        /// Gets a declaration from a serialized identifier generated to <see cref="IRef.ToSerializableId"/>.
         /// </summary>
         IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId );
 
