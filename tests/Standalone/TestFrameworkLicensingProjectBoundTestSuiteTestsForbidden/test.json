@@ -1,0 +1,4 @@
+{
+    "IgnoreExitCode": true,
+    // "SuccessRegexes": [ "LAMA0610" ] Uncomment once #35461 is fixed
+}

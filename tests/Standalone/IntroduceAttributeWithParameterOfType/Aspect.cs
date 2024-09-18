@@ -20,6 +20,6 @@ public class MyAspect : TypeAspect
             builder.Target,
             AttributeConstruction.Create(
                 typeof( MyAttribute ),
-                constructorArguments: [typeof( Target )] ) );
+                constructorArguments: new[] { typeof( Target ) } ) );
     }
 }

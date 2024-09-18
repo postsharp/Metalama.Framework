@@ -1,5 +1,6 @@
 ﻿#if TEST_OPTIONS
 // @ExpectedException(Metalama.Testing.AspectTesting.Licensing.InvalidLicenseException)
+// @Skipped(#35461)
 #endif
 
 using System;
