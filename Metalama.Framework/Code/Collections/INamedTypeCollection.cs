@@ -13,6 +13,12 @@ namespace Metalama.Framework.Code.Collections
     /// </remarks>
     public interface INamedTypeCollection : IMemberOrNamedTypeCollection<INamedType>
     {
+        /// <summary>
+        /// Gets the types in the collection that are derived from a given generic type,
+        /// taking any type instance into account.
+        /// </summary>
+        /// <param name="typeDefinition"></param>
+        /// <returns></returns>
         IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition );
     }
 

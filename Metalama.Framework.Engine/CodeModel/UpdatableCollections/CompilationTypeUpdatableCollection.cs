@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,6 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 
     public IEnumerable<IRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )
     {
-        // This does not make sense, since a compilation only has type definitions.
-        throw new NotSupportedException();
+        return this.GetMemberRefs().Where( r => r.GetStrategy().Is( r, typeDefinition.ToRef(), ConversionKind.TypeDefinition ) );
     }
 }

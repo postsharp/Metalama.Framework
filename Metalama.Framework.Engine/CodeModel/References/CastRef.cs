@@ -14,7 +14,7 @@ internal class CastRef<T> : IRefImpl<T>
 
     public CastRef( IRefImpl underlying )
     {
-        this._underlying = underlying;
+        this._underlying = underlying.Unwrap();
     }
 
     public ISymbol GetClosestSymbol( CompilationContext compilationContext ) => this._underlying.GetClosestSymbol( compilationContext );

@@ -99,9 +99,9 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         Type aspectType,
         IAspect? prototype,
         IDiagnosticAdder diagnosticAdder,
-        ITemplateReflectionContext compilationContext ) : base(
+        ITemplateReflectionContext templateReflectionContext ) : base(
         serviceProvider,
-        compilationContext,
+        templateReflectionContext,
         typeSymbol,
         diagnosticAdder,
         baseClass,
@@ -112,7 +112,10 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.IsAbstract = typeSymbol.IsAbstract;
         this.Project = project;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
-        var attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
+
+        var attributeDeserializer = serviceProvider.GetRequiredService<SystemAttributeDeserializer.Provider>()
+            .Get( templateReflectionContext.CompilationContext );
+
         this.Type = aspectType;
         this._prototypeAspectInstance = prototype;
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );

@@ -14,6 +14,8 @@ public static class RefExtensions
     /// </summary>
     internal static IRefImpl Unwrap( this IRef reference ) => ((IRefImpl) reference).Unwrap();
 
+    internal static IRefStrategy GetStrategy( this IRef reference ) => reference.Unwrap().Strategy;
+
     internal static IRefImpl<T> AsRefImpl<T>( this IRef<T> reference )
         where T : class, ICompilationElement
         => (IRefImpl<T>) reference;

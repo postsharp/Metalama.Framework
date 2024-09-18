@@ -24,8 +24,8 @@ public partial class DerivedTypeIndex
         {
             this._compilationContext = compilationContext;
 
-            this._relationships = new ImmutableDictionaryOfArray<IRef<INamedType>, IRef<INamedType>>.Builder();
-            this._processedTypes = ImmutableHashSet.CreateBuilder<IRef<INamedType>>();
+            this._relationships = new ImmutableDictionaryOfArray<IRef<INamedType>, IRef<INamedType>>.Builder( RefEqualityComparer<INamedType>.Default );
+            this._processedTypes = ImmutableHashSet.CreateBuilder<IRef<INamedType>>( RefEqualityComparer<INamedType>.Default );
         }
 
         internal Builder( DerivedTypeIndex immutable )

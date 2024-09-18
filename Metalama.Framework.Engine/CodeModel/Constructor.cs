@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private IRef<IConstructor> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+        private IRef<IConstructor> Ref => this.RefFactory.FromSymbolBasedDeclaration<IConstructor>( this );
 
         private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

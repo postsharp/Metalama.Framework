@@ -31,13 +31,14 @@ internal sealed class SerializationReader
         Stream stream,
         CompileTimeSerializer formatter,
         bool shouldReportExceptionCause,
-        string assemblyName )
+        string assemblyName,
+        CompilationContext compilationContext )
     {
         this._formatter = formatter;
         this._shouldReportExceptionCause = shouldReportExceptionCause;
         this._assemblyName = assemblyName;
         this._binaryReader = new SerializationBinaryReader( new BinaryReader( stream ) );
-        this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
+        this._compileTimeTypeFactory = compilationContext.CompileTimeTypeFactory;
         this._emptyInstanceFields = new InstanceFields( formatter );
     }
 

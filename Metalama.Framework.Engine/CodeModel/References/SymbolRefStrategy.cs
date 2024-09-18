@@ -23,8 +23,6 @@ internal class SymbolRefStrategy : IRefStrategy
         this._compilationContext = compilationContext;
     }
 
-    public static IRefStrategy Instance { get; } = new DeclarationRefStrategy();
-
     public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<IRef<IAttribute>> add )
     {
         var symbolRef = (ISymbolRef) declaration.Unwrap();
@@ -117,7 +115,7 @@ internal class SymbolRefStrategy : IRefStrategy
                     var predicate = GetSymbolPredicate( kind );
 
                     return symbol.GetMembers( name )
-                        .Where( x => predicate( symbol, compilation ) )
+                        .Where( x => predicate( x, compilation ) )
                         .Select( s => this._compilationContext.RefFactory.FromSymbol<T>( s ) );
                 }
         }
@@ -182,14 +180,40 @@ internal class SymbolRefStrategy : IRefStrategy
                 return this._compilationContext.Compilation.HasImplicitConversion( leftSymbol, rightSymbol );
 
             case ConversionKind.TypeDefinition:
+
+                bool IsOfTypeDefinitionRecursive( INamedTypeSymbol t )
+                {
+                    if ( t.OriginalDefinition == rightSymbol )
+                    {
+                        return true;
+                    }
+
+                    if ( t.BaseType != null && IsOfTypeDefinitionRecursive( t.BaseType ) )
+                    {
+                        return true;
+                    }
+
+
+                    foreach ( var i in t.AllInterfaces )
+                    {
+                        if ( IsOfTypeDefinitionRecursive( i ) )
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
                 if ( leftSymbol is INamedTypeSymbol leftNamedType && rightSymbol is INamedTypeSymbol rightNamedType )
                 {
-                    return leftNamedType.OriginalDefinition == rightNamedType;
+                    return IsOfTypeDefinitionRecursive( leftNamedType );
                 }
                 else
                 {
                     return false;
                 }
+
 
             default:
                 throw new NotImplementedException( "This ConversionKind is not implemented." );
@@ -293,6 +317,8 @@ internal class SymbolRefStrategy : IRefStrategy
         => symbol.Kind == SymbolKind.Property
            && IsValidSymbol( symbol, compilation ) && ((IPropertySymbol) symbol).Parameters.Length == 0;
 
+    private static bool IsValidNamedType( ISymbol symbol, CompilationModel compilation )
+        => symbol is INamedTypeSymbol namedTypeSymbol && IsValidNamedType( namedTypeSymbol, compilation );
     private static bool IsValidNamedType( INamedTypeSymbol symbol, CompilationModel compilation )
     {
         if ( !IsValidSymbol( symbol, compilation ) )
@@ -335,6 +361,7 @@ internal class SymbolRefStrategy : IRefStrategy
             DeclarationKind.Indexer => IsValidIndexer,
             DeclarationKind.Method => IsValidMethod,
             DeclarationKind.Property => IsValidProperty,
+            DeclarationKind.NamedType => IsValidNamedType,
             _ => throw new NotImplementedException()
         };
 }

@@ -22,13 +22,13 @@ namespace Metalama.Framework.Engine.Aspects;
 /// </summary>
 internal sealed class CompilationAspectSource : IAspectSource
 {
-    private readonly IAttributeDeserializer _attributeDeserializer;
+    private readonly UserCodeAttributeDeserializer.Provider _attributeDeserializerProvider;
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
     private ImmutableDictionaryOfArray<IType, IRef<IDeclaration>>? _exclusions;
 
     public CompilationAspectSource( in ProjectServiceProvider serviceProvider, ImmutableArray<IAspectClass> aspectTypes )
     {
-        this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
+        this._attributeDeserializerProvider = serviceProvider.GetRequiredService<UserCodeAttributeDeserializer.Provider>();
         this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
         this.AspectClasses = aspectTypes;
     }
@@ -58,6 +58,7 @@ internal sealed class CompilationAspectSource : IAspectSource
     {
         var compilation = context.Compilation;
         var cancellationToken = context.CancellationToken;
+        var attributeDeserializer = this._attributeDeserializerProvider.Get( context.Compilation.CompilationContext );
 
         if ( !compilation.Factory.TryGetTypeByReflectionName( aspectClass.FullName, out var aspectType ) )
         {
@@ -85,7 +86,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
             var attributeData = attribute.GetAttributeData();
 
-            if ( this._attributeDeserializer.TryCreateAttribute( attributeData, context.Collector, out var attributeInstance ) )
+            if ( attributeDeserializer.TryCreateAttribute( attributeData, context.Collector, out var attributeInstance ) )
             {
                 var targetDeclaration = attribute.ContainingDeclaration;
 

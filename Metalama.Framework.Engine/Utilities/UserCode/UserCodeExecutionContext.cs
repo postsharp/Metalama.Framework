@@ -36,8 +36,9 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     private readonly INamedType? _targetType;
     private readonly ImmutableArray<SyntaxTree>? _sourceTrees;
     private readonly ISyntaxBuilderImpl? _syntaxBuilder;
-    private readonly CompilationContext? _compilationServices;
+    private readonly CompilationContext? _compilationContext;
     private bool _collectDependencyDisabled;
+    private CompileTimeTypeFactory? _compileTimeTypeFactory;
 
     internal static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
@@ -45,18 +46,21 @@ public class UserCodeExecutionContext : IExecutionContextInternal
 
     internal static Type ResolveCompileTimeTypeOf( string typeId, IReadOnlyDictionary<string, IType>? substitutions = null )
     {
-        if ( Current._compilationServices == null )
+        if ( Current._compilationContext == null )
         {
             throw new InvalidOperationException( "Cannot use typeof for run-time types in the current execution context." );
         }
 
-        return Current._compilationServices.CompileTimeTypeFactory
+        return Current._compilationContext.CompileTimeTypeFactory
             .Get( new SerializableTypeId( typeId ), substitutions );
     }
 
     internal static Type ResolveCompileTimeTypeOf( string typeId, string? ns, string name, string fullName, string toString )
-        => Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+    {
+        return Current._compilationContext.AssertNotNull()
+            .CompileTimeTypeFactory
             .Get( new SerializableTypeId( typeId ), new CompileTimeTypeMetadata( ns, name, fullName, toString ) );
+    }
 
     IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 
@@ -129,7 +133,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this.ServiceProvider = serviceProvider;
         this.AspectLayerId = aspectAspectLayerId;
         this.Compilation = compilationModel;
-        this._compilationServices = compilationModel?.CompilationContext;
+        this._compilationContext = compilationModel?.CompilationContext;
         this.TargetDeclaration = targetDeclaration;
         this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
         this._targetType = targetDeclaration?.GetTopmostNamedType();
@@ -166,7 +170,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
         this._targetType = targetDeclaration?.GetTopmostNamedType();
 
-        this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
+        this._compilationContext = compilationServices ?? compilationModel?.CompilationContext;
 
         this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider, targetDeclaration );
         this.MetaApi = metaApi;
@@ -184,7 +188,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this._sourceTrees = prototype._sourceTrees;
         this._dependencyCollector = prototype._dependencyCollector;
         this._targetType = prototype._targetType;
-        this._compilationServices = prototype._compilationServices;
+        this._compilationContext = prototype._compilationContext;
         this._syntaxBuilder = prototype._syntaxBuilder;
         this.MetaApi = prototype.MetaApi;
     }

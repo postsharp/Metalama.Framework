@@ -29,6 +29,6 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
 
     protected override void PopulateAllItems( Action<IRef<INamedType>> action )
     {
-        ((IRefStrategy) this._declaringType).EnumerateImplementedInterfaces( this._declaringType, this.Compilation, action );
+        this._declaringType.GetStrategy().EnumerateImplementedInterfaces( this._declaringType, this.Compilation, action );
     }
 }

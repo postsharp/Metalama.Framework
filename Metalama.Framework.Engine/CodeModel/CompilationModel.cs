@@ -131,9 +131,10 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
         private ImmutableDictionary<IRef<ICompilationElement>, IRef<ICompilationElement>> _redirections =
-            ImmutableDictionary.Create<IRef<ICompilationElement>, IRef<ICompilationElement>>();
+            ImmutableDictionary.Create<IRef<ICompilationElement>, IRef<ICompilationElement>>( RefEqualityComparer<ICompilationElement>.Default );
 
-        private ImmutableDictionary<IRefImpl<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<IRefImpl<IDeclaration>, int>();
+        private ImmutableDictionary<IRefImpl<IDeclaration>, int> _depthsCache =
+            ImmutableDictionary.Create<IRefImpl<IDeclaration>, int>( RefEqualityComparer<IDeclaration>.Default );
 
         SemanticModel ISdkCompilation.GetCachedSemanticModel( SyntaxTree syntaxTree ) => this.RoslynCompilation.GetCachedSemanticModel( syntaxTree );
 
@@ -189,13 +190,13 @@ namespace Metalama.Framework.Engine.CodeModel
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
                                  ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
 
-            this.Helpers = new CompilationHelpers( project.ServiceProvider );
+            this.Helpers = new CompilationHelpers( project.ServiceProvider, this.CompilationContext );
             this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
             static void InitializeDictionary<T>( out ImmutableDictionary<IRef<INamedType>, T> dictionary )
             {
-                dictionary = ImmutableDictionary.Create<IRef<INamedType>, T>();
+                dictionary = ImmutableDictionary.Create<IRef<INamedType>, T>( RefEqualityComparer<INamedType>.Default );
             }
 
             InitializeDictionary( out this._fields );
@@ -207,11 +208,12 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
-            this._namedTypes = ImmutableDictionary.Create<IRef<INamespaceOrNamedType>, TypeUpdatableCollection>();
+            this._namedTypes =
+                ImmutableDictionary.Create<IRef<INamespaceOrNamedType>, TypeUpdatableCollection>( RefEqualityComparer<INamespaceOrNamedType>.Default );
 
-            this._namespaces = ImmutableDictionary.Create<IRef<INamespace>, NamespaceUpdatableCollection>();
+            this._namespaces = ImmutableDictionary.Create<IRef<INamespace>, NamespaceUpdatableCollection>( RefEqualityComparer<INamespace>.Default );
 
-            this._parameters = ImmutableDictionary.Create<IRef<IHasParameters>, ParameterUpdatableCollection>();
+            this._parameters = ImmutableDictionary.Create<IRef<IHasParameters>, ParameterUpdatableCollection>( RefEqualityComparer<IHasParameters>.Default );
 
             this._attributes =
                 ImmutableDictionary<IRef<IDeclaration>, AttributeUpdatableCollection>.Empty;

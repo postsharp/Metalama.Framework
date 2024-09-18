@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.CodeModel
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
         [Memo]
-        private IRef<IField> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+        private IRef<IField> Ref => this.RefFactory.FromSymbolBasedDeclaration<IField>( this );
 
         private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

@@ -160,7 +160,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     }
 
     [Memo]
-    private IRef<IMethod> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+    private IRef<IMethod> Ref => this.RefFactory.FromSymbolBasedDeclaration<IMethod>( this );
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

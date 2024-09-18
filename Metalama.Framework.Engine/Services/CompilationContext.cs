@@ -14,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Services;
 
@@ -22,11 +23,14 @@ namespace Metalama.Framework.Engine.Services;
 public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
     private readonly ConcurrentDictionary<SyntaxGenerationContextCacheKey, SyntaxGenerationContext> _syntaxGenerationContextCache = new();
+    private static int _id;
 
     internal CompilationContext( Compilation compilation )
     {
         this.Compilation = compilation;
     }
+
+    public int Id { get; } = Interlocked.Increment( ref _id );
 
     [Memo]
     internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver, this );
@@ -114,6 +118,9 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
+
+    [Memo]
+    internal SymbolRefStrategy SymbolRefStrategy => new( this );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );

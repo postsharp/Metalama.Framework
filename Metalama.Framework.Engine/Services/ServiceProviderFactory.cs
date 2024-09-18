@@ -137,10 +137,8 @@ public static class ServiceProviderFactory
             .WithServiceConditional<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
             .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
             .WithService( _ => new SyntaxSerializationService() )
-
-            //.WithService( _ => new CompileTimeTypeFactory() )
-            .WithServiceConditional<SystemTypeResolver>( sp => new SystemTypeResolver( sp ) )
-            .WithServiceConditional<ISystemAttributeDeserializer>( sp => new SystemAttributeDeserializer( sp ) )
+            .WithServiceConditional( sp => new SystemTypeResolver.Provider( sp ) )
+            .WithServiceConditional( sp => new SystemAttributeDeserializer.Provider( sp ) )
             .WithService( provider => new ClassifyingCompilationContextFactory( provider ) )
             .WithService( provider => new ObjectReaderFactory( provider ) )
             .WithService( provider => new ProjectIntrospectionService( provider ) );
@@ -159,8 +157,8 @@ public static class ServiceProviderFactory
     {
         return serviceProvider.Underlying
             .WithService( repository )
-            .WithService( sp => new ProjectSpecificCompileTimeTypeResolver( sp ) )
-            .WithServiceConditional<IUserCodeAttributeDeserializer>( sp => new UserCodeAttributeDeserializer( sp ) )
+            .WithService( sp => new ProjectSpecificCompileTimeTypeResolver.Provider( sp ) )
+            .WithServiceConditional<UserCodeAttributeDeserializer.Provider>( sp => new UserCodeAttributeDeserializer.Provider( sp ) )
             .WithService<SymbolClassificationService>( _ => new SymbolClassificationService( repository ) )
             .WithServiceConditional<TemplateAttributeFactory>( sp => new TemplateAttributeFactory( sp ) );
     }

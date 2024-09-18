@@ -35,14 +35,16 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
     private readonly INamedType?[] _internalSpecialTypes = new INamedType?[(int) InternalSpecialType.Count];
 
     private readonly CompilationModel _compilationModel;
-    private readonly SystemTypeResolver _systemTypeResolver;
+    private readonly CompileTimeTypeResolver _systemTypeResolver;
 
     internal DeclarationFactory( CompilationModel compilation )
     {
         this._compilationModel = compilation;
         this._symbolCache = new ConcurrentDictionary<ISymbol, IDeclaration>( compilation.CompilationContext.SymbolComparer );
         this._typeCache = new ConcurrentDictionary<ITypeSymbol, IType>( compilation.CompilationContext.SymbolComparerIncludingNullability );
-        this._systemTypeResolver = compilation.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>();
+
+        this._systemTypeResolver = compilation.Project.ServiceProvider.GetRequiredService<SystemTypeResolver.Provider>()
+            .Get( compilation.CompilationContext );
     }
 
     private Compilation RoslynCompilation => this._compilationModel.RoslynCompilation;

@@ -30,6 +30,8 @@ internal class SymbolRef<T> : BaseRef<T>, ISymbolRef
         this.CompilationContext = compilationContext;
     }
 
+    public override IRefStrategy Strategy => this.CompilationContext.SymbolRefStrategy;
+
     protected override ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {
         return compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();

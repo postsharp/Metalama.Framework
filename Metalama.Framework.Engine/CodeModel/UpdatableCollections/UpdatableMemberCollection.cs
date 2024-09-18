@@ -22,12 +22,12 @@ internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationColle
     public abstract ImmutableArray<IRef<T>> OfName( string name );
 
     protected virtual IEnumerable<IRef<T>> GetMemberRefsOfName( string name )
-        => ((IRefImpl) this.DeclaringTypeOrNamespace).Strategy.GetMembersOfName<T>(
+        => this.DeclaringTypeOrNamespace.GetStrategy().GetMembersOfName<T>(
             this.DeclaringTypeOrNamespace,
             name,
             this.DeclarationKind,
             this.Compilation );
 
     protected virtual IEnumerable<IRef<T>> GetMemberRefs()
-        => ((IRefImpl) this.DeclaringTypeOrNamespace).Strategy.GetMembers<T>( this.DeclaringTypeOrNamespace, this.DeclarationKind, this.Compilation );
+        => this.DeclaringTypeOrNamespace.GetStrategy().GetMembers<T>( this.DeclaringTypeOrNamespace, this.DeclarationKind, this.Compilation );
 }

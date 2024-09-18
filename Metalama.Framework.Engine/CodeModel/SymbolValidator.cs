@@ -12,7 +12,9 @@ internal sealed class SymbolValidator : SymbolVisitor<bool>
 
     private SymbolValidator() { }
 
-    public override bool DefaultVisit( ISymbol symbol ) => throw new NotImplementedException();
+    public override bool DefaultVisit( ISymbol symbol ) => throw new NotImplementedException($"Not implemented: {symbol.Kind}.");
+
+    public override bool VisitNamespace( INamespaceSymbol symbol ) => true;
 
     public override bool VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType );
 

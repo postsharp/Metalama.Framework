@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -15,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Creates and ensures uniqueness of instances of the <see cref="CompileTimeType"/> class.
     /// </summary>
-    internal class CompileTimeTypeFactory : IProjectService
+    internal class CompileTimeTypeFactory
     {
         // The class is intentionally project-scoped even if does not depend on the project because
         // we want the lifetime and scope of this dictionary to be project-scoped.
@@ -23,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly ConcurrentDictionary<string, CompileTimeType> _instances = new( StringComparer.Ordinal );
         private readonly CompilationContext _compilationContext;
 
-        public CompileTimeTypeFactory( CompilationContext compilationContext )
+        protected CompileTimeTypeFactory( CompilationContext compilationContext )
         {
             this._compilationContext = compilationContext;
         }

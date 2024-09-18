@@ -19,13 +19,13 @@ namespace Metalama.Framework.Engine.HierarchicalOptions;
 internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOptionsSource
 {
     private readonly ProjectServiceProvider _serviceProvider;
-    private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
+    private readonly UserCodeAttributeDeserializer.Provider _attributeDeserializerProvider;
     private readonly UserCodeInvoker _invoker;
 
     public CompilationHierarchicalOptionsSource( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
-        this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
+        this._attributeDeserializerProvider = serviceProvider.GetRequiredService<UserCodeAttributeDeserializer.Provider>();
         this._invoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
@@ -34,6 +34,8 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
         var compilation = context.Compilation;
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
         var systemAttributeType = compilation.Factory.GetTypeByReflectionType( typeof(Attribute) );
+
+        var attributeDeserializer = this._attributeDeserializerProvider.Get( context.Compilation.CompilationContext );
 
         foreach ( var attributeType in compilation.GetDerivedTypes(
                      (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider) ),
@@ -53,7 +55,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
 
             foreach ( var attribute in compilation.GetAllAttributesOfType( attributeType ) )
             {
-                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), context.Collector, out var deserializedAttribute ) )
+                if ( !attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), context.Collector, out var deserializedAttribute ) )
                 {
                     continue;
                 }

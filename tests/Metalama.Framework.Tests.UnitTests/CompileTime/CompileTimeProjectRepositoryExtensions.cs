@@ -7,7 +7,14 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime;
 
 internal static class CompileTimeProjectRepositoryExtensions
 {
-    // Should be used only in tests.
-    public static UserCodeAttributeDeserializer CreateAttributeDeserializer( this CompileTimeProjectRepository repo, in ProjectServiceProvider serviceProvider )
-        => new( serviceProvider.WithService( new ProjectSpecificCompileTimeTypeResolver( serviceProvider.WithService( repo ) ) ) );
+    public static AttributeDeserializer CreateAttributeDeserializer(
+        this CompileTimeProjectRepository repo,
+        in ProjectServiceProvider serviceProvider,
+        CompilationContext compilationContext )
+    {
+        var augmentedServiceProvider =
+            serviceProvider.WithService( new ProjectSpecificCompileTimeTypeResolver.Provider( serviceProvider.WithService( repo ) ) );
+
+        return new UserCodeAttributeDeserializer.Provider( augmentedServiceProvider ).Get( compilationContext );
+    }
 }

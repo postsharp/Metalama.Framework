@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.CodeModel
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
         [Memo]
-        private IRef<IProperty> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+        private IRef<IProperty> Ref => this.RefFactory.FromSymbolBasedDeclaration<IProperty>( this );
 
         private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

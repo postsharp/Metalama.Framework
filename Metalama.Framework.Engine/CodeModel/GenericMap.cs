@@ -96,6 +96,11 @@ internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImp
             return true;
         }
 
+        if ( this.TypeArguments == null || other.TypeArguments == null! )
+        {
+            return false;
+        }
+
         if ( other.TypeArguments.Count != this.TypeArguments.Count )
         {
             return false;
@@ -117,6 +122,11 @@ internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImp
     public override int GetHashCode()
     {
         var hashCode = default(HashCode);
+
+        if ( this.TypeArguments == null )
+        {
+            return 0;
+        }
 
         foreach ( var type in this.TypeArguments )
         {

@@ -115,8 +115,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return this.FromSymbol<ICompilation>( compilationContext.Compilation.Assembly );
         }
 
-        public IRef<T> FromSymbolBasedDeclaration<T>( T declaration )
-            where T : SymbolBasedDeclaration
+        public IRef<T> FromSymbolBasedDeclaration<T>( SymbolBasedDeclaration declaration )
+            where T : class, IDeclaration
         {
             Invariant.Assert( declaration.GetCompilationContext() == this._compilationContext );
 

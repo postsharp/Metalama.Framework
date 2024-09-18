@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+        private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamedType>( this );
 
         IRef<INamedType> INamedType.ToRef() => this.Ref;
 

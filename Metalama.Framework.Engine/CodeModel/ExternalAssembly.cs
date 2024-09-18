@@ -62,7 +62,7 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
     public override bool BelongsToCurrentProject => false;
 
     [Memo]
-    private IRef<IAssembly> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+    private IRef<IAssembly> Ref => this.RefFactory.FromSymbolBasedDeclaration<IAssembly>( this );
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

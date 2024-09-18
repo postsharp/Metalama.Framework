@@ -655,7 +655,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl, IGeneri
     public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.TypeSymbol );
 
     [Memo]
-    private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+    private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamedType>( this );
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

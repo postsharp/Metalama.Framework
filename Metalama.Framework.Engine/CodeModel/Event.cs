@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMember? OverriddenMember => this.OverriddenEvent;
 
         [Memo]
-        private IRef<IEvent> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
+        private IRef<IEvent> Ref => this.RefFactory.FromSymbolBasedDeclaration<IEvent>( this );
 
         private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

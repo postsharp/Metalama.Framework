@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Services;
 using System;
 using System.Reflection;
 
@@ -13,14 +12,14 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <summary>
 /// An implementation of <see cref="CompileTimeTypeResolver"/> that cannot be used for user-code attributes.
 /// </summary>
-internal class SystemTypeResolver : CurrentAppDomainTypeResolver, IProjectService
+internal class SystemTypeResolver : CurrentAppDomainTypeResolver
 {
     // Avoid initializing from a static member because it is more difficult to debug.
     private readonly Assembly _netStandardAssembly = Assembly.Load( "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" );
 
     private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-    public SystemTypeResolver( in ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    public SystemTypeResolver( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base( serviceProvider, compilationContext )
     {
         this._referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
     }
@@ -43,5 +42,13 @@ internal class SystemTypeResolver : CurrentAppDomainTypeResolver, IProjectServic
         {
             return null;
         }
+    }
+
+    public new class Provider : CompilationServiceProvider<CompileTimeTypeResolver>
+    {
+        public Provider( in ProjectServiceProvider serviceProvider ) : base( serviceProvider ) { }
+
+        protected override CompileTimeTypeResolver Create( CompilationContext compilationContext )
+            => new SystemTypeResolver( this.ServiceProvider, compilationContext );
     }
 }

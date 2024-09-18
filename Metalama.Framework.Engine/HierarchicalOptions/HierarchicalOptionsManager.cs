@@ -26,8 +26,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly UserCodeInvoker _userCodeInvoker;
     private IExternalHierarchicalOptionsProvider? _externalOptionsProvider;
-
-    private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
+    private CompileTimeTypeResolver? _typeResolver;
 
     private bool IsInitialized { get; set; }
 
@@ -41,7 +40,8 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
     {
         // We get the type resolver lazily because several tests do not supply it.
 
-        this._typeResolver ??= this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
+        this._typeResolver ??= this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver.Provider>()
+            .Get( compilationModel.CompilationContext );
 
         var type = compilationModel.Factory.GetTypeByReflectionName( typeName );
 
