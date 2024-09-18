@@ -91,21 +91,21 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     /// </summary>
     public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( CompilationContext compilationContext )
     {
-        if ( this.TargetKind == DeclarationRefTargetKind.Return )
+        if ( this.TargetKind != DeclarationRefTargetKind.Default )
         {
-            var method = (IMethodSymbol) this.GetSymbolIgnoringKind( compilationContext );
+            var baseSymbol = this.GetSymbolIgnoringKind( compilationContext );
 
-            return (method.GetReturnTypeAttributes(), method);
-        }
-        else if ( this.TargetKind == DeclarationRefTargetKind.Field )
-        {
-            var target = this.GetSymbolIgnoringKind( compilationContext );
-
-            if ( target is IEventSymbol )
+            switch ( this.TargetKind )
             {
-                // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
-                return (ImmutableArray<AttributeData>.Empty, target);
+                case DeclarationRefTargetKind.Return when baseSymbol is IMethodSymbol method:
+                    return (method.GetReturnTypeAttributes(), method);
+
+                case DeclarationRefTargetKind.Field when baseSymbol is IEventSymbol @event:
+                    // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
+                    return (ImmutableArray<AttributeData>.Empty, @event);
             }
+
+            // Fallback to the default GetSymbol implementation.
         }
 
         var symbol = this.GetSymbol( compilationContext, true );

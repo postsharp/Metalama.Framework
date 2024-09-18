@@ -445,7 +445,11 @@ namespace Metalama.Framework.Engine.CodeModel
                     .Select(
                         a =>
                         {
-                            a.TryGetTarget( this, null, out var target );
+                            if ( !a.TryGetTarget( this, null, out var target ) )
+                            {
+                                // Skipped.
+                                return null;
+                            }
 
                             return target;
                         } )

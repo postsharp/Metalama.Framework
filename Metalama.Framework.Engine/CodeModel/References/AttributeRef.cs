@@ -20,9 +20,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
     {
         private readonly IRef<IDeclaration> _containingDeclaration;
 
-        private readonly object _originalTarget;
+        private readonly object _target;
+        private ResolvedRef? _resolvedRef;
 
-        public object? Target { get; private set; }
+        private record ResolvedRef( AttributeData AttributeData, ISymbol Parent )
+        {
+            public static ResolvedRef Invalid { get; } = new( null!, null! );
+        }
 
         public IRef<INamedType> AttributeType { get; }
 
@@ -37,8 +41,20 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public IRefImpl Unwrap() => this;
 
-        private (AttributeData? Attribute, ISymbol Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
+        private ResolvedRef? ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
+            if ( this._resolvedRef != null )
+            {
+                if ( this._resolvedRef == ResolvedRef.Invalid )
+                {
+                    return null;
+                }
+                else
+                {
+                    return this._resolvedRef;
+                }
+            }
+
             // Find the parent declaration.
             var (attributes, symbol) = this._containingDeclaration.Unwrap().GetAttributeData( compilation );
 
@@ -48,10 +64,17 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span
                                                           && a.ApplicationSyntaxReference.SyntaxTree == attributeSyntax.SyntaxTree );
 
-            // Save the resolved AttributeData.
-            this.Target = attributeData;
+            if ( attributeData != null )
+            {
+                // Save the resolved AttributeData.
+                return this._resolvedRef = new ResolvedRef( attributeData, symbol );
+            }
+            else
+            {
+                this._resolvedRef = ResolvedRef.Invalid;
 
-            return (attributeData, symbol);
+                return null;
+            }
         }
 
         public AttributeRef( AttributeData attributeData, IRef<IDeclaration> containingDeclaration, CompilationContext compilationContext )
@@ -59,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             // Note that Roslyn can return an AttributeData that does not belong to the same compilation
             // as the parent symbol, probably because of some bug or optimisation.
 
-            this.Target = this._originalTarget = attributeData;
+            this._target = attributeData;
 
             this.AttributeType = compilationContext.RefFactory.FromSymbol<INamedType>(
                 attributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes )
@@ -76,27 +99,27 @@ namespace Metalama.Framework.Engine.CodeModel.References
             CompilationContext compilationContext )
         {
             this.AttributeType = attributeType;
-            this.Target = this._originalTarget = attributeSyntax;
+            this._target = attributeSyntax;
             this._containingDeclaration = new SyntaxNodeRef<IDeclaration>( declaration, targetKind, compilationContext );
         }
 
         public AttributeRef( IRef<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
         {
             this.AttributeType = attributeType;
-            this.Target = this._originalTarget = attributeSyntax;
+            this._target = attributeSyntax;
             this._containingDeclaration = compilationContext.RefFactory.FromSymbol<IDeclaration>( declaration ).AsRefImpl();
         }
 
         public AttributeRef( AttributeBuilder builder )
         {
             this.AttributeType = builder.Constructor.DeclaringType.ToRef();
-            this.Target = this._originalTarget = builder;
+            this._target = builder;
             this._containingDeclaration = builder.ContainingDeclaration.ToRef();
         }
 
         public AttributeRef( AttributeSerializationData serializationData )
         {
-            this.Target = this._originalTarget = serializationData;
+            this._target = serializationData;
             this.AttributeType = serializationData.Type;
             this._containingDeclaration = serializationData.ContainingDeclaration.AsRefImpl();
         }
@@ -136,18 +159,21 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => this as IRef<TOut> ?? throw new InvalidCastException();
 
         private AttributeSyntax? Syntax
-            => this.Target switch
+            => this._target switch
             {
                 null => null,
                 AttributeSyntax syntax => syntax,
                 AttributeData data => (AttributeSyntax?) data.ApplicationSyntaxReference?.GetSyntax(),
                 AttributeBuilder => null,
-                _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target.GetType()}'." )
+                _ => throw new AssertionFailedException( $"Unexpected target type '{this._target.GetType()}'." )
             };
+
+        [Obsolete( "This is a hack, and should no longer be used." )]
+        public object Target => this._target;
 
         public bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
         {
-            switch ( this.Target )
+            switch ( this._target )
             {
                 case null:
                     // This happens when ResolveAttributeData was already called but was unsuccessful.
@@ -159,7 +185,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         var resolved = this.ResolveAttributeData( attributeSyntax, compilation.CompilationContext );
 
-                        if ( resolved.Attribute == null )
+                        if ( resolved == null )
                         {
                             attribute = null;
 
@@ -167,7 +193,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         }
 
                         attribute = new Attribute(
-                            resolved.Attribute,
+                            resolved.AttributeData,
                             compilation,
                             this._containingDeclaration.GetTarget( compilation, genericContext: genericContext ) );
 
@@ -198,13 +224,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     return true;
 
                 default:
-                    throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
+                    throw new AssertionFailedException( $"Don't know how to resolve a {this._target.GetType().Name}.'" );
             }
         }
 
         public bool TryGetAttributeSerializationDataKey( CompilationContext compilationContext, [NotNullWhen( true )] out object? serializationDataKey )
         {
-            switch ( this.Target )
+            switch ( this._target )
             {
                 case null:
                     // This happens when ResolveAttributeData was already called but was unsuccessful.
@@ -217,14 +243,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         var resolved = this.ResolveAttributeData( attributeSyntax, compilationContext );
 
-                        if ( resolved.Attribute == null )
+                        if ( resolved == null )
                         {
                             serializationDataKey = null;
 
                             return false;
                         }
 
-                        serializationDataKey = resolved.Attribute;
+                        serializationDataKey = resolved;
 
                         return true;
                     }
@@ -232,12 +258,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case AttributeData:
                 case AttributeBuilder:
                 case AttributeSerializationData:
-                    serializationDataKey = this.Target;
+                    serializationDataKey = this._target;
 
                     return true;
 
                 default:
-                    throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
+                    throw new AssertionFailedException( $"Don't know how to resolve a {this._target.GetType().Name}.'" );
             }
         }
 
@@ -245,7 +271,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             CompilationContext compilationContext,
             [NotNullWhen( true )] out AttributeSerializationData? serializationData )
         {
-            switch ( this.Target )
+            switch ( this._target )
             {
                 case null:
                     // This happens when ResolveAttributeData was already called but was unsuccessful.
@@ -258,14 +284,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         var resolved = this.ResolveAttributeData( attributeSyntax, compilationContext );
 
-                        if ( resolved.Attribute == null )
+                        if ( resolved == null )
                         {
                             serializationData = null;
 
                             return false;
                         }
 
-                        serializationData = new AttributeSerializationData( resolved.Parent, resolved.Attribute, compilationContext );
+                        serializationData = new AttributeSerializationData( resolved.Parent, resolved.AttributeData, compilationContext );
 
                         return true;
                     }
@@ -297,16 +323,16 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     return true;
 
                 default:
-                    throw new AssertionFailedException( $"Don't know how to resolve a {this.Target.GetType().Name}.'" );
+                    throw new AssertionFailedException( $"Don't know how to resolve a {this._target.GetType().Name}.'" );
             }
         }
 
         ISymbol ISdkRef.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
-        public override string ToString() => this.Target?.ToString() ?? "null";
+        public override string ToString() => $"{this._target} on {this._containingDeclaration}";
 
         public bool IsSyntax( AttributeSyntax attribute )
-            => this.Target switch
+            => this._target switch
             {
                 AttributeData targetAttributeData => targetAttributeData.ApplicationSyntaxReference?.GetSyntax() == attribute,
                 AttributeSyntax targetAttributeSyntax => targetAttributeSyntax == attribute,
@@ -320,7 +346,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 return false;
             }
 
-            switch ( this._originalTarget )
+            switch ( this._target )
             {
                 case AttributeSyntax syntax:
                     if ( syntax != other.Syntax )
@@ -339,7 +365,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     break;
 
                 case AttributeBuilder builder:
-                    if ( builder != other.Target )
+                    if ( builder != other._target )
                     {
                         return false;
                     }
@@ -347,7 +373,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget.GetType()}'." );
+                    throw new AssertionFailedException( $"Unexpected target type '{this._target.GetType()}'." );
             }
 
             if ( !RefEqualityComparer<IDeclaration>.Default.Equals( this._containingDeclaration, other._containingDeclaration ) )
@@ -362,12 +388,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public override int GetHashCode()
         {
-            var targetHashCode = this._originalTarget switch
+            var targetHashCode = this._target switch
             {
                 AttributeSyntax syntax => syntax.GetHashCode(),
                 AttributeData data => data.ApplicationSyntaxReference?.GetSyntax().GetHashCode() ?? 0,
                 AttributeBuilder builder => builder.GetHashCode(),
-                _ => throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget.GetType()}'." )
+                _ => throw new AssertionFailedException( $"Unexpected target type '{this._target.GetType()}'." )
             };
 
             return HashCode.Combine( targetHashCode, RefEqualityComparer<IDeclaration>.Default.GetHashCode( this._containingDeclaration ) );

@@ -220,7 +220,9 @@ internal sealed partial class LinkerInjectionStep
             // Add new attributes.
             foreach ( var attribute in finalModelAttributes )
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 

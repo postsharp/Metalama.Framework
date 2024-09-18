@@ -6,12 +6,11 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SymbolRef<T> : BaseRef<T>, ISymbolRef
+internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
     where T : class, ICompilationElement
 {
     public ISymbol Symbol { get; }
@@ -56,5 +55,10 @@ internal class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
     protected override int GetHashCodeCore() => StructuralSymbolComparer.Default.GetHashCode( this.Symbol );
 
-    public override string ToString() => this.Symbol.ToString()!;
+    public override string ToString()
+        => this.TargetKind switch
+        {
+            DeclarationRefTargetKind.Default => this.Symbol.ToString()!,
+            _ => $"{this.Symbol}:{this.TargetKind}"
+        };
 }

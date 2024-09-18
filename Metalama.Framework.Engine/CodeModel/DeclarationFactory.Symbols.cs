@@ -212,15 +212,19 @@ public partial class DeclarationFactory
                     var method = (IMethodSymbol) symbol;
 
                     return
-                        targetKind == DeclarationRefTargetKind.Return
-                            ? this.GetReturnParameter( method )
-                            : method.GetDeclarationKind() switch
+                        targetKind switch
+                        {
+                            DeclarationRefTargetKind.Return => this.GetReturnParameter( method ),
+                            DeclarationRefTargetKind.Parameter => this.GetParameter( method.Parameters[0] ),
+                            DeclarationRefTargetKind.Default => method.GetDeclarationKind() switch
                             {
                                 DeclarationKind.Method => this.GetMethod( method ),
                                 DeclarationKind.Constructor => this.GetConstructor( method ),
                                 DeclarationKind.Finalizer => this.GetFinalizer( method ),
                                 _ => throw new AssertionFailedException( $"Unexpected DeclarationRefTargetKind: {method.GetDeclarationKind()}." )
-                            };
+                            },
+                            _ => throw new AssertionFailedException( $"Unexpected TargetKind for method: {targetKind}" )
+                        };
                 }
 
             case SymbolKind.Property:

@@ -15,7 +15,7 @@ internal class SyntaxNodeRef<T> : BaseRef<T>
 
     public SyntaxNodeRef( SyntaxNode syntaxNode, DeclarationRefTargetKind targetKind, CompilationContext compilationContext )
     {
-        this.SyntaxNode = syntaxNode;
+        this.SyntaxNode = syntaxNode.AssertNotNull();
         this.TargetKind = targetKind;
         this.CompilationContext = compilationContext;
     }
@@ -46,12 +46,6 @@ internal class SyntaxNodeRef<T> : BaseRef<T>
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
-/* Unmerged change from project 'Metalama.Framework.Engine'
-Before:
-        return this.ConvertOrThrow(
-After:
-        return ConvertOrThrow(
-*/
         return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
                     GetSymbolOfNode( compilation.PartialCompilation.CompilationContext, this.SyntaxNode ),
@@ -64,4 +58,11 @@ After:
         => other is SyntaxNodeRef<T> nodeRef && nodeRef.SyntaxNode == this.SyntaxNode && nodeRef.TargetKind == this.TargetKind;
 
     protected override int GetHashCodeCore() => HashCode.Combine( this.SyntaxNode, this.TargetKind );
+
+    public override string ToString()
+        => this.TargetKind switch
+        {
+            DeclarationRefTargetKind.Default => this.SyntaxNode.GetType().Name,
+            _ => $"{this.SyntaxNode.GetType().Name}:{this.TargetKind}"
+        };
 }
