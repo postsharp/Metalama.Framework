@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public IType? ExpressionType { get; }
 
         /// <summary>
-        /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>IRefImpl</c> argument modifier with this expression.
+        /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
         /// </summary>
         public bool IsReferenceable { get; }
 

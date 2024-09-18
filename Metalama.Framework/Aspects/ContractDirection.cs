@@ -24,7 +24,7 @@ public enum ContractDirection
     Input,
 
     /// <summary>
-    /// Validates the output value of an <c>out</c> or <c>IRefImpl</c> parameter or the value (after execution of the method), the value returned by the
+    /// Validates the output value of an <c>out</c> or <c>ref</c> parameter or the value (after execution of the method), the value returned by the
     /// property or indexer getter, or the value assigned to the field at the moment when the field is retrieved.
     /// </summary>
     Output,

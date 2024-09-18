@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Code
 {
     /// <summary>
-    /// Kinds of parameters, such as <c>IRefImpl</c>, <c>in</c>, <c>out</c>...
+    /// Kinds of parameters, such as <c>ref</c>, <c>in</c>, <c>out</c>...
     /// </summary>
     [CompileTime]
     public enum RefKind
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Code
         None,
 
         /// <summary>
-        /// <c>IRefImpl</c>.
+        /// <c>ref</c>.
         /// </summary>
         Ref,
 

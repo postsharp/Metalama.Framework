@@ -17,7 +17,7 @@ public interface INamedTypeBuilder : IMemberOrNamedTypeBuilder, INamedType
     // new bool IsReadOnly { get; set; }
 
     ///// <summary>
-    ///// Gets or sets a value indicating whether the type is a <c>IRefImpl</c> struct.
+    ///// Gets or sets a value indicating whether the type is a <c>ref</c> struct.
     ///// </summary>
     // new bool IsRef { get; set; }
 

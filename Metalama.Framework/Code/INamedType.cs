@@ -159,7 +159,7 @@ namespace Metalama.Framework.Code
         bool IsReadOnly { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the type is a <c>IRefImpl</c> struct.
+        /// Gets a value indicating whether the type is a <c>ref</c> struct.
         /// </summary>
         bool IsRef { get; }
 

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Code
         // Coverage: ignore
 
         /// <summary>
-        /// Determines whether the parameter or return value represents a reference (<c>in</c> and <c>out</c> properties, <c>IRefImpl</c> and <c>ref readonly</c> methods and properties).  
+        /// Determines whether the parameter or return value represents a reference (<c>in</c> and <c>out</c> properties, <c>ref</c> and <c>ref readonly</c> methods and properties).  
         /// </summary>
         public static bool IsByRef( this RefKind kind ) => kind != RefKind.None;
 

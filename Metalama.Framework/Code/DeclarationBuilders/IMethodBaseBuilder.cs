@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         /// <param name="name">Parameter name.</param>
         /// <param name="type">Parameter type.</param>
-        /// <param name="refKind"><c>out</c>, <c>IRefImpl</c>...</param>
+        /// <param name="refKind"><c>out</c>, <c>ref</c>...</param>
         /// <param name="defaultValue">Default value.</param>
         /// <returns>A <see cref="IParameterBuilder"/> that allows you to further build the new parameter.</returns>
         IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = default );
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         /// <param name="name">Parameter name.</param>
         /// <param name="type">Parameter type.</param>
-        /// <param name="refKind"><c>out</c>, <c>IRefImpl</c>...</param>
+        /// <param name="refKind"><c>out</c>, <c>ref</c>...</param>
         /// <param name="defaultValue">Default value.</param>
         /// <returns>A <see cref="IParameterBuilder"/> that allows you to further build the new parameter.</returns>
         IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null );
