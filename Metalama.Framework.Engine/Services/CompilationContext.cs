@@ -17,6 +17,8 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Services;
 
+#pragma warning disable CA1822
+
 public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
     private readonly ConcurrentDictionary<SyntaxGenerationContextCacheKey, SyntaxGenerationContext> _syntaxGenerationContextCache = new();
@@ -72,28 +74,28 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         => this.Compilation.SourceModule.ReferencedAssemblySymbols.Concat( this.Compilation.Assembly ).ToImmutableDictionary( x => x.Identity, x => x );
 
     [Memo]
-    internal IEqualityComparer<IRef<INamedType>> NamedTypeRefComparer => RefEqualityComparer<INamedType>.Default;
+    internal IEqualityComparer<IRef<INamedType>?> NamedTypeRefComparer => RefEqualityComparer<INamedType>.Default;
 
     [Memo]
-    internal IEqualityComparer<IRef<INamespace>> NamespaceRefComparer => RefEqualityComparer<INamespace>.Default;
+    internal IEqualityComparer<IRef<INamespace>?> NamespaceRefComparer => RefEqualityComparer<INamespace>.Default;
 
     [Memo]
-    internal IEqualityComparer<IRef<IConstructor>> ConstructorRefComparer => RefEqualityComparer<IConstructor>.Default;
+    internal IEqualityComparer<IRef<IConstructor>?> ConstructorRefComparer => RefEqualityComparer<IConstructor>.Default;
 
     [Memo]
-    internal IEqualityComparer<IRef<IEvent>> EventRefComparer => RefEqualityComparer<IEvent>.Default;
+    internal IEqualityComparer<IRef<IEvent>?> EventRefComparer => RefEqualityComparer<IEvent>.Default;
 
     [Memo]
-    internal IEqualityComparer<IRef<IField>> FieldRefComparer => RefEqualityComparer<IField>.Default;
+    internal IEqualityComparer<IRef<IField>?> FieldRefComparer => RefEqualityComparer<IField>.Default;
 
     [Memo]
-    internal IEqualityComparer<IRef<IProperty>> PropertyRefComparer => RefEqualityComparer<IProperty>.Default;
+    internal IEqualityComparer<IRef<IProperty>?> PropertyRefComparer => RefEqualityComparer<IProperty>.Default;
 
     [Memo]
-    internal IEqualityComparer<IRef<IIndexer>> IndexerRefComparer => RefEqualityComparer<IIndexer>.Default;
+    internal IEqualityComparer<IRef<IIndexer>?> IndexerRefComparer => RefEqualityComparer<IIndexer>.Default;
 
     [Memo]
-    internal IEqualityComparer<IRef<IMethod>> MethodRefComparer => RefEqualityComparer<IMethod>.Default;
+    internal IEqualityComparer<IRef<IMethod>?> MethodRefComparer => RefEqualityComparer<IMethod>.Default;
 
     [Memo]
     internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.Comparers.Default );

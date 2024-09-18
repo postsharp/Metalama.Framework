@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-partial class DeclarationFactory
+public partial class DeclarationFactory
 {
     private readonly ConcurrentDictionary<ISymbol, IDeclaration> _symbolCache;
 
@@ -32,7 +32,7 @@ partial class DeclarationFactory
             (me: this, assemblySymbol) );
 
     public IType GetIType( ITypeSymbol typeSymbol )
-        => (IType) this._typeCache.GetOrAdd(
+        => this._typeCache.GetOrAdd(
             typeSymbol,
             static ( l, c ) => CodeModelFactory.CreateIType( l, c ),
             this._compilationModel );

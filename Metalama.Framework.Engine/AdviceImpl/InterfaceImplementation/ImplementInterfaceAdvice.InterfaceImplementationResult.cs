@@ -34,7 +34,18 @@ internal sealed partial class ImplementInterfaceAdvice
 
         IInterfaceImplementationAdviser IInterfaceImplementationResult.ExplicitMembers => this;
 
-        INamedType IInterfaceImplementationAdviser.Target => this._targetDeclaration.GetTarget();
+        INamedType IInterfaceImplementationAdviser.Target
+        {
+            get
+            {
+                if ( this._targetDeclaration == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                return this._targetDeclaration.GetTarget();
+            }
+        }
 
         IAdviceFactory IAdviserInternal.AdviceFactory
             => this._adviceFactory

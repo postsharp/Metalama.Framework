@@ -8,7 +8,6 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -128,7 +127,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
     [Memo]
-    public BuilderRef<IField> Ref => new( this );
+    public IRef<IField> Ref => this.RefFactory.FromBuilder<IField>( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

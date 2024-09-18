@@ -20,7 +20,9 @@ internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImp
 
     public IReadOnlyList<IType> TypeArguments { get; }
 
-    public static readonly GenericMap Empty = new();
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
+    public static readonly GenericMap Empty;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
 
     public GenericMap Apply( in GenericMap map )
     {
@@ -52,7 +54,7 @@ internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImp
 
     public IType Map( ITypeParameter typeParameter )
     {
-        if ( typeParameter.ContainingDeclaration.DeclarationKind != DeclarationKind.NamedType )
+        if ( typeParameter.ContainingDeclaration.AssertNotNull().DeclarationKind != DeclarationKind.NamedType )
         {
             throw new NotImplementedException( "Method type parameters are not supported." );
         }
@@ -114,7 +116,7 @@ internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImp
 
     public override int GetHashCode()
     {
-        var hashCode = new HashCode();
+        var hashCode = default(HashCode);
 
         foreach ( var type in this.TypeArguments )
         {

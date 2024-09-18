@@ -20,7 +20,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
     private ImmutableDictionary<string, IRef<T>?> GetInitializedDictionary()
         => this._dictionary ??= ImmutableDictionary<string, IRef<T>?>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );
 
-    protected abstract IEqualityComparer<IRef<T>> MemberRefComparer { get; }
+    protected abstract IEqualityComparer<IRef<T>?> MemberRefComparer { get; }
 
     public void Add( IRef<T> member )
     {
@@ -54,7 +54,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
 
         var name = ((IRefImpl) member).Name;
 
-        if ( dictionary.TryGetValue( name, out var existingMember ) )
+        if ( dictionary.TryGetValue( name, out _ ) )
         {
             // The dictionary was populated, and there was was a member with that name, so remove it.
             this._dictionary = dictionary.SetItem( name, default );
@@ -80,7 +80,10 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         // Add items that have already been retrieved.
         foreach ( var item in dictionary )
         {
-            action( item.Value );
+            if ( item.Value != null )
+            {
+                action( item.Value );
+            }
         }
 
         var dictionaryBuilder = dictionary.ToBuilder();
@@ -114,6 +117,13 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
             this._dictionary = dictionary.SetItem( name, member );
         }
 
-        return ImmutableArray.Create( member );
+        if ( member != null )
+        {
+            return ImmutableArray.Create( member );
+        }
+        else
+        {
+            return ImmutableArray<IRef<T>>.Empty;
+        }
     }
 }

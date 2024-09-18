@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;

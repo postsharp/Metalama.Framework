@@ -129,7 +129,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
-    [Memo] // TODO
+    [Memo]
     public IMember? OverriddenMember
         => this.Compilation.Factory.TranslateDeclaration( this._accessorBuilder.OverriddenMember, genericContext: this.GenericContext );
 

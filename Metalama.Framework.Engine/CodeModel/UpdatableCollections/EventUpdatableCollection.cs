@@ -11,7 +11,7 @@ internal sealed class EventUpdatableCollection : UniquelyNamedTypeMemberUpdatabl
         compilation,
         declaringType.As<INamespaceOrNamedType>() ) { }
 
-    protected override IEqualityComparer<IRef<IEvent>> MemberRefComparer => this.Compilation.CompilationContext.EventRefComparer;
+    protected override IEqualityComparer<IRef<IEvent>?> MemberRefComparer => this.Compilation.CompilationContext.EventRefComparer;
 
     protected override DeclarationKind DeclarationKind => DeclarationKind.Event;
 }

@@ -123,7 +123,9 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
         return this._conversions.HasConversion( left, right, kind );
     }
 
+#pragma warning disable CA1822
     public bool Is( IRef<IType> left, IType right, ConversionKind kind ) => ((IRefImpl) left).Strategy.Is( left, right.ToRef(), kind );
+#pragma warning restore CA1822
 
     public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
 

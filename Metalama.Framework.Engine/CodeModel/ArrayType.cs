@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
                             elementType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ),
                             this.Rank );
 
-                return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
+                return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
             }
         }
 

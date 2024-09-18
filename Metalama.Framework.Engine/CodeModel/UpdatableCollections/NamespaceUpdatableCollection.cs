@@ -11,7 +11,7 @@ internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableColle
         compilation,
         declaringNamespace.As<INamespaceOrNamedType>() ) { }
 
-    protected override IEqualityComparer<IRef<INamespace>> MemberRefComparer => this.Compilation.CompilationContext.NamespaceRefComparer;
+    protected override IEqualityComparer<IRef<INamespace>?> MemberRefComparer => this.Compilation.CompilationContext.NamespaceRefComparer;
 
     protected override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
 }

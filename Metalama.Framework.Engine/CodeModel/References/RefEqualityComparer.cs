@@ -5,7 +5,8 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class RefEqualityComparer<T> : IEqualityComparer<IRef<T>> where T : class, ICompilationElement
+internal class RefEqualityComparer<T> : IEqualityComparer<IRef<T>?>
+    where T : class, ICompilationElement
 {
     public static RefEqualityComparer<T> Default { get; } = new();
 

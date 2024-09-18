@@ -8,7 +8,6 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -157,7 +156,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
             out initializerMethod );
 
     [Memo]
-    public BuilderRef<IProperty> Ref => new( this );
+    public IRef<IProperty> Ref => this.RefFactory.FromBuilder<IProperty>( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

@@ -11,12 +11,13 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
     where T : class, ICompilationElement
 {
-    public BuilderRef( IDeclarationBuilder builder )
+    public BuilderRef( IDeclarationBuilder builder, CompilationContext compilationContext )
     {
         this.Builder = builder;
+        this.CompilationContext = compilationContext;
     }
 
-    private protected override CompilationContext? CompilationContext => this.Builder.GetCompilationContext();
+    private protected override CompilationContext CompilationContext { get; }
 
     public IDeclarationBuilder Builder { get; }
 
@@ -53,10 +54,10 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
-        return this.ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
+        return ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
     }
 
-    public override bool Equals( IRef? other ) => other.Unwrap() is IBuilderRef builderRef && this.Builder == builderRef.Builder;
+    public override bool Equals( IRef? other ) => other?.Unwrap() is IBuilderRef builderRef && this.Builder == builderRef.Builder;
 
     protected override int GetHashCodeCore() => this.Builder.GetHashCode();
 

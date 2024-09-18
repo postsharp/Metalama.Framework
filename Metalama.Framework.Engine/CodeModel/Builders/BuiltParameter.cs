@@ -44,7 +44,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     public bool IsReturnParameter => this._parameterBuilder.IsReturnParameter;
 
-    IRef<IParameter> IParameter.ToRef() => this._parameterBuilder.BoxedRef;
+    IRef<IParameter> IParameter.ToRef() => this._parameterBuilder.Ref;
 
     bool IExpression.IsAssignable => true;
 

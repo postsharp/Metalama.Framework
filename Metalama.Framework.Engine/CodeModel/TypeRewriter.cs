@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else if ( arrayType is ArrayType sourceArrayType )
             {
-                return sourceArrayType.WithElementType( elementType );    
+                return sourceArrayType.WithElementType( elementType );
             }
             else
             {
@@ -70,6 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 var typeArguments = ImmutableArray.CreateBuilder<IType>( namedType.TypeArguments.Count );
 
                 var hasChange = false;
+
                 foreach ( var t in namedType.TypeArguments )
                 {
                     var argumentType = this.Visit( t );
@@ -81,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     if ( namedType is NamedType sourceNamedType )
                     {
-                        return sourceNamedType.WithTypeArguments( typeArguments.MoveToImmutable() );        
+                        return sourceNamedType.WithTypeArguments( typeArguments.MoveToImmutable() );
                     }
                     else
                     {
@@ -92,7 +93,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     return namedType;
                 }
-                
             }
         }
 

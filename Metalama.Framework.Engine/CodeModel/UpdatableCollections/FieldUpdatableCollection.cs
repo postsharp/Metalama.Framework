@@ -11,7 +11,7 @@ internal sealed class FieldUpdatableCollection : UniquelyNamedTypeMemberUpdatabl
         compilation,
         declaringType ) { }
 
-    protected override IEqualityComparer<IRef<IField>> MemberRefComparer => this.Compilation.CompilationContext.FieldRefComparer;
+    protected override IEqualityComparer<IRef<IField>?> MemberRefComparer => this.Compilation.CompilationContext.FieldRefComparer;
 
     protected override DeclarationKind DeclarationKind => DeclarationKind.Field;
 }

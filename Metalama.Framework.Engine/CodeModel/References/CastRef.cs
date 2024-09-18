@@ -57,6 +57,4 @@ internal class CastRef<T> : IRefImpl<T>
     public IRef<TOut> As<TOut>()
         where TOut : class, ICompilationElement
         => this._underlying.As<TOut>();
-
-    //public bool Equals( IRef<ICompilationElement>? other, bool includeNullability ) => this._underlying.Equals( other, includeNullability );
 }

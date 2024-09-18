@@ -32,7 +32,7 @@ internal readonly struct TypedConstantRef
 
     public TypedConstant Resolve( CompilationModel compilation )
     {
-        var type = this.Type.GetTargetOrNull( compilation );
+        var type = this.Type?.GetTargetOrNull( compilation );
 
         if ( this.RawValue == null && type == null )
         {

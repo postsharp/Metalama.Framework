@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this.Aspect = aspect;
             this.AspectClass = aspectClass;
-            this.TargetDeclaration = default;
+            this.TargetDeclaration = null!;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( TemplateProvider.FromInstance( aspect ), aspectClass ) );

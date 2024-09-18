@@ -15,7 +15,7 @@ internal class SymbolRef<T> : BaseRef<T>, ISymbolRef
 {
     public ISymbol Symbol { get; }
 
-    private protected override CompilationContext? CompilationContext { get; }
+    private protected override CompilationContext CompilationContext { get; }
 
     public override DeclarationRefTargetKind TargetKind { get; }
 
@@ -41,10 +41,10 @@ internal class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
         if ( translatedSymbol == null )
         {
-            return this.ReturnNullOrThrow( MetalamaStringFormatter.Instance.Format( this.Symbol ), throwIfMissing, compilation );
+            return ReturnNullOrThrow( MetalamaStringFormatter.Instance.Format( this.Symbol ), throwIfMissing, compilation );
         }
 
-        return this.ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind ).AssertNotNull(), compilation );
+        return ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind ).AssertNotNull(), compilation );
     }
 
     public override bool Equals( IRef? other )
@@ -53,5 +53,5 @@ internal class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
     protected override int GetHashCodeCore() => StructuralSymbolComparer.Default.GetHashCode( this.Symbol );
 
-    public override string ToString() => this.Symbol.ToString();
+    public override string ToString() => this.Symbol.ToString()!;
 }

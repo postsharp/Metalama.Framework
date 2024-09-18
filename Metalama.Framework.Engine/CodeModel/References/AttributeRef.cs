@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         string IRefImpl.Name => throw new NotSupportedException();
 
-        public IRefStrategy Strategy { get; set; }
+        IRefStrategy IRefImpl.Strategy => throw new NotSupportedException();
 
         public IRefImpl Unwrap() => this;
 
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public AttributeRef(
             IRef<INamedType> attributeType,
             AttributeSyntax attributeSyntax,
-            SyntaxNode? declaration,
+            SyntaxNode declaration,
             DeclarationRefTargetKind targetKind,
             CompilationContext compilationContext )
         {
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
-        IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => throw new NotImplementedException();
+        IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => this as IRefImpl<TOut> ?? throw new NotSupportedException();
 
         public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default )
         {
@@ -158,7 +158,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         var resolved = this.ResolveAttributeData( attributeSyntax, compilation.CompilationContext );
 
-                        if ( resolved.Attribute == null || resolved.Parent == null )
+                        if ( resolved.Attribute == null )
                         {
                             attribute = null;
 
@@ -187,7 +187,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     return true;
 
                 case AttributeBuilder builder:
-                    attribute = new BuiltAttribute( builder, compilation, genericContext );
+                    attribute = new BuiltAttribute( builder, compilation, genericContext ?? NullGenericContext.Instance );
 
                     return true;
 
@@ -216,7 +216,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         var resolved = this.ResolveAttributeData( attributeSyntax, compilationContext );
 
-                        if ( resolved.Attribute == null || resolved.Parent == null )
+                        if ( resolved.Attribute == null )
                         {
                             serializationDataKey = null;
 
@@ -257,7 +257,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         var resolved = this.ResolveAttributeData( attributeSyntax, compilationContext );
 
-                        if ( resolved.Attribute == null || resolved.Parent == null )
+                        if ( resolved.Attribute == null )
                         {
                             serializationData = null;
 

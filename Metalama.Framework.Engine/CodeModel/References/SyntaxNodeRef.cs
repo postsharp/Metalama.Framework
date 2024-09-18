@@ -20,7 +20,7 @@ internal class SyntaxNodeRef<T> : BaseRef<T>
         this.CompilationContext = compilationContext;
     }
 
-    private protected override CompilationContext? CompilationContext { get; }
+    private protected override CompilationContext CompilationContext { get; }
 
     public override DeclarationRefTargetKind TargetKind { get; }
 
@@ -46,7 +46,13 @@ internal class SyntaxNodeRef<T> : BaseRef<T>
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
+/* Unmerged change from project 'Metalama.Framework.Engine'
+Before:
         return this.ConvertOrThrow(
+After:
+        return ConvertOrThrow(
+*/
+        return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
                     GetSymbolOfNode( compilation.PartialCompilation.CompilationContext, this.SyntaxNode ),
                     this.TargetKind )

@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -104,7 +103,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
     [Memo]
-    public BuilderRef<IConstructor> Ref => new( this );
+    public IRef<IConstructor> Ref => this.RefFactory.FromBuilder<IConstructor>( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

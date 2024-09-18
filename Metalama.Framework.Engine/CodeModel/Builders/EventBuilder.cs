@@ -7,7 +7,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -157,7 +156,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     }
 
     [Memo]
-    public BuilderRef<IEvent> Ref => new( this );
+    public IRef<IEvent> Ref => this.RefFactory.FromBuilder<IEvent>( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

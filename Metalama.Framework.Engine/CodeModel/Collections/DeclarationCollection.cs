@@ -44,6 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         protected DeclarationCollection()
         {
             this.Source = ImmutableArray<TRef>.Empty;
+            this._genericContext = NullGenericContext.Instance;
         }
 
         public IEnumerator<TDeclaration> GetEnumerator()

@@ -11,7 +11,7 @@ internal sealed class PropertyUpdatableCollection : UniquelyNamedTypeMemberUpdat
         compilation,
         declaringType.As<INamespaceOrNamedType>() ) { }
 
-    protected override IEqualityComparer<IRef<IProperty>> MemberRefComparer => this.Compilation.CompilationContext.PropertyRefComparer;
+    protected override IEqualityComparer<IRef<IProperty>?> MemberRefComparer => this.Compilation.CompilationContext.PropertyRefComparer;
 
     protected override DeclarationKind DeclarationKind => DeclarationKind.Property;
 }

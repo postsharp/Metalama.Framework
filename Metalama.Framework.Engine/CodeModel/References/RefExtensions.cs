@@ -14,9 +14,13 @@ public static class RefExtensions
     /// </summary>
     internal static IRefImpl Unwrap( this IRef reference ) => ((IRefImpl) reference).Unwrap();
 
-    internal static IRefImpl<T> AsRefImpl<T>( this IRef<T> reference ) where T : class, ICompilationElement => (IRefImpl<T>) reference;
+    internal static IRefImpl<T> AsRefImpl<T>( this IRef<T> reference )
+        where T : class, ICompilationElement
+        => (IRefImpl<T>) reference;
 
-    internal static IRefImpl<T> ToRefImpl<T>( this T declaration ) where T : class, IDeclaration => (IRefImpl<T>) declaration.ToRef();
+    internal static IRefImpl<T> ToRefImpl<T>( this T declaration )
+        where T : class, IDeclaration
+        => (IRefImpl<T>) declaration.ToRef();
 
     // ReSharper disable once SuspiciousTypeConversion.Global
     public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference, CompilationContext compilationContext )

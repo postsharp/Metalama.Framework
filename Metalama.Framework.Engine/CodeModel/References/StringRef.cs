@@ -76,10 +76,10 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 
             if ( declaration == null )
             {
-                return this.ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
+                return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
             }
 
-            return this.ConvertOrThrow( declaration, compilation );
+            return ConvertOrThrow( declaration, compilation );
         }
         else if ( IsTypeId( this.Id ) )
         {
@@ -87,11 +87,11 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
             {
                 var type = new SerializableTypeId( this.Id ).Resolve( compilation );
 
-                return this.ConvertOrThrow( type, compilation );
+                return ConvertOrThrow( type, compilation );
             }
             catch ( InvalidOperationException ex )
             {
-                return this.ReturnNullOrThrow( this.Id, throwIfMissing, compilation, ex );
+                return ReturnNullOrThrow( this.Id, throwIfMissing, compilation, ex );
             }
         }
         else
@@ -100,16 +100,23 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 
             if ( symbol == null )
             {
-                return this.ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
+                return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
             }
 
-            return this.ConvertOrThrow( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull(), compilation );
+            return ConvertOrThrow( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull(), compilation );
         }
     }
 
     public override bool Equals( IRef? other ) => other?.Unwrap() is IStringRef stringRef && stringRef.Id == this.Id;
 
-    protected override int GetHashCodeCore() => this.Id.GetHashCode();
+    protected override int GetHashCodeCore()
+    {
+#if NET5_0_OR_GREATER
+        return this.Id.GetHashCode( StringComparison.Ordinal );
+#else
+        return this.Id.GetHashCode();
+#endif
+    }
 
     public override string ToString() => this.Id;
 }

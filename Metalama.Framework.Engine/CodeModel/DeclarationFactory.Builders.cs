@@ -9,7 +9,7 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-partial class DeclarationFactory
+public partial class DeclarationFactory
 {
     private readonly ConcurrentDictionary<BuilderCacheKey, IDeclaration> _builderCache = new();
 
@@ -83,7 +83,7 @@ partial class DeclarationFactory
         => (IMethod) this._builderCache.GetOrAdd(
             new BuilderCacheKey( methodBuilder, genericContext.GetGenericMap() ),
             static ( key, x )
-                => ((IHasAccessors) x.me.GetDeclaration( x.methodBuilder.ContainingMember, x.options, key.GenericMap )).GetAccessor(
+                => ((IHasAccessors) x.me.GetDeclaration( x.methodBuilder.ContainingMember, x.options, key.GenericMap ).AssertNotNull()).GetAccessor(
                     x.methodBuilder.MethodKind )!,
             (me: this, options, methodBuilder) );
 

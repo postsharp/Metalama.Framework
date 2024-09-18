@@ -40,7 +40,9 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         {
             var factory = compilation.GetCompilationModel().Factory;
 
-            var type = this.ExpressionType != null ? factory.TranslateType( this.ExpressionType ) : factory.GetSpecialType( SpecialType.Object );
+            var type = this.ExpressionType != null
+                ? factory.TranslateType( this.ExpressionType ).AssertNotNull()
+                : factory.GetSpecialType( SpecialType.Object );
 
             return new SyntaxUserExpression( this.Syntax, type );
         }

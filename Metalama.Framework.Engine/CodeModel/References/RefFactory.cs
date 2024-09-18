@@ -10,6 +10,8 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
+#pragma warning disable CA1822
+
     /// <summary>
     /// Builds instances of the <see cref="IRef{T}"/> interface.
     /// </summary>
@@ -23,19 +25,19 @@ namespace Metalama.Framework.Engine.CodeModel.References
         }
 
         /// <summary>
-        /// Creates a <see cref="Ref{T}"/> from an <see cref="IDeclarationBuilder"/>.
+        /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
         public IRef<TCodeElement> FromBuilder<TCodeElement>( IDeclarationBuilder builder )
             where TCodeElement : class, IDeclaration
-            => new BuilderRef<TCodeElement>( builder );
+            => new BuilderRef<TCodeElement>( builder, this._compilationContext );
 
         /// <summary>
-        /// Creates a <see cref="Ref{T}"/> from an <see cref="IDeclarationBuilder"/>.
+        /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new BuilderRef<IDeclaration>( builder );
+        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new BuilderRef<IDeclaration>( builder, this._compilationContext );
 
         /// <summary>
-        /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
+        /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
         public IRef<ICompilationElement> FromSymbol( ISymbol symbol ) => new SymbolRef<ICompilationElement>( symbol, this._compilationContext );
 
@@ -82,15 +84,20 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 } );
         }
 
-        public IRef<T> FromSymbolId<T>( SymbolId symbolKey ) where T : class, ICompilationElement => new StringRef<T>( symbolKey.Id, this._compilationContext );
+        public IRef<T> FromSymbolId<T>( SymbolId symbolKey )
+            where T : class, ICompilationElement
+            => new StringRef<T>( symbolKey.Id, this._compilationContext );
 
-        public IRef<T> FromDeclarationId<T>( SerializableDeclarationId id ) where T : class, ICompilationElement
+        public IRef<T> FromDeclarationId<T>( SerializableDeclarationId id )
+            where T : class, ICompilationElement
             => new StringRef<T>( id.Id, this._compilationContext );
 
-        public IRef<T> FromTypeId<T>( SerializableTypeId id ) where T : class, IType => new StringRef<T>( id.Id, this._compilationContext );
+        public IRef<T> FromTypeId<T>( SerializableTypeId id )
+            where T : class, IType
+            => new StringRef<T>( id.Id, this._compilationContext );
 
         /// <summary>
-        /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
+        /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
         public IRef<T> FromSymbol<T>(
             ISymbol symbol,

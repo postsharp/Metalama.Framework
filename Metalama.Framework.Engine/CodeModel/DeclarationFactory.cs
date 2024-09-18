@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
@@ -16,7 +15,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading.Tasks;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -160,7 +158,7 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
     public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
         => this._compilationModel.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
 
-    public IType TranslateType( IType type )
+    public IType? TranslateType( IType type )
     {
         if ( ReferenceEquals( type.Compilation, this._compilationModel ) )
         {

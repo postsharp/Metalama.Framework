@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;

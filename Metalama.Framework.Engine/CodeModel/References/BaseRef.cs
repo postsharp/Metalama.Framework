@@ -149,7 +149,7 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         bool throwIfMissing,
         IGenericContext? genericContext );
 
-    protected T? ReturnNullOrThrow( string id, bool throwIfMissing, CompilationModel compilation, Exception? ex = null )
+    protected static T? ReturnNullOrThrow( string id, bool throwIfMissing, CompilationModel compilation, Exception? ex = null )
     {
         if ( throwIfMissing )
         {
@@ -161,7 +161,7 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         }
     }
 
-    protected T? ConvertOrThrow( ICompilationElement? compilationElement, CompilationModel compilation )
+    protected static T? ConvertOrThrow( ICompilationElement? compilationElement, CompilationModel compilation )
     {
         if ( compilationElement == null )
         {
@@ -178,13 +178,13 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         return safeCast;
     }
 
-    public IRefImpl<TOut> As<TOut>() where TOut : class, ICompilationElement => this as IRefImpl<TOut> ?? new CastRef<TOut>( this );
+    public IRefImpl<TOut> As<TOut>()
+        where TOut : class, ICompilationElement
+        => this as IRefImpl<TOut> ?? new CastRef<TOut>( this );
 
     public override int GetHashCode() => this.GetHashCodeCore();
 
     public abstract bool Equals( IRef? other );
-
-    //bool IRef.Equals( IRef<ICompilationElement>? other, bool includeNullability ) => throw new NotImplementedException();
 
     protected abstract int GetHashCodeCore();
 }

@@ -7,7 +7,7 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-partial class DeclarationFactory
+public partial class DeclarationFactory
 {
     IArrayType IDeclarationFactory.ConstructArrayType( IType elementType, int rank )
         => (IArrayType) this.GetIType(

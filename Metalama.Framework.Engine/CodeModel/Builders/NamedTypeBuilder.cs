@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -253,7 +252,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
         };
 
     [Memo]
-    public BuilderRef<INamedType> Ref => new( this );
+    public IRef<INamedType> Ref => this.RefFactory.FromBuilder<INamedType>( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

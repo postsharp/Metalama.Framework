@@ -57,7 +57,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         this.DiagnosticSourceDescription = null!;
     }
 
-    public IRef<IDeclaration> ValidatedDeclaration { get; private set; }
+    public IRef<IDeclaration>? ValidatedDeclaration { get; private set; }
 
     public ReferenceKinds ReferenceKinds { get; private set; }
 

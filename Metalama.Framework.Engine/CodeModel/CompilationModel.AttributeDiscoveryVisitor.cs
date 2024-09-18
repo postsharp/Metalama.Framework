@@ -44,9 +44,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 var attributeType = this._compilationContext.RefFactory.FromSymbol<INamedType>( attributeConstructor.ContainingType );
 
                 // A local method that adds the attribute.
-                void IndexAttribute( SyntaxNode? parentDeclaration, DeclarationRefTargetKind kind )
+                void IndexAttribute( SyntaxNode parentDeclaration, DeclarationRefTargetKind kind )
                 {
-                    void Add( SyntaxNode? realDeclaration )
+                    void Add( SyntaxNode realDeclaration )
                     {
                         this._builder.Add( attributeType, new AttributeRef( attributeType, node, realDeclaration, kind, this._compilationContext ) );
                     }
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // Get the parent declaration. 
                 var attributeList = (AttributeListSyntax) node.Parent.AssertNotNull();
 
-                var declaration = attributeList.Parent;
+                var declaration = attributeList.Parent.AssertNotNull();
 
                 if ( attributeList.Target != null )
                 {
