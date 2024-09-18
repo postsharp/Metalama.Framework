@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public SpecialType SpecialType => SpecialType.None;
 
-        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this._typeSymbol );
+        public Type ToType() => this.Compilation.Factory.GetReflectionType( this._typeSymbol );
 
         public bool? IsReferenceType => this.IsReferenceTypeImpl();
 
@@ -89,6 +89,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
+        public override IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
+
         public override ISymbol Symbol => this._typeSymbol;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
@@ -115,12 +117,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 
         [Memo]
-        private BoxedRef<ITypeParameter> BoxedRef => new( this.ToValueTypedRef() );
+        private IRef<ITypeParameter> Ref => this.RefFactory.FromSymbol<ITypeParameter>( this._typeSymbol );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-        IRef<ITypeParameter> ITypeParameter.ToRef() => this.BoxedRef;
+        IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 
-        IRef<IType> IType.ToRef() => this.BoxedRef;
+        IRef<IType> IType.ToRef() => this.Ref;
     }
 }

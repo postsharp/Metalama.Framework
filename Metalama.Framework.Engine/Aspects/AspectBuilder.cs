@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
@@ -89,7 +88,7 @@ namespace Metalama.Framework.Engine.Aspects
         [Memo]
         public IAspectReceiver<T> Outbound
             => new RootAspectReceiver<T>(
-                this.Target.ToValueTypedRef(),
+                this.Target.ToRef(),
                 this,
                 CompilationModelVersion.Current );
 

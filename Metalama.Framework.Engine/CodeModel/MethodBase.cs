@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.GetCompilationModel().GetParameterCollection( this.ToValueTypedRef<IHasParameters>() ) );
+                this.Compilation.GetParameterCollection( this.ToRef() ) );
 
         public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract System.Reflection.MethodBase ToMethodBase();
 
-        IRef<IMethodBase> IMethodBase.ToRef() => this.GetMethodBaseRef();
+        public IRef<IMethodBase> ToRef() => this.GetMethodBaseRef();
 
         protected abstract IRef<IMethodBase> GetMethodBaseRef();
 

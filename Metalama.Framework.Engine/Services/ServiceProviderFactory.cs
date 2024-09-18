@@ -138,7 +138,8 @@ public static class ServiceProviderFactory
             .WithServiceConditional<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
             .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
             .WithService( _ => new SyntaxSerializationService() )
-            .WithService( _ => new CompileTimeTypeFactory() )
+
+            //.WithService( _ => new CompileTimeTypeFactory() )
             .WithServiceConditional<SystemTypeResolver>( sp => new SystemTypeResolver( sp ) )
             .WithServiceConditional<ISystemAttributeDeserializer>( sp => new SystemAttributeDeserializer( sp ) )
             .WithService( provider => new ClassifyingCompilationContextFactory( provider ) )

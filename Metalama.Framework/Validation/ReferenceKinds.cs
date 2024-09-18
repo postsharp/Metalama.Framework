@@ -96,7 +96,7 @@ namespace Metalama.Framework.Validation
         PointerType = 1 << 14,
 
         /// <summary>
-        /// Type of a <c>ref</c>.
+        /// Type of a <c>IRefImpl</c>.
         /// </summary>
         [Obsolete( "No longer detected." )]
         RefType = 1 << 15,

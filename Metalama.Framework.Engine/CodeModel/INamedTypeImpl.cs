@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal interface INamedTypeImpl : INamedType, ITypeImpl, IGenericInternal, IMemberOrNamedTypeImpl, INamespaceOrNamedTypeImpl, IGenericContext
+internal interface INamedTypeImpl : INamedType, ITypeImpl, IGenericInternal, IMemberOrNamedTypeImpl, INamespaceOrNamedTypeImpl
 {
     /// <summary>
     /// Gets the set of methods that override a given member of a base type or interface. In case of

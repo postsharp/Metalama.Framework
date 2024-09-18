@@ -27,7 +27,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
-    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
+    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.Ref;
 
     public override Writeability Writeability
     {
@@ -60,7 +60,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     IProperty IProperty.Definition => this;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.BoxedRef;
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
@@ -70,7 +70,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public override IMember? OverriddenMember => this.OverriddenProperty;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public virtual IInjectMemberTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
 
@@ -157,13 +157,13 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
             out initializerMethod );
 
     [Memo]
-    public BoxedRef<IProperty> BoxedRef => new BoxedRef<IProperty>( this.ToValueTypedRef() );
+    public BuilderRef<IProperty> Ref => new( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.Ref;
 
-    IRef<IProperty> IProperty.ToRef() => this.BoxedRef;
+    public new IRef<IProperty> ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

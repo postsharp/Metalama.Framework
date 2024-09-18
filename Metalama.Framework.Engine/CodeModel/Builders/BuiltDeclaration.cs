@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -17,26 +16,29 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// </summary>
 internal abstract class BuiltDeclaration : BaseDeclaration
 {
-    protected BuiltDeclaration( CompilationModel compilation )
+    protected BuiltDeclaration( CompilationModel compilation, IGenericContext genericContext )
     {
         this.Compilation = compilation;
+        this.GenericContext = genericContext;
     }
 
     public override CompilationModel Compilation { get; }
 
     public abstract DeclarationBuilder Builder { get; }
 
+    public override IGenericContext GenericContext { get; }
+
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => this.Builder.ToDisplayString( format, context );
 
     [Memo]
-    public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetDeclaration( this.Builder.DeclaringAssembly );
+    public override IAssembly DeclaringAssembly => this.Compilation.Factory.TranslateDeclaration( this.Builder.DeclaringAssembly );
 
     public override IDeclarationOrigin Origin => this.Builder.Origin;
 
     [Memo]
     public override IDeclaration? ContainingDeclaration
-        => this.Compilation.Factory.GetDeclaration( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
+        => this.Compilation.Factory.TranslateDeclaration( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
 
     public sealed override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
 
@@ -44,13 +46,11 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     public override IAttributeCollection Attributes
         => new AttributeCollection(
             this,
-            this.GetCompilationModel().GetAttributeCollection( this.ToValueTypedRef<IDeclaration>() ) );
+            this.Compilation.GetAttributeCollection( this.ToDeclarationRef() ) );
 
     public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
-    internal override Ref<IDeclaration> ToValueTypedRef() => this.Builder.ToValueTypedRef();
-
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Builder.ToIRef();
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Builder.ToDeclarationRef();
 
     public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 

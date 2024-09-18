@@ -14,7 +14,7 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 {
     public PropertyBuilder PropertyBuilder { get; }
 
-    public BuiltProperty( CompilationModel compilation, PropertyBuilder builder ) : base( compilation )
+    public BuiltProperty( CompilationModel compilation, PropertyBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.PropertyBuilder = builder;
     }
@@ -32,18 +32,18 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 
     [Memo]
-    public IProperty? OverriddenProperty => this.Compilation.Factory.GetDeclaration( this.PropertyBuilder.OverriddenProperty );
+    public IProperty? OverriddenProperty => this.Compilation.Factory.TranslateDeclaration( this.PropertyBuilder.OverriddenProperty );
 
     IProperty IProperty.Definition => this;
 
-    IRef<IProperty> IProperty.ToRef() => this.PropertyBuilder.BoxedRef;
+    IRef<IProperty> IProperty.ToRef() => this.PropertyBuilder.Ref;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.PropertyBuilder.BoxedRef;
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.PropertyBuilder.Ref;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
-        => this.PropertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this.PropertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.TranslateDeclaration( i ) );
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 

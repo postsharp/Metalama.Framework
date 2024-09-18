@@ -128,7 +128,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
 
@@ -157,11 +157,11 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     }
 
     [Memo]
-    public BoxedRef<IEvent> BoxedRef => new BoxedRef<IEvent>( this.ToValueTypedRef() );
+    public BuilderRef<IEvent> Ref => new( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IEvent> IEvent.ToRef() => this.BoxedRef;
+    public new IRef<IEvent> ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

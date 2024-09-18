@@ -81,7 +81,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         {
             var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType )
             {
-                ReplacedImplicit = constructor.ToValueTypedRef(), Accessibility = Accessibility.Public
+                ReplacedImplicit = constructor.ToRef(), Accessibility = Accessibility.Public
             };
 
             initializedConstructor = constructorBuilder;
@@ -106,7 +106,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
 
-        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToValueTypedRef<IParameter>() );
+        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToRef() );
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
@@ -156,7 +156,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 {
                     var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType )
                     {
-                        ReplacedImplicit = chainedConstructor.ToValueTypedRef(), Accessibility = Accessibility.Public
+                        ReplacedImplicit = chainedConstructor.ToRef(), Accessibility = Accessibility.Public
                     };
 
                     addTransformation( derivedConstructorBuilder.ToTransformation() );

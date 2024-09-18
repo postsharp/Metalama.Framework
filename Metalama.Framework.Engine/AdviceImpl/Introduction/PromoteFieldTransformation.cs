@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
@@ -20,7 +19,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 
     public override InsertPosition InsertPosition => this._replacedField.ToInsertPosition();
 
-    public MemberRef<IMember> ReplacedMember => this._replacedField.ToMemberRef<IMember>();
+    public IRef<IMember>? ReplacedMember => this._replacedField.ToRef();
 
     public override IDeclaration TargetDeclaration => this._replacedField;
 }

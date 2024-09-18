@@ -50,9 +50,9 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
                 true ) );
 
     [Memo]
-    public BoxedRef<IParameter> BoxedRef => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+    public BuilderRef<IParameter> BoxedRef => new( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
 
-    IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
+    public new IRef<IParameter> ToRef() => this.BoxedRef;
 }

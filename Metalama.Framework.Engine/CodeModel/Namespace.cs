@@ -56,6 +56,8 @@ internal sealed class Namespace : Declaration, INamespace
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
 
+    public override IGenericContext GenericContext => NullGenericContext.Instance;
+
     public override ISymbol Symbol => this._symbol;
 
     public string Name => this._symbol.IsGlobalNamespace ? "" : this._symbol.Name;
@@ -90,7 +92,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamedTypeCollection TypesCore
         => new NamedTypeCollection(
             this.Compilation,
-            this.Compilation.GetNamedTypeCollection( this._symbol.ToValueTypedRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamedTypeCollection( this._symbol.ToRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
 
     // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
 
@@ -111,7 +113,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamespaceCollection NamespacesCore
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._symbol.ToValueTypedRef<INamespace>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamespaceCollection( this._symbol.ToRef<INamespace>( this.Compilation.CompilationContext ) ) );
 
     public INamespace? GetDescendant( string ns )
     {
@@ -136,7 +138,7 @@ internal sealed class Namespace : Declaration, INamespace
     public override SyntaxTree? PrimarySyntaxTree => null;
 
     [Memo]
-    private IRef<INamespace> Ref => new BoxedRef<INamespace>( this.ToValueTypedRef() );
+    private IRef<INamespace> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

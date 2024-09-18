@@ -552,7 +552,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             var transformations = pipelineResultValue?.Transformations ?? ImmutableArray<ITransformationBase>.Empty;
 
-            var annotations = pipelineResultValue?.Annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            var annotations = pipelineResultValue?.Annotations ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty;
 
             var result = new DesignTimePipelineExecutionResult(
                 compilation.SyntaxTrees,

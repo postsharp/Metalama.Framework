@@ -27,10 +27,13 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     }
 
     [Memo]
-    internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver );
+    internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver, this );
 
     [Memo]
     internal CompilationComparers Comparers => new( this.Compilation );
+
+    [Memo]
+    internal RefFactory RefFactory => new( this );
 
     public Compilation Compilation { get; }
 
@@ -69,28 +72,28 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         => this.Compilation.SourceModule.ReferencedAssemblySymbols.Concat( this.Compilation.Assembly ).ToImmutableDictionary( x => x.Identity, x => x );
 
     [Memo]
-    internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<INamedType>> NamedTypeRefComparer => RefEqualityComparer<INamedType>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<INamespace>> NamespaceRefComparer => new MemberRefEqualityComparer<INamespace>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<INamespace>> NamespaceRefComparer => RefEqualityComparer<INamespace>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IConstructor>> ConstructorRefComparer => new MemberRefEqualityComparer<IConstructor>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IConstructor>> ConstructorRefComparer => RefEqualityComparer<IConstructor>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IEvent>> EventRefComparer => new MemberRefEqualityComparer<IEvent>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IEvent>> EventRefComparer => RefEqualityComparer<IEvent>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IField>> FieldRefComparer => new MemberRefEqualityComparer<IField>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IField>> FieldRefComparer => RefEqualityComparer<IField>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IProperty>> PropertyRefComparer => new MemberRefEqualityComparer<IProperty>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IProperty>> PropertyRefComparer => RefEqualityComparer<IProperty>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IIndexer>> IndexerRefComparer => new MemberRefEqualityComparer<IIndexer>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IIndexer>> IndexerRefComparer => RefEqualityComparer<IIndexer>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IMethod>> MethodRefComparer => RefEqualityComparer<IMethod>.Default;
 
     [Memo]
     internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.Comparers.Default );

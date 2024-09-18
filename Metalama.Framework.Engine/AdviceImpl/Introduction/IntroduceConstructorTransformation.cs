@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -26,10 +25,7 @@ internal sealed class IntroduceConstructorTransformation
         Invariant.Assert( !introducedDeclaration.IsStatic );
         Invariant.Assert( !introducedDeclaration.IsRecordCopyConstructor() );
 
-        if ( !introducedDeclaration.ReplacedImplicit.IsDefault )
-        {
-            this.ReplacedMember = new MemberRef<IMember>( introducedDeclaration.ReplacedImplicit.As<IDeclaration>() );
-        }
+        this.ReplacedMember = introducedDeclaration.ReplacedImplicit;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
@@ -67,7 +63,7 @@ internal sealed class IntroduceConstructorTransformation
                     ConstructorInitializer(
                         SyntaxKind.ThisConstructorInitializer,
                         arguments ),
-                var i => throw new AssertionFailedException( $"Unsupported initializer kind: {i}" ),
+                var i => throw new AssertionFailedException( $"Unsupported initializer kind: {i}" )
             };
 
         var syntax =
@@ -92,15 +88,15 @@ internal sealed class IntroduceConstructorTransformation
         };
     }
 
-    public MemberRef<IMember> ReplacedMember { get; }
+    public IRef<IMember>? ReplacedMember { get; }
 
     public override InsertPosition InsertPosition
-        => this.ReplacedMember.Target != null
+        => this.ReplacedMember != null
             ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
             : this.IntroducedDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability
-        => this.ReplacedMember.IsDefault
+        => this.ReplacedMember == null
             ? TransformationObservability.Always
             : TransformationObservability.CompileTimeOnly;
 

@@ -14,7 +14,7 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 {
     private readonly IndexerBuilder _indexerBuilder;
 
-    public BuiltIndexer( CompilationModel compilation, IndexerBuilder builder ) : base( compilation )
+    public BuiltIndexer( CompilationModel compilation, IndexerBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._indexerBuilder = builder;
     }
@@ -33,14 +33,15 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this._indexerBuilder.ToValueTypedRef<IHasParameters>() ) );
+            this.Compilation.GetParameterCollection( this._indexerBuilder.ToRef() ) );
 
     [Memo]
-    public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this._indexerBuilder.OverriddenIndexer );
+    public IIndexer? OverriddenIndexer
+        => this.Compilation.Factory.TranslateDeclaration( this._indexerBuilder.OverriddenIndexer, genericContext: this.GenericContext );
 
     IIndexer IIndexer.Definition => this;
 
-    IRef<IIndexer> IIndexer.ToRef() => this._indexerBuilder.BoxedRef;
+    IRef<IIndexer> IIndexer.ToRef() => this._indexerBuilder.Ref;
 
     public IIndexerInvoker With( InvokerOptions options ) => this._indexerBuilder.With( options );
 
@@ -53,5 +54,6 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
-        => this._indexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this._indexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray(
+            i => this.Compilation.Factory.TranslateDeclaration( i, genericContext: this.GenericContext ) );
 }

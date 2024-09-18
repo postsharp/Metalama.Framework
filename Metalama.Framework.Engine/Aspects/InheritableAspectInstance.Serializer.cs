@@ -29,7 +29,7 @@ public sealed partial class InheritableAspectInstance
         public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
         {
             var instance = (InheritableAspectInstance) obj;
-            instance.TargetDeclaration = initializationArguments.GetValue<Ref<IDeclaration>>( nameof(instance.TargetDeclaration) )!;
+            instance.TargetDeclaration = initializationArguments.GetValue<IRefImpl<IDeclaration>>( nameof(instance.TargetDeclaration) )!;
             instance.Aspect = initializationArguments.GetValue<IAspect>( nameof(instance.Aspect) )!;
             instance.SecondaryInstances = initializationArguments.GetValue<ImmutableArray<IAspectInstance>>( nameof(instance.SecondaryInstances) );
             instance.AspectState = initializationArguments.GetValue<IAspectState>( nameof(instance.AspectState) );

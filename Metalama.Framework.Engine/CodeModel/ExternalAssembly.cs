@@ -26,6 +26,8 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
 
     public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
 
+    public override IGenericContext GenericContext => NullGenericContext.Instance;
+
     public override ISymbol Symbol => this._assemblySymbol;
 
     public override bool CanBeInherited => false;
@@ -61,7 +63,7 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
     public override bool BelongsToCurrentProject => false;
 
     [Memo]
-    private IRef<IAssembly> Ref => new BoxedRef<IAssembly>( this.ToValueTypedRef() );
+    private IRef<IAssembly> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

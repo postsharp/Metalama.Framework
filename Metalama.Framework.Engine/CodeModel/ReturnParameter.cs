@@ -37,9 +37,6 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
 
     public virtual bool IsReturnParameter => true;
 
-    internal override Ref<IDeclaration> ToValueTypedRef()
-        => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertSymbolNotNull(), this.GetCompilationModel().CompilationContext );
-
     public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
     IDeclarationOrigin IDeclaration.Origin => this.DeclaringMember.Origin;
@@ -80,9 +77,14 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
     public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
     [Memo]
-    private BoxedRef<IParameter> BoxedRef => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+    private IRef<IParameter> Ref
+        => this.RefFactory.FromSymbol<IParameter>(
+            (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertSymbolNotNull(),
+            DeclarationRefTargetKind.Return );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
+    IRef<IParameter> IParameter.ToRef() => this.Ref;
+
+    public override IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
 }

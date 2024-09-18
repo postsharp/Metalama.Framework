@@ -9,7 +9,6 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.Fabrics
     internal abstract class AspectReceiver<TDeclaration, TTag> : IAspectReceiver<TDeclaration, TTag>
         where TDeclaration : class, IDeclaration
     {
-        private readonly ISdkRef<IDeclaration> _containingDeclaration;
+        private readonly IRef<IDeclaration> _containingDeclaration;
 
         protected abstract IAspectReceiverParent Parent { get; }
 
@@ -51,7 +50,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         internal AspectReceiver(
             ProjectServiceProvider serviceProvider,
-            ISdkRef<IDeclaration> containingDeclaration,
+            IRef<IDeclaration> containingDeclaration,
             CompilationModelVersion compilationModelVersion,
             Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
         {
@@ -1102,7 +1101,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             context2.Collector.AddAspectRequirement(
                                 new AspectRequirement(
-                                    declaration.ToValueTypedRef<IDeclaration>(),
+                                    declaration.ToRef(),
                                     this.Parent.AspectPredecessor.Instance ) );
 
                             return Task.CompletedTask;

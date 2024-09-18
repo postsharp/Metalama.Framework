@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -60,7 +59,7 @@ internal static class OverrideHelper
             {
                 var constructorBuilder = new ConstructorBuilder( advice, type )
                 {
-                    ReplacedImplicit = implicitConstructor.ToValueTypedRef(), Accessibility = Accessibility.Public
+                    ReplacedImplicit = implicitConstructor.ToRef(), Accessibility = Accessibility.Public
                 };
 
                 addTransformation( constructorBuilder.ToTransformation() );

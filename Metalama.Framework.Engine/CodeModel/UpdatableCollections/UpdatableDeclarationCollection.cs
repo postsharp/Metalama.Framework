@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : BaseDeclarationCollection, ILazy, ISourceDeclarationCollection<TDeclaration, TRef>
     where TDeclaration : class, IDeclaration
-    where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
+    where TRef : class, IRef<TDeclaration>
 {
     private List<TRef>? _allItems;
     private volatile int _removeOperationsCount;
@@ -43,16 +42,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
             this._allItems = new List<TRef>();
 
 #if DEBUG
-            this.PopulateAllItems(
-                r =>
-                {
-                    if ( r.IsDefault )
-                    {
-                        throw new AssertionFailedException( "The reference is not initialized." );
-                    }
-
-                    this._allItems.Add( r );
-                } );
+            this.PopulateAllItems( r => this._allItems.Add( (TRef) r ) );
 #else
             this.PopulateAllItems( this._allItems.Add );
 #endif
@@ -60,7 +50,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         }
     }
 
-    protected abstract void PopulateAllItems( Action<TRef> action );
+    protected abstract void PopulateAllItems( Action<IRef<TDeclaration>> action );
 
     protected void AddItem( in TRef item )
     {
@@ -184,7 +174,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
     }
 }
 
-internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>,
+internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, IRef<TDeclaration>>,
                                                                        ISourceDeclarationCollection<TDeclaration>
     where TDeclaration : class, IDeclaration
 {

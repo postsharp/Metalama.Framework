@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,7 +20,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         Invariant.Assert( introducedDeclaration.IsStatic );
 
         var targetType = introducedDeclaration.DeclaringType;
-        this.ReplacedMember = targetType.StaticConstructor?.ToMemberRef<IMember>() ?? default;
+        this.ReplacedMember = targetType.StaticConstructor?.ToRef() ?? default;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
@@ -49,10 +48,10 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         };
     }
 
-    public MemberRef<IMember> ReplacedMember { get; }
+    public IRef<IMember>? ReplacedMember { get; }
 
     public override InsertPosition InsertPosition
-        => this.ReplacedMember.Target != null
+        => this.ReplacedMember != null
             ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
             : this.IntroducedDeclaration.ToInsertPosition();
 

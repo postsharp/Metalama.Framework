@@ -49,6 +49,8 @@ internal sealed partial class LinkerInjectionStep
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
         }
 
+        private RefFactory RefFactory => this._compilation.CompilationContext.RefFactory;
+
         private CompilationContext CompilationContext => this._parent._compilationContext;
 
         private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
@@ -92,7 +94,7 @@ internal sealed partial class LinkerInjectionStep
             SyntaxGenerationContext? syntaxGenerationContext = null;
 
             this.RewriteAttributeLists(
-                Ref.FromSymbol<IDeclaration>( symbol, this._compilation.CompilationContext ),
+                this.RefFactory.FromSymbol<IDeclaration>( symbol ),
                 SyntaxKind.None,
                 originalDeclaringNode,
                 attributeLists,
@@ -105,7 +107,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 case IMethodSymbol method:
                     this.RewriteAttributeLists(
-                        Ref.ReturnParameter( method, this._compilation.CompilationContext ),
+                        this.RefFactory.ReturnParameter( method ),
                         SyntaxKind.ReturnKeyword,
                         originalDeclaringNode,
                         attributeLists,
@@ -128,7 +130,7 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private void RewriteAttributeLists(
-            Ref<IDeclaration> target,
+            IRef<IDeclaration> target,
             SyntaxKind targetKind,
             SyntaxNode originalDeclaringNode,
             SyntaxList<AttributeListSyntax> inputAttributeLists,
@@ -1369,7 +1371,7 @@ internal sealed partial class LinkerInjectionStep
             List<SyntaxTrivia> outputTrivias = new();
 
             this.RewriteAttributeLists(
-                this._compilation.ToValueTypedRef<IDeclaration>(),
+                this._compilation.ToRef(),
                 SyntaxKind.AssemblyKeyword,
                 node,
                 node.AttributeLists,

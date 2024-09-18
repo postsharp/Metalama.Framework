@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             foreach ( var sourceItem in typedSource.OfTypeDefinition( typeDefinition ) )
             {
                 // Resolve the reference and store the declaration.
-                var member = this.GetItem( sourceItem.ToRef() );
+                var member = this.GetItem( sourceItem );
 
                 // Return the result.
                 yield return member;

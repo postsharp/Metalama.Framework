@@ -18,7 +18,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
     public NamedTypeBuilder TypeBuilder { get; }
 
-    public BuiltNamedType( CompilationModel compilation, NamedTypeBuilder builder ) : base( compilation )
+    public BuiltNamedType( CompilationModel compilation, NamedTypeBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.TypeBuilder = builder;
     }
@@ -33,27 +33,31 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public bool HasDefaultConstructor => this.TypeBuilder.HasDefaultConstructor;
 
-    public INamedType? BaseType => this.Compilation.Factory.GetDeclaration( this.TypeBuilder.BaseType, ReferenceResolutionOptions.CanBeMissing );
+    public INamedType? BaseType
+        => this.Compilation.Factory.TranslateDeclaration(
+            this.TypeBuilder.BaseType,
+            ReferenceResolutionOptions.CanBeMissing,
+            genericContext: this.GenericContext );
 
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(
             this,
-            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeBuilder.ToValueTypedRef<INamedType>(), false ) );
+            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeBuilder.ToRef(), false ) );
 
     public IImplementedInterfaceCollection ImplementedInterfaces
         => new ImplementedInterfacesCollection(
             this,
-            this.Compilation.GetInterfaceImplementationCollection( this.TypeBuilder.ToValueTypedRef().As<INamedType>(), false ) );
+            this.Compilation.GetInterfaceImplementationCollection( this.TypeBuilder.ToRef(), false ) );
 
     INamespace INamedType.Namespace => this.ContainingNamespace;
 
     public INamespace ContainingNamespace => this.TypeBuilder.ContainingNamespace;
 
-    IRef<INamedType> INamedType.ToRef() => this.TypeBuilder.BoxedRef;
+    IRef<INamedType> INamedType.ToRef() => this.TypeBuilder.Ref;
 
-    IRef<IType> IType.ToRef() => this.TypeBuilder.BoxedRef;
+    IRef<IType> IType.ToRef() => this.TypeBuilder.Ref;
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.TypeBuilder.BoxedRef;
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.TypeBuilder.Ref;
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -63,7 +67,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this.TypeBuilder.ToValueTypedRef().As<INamespaceOrNamedType>() ) );
+            this.Compilation.GetNamedTypeCollection( this.TypeBuilder.ToRef() ) );
 
     [Memo]
     public INamedTypeCollection AllTypes => new AllTypesCollection( this );
@@ -72,7 +76,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IPropertyCollection Properties
         => new PropertyCollection(
             this,
-            this.Compilation.GetPropertyCollection( this.TypeBuilder.ToValueTypedRef().As<INamedType>() ) );
+            this.Compilation.GetPropertyCollection( this.TypeBuilder.ToRef() ) );
 
     [Memo]
     public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
@@ -81,7 +85,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IIndexerCollection Indexers
         => new IndexerCollection(
             this,
-            this.Compilation.GetIndexerCollection( this.Builder.ToValueTypedRef().As<INamedType>() ) );
+            this.Compilation.GetIndexerCollection( this.TypeBuilder.ToRef() ) );
 
     [Memo]
     public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
@@ -90,7 +94,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IFieldCollection Fields
         => new FieldCollection(
             this,
-            this.Compilation.GetFieldCollection( this.Builder.ToValueTypedRef().As<INamedType>() ) );
+            this.Compilation.GetFieldCollection( this.TypeBuilder.ToRef() ) );
 
     [Memo]
     public IFieldCollection AllFields => new AllFieldsCollection( this );
@@ -104,7 +108,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IEventCollection Events
         => new EventCollection(
             this,
-            this.Compilation.GetEventCollection( this.Builder.ToValueTypedRef().As<INamedType>() ) );
+            this.Compilation.GetEventCollection( this.TypeBuilder.ToRef() ) );
 
     [Memo]
     public IEventCollection AllEvents => new AllEventsCollection( this );
@@ -112,7 +116,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IMethodCollection Methods
         => new MethodCollection(
             this,
-            this.Compilation.GetMethodCollection( this.Builder.ToValueTypedRef().As<INamedType>() ) );
+            this.Compilation.GetMethodCollection( this.TypeBuilder.ToRef() ) );
 
     public IMethodCollection AllMethods => new AllMethodsCollection( this );
 
@@ -121,7 +125,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IConstructorCollection Constructors
         => new ConstructorCollection(
             this,
-            this.Compilation.GetConstructorCollection( this.Builder.ToValueTypedRef().As<INamedType>() ) );
+            this.Compilation.GetConstructorCollection( this.TypeBuilder.ToRef() ) );
 
     public IConstructor? StaticConstructor => this.TypeBuilder.StaticConstructor;
 
@@ -204,4 +208,6 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     {
         throw new NotSupportedException( "ConstructGenericInstance on introduced types is not yet supported." );
     }
+
+    public GenericMap GenericMap => GenericMap.Create( this.TypeArguments, this.IsCanonicalGenericInstance );
 }

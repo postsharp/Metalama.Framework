@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -18,7 +17,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
 {
     private readonly InitializerKind _kind;
 
-    private new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
+    private new IRef<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
     protected InitializeAdvice( AdviceConstructorParameters<IMemberOrNamedType> parameters, InitializerKind kind ) : base( parameters )
     {
@@ -52,7 +51,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
             if ( staticConstructor == null || staticConstructor.IsImplicitlyDeclared )
             {
                 var staticConstructorBuilder =
-                    new ConstructorBuilder( this, containingType ) { IsStatic = true, ReplacedImplicit = staticConstructor?.ToValueTypedRef() ?? default };
+                    new ConstructorBuilder( this, containingType ) { IsStatic = true, ReplacedImplicit = staticConstructor?.ToRef() ?? default };
 
                 staticConstructor = staticConstructorBuilder;
                 addTransformation( staticConstructorBuilder.ToTransformation() );
@@ -87,7 +86,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
             {
                 // Missing explicit ctor.
                 var builder =
-                    new ConstructorBuilder( this, ctor.DeclaringType ) { ReplacedImplicit = ctor.ToValueTypedRef(), Accessibility = Accessibility.Public };
+                    new ConstructorBuilder( this, ctor.DeclaringType ) { ReplacedImplicit = ctor.ToRef(), Accessibility = Accessibility.Public };
 
                 addTransformation( builder.ToTransformation() );
                 targetCtor = builder;

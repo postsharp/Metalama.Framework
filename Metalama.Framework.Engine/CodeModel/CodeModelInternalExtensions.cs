@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -17,6 +18,13 @@ namespace Metalama.Framework.Engine.CodeModel;
 internal static class CodeModelInternalExtensions
 {
     public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
+
+    [Obsolete( "Use the Compilation property." )]
+    public static CompilationModel GetCompilationModel( this ICompilationElementImpl declaration ) => declaration.Compilation;
+
+    public static CompilationContext GetCompilationContext( this ICompilationElementImpl declaration ) => declaration.Compilation.CompilationContext;
+
+    public static CompilationContext GetCompilationContext( this ICompilationElement declaration ) => declaration.GetCompilationModel().CompilationContext;
 
     // Resharper disable UnusedMember.Global
     [Obsolete( "Redundant call" )]
@@ -67,8 +75,7 @@ internal static class CodeModelInternalExtensions
                     (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
             case NamedTypeBuilder topLevelType:
-                return new InsertPosition(
-                    topLevelType.PrimarySyntaxTree );
+                return new InsertPosition( topLevelType.PrimarySyntaxTree );
 
             case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
                 return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );

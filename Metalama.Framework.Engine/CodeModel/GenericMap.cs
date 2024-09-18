@@ -1,32 +1,41 @@
-﻿using Metalama.Framework.Code;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Code;
 using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal readonly struct GenericMap( IReadOnlyList<IType> typeArguments ) : IEquatable<GenericMap>
+internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImpl
 {
-    public bool IsEmpty => this.TypeArguments.Count == 0;
+    private GenericMap( IReadOnlyList<IType> typeArguments, bool isIdentity )
+    {
+        this.TypeArguments = typeArguments;
+        this.IsEmptyOrIdentity = isIdentity || typeArguments.Count == 0;
+    }
 
-    public IReadOnlyList<IType> TypeArguments { get; init; } = typeArguments;
+    public static GenericMap Create( IReadOnlyList<IType> typeArguments, bool isIdentity ) => new( typeArguments, isIdentity );
 
-    public static readonly GenericMap Empty = new GenericMap();
+    public bool IsEmptyOrIdentity { get; }
+
+    public IReadOnlyList<IType> TypeArguments { get; }
+
+    public static readonly GenericMap Empty = new();
 
     public GenericMap Apply( in GenericMap map )
     {
-        if ( map.IsEmpty )
+        if ( map.IsEmptyOrIdentity )
         {
             return Empty;
         }
-        
+
         var results = new IType[map.TypeArguments.Count];
         Mapper? mapper = null;
-
 
         for ( var i = 0; i < map.TypeArguments.Count; i++ )
         {
             var type = map.TypeArguments[i];
-            
+
             if ( type is ITypeParameter typeParameter )
             {
                 results[i] = this.Map( typeParameter );
@@ -38,7 +47,7 @@ internal readonly struct GenericMap( IReadOnlyList<IType> typeArguments ) : IEqu
             }
         }
 
-        return new GenericMap(results);
+        return new GenericMap( typeArguments: results, false );
     }
 
     public IType Map( ITypeParameter typeParameter )
@@ -47,7 +56,7 @@ internal readonly struct GenericMap( IReadOnlyList<IType> typeArguments ) : IEqu
         {
             throw new NotImplementedException( "Method type parameters are not supported." );
         }
-        
+
         return this.TypeArguments[typeParameter.Index];
     }
 
@@ -67,7 +76,7 @@ internal readonly struct GenericMap( IReadOnlyList<IType> typeArguments ) : IEqu
     {
         private readonly GenericMap _genericMap;
 
-        public Mapper( GenericMap genericMap ) 
+        public Mapper( GenericMap genericMap )
         {
             this._genericMap = genericMap;
         }
@@ -92,7 +101,7 @@ internal readonly struct GenericMap( IReadOnlyList<IType> typeArguments ) : IEqu
 
         for ( var i = 0; i < this.TypeArguments.Count; i++ )
         {
-            if ( !other.TypeArguments[i].Equals(  this.TypeArguments[i] ) )
+            if ( !other.TypeArguments[i].Equals( this.TypeArguments[i] ) )
             {
                 return false;
             }
@@ -100,6 +109,8 @@ internal readonly struct GenericMap( IReadOnlyList<IType> typeArguments ) : IEqu
 
         return true;
     }
+
+    public override bool Equals( object? obj ) => obj is GenericMap genericMap && this.Equals( genericMap );
 
     public override int GetHashCode()
     {
@@ -112,9 +123,10 @@ internal readonly struct GenericMap( IReadOnlyList<IType> typeArguments ) : IEqu
 
         return hashCode.ToHashCode();
     }
-    
 
     public static bool operator ==( GenericMap left, GenericMap right ) => left.Equals( right );
 
     public static bool operator !=( GenericMap left, GenericMap right ) => !left.Equals( right );
+
+    GenericMap IGenericContextImpl.GenericMap => this;
 }

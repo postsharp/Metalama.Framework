@@ -196,7 +196,7 @@ internal sealed class AspectReferenceResolver
             // Resolved to the initial version of the symbol (before any aspects).
 
             if ( targetIntroductionInjectedMember == null
-                 || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { IsDefault: false } replacedMember }
+                 || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
                      && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null) )
             {
                 // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
@@ -414,7 +414,7 @@ internal sealed class AspectReferenceResolver
             return null;
         }
 
-        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { IsDefault: false } replacedMemberRef } )
+        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
         {
             var replacedMember = replacedMemberRef.GetTarget(
                 this._finalCompilationModel,
@@ -598,7 +598,7 @@ internal sealed class AspectReferenceResolver
                             ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax memberAccess }]
                         } invocationExpression:
                             var symbolInfo = semanticModel.GetSymbolInfo( memberAccess );
-                            
+
                             rootNode = invocationExpression;
 
                             // This should match AspectReferenceWalker's VisitCore method as it does the same symbol resolution.
@@ -612,7 +612,7 @@ internal sealed class AspectReferenceResolver
                                     { CandidateSymbols: [{ } symbol] } => symbol,
 
                                     // We should not get here because this reference would be skipped by AspectReferenceWalker.
-                                    _ => throw new AssertionFailedException( $"Invalid symbol info: {symbolInfo}" ),
+                                    _ => throw new AssertionFailedException( $"Invalid symbol info: {symbolInfo}" )
                                 };
 
                             targetSymbolSource = memberAccess;

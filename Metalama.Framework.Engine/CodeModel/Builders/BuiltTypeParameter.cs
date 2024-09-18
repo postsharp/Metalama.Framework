@@ -11,7 +11,9 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 {
     private readonly TypeParameterBuilder _typeParameterBuilder;
 
-    public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation )
+    public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base(
+        compilation,
+        genericContext )
     {
         this._typeParameterBuilder = builder;
     }
@@ -49,9 +51,9 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public bool HasDefaultConstructorConstraint => this._typeParameterBuilder.HasDefaultConstructorConstraint;
 
-    IRef<ITypeParameter> ITypeParameter.ToRef() => this._typeParameterBuilder.BoxedRef;
+    IRef<ITypeParameter> ITypeParameter.ToRef() => this._typeParameterBuilder.Ref;
 
-    IRef<IType> IType.ToRef() => this._typeParameterBuilder.BoxedRef;
+    IRef<IType> IType.ToRef() => this._typeParameterBuilder.Ref;
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 

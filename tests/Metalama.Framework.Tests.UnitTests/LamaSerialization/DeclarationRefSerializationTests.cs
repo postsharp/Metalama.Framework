@@ -15,7 +15,7 @@ public class DeclarationRefSerializationTests : SerializationTestsBase
     {
         const string code = "public class C;";
         using var testContext = this.CreateTestContext( code );
-        var initialRef = testContext.Compilation.Types.Single().ToValueTypedRef();
+        var initialRef = testContext.Compilation.Types.Single().ToRef();
 
         var roundtripRef = this.TestSerialization( initialRef, testEquality: false );
 
@@ -31,8 +31,6 @@ public class DeclarationRefSerializationTests : SerializationTestsBase
         const string code = "public class C;";
         using var testContext = this.CreateTestContext( code );
         var initialRef = testContext.Compilation.Types.Single().ToRef();
-
-        Assert.IsType<BoxedRef<INamedType>>( initialRef );
 
         var roundtripRef = this.TestSerialization( initialRef, testEquality: false );
 

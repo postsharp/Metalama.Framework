@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
             else
             {
                 var symbol =
-                    this.GetCompilationModel()
+                    this.Compilation
                         .RoslynCompilation.CreateArrayTypeSymbol(
                             elementType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ),
                             this.Rank );

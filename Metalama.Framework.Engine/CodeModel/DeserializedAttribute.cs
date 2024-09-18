@@ -34,8 +34,6 @@ internal class DeserializedAttribute : IAttributeImpl
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => throw new NotSupportedException();
-
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
     bool IDeclarationImpl.CanBeInherited => false;
@@ -43,8 +41,6 @@ internal class DeserializedAttribute : IAttributeImpl
     SyntaxTree? IDeclarationImpl.PrimarySyntaxTree => null;
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => [];
-
-    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => throw new NotSupportedException();
 
     bool IEquatable<IDeclaration>.Equals( IDeclaration? other ) => throw new NotImplementedException();
 
@@ -75,6 +71,8 @@ internal class DeserializedAttribute : IAttributeImpl
     bool IDeclaration.BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
     ImmutableArray<SourceReference> IDeclaration.Sources => ImmutableArray<SourceReference>.Empty;
+
+    public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
 
     [Memo]
     public INamedType Type => this._serializationData.Type.GetTarget( this.Compilation );

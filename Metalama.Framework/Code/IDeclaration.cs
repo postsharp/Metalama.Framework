@@ -91,5 +91,10 @@ namespace Metalama.Framework.Code
         /// set if the current declaration is not backed by source code.
         /// </summary>
         ImmutableArray<SourceReference> Sources { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IGenericContext"/> for the current declaration.
+        /// </summary>
+        IGenericContext GenericContext { get; }
     }
 }

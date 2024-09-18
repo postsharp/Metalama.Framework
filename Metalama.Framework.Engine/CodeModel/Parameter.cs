@@ -62,6 +62,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
+        public override IGenericContext GenericContext => this.DeclaringMember.GenericContext;
+
         public override ISymbol Symbol => this._parameterSymbol;
 
         public override bool CanBeInherited => this.DeclaringMember.CanBeInherited;
@@ -71,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public TypedConstant? DefaultValue
             => this._parameterSymbol.HasExplicitDefaultValue
-                ? TypedConstant.Create( this._parameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.GetIType( this.Type ) )
+                ? TypedConstant.Create( this._parameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.TranslateType( this.Type ) )
                 : null;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
@@ -94,7 +96,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     true ) );
 
         [Memo]
-        private IRef<IParameter> Ref => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+        private IRef<IParameter> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
 
         private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

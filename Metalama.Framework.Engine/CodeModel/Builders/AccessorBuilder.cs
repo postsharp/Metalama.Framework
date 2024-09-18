@@ -107,9 +107,9 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     IMethod IMethod.Definition => this;
 
-    IRef<IMember> IMember.ToRef() => this.BoxedRef;
+    IRef<IMember> IMember.ToRef() => this.Ref;
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.BoxedRef;
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
 
     IMember IMember.Definition => this;
 
@@ -286,7 +286,7 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
-    IRef<IMethodBase> IMethodBase.ToRef() => this.BoxedRef;
+    IRef<IMethodBase> IMethodBase.ToRef() => this.Ref;
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
@@ -300,9 +300,9 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
     [Memo]
-    public BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+    public IRef<IMethod> Ref => this.RefFactory.FromBuilder<IMethod>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+    public new IRef<IMethod> ToRef() => this.Ref;
 }

@@ -6,16 +6,9 @@ using System;
 
 namespace Metalama.Framework.Code
 {
-    /// <summary>
-    /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
-    /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
-    /// given an compilation, or using the <see cref="RefExtensions.GetTarget{T}"/> extension method for the compilation of the current context.
-    /// </summary>
-    /// <typeparam name="T">The type of the target object of the declaration or type.</typeparam>
     [CompileTime]
     [InternalImplement]
-    public interface IRef<out T> : IEquatable<IRef<ICompilationElement>>
-        where T : class, ICompilationElement
+    public interface IRef : IEquatable<IRef>
     {
         /// <summary>
         /// Returns a string that uniquely identifies the declaration represented by the current reference. This identifier can then be resolved using <see cref="IDeclarationFactory.GetDeclarationFromId"/>, even in
@@ -24,21 +17,44 @@ namespace Metalama.Framework.Code
         /// <returns>A string, or <c>null</c> if the current reference cannot be serialized to a public id.</returns>
         SerializableDeclarationId ToSerializableId();
 
+        IRef<TOut> As<TOut>()
+            where TOut : class, ICompilationElement;
+
         /// <summary>
         /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
         /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
         /// </summary>
-        T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default );
+        ICompilationElement GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
         /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
         /// </summary>
-        T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default );
+        ICompilationElement? GetTargetOrNull(
+            ICompilation compilation,
+            ReferenceResolutionOptions options = default,
+            IGenericContext? genericContext = default );
+    }
 
-        IRef<TOut> As<TOut>()
-            where TOut : class, ICompilationElement;
+    /// <summary>
+    /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
+    /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
+    /// given an compilation, or using the <see cref="RefExtensions.GetTarget{T}"/> extension method for the compilation of the current context.
+    /// </summary>
+    /// <typeparam name="T">The type of the target object of the declaration or type.</typeparam>
+    public interface IRef<out T> : IRef
+        where T : class, ICompilationElement
+    {
+        /// <summary>
+        /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
+        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
+        /// </summary>
+        new T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
 
-        bool Equals( IRef<ICompilationElement>? other, bool includeNullability );
+        /// <summary>
+        /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
+        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
+        /// </summary>
+        new T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
     }
 }

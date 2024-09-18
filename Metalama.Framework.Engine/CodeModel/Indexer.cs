@@ -21,7 +21,7 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.PropertySymbol.Parameters.Select( p => new Ref<IParameter>( p, this.Compilation.CompilationContext ) ).ToReadOnlyList() );
+            this.PropertySymbol.Parameters.Select( p => this.RefFactory.FromSymbol<IParameter>( p ) ).ToReadOnlyList() );
 
     public IIndexer? OverriddenIndexer
     {
@@ -63,17 +63,17 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
     [Memo]
-    private BoxedRef<IIndexer> BoxedRef => new BoxedRef<IIndexer>( this.ToValueTypedRef() );
+    private IRef<IIndexer> Ref => this.RefFactory.FromSymbol<IIndexer>( this.PropertySymbol );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IIndexer> IIndexer.ToRef() => this.BoxedRef;
+    IRef<IIndexer> IIndexer.ToRef() => this.Ref;
 
-    protected override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+    protected override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.Ref;
 
-    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
+    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.Ref;
 
-    protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    protected override IRef<IMember> ToMemberRef() => this.Ref;
 
-    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

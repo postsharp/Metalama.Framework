@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
@@ -18,8 +17,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 internal sealed class PromotedField : PropertyBuilder
 {
     internal IFieldImpl Field { get; }
-
-    public override Ref<IDeclaration> ToValueTypedRef() => this.Field.ToValueTypedRef();
 
     public override Writeability Writeability
         => this.Field.Writeability switch

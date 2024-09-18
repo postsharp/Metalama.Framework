@@ -32,5 +32,5 @@ namespace Metalama.Framework.DesignTime.Pipeline
         ImmutableArray<ReferenceValidatorInstance> ReferenceValidators,
         ImmutableArray<IAspectInstance> AspectInstances,
         IReadOnlyCollection<ITransformationBase> Transformations,
-        ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations );
+        ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance> Annotations );
 }

@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -20,8 +19,6 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod, IConstructor, ConstructorBuilder>
 {
     private readonly PartiallyBoundTemplateMethod _template;
-
-    private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public IntroduceConstructorAdvice(
         AdviceConstructorParameters<INamedType> parameters,
@@ -97,7 +94,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             if ( existingImplicitConstructor != null && this.Builder.Parameters.Count == 0 )
             {
                 // Redirect if the builder has no parameters and the existing constructor is implicit.
-                this.Builder.ReplacedImplicit = existingImplicitConstructor.ToValueTypedRef();
+                this.Builder.ReplacedImplicit = existingImplicitConstructor.ToRef();
             }
 
             // There is no existing declaration, we will introduce and override the introduced.

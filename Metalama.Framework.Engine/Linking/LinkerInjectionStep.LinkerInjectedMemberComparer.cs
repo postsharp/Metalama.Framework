@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using System;
@@ -181,13 +182,13 @@ internal sealed partial class LinkerInjectionStep
 
                     // Order replaced declarations within the same layer.
                     if ( x.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
-                         && replacedMemberRefX.Target == y.Transformation )
+                         && replacedMemberRefX.Unwrap() is IBuilderRef builderRefX && builderRefX.Builder == y.DeclarationBuilder )
                     {
                         return 1;
                     }
 
                     if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
-                         && replacedMemberRefY.Target == x.Transformation )
+                         && replacedMemberRefY.Unwrap() is IBuilderRef builderRefY && builderRefY.Builder == x.DeclarationBuilder )
                     {
                         return -1;
                     }

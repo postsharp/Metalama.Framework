@@ -1,13 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -16,16 +14,18 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 {
     private readonly bool _includeNestedTypes;
 
-    public CompilationTypeUpdatableCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringType, bool includeNestedTypes ) : base(
+    public CompilationTypeUpdatableCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringType, bool includeNestedTypes ) : base(
         compilation,
         declaringType )
     {
         this._includeNestedTypes = includeNestedTypes;
     }
 
-    protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
+    protected override IEqualityComparer<IRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
 
-    protected override ImmutableArray<MemberRef<INamedType>> GetMemberRefsOfName( string name )
+    protected override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
+
+    protected override IEnumerable<IRef<INamedType>> GetMemberRefsOfName( string name )
     {
         // TODO: Optimize, what about introduced types?
         if ( this._includeNestedTypes )
@@ -35,11 +35,15 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 
         return this.Compilation.PartialCompilation.Types
             .Where( t => t.Name == name && this.IsVisible( t ) )
-            .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
-            .ToImmutableArray();
+            .Select( s => this.RefFactory.FromSymbol<INamedType>( s ) );
     }
 
-    protected override ImmutableArray<MemberRef<INamedType>> GetMemberRefs()
+    private bool IsVisible( ISymbol symbol )
+    {
+        return this.Compilation.Project.ClassificationService?.GetExecutionScope( symbol ) != ExecutionScope.CompileTime;
+    }
+
+    protected override IEnumerable<IRef<INamedType>> GetMemberRefs()
     {
         // TODO: Optimize, what about introduced types?
         var topLevelTypes = this.Compilation.PartialCompilation.Types
@@ -49,8 +53,7 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
         {
             return
                 topLevelTypes
-                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
-                    .ToImmutableArray();
+                    .Select( s => this.RefFactory.FromSymbol<INamedType>( s ) );
         }
         else
         {
@@ -74,27 +77,14 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 #pragma warning disable CS0618 // Type or member is obsolete
             return
                 types
-                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
-                    .ToImmutableArray();
+                    .Select( s => this.RefFactory.FromSymbol<INamedType>( s ) );
 #pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 
-    public IEnumerable<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )
+    public IEnumerable<IRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )
     {
-        var comparer = (DeclarationEqualityComparer) this.Compilation.Comparers.GetTypeComparer( TypeComparison.Default );
-
-        // TODO: This should not use GetSymbol.
-        return
-            this.GetMemberRefs()
-                .Where( t => comparer.Is( t, typeDefinition, ConversionKind.TypeDefinition ) )
-                .Where(
-                    t =>
-                    {
-                        var symbol = t.GetSymbol( this.Compilation.RoslynCompilation );
-
-                        return symbol == null || this.IsSymbolIncluded( symbol );
-                    } )
-                .ToImmutableArray();
+        // This does not make sense, since a compilation only has type definitions.
+        throw new NotSupportedException();
     }
 }

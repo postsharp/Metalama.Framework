@@ -15,7 +15,7 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 {
     public FieldBuilder FieldBuilder { get; }
 
-    public BuiltField( CompilationModel compilation, FieldBuilder builder ) : base( compilation )
+    public BuiltField( FieldBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.FieldBuilder = builder;
     }
@@ -37,16 +37,16 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     public RefKind RefKind => this.FieldBuilder.RefKind;
 
     [Memo]
-    public IMethod GetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod );
+    public IMethod GetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod, this.GenericContext );
 
     [Memo]
-    public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod );
+    public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod, this.GenericContext );
 
-    IRef<IField> IField.ToRef() => this.FieldBuilder.BoxedRef;
+    IRef<IField> IField.ToRef() => this.FieldBuilder.Ref;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.FieldBuilder.BoxedRef;
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.FieldBuilder.Ref;
 
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.FieldBuilder.BoxedRef;
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.FieldBuilder.Ref;
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 

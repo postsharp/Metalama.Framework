@@ -47,13 +47,14 @@ internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvid
         this.AddSerializer( typeof(ImmutableHashSet<>), typeof(ImmutableHashSetSerializer<>) );
 
         // Our own types.
-        this.AddSerializer( typeof(Ref<>), typeof(RefSerializer<>) );
-        this.AddSerializer( typeof(BoxedRef<>), typeof(BoxedRefSerializer<>) );
+        this.AddSerializer( typeof(IRef<>), typeof(RefSerializer<>) );
         this.AddSerializer( typeof(SerializableDeclarationId), typeof(SerializableDeclarationIdSerializer) );
         this.AddSerializer( typeof(SerializableTypeId), typeof(SerializableTypeIdSerializer) );
         this.AddSerializer<AttributeRef, AttributeRefSerializer>();
         this.AddSerializer<TypedConstantRef, TypedConstantRefSerializer>();
         this.AddSerializer<AttributeSerializationData, AttributeSerializationDataSerializer>();
+
+        // TODO: Backward-compatible deserializers for references.
 
         this.MakeReadOnly();
     }

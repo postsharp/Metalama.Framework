@@ -16,10 +16,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
-    private Ref<IConstructor> _replacedImplicit;
+    private IRef<IConstructor>? _replacedImplicit;
     private ConstructorInitializerKind _initializerKind;
 
-    public Ref<IConstructor> ReplacedImplicit
+    public IRef<IConstructor>? ReplacedImplicit
     {
         get => this._replacedImplicit;
         set
@@ -47,14 +47,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         this.InitializerArguments = new List<(IExpression Expression, string? ParameterName)>();
     }
 
-    public override Ref<IDeclaration> ToValueTypedRef()
-
-        // Replacement of implicit constructor should use the implicit constructor as Ref.
-        => !this.ReplacedImplicit.IsDefault
-            ? this.ReplacedImplicit.As<IDeclaration>()
-            : base.ToValueTypedRef();
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 
     public void AddInitializerArgument( IExpression expression, string? parameterName )
     {
@@ -67,7 +60,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public override IMember? OverriddenMember => null;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public override bool IsExplicitInterfaceImplementation => false;
 
@@ -91,7 +84,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     IConstructor IConstructor.Definition => this;
 
-    public override IRef<IMethodBase> ToMethodBaseRef() => this.BoxedRef;
+    public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
@@ -111,9 +104,9 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
     [Memo]
-    public BoxedRef<IConstructor> BoxedRef => new BoxedRef<IConstructor>( this.ToValueTypedRef() );
+    public BuilderRef<IConstructor> Ref => new( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IConstructor> IConstructor.ToRef() => this.BoxedRef;
+    public new IRef<IConstructor> ToRef() => this.Ref;
 }

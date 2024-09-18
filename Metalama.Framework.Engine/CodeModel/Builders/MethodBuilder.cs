@@ -107,7 +107,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
             _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {this.DeclarationKind}." )
         };
 
-    public override IRef<IMethodBase> ToMethodBaseRef() => this.BoxedRef;
+    public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
@@ -180,16 +180,16 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
 
     [Memo]
-    public BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+    public BuilderRef<IMethod> Ref => new( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+    public new IRef<IMethod> ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

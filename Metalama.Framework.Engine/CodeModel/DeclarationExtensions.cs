@@ -62,7 +62,7 @@ public static class DeclarationExtensions
         => declaration.SelectManyRecursive(
             child => child switch
             {
-                ICompilation compilation => new[] { compilation.GlobalNamespace },
+                ICompilation compilation => [compilation.GlobalNamespace],
                 INamespace ns => EnumerableExtensions.Concat<IDeclaration>( ns.Namespaces, ns.Types ),
                 INamedType namedType => EnumerableExtensions.Concat<IDeclaration>(
                         namedType.Types,
@@ -84,25 +84,22 @@ public static class DeclarationExtensions
                 _ => Enumerable.Empty<IDeclaration>()
             } );
 
-    internal static Ref<ICompilationElement> ToValueTypedRef( this ISymbol symbol, CompilationContext compilationContext )
-        => Ref.FromSymbol( symbol, compilationContext );
+    [Obsolete]
+    internal static IRef<T> ToRef<T>( T declaration )
+        where T : class, IDeclaration
+        => (IRef<T>) declaration.ToRef();
 
-    internal static Ref<TCompilationElement> ToValueTypedRef<TCompilationElement>( this ISymbol symbol, CompilationContext compilationContext )
-        where TCompilationElement : class, ICompilationElement
-        => Ref.FromSymbol( symbol, compilationContext ).As<TCompilationElement>();
+    internal static IRef<ICompilationElement> ToRef( this ISymbol symbol, CompilationContext compilationContext )
+        => compilationContext.RefFactory.FromSymbol( symbol );
 
-    internal static Ref<TCompilationElement> ToValueTypedRef<TCompilationElement>( this TCompilationElement compilationElement )
+    internal static IRef<TCompilationElement> ToRef<TCompilationElement>( this ISymbol symbol, CompilationContext compilationContext )
         where TCompilationElement : class, ICompilationElement
-        => ((ICompilationElementImpl) compilationElement).ToValueTypedRef().As<TCompilationElement>();
+        => compilationContext.RefFactory.FromSymbol<TCompilationElement>( symbol );
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
         => declaration.GetSymbol() is { } symbol
             ? compilationContext.SymbolTranslator.Translate( symbol, declaration.GetCompilationModel().RoslynCompilation )
             : null;
-
-    internal static MemberRef<T> ToMemberRef<T>( this T member )
-        where T : class, INamedDeclaration
-        => new( member.ToValueTypedRef<IDeclaration>() );
 
     internal static Location? GetDiagnosticLocation( this IDeclaration declaration )
         => declaration switch
@@ -355,8 +352,7 @@ public static class DeclarationExtensions
         {
             { IsAbstract: true } => false,
             { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
-                syntaxReferences.All(
-                    sr => sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
+                syntaxReferences.All( sr => sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
             _ => symbol.IsCompilerGenerated()
         };
 

@@ -3,19 +3,18 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class ParameterList : DeclarationCollection<IParameter, Ref<IParameter>>, IParameterList
+    internal sealed class ParameterList : DeclarationCollection<IParameter, IRef<IParameter>>, IParameterList
     {
-        public ParameterList( IMethodBase declaringMethod, IReadOnlyList<Ref<IParameter>> sourceItems )
+        public ParameterList( IMethodBase declaringMethod, IReadOnlyList<IRef<IParameter>> sourceItems )
             : base( declaringMethod, sourceItems ) { }
 
-        public ParameterList( IIndexer declaringIndexer, IReadOnlyList<Ref<IParameter>> sourceItems )
+        public ParameterList( IIndexer declaringIndexer, IReadOnlyList<IRef<IParameter>> sourceItems )
             : base( declaringIndexer, sourceItems ) { }
 
         private ParameterList() { }

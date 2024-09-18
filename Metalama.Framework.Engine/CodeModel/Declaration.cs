@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 
@@ -34,17 +33,10 @@ namespace Metalama.Framework.Engine.CodeModel
         private IAttributeCollection AttributesImpl
             => new AttributeCollection(
                 this,
-                this.Compilation.GetAttributeCollection( this.ToValueTypedRef<IDeclaration>() ) );
+                this.Compilation.GetAttributeCollection( this.ToDeclarationRef() ) );
 
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
-
-        internal override Ref<IDeclaration> ToValueTypedRef()
-        {
-            this.OnUsingDeclaration();
-
-            return Ref.FromSymbol<IDeclaration>( this.Symbol, this.Compilation.CompilationContext );
-        }
 
         public override string ToString()
         {

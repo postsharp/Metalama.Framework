@@ -98,7 +98,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public INamespace ContainingNamespace { get; }
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -253,13 +253,15 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
         };
 
     [Memo]
-    public BoxedRef<INamedType> BoxedRef => new( this.ToValueTypedRef() );
+    public BuilderRef<INamedType> Ref => new( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+    public new IRef<INamedType> ToRef() => this.Ref;
 
-    IRef<IType> IType.ToRef() => this.BoxedRef;
+    IRef<IType> IType.ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
+
+    public GenericMap GenericMap => GenericMap.Create( this.TypeArguments, true );
 }

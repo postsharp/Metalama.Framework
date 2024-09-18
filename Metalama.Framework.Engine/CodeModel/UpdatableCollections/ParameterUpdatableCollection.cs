@@ -10,51 +10,51 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollection<IParameter>
 {
-    private readonly Ref<IHasParameters> _parent;
+    private readonly IRef<IHasParameters> _parent;
 
-    public ParameterUpdatableCollection( CompilationModel compilation, in Ref<IHasParameters> parent ) : base( compilation )
+    public ParameterUpdatableCollection( CompilationModel compilation, IRef<IHasParameters> parent ) : base( compilation )
     {
         this._parent = parent;
     }
 
-    protected override void PopulateAllItems( Action<Ref<IParameter>> action )
+    protected override void PopulateAllItems( Action<IRef<IParameter>> action )
     {
-        switch ( this._parent.Target )
+        switch ( this._parent.Unwrap() )
         {
-            case IMethodSymbol method:
+            case ISymbolRef { Symbol: IMethodSymbol method }:
                 foreach ( var p in method.Parameters )
                 {
-                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.CompilationContext ) );
+                    action( this.RefFactory.FromSymbol<IParameter>( p ) );
                 }
 
                 break;
 
-            case IMethodBaseBuilder builder:
-                foreach ( var p in builder.Parameters )
-                {
-                    action( Ref.FromBuilder<IParameter>( p ) );
-                }
-
-                break;
-
-            case IPropertySymbol { Parameters.IsEmpty: false } indexer:
+            case ISymbolRef { Symbol: IPropertySymbol { Parameters.IsEmpty: false } indexer }:
                 foreach ( var p in indexer.Parameters )
                 {
-                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.CompilationContext ) );
+                    action( this.RefFactory.FromSymbol<IParameter>( p ) );
                 }
 
                 break;
 
-            case IIndexerBuilder indexerBuilder:
+            case IBuilderRef { Builder: IMethodBaseBuilder builder }:
+                foreach ( var p in builder.Parameters )
+                {
+                    action( this.RefFactory.FromBuilder<IParameter>( p ) );
+                }
+
+                break;
+
+            case IBuilderRef { Builder: IIndexerBuilder indexerBuilder }:
                 foreach ( var p in indexerBuilder.Parameters )
                 {
-                    action( Ref.FromBuilder<IParameter>( p ) );
+                    action( this.RefFactory.FromBuilder<IParameter>( p ) );
                 }
 
                 break;
 
             default:
-                throw new AssertionFailedException( $"Unexpected parent type: '{this._parent.Target?.GetType()}'." );
+                throw new AssertionFailedException( $"Unexpected parent type: '{this._parent}'." );
         }
     }
 
@@ -64,16 +64,16 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 
         var lastParam =
             this.Count > 0
-                ? (Ref<IParameter>?) this[this.Count - 1]
+                ? (IRef<IParameter>?) this[this.Count - 1]
                 : null;
 
-        if ( lastParam is { Target: IParameterSymbol { IsParams: true } } )
+        if ( lastParam is ISymbolRef { Symbol: IParameterSymbol { IsParams: true } } )
         {
-            this.InsertItem( this.Count - 1, parameterBuilder.ToValueTypedRef<IParameter>() );
+            this.InsertItem( this.Count - 1, parameterBuilder.ToRef() );
         }
         else
         {
-            this.AddItem( parameterBuilder.ToValueTypedRef<IParameter>() );
+            this.AddItem( parameterBuilder.ToRef() );
         }
     }
 }

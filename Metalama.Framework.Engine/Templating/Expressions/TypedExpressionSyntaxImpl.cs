@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public IType? ExpressionType { get; }
 
         /// <summary>
-        /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
+        /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>IRefImpl</c> argument modifier with this expression.
         /// </summary>
         public bool IsReferenceable { get; }
 
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         {
             var factory = compilation.GetCompilationModel().Factory;
 
-            var type = this.ExpressionType != null ? factory.GetIType( this.ExpressionType ) : factory.GetSpecialType( SpecialType.Object );
+            var type = this.ExpressionType != null ? factory.TranslateType( this.ExpressionType ) : factory.GetSpecialType( SpecialType.Object );
 
             return new SyntaxUserExpression( this.Syntax, type );
         }
@@ -123,7 +123,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     }
                     else
                     {
-                        throw new InvalidOperationException( $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression. If you are attempting to use a run-time expression as IExpression in compile-time code, that is not supported." );
+                        throw new InvalidOperationException(
+                            $"Cannot convert an instance of type {value.GetType().Name} to a run-time expression. If you are attempting to use a run-time expression as IExpression in compile-time code, that is not supported." );
                     }
             }
         }

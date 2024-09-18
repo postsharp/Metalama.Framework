@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -16,19 +17,24 @@ namespace Metalama.Framework.Engine.CodeModel.References
 {
     internal sealed class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
-        private readonly Ref<IDeclaration> _containingDeclaration;
+        private readonly IRefImpl<IDeclaration> _containingDeclaration;
 
         private readonly object _originalTarget;
 
         public object? Target { get; private set; }
 
-        public Ref<INamedType> AttributeType { get; }
-
-        bool IRefImpl.IsDefault => false;
+        public IRef<INamedType> AttributeType { get; }
 
         public ISymbol GetClosestSymbol( CompilationContext compilation ) => this._containingDeclaration.GetClosestSymbol( compilation );
 
-        DeclarationRefTargetKind IRefImpl.TargetKind => DeclarationRefTargetKind.Default;
+        (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) IRefImpl.GetAttributeData( CompilationContext compilationContext )
+            => throw new NotSupportedException();
+
+        string IRefImpl.Name => throw new NotSupportedException();
+
+        public IRefStrategy Strategy { get; set; }
+
+        public IRefImpl Unwrap() => this;
 
         private (AttributeData? Attribute, ISymbol Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
@@ -47,23 +53,22 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return (attributeData, symbol);
         }
 
-        public AttributeRef( AttributeData attributeData, Ref<IDeclaration> containingDeclaration, CompilationContext compilationContext )
+        public AttributeRef( AttributeData attributeData, IRef<IDeclaration> containingDeclaration, CompilationContext compilationContext )
         {
             // Note that Roslyn can return an AttributeData that does not belong to the same compilation
             // as the parent symbol, probably because of some bug or optimisation.
 
             this.Target = this._originalTarget = attributeData;
 
-            this.AttributeType = Ref.FromSymbol<INamedType>(
+            this.AttributeType = compilationContext.RefFactory.FromSymbol<INamedType>(
                 attributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes )
-                    .TranslateIfNecessary( compilationContext ),
-                compilationContext );
+                    .TranslateIfNecessary( compilationContext ) );
 
-            this._containingDeclaration = containingDeclaration;
+            this._containingDeclaration = containingDeclaration.AsRefImpl();
         }
 
         public AttributeRef(
-            Ref<INamedType> attributeType,
+            IRef<INamedType> attributeType,
             AttributeSyntax attributeSyntax,
             SyntaxNode? declaration,
             DeclarationRefTargetKind targetKind,
@@ -71,35 +76,37 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
-            this._containingDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilationContext );
+            this._containingDeclaration = new SyntaxNodeRef<IDeclaration>( declaration, targetKind, compilationContext );
         }
 
-        public AttributeRef( in Ref<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
+        public AttributeRef( IRef<INamedType> attributeType, AttributeSyntax attributeSyntax, ISymbol declaration, CompilationContext compilationContext )
         {
             this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
-            this._containingDeclaration = Ref.FromSymbol<IDeclaration>( declaration, compilationContext );
+            this._containingDeclaration = compilationContext.RefFactory.FromSymbol<IDeclaration>( declaration ).AsRefImpl();
         }
 
         public AttributeRef( AttributeBuilder builder )
         {
-            this.AttributeType = builder.Constructor.DeclaringType.ToValueTypedRef();
+            this.AttributeType = builder.Constructor.DeclaringType.ToRef();
             this.Target = this._originalTarget = builder;
-            this._containingDeclaration = builder.ContainingDeclaration.ToValueTypedRef();
+            this._containingDeclaration = builder.ContainingDeclaration.ToRefImpl();
         }
 
         public AttributeRef( AttributeSerializationData serializationData )
         {
             this.Target = this._originalTarget = serializationData;
             this.AttributeType = serializationData.Type;
-            this._containingDeclaration = serializationData.ContainingDeclaration;
+            this._containingDeclaration = serializationData.ContainingDeclaration.AsRefImpl();
         }
 
         public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
-        public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default )
+        IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => throw new NotImplementedException();
+
+        public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default )
         {
-            if ( !this.TryGetTarget( (CompilationModel) compilation, out var attribute ) )
+            if ( !this.TryGetTarget( (CompilationModel) compilation, genericContext, out var attribute ) )
             {
                 throw new AssertionFailedException( "Attempt to resolve an invalid custom attribute." );
             }
@@ -107,9 +114,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return attribute;
         }
 
-        public IAttribute? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default )
+        ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
+            => this.GetTargetOrNull( compilation, options, genericContext );
+
+        ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
+            => this.GetTarget( compilation, options, genericContext );
+
+        public IAttribute? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default )
         {
-            if ( !this.TryGetTarget( (CompilationModel) compilation, out var attribute ) )
+            if ( !this.TryGetTarget( (CompilationModel) compilation, genericContext, out var attribute ) )
             {
                 return null;
             }
@@ -131,7 +144,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target.GetType()}'." )
             };
 
-        public bool TryGetTarget( CompilationModel compilation, [NotNullWhen( true )] out IAttribute? attribute )
+        public bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
         {
             switch ( this.Target )
             {
@@ -155,7 +168,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         attribute = new Attribute(
                             resolved.Attribute,
                             compilation,
-                            compilation.Factory.GetDeclaration( resolved.Parent, this._containingDeclaration.TargetKind ) );
+                            this._containingDeclaration.GetTarget( compilation, genericContext: genericContext ) );
 
                         return true;
                     }
@@ -174,7 +187,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     return true;
 
                 case AttributeBuilder builder:
-                    attribute = new BuiltAttribute( builder, compilation );
+                    attribute = new BuiltAttribute( builder, compilation, genericContext );
 
                     return true;
 
@@ -287,7 +300,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        ISymbol ISdkRef<IAttribute>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
+        ISymbol ISdkRef.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
@@ -344,11 +357,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return true;
         }
 
-        bool IEquatable<IRef<ICompilationElement>>.Equals( IRef<ICompilationElement>? other )
-            => other is AttributeRef otherAttributeRef && this.Equals( otherAttributeRef );
-
-        bool IRef<IAttribute>.Equals( IRef<ICompilationElement>? other, bool includeNullability )
-            => other is AttributeRef otherAttributeRef && this.Equals( otherAttributeRef );
+        bool IEquatable<IRef>.Equals( IRef? other ) => other is AttributeRef otherAttributeRef && this.Equals( otherAttributeRef );
 
         public override int GetHashCode()
         {

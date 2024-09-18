@@ -165,7 +165,7 @@ internal sealed class AspectDriver : IAspectDriver
             var serviceProvider = pipelineConfiguration.ServiceProvider;
 
             // Map the target declaration to the correct revision of the compilation model.
-            targetDeclaration = initialCompilationRevision.Factory.GetDeclaration( targetDeclaration );
+            targetDeclaration = initialCompilationRevision.Factory.Translate( targetDeclaration );
 
             if ( aspectInstance.Aspect is not IAspect<T> aspectOfT )
             {

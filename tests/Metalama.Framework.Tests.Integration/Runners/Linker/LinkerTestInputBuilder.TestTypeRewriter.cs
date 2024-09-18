@@ -437,17 +437,25 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 switch ( declarationKind )
                 {
                     case DeclarationKind.Method:
-                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).Target ).Returns( transformation );
+                        //A.CallTo( () => ((IRefImpl<IMethod>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
+                        A.CallTo(
+                                () => ((IRefImpl<IMethod>) transformation).GetTarget(
+                                    A<CompilationModel>.Ignored,
+                                    A<ReferenceResolutionOptions>.Ignored,
+                                    null ) )
                             .Returns( (IMethod) transformation );
 
                         break;
 
                     case DeclarationKind.Property:
-                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).Target ).Returns( transformation );
+                        // A.CallTo( () => ((IRefImpl<IProperty>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
+                        A.CallTo(
+                                () => ((IRefImpl<IProperty>) transformation).GetTarget(
+                                    A<CompilationModel>.Ignored,
+                                    A<ReferenceResolutionOptions>.Ignored,
+                                    null ) )
                             .Returns( (IProperty) transformation );
 
                         A.CallTo( () => ((IProperty) transformation).GetMethod ).Returns( A.Fake<IMethodImpl>() );
@@ -456,9 +464,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         break;
 
                     case DeclarationKind.Event:
-                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).Target ).Returns( transformation );
+                        //A.CallTo( () => ((IRefImpl<IEvent>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
+                        A.CallTo(
+                                () => ((IRefImpl<IEvent>) transformation).GetTarget(
+                                    A<CompilationModel>.Ignored,
+                                    A<ReferenceResolutionOptions>.Ignored,
+                                    null ) )
                             .Returns( (IEvent) transformation );
 
                         A.CallTo( () => ((IEvent) transformation).AddMethod ).Returns( A.Fake<IMethodImpl>() );
@@ -467,9 +479,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         break;
 
                     case DeclarationKind.Field:
-                        A.CallTo( () => ((IRefImpl<IField>) transformation).Target ).Returns( transformation );
+                        //A.CallTo( () => ((IRefImpl<IField>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IField>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
+                        A.CallTo(
+                                () => ((IRefImpl<IField>) transformation).GetTarget(
+                                    A<CompilationModel>.Ignored,
+                                    A<ReferenceResolutionOptions>.Ignored,
+                                    null ) )
                             .Returns( (IField) transformation );
 
                         break;

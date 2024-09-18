@@ -13,7 +13,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 {
     private readonly BaseParameterBuilder _parameterBuilder;
 
-    public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation ) : base( compilation )
+    public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._parameterBuilder = builder;
     }
@@ -23,7 +23,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     public RefKind RefKind => this._parameterBuilder.RefKind;
 
     [Memo]
-    public IType Type => this.Compilation.Factory.GetIType( this._parameterBuilder.Type );
+    public IType Type => this.Compilation.Factory.TranslateType( this._parameterBuilder.Type );
 
     public string Name => this._parameterBuilder.Name;
 
@@ -35,7 +35,10 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     [Memo]
     public IHasParameters DeclaringMember
-        => this.Compilation.Factory.GetDeclaration( this._parameterBuilder.DeclaringMember, ReferenceResolutionOptions.CanBeMissing );
+        => this.Compilation.Factory.TranslateDeclaration(
+            this._parameterBuilder.DeclaringMember,
+            ReferenceResolutionOptions.CanBeMissing,
+            genericContext: this.GenericContext );
 
     public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
 

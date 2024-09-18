@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
@@ -23,7 +22,7 @@ public sealed partial class HierarchicalOptionsManager
         private readonly IHierarchicalOptions _defaultOptions;
         private readonly IHierarchicalOptions _emptyOptions;
         private readonly HierarchicalOptionsManager _parent;
-        private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
+        private readonly ConcurrentDictionary<IRef<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
         private readonly Type _type;
         private readonly string _typeName;
@@ -243,7 +242,7 @@ public sealed partial class HierarchicalOptionsManager
         private DeclarationNode GetOrAddDeclarationNode( IDeclaration declaration )
         {
             return this._optionsByDeclaration.GetOrAdd(
-                declaration.ToValueTypedRef(),
+                declaration.ToRef(),
                 static ( _, ctx ) =>
                 {
                     var node = new DeclarationNode();
@@ -291,7 +290,7 @@ public sealed partial class HierarchicalOptionsManager
             bool createNodeIfEmpty = false )
         {
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToValueTypedRef(), out var node ) )
+            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToRef(), out var node ) )
             {
                 if ( !declaration.BelongsToCurrentProject
                      && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out _ ) == true )
@@ -326,7 +325,7 @@ public sealed partial class HierarchicalOptionsManager
             // options may be project-dependency.
             var compilationOptions = this._defaultOptions;
 
-            if ( this._optionsByDeclaration.TryGetValue( compilation.ToValueTypedRef<IDeclaration>(), out var compilationNode )
+            if ( this._optionsByDeclaration.TryGetValue( compilation.ToRef(), out var compilationNode )
                  && compilationNode.DirectOptions != null )
             {
                 compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation )

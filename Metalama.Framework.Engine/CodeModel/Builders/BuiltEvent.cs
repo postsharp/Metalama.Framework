@@ -14,7 +14,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 {
     public EventBuilder EventBuilder { get; }
 
-    public BuiltEvent( CompilationModel compilation, EventBuilder builder ) : base( compilation )
+    public BuiltEvent( CompilationModel compilation, EventBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.EventBuilder = builder;
     }
@@ -28,31 +28,32 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     protected override MemberBuilder MemberBuilder => this.EventBuilder;
 
     [Memo]
-    public INamedType Type => this.Compilation.Factory.GetDeclaration( this.EventBuilder.Type );
+    public INamedType Type => this.Compilation.Factory.TranslateDeclaration( this.EventBuilder.Type );
 
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
     [Memo]
-    public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod );
+    public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod, this.GenericContext );
 
     [Memo]
-    public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod );
+    public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod, this.GenericContext );
 
     public IMethod? RaiseMethod => null;
 
     [Memo]
-    public IEvent? OverriddenEvent => this.Compilation.Factory.GetDeclaration( this.EventBuilder.OverriddenEvent );
+    public IEvent? OverriddenEvent => this.Compilation.Factory.TranslateDeclaration( this.EventBuilder.OverriddenEvent );
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-        => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray(
+            i => this.Compilation.Factory.TranslateDeclaration( i, genericContext: this.GenericContext ) );
 
     IEvent IEvent.Definition => this;
 
     public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-    IRef<IEvent> IEvent.ToRef() => this.EventBuilder.BoxedRef;
+    IRef<IEvent> IEvent.ToRef() => this.EventBuilder.Ref;
 
     public IEventInvoker With( InvokerOptions options ) => this.EventBuilder.With( options );
 

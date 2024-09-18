@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.TargetDeclaration;
 
-        public Ref<IDeclaration> TargetDeclaration { get; }
+        public IRef<IDeclaration> TargetDeclaration { get; }
 
         public bool IsSkipped { get; private set; }
 
@@ -72,7 +71,7 @@ namespace Metalama.Framework.Engine.Aspects
             ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = targetDeclaration.ToValueTypedRef();
+            this.TargetDeclaration = targetDeclaration.ToRef();
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
             this.TargetDeclarationDepth = targetDeclaration.Depth;
@@ -102,7 +101,7 @@ namespace Metalama.Framework.Engine.Aspects
             ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = targetDeclaration.ToValueTypedRef();
+            this.TargetDeclaration = targetDeclaration.ToRef();
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
             this.TargetDeclarationDepth = targetDeclaration.GetCompilationModel().GetDepth( targetDeclaration );

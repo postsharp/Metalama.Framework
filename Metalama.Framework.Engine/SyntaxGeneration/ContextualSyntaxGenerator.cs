@@ -41,7 +41,7 @@ internal sealed partial class ContextualSyntaxGenerator
     }
 
     private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
-    private readonly ConcurrentDictionary<Ref<IType>, TypeSyntax> _typeSyntaxCache;
+    private readonly ConcurrentDictionary<IRef<IType>, TypeSyntax> _typeSyntaxCache;
 
     public bool IsNullAware { get; }
 
@@ -51,7 +51,7 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         this.SyntaxGenerationContext = context;
         this._syntaxGeneratorForIType = new SyntaxGeneratorForIType( context.Options );
-        this._typeSyntaxCache = new ConcurrentDictionary<Ref<IType>, TypeSyntax>( RefEqualityComparer<IType>.IncludeNullability );
+        this._typeSyntaxCache = new ConcurrentDictionary<IRef<IType>, TypeSyntax>( RefEqualityComparer<IType>.Default );
         this.IsNullAware = nullAware;
     }
 
@@ -465,7 +465,7 @@ internal sealed partial class ContextualSyntaxGenerator
         {
             return this._typeSyntaxCache.AssertNotNull()
                 .GetOrAdd(
-                    type.ToValueTypedRef(),
+                    type.ToRef(),
                     static ( _, x ) => x.This.TypeCore( x.Type ),
                     (This: this, Type: type) );
         }
@@ -480,7 +480,7 @@ internal sealed partial class ContextualSyntaxGenerator
         if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
             return this._typeSyntaxCache.GetOrAdd(
-                symbol.ToValueTypedRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
+                symbol.ToRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
                 static ( _, x ) => x.This.TypeCore( x.Type ),
                 (This: this, Type: symbol) );
         }
@@ -565,7 +565,7 @@ internal sealed partial class ContextualSyntaxGenerator
     }
 
     public SyntaxList<AttributeListSyntax> AttributesForDeclaration(
-        in Ref<IDeclaration> declaration,
+        IRef<IDeclaration> declaration,
         CompilationModel compilation,
         SyntaxKind attributeTargetKind = SyntaxKind.None )
     {
@@ -731,7 +731,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 break;
         }
 
-        syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToValueTypedRef<IDeclaration>(), compilation ) );
+        syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToRef(), compilation ) );
 
         return syntax;
     }
@@ -756,7 +756,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public ParameterSyntax Parameter( IParameter parameter, CompilationModel compilation, bool removeDefaultValue )
         => SyntaxFactory.Parameter(
-            this.AttributesForDeclaration( parameter.ToValueTypedRef<IDeclaration>(), compilation ),
+            this.AttributesForDeclaration( parameter.ToRef(), compilation ),
             parameter.GetSyntaxModifierList(),
             this.Type( parameter.Type ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
             Identifier( parameter.Name ),

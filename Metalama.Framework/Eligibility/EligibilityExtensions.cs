@@ -196,7 +196,7 @@ public static partial class EligibilityExtensions
         => requirement( eligibilityBuilder );
 
     /// <summary>
-    /// Requires the target method not to have <c>ref</c> or <c>out</c> parameters.
+    /// Requires the target method not to have <c>IRefImpl</c> or <c>out</c> parameters.
     /// </summary>
     public static void MustNotHaveRefOrOutParameter( this IEligibilityBuilder<IMethod> eligibilityBuilder )
         => eligibilityBuilder.AddRule(
@@ -250,7 +250,7 @@ public static partial class EligibilityExtensions
             b => b.Convert().To<IPropertyOrIndexer>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
 
     /// <summary>
-    /// Requires the target parameter to be writable, i.e. <c>ref</c> or <c>out</c>.
+    /// Requires the target parameter to be writable, i.e. <c>IRefImpl</c> or <c>out</c>.
     /// </summary>
     public static void MustBeWritable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
@@ -282,7 +282,7 @@ public static partial class EligibilityExtensions
             member => $"{member} must not be the return value parameter" );
 
     /// <summary>
-    /// Requires the parameter to be <c>ref</c>.
+    /// Requires the parameter to be <c>IRefImpl</c>.
     /// </summary>
     public static void MustBeRef( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
@@ -306,7 +306,7 @@ public static partial class EligibilityExtensions
             m => $"{m} must be explicitly declared" );
 
     /// <summary>
-    /// Forbids the field, property or indexer from being <c>ref</c> or <c>ref readonly</c>.
+    /// Forbids the field, property or indexer from being <c>IRefImpl</c> or <c>ref readonly</c>.
     /// </summary>
     public static void MustNotBeRef( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy( f => f.RefKind == RefKind.None, f => $"{f} must not be 'ref'" );
@@ -318,7 +318,7 @@ public static partial class EligibilityExtensions
         => eligibilityBuilder.MustSatisfy( f => !f.IsRef, f => $"{f} must not be a 'ref struct'" );
 
     /// <summary>
-    /// Forbids the method from returning a <c>ref</c>.
+    /// Forbids the method from returning a <c>IRefImpl</c>.
     /// </summary>
     public static void MustNotBeRef( this IEligibilityBuilder<IMethod> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy( f => f.ReturnParameter.RefKind == RefKind.None, f => $"{f} must not be a 'ref' method" );

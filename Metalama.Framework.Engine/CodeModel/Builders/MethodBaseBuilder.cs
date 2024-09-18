@@ -52,7 +52,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
 
     public abstract System.Reflection.MethodBase ToMethodBase();
 
-    IRef<IMethodBase> IMethodBase.ToRef() => this.ToMethodBaseRef();
+    public new IRef<IMethodBase> ToRef() => this.ToMethodBaseRef();
 
     protected MethodBaseBuilder(
         Advice advice,

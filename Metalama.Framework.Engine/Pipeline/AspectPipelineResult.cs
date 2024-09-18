@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
@@ -51,7 +50,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<IAspectInstance> ExternallyInheritableAspects { get; }
 
-        public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; }
+        public ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance> Annotations { get; }
 
         public bool HasDeclarationValidator { get; }
 
@@ -106,7 +105,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AdditionalSyntaxTrees = ImmutableArray<IntroducedSyntaxTree>.Empty;
             this.AdditionalCompilationOutputFiles = ImmutableArray<AdditionalCompilationOutputFile>.Empty;
             this.Transformations = ImmutableArray<ITransformationBase>.Empty;
-            this.Annotations = ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            this.Annotations = ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty;
         }
 
         internal AspectPipelineResult(
@@ -119,7 +118,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableUserDiagnosticList? diagnostics = null,
             PipelineContributorSources? sources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
-            ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>? annotations = default,
+            ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>? annotations = default,
             bool hasDeclarationValidator = false,
             ImmutableArray<ReferenceValidatorInstance> referenceValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
@@ -141,7 +140,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.Configuration = configuration;
             this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
-            this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            this.Annotations = annotations ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty;
             this.HasDeclarationValidator = hasDeclarationValidator;
 
             this.ReferenceValidators =

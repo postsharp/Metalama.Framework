@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var transformationsByTarget =
                 transformations
                     .Where(
-                        t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation { ReplacedMember.IsDefault: false }
+                        t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation { }
                                                                                    && t.TargetDeclaration is INamedType or IConstructor or INamespace )
                     .GroupBy(
                         t =>
@@ -62,13 +62,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                 IConstructor constructor => constructor.DeclaringType,
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
                             } )
-                    .ToDictionary( g => g.Key.ToValueTypedRef(), g => g.AsEnumerable() );
+                    .ToDictionary( g => g.Key.ToRef(), g => g.AsEnumerable() );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
             await taskScheduler.RunConcurrentlyAsync( transformationsByTarget, ProcessTransformationsOnTypeOrNamespace, cancellationToken );
 
-            void ProcessTransformationsOnTypeOrNamespace( KeyValuePair<Ref<INamespaceOrNamedType>, IEnumerable<ITransformation>> transformationGroup )
+            void ProcessTransformationsOnTypeOrNamespace( KeyValuePair<IRef<INamespaceOrNamedType>, IEnumerable<ITransformation>> transformationGroup )
             {
                 var target = transformationGroup.Key.GetTarget( finalCompilationModel );
 
@@ -101,11 +101,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                          {
                              DeclarationBuilder: INamedType namedTypeBuilder
                          } introduceDeclarationTransformation
-                         && !transformationsByTarget.ContainsKey(
-                             introduceDeclarationTransformation.DeclarationBuilder.ToValueTypedRef().As<INamespaceOrNamedType>() ) )
+                         && !transformationsByTarget.ContainsKey( introduceDeclarationTransformation.DeclarationBuilder.ToRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
-                        ProcessTransformationsOnType( namedTypeBuilder.ToValueTypedRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
+                        ProcessTransformationsOnType( namedTypeBuilder.ToRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
                     }
                 }
             }
@@ -291,7 +290,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext )
         {
-            var finalConstructor = constructorBuilder.ToValueTypedRef().As<IConstructor>().GetTarget( finalCompilationModel );
+            var finalConstructor = constructorBuilder.ToRef().GetTarget( finalCompilationModel );
 
             foreach ( var member in injectedMembers )
             {
@@ -358,9 +357,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Additionally, add all introduced constructors to the list.
             foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
             {
-                var constructorBuilder = introducedConstructor.ToValueTypedRef().Target as ConstructorBuilder;
+                var constructorBuilder = (introducedConstructor.ToRef().Unwrap() as IBuilderRef)?.Builder as ConstructorBuilder;
 
-                if ( constructorBuilder is null or { ReplacedImplicit.IsDefault: false } )
+                if ( constructorBuilder is null || constructorBuilder.ReplacedImplicit != null )
                 {
                     // Skip introduced constructors that are replacements.
                     continue;

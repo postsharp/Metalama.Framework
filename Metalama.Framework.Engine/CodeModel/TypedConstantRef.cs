@@ -17,9 +17,9 @@ internal readonly struct TypedConstantRef
     public object? RawValue { get; }
 
     // This property may be null if the type can be assumed from the value.
-    public Ref<IType> Type { get; }
+    public IRef<IType>? Type { get; }
 
-    public TypedConstantRef( object? value, Ref<IType> type )
+    public TypedConstantRef( object? value, IRef<IType>? type )
     {
         if ( value is Array )
         {
@@ -43,7 +43,7 @@ internal readonly struct TypedConstantRef
         {
             null => TypedConstant.Default( type! ),
             ImmutableArray<TypedConstantRef> array => TypedConstant.Create( array.SelectAsImmutableArray( x => x.Resolve( compilation ) ), type! ),
-            Ref<IType> valueAsType => TypedConstant.Create( valueAsType.GetTarget( compilation ), type! ),
+            IRefImpl<IType> valueAsType => TypedConstant.Create( valueAsType.GetTarget( compilation ), type! ),
             _ => TypedConstant.Create( this.RawValue, type! )
         };
     }

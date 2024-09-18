@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberOrNamedTypeImpl
 {
-    protected BuiltMemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
+    protected BuiltMemberOrNamedType( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
     protected abstract MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder { get; }
 
@@ -25,7 +25,7 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
     public INamedType? DeclaringType
-        => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
+        => this.Compilation.Factory.TranslateDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 

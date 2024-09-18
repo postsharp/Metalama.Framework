@@ -60,7 +60,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        // Calling OnUsingDeclaration creates an infinite recursion.
+        public override IGenericContext GenericContext
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.GenericContext;
+            }
+        }
+
         public override ISymbol Symbol => this.Implementation.Symbol;
 
         public override MemberInfo ToMemberInfo()
@@ -236,13 +245,13 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private BoxedRef<INamedType> BoxedRef => new( this.ToValueTypedRef() );
+        private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
 
-        IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+        IRef<INamedType> INamedType.ToRef() => this.Ref;
 
-        IRef<IType> IType.ToRef() => this.BoxedRef;
+        IRef<IType> IType.ToRef() => this.Ref;
 
-        IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+        IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
         INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -532,7 +541,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var symbol = ((INamedTypeSymbol) this.TypeSymbol.OriginalDefinition).Construct( typeArgumentSymbols );
 
-            return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
+            return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
         }
 
         public override IDeclaration ContainingDeclaration => this.Implementation.ContainingDeclaration;
@@ -566,6 +575,16 @@ namespace Metalama.Framework.Engine.CodeModel
             this.OnUsingDeclaration();
 
             return this.Implementation.GetHashCode();
+        }
+
+        public GenericMap GenericMap
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.GenericMap;
+            }
         }
     }
 }

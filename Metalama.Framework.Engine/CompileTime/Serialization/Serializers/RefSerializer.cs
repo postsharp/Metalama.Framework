@@ -6,18 +6,10 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 
-internal sealed class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
+internal sealed class RefSerializer<T> : ReferenceTypeSerializer<IRef>
     where T : class, ICompilationElement
 {
-    public override void SerializeObject( Ref<T> obj, IArgumentsWriter constructorArguments )
-    {
-        if ( !obj.IsDefault )
-        {
-            constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
-        }
-    }
-
-    public override Ref<T> DeserializeObject( IArgumentsReader constructorArguments )
+    public override IRef CreateInstance( IArgumentsReader constructorArguments )
     {
         var id = constructorArguments.GetValue<string>( "id" );
 
@@ -26,6 +18,13 @@ internal sealed class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
             return default;
         }
 
-        return Ref.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
+        return ((ISerializationContext) constructorArguments).CompilationContext.RefFactory.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
     }
+
+    public override void SerializeObject( IRef obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
+    {
+        constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
+    }
+
+    public override void DeserializeFields( IRef obj, IArgumentsReader initializationArguments ) { }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -20,6 +21,12 @@ namespace Metalama.Framework.Engine.CodeModel
         // we want the lifetime and scope of this dictionary to be project-scoped.
         // Key is SerializableTypeId for most types. Only type parameters can't be represented using just that, so they use SymbolId.
         private readonly ConcurrentDictionary<string, CompileTimeType> _instances = new( StringComparer.Ordinal );
+        private readonly CompilationContext _compilationContext;
+
+        public CompileTimeTypeFactory( CompilationContext compilationContext )
+        {
+            this._compilationContext = compilationContext;
+        }
 
         public CompileTimeType Get( ITypeSymbol symbol )
             => symbol switch
@@ -45,18 +52,18 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             return this._instances.GetOrAdd(
                 id,
-                static ( key, s ) => key.StartsWith( "typeof(", StringComparison.Ordinal )
-                    ? CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), s )
-                    : CompileTimeType.CreateFromSymbolId( new SymbolId( key ), s ),
-                symbolForMetadata );
+                static ( key, x ) => key.StartsWith( "typeof(", StringComparison.Ordinal )
+                    ? CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), x.symbolForMetadata, x.me._compilationContext )
+                    : CompileTimeType.CreateFromSymbolId( new SymbolId( key ), x.symbolForMetadata, x.me._compilationContext ),
+                (me: this, symbolForMetadata) );
         }
 
         public CompileTimeType Get( SerializableTypeId declarationId, CompileTimeTypeMetadata metadata )
         {
             return this._instances.GetOrAdd(
                 declarationId.ToString(),
-                static ( id, m ) => CompileTimeType.CreateFromTypeId( new SerializableTypeId( id ), m ),
-                metadata );
+                static ( id, x ) => CompileTimeType.CreateFromTypeId( new SerializableTypeId( id ), x.metadata, x.me._compilationContext ),
+                (me: this, metadata) );
         }
     }
 }

@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
 /// 
 /// </summary>
-internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
+internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 {
     private readonly AttributeBuilderCollection _attributes = new();
 
@@ -59,6 +60,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
     bool IDeclaration.BelongsToCurrentProject => true;
 
     ImmutableArray<SourceReference> IDeclaration.Sources => ImmutableArray<SourceReference>.Empty;
+
+    IGenericContext IDeclaration.GenericContext => NullGenericContext.Instance;
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -101,15 +104,11 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public virtual void Freeze() => this.IsFrozen = true;
 
-    public virtual Ref<IDeclaration> ToValueTypedRef() => Ref.FromBuilder( this );
-
-    public abstract IRef<IDeclaration> ToIRef();
+    public abstract IRef<IDeclaration> ToDeclarationRef();
 
     public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
-    IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
-
-    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
+    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 
@@ -131,7 +130,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public TExtension GetMetric<TExtension>()
         where TExtension : IMetric
-        => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+        => this.Compilation.MetricManager.GetMetric<TExtension>( this );
 
     protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
 
@@ -140,7 +139,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         declaration ??= this;
 
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-            declaration.ToValueTypedRef(),
+            declaration.ToRef(),
             context.Compilation,
             this.AttributeTargetSyntaxKind );
 
@@ -148,7 +147,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         {
             attributes = attributes.AddRange(
                 context.SyntaxGenerator.AttributesForDeclaration(
-                    method.ReturnParameter.ToValueTypedRef<IDeclaration>(),
+                    method.ReturnParameter.ToRef(),
                     context.Compilation,
                     SyntaxKind.ReturnKeyword ) );
 
@@ -156,7 +155,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
             {
                 attributes = attributes.AddRange(
                     context.SyntaxGenerator.AttributesForDeclaration(
-                        method.Parameters[0].ToValueTypedRef<IDeclaration>(),
+                        method.Parameters[0].ToRef(),
                         context.Compilation,
                         SyntaxKind.ParamKeyword ) );
             }
@@ -170,7 +169,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
     }
 
     // TODO: This is temporary overload (see the callsite for reason).
-    public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, Ref<IDeclaration> declarationRef )
+    public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, IRef<IDeclaration> declarationRef )
     {
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
             declarationRef,
@@ -181,4 +180,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
     }
 
     public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
+
+    [Memo]
+    protected RefFactory RefFactory => this.GetCompilationContext().RefFactory;
 }

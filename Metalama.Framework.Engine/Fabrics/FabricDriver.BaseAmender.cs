@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
@@ -28,7 +27,7 @@ internal abstract partial class FabricDriver
         // The Target property is protected (and not exposed to the API) because
         private readonly FabricInstance _fabricInstance;
 
-        private Ref<T> TargetDeclaration { get; }
+        private IRef<T> TargetDeclaration { get; }
 
         private readonly FabricManager _fabricManager;
         private readonly IProject _project;
@@ -37,7 +36,7 @@ internal abstract partial class FabricDriver
             IProject project,
             FabricManager fabricManager,
             FabricInstance fabricInstance,
-            Ref<T> targetDeclaration ) : base(
+            IRef<T> targetDeclaration ) : base(
             fabricManager.ServiceProvider,
             targetDeclaration,
             CompilationModelVersion.Final,

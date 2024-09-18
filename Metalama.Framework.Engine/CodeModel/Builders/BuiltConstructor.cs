@@ -12,7 +12,9 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 {
     private readonly ConstructorBuilder _constructorBuilder;
 
-    public BuiltConstructor( CompilationModel compilation, ConstructorBuilder constructorBuilder ) : base( compilation )
+    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation, IGenericContext genericContext ) : base(
+        compilation,
+        genericContext )
     {
         this._constructorBuilder = constructorBuilder;
     }
@@ -29,7 +31,7 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
-    IRef<IConstructor> IConstructor.ToRef() => this._constructorBuilder.BoxedRef;
+    IRef<IConstructor> IConstructor.ToRef() => this._constructorBuilder.Ref;
 
     public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 

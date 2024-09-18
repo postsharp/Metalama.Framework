@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,15 +17,15 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
 {
-    private readonly RefEqualityComparer<IDeclaration> _innerComparer;
     private readonly Compilation _compilation;
     private readonly Conversions _conversions;
+    private readonly StructuralDeclarationComparer _structuralDeclarationComparer;
 
     public DeclarationEqualityComparer( Compilation compilation, bool includeNullability )
     {
-        this._innerComparer = includeNullability ? RefEqualityComparer<IDeclaration>.IncludeNullability : RefEqualityComparer<IDeclaration>.Default;
         this._compilation = compilation;
         this._conversions = new Conversions( this );
+        this._structuralDeclarationComparer = includeNullability ? StructuralDeclarationComparer.IncludeNullability : StructuralDeclarationComparer.Default;
     }
 
     public bool Equals( IDeclaration? x, IDeclaration? y )
@@ -48,7 +49,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
             return ReferenceEquals( xAttribute, yAttribute );
         }
 
-        return this._innerComparer.Equals( x.ToValueTypedRef(), y.ToValueTypedRef() );
+        return x.ToRef().Equals( y.ToRef() );
     }
 
     public int GetHashCode( IDeclaration obj )
@@ -58,18 +59,17 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
             return RuntimeHelpers.GetHashCode( attribute );
         }
 
-        return this._innerComparer.GetHashCode( obj.ToValueTypedRef() );
+        return obj.ToRef().GetHashCode();
     }
 
-    public bool Equals( IType? x, IType? y )
-        => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralDeclarationComparer.Equals( x, y ));
+    public bool Equals( IType? x, IType? y ) => (x == null && y == null) || (x != null && y != null && this._structuralDeclarationComparer.Equals( x, y ));
 
     public bool Equals( INamedType? x, INamedType? y )
-        => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralDeclarationComparer.Equals( x, y ));
+        => (x == null && y == null) || (x != null && y != null && this._structuralDeclarationComparer.Equals( x, y ));
 
-    public int GetHashCode( IType obj ) => this._innerComparer.StructuralDeclarationComparer.GetHashCode( obj );
+    public int GetHashCode( IType obj ) => this._structuralDeclarationComparer.GetHashCode( obj );
 
-    public int GetHashCode( INamedType obj ) => this._innerComparer.StructuralDeclarationComparer.GetHashCode( obj );
+    public int GetHashCode( INamedType obj ) => this._structuralDeclarationComparer.GetHashCode( obj );
 
     public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
 
@@ -123,7 +123,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
         return this._conversions.HasConversion( left, right, kind );
     }
 
-    public bool Is( MemberRef<INamedType> left, IType right, ConversionKind kind ) => this.Is( left.GetTarget( right.Compilation ), right, kind );
+    public bool Is( IRef<IType> left, IType right, ConversionKind kind ) => ((IRefImpl) left).Strategy.Is( left, right.ToRef(), kind );
 
     public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
 

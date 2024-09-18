@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -9,12 +10,24 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationCollection<T>, ISourceMemberCollection<T>
     where T : class, INamedDeclaration
 {
-    protected UpdatableMemberCollection( CompilationModel compilation, in Ref<INamespaceOrNamedType> declaringType ) : base( compilation )
+    protected UpdatableMemberCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringType ) : base( compilation )
     {
         this.DeclaringTypeOrNamespace = declaringType;
     }
 
-    protected Ref<INamespaceOrNamedType> DeclaringTypeOrNamespace { get; }
+    protected IRef<INamespaceOrNamedType> DeclaringTypeOrNamespace { get; }
 
-    public abstract ImmutableArray<MemberRef<T>> OfName( string name );
+    protected abstract DeclarationKind DeclarationKind { get; }
+
+    public abstract ImmutableArray<IRef<T>> OfName( string name );
+
+    protected virtual IEnumerable<IRef<T>> GetMemberRefsOfName( string name )
+        => ((IRefImpl) this.DeclaringTypeOrNamespace).Strategy.GetMembersOfName<T>(
+            this.DeclaringTypeOrNamespace,
+            name,
+            this.DeclarationKind,
+            this.Compilation );
+
+    protected virtual IEnumerable<IRef<T>> GetMemberRefs()
+        => ((IRefImpl) this.DeclaringTypeOrNamespace).Strategy.GetMembers<T>( this.DeclaringTypeOrNamespace, this.DeclarationKind, this.Compilation );
 }

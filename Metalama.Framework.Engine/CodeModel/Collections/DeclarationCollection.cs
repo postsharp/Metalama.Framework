@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
 using System.Collections;
@@ -13,8 +12,10 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal abstract class DeclarationCollection<TDeclaration, TRef> : IReadOnlyCollection<TDeclaration>
         where TDeclaration : class, IDeclaration
-        where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
+        where TRef : class, IRef<TDeclaration>
     {
+        private readonly IGenericContext _genericContext;
+
         internal IDeclaration? ContainingDeclaration { get; }
 
         protected IReadOnlyList<TRef> Source { get; }
@@ -28,6 +29,8 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             {
                 throw new ArgumentOutOfRangeException( nameof(containingDeclaration) );
             }
+
+            this._genericContext = containingDeclaration.GenericContext;
 #endif
 
             this.Source = source;
@@ -70,7 +73,17 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         // We allow resolving references to missing declarations because the collection may be a child collection of a missing declaration,
         // for instance the parameters of a method that has been introduced into the current compilation but is not included in the current compilation.
-        protected TDeclaration GetItem( in TRef reference ) => reference.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
+        protected TDeclaration GetItem( in TRef reference )
+        {
+            var definition = reference.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
+
+            if ( !this._genericContext.IsEmptyOrIdentity && !ReferenceEquals( definition.GetDefinition(), definition ) )
+            {
+                // We must apply the mapping.
+            }
+
+            return definition;
+        }
 
         protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
 

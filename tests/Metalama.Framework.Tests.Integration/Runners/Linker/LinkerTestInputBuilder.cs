@@ -271,7 +271,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         {
                             // This is replaced source element.
                             A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMember>( replacedMemberSymbol, inputCompilation.GetCompilationContext() ) );
+                                .Returns( initialCompilationModel.CompilationContext.RefFactory.FromSymbol<IMember>( replacedMemberSymbol ) );
                         }
                         else
                         {
@@ -294,7 +294,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             A.CallTo( () => ((ICompilationElementImpl) replacedTransformation).Compilation ).Returns( initialCompilationModel );
 
                             A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMember>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
+                                .Returns(
+                                    initialCompilationModel.CompilationContext.RefFactory.FromBuilder<IMember>(
+                                        (IMemberOrNamedTypeBuilder) replacedTransformation ) );
                         }
                     }
 
@@ -460,8 +462,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         {
             A.CallTo( () => observableTransformation.TargetDeclaration ).Returns( containingDeclaration );
 
-            A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToValueTypedRef() )
-                .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
+            A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
+                .Returns( containingDeclaration.GetCompilationContext().RefFactory.FromBuilder( (IDeclarationBuilder) observableTransformation ) );
 
             A.CallTo( () => ((IInjectMemberTransformation) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );

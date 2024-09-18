@@ -18,8 +18,8 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         private sealed class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
-            private readonly ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef>.Builder _builder =
-                ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef>.CreateBuilder();
+            private readonly ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.Builder _builder =
+                ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.CreateBuilder();
 
             private readonly CompilationContext _compilationContext;
 
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return;
                 }
 
-                var attributeType = Ref.FromSymbol<INamedType>( attributeConstructor.ContainingType, this._compilationContext );
+                var attributeType = this._compilationContext.RefFactory.FromSymbol<INamedType>( attributeConstructor.ContainingType );
 
                 // A local method that adds the attribute.
                 void IndexAttribute( SyntaxNode? parentDeclaration, DeclarationRefTargetKind kind )
@@ -156,12 +156,14 @@ namespace Metalama.Framework.Engine.CodeModel
                 base.VisitAttribute( node );
             }
 
-            public ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
+            public ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
 
             public void Visit( SyntaxTree tree )
             {
                 this.Visit( tree.GetRoot() );
             }
         }
+
+        public override IGenericContext GenericContext => NullGenericContext.Instance;
     }
 }

@@ -28,11 +28,11 @@ namespace Metalama.Framework.Engine.CodeModel
             else
             {
                 var symbol =
-                    this.GetCompilationModel()
+                    this.Compilation
                         .RoslynCompilation.CreatePointerTypeSymbol(
                             pointedAtType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
-                return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
+                return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
             }
         }
     }

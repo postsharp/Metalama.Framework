@@ -20,7 +20,7 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 {
     public ParameterBuilderList Parameters { get; } = new();
 
-    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
+    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.Ref;
 
     public override Writeability Writeability
     {
@@ -77,7 +77,7 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public override IMember? OverriddenMember => this.OverriddenIndexer;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public IInjectMemberTransformation ToTransformation() => new IntroduceIndexerTransformation( this.ParentAdvice, this );
 
@@ -117,13 +117,13 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
     public void SetExplicitInterfaceImplementation( IIndexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = [interfaceIndexer];
 
     [Memo]
-    public BoxedRef<IIndexer> BoxedRef => new BoxedRef<IIndexer>( this.ToValueTypedRef() );
+    public BuilderRef<IIndexer> Ref => new( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.Ref;
 
-    IRef<IIndexer> IIndexer.ToRef() => this.BoxedRef;
+    public new IRef<IIndexer> ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
@@ -25,11 +26,13 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
+internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl, IGenericContextImpl
 {
     private readonly NamedType _facade;
 
     ITypeSymbol ISdkType.TypeSymbol => this.TypeSymbol;
+
+    public override IGenericContext GenericContext => this;
 
     public override ISymbol Symbol => this.TypeSymbol;
 
@@ -106,7 +109,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         }
     }
 
-    public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this.TypeSymbol );
+    public Type ToType() => this.Compilation.Factory.GetReflectionType( this.TypeSymbol );
 
     public bool? IsReferenceType => this.TypeSymbol.IsReferenceType;
 
@@ -136,7 +139,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this._facade,
-            this.Compilation.GetNamedTypeCollection( this.TypeSymbol.ToValueTypedRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamedTypeCollection( this.TypeSymbol.ToRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -147,7 +150,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IPropertyCollection Properties
         => new PropertyCollection(
             this._facade,
-            this.Compilation.GetPropertyCollection( this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetPropertyCollection( this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IPropertyCollection AllProperties => new AllPropertiesCollection( this._facade );
@@ -156,7 +159,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IIndexerCollection Indexers
         => new IndexerCollection(
             this._facade,
-            this.Compilation.GetIndexerCollection( this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetIndexerCollection( this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IIndexerCollection AllIndexers => new AllIndexersCollection( this._facade );
@@ -165,7 +168,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IFieldCollection Fields
         => new FieldCollection(
             this._facade,
-            this.Compilation.GetFieldCollection( this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetFieldCollection( this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IFieldCollection AllFields => new AllFieldsCollection( this._facade );
@@ -180,7 +183,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IEventCollection Events
         => new EventCollection(
             this._facade,
-            this.Compilation.GetEventCollection( this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetEventCollection( this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IEventCollection AllEvents => new AllEventsCollection( this._facade );
@@ -189,7 +192,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IMethodCollection Methods
         => new MethodCollection(
             this._facade,
-            this.Compilation.GetMethodCollection( this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetMethodCollection( this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IMethodCollection AllMethods => new AllMethodsCollection( this._facade );
@@ -198,7 +201,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IConstructorCollection Constructors
         => new ConstructorCollection(
             this._facade,
-            this.Compilation.GetConstructorCollection( this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetConstructorCollection( this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IConstructor? PrimaryConstructor => this.GetPrimaryConstructorImpl();
@@ -210,11 +213,11 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     private IConstructor? GetPrimaryConstructorImpl()
     {
-        var constructors = this.Compilation.GetConstructorCollection( this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ) );
+        var constructors = this.Compilation.GetConstructorCollection( this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ) );
 
         foreach ( var constructor in constructors )
         {
-            if ( constructor.Target is IMethodSymbol methodSymbol && methodSymbol.IsPrimaryConstructor() )
+            if ( constructor.Unwrap() is ISymbolRef { Symbol: IMethodSymbol methodSymbol } && methodSymbol.IsPrimaryConstructor() )
             {
                 return this.Compilation.Factory.GetConstructor( methodSymbol );
             }
@@ -231,7 +234,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
         if ( builder != null )
         {
-            return this.Compilation.Factory.GetConstructor( builder );
+            return this.Compilation.Factory.GetConstructor( (ConstructorBuilder) builder );
         }
 
         var symbol = this.TypeSymbol.StaticConstructors.SingleOrDefault();
@@ -250,7 +253,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
         if ( builder != null )
         {
-            return this.Compilation.Factory.GetDeclaration<IMethod>( builder );
+            return this.Compilation.Factory.GetMethod( (MethodBuilder) builder );
         }
 
         var symbol = this.TypeSymbol.GetMembers()
@@ -294,7 +297,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this._facade,
-            this.TypeSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
+            this.TypeSymbol.TypeParameters.Select( x => this.RefFactory.FromSymbol<ITypeParameter>( x ) )
                 .ToReadOnlyList() );
 
     INamespace INamedType.Namespace => this.ContainingNamespace;
@@ -309,7 +312,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 ? this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace )
                 : this.Compilation.GlobalNamespace;
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
     [Memo]
     public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
@@ -337,7 +340,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         => new AllImplementedInterfacesCollection(
             this._facade,
             this.Compilation.GetAllInterfaceImplementationCollection(
-                this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ),
+                this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ),
                 false ) );
 
     [Memo]
@@ -345,7 +348,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         => new ImplementedInterfacesCollection(
             this._facade,
             this.Compilation.GetInterfaceImplementationCollection(
-                this.TypeSymbol.ToValueTypedRef<INamedType>( this.Compilation.CompilationContext ),
+                this.TypeSymbol.ToRef<INamedType>( this.Compilation.CompilationContext ),
                 false ) );
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
@@ -526,7 +529,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         {
             var introducedInterface =
                 this.Compilation
-                    .GetInterfaceImplementationCollection( currentType.ToValueTypedRef(), false )
+                    .GetInterfaceImplementationCollection( currentType.ToRef(), false )
                     .Introductions
                     .SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
@@ -623,7 +626,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         // Process the Roslyn type system.
         foreach ( var type in this.TypeSymbol.Interfaces )
         {
-            builder.Add( genericMap.SubstituteSymbol( type , compilation ) );
+            builder.Add( genericMap.SubstituteSymbol( type, compilation ) );
         }
 
         if ( this.TypeSymbol.BaseType != null )
@@ -652,13 +655,17 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.TypeSymbol );
 
     [Memo]
-    private BoxedRef<INamedType> BoxedRef => new( this.ToValueTypedRef() );
+    private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration( this );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+    IRef<INamedType> INamedType.ToRef() => this.Ref;
 
-    IRef<IType> IType.ToRef() => this.BoxedRef;
+    IRef<IType> IType.ToRef() => this.Ref;
 
-    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
+
+    public GenericMap GenericMap => GenericMap.Create( this.TypeArguments, this.IsCanonicalGenericInstance );
+
+    bool IGenericContext.IsEmptyOrIdentity => !this.IsGeneric || this.IsCanonicalGenericInstance;
 }

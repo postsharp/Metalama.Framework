@@ -17,7 +17,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 {
     private readonly MethodBuilder _methodBuilder;
 
-    public BuiltMethod( CompilationModel compilation, MethodBuilder builder ) : base( compilation )
+    public BuiltMethod( MethodBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._methodBuilder = builder;
     }
@@ -41,7 +41,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.TranslateDeclaration( i ) );
 
     public MethodInfo ToMethodInfo() => this._methodBuilder.ToMethodInfo();
 
@@ -49,19 +49,19 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
-    public IRef<IMethod> ToRef() => this._methodBuilder.BoxedRef;
+    public IRef<IMethod> ToRef() => this._methodBuilder.Ref;
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation );
+    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation, this.GenericContext );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.GetIType( this._methodBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.Compilation.Factory.TranslateType( this._methodBuilder.ReturnParameter.Type );
 
     [Memo]
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this._methodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter> ).ToReadOnlyList() );
+            this._methodBuilder.TypeParameters.AsBuilderList.Select( this.RefFactory.FromBuilder<ITypeParameter> ).ToReadOnlyList() );
 
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
@@ -72,7 +72,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
     [Memo]
-    public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this._methodBuilder.OverriddenMethod );
+    public IMethod? OverriddenMethod => this.Compilation.Factory.TranslateDeclaration( this._methodBuilder.OverriddenMethod );
 
     IMethod IMethod.Definition => this;
 
