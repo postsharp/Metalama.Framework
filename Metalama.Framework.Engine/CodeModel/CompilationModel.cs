@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     allNewDeclarations.SelectMany( c => c.Attributes )
                         .Cast<AttributeBuilder>()
                         .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
-                        .Select( a => new AttributeRef( a ) )
+                        .Select( a => new BuilderAttributeRef( a ) )
                         .ToReadOnlyList();
 
                 // TODO: this cache may need to be smartly invalidated when we have interface introductions.
@@ -432,7 +432,9 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( includeDerivedTypes )
             {
-                return this._derivedTypes.Value.GetDerivedTypes( type ).Append( type ).SelectMany( GetAllAttributesOfExactType );
+                var attributeTypes = this._derivedTypes.Value.GetDerivedTypes( type ).Append( type );
+
+                return attributeTypes.SelectMany( GetAllAttributesOfExactType );
             }
             else
             {
@@ -447,7 +449,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         {
                             if ( !a.TryGetTarget( this, null, out var target ) )
                             {
-                                // Skipped.
+                                // Skipped by WhereNotNull.
                                 return null;
                             }
 

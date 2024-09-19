@@ -446,7 +446,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split inheritable aspects by syntax tree.
         foreach ( var inheritableAspectInstance in pipelineResults.InheritableAspects )
         {
-            var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilationContext );
+            var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree();
 
             if ( syntaxTree == null )
             {
@@ -505,7 +505,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split aspect instances by syntax tree.
         foreach ( var aspectInstance in pipelineResults.AspectInstances )
         {
-            var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilationContext );
+            var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree();
 
             // No continue here to handle even aspect instances without a syntax tree.
             if ( syntaxTree == null && !resultBuilders.ContainsKey( string.Empty ) )
@@ -598,7 +598,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 continue;
             }
 
-            var syntaxTree = annotationsOnDeclaration.Key.GetPrimarySyntaxTree( compilation.CompilationContext );
+            var syntaxTree = annotationsOnDeclaration.Key.GetPrimarySyntaxTree();
 
             SyntaxTreePipelineResult.Builder builder;
 

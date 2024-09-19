@@ -79,12 +79,12 @@ public class AttributeSerializationTests : SerializationTestsBase
         var compilationModel1 = testContext.Compilation;
         var attribute1 = compilationModel1.Types.OfName( "C" ).Single().Attributes.Single();
 
-        Assert.True( ((AttributeRef) attribute1.ToRef()).TryGetAttributeSerializationDataKey( compilationModel1.CompilationContext, out var attributeKey1 ) );
+        Assert.True( ((AttributeRef) attribute1.ToRef()).TryGetAttributeSerializationDataKey( out var attributeKey1 ) );
 
         var compilationModel2 = testContext.CreateCompilationModel( testContext.Compilation.RoslynCompilation );
         var attribute2 = compilationModel1.Types.OfName( "C" ).Single().Attributes.Single();
 
-        Assert.True( ((AttributeRef) attribute2.ToRef()).TryGetAttributeSerializationDataKey( compilationModel2.CompilationContext, out var attributeKey2 ) );
+        Assert.True( ((AttributeRef) attribute2.ToRef()).TryGetAttributeSerializationDataKey( out var attributeKey2 ) );
 
         // Test that two serialization keys of the same attribute in two models resolve are identical. 
         Assert.Same( attributeKey1, attributeKey2 );

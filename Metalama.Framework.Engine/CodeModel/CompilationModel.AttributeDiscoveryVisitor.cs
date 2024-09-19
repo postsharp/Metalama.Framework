@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private sealed class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
             private readonly ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.Builder _builder =
-                ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.CreateBuilder(RefEqualityComparer<INamedType>.Default);
+                ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.CreateBuilder( RefEqualityComparer<INamedType>.Default );
 
             private readonly CompilationContext _compilationContext;
 
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     void Add( SyntaxNode realDeclaration )
                     {
-                        this._builder.Add( attributeType, new AttributeRef( attributeType, node, realDeclaration, kind, this._compilationContext ) );
+                        this._builder.Add( attributeType, new SyntaxAttributeRef( attributeType, node, realDeclaration, this._compilationContext, kind ) );
                     }
 
                     switch ( parentDeclaration )
@@ -91,14 +91,14 @@ namespace Metalama.Framework.Engine.CodeModel
                         case SyntaxKind.ModuleKeyword:
                             this._builder.Add(
                                 attributeType,
-                                new AttributeRef( attributeType, node, this._compilationContext.Compilation.SourceModule, this._compilationContext ) );
+                                new SyntaxAttributeRef( attributeType, node, this._compilationContext.Compilation.SourceModule, this._compilationContext ) );
 
                             break;
 
                         case SyntaxKind.AssemblyKeyword:
                             this._builder.Add(
                                 attributeType,
-                                new AttributeRef( attributeType, node, this._compilationContext.Compilation.Assembly, this._compilationContext ) );
+                                new SyntaxAttributeRef( attributeType, node, this._compilationContext.Compilation.Assembly, this._compilationContext ) );
 
                             break;
 

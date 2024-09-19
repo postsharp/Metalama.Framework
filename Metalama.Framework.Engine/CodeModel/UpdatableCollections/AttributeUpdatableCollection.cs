@@ -41,7 +41,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
                     continue;
                 }
 
-                action( new AttributeRef( attribute, this._parent, this.Compilation.CompilationContext ) );
+                action( new SymbolAttributeRef( attribute, this._parent, this.Compilation.CompilationContext ) );
             }
         }
     }
@@ -49,7 +49,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
     public void Add( AttributeBuilder attribute )
     {
         this.EnsureComplete();
-        this.AddItem( new AttributeRef( attribute ) );
+        this.AddItem( new BuilderAttributeRef( attribute ) );
     }
 
     public void Remove( INamedType namedType )

@@ -13,18 +13,17 @@ public class AttributeRefSerializer : ReferenceTypeSerializer
     {
         var data = constructorArguments.GetValue<AttributeSerializationData>( "data" ).AssertNotNull();
 
-        return new AttributeRef( data );
+        return new DeserializedAttributeRef( data, ((ISerializationContext) constructorArguments).CompilationContext );
     }
 
     public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
     {
         var attributeRef = (AttributeRef) obj;
         var serializationContext = (ISerializationContext) constructorArguments;
-        var compilationContext = serializationContext.CompilationContext.AssertNotNull();
-
+        
         // We're trying to deduplicate instances of the AttributeSerializationData class.
 
-        if ( !attributeRef.TryGetAttributeSerializationDataKey( compilationContext, out var serializationDataKey ) )
+        if ( !attributeRef.TryGetAttributeSerializationDataKey( out var serializationDataKey ) )
         {
             throw new AssertionFailedException( $"Cannot serialize the attribute '{attributeRef}'." );
         }
@@ -44,7 +43,7 @@ public class AttributeRefSerializer : ReferenceTypeSerializer
 
         if ( !instances.TryGetValue( serializationDataKey, out var serializationData ) )
         {
-            if ( !attributeRef.TryGetAttributeSerializationData( compilationContext, out serializationData ) )
+            if ( !attributeRef.TryGetAttributeSerializationData( out serializationData ) )
             {
                 throw new AssertionFailedException( $"Cannot serialize the attribute '{attributeRef}'." );
             }

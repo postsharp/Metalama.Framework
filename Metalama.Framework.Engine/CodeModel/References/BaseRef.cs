@@ -19,7 +19,7 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 {
     // The compilation for which the symbol (stored in Target) is valid.
 
-    private protected abstract CompilationContext CompilationContext { get; }
+    public abstract CompilationContext CompilationContext { get; }
 
     static BaseRef()
     {
@@ -44,7 +44,7 @@ internal abstract class BaseRef<T> : IRefImpl<T>
             throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
         }
 
-        var symbol = this.GetSymbolIgnoringKind( this.CompilationContext, true );
+        var symbol = this.GetSymbolIgnoringKind( true );
 
         return symbol.GetSerializableId( this.TargetKind );
     }
@@ -65,6 +65,8 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     private T? GetTargetImpl( ICompilation compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
+        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
+
         var compilationModel = (CompilationModel) compilation;
 
         if ( options.FollowRedirections() && compilationModel.TryGetRedirectedDeclaration( this, out var redirected ) )
@@ -89,11 +91,11 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
     /// the code model.
     /// </summary>
-    public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( CompilationContext compilationContext )
+    public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData()
     {
         if ( this.TargetKind != DeclarationRefTargetKind.Default )
         {
-            var baseSymbol = this.GetSymbolIgnoringKind( compilationContext );
+            var baseSymbol = this.GetSymbolIgnoringKind();
 
             switch ( this.TargetKind )
             {
@@ -108,22 +110,21 @@ internal abstract class BaseRef<T> : IRefImpl<T>
             // Fallback to the default GetSymbol implementation.
         }
 
-        var symbol = this.GetSymbol( compilationContext, true );
+        var symbol = this.GetSymbol( true );
 
         return (symbol.GetAttributes(), symbol);
     }
 
-    public virtual ISymbol GetClosestSymbol( CompilationContext compilationContext )
+    public virtual ISymbol GetClosestSymbol()
     {
-        return this.GetSymbolIgnoringKind( compilationContext );
+        return this.GetSymbolIgnoringKind();
     }
 
-    ISymbol ISdkRef.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol( compilation.GetCompilationContext(), ignoreAssemblyKey );
+    ISymbol ISdkRef.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol( ignoreAssemblyKey );
 
-    private ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
-        => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilationContext, ignoreAssemblyKey ) );
+    private ISymbol GetSymbol( bool ignoreAssemblyKey = false ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( ignoreAssemblyKey ) );
 
-    protected abstract ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false );
+    protected abstract ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false );
 
     private ISymbol GetSymbolWithKind( ISymbol symbol )
         => this.TargetKind switch

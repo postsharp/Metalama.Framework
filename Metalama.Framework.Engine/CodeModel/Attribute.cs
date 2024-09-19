@@ -36,7 +36,7 @@ internal sealed class Attribute : IAttributeImpl
     public AttributeData AttributeData { get; }
 
     [Memo]
-    private IRef<IAttribute> Ref => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToRef(), this.Compilation.CompilationContext );
+    private IRef<IAttribute> Ref => new SymbolAttributeRef( this.AttributeData, this.ContainingDeclaration.ToRef(), this.Compilation.CompilationContext );
 
     IRef<IAttribute> IAttribute.ToRef() => this.Ref;
 

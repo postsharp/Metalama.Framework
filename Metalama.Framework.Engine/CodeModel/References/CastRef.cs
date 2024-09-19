@@ -17,16 +17,17 @@ internal class CastRef<T> : IRefImpl<T>
         this._underlying = underlying.Unwrap();
     }
 
-    public ISymbol GetClosestSymbol( CompilationContext compilationContext ) => this._underlying.GetClosestSymbol( compilationContext );
+    public ISymbol GetClosestSymbol() => this._underlying.GetClosestSymbol();
 
-    public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( CompilationContext compilationContext )
-        => this._underlying.GetAttributeData( compilationContext );
+    public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData() => this._underlying.GetAttributeData();
 
     public string Name => this._underlying.Name;
 
     public IRefStrategy Strategy => this._underlying.Strategy;
 
     public IRefImpl Unwrap() => this._underlying.Unwrap();
+
+    public CompilationContext CompilationContext => this._underlying.CompilationContext;
 
     public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey = false ) => this._underlying.GetSymbol( compilation, ignoreAssemblyKey );
 

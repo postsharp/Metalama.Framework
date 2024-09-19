@@ -16,7 +16,7 @@ internal sealed class SystemAttributeDeserializer : AttributeDeserializer
 
         protected override SystemAttributeDeserializer Create( CompilationContext compilationContext )
         {
-            var resolver = (SystemTypeResolver) this.ServiceProvider.GetRequiredService<SystemTypeResolver.Provider>().Get( compilationContext );
+            var resolver = this.ServiceProvider.GetRequiredService<SystemTypeResolver.Provider>().Get( compilationContext );
 
             return new SystemAttributeDeserializer( this.ServiceProvider, resolver );
         }

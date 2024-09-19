@@ -20,10 +20,17 @@ namespace Metalama.Framework.Engine.Collections
             this._dictionary = dictionary;
         }
 
-        public ImmutableDictionaryOfArray( IEnumerable<KeyValuePair<TKey, ImmutableArray<TValue>>> dictionary )
+        public ImmutableDictionaryOfArray( IEnumerable<KeyValuePair<TKey, ImmutableArray<TValue>>> dictionary, IEqualityComparer<TKey>? keyComparer = null )
         {
-            this._dictionary = dictionary.ToImmutableDictionary( x => x.Key, x => new Group( x.Key, x.Value ) );
+            keyComparer ??= EqualityComparer<TKey>.Default;
+
+            this._dictionary = dictionary.ToImmutableDictionary(
+                x => x.Key,
+                x => new Group( x.Key, x.Value, keyComparer ),
+                keyComparer );
         }
+
+        public IEqualityComparer<TKey> KeyComparer => this._dictionary.KeyComparer;
 
         public static ImmutableDictionaryOfArray<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
 
@@ -70,7 +77,8 @@ namespace Metalama.Framework.Engine.Collections
             }
             else
             {
-                return new ImmutableDictionaryOfArray<TKey, TValue>( this._dictionary.Add( key, new Group( key, ImmutableArray.Create( value ) ) ) );
+                return new ImmutableDictionaryOfArray<TKey, TValue>(
+                    this._dictionary.Add( key, new Group( key, ImmutableArray.Create( value ), this._dictionary.KeyComparer ) ) );
             }
         }
 
@@ -127,7 +135,7 @@ namespace Metalama.Framework.Engine.Collections
                 {
                     if ( builder.TryGetValue( pair.Key, out var currentGroup ) )
                     {
-                        builder[pair.Key] = new Group( pair.Key, currentGroup.Items.AddRange( pair.Value.Items ) );
+                        builder[pair.Key] = new Group( pair.Key, currentGroup.Items.AddRange( pair.Value.Items ), this._dictionary.KeyComparer );
                     }
                     else
                     {

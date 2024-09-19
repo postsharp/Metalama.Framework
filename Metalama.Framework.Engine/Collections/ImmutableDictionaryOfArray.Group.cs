@@ -10,11 +10,13 @@ namespace Metalama.Framework.Engine.Collections
 {
     public sealed partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
-        internal readonly struct Group : IGrouping<TKey, TValue>
+        internal readonly struct Group : IGrouping<TKey, TValue>, IEquatable<Group>
         {
+            private readonly IEqualityComparer<TKey> _keyComparer;
+
             public ImmutableArray<TValue> Items { get; }
 
-            public Group( TKey key, ImmutableArray<TValue> items )
+            public Group( TKey key, ImmutableArray<TValue> items, IEqualityComparer<TKey> keyComparer )
             {
 #if DEBUG
                 if ( items.IsDefault )
@@ -25,6 +27,7 @@ namespace Metalama.Framework.Engine.Collections
 
                 this.Key = key;
                 this.Items = items;
+                this._keyComparer = keyComparer;
             }
 
             public TKey Key { get; }
@@ -39,9 +42,19 @@ namespace Metalama.Framework.Engine.Collections
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-            public Group Add( TValue value ) => new( this.Key, this.Items.Add( value ) );
+            public Group Add( TValue value ) => new( this.Key, this.Items.Add( value ), this._keyComparer );
 
             public override string ToString() => $"Key={this.Key}, Items={this.Items.Length}";
+
+            public bool Equals( Group other ) => this._keyComparer.Equals( this.Key, other.Key );
+
+            public override bool Equals( object? obj ) => obj is Group other && this.Equals( other );
+
+            public override int GetHashCode() => this._keyComparer.GetHashCode( this.Key );
+
+            public static bool operator ==( Group left, Group right ) => left.Equals( right );
+
+            public static bool operator !=( Group left, Group right ) => !left.Equals( right );
         }
     }
 }

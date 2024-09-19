@@ -91,9 +91,12 @@ public static class DeclarationExtensions
     internal static IRef<ICompilationElement> ToRef( this ISymbol symbol, CompilationContext compilationContext )
         => compilationContext.RefFactory.FromSymbol( symbol );
 
-    internal static IRef<TCompilationElement> ToRef<TCompilationElement>( this ISymbol symbol, CompilationContext compilationContext )
-        where TCompilationElement : class, ICompilationElement
-        => compilationContext.RefFactory.FromSymbol<TCompilationElement>( symbol );
+    internal static IRef<TDeclaration> ToRef<TDeclaration>( this ISymbol symbol, CompilationContext compilationContext )
+        where TDeclaration : class, IDeclaration
+        => compilationContext.RefFactory.FromSymbol<TDeclaration>( symbol );
+
+    internal static IRef<IType> ToRef( this ITypeSymbol symbol, CompilationContext compilationContext )
+        => compilationContext.RefFactory.FromSymbol<IType>( symbol );
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
         => declaration.GetSymbol() is { } symbol

@@ -13,7 +13,7 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 {
     public string Id { get; }
 
-    private protected override CompilationContext CompilationContext { get; }
+    public override CompilationContext CompilationContext { get; }
 
     public StringRef( string id, CompilationContext compilationContext )
     {
@@ -41,28 +41,28 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
         => id.StartsWith( SerializableTypeIdResolverForSymbol.LegacyPrefix, StringComparison.Ordinal )
            || id.StartsWith( SerializableTypeIdResolverForSymbol.Prefix, StringComparison.Ordinal );
 
-    protected override ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
+    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
     {
         ISymbol? symbol;
 
         if ( IsDeclarationId( this.Id ) )
         {
-            symbol = new SerializableDeclarationId( this.Id ).ResolveToSymbolOrNull( compilationContext );
+            symbol = new SerializableDeclarationId( this.Id ).ResolveToSymbolOrNull( this.CompilationContext );
         }
         else if ( IsTypeId( this.Id ) )
         {
-            symbol = compilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( this.Id ) );
+            symbol = this.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( this.Id ) );
         }
         else
         {
             var symbolKey = new SymbolId( this.Id );
 
-            symbol = symbolKey.Resolve( compilationContext.Compilation, ignoreAssemblyKey );
+            symbol = symbolKey.Resolve( this.CompilationContext.Compilation, ignoreAssemblyKey );
         }
 
         if ( symbol == null )
         {
-            throw new SymbolNotFoundException( this.Id, compilationContext.Compilation );
+            throw new SymbolNotFoundException( this.Id, this.CompilationContext.Compilation );
         }
 
         return symbol;
@@ -107,7 +107,17 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
         }
     }
 
-    public override bool Equals( IRef? other ) => other?.Unwrap() is IStringRef stringRef && stringRef.Id == this.Id;
+    public override bool Equals( IRef? other )
+    {
+        if ( other?.Unwrap() is not IStringRef stringRef )
+        {
+            return false;
+        }
+
+        Invariant.Assert( this.CompilationContext == stringRef.CompilationContext, "Attempted to compare two symbols of different compilations." );
+
+        return stringRef.Id == this.Id;
+    }
 
     protected override int GetHashCodeCore()
     {

@@ -44,7 +44,7 @@ internal class SymbolRefStrategy : IRefStrategy
             // Note that Roslyn can return an AttributeData that does not belong to the same compilation
             // as the parent symbol, probably because of some bug or optimisation.
 
-            add( new AttributeRef( attribute, declaration, compilation.CompilationContext ) );
+            add( new SymbolAttributeRef( attribute, declaration, compilation.CompilationContext ) );
         }
 
         if ( compilation.TryGetRedirectedDeclaration( declaration, out var redirectedDeclaration ) )

@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => new AttributeCollection(
                 this,
                 this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new AttributeRef( a, this.ToDeclarationRef(), this.Compilation.CompilationContext ) )
+                    .Select( a => new SymbolAttributeRef( a, this.ToDeclarationRef(), this.Compilation.CompilationContext ) )
                     .ToReadOnlyList() );
 
         public override bool IsReturnParameter => true;

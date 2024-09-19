@@ -48,7 +48,7 @@ internal class DeserializedAttribute : IAttributeImpl
     public IDeclaration ContainingDeclaration => this._serializationData.ContainingDeclaration.GetTarget( this.Compilation );
 
     [Memo]
-    private AttributeRef AttributeRef => new( this._serializationData );
+    private AttributeRef AttributeRef => new DeserializedAttributeRef( this._serializationData, this.GetCompilationContext() );
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.AttributeRef;
 

@@ -17,7 +17,7 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
         this.CompilationContext = compilationContext;
     }
 
-    private protected override CompilationContext CompilationContext { get; }
+    public override CompilationContext CompilationContext { get; }
 
     public IDeclarationBuilder Builder { get; }
 
@@ -34,12 +34,12 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
 
     public override SerializableDeclarationId ToSerializableId() => this.Builder.ToSerializableId();
 
-    protected override ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
+    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
     {
         throw new NotSupportedException();
     }
 
-    public override ISymbol GetClosestSymbol( CompilationContext compilationContext )
+    public override ISymbol GetClosestSymbol()
     {
         var containingDeclaration = this.Builder.ContainingDeclaration;
 
@@ -49,7 +49,7 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
             containingDeclaration = containingBuilder.ContainingDeclaration;
         }
 
-        return containingDeclaration.AssertNotNull().GetSymbol( compilationContext ).AssertSymbolNotNull();
+        return containingDeclaration.AssertNotNull().GetSymbol( this.CompilationContext ).AssertSymbolNotNull();
     }
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )

@@ -14,15 +14,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// </summary>
     internal interface IRefImpl : IRef
     {
-        // TODO: the target must be made a private implementation detail, but many linker tests rely on it.
-
-        ISymbol GetClosestSymbol( CompilationContext compilationContext );
-
-        (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( CompilationContext compilationContext );
-
         string Name { get; }
 
         IRefStrategy Strategy { get; }
+
+        CompilationContext CompilationContext { get; }
+
+        ISymbol GetClosestSymbol();
+
+        (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData();
 
         IRefImpl Unwrap();
     }

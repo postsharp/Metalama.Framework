@@ -3,10 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -15,7 +13,7 @@ internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
 {
     public ISymbol Symbol { get; }
 
-    private protected override CompilationContext CompilationContext { get; }
+    public override CompilationContext CompilationContext { get; }
 
     public override DeclarationRefTargetKind TargetKind { get; }
 
@@ -32,9 +30,9 @@ internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
     public override IRefStrategy Strategy => this.CompilationContext.SymbolRefStrategy;
 
-    protected override ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
+    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
     {
-        return compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
+        return this.CompilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
     }
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
@@ -50,10 +48,20 @@ internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
     }
 
     public override bool Equals( IRef? other )
-        => other?.Unwrap() is ISymbolRef symbolRef && StructuralComparisons.StructuralEqualityComparer.Equals( symbolRef.Symbol, this.Symbol )
-                                                   && this.TargetKind == symbolRef.TargetKind;
+    {
+        if ( other?.Unwrap() is not ISymbolRef symbolRef )
+        {
+            return false;
+        }
 
-    protected override int GetHashCodeCore() => StructuralSymbolComparer.Default.GetHashCode( this.Symbol );
+        Invariant.Assert( this.CompilationContext == symbolRef.CompilationContext, "Attempted to compare two symbols of different compilations." );
+
+        // Intentionally using non-structural comparison because we are in the same compilation.
+        return SymbolEqualityComparer.Default.Equals( symbolRef.Symbol, this.Symbol )
+               && this.TargetKind == symbolRef.TargetKind;
+    }
+
+    protected override int GetHashCodeCore() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
 
     public override string ToString()
         => this.TargetKind switch

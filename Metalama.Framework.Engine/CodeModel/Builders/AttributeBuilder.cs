@@ -74,7 +74,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
 
-    public AttributeRef ToAttributeRef() => this._attributeRef ??= new AttributeRef( this );
+    public AttributeRef ToAttributeRef() => this._attributeRef ??= new BuilderAttributeRef( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.ToAttributeRef();
 }

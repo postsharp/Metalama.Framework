@@ -245,7 +245,7 @@ public partial class DeclarationFactory
                     DeclarationRefTargetKind.Property => propertyOrIndexer,
 
                     // The underlying field.
-                    DeclarationRefTargetKind.Field => this.GetField( propertySymbol.GetBackingField() ),
+                    DeclarationRefTargetKind.Field => this.GetField( propertySymbol.GetBackingField().AssertSymbolNotNull() ),
 
                     _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                 };

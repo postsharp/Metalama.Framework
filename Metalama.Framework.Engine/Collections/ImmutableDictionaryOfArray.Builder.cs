@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Code.Comparers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -103,7 +104,7 @@ namespace Metalama.Framework.Engine.Collections
             {
                 if ( this._modifiedValuesBuilder.Count == 0 )
                 {
-                    return this._initialValues ?? Empty;
+                    return this._initialValues ?? Create( this._modifiedValuesBuilder.Comparer );
                 }
                 else
                 {
@@ -112,7 +113,7 @@ namespace Metalama.Framework.Engine.Collections
 
                     foreach ( var modifiedGroup in this._modifiedValuesBuilder )
                     {
-                        dictionaryBuilder[modifiedGroup.Key] = new Group( modifiedGroup.Key, modifiedGroup.Value.ToImmutable() );
+                        dictionaryBuilder[modifiedGroup.Key] = new Group( modifiedGroup.Key, modifiedGroup.Value.ToImmutable(), dictionaryBuilder.KeyComparer );
                     }
 
                     return new ImmutableDictionaryOfArray<TKey, TValue>( dictionaryBuilder.ToImmutable() );

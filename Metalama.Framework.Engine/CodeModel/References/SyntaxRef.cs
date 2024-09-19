@@ -8,27 +8,27 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SyntaxNodeRef<T> : BaseRef<T>
+internal class SyntaxRef<T> : BaseRef<T>
     where T : class, ICompilationElement
 {
     public SyntaxNode SyntaxNode { get; }
 
-    public SyntaxNodeRef( SyntaxNode syntaxNode, DeclarationRefTargetKind targetKind, CompilationContext compilationContext )
+    public SyntaxRef( SyntaxNode syntaxNode, DeclarationRefTargetKind targetKind, CompilationContext compilationContext )
     {
         this.SyntaxNode = syntaxNode.AssertNotNull();
         this.TargetKind = targetKind;
         this.CompilationContext = compilationContext;
     }
 
-    private protected override CompilationContext CompilationContext { get; }
+    public override CompilationContext CompilationContext { get; }
 
     public override DeclarationRefTargetKind TargetKind { get; }
 
     public override string Name => throw new NotSupportedException();
 
-    protected override ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
+    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
     {
-        return GetSymbolOfNode( compilationContext, this.SyntaxNode );
+        return GetSymbolOfNode( this.CompilationContext, this.SyntaxNode );
     }
 
     private static ISymbol GetSymbolOfNode( CompilationContext compilationContext, SyntaxNode node )
@@ -55,7 +55,16 @@ internal class SyntaxNodeRef<T> : BaseRef<T>
     }
 
     public override bool Equals( IRef? other )
-        => other is SyntaxNodeRef<T> nodeRef && nodeRef.SyntaxNode == this.SyntaxNode && nodeRef.TargetKind == this.TargetKind;
+    {
+        if ( other is not SyntaxRef<T> nodeRef )
+        {
+            return false;
+        }
+
+        Invariant.Assert( this.CompilationContext == nodeRef.CompilationContext, "Attempted to compare two symbols of different compilations." );
+
+        return nodeRef.SyntaxNode == this.SyntaxNode && nodeRef.TargetKind == this.TargetKind;
+    }
 
     protected override int GetHashCodeCore() => HashCode.Combine( this.SyntaxNode, this.TargetKind );
 

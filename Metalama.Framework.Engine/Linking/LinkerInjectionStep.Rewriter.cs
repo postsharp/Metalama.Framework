@@ -221,18 +221,18 @@ internal sealed partial class LinkerInjectionStep
             foreach ( var attribute in finalModelAttributes )
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
+                if ( attribute is BuilderAttributeRef builderAttributeRef && isPrimaryNode( builderAttributeRef.AttributeBuilder, originalDeclaringNode ) )
 #pragma warning restore CS0618 // Type or member is obsolete
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
-                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder )
+                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( builderAttributeRef.AttributeBuilder )
                         .AssertNotNull();
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
                         .WithOptionalTrailingLineFeed( syntaxGenerationContext )
                         .WithAdditionalAnnotations(
-                            attributeBuilder.ParentAdvice?.AspectInstance.AspectClass.GeneratedCodeAnnotation
+                            builderAttributeRef.AttributeBuilder.ParentAdvice?.AspectInstance.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     if ( targetKind != SyntaxKind.None )

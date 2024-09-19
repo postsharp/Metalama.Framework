@@ -480,7 +480,7 @@ internal sealed partial class ContextualSyntaxGenerator
         if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
             return this._typeSyntaxCache.GetOrAdd(
-                symbol.ToRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
+                symbol.ToRef( this.SyntaxGenerationContext.CompilationContext ),
                 static ( _, x ) => x.This.TypeCore( x.Type ),
                 (This: this, Type: symbol) );
         }

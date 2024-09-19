@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -30,6 +31,8 @@ public sealed partial class DerivedTypeIndex
         ImmutableDictionaryOfArray<IRef<INamedType>, IRef<INamedType>> relationships,
         ImmutableHashSet<IRef<INamedType>> processedTypes )
     {
+        Invariant.Assert( ReferenceEquals( relationships.KeyComparer, RefEqualityComparer<INamedType>.Default ) );
+
         this._relationships = relationships;
         this._processedTypes = processedTypes;
         this._compilationContext = compilationContext;
