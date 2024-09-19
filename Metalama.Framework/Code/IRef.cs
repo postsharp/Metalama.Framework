@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     public enum RefComparison
     {
         Default,
-        Structural
+        Portable
     }
 
     public enum RefOptions
@@ -57,10 +57,6 @@ namespace Metalama.Framework.Code
             ReferenceResolutionOptions options = default,
             IGenericContext? genericContext = default );
 
-        bool IsCompilationNeutral { get; }
-
-        IRef ToCompilationNeutral();
-
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
         int GetHashCode( RefComparison comparison );
@@ -89,7 +85,5 @@ namespace Metalama.Framework.Code
         /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
         /// </summary>
         new T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
-
-        new IRef<T> ToCompilationNeutral();
     }
 }

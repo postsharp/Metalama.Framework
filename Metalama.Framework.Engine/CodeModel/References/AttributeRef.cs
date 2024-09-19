@@ -25,7 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public CompilationContext CompilationContext { get; }
 
-        public ISymbol GetClosestSymbol() => ((ICompilationBoundRefImpl) this.ContainingDeclaration).GetClosestSymbol();
+        public ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
+            => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
 
         string IRefImpl.Name => throw new NotSupportedException();
 
@@ -48,11 +49,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
             => this.GetTargetOrNull( compilation, options, genericContext );
 
-        public IRef<IAttribute> ToCompilationNeutral() => throw new NotSupportedException();
+        public IRef<IAttribute> ToPortable() => throw new NotSupportedException();
 
-        public bool IsCompilationNeutral => false;
+        public bool IsPortable => false;
 
-        IRef IRef.ToCompilationNeutral() => this.ToCompilationNeutral();
+        IRef IRefImpl.ToPortable() => this.ToPortable();
 
         public bool Equals( IRef? other, RefComparison comparison = RefComparison.Default )
             => comparison switch

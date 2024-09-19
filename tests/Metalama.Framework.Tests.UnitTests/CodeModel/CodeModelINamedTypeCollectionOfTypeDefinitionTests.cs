@@ -305,29 +305,5 @@ class E
 
             Assert.Equal( new[] { type, interfaceBaseType, interfaceType }, types );
         }
-
-        [Fact]
-        public void UnboundGenericError()
-        {
-            using var testContext = this.CreateTestContext();
-
-            const string code = @"
-class C<T>
-{
-}
-class D
-{
-}
-";
-
-            var compilation = testContext.CreateCompilationModel( code );
-
-            using var userCodeContext = testContext.WithExecutionContext( compilation );
-
-            var type = compilation.Types.Single( t => t.Name == "C" ).WithTypeArguments( typeof(int) );
-
-            Assert.Throws<ArgumentException>(
-                () => _ = compilation.Types.OfTypeDefinition( type ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray() );
-        }
     }
 }

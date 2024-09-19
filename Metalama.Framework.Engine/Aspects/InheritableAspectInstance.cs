@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -38,7 +39,7 @@ public sealed partial class InheritableAspectInstance : IAspectInstance, IAspect
     public InheritableAspectInstance( IAspectInstance aspectInstance )
     {
         var asPredecessor = (IAspectPredecessorImpl) aspectInstance;
-        this.TargetDeclaration = asPredecessor.TargetDeclaration;
+        this.TargetDeclaration = asPredecessor.TargetDeclaration.ToPortable();
         this.TargetDeclarationDepth = asPredecessor.TargetDeclarationDepth;
         this.Aspect = aspectInstance.Aspect;
         this._aspectClass = aspectInstance.AspectClass;

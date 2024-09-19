@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRefImpl
     where T : class, ICompilationElement
 {
-    public sealed override bool IsCompilationNeutral => false;
+    public sealed override bool IsPortable => false;
 
     public abstract CompilationContext CompilationContext { get; }
 
@@ -49,7 +49,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
     [Memo]
     private StringRef<T> CompilationNeutralRef => new( this.ToSerializableId().Id );
 
-    public sealed override IRef<T> ToCompilationNeutral() => this.CompilationNeutralRef;
+    public sealed override IRef<T> ToPortable() => this.CompilationNeutralRef;
 
     public override SerializableDeclarationId ToSerializableId()
     {
@@ -63,7 +63,12 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     protected abstract ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false );
 
-    public virtual ISymbol GetClosestSymbol() => this.GetSymbolIgnoringKind();
+    public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
+    {
+        Invariant.Assert( compilationContext == this.CompilationContext );
+
+        return this.GetSymbolIgnoringKind();
+    }
 
     private ISymbol GetSymbolWithKind( ISymbol symbol )
         => this.TargetKind switch

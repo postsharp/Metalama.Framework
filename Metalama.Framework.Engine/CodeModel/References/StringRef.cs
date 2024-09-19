@@ -32,9 +32,9 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
         }
     }
 
-    public override IRef<T> ToCompilationNeutral() => this;
+    public override IRef<T> ToPortable() => this;
 
-    public override bool IsCompilationNeutral => true;
+    public override bool IsPortable => true;
 
     private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolverForSymbol.Prefix[0];
 
@@ -67,6 +67,12 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
         }
 
         return symbol;
+    }
+
+    public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
+    {
+        // TODO: Handle references to builders.
+        return this.GetSymbol( compilationContext );
     }
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )

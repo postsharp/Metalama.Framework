@@ -38,17 +38,20 @@ internal class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false ) => throw new NotSupportedException();
 
-    public override ISymbol GetClosestSymbol()
+    public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
     {
-        var containingDeclaration = this.Builder.ContainingDeclaration;
+        Invariant.Assert( compilationContext == this.CompilationContext );
 
-        // This can happen for accessor method of a builder member.
-        if ( containingDeclaration is IDeclarationBuilder containingBuilder )
+        for ( var ancestor = this.Builder.ContainingDeclaration; ancestor != null; ancestor = ancestor.ContainingDeclaration )
         {
-            containingDeclaration = containingBuilder.ContainingDeclaration;
+            if ( ancestor is SymbolBasedDeclaration symbolBasedDeclaration )
+            {
+                return symbolBasedDeclaration.Symbol;
+            }
         }
 
-        return containingDeclaration.AssertNotNull().GetSymbol( this.CompilationContext ).AssertSymbolNotNull();
+        // We should always have an containing symbol.
+        throw new AssertionFailedException();
     }
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )

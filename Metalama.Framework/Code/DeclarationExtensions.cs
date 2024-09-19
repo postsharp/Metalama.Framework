@@ -17,14 +17,6 @@ namespace Metalama.Framework.Code
     [PublicAPI]
     public static class DeclarationExtensions
     {
-        public static IRef<T> ToRef<T>( this T declaration, RefOptions options )
-            where T : class, IDeclaration
-            => options switch
-            {
-                RefOptions.Default => (IRef<T>) declaration.ToRef(),
-                RefOptions.CompilationNeutral => (IRef<T>) declaration.ToRef().ToCompilationNeutral()
-            };
-
         /// <summary>
         /// Determines if a given declaration is a child of another given declaration, using the <see cref="IDeclaration.ContainingDeclaration"/>
         /// relationship for all declarations except for named type, where the parent namespace is considered.

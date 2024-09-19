@@ -17,13 +17,22 @@ namespace Metalama.Framework.Engine.CodeModel.References
         string Name { get; }
 
         IRefStrategy Strategy { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the reference is portable to a different edition of the project. Most references are bound to a
+        /// specific state of the project. They are faster to resolve but prevent that specific project state to be garbage-collected. Portable
+        /// references are slower to resolve but not cause a memory leak if they stay in memory for a long time. Any referen
+        /// </summary>
+        bool IsPortable { get; }
+
+        IRef ToPortable();
+
+        ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
     }
 
     internal interface ICompilationBoundRefImpl : IRefImpl
     {
         CompilationContext CompilationContext { get; }
-
-        ISymbol GetClosestSymbol();
 
         (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData();
     }
@@ -33,5 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     {
         new IRefImpl<TOut> As<TOut>()
             where TOut : class, ICompilationElement;
+
+        new IRef<T> ToPortable();
     }
 }

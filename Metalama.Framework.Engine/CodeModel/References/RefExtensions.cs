@@ -11,18 +11,18 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 public static class RefExtensions
 {
-    internal static IRefStrategy GetStrategy( this IRef reference ) => reference.AsRefImpl().Strategy;
+    internal static IRefStrategy GetStrategy( this IRef reference ) => ((IRefImpl) reference).Strategy;
 
-    internal static IRefImpl AsRefImpl( this IRef reference ) => (IRefImpl) reference;
-
-    internal static IRefImpl<T> AsRefImpl<T>( this IRef<T> reference )
+    internal static IRef<T> ToPortable<T>( this IRef<T> reference )
         where T : class, ICompilationElement
-        => (IRefImpl<T>) reference;
+        => ((IRefImpl<T>) reference).ToPortable();
+
+    internal static IRef ToPortable( this IRef reference ) => ((IRefImpl) reference).ToPortable();
 
     // ReSharper disable once SuspiciousTypeConversion.Global
-    public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference )
+    public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference, CompilationContext compilationContext )
         where T : IRef<IDeclaration>
-        => ((ICompilationBoundRefImpl) reference).GetClosestSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
+        => ((IRefImpl) reference).GetClosestContainingSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
 
     internal static Type GetRefInterfaceType( this DeclarationKind declarationKind, RefTargetKind refTargetKind = RefTargetKind.Default )
         => refTargetKind switch
