@@ -36,8 +36,7 @@ internal sealed class ObjectReaderTypeAdapter
             () => property( obj ),
             new UserCodeExecutionContext(
                 this._serviceProvider,
-                UserCodeDescription.Create( "evaluating the {0} field or property", key ),
-                UserCodeExecutionContext.Current.Compilation.AssertNotNull() ) );
+                UserCodeDescription.Create( "evaluating the {0} field or property", key ) ) );
 
         return true;
     }
