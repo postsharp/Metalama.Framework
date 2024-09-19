@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class StringRef<T> : BaseRef<T>, IStringRef
+internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IPortableRef<T>
     where T : class, ICompilationElement
 {
     public string Id { get; }
@@ -32,7 +32,7 @@ internal sealed class StringRef<T> : BaseRef<T>, IStringRef
         }
     }
 
-    public override IRef<T> ToPortable() => this;
+    public override IPortableRef<T> ToPortable() => this;
 
     public override bool IsPortable => true;
 
@@ -120,12 +120,24 @@ internal sealed class StringRef<T> : BaseRef<T>, IStringRef
 
     public override bool Equals( IRef? other, RefComparisonOptions comparisonOptions )
     {
-        // String comparisons are always portable and null-sensitive, so we ignore all flags.
-
-        if ( other is not IStringRef stringRef )
+        if ( other == null )
         {
             return false;
         }
+
+        if ( other is not IStringRef stringRef )
+        {
+            if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
+            {
+                return this.Equals( other.ToPortable(), comparisonOptions );
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // String comparisons are always portable and null-sensitive, so we ignore all flags.
 
         return stringRef.Id == this.Id;
     }

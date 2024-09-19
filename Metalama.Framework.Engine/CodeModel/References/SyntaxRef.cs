@@ -65,21 +65,12 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
             compilation );
     }
 
-    public override bool Equals( IRef? other, RefComparisonOptions options )
+    protected override bool EqualsCore( IRef? other, RefComparisonOptions options )
     {
         if ( other is not SyntaxRef<T> nodeRef )
         {
-            if ( (options & RefComparisonOptions.Structural) != 0 )
-            {
-                throw new NotImplementedException( "Structural comparisons of different reference kinds is not implemented." );
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
-
-        Invariant.Assert( this.CompilationContext == nodeRef.CompilationContext, "Attempted to compare two symbols of different compilations." );
 
         if ( this.TargetKind != nodeRef.TargetKind )
         {
@@ -93,14 +84,7 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
         };
     }
 
-    public override int GetHashCode( RefComparisonOptions comparisonOptions )
-        => HashCode.Combine(
-            comparisonOptions switch
-            {
-                RefComparisonOptions.Default or RefComparisonOptions.IncludeNullability => this.SyntaxNode.GetHashCode(),
-                _ => comparisonOptions.GetSymbolComparer().GetHashCode( this.GetSymbol() )
-            },
-            this.TargetKind );
+    protected override int GetHashCodeCore( RefComparisonOptions comparisonOptions ) => this.SyntaxNode.GetHashCode();
 
     public override string ToString()
         => this.TargetKind switch

@@ -37,7 +37,7 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
         => this.GetTargetOrNull( compilation, options, genericContext );
 
-    public abstract IRef<T> ToPortable();
+    public abstract IPortableRef<T> ToPortable();
 
     public abstract ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
 

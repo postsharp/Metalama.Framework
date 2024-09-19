@@ -59,26 +59,17 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         return ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
     }
 
-    public override bool Equals( IRef? other, RefComparisonOptions options )
+    protected override bool EqualsCore( IRef? other, RefComparisonOptions options )
     {
         if ( other is not BuilderRef<T> builderRef )
         {
-            if ( (options & RefComparisonOptions.Structural) != 0 )
-            {
-                throw new NotImplementedException( "Structural comparisons of different reference kinds is not implemented." );
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
-
-        Invariant.Assert( builderRef.CompilationContext == this.CompilationContext, "CompilationContext mismatch in a non-portable comparison." );
 
         return this.Builder == builderRef.Builder;
     }
 
-    public override int GetHashCode( RefComparisonOptions comparisonOptions ) => this.Builder.GetHashCode();
+    protected override int GetHashCodeCore( RefComparisonOptions comparisonOptions ) => this.Builder.GetHashCode();
 
     public override string ToString() => this.Builder.ToString()!;
 

@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
             => this.GetTargetOrNull( compilation, options, genericContext );
 
-        public IRef<IAttribute> ToPortable() => throw new NotSupportedException();
+        public IPortableRef<IAttribute> ToPortable() => throw new NotSupportedException();
 
         public bool IsPortable => false;
 

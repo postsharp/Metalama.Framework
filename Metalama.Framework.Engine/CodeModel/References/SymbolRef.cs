@@ -55,27 +55,18 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         return ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind ).AssertNotNull(), compilation );
     }
 
-    public override bool Equals( IRef? other, RefComparisonOptions comparisonOptions )
+    protected override bool EqualsCore( IRef? other, RefComparisonOptions comparisonOptions )
     {
         if ( other is not SymbolRef<T> symbolRef )
         {
-            if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
-            {
-                throw new NotImplementedException( "Structural comparisons of different reference kinds is not implemented." );
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
-
-        Invariant.Assert( this.CompilationContext == symbolRef.CompilationContext, "Compilation mistmatch in a non-portable comparison." );
 
         return comparisonOptions.GetSymbolComparer().Equals( symbolRef.Symbol, this.Symbol )
                && this.TargetKind == symbolRef.TargetKind;
     }
 
-    public override int GetHashCode( RefComparisonOptions comparisonOptions ) => comparisonOptions.GetSymbolComparer().GetHashCode( this.Symbol );
+    protected override int GetHashCodeCore( RefComparisonOptions comparisonOptions ) => comparisonOptions.GetSymbolComparer().GetHashCode( this.Symbol );
 
     public override string ToString()
         => this.TargetKind switch

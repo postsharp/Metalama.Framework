@@ -49,7 +49,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
     [Memo]
     private StringRef<T> CompilationNeutralRef => new( this.ToSerializableId().Id );
 
-    public sealed override IRef<T> ToPortable() => this.CompilationNeutralRef;
+    public sealed override IPortableRef<T> ToPortable() => this.CompilationNeutralRef;
 
     public override SerializableDeclarationId ToSerializableId()
     {
@@ -69,6 +69,37 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
         return this.GetSymbolIgnoringKind();
     }
+
+    public sealed override bool Equals( IRef? other, RefComparisonOptions comparisonOptions )
+    {
+        if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
+        {
+            return this.ToPortable().Equals( other, comparisonOptions );
+        }
+
+        if ( other is not ICompilationBoundRefImpl symbolRef )
+        {
+            return false;
+        }
+
+        Invariant.Assert( this.CompilationContext == symbolRef.CompilationContext, "Compilation mistmatch in a non-portable comparison." );
+
+        return this.EqualsCore( other, comparisonOptions );
+    }
+
+    public sealed override int GetHashCode( RefComparisonOptions comparisonOptions )
+    {
+        if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
+        {
+            return this.ToPortable().GetHashCode( comparisonOptions );
+        }
+
+        return this.GetHashCodeCore( comparisonOptions );
+    }
+
+    protected abstract bool EqualsCore( IRef? other, RefComparisonOptions comparisonOptions );
+
+    protected abstract int GetHashCodeCore( RefComparisonOptions comparisonOptions );
 
     private ISymbol GetSymbolWithKind( ISymbol symbol )
         => this.TargetKind switch

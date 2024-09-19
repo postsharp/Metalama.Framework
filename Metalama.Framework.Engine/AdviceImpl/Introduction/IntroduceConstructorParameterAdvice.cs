@@ -97,7 +97,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             RefKind.None,
             this ) { DefaultValue = this._defaultValue };
 
-        var parameter = parameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
+        var parameter = parameterBuilder.ForCompilation<IParameter>( compilation, ReferenceResolutionOptions.CanBeMissing );
 
         this._buildAction?.Invoke( parameterBuilder );
 

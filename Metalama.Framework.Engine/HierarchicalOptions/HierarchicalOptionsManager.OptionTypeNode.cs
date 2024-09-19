@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -20,10 +22,13 @@ public sealed partial class HierarchicalOptionsManager
 {
     private sealed class OptionTypeNode
     {
+        // Options are also evaluated after the linker, so we must use portable references
+        private readonly ConcurrentDictionary<IPortableRef<IDeclaration>, DeclarationNode> _optionsByDeclaration =
+            new( RefEqualityComparer<IDeclaration>.Structural );
+
         private readonly IHierarchicalOptions _defaultOptions;
         private readonly IHierarchicalOptions _emptyOptions;
         private readonly HierarchicalOptionsManager _parent;
-        private readonly ConcurrentDictionary<IRef<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
         private readonly Type _type;
         private readonly string _typeName;
@@ -244,7 +249,7 @@ public sealed partial class HierarchicalOptionsManager
         private DeclarationNode GetOrAddDeclarationNode( IDeclaration declaration )
         {
             return this._optionsByDeclaration.GetOrAdd(
-                declaration.ToRef(),
+                declaration.ToRef().ToPortable(),
                 static ( _, ctx ) =>
                 {
                     var node = new DeclarationNode();
@@ -292,7 +297,7 @@ public sealed partial class HierarchicalOptionsManager
             bool createNodeIfEmpty = false )
         {
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToRef(), out var node ) )
+            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToRef().ToPortable(), out var node ) )
             {
                 if ( !declaration.BelongsToCurrentProject
                      && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out _ ) == true )
@@ -327,7 +332,7 @@ public sealed partial class HierarchicalOptionsManager
             // options may be project-dependency.
             var compilationOptions = this._defaultOptions;
 
-            if ( this._optionsByDeclaration.TryGetValue( compilation.ToRef(), out var compilationNode )
+            if ( this._optionsByDeclaration.TryGetValue( compilation.ToRef().ToPortable(), out var compilationNode )
                  && compilationNode.DirectOptions != null )
             {
                 compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation )

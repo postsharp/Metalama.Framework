@@ -37,12 +37,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
         (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData();
     }
 
+    internal interface IPortableRef<out T> : IRefImpl<T>
+        where T : class, ICompilationElement { }
+
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
         where T : class, ICompilationElement
     {
         new IRefImpl<TOut> As<TOut>()
             where TOut : class, ICompilationElement;
 
-        new IRef<T> ToPortable();
+        new IPortableRef<T> ToPortable();
     }
 }

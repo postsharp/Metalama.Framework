@@ -16,7 +16,7 @@ public static class RefExtensions
     internal static IRefStrategy GetStrategy( this IRef reference ) => ((IRefImpl) reference).Strategy;
 
     // TODO: Portable references are useful only in design-time execution scenarios.
-    internal static IRef<T> ToPortable<T>( this IRef<T> reference )
+    internal static IPortableRef<T> ToPortable<T>( this IRef<T> reference )
         where T : class, ICompilationElement
         => ((IRefImpl<T>) reference).ToPortable();
 
