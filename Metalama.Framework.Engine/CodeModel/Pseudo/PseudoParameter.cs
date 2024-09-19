@@ -116,5 +116,11 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         IRef<IParameter> IParameter.ToRef() => this.Ref;
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
+
+        internal override ICompilationElement Translate(
+            CompilationModel newCompilation,
+            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+            IGenericContext? genericContext = null )
+            => newCompilation.Factory.Translate( this.DeclaringMember, options, genericContext ).AssertNotNull().Parameters[this.Index];
     }
 }

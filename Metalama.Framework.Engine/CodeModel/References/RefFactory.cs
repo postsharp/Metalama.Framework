@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// <summary>
     /// Builds instances of the <see cref="IRef{T}"/> interface.
     /// </summary>
-    internal class RefFactory
+    internal sealed class RefFactory
     {
         private readonly CompilationContext _compilationContext;
 

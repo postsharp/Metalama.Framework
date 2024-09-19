@@ -33,7 +33,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<TDeclaration, TRef> 
         else if ( !this.IsComplete )
         {
             var members = new UpdatableMemberRefArray<TRef>(
-                this.GetMemberRefsOfName( name ).Cast<TRef>().ToImmutableArray(),
+                this.GetMemberRefsOfName( name ).ToImmutableArray(),
                 this.Compilation,
                 this.MemberRefComparer );
 

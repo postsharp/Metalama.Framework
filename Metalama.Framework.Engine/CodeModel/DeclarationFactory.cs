@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
@@ -129,42 +128,9 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
     public T? Translate<T>(
         T? compilationElement,
         ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-        IGenericContext? genericContext = null )
-        where T : class, ICompilationElement?
-    {
-        if ( compilationElement == null )
-        {
-            return null;
-        }
-
-        if ( ReferenceEquals( compilationElement.Compilation, this._compilationModel ) )
-        {
-            return compilationElement;
-        }
-        else
-        {
-            switch ( compilationElement )
-            {
-                case IBuilderBasedDeclaration builderBased:
-                    return (T) this.GetDeclaration( builderBased.Builder, options )!;
-
-                case ISymbolBasedCompilationElement symbolBased:
-                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate(
-                        symbolBased.Symbol,
-                        symbolCompilationContext: symbolBased.Compilation.CompilationContext );
-
-                    if ( translatedSymbol == null )
-                    {
-                        return null;
-                    }
-
-                    return (T?) this._compilationModel.Factory.GetCompilationElement( translatedSymbol );
-
-                default:
-                    throw new AssertionFailedException( $"Cannot translate a '{compilationElement.GetType().Name}'." );
-            }
-        }
-    }
+        IGenericContext? genericContext = null ) 
+        where T : class, ICompilationElement
+        => (T?) ((ICompilationElementImpl?) compilationElement)?.Translate( this._compilationModel, options, genericContext );
 
     public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
         => this._compilationModel.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );

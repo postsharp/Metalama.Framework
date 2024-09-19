@@ -52,7 +52,7 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         this.SyntaxGenerationContext = context;
         this._syntaxGeneratorForIType = new SyntaxGeneratorForIType( context.Options );
-        this._typeSyntaxCache = new ConcurrentDictionary<IRef<IType>, TypeSyntax>( RefEqualityComparer<IType>.Default );
+        this._typeSyntaxCache = new ConcurrentDictionary<IRef<IType>, TypeSyntax>( RefEqualityComparer<IType>.IncludeNullability );
         this.IsNullAware = nullAware;
     }
 

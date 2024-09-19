@@ -22,6 +22,17 @@ namespace Metalama.Framework.Engine.CodeModel
         [PublicAPI]
         public abstract CompilationModel Compilation { get; }
 
+        ICompilationElement? ICompilationElementImpl.Translate(
+            CompilationModel newCompilation,
+            ReferenceResolutionOptions options,
+            IGenericContext? genericContext )
+            => this.Translate( newCompilation, options, genericContext );
+
+        internal abstract ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+            IGenericContext? genericContext = null );
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToDeclarationRef();

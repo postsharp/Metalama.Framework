@@ -2,9 +2,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
@@ -104,5 +106,15 @@ public static class RefExtensions
             SymbolKind.TypeParameter => compilationContext.RefFactory.FromSymbol<ITypeParameter>( symbol ),
             SymbolKind.NamedType => compilationContext.RefFactory.FromSymbol<INamedType>( symbol ),
             _ => compilationContext.RefFactory.FromSymbol<IType>( symbol )
+        };
+
+    public static IEqualityComparer<ISymbol> GetSymbolComparer( this RefComparisonOptions comparisonOptions )
+        => comparisonOptions switch
+        {
+            RefComparisonOptions.Default => SymbolEqualityComparer.Default,
+            RefComparisonOptions.Structural => StructuralSymbolComparer.Default,
+            RefComparisonOptions.Structural | RefComparisonOptions.IncludeNullability => StructuralSymbolComparer.IncludeNullability,
+            RefComparisonOptions.IncludeNullability => SymbolEqualityComparer.IncludeNullability,
+            _ => throw new ArgumentOutOfRangeException()
         };
 }

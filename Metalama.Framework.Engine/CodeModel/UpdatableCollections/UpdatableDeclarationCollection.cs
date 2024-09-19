@@ -74,8 +74,9 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
     {
         if ( this.IsComplete )
         {
+            var itemCopy = item;
             Interlocked.Increment( ref this._removeOperationsCount );
-            this._allItems!.Remove( item );
+            this._allItems!.RemoveAll( i => i.Equals( itemCopy ) );
         }
     }
 

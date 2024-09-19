@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class StringRef<T> : BaseRef<T>, IStringRef
+internal sealed class StringRef<T> : BaseRef<T>, IStringRef
     where T : class, ICompilationElement
 {
     public string Id { get; }
@@ -118,8 +118,10 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
         }
     }
 
-    public override bool Equals( IRef? other )
+    public override bool Equals( IRef? other, RefComparisonOptions comparisonOptions )
     {
+        // String comparisons are always portable and null-sensitive, so we ignore all flags.
+
         if ( other is not IStringRef stringRef )
         {
             return false;
@@ -128,7 +130,7 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
         return stringRef.Id == this.Id;
     }
 
-    protected override int GetHashCodeCore()
+    public override int GetHashCode( RefComparisonOptions comparisonOptions )
     {
 #if NET5_0_OR_GREATER
         return this.Id.GetHashCode( StringComparison.Ordinal );

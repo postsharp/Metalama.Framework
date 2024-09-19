@@ -55,17 +55,17 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         IRef IRefImpl.ToPortable() => this.ToPortable();
 
-        public bool Equals( IRef? other, RefComparison comparison = RefComparison.Default )
-            => comparison switch
+        public bool Equals( IRef? other, RefComparisonOptions comparisonOptions = RefComparisonOptions.Default )
+            => comparisonOptions switch
             {
-                RefComparison.Default => this.Equals( other ),
+                RefComparisonOptions.Default => this.Equals( other ),
                 _ => throw new NotSupportedException( "Compilation-neutral comparison of attributes is not supported." )
             };
 
-        public int GetHashCode( RefComparison comparison )
-            => comparison switch
+        public int GetHashCode( RefComparisonOptions comparisonOptions )
+            => comparisonOptions switch
             {
-                RefComparison.Default => this.GetHashCode(),
+                RefComparisonOptions.Default => this.GetHashCode(),
                 _ => throw new NotSupportedException( "Compilation-neutral comparison of attributes is not supported." )
             };
 

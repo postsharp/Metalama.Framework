@@ -18,8 +18,14 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public CompilationModel Compilation { get; }
 
+        public ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+            IGenericContext? genericContext = null )
+            => newCompilation.Factory.GetCompilationElement( this.Symbol );
+
         ISymbol ISymbolBasedCompilationElement.Symbol => this.Symbol;
-        
+
         protected T Symbol { get; }
 
         protected RoslynType( T symbol, CompilationModel compilation )

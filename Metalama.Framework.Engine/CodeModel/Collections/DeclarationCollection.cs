@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
             if ( !this._genericContext.IsEmptyOrIdentity && !ReferenceEquals( definition.GetDefinition(), definition ) )
             {
-                // We must apply the mapping.
+                // TODO: We must apply the mapping.
             }
 
             return (TDeclaration) definition;

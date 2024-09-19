@@ -29,8 +29,8 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
     protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome = AdviceOutcome.Default, TIntroduced? member = null )
     {
         var reference = member != null
-            ? member.ToRef().As<TIntroduced>()
-            : this.Builder.ToRef().As<TIntroduced>();
+            ? member.ToRef()
+            : this.Builder.ToRef();
 
         return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, reference, null );
     }

@@ -130,8 +130,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
-        private ImmutableDictionary<IRef<ICompilationElement>, IRef<ICompilationElement>> _redirections =
-            ImmutableDictionary.Create<IRef<ICompilationElement>, IRef<ICompilationElement>>( RefEqualityComparer<ICompilationElement>.Default );
+        private ImmutableDictionary<IRef, IRef> _redirections =
+            ImmutableDictionary.Create<IRef, IRef>( RefEqualityComparer.Default );
 
         private ImmutableDictionary<IRef<IDeclaration>, int> _depthsCache =
             ImmutableDictionary.Create<IRef<IDeclaration>, int>( RefEqualityComparer<IDeclaration>.Default );
@@ -549,7 +549,12 @@ namespace Metalama.Framework.Engine.CodeModel
             return depth;
         }
 
-        internal bool TryGetRedirectedDeclaration( IRef<ICompilationElement> reference, out IRef<ICompilationElement> redirected )
+        internal bool IsRedirected( IRef reference )
+        {
+            return reference is IRef<IDeclaration> declarationRef && this._redirections.ContainsKey( declarationRef );
+        }
+
+        internal bool TryGetRedirectedDeclaration( IRef reference, out IRef redirected )
         {
             var result = false;
 

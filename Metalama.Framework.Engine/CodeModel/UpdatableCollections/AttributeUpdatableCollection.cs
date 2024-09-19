@@ -56,6 +56,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
     {
         this.EnsureComplete();
 
+        // TODO: Do not resolve the AttributeRef.
         var itemsToRemove = this.Where( x => x.GetTarget( namedType.Compilation ).Constructor.DeclaringType.Is( namedType ) )
             .ToReadOnlyList();
 

@@ -8,9 +8,11 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SyntaxRef<T> : CompilationBoundRef<T>
+internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
     where T : class, ICompilationElement
 {
+    private ISymbol? _cachedSymbol;
+
     public SyntaxNode SyntaxNode { get; }
 
     public SyntaxRef( SyntaxNode syntaxNode, RefTargetKind targetKind, CompilationContext compilationContext )
@@ -28,20 +30,27 @@ internal class SyntaxRef<T> : CompilationBoundRef<T>
 
     protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
     {
-        return GetSymbolOfNode( this.CompilationContext, this.SyntaxNode );
+        return this.GetSymbol();
     }
 
-    private static ISymbol GetSymbolOfNode( CompilationContext compilationContext, SyntaxNode node )
+    private ISymbol GetSymbol()
     {
+        if ( this._cachedSymbol != null )
+        {
+            return this._cachedSymbol;
+        }
+
         var semanticModel =
-            compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree )
-            ?? throw new AssertionFailedException( $"Cannot get a semantic model for '{node.SyntaxTree.FilePath}'." );
+            this.CompilationContext.SemanticModelProvider.GetSemanticModel( this.SyntaxNode.SyntaxTree )
+            ?? throw new AssertionFailedException( $"Cannot get a semantic model for '{this.SyntaxNode.SyntaxTree.FilePath}'." );
 
-        var symbol =
-            (node is LambdaExpressionSyntax ? semanticModel.GetSymbolInfo( node ).Symbol : semanticModel.GetDeclaredSymbol( node ))
-            ?? throw new AssertionFailedException( $"Cannot get a symbol for {node.GetType().Name}." );
+        this._cachedSymbol =
+            (this.SyntaxNode is LambdaExpressionSyntax
+                ? semanticModel.GetSymbolInfo( this.SyntaxNode ).Symbol
+                : semanticModel.GetDeclaredSymbol( this.SyntaxNode ))
+            ?? throw new AssertionFailedException( $"Cannot get a symbol for {this.SyntaxNode.GetType().Name}." );
 
-        return symbol;
+        return this._cachedSymbol;
     }
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
@@ -50,25 +59,48 @@ internal class SyntaxRef<T> : CompilationBoundRef<T>
 
         return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
-                    GetSymbolOfNode( compilation.PartialCompilation.CompilationContext, this.SyntaxNode ),
+                    this.GetSymbol(),
                     this.TargetKind )
                 .AssertNotNull(),
             compilation );
     }
 
-    public override bool Equals( IRef? other )
+    public override bool Equals( IRef? other, RefComparisonOptions options )
     {
         if ( other is not SyntaxRef<T> nodeRef )
         {
-            return false;
+            if ( (options & RefComparisonOptions.Structural) != 0 )
+            {
+                throw new NotImplementedException( "Structural comparisons of different reference kinds is not implemented." );
+            }
+            else
+            {
+                return false;
+            }
         }
 
         Invariant.Assert( this.CompilationContext == nodeRef.CompilationContext, "Attempted to compare two symbols of different compilations." );
 
-        return nodeRef.SyntaxNode == this.SyntaxNode && nodeRef.TargetKind == this.TargetKind;
+        if ( this.TargetKind != nodeRef.TargetKind )
+        {
+            return false;
+        }
+
+        return options switch
+        {
+            RefComparisonOptions.Default or RefComparisonOptions.IncludeNullability => nodeRef.SyntaxNode == this.SyntaxNode,
+            _ => options.GetSymbolComparer().Equals( this.GetSymbol(), nodeRef.GetSymbol() )
+        };
     }
 
-    protected override int GetHashCodeCore() => HashCode.Combine( this.SyntaxNode, this.TargetKind );
+    public override int GetHashCode( RefComparisonOptions comparisonOptions )
+        => HashCode.Combine(
+            comparisonOptions switch
+            {
+                RefComparisonOptions.Default or RefComparisonOptions.IncludeNullability => this.SyntaxNode.GetHashCode(),
+                _ => comparisonOptions.GetSymbolComparer().GetHashCode( this.GetSymbol() )
+            },
+            this.TargetKind );
 
     public override string ToString()
         => this.TargetKind switch

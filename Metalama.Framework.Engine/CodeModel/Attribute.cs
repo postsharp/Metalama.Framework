@@ -33,6 +33,12 @@ internal sealed class Attribute : IAttributeImpl
 
     public CompilationModel Compilation { get; }
 
+    public ICompilationElement Translate(
+        CompilationModel newCompilation,
+        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+        IGenericContext? genericContext = null )
+        => throw new NotImplementedException();
+
     public AttributeData AttributeData { get; }
 
     [Memo]

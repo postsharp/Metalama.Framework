@@ -7,10 +7,13 @@ using System;
 
 namespace Metalama.Framework.Code
 {
-    public enum RefComparison
+    [Flags]
+    public enum RefComparisonOptions
     {
         Default,
-        Portable
+        Structural = 1,
+        IncludeNullability = 2,
+        StructuralIncludeNullability = Structural | IncludeNullability
     }
 
     public enum RefOptions
@@ -57,9 +60,9 @@ namespace Metalama.Framework.Code
             ReferenceResolutionOptions options = default,
             IGenericContext? genericContext = default );
 
-        bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
+        bool Equals( IRef? other, RefComparisonOptions comparisonOptions = RefComparisonOptions.Default );
 
-        int GetHashCode( RefComparison comparison );
+        int GetHashCode( RefComparisonOptions comparisonOptions );
     }
 
     /// <summary>

@@ -117,23 +117,11 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public abstract IRefImpl<TOut> As<TOut>()
         where TOut : class, ICompilationElement;
 
-    public override int GetHashCode() => this.GetHashCodeCore();
+    public override int GetHashCode() => this.GetHashCode( RefComparisonOptions.Default );
 
-    public abstract bool Equals( IRef? other );
+    public bool Equals( IRef? other ) => this.Equals( other, RefComparisonOptions.Default );
 
-    public bool Equals( IRef? other, RefComparison comparison )
-        => comparison switch
-        {
-            RefComparison.Default => this.Equals( other ),
-            _ => this.ToPortable().Equals( other?.ToPortable() )
-        };
+    public abstract bool Equals( IRef? other, RefComparisonOptions comparisonOptions );
 
-    public int GetHashCode( RefComparison comparison )
-        => comparison switch
-        {
-            RefComparison.Default => this.GetHashCodeCore(),
-            _ => this.ToPortable().GetHashCode()
-        };
-
-    protected abstract int GetHashCodeCore();
+    public abstract int GetHashCode( RefComparisonOptions comparisonOptions );
 }

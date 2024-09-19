@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SyntaxAttributeRef : AttributeRef
+internal sealed class SyntaxAttributeRef : AttributeRef
 {
     private readonly AttributeSyntax _attributeSyntax;
 
@@ -41,12 +41,12 @@ internal class SyntaxAttributeRef : AttributeRef
 
     private ResolvedRef? _resolvedRef;
 
-    protected record ResolvedRef( AttributeData AttributeData, ISymbol Parent )
+    private sealed record ResolvedRef( AttributeData AttributeData, ISymbol Parent )
     {
         public static ResolvedRef Invalid { get; } = new( null!, null! );
     }
 
-    protected ResolvedRef? ResolveAttributeData( AttributeSyntax attributeSyntax )
+    private ResolvedRef? ResolveAttributeData( AttributeSyntax attributeSyntax )
     {
         if ( this._resolvedRef != null )
         {

@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class DeserializedAttributeRef : AttributeRef
+internal sealed class DeserializedAttributeRef : AttributeRef
 {
     private readonly AttributeSerializationData _serializationData;
 

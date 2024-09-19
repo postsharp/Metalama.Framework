@@ -21,7 +21,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 namespace Metalama.Framework.Engine.CodeModel.Pseudo;
 
 internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
-    where T : IHasAccessorsImpl
+    where T : class, IHasAccessorsImpl
 {
     protected T DeclaringMember { get; }
 
@@ -165,6 +165,12 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     bool IDeclarationImpl.CanBeInherited => false;
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => throw new NotSupportedException();
+
+    public ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+        IGenericContext? genericContext = null )
+        => newCompilation.Factory.Translate( this.DeclaringMember, options, genericContext ).AssertNotNull().GetAccessor( this.MethodKind );
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
 

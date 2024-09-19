@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -54,21 +55,27 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         return ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind ).AssertNotNull(), compilation );
     }
 
-    public override bool Equals( IRef? other )
+    public override bool Equals( IRef? other, RefComparisonOptions comparisonOptions )
     {
-        if ( other is not ISymbolRef symbolRef )
+        if ( other is not SymbolRef<T> symbolRef )
         {
-            return false;
+            if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
+            {
+                throw new NotImplementedException( "Structural comparisons of different reference kinds is not implemented." );
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        Invariant.Assert( this.CompilationContext == symbolRef.CompilationContext, "Attempted to compare two symbols of different compilations." );
+        Invariant.Assert( this.CompilationContext == symbolRef.CompilationContext, "Compilation mistmatch in a non-portable comparison." );
 
-        // Intentionally using non-structural comparison because we are in the same compilation.
-        return SymbolEqualityComparer.Default.Equals( symbolRef.Symbol, this.Symbol )
+        return comparisonOptions.GetSymbolComparer().Equals( symbolRef.Symbol, this.Symbol )
                && this.TargetKind == symbolRef.TargetKind;
     }
 
-    protected override int GetHashCodeCore() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
+    public override int GetHashCode( RefComparisonOptions comparisonOptions ) => comparisonOptions.GetSymbolComparer().GetHashCode( this.Symbol );
 
     public override string ToString()
         => this.TargetKind switch

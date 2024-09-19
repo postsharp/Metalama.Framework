@@ -38,6 +38,12 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol? Symbol => null;
 
+        internal override ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+            IGenericContext? genericContext = null )
+            => ((IMethod?) this.DeclaringMethod.Translate( newCompilation, options, genericContext ))?.ReturnParameter;
+
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
             => this.DeclaringMethod.GetDerivedDeclarations( options ).Select( d => ((IMethod) d).ReturnParameter );
 

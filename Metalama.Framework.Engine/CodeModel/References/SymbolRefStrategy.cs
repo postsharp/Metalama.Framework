@@ -14,7 +14,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SymbolRefStrategy : IRefStrategy
+internal sealed class SymbolRefStrategy : IRefStrategy
 {
     private readonly CompilationContext _compilationContext;
 

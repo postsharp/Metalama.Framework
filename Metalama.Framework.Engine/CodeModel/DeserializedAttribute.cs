@@ -32,6 +32,12 @@ internal class DeserializedAttribute : IAttributeImpl
 
     internal CompilationModel Compilation { get; }
 
+    public ICompilationElement Translate(
+        CompilationModel newCompilation,
+        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+        IGenericContext? genericContext = null )
+        => throw new NotImplementedException();
+
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;

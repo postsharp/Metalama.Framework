@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
     public abstract class SymbolBasedDeclaration : BaseDeclaration, ISymbolBasedCompilationElement
     {
         public abstract ISymbol Symbol { get; }
-        
+
         [Memo]
         public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
 
@@ -105,5 +105,22 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public override ImmutableArray<SourceReference> Sources
             => this.Symbol.DeclaringSyntaxReferences.SelectAsImmutableArray( r => new SourceReference( r.GetSyntax(), SourceReferenceImpl.Instance ) );
+
+        internal override ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+            IGenericContext? genericContext = null )
+        {
+            var translatedSymbol = newCompilation.CompilationContext.SymbolTranslator.Translate(
+                this.Symbol,
+                symbolCompilationContext: this.Compilation.CompilationContext );
+
+            if ( translatedSymbol == null )
+            {
+                return null;
+            }
+
+            return newCompilation.Factory.GetCompilationElement( this.Symbol );
+        }
     }
 }

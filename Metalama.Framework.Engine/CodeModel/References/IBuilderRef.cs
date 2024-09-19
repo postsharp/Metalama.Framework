@@ -4,7 +4,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal interface IBuilderRef 
+internal interface IBuilderRef : ICompilationBoundRefImpl
 {
     IDeclarationBuilder Builder { get; }
 }

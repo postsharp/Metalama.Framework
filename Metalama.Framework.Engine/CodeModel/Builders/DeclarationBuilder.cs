@@ -65,6 +65,12 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
+    public ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+        IGenericContext? genericContext = null )
+        => newCompilation.Factory.GetDeclaration( this, options, genericContext );
+
     public CompilationModel Compilation
         => (CompilationModel?) this.ContainingDeclaration?.Compilation
            ?? throw new AssertionFailedException( $"Declaration '{this}' has no containing declaration." );

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class BuilderRefStrategy : IRefStrategy
+internal sealed class BuilderRefStrategy : IRefStrategy
 {
     public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add )
     {

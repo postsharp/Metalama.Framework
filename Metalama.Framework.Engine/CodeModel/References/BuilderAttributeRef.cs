@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class BuilderAttributeRef : AttributeRef
+internal sealed class BuilderAttributeRef : AttributeRef
 {
     public AttributeBuilder AttributeBuilder { get; }
 

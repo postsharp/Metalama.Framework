@@ -7,4 +7,9 @@ namespace Metalama.Framework.Engine.CodeModel;
 internal interface ICompilationElementImpl : ICompilationElement
 {
     new CompilationModel Compilation { get; }
+
+    ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+        IGenericContext? genericContext = null );
 }

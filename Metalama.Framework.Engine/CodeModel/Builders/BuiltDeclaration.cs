@@ -22,7 +22,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         this.Compilation = compilation;
         this.GenericContext = genericContext;
     }
-    
+
     IDeclarationBuilder IBuilderBasedDeclaration.Builder => this.Builder;
 
     public override CompilationModel Compilation { get; }
@@ -83,4 +83,10 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     public override bool BelongsToCurrentProject => true;
 
     public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
+
+    internal override ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+        IGenericContext? genericContext = null )
+        => this.Builder.Translate( newCompilation, options, genericContext );
 }

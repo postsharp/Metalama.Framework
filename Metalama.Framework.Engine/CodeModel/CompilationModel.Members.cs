@@ -42,7 +42,7 @@ public sealed partial class CompilationModel
     internal bool Contains( FieldBuilder fieldBuilder )
         => (this._fields.TryGetValue( fieldBuilder.DeclaringType.ToRef(), out var fields )
             && fields.Contains( fieldBuilder.ToRef() ))
-           || this.TryGetRedirectedDeclaration( fieldBuilder.ToRef(), out _ );
+           || this.IsRedirected( fieldBuilder.ToRef() );
 
     internal bool Contains( MethodBuilder methodBuilder )
         => methodBuilder switch
@@ -427,7 +427,7 @@ public sealed partial class CompilationModel
 
             case IField replacedField:
                 var fields = this.GetFieldCollection( replacedField.DeclaringType.ToRef(), true );
-                fields.Remove( replaced.As<IField>() );
+                fields.Remove( replaced.As<IFieldOrProperty>() );
 
                 break;
 

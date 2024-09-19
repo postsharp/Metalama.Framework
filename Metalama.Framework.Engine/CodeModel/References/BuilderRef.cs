@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
+internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     where T : class, ICompilationElement
 {
     public BuilderRef( IDeclarationBuilder builder, CompilationContext compilationContext )
@@ -22,7 +22,7 @@ internal class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     public override CompilationContext CompilationContext { get; }
 
     public IDeclarationBuilder Builder { get; }
-    
+
     public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
 
     public override string Name
@@ -59,12 +59,29 @@ internal class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         return ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
     }
 
-    public override bool Equals( IRef? other ) => other is IBuilderRef builderRef && this.Builder == builderRef.Builder;
+    public override bool Equals( IRef? other, RefComparisonOptions options )
+    {
+        if ( other is not BuilderRef<T> builderRef )
+        {
+            if ( (options & RefComparisonOptions.Structural) != 0 )
+            {
+                throw new NotImplementedException( "Structural comparisons of different reference kinds is not implemented." );
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-    protected override int GetHashCodeCore() => this.Builder.GetHashCode();
+        Invariant.Assert( builderRef.CompilationContext == this.CompilationContext, "CompilationContext mismatch in a non-portable comparison." );
+
+        return this.Builder == builderRef.Builder;
+    }
+
+    public override int GetHashCode( RefComparisonOptions comparisonOptions ) => this.Builder.GetHashCode();
 
     public override string ToString() => this.Builder.ToString()!;
 
     public override IRefImpl<TOut> As<TOut>()
-        => (IRefImpl<TOut>) this; // There should be no reason to upcast since we always create instances of the right type.
+        => (IRefImpl<TOut>) (object) this; // There should be no reason to upcast since we always create instances of the right type.
 }
