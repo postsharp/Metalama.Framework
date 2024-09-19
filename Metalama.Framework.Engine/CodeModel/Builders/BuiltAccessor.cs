@@ -96,12 +96,12 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
         => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.TranslateType( this._accessorBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.Compilation.Factory.Translate( this._accessorBuilder.ReturnParameter.Type );
 
     public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments => this._accessorBuilder.TypeArguments.SelectAsImmutableArray( t => this.Compilation.Factory.TranslateType( t ) );
+    public IReadOnlyList<IType> TypeArguments => this._accessorBuilder.TypeArguments.SelectAsImmutableArray( t => this.Compilation.Factory.Translate( t ) );
 
     public bool IsGeneric => this._accessorBuilder.IsGeneric;
 
@@ -131,7 +131,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     [Memo]
     public IMember? OverriddenMember
-        => this.Compilation.Factory.TranslateDeclaration( this._accessorBuilder.OverriddenMember, genericContext: this.GenericContext );
+        => this.Compilation.Factory.Translate( this._accessorBuilder.OverriddenMember, genericContext: this.GenericContext );
 
     public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
 

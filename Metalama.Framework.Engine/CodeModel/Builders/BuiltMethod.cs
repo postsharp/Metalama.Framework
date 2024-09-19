@@ -40,7 +40,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.TranslateDeclaration( i ) );
+        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.Translate( i ) );
 
     public MethodInfo ToMethodInfo() => this._methodBuilder.ToMethodInfo();
 
@@ -54,7 +54,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation, this.GenericContext );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.TranslateType( this._methodBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.Compilation.Factory.Translate( this._methodBuilder.ReturnParameter.Type );
 
     [Memo]
     public IGenericParameterList TypeParameters
@@ -71,7 +71,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
     [Memo]
-    public IMethod? OverriddenMethod => this.Compilation.Factory.TranslateDeclaration( this._methodBuilder.OverriddenMethod );
+    public IMethod? OverriddenMethod => this.Compilation.Factory.Translate( this._methodBuilder.OverriddenMethod );
 
     IMethod IMethod.Definition => this;
 

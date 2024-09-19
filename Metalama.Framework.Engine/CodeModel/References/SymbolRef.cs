@@ -73,8 +73,8 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
     public override string ToString()
         => this.TargetKind switch
         {
-            RefTargetKind.Default => this.Symbol.ToString()!,
-            _ => $"{this.Symbol}:{this.TargetKind}"
+            RefTargetKind.Default => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ),
+            _ => $"{this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}:{this.TargetKind}"
         };
 
     public override IRefImpl<TOut> As<TOut>()

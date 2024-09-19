@@ -32,7 +32,7 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 
     [Memo]
-    public IProperty? OverriddenProperty => this.Compilation.Factory.TranslateDeclaration( this.PropertyBuilder.OverriddenProperty );
+    public IProperty? OverriddenProperty => this.Compilation.Factory.Translate( this.PropertyBuilder.OverriddenProperty );
 
     IProperty IProperty.Definition => this;
 
@@ -43,7 +43,7 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
-        => this.PropertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.TranslateDeclaration( i ) );
+        => this.PropertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.Translate( i ) );
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 

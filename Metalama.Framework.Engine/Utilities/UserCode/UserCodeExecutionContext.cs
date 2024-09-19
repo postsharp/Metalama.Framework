@@ -207,12 +207,29 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         ISyntaxBuilderImpl? syntaxBuilderImpl,
         ProjectServiceProvider serviceProvider,
         IDeclaration? targetDeclaration )
-        => syntaxBuilderImpl ?? (compilationModel == null
-            ? null
-            : new SyntaxBuilderImpl(
-                compilationModel,
-                serviceProvider.GetRequiredService<SyntaxGenerationOptions>(),
-                targetDeclaration?.GetClosestNamedType() ));
+    {
+        if ( syntaxBuilderImpl != null )
+        {
+            return syntaxBuilderImpl;
+        }
+
+        if ( compilationModel == null )
+        {
+            return null;
+        }
+        
+        var syntaxGenerationOptions = serviceProvider.GetService<SyntaxGenerationOptions>();
+
+        if ( syntaxGenerationOptions == null )
+        {
+            return null;
+        }
+
+        return new SyntaxBuilderImpl(
+            compilationModel,
+            syntaxGenerationOptions,
+            targetDeclaration?.GetClosestNamedType() );
+    }
 
     internal IDiagnosticAdder Diagnostics
         => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );

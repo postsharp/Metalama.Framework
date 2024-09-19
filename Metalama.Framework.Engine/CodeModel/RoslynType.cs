@@ -13,11 +13,13 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal abstract class RoslynType<T> : ITypeImpl
+    internal abstract class RoslynType<T> : ITypeImpl, ISymbolBasedCompilationElement
         where T : ITypeSymbol
     {
         public CompilationModel Compilation { get; }
 
+        ISymbol ISymbolBasedCompilationElement.Symbol => this.Symbol;
+        
         protected T Symbol { get; }
 
         protected RoslynType( T symbol, CompilationModel compilation )

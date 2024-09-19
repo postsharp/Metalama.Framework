@@ -25,7 +25,7 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
     public INamedType? DeclaringType
-        => this.Compilation.Factory.TranslateDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
+        => this.Compilation.Factory.Translate( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 

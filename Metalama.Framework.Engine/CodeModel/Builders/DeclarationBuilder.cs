@@ -22,13 +22,18 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
+internal interface IBuilderBasedDeclaration : IDeclarationImpl
+{
+    IDeclarationBuilder Builder { get; }
+}
+
 /// <summary>
 /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advice methods so the user can continue
 /// specifying the introduced declaration. They are bound to the <see cref="CompilationModel"/> that created them, but implement
 /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
 /// 
 /// </summary>
-internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
+internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBasedDeclaration
 {
     private readonly AttributeBuilderCollection _attributes = new();
 
@@ -183,4 +188,6 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 
     [Memo]
     protected RefFactory RefFactory => this.GetCompilationContext().RefFactory;
+
+    IDeclarationBuilder IBuilderBasedDeclaration.Builder => this;
 }

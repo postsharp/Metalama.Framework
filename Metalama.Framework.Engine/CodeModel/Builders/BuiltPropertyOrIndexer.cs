@@ -19,7 +19,7 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
     public Writeability Writeability => this.PropertyOrIndexerBuilder.Writeability;
 
     [Memo]
-    public IType Type => this.Compilation.Factory.TranslateType( this.PropertyOrIndexerBuilder.Type );
+    public IType Type => this.Compilation.Factory.Translate( this.PropertyOrIndexerBuilder.Type );
 
     [Memo]
     public IMethod? GetMethod
@@ -42,5 +42,5 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
     public IEnumerable<IMethod> Accessors
-        => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.TranslateDeclaration( a, genericContext: this.GenericContext ) );
+        => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.Translate( a, genericContext: this.GenericContext ) );
 }

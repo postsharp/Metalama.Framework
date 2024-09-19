@@ -28,7 +28,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     protected override MemberBuilder MemberBuilder => this.EventBuilder;
 
     [Memo]
-    public INamedType Type => this.Compilation.Factory.TranslateDeclaration( this.EventBuilder.Type );
+    public INamedType Type => this.Compilation.Factory.Translate( this.EventBuilder.Type );
 
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
@@ -41,13 +41,13 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     public IMethod? RaiseMethod => null;
 
     [Memo]
-    public IEvent? OverriddenEvent => this.Compilation.Factory.TranslateDeclaration( this.EventBuilder.OverriddenEvent );
+    public IEvent? OverriddenEvent => this.Compilation.Factory.Translate( this.EventBuilder.OverriddenEvent );
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
         => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray(
-            i => this.Compilation.Factory.TranslateDeclaration( i, genericContext: this.GenericContext ) );
+            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericContext ) );
 
     IEvent IEvent.Definition => this;
 

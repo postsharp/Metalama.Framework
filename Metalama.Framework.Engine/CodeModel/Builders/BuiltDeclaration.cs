@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -14,13 +15,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
 /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
 /// </summary>
-internal abstract class BuiltDeclaration : BaseDeclaration
+internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclaration
 {
     protected BuiltDeclaration( CompilationModel compilation, IGenericContext genericContext )
     {
         this.Compilation = compilation;
         this.GenericContext = genericContext;
     }
+    
+    IDeclarationBuilder IBuilderBasedDeclaration.Builder => this.Builder;
 
     public override CompilationModel Compilation { get; }
 
@@ -32,13 +35,13 @@ internal abstract class BuiltDeclaration : BaseDeclaration
         => this.Builder.ToDisplayString( format, context );
 
     [Memo]
-    public override IAssembly DeclaringAssembly => this.Compilation.Factory.TranslateDeclaration( this.Builder.DeclaringAssembly );
+    public override IAssembly DeclaringAssembly => this.Compilation.Factory.Translate( this.Builder.DeclaringAssembly );
 
     public override IDeclarationOrigin Origin => this.Builder.Origin;
 
     [Memo]
     public override IDeclaration? ContainingDeclaration
-        => this.Compilation.Factory.TranslateDeclaration( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
+        => this.Compilation.Factory.Translate( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
 
     public sealed override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
 

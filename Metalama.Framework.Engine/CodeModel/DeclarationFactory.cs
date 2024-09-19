@@ -126,8 +126,8 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
         return declaration;
     }
 
-    public T? Translate<T>( T compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
-        where T : class, ICompilationElement
+    public T? Translate<T>( T compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default, IGenericContext? genericContext = null )
+        where T : class?, ICompilationElement?
     {
         if ( ReferenceEquals( compilationElement.Compilation, this._compilationModel ) )
         {
@@ -137,19 +137,18 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
         {
             switch ( compilationElement )
             {
-                case IDeclaration declaration:
-                    return (T?) declaration.ToRef().GetTargetOrNull( this._compilationModel, options );
-
-                case IType type:
-                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate(
-                        type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
+                case IBuilderBasedDeclaration builderBased:
+                    return (T) this.GetDeclaration( builderBased.Builder, options )!;
+                
+                case ISymbolBasedCompilationElement symbolBased:
+                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate( symbolBased.Symbol, symbolCompilationContext: symbolBased.Compilation.CompilationContext );
 
                     if ( translatedSymbol == null )
                     {
                         return null;
                     }
 
-                    return (T) this._compilationModel.Factory.GetIType( translatedSymbol );
+                    return (T) this._compilationModel.Factory.GetCompilationElement( translatedSymbol );
 
                 default:
                     throw new AssertionFailedException( $"Cannot translate a '{compilationElement.GetType().Name}'." );
@@ -160,52 +159,7 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
     public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
         => this._compilationModel.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
 
-    public IType? TranslateType( IType type )
-    {
-        if ( ReferenceEquals( type.Compilation, this._compilationModel ) )
-        {
-            return type;
-        }
-
-        var typeImpl = (ITypeImpl) type;
-
-        if ( typeImpl.TypeSymbol != null )
-        {
-            return this.GetIType( typeImpl.TypeSymbol );
-        }
-        else if ( typeImpl is BuiltNamedType builtNamedType )
-        {
-            return this.GetNamedType( builtNamedType.TypeBuilder, ReferenceResolutionOptions.Default, builtNamedType.GenericContext );
-        }
-        else
-        {
-            throw new AssertionFailedException( $"Constructions of introduced types are not supported." );
-        }
-    }
-
-    [return: NotNullIfNotNull( "declaration" )]
-    public T? TranslateDeclaration<T>( T? declaration, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
-        where T : class, IDeclaration
-    {
-        if ( declaration == null )
-        {
-            return null;
-        }
-
-        if ( ReferenceEquals( declaration.Compilation, this._compilationModel ) && genericContext == null )
-        {
-            return declaration;
-        }
-        else if ( declaration is NamedType namedType )
-        {
-            return (T) this.GetNamedType( (INamedTypeSymbol) namedType.Symbol, genericContext: genericContext );
-        }
-        else
-        {
-            return (T) declaration.ToRef().GetTarget( this._compilationModel, options, genericContext );
-        }
-    }
-
+    
     private Compilation Compilation => this._compilationModel.RoslynCompilation;
 
     private CompilationContext CompilationContext => this._compilationModel.CompilationContext;

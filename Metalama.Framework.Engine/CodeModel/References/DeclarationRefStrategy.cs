@@ -55,6 +55,7 @@ internal class DeclarationRefStrategy : IRefStrategy
             DeclarationKind.Method => (INamedDeclarationCollection<T>) ((INamedType) parent).Methods,
             DeclarationKind.Property => (INamedDeclarationCollection<T>) ((INamedType) parent).Properties,
             DeclarationKind.Namespace => (INamedDeclarationCollection<T>) ((INamespace) parent).Namespaces,
+            DeclarationKind.NamedType => (INamedDeclarationCollection<T>) ((INamespaceOrNamedType) parent).Types,
             _ => throw new ArgumentOutOfRangeException( nameof(kind) )
         };
     }

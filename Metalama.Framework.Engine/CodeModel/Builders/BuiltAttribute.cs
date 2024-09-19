@@ -29,7 +29,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     public INamedType Type => this.Constructor.DeclaringType;
 
     [Memo]
-    public IConstructor Constructor => this.Compilation.Factory.TranslateDeclaration( this._attributeBuilder.Constructor, genericContext: this.GenericContext );
+    public IConstructor Constructor => this.Compilation.Factory.Translate( this._attributeBuilder.Constructor, genericContext: this.GenericContext );
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments

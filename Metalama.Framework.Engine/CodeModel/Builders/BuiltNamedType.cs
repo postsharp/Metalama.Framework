@@ -34,7 +34,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public bool HasDefaultConstructor => this.TypeBuilder.HasDefaultConstructor;
 
     public INamedType? BaseType
-        => this.Compilation.Factory.TranslateDeclaration(
+        => this.Compilation.Factory.Translate(
             this.TypeBuilder.BaseType,
             ReferenceResolutionOptions.CanBeMissing,
             genericContext: this.GenericContext );
