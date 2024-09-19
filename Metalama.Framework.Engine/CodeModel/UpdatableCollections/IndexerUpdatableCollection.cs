@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class IndexerUpdatableCollection : NonUniquelyNamedMemberUpdatableCollection<IIndexer>
+internal sealed class IndexerUpdatableCollection : NonUniquelyNamedUpdatableCollection<IIndexer, IRef<IIndexer>>
 {
     public IndexerUpdatableCollection( CompilationModel compilation, IRef<INamedType> declaringType ) : base(
         compilation,

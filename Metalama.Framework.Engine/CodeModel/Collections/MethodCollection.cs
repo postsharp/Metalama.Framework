@@ -10,7 +10,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class MethodCollection : MethodBaseCollection<IMethod>, IMethodCollection
     {
-        public MethodCollection( INamedType declaringType, ISourceMemberCollection<IMethod> sourceItems ) : base( declaringType, sourceItems ) { }
+        public MethodCollection( INamedType declaringType, ISourceDeclarationCollection<IMethod, IRef<IMethod>> sourceItems ) : base(
+            declaringType,
+            sourceItems ) { }
 
         public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
 

@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -13,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : BaseDeclarationCollection, ILazy, ISourceDeclarationCollection<TDeclaration, TRef>
     where TDeclaration : class, IDeclaration
-    where TRef : class, IRef<TDeclaration>
+    where TRef : class, IRef
 {
     private List<TRef>? _allItems;
     private volatile int _removeOperationsCount;
@@ -42,7 +44,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
             this._allItems = new List<TRef>();
 
 #if DEBUG
-            this.PopulateAllItems( r => this._allItems.Add( (TRef) r ) );
+            this.PopulateAllItems( r => this._allItems.Add( r ) );
 #else
             this.PopulateAllItems( this._allItems.Add );
 #endif
@@ -50,7 +52,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         }
     }
 
-    protected abstract void PopulateAllItems( Action<IRef<TDeclaration>> action );
+    protected abstract void PopulateAllItems( Action<TRef> action );
 
     protected void AddItem( in TRef item )
     {
@@ -110,6 +112,8 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
 
         return clone;
     }
+
+    public virtual ImmutableArray<TRef> OfName( string name ) => this.Where( r => ((IRefImpl) r).Name == name ).ToImmutableArray();
 
     IEnumerator<TRef> IEnumerable<TRef>.GetEnumerator() => this.GetEnumerator();
 
@@ -172,11 +176,4 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
 
         public readonly void Dispose() { }
     }
-}
-
-internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, IRef<TDeclaration>>,
-                                                                       ISourceDeclarationCollection<TDeclaration>
-    where TDeclaration : class, IDeclaration
-{
-    protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }
 }

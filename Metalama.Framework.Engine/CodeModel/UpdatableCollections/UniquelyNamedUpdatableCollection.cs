@@ -9,20 +9,21 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCollection<T>
-    where T : class, INamedDeclaration
+internal abstract class UniquelyNamedUpdatableCollection<TDeclaration, TRef> : UpdatableMemberCollection<TDeclaration, TRef>
+    where TDeclaration : class, INamedDeclaration
+    where TRef : class, IRef
 {
-    private ImmutableDictionary<string, IRef<T>?>? _dictionary;
+    private ImmutableDictionary<string, TRef?>? _dictionary;
 
     protected UniquelyNamedUpdatableCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringType ) :
         base( compilation, declaringType ) { }
 
-    private ImmutableDictionary<string, IRef<T>?> GetInitializedDictionary()
-        => this._dictionary ??= ImmutableDictionary<string, IRef<T>?>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );
+    private ImmutableDictionary<string, TRef?> GetInitializedDictionary()
+        => this._dictionary ??= ImmutableDictionary<string, TRef?>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );
 
-    protected abstract IEqualityComparer<IRef<T>?> MemberRefComparer { get; }
+    protected abstract IEqualityComparer<TRef?> MemberRefComparer { get; }
 
-    public void Add( IRef<T> member )
+    public void Add( TRef member )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -48,7 +49,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         this.AddItem( member );
     }
 
-    public void Remove( IRef<T> member )
+    public void Remove( TRef member )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -73,7 +74,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         this.RemoveItem( member );
     }
 
-    protected override void PopulateAllItems( Action<IRef<T>> action )
+    protected override void PopulateAllItems( Action<TRef> action )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -107,7 +108,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         this._dictionary = dictionaryBuilder.ToImmutable();
     }
 
-    public override ImmutableArray<IRef<T>> OfName( string name )
+    public override ImmutableArray<TRef> OfName( string name )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -123,7 +124,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         }
         else
         {
-            return ImmutableArray<IRef<T>>.Empty;
+            return ImmutableArray<TRef>.Empty;
         }
     }
 }

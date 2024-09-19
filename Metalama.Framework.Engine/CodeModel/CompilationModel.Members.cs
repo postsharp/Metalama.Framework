@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 public sealed partial class CompilationModel
 {
     private ImmutableDictionary<IRef<INamedType>, FieldUpdatableCollection> _fields;
-    private ImmutableDictionary<IRef<INamedType>, ISourceMemberCollection<IMethod>> _methods;
+    private ImmutableDictionary<IRef<INamedType>, MethodUpdatableCollection> _methods;
     private ImmutableDictionary<IRef<INamedType>, ConstructorUpdatableCollection> _constructors;
     private ImmutableDictionary<IRef<INamedType>, EventUpdatableCollection> _events;
     private ImmutableDictionary<IRef<INamedType>, PropertyUpdatableCollection> _properties;
@@ -142,7 +142,7 @@ public sealed partial class CompilationModel
         Func<CompilationModel, IRef<TOwner>, TCollection> createCollection )
         where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
-        where TCollection : ISourceDeclarationCollection<TDeclaration>
+        where TCollection : ISourceDeclarationCollection<TDeclaration, IRef<TDeclaration>>
         => this.GetMemberCollection<TOwner, TDeclaration, IRef<TDeclaration>, TCollection>(
             ref dictionary,
             requestMutableCollection,
@@ -157,7 +157,7 @@ public sealed partial class CompilationModel
         where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
         where TCollection : ISourceDeclarationCollection<TDeclaration, TRef>
-        where TRef : IRef<TDeclaration>
+        where TRef : IRef
     {
         if ( requestMutableCollection && !this.IsMutable )
         {
@@ -191,14 +191,14 @@ public sealed partial class CompilationModel
     }
 
     internal FieldUpdatableCollection GetFieldCollection( IRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IField, FieldUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, IField, IRef<IFieldOrProperty>, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
             ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
-    internal ISourceMemberCollection<IMethod> GetMethodCollection( IRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IMethod, ISourceMemberCollection<IMethod>>(
+    internal MethodUpdatableCollection GetMethodCollection( IRef<INamedType> declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedType, IMethod, MethodUpdatableCollection>(
             ref this._methods,
             mutable,
             declaringType,

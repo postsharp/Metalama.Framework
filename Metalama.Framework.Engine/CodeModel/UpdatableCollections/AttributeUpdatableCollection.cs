@@ -27,7 +27,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
 #endif
     }
 
-    protected override void PopulateAllItems( Action<IRef<IAttribute>> action )
+    protected override void PopulateAllItems( Action<AttributeRef> action )
     {
         this._parent.GetStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
 

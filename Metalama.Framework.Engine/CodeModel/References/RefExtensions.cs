@@ -13,9 +13,23 @@ public static class RefExtensions
 {
     internal static IRefStrategy GetStrategy( this IRef reference ) => ((IRefImpl) reference).Strategy;
 
+    // TODO: Portable references are useful only in design-time execution scenarios.
     internal static IRef<T> ToPortable<T>( this IRef<T> reference )
         where T : class, ICompilationElement
         => ((IRefImpl<T>) reference).ToPortable();
+
+    internal static IRef<T> AssertPortable<T>( this IRef<T> reference )
+        where T : class, ICompilationElement
+    {
+#if DEBUG
+        if ( !((IRefImpl) reference).IsPortable )
+        {
+            throw new AssertionFailedException( $"The reference '{reference}' must be portable." );
+        }
+#endif
+
+        return reference;
+    }
 
     internal static IRef ToPortable( this IRef reference ) => ((IRefImpl) reference).ToPortable();
 
@@ -30,7 +44,7 @@ public static class RefExtensions
             RefTargetKind.Return => typeof(IParameter),
             RefTargetKind.Assembly => typeof(IAssembly),
             RefTargetKind.Module => typeof(IAssembly),
-            RefTargetKind.Field => typeof(IField),
+            RefTargetKind.Field => typeof(IFieldOrProperty),
             RefTargetKind.Parameter => typeof(IParameter),
             RefTargetKind.Property => typeof(IProperty),
             RefTargetKind.Event => typeof(IEvent),
@@ -52,7 +66,7 @@ public static class RefExtensions
                 DeclarationKind.Method => typeof(IMethod),
                 DeclarationKind.Property => typeof(IProperty),
                 DeclarationKind.Indexer => typeof(IIndexer),
-                DeclarationKind.Field => typeof(IField),
+                DeclarationKind.Field => typeof(IFieldOrProperty),
                 DeclarationKind.Event => typeof(IEvent),
                 DeclarationKind.Parameter => typeof(IParameter),
                 DeclarationKind.TypeParameter => typeof(ITypeParameter),

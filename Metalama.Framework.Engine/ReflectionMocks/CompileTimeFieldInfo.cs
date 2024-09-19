@@ -9,9 +9,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal sealed class CompileTimeFieldInfo : FieldInfo, ICompileTimeReflectionObject<IField>
+    internal sealed class CompileTimeFieldInfo : FieldInfo, ICompileTimeReflectionObject<IFieldOrProperty>
     {
-        public IRef<IField> Target { get; }
+        public IRef<IFieldOrProperty> Target { get; }
 
         private CompileTimeFieldInfo( IField field )
         {
@@ -56,6 +56,9 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public ref object? Value => ref RefHelper.Wrap( this );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => CompileTimeMocksHelper.ToTypedExpressionSyntax( this, CompileTimeFieldInfoSerializer.SerializeField, syntaxGenerationContext );
+            => CompileTimeMocksHelper.ToTypedExpressionSyntax(
+                this,
+                ( fieldOrProperty, context ) => CompileTimeFieldInfoSerializer.SerializeField( (IField) fieldOrProperty, context ),
+                syntaxGenerationContext );
     }
 }

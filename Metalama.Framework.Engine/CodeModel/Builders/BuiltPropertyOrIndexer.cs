@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,5 +43,5 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
     public IEnumerable<IMethod> Accessors
-        => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.Translate( a, genericContext: this.GenericContext ) );
+        => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.Translate( a, genericContext: this.GenericContext ) ).WhereNotNull();
 }

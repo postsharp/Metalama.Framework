@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal abstract class DeclarationCollection<TDeclaration, TRef> : IReadOnlyCollection<TDeclaration>
         where TDeclaration : class, IDeclaration
-        where TRef : class, IRef<TDeclaration>
+        where TRef : class, IRef<IDeclaration>
     {
         private readonly IGenericContext _genericContext;
 
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 throw new ArgumentOutOfRangeException( nameof(containingDeclaration) );
             }
 #endif
-            
+
             this._genericContext = containingDeclaration.GenericContext;
             this.Source = source;
             this.ContainingDeclaration = containingDeclaration;
@@ -81,10 +81,11 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 // We must apply the mapping.
             }
 
-            return definition;
+            return (TDeclaration) definition;
         }
 
-        protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
+        protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references )
+            => references.Select( x => (TDeclaration) x.GetTarget( this.Compilation ) );
 
         public override string ToString()
         {

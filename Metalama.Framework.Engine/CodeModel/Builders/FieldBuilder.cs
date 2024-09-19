@@ -127,11 +127,9 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
     [Memo]
-    public IRef<IField> Ref => this.RefFactory.FromBuilder<IField>( this );
+    public IRef<IFieldOrProperty> Ref => this.RefFactory.FromBuilder<IFieldOrProperty>( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public new IRef<IField> ToRef() => this.Ref;
 
     public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

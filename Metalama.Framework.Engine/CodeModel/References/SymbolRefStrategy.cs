@@ -23,7 +23,7 @@ internal class SymbolRefStrategy : IRefStrategy
         this._compilationContext = compilationContext;
     }
 
-    public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<IRef<IAttribute>> add )
+    public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add )
     {
         var symbolRef = (ISymbolRef) declaration;
 
@@ -54,7 +54,7 @@ internal class SymbolRefStrategy : IRefStrategy
             {
                 foreach ( var attribute in redirectedBuilder.Attributes )
                 {
-                    add( attribute.ToRef() );
+                    add( (AttributeRef) attribute.ToRef() );
                 }
             }
             else
@@ -94,8 +94,11 @@ internal class SymbolRefStrategy : IRefStrategy
         }
     }
 
-    public IEnumerable<IRef<T>> GetMembersOfName<T>( IRef<INamespaceOrNamedType> parent, string name, DeclarationKind kind, CompilationModel compilation )
-        where T : class, INamedDeclaration
+    public IEnumerable<IRef> GetMembersOfName(
+        IRef<INamespaceOrNamedType> parent,
+        string name,
+        DeclarationKind kind,
+        CompilationModel compilation )
     {
         switch ( kind )
         {
@@ -105,7 +108,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
                     return symbol.GetNamespaceMembers()
                         .Where( ns => ns.Name == name && IsValidNamespace( ns, compilation ) )
-                        .Select( s => this._compilationContext.RefFactory.FromSymbol<T>( s ) );
+                        .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
                 }
 
             default:
@@ -116,13 +119,12 @@ internal class SymbolRefStrategy : IRefStrategy
 
                     return symbol.GetMembers( name )
                         .Where( x => predicate( x, compilation ) )
-                        .Select( s => this._compilationContext.RefFactory.FromSymbol<T>( s ) );
+                        .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
                 }
         }
     }
 
-    public IEnumerable<IRef<T>> GetMembers<T>( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation )
-        where T : class, INamedDeclaration
+    public IEnumerable<IRef> GetMembers( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation )
     {
         var parentSymbol = ((ISymbolRef) parent).Symbol;
 
@@ -134,7 +136,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
                     return parentNs.GetNamespaceMembers()
                         .Where( ns => IsValidNamespace( ns, compilation ) )
-                        .Select( s => this._compilationContext.RefFactory.FromSymbol<T>( s ) );
+                        .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
                 }
 
             case DeclarationKind.NamedType:
@@ -143,7 +145,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
                     return parentScope.GetTypeMembers()
                         .Where( t => IsValidNamedType( t, compilation ) )
-                        .Select( t => this._compilationContext.RefFactory.FromSymbol<T>( t ) );
+                        .Select( t => this._compilationContext.RefFactory.FromAnySymbol( t ) );
                 }
 
             default:
@@ -154,7 +156,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
                     return parentScope.GetMembers()
                         .Where( m => predicate( m, compilation ) )
-                        .Select( m => this._compilationContext.RefFactory.FromSymbol<T>( m ) );
+                        .Select( m => this._compilationContext.RefFactory.FromAnySymbol( m ) );
                 }
         }
     }

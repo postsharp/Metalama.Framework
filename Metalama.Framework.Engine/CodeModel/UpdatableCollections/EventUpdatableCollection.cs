@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class EventUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IEvent>
+internal sealed class EventUpdatableCollection : UniquelyNamedUpdatableCollection<IEvent, IRef<IEvent>>
 {
     public EventUpdatableCollection( CompilationModel compilation, IRef<INamedType> declaringType ) : base(
         compilation,

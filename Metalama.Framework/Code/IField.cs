@@ -26,6 +26,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         new IField Definition { get; }
 
-        new IRef<IField> ToRef();
+        // There is intentionally no ToRef() method returning an IRef<IField> because fields can be changed to property,
+        // e.g. returning IRef<IFieldOrProperty> is correct, which is that IFieldOrProperty.ToRef does.
     }
 }

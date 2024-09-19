@@ -3,12 +3,13 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationCollection<T>, ISourceMemberCollection<T>
-    where T : class, INamedDeclaration
+internal abstract class UpdatableMemberCollection<TDeclaration, TRef> : UpdatableDeclarationCollection<TDeclaration, TRef>
+    where TDeclaration : class, INamedDeclaration
+    where TRef : class, IRef
 {
     protected UpdatableMemberCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringType ) : base( compilation )
     {
@@ -19,15 +20,15 @@ internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationColle
 
     protected abstract DeclarationKind DeclarationKind { get; }
 
-    public abstract ImmutableArray<IRef<T>> OfName( string name );
+    protected virtual IEnumerable<TRef> GetMemberRefsOfName( string name )
+        => this.DeclaringTypeOrNamespace.GetStrategy()
+            .GetMembersOfName(
+                this.DeclaringTypeOrNamespace,
+                name,
+                this.DeclarationKind,
+                this.Compilation )
+            .Cast<TRef>();
 
-    protected virtual IEnumerable<IRef<T>> GetMemberRefsOfName( string name )
-        => this.DeclaringTypeOrNamespace.GetStrategy().GetMembersOfName<T>(
-            this.DeclaringTypeOrNamespace,
-            name,
-            this.DeclarationKind,
-            this.Compilation );
-
-    protected virtual IEnumerable<IRef<T>> GetMemberRefs()
-        => this.DeclaringTypeOrNamespace.GetStrategy().GetMembers<T>( this.DeclaringTypeOrNamespace, this.DeclarationKind, this.Compilation );
+    protected virtual IEnumerable<TRef> GetMemberRefs()
+        => this.DeclaringTypeOrNamespace.GetStrategy().GetMembers( this.DeclaringTypeOrNamespace, this.DeclarationKind, this.Compilation ).Cast<TRef>();
 }

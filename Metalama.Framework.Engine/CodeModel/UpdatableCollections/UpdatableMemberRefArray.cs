@@ -7,28 +7,28 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class UpdatableMemberRefArray<T>
-    where T : class, IMemberOrNamedType
+    where T : class, IRef
 {
-    private readonly IEqualityComparer<IRef<T>> _comparer;
+    private readonly IEqualityComparer<T> _comparer;
 
     // This is the only compilation in which the current object is mutable. It should not be mutable in other transformations.
     public CompilationModel ParentCompilation { get; }
 
-    public UpdatableMemberRefArray( ImmutableArray<IRef<T>> array, CompilationModel parentCompilation, IEqualityComparer<IRef<T>> comparer )
+    public UpdatableMemberRefArray( ImmutableArray<T> array, CompilationModel parentCompilation, IEqualityComparer<T> comparer )
     {
         this.Array = array;
         this.ParentCompilation = parentCompilation;
         this._comparer = comparer;
     }
 
-    public ImmutableArray<IRef<T>> Array { get; private set; }
+    public ImmutableArray<T> Array { get; private set; }
 
-    public void Add( IRef<T> member )
+    public void Add( T member )
     {
         this.Array = this.Array.Add( member );
     }
 
-    public void Remove( IRef<T> member )
+    public void Remove( T member )
     {
         var index = this.Array.IndexOf( member, this._comparer );
 

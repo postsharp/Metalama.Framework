@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class FieldUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IField>
+internal sealed class FieldUpdatableCollection : UniquelyNamedUpdatableCollection<IField, IRef<IFieldOrProperty>>
 {
     public FieldUpdatableCollection( CompilationModel compilation, IRef<INamedType> declaringType ) : base(
         compilation,
         declaringType ) { }
 
-    protected override IEqualityComparer<IRef<IField>?> MemberRefComparer => this.Compilation.CompilationContext.FieldRefComparer;
+    protected override IEqualityComparer<IRef<IFieldOrProperty>?> MemberRefComparer => this.Compilation.CompilationContext.FieldOrPropertyRefComparer;
 
     protected override DeclarationKind DeclarationKind => DeclarationKind.Field;
 }

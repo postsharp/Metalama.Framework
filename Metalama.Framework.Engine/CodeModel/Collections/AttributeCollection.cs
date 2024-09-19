@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( IType type, ConversionKind conversionKind )
             => this.OfAttributeType( type, conversionKind );
 
+        // TODO: Don't call GetTarget in OfAttributeType.
         private IEnumerable<IAttribute> OfAttributeType( IType type, ConversionKind conversionKind = ConversionKind.Default )
             => this.GetItems( this.Source.Where( a => a.AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) ) );
 

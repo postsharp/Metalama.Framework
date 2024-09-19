@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
@@ -44,7 +45,7 @@ internal abstract partial class FabricDriver
         {
             this._project = project;
             this._fabricInstance = fabricInstance;
-            this.TargetDeclaration = targetDeclaration;
+            this.TargetDeclaration = targetDeclaration.ToPortable();
             this._fabricManager = fabricManager;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }

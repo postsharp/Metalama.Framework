@@ -5,22 +5,24 @@ using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMemberCollection<T>
-    where T : class, IMemberOrNamedType
+internal abstract class NonUniquelyNamedUpdatableCollection<TDeclaration, TRef> : UpdatableMemberCollection<TDeclaration, TRef>
+    where TDeclaration : class, IMemberOrNamedType
+    where TRef : class, IRef
 {
-    private ImmutableDictionary<string, UpdatableMemberRefArray<T>>? _byNameDictionary;
+    private ImmutableDictionary<string, UpdatableMemberRefArray<TRef>>? _byNameDictionary;
 
     protected NonUniquelyNamedUpdatableCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringNamespaceOrType ) : base(
         compilation,
         declaringNamespaceOrType ) { }
 
-    private ImmutableDictionary<string, UpdatableMemberRefArray<T>> GetInitializedByNameDictionary()
-        => this._byNameDictionary ??= ImmutableDictionary<string, UpdatableMemberRefArray<T>>.Empty.WithComparers( StringComparer.Ordinal );
+    private ImmutableDictionary<string, UpdatableMemberRefArray<TRef>> GetInitializedByNameDictionary()
+        => this._byNameDictionary ??= ImmutableDictionary<string, UpdatableMemberRefArray<TRef>>.Empty.WithComparers( StringComparer.Ordinal );
 
-    public override ImmutableArray<IRef<T>> OfName( string name )
+    public override ImmutableArray<TRef> OfName( string name )
     {
         var byName = this.GetInitializedByNameDictionary();
 
@@ -30,18 +32,22 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         }
         else if ( !this.IsComplete )
         {
-            var members = new UpdatableMemberRefArray<T>( this.GetMemberRefsOfName( name ).ToImmutableArray(), this.Compilation, this.MemberRefComparer );
+            var members = new UpdatableMemberRefArray<TRef>(
+                this.GetMemberRefsOfName( name ).Cast<TRef>().ToImmutableArray(),
+                this.Compilation,
+                this.MemberRefComparer );
+
             this._byNameDictionary = byName.SetItem( name, members );
 
             return members.Array;
         }
         else
         {
-            return ImmutableArray<IRef<T>>.Empty;
+            return ImmutableArray<TRef>.Empty;
         }
     }
 
-    protected override void PopulateAllItems( Action<IRef<T>> action )
+    protected override void PopulateAllItems( Action<TRef> action )
     {
         var byNameDictionary = this.GetInitializedByNameDictionary();
         var byNameDictionaryBuilder = byNameDictionary.ToBuilder();
@@ -70,7 +76,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                 if ( !byNameDictionaryBuilder.TryGetValue( name, out var members ) )
                 {
                     // This is the first time this method processes a member of that name.
-                    members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( memberRef ), this.Compilation, this.MemberRefComparer );
+                    members = new UpdatableMemberRefArray<TRef>( ImmutableArray.Create( memberRef ), this.Compilation, this.MemberRefComparer );
                     byNameDictionaryBuilder[name] = members;
                 }
                 else
@@ -84,7 +90,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         this._byNameDictionary = byNameDictionaryBuilder.ToImmutable();
     }
 
-    public void Add( IRef<T> member )
+    public void Add( TRef member )
     {
         var name = ((IRefImpl) member).Name;
 
@@ -95,7 +101,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             if ( !this.IsComplete )
             {
                 // The collection has not been populated yet, so do it now, and add the new member.
-                members = new UpdatableMemberRefArray<T>(
+                members = new UpdatableMemberRefArray<TRef>(
                     this.GetMemberRefsOfName( name ).ToImmutableArray().Add( member ),
                     this.Compilation,
                     this.MemberRefComparer );
@@ -103,7 +109,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             else
             {
                 // The collection has been populated and there is no item of that name, so only add the member.
-                members = new UpdatableMemberRefArray<T>( ImmutableArray.Create( member ), this.Compilation, this.MemberRefComparer );
+                members = new UpdatableMemberRefArray<TRef>( ImmutableArray.Create( member ), this.Compilation, this.MemberRefComparer );
             }
 
             this._byNameDictionary = byNameDictionary.SetItem( name, members );
@@ -118,7 +124,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             else
             {
                 // The object was created for another compilation, so we need to create a clone for ourselves.
-                members = new UpdatableMemberRefArray<T>( members.Array.Add( member ), this.Compilation, this.MemberRefComparer );
+                members = new UpdatableMemberRefArray<TRef>( members.Array.Add( member ), this.Compilation, this.MemberRefComparer );
                 this._byNameDictionary = byNameDictionary.SetItem( name, members );
             }
         }
@@ -126,12 +132,12 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         this.AddItem( member );
     }
 
-    protected abstract IEqualityComparer<IRef<T>> MemberRefComparer { get; }
+    protected abstract IEqualityComparer<TRef> MemberRefComparer { get; }
 
     // TODO: Verify why Remove is never called.
     // Resharper disable UnusedMember.Global
 
-    public void Remove( IRef<T> member )
+    public void Remove( TRef member )
     {
         var byNameDictionary = this.GetInitializedByNameDictionary();
 
@@ -151,7 +157,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                     throw new AssertionFailedException( $"The collection does not contain the item '{member}'." );
                 }
 
-                members = new UpdatableMemberRefArray<T>( sourceMembers.RemoveAt( index ), this.Compilation, this.MemberRefComparer );
+                members = new UpdatableMemberRefArray<TRef>( sourceMembers.RemoveAt( index ), this.Compilation, this.MemberRefComparer );
             }
             else
             {
@@ -177,7 +183,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                     throw new AssertionFailedException( $"The collection does not contain the item '{member}'." );
                 }
 
-                members = new UpdatableMemberRefArray<T>( members.Array.RemoveAt( index ), this.Compilation, this.MemberRefComparer );
+                members = new UpdatableMemberRefArray<TRef>( members.Array.RemoveAt( index ), this.Compilation, this.MemberRefComparer );
                 this._byNameDictionary = byNameDictionary.SetItem( name, members );
             }
         }

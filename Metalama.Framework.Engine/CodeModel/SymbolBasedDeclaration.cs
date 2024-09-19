@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -14,11 +13,6 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface ISymbolBasedCompilationElement : ICompilationElementImpl
-    {
-        ISymbol Symbol { get; }
-    }
-    
     public abstract class SymbolBasedDeclaration : BaseDeclaration, ISymbolBasedCompilationElement
     {
         public abstract ISymbol Symbol { get; }

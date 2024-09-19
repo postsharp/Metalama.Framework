@@ -9,18 +9,18 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
-        public NamedTypeCollection( INamedType declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
+        public NamedTypeCollection( INamedType declaringType, ITypeUpdatableCollection sourceItems ) :
             base( declaringType, sourceItems ) { }
 
-        public NamedTypeCollection( ICompilation declaringCompilation, UpdatableMemberCollection<INamedType> sourceItems ) :
+        public NamedTypeCollection( ICompilation declaringCompilation, ITypeUpdatableCollection sourceItems ) :
             base( declaringCompilation, sourceItems ) { }
 
-        public NamedTypeCollection( INamespace declaringNamespace, UpdatableMemberCollection<INamedType> sourceItems ) :
+        public NamedTypeCollection( INamespace declaringNamespace, ITypeUpdatableCollection sourceItems ) :
             base( declaringNamespace, sourceItems ) { }
 
         public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
         {
-            var typedSource = (INamedTypeCollectionImpl) this.Source;
+            var typedSource = (ITypeUpdatableCollection) this.Source;
 
             // Enumerate the source without causing a resolution of the reference.
             foreach ( var sourceItem in typedSource.OfTypeDefinition( typeDefinition ) )

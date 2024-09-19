@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class PropertyUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IProperty>
+internal sealed class PropertyUpdatableCollection : UniquelyNamedUpdatableCollection<IProperty, IRef<IProperty>>
 {
     public PropertyUpdatableCollection( CompilationModel compilation, IRef<INamedType> declaringType ) : base(
         compilation,

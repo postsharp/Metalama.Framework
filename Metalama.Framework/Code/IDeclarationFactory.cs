@@ -69,7 +69,10 @@ namespace Metalama.Framework.Code
         /// </summary>
         IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId );
 
-        T? Translate<T>( T compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default, IGenericContext? genericContext = null )
+        T? Translate<T>(
+            T? compilationElement,
+            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+            IGenericContext? genericContext = null )
             where T : class, ICompilationElement;
 
         IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments );

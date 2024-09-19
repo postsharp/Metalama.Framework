@@ -94,6 +94,9 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<IRef<IField>?> FieldRefComparer => RefEqualityComparer<IField>.Default;
 
     [Memo]
+    internal IEqualityComparer<IRef<IFieldOrProperty>?> FieldOrPropertyRefComparer => RefEqualityComparer<IFieldOrProperty>.Default;
+
+    [Memo]
     internal IEqualityComparer<IRef<IProperty>?> PropertyRefComparer => RefEqualityComparer<IProperty>.Default;
 
     [Memo]

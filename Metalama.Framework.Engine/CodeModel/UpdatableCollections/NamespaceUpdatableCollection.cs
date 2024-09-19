@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableCollection<INamespace>
+internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableCollection<INamespace, IRef<INamespace>>
 {
     public NamespaceUpdatableCollection( CompilationModel compilation, IRef<INamespace> declaringNamespace ) : base(
         compilation,

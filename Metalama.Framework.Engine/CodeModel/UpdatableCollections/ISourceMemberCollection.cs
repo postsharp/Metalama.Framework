@@ -6,20 +6,13 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal interface ISourceMemberCollection<T> : ISourceDeclarationCollection<T>
-    where T : class, INamedDeclaration
-{
-    ImmutableArray<IRef<T>> OfName( string name );
-}
-
-internal interface ISourceDeclarationCollection<T> : ISourceDeclarationCollection<T, IRef<T>>
-    where T : class, IDeclaration;
-
-internal interface ISourceDeclarationCollection<TDeclaration, out TRef> : IReadOnlyList<TRef>
+internal interface ISourceDeclarationCollection<TDeclaration, TRef> : IReadOnlyList<TRef>
     where TDeclaration : class, IDeclaration
-    where TRef : IRef<TDeclaration>
+    where TRef : IRef
 {
     CompilationModel Compilation { get; }
 
     ISourceDeclarationCollection<TDeclaration, TRef> Clone( CompilationModel compilation );
+
+    ImmutableArray<TRef> OfName( string name );
 }

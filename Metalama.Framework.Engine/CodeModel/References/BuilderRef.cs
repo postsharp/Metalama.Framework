@@ -22,10 +22,8 @@ internal class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     public override CompilationContext CompilationContext { get; }
 
     public IDeclarationBuilder Builder { get; }
-
-    IDeclaration IDeclarationRef.Declaration => this.Builder;
-
-    public override IRefStrategy Strategy => DeclarationRefStrategy.Instance;
+    
+    public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
 
     public override string Name
         => this.Builder switch

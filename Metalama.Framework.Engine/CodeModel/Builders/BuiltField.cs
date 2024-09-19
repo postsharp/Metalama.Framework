@@ -42,8 +42,6 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     [Memo]
     public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod, this.GenericContext );
 
-    IRef<IField> IField.ToRef() => this.FieldBuilder.Ref;
-
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.FieldBuilder.Ref;
 
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.FieldBuilder.Ref;

@@ -36,7 +36,11 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 
     public override bool IsPortable => true;
 
-    private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolverForSymbol.Prefix[0];
+    private static bool IsDeclarationId( string id )
+    {
+        return (char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolverForSymbol.Prefix[0])
+               || id.StartsWith( "Assembly:", StringComparison.Ordinal );
+    }
 
     private static bool IsTypeId( string id )
         => id.StartsWith( SerializableTypeIdResolverForSymbol.LegacyPrefix, StringComparison.Ordinal )

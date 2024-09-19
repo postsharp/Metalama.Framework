@@ -9,17 +9,15 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal interface IRefStrategy
 {
-    void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<IRef<IAttribute>> add );
+    void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add );
 
     void EnumerateAllImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add );
 
     void EnumerateImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add );
 
-    IEnumerable<IRef<T>> GetMembersOfName<T>( IRef<INamespaceOrNamedType> parent, string name, DeclarationKind kind, CompilationModel compilation )
-        where T : class, INamedDeclaration;
+    IEnumerable<IRef> GetMembersOfName( IRef<INamespaceOrNamedType> parent, string name, DeclarationKind kind, CompilationModel compilation );
 
-    IEnumerable<IRef<T>> GetMembers<T>( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation )
-        where T : class, INamedDeclaration;
+    IEnumerable<IRef> GetMembers( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation );
 
     bool Is( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default );
 }
