@@ -24,14 +24,14 @@ namespace Metalama.Framework.Engine.Services;
 public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
     private readonly ConcurrentDictionary<SyntaxGenerationContextCacheKey, SyntaxGenerationContext> _syntaxGenerationContextCache = new();
-    private static int _id;
+    private static int _nextId;
 
     internal CompilationContext( Compilation compilation )
     {
         this.Compilation = compilation;
     }
 
-    public int Id { get; } = Interlocked.Increment( ref _id );
+    public int Id { get; } = Interlocked.Increment( ref _nextId );
 
     [Memo]
     internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver, this );
@@ -179,4 +179,6 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal SymbolTranslator SymbolTranslator => new( this );
+
+    public override string ToString() => $"{this.GetType().Name} #{this.Id}, Assembly={this.Compilation.AssemblyName}";
 }

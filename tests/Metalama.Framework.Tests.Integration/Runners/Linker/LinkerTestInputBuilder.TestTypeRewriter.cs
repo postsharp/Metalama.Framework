@@ -411,6 +411,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     o =>
                     {
                         _ = o
+                            .Named( $"IInjectMemberTransformation({node.Span.Start})" )
                             .Implements<ITransformation>()
                             .Implements<IInjectMemberTransformation>()
                             .Implements<IIntroduceDeclarationTransformation>()
@@ -458,8 +459,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                     null ) )
                             .Returns( (IProperty) transformation );
 
-                        A.CallTo( () => ((IProperty) transformation).GetMethod ).Returns( A.Fake<IMethodImpl>() );
-                        A.CallTo( () => ((IProperty) transformation).SetMethod ).Returns( A.Fake<IMethodImpl>() );
+                        A.CallTo( () => ((IProperty) transformation).GetMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "GetMethod" ) ) );
+                        A.CallTo( () => ((IProperty) transformation).SetMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "SetMethod" ) ) );
 
                         break;
 
@@ -473,8 +474,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                     null ) )
                             .Returns( (IEvent) transformation );
 
-                        A.CallTo( () => ((IEvent) transformation).AddMethod ).Returns( A.Fake<IMethodImpl>() );
-                        A.CallTo( () => ((IEvent) transformation).RemoveMethod ).Returns( A.Fake<IMethodImpl>() );
+                        A.CallTo( () => ((IEvent) transformation).AddMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "AddMethod" ) ) );
+                        A.CallTo( () => ((IEvent) transformation).RemoveMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "RemoveMethod" ) ) );
 
                         break;
 
@@ -492,8 +493,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 }
 
                 A.CallTo( () => ((ISdkDeclaration) transformation).Symbol ).Returns( null );
+                A.CallTo( () => ((IDeclaration) transformation).DeclarationKind ).Returns( declarationKind );
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
-                A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
+                A.CallTo( () => transformation.ToString() ).Returns( $"Introduced {declarationKind}" );
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
                 A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder) transformation );
 
@@ -598,6 +600,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var transformation = (IInjectMemberTransformation) A.Fake<object>(
                     o => o
+                        .Named( $"IInjectMemberTransformation({node.Span.Start})" )
                         .Implements<ITransformation>()
                         .Implements<IInjectMemberTransformation>()
                         .Implements<IOverrideDeclarationTransformation>()
@@ -853,9 +856,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             private Advice CreateFakeAdvice( AspectLayerId aspectLayer )
             {
-                var fakeAspectSymbol = A.Fake<INamedTypeSymbol>();
-                var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>();
-                var fakeDiagnosticAdder = A.Fake<IDiagnosticAdder>();
+                var fakeAspectSymbol = A.Fake<INamedTypeSymbol>( s => s.Named( $"INamedTypeSymbol({aspectLayer.AspectName})" ) );
+                var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>( s => s.Named( "INamespaceSymbol(global)" ) );
+                var fakeDiagnosticAdder = A.Fake<IDiagnosticAdder>( s => s.Named( "IDiagnosticAdder" ) );
 
                 A.CallTo( () => fakeAspectSymbol.MetadataName ).Returns( aspectLayer.AspectName.AssertNotNull() );
                 A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
@@ -879,16 +882,17 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), aspectClass );
 
                 return A.Fake<Advice>(
-                    i => i.WithArgumentsForConstructor(
-                        new object?[]
-                        {
+                    i => i
+                        .Named( $"Advice({aspectLayer.AspectName})" )
+                        .WithArgumentsForConstructor(
+                        [
                             new Advice.AdviceConstructorParameters(
                                 fakeAspectInstance,
                                 fakeAspectInstance.TemplateInstances.Values.Single(),
-                                A.Fake<IDeclarationImpl>(),
-                                A.Fake<ICompilation>(),
+                                A.Fake<IDeclarationImpl>( p => p.Named( $"Advice({aspectLayer.AspectName}).P1" ) ),
+                                A.Fake<ICompilation>( p => p.Named( $"Advice({aspectLayer.AspectName}).P2" ) ),
                                 aspectLayer.LayerName )
-                        } ) );
+                        ] ) );
             }
         }
     }

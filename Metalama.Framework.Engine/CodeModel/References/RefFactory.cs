@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 DeclarationKind.Operator => new BuilderRef<IMethod>( builder, this._compilationContext ),
                 DeclarationKind.AssemblyReference => new BuilderRef<IAssembly>( builder, this._compilationContext ),
                 DeclarationKind.Namespace => new BuilderRef<INamespace>( builder, this._compilationContext ),
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException( nameof(builder), $"Unexpected declaration kind: {builder.DeclarationKind}." )
             };
 
         /// <summary>
