@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SyntaxRef<T> : BaseRef<T>
+internal class SyntaxRef<T> : CompilationBoundRef<T>
     where T : class, ICompilationElement
 {
     public SyntaxNode SyntaxNode { get; }
@@ -46,6 +46,8 @@ internal class SyntaxRef<T> : BaseRef<T>
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
+        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
+
         return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
                     GetSymbolOfNode( compilation.PartialCompilation.CompilationContext, this.SyntaxNode ),

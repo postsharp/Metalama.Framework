@@ -7,6 +7,18 @@ using System;
 
 namespace Metalama.Framework.Code
 {
+    public enum RefComparison
+    {
+        Default,
+        Structural
+    }
+
+    public enum RefOptions
+    {
+        Default,
+        CompilationNeutral
+    }
+
     /// <summary>
     /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
     /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
@@ -44,6 +56,14 @@ namespace Metalama.Framework.Code
             ICompilation compilation,
             ReferenceResolutionOptions options = default,
             IGenericContext? genericContext = default );
+
+        bool IsCompilationNeutral { get; }
+
+        IRef ToCompilationNeutral();
+
+        bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
+
+        int GetHashCode( RefComparison comparison );
     }
 
     /// <summary>
@@ -69,5 +89,7 @@ namespace Metalama.Framework.Code
         /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
         /// </summary>
         new T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
+
+        new IRef<T> ToCompilationNeutral();
     }
 }

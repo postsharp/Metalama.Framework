@@ -2,24 +2,18 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 /// <summary>
-/// The base implementation of <see cref="ISdkRef{T}"/>.
+/// The base implementation of <see cref="IRef{T}"/> except for attributes.
 /// </summary>
-/// <typeparam name="T"></typeparam>
 internal abstract class BaseRef<T> : IRefImpl<T>
     where T : class, ICompilationElement
 {
     // The compilation for which the symbol (stored in Target) is valid.
-
-    public abstract CompilationContext CompilationContext { get; }
 
     static BaseRef()
     {
@@ -35,23 +29,19 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     public virtual IRefStrategy Strategy => throw new NotSupportedException();
 
-    public virtual SerializableDeclarationId ToSerializableId()
-    {
-        if ( this.CompilationContext == null )
-        {
-            throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
-        }
-
-        var symbol = this.GetSymbolIgnoringKind( true );
-
-        return symbol.GetSerializableId( this.TargetKind );
-    }
+    public abstract SerializableDeclarationId ToSerializableId();
 
     ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
         => this.GetTarget( compilation, options, genericContext );
 
     ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
         => this.GetTargetOrNull( compilation, options, genericContext );
+
+    public abstract IRef<T> ToCompilationNeutral();
+
+    public abstract bool IsCompilationNeutral { get; }
+
+    IRef IRef.ToCompilationNeutral() => this.ToCompilationNeutral();
 
     IRef<TOut> IRef.As<TOut>() => this.As<TOut>();
 
@@ -63,8 +53,6 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     private T? GetTargetImpl( ICompilation compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
-        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
-
         var compilationModel = (CompilationModel) compilation;
 
         if ( options.FollowRedirections() && compilationModel.TryGetRedirectedDeclaration( this, out var redirected ) )
@@ -85,62 +73,9 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         }
     }
 
-    /// <summary>
-    /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
-    /// the code model.
-    /// </summary>
-    public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData()
-    {
-        if ( this.TargetKind != RefTargetKind.Default )
-        {
-            var baseSymbol = this.GetSymbolIgnoringKind();
+    ISymbol ISdkRef.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol( compilation.GetCompilationContext(), ignoreAssemblyKey );
 
-            switch ( this.TargetKind )
-            {
-                case RefTargetKind.Return when baseSymbol is IMethodSymbol method:
-                    return (method.GetReturnTypeAttributes(), method);
-
-                case RefTargetKind.Field when baseSymbol is IEventSymbol @event:
-                    // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
-                    return (ImmutableArray<AttributeData>.Empty, @event);
-            }
-
-            // Fallback to the default GetSymbol implementation.
-        }
-
-        var symbol = this.GetSymbol( true );
-
-        return (symbol.GetAttributes(), symbol);
-    }
-
-    public virtual ISymbol GetClosestSymbol()
-    {
-        return this.GetSymbolIgnoringKind();
-    }
-
-    ISymbol ISdkRef.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol( ignoreAssemblyKey );
-
-    private ISymbol GetSymbol( bool ignoreAssemblyKey = false ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( ignoreAssemblyKey ) );
-
-    protected abstract ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false );
-
-    private ISymbol GetSymbolWithKind( ISymbol symbol )
-        => this.TargetKind switch
-        {
-            RefTargetKind.Assembly when symbol is IAssemblySymbol => symbol,
-            RefTargetKind.Module when symbol is IModuleSymbol => symbol,
-            RefTargetKind.NamedType when symbol is INamedTypeSymbol => symbol,
-            RefTargetKind.Default => symbol,
-            RefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
-            RefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertSymbolNotNull(),
-            RefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException( "Cannot get the underlying field of an event." ),
-            RefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertSymbolNotNull().Parameters[0],
-            RefTargetKind.Parameter when symbol is IMethodSymbol method => method.Parameters[0],
-            RefTargetKind.Property when symbol is IParameterSymbol parameter => parameter.ContainingType.GetMembers( symbol.Name )
-                .OfType<IPropertySymbol>()
-                .Single(),
-            _ => throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." )
-        };
+    protected abstract ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false );
 
     protected abstract T? Resolve(
         CompilationModel compilation,
@@ -183,6 +118,20 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public override int GetHashCode() => this.GetHashCodeCore();
 
     public abstract bool Equals( IRef? other );
+
+    public bool Equals( IRef? other, RefComparison comparison )
+        => comparison switch
+        {
+            RefComparison.Default => this.Equals( other ),
+            _ => this.ToCompilationNeutral().Equals( other?.ToCompilationNeutral() )
+        };
+
+    public int GetHashCode( RefComparison comparison )
+        => comparison switch
+        {
+            RefComparison.Default => this.GetHashCodeCore(),
+            _ => this.ToCompilationNeutral().GetHashCode()
+        };
 
     protected abstract int GetHashCodeCore();
 }

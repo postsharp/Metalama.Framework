@@ -34,12 +34,33 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new BuilderRef<IDeclaration>( builder, this._compilationContext );
+        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder )
+            => builder.DeclarationKind switch
+            {
+                DeclarationKind.NamedType => new BuilderRef<INamedType>( builder, this._compilationContext ),
+                DeclarationKind.Method => new BuilderRef<IMethod>( builder, this._compilationContext ),
+                DeclarationKind.Property => new BuilderRef<IProperty>( builder, this._compilationContext ),
+                DeclarationKind.Indexer => new BuilderRef<IIndexer>( builder, this._compilationContext ),
+                DeclarationKind.Field => new BuilderRef<IField>( builder, this._compilationContext ),
+                DeclarationKind.Event => new BuilderRef<IEvent>( builder, this._compilationContext ),
+                DeclarationKind.Parameter => new BuilderRef<IParameter>( builder, this._compilationContext ),
+                DeclarationKind.TypeParameter => new BuilderRef<ITypeParameter>( builder, this._compilationContext ),
+                DeclarationKind.Attribute => new BuilderRef<IAttribute>( builder, this._compilationContext ),
+                DeclarationKind.ManagedResource => new BuilderRef<IManagedResource>( builder, this._compilationContext ),
+                DeclarationKind.Constructor => new BuilderRef<IConstructor>( builder, this._compilationContext ),
+                DeclarationKind.Finalizer => new BuilderRef<IMethod>( builder, this._compilationContext ),
+                DeclarationKind.Operator => new BuilderRef<IMethod>( builder, this._compilationContext ),
+                DeclarationKind.AssemblyReference => new BuilderRef<IAssembly>( builder, this._compilationContext ),
+                DeclarationKind.Namespace => new BuilderRef<INamespace>( builder, this._compilationContext ),
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
-        public IRef<IDeclaration> FromSymbol( ISymbol symbol )
+        public IRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (IRef<IDeclaration>) this.FromAnySymbol( symbol );
+
+        public IRef<ICompilationElement> FromAnySymbol( ISymbol symbol )
             => symbol.GetDeclarationKind( this._compilationContext ) switch
             {
                 DeclarationKind.Compilation => new SymbolRef<ICompilation>( symbol, this._compilationContext ),
@@ -58,6 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 DeclarationKind.Operator => new SymbolRef<IMethod>( symbol, this._compilationContext ),
                 DeclarationKind.AssemblyReference => new SymbolRef<IAssembly>( symbol, this._compilationContext ),
                 DeclarationKind.Namespace => new SymbolRef<INamespace>( symbol, this._compilationContext ),
+                DeclarationKind.Type => new SymbolRef<IType>( symbol, this._compilationContext ),
                 _ => throw new ArgumentOutOfRangeException()
             };
 
@@ -106,15 +128,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public IRef<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
-            => new StringRef<T>( symbolKey.Id, this._compilationContext );
+            => new StringRef<T>( symbolKey.Id );
 
         public IRef<T> FromDeclarationId<T>( SerializableDeclarationId id )
             where T : class, ICompilationElement
-            => new StringRef<T>( id.Id, this._compilationContext );
+            => new StringRef<T>( id.Id );
 
         public IRef<T> FromTypeId<T>( SerializableTypeId id )
             where T : class, IType
-            => new StringRef<T>( id.Id, this._compilationContext );
+            => new StringRef<T>( id.Id );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.

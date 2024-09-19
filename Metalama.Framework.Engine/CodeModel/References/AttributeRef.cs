@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References
@@ -26,9 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public CompilationContext CompilationContext { get; }
 
-        public ISymbol GetClosestSymbol() => this.ContainingDeclaration.AsRefImpl().GetClosestSymbol();
-
-        (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) IRefImpl.GetAttributeData() => throw new NotSupportedException();
+        public ISymbol GetClosestSymbol() => ((ICompilationBoundRefImpl) this.ContainingDeclaration).GetClosestSymbol();
 
         string IRefImpl.Name => throw new NotSupportedException();
 
@@ -50,6 +47,26 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
             => this.GetTargetOrNull( compilation, options, genericContext );
+
+        public IRef<IAttribute> ToCompilationNeutral() => throw new NotSupportedException();
+
+        public bool IsCompilationNeutral => false;
+
+        IRef IRef.ToCompilationNeutral() => this.ToCompilationNeutral();
+
+        public bool Equals( IRef? other, RefComparison comparison = RefComparison.Default )
+            => comparison switch
+            {
+                RefComparison.Default => this.Equals( other ),
+                _ => throw new NotSupportedException( "Compilation-neutral comparison of attributes is not supported." )
+            };
+
+        public int GetHashCode( RefComparison comparison )
+            => comparison switch
+            {
+                RefComparison.Default => this.GetHashCode(),
+                _ => throw new NotSupportedException( "Compilation-neutral comparison of attributes is not supported." )
+            };
 
         ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
             => this.GetTarget( compilation, options, genericContext );

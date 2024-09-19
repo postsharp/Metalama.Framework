@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
+internal class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     where T : class, ICompilationElement
 {
     public BuilderRef( IDeclarationBuilder builder, CompilationContext compilationContext )
@@ -36,10 +36,7 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
 
     public override SerializableDeclarationId ToSerializableId() => this.Builder.ToSerializableId();
 
-    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
-    {
-        throw new NotSupportedException();
-    }
+    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false ) => throw new NotSupportedException();
 
     public override ISymbol GetClosestSymbol()
     {
@@ -56,6 +53,8 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
+        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
+
         return ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
     }
 
@@ -63,7 +62,7 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
 
     protected override int GetHashCodeCore() => this.Builder.GetHashCode();
 
-    public override string ToString() => this.Builder.ToString();
+    public override string ToString() => this.Builder.ToString()!;
 
     public override IRefImpl<TOut> As<TOut>()
         => (IRefImpl<TOut>) this; // There should be no reason to upcast since we always create instances of the right type.

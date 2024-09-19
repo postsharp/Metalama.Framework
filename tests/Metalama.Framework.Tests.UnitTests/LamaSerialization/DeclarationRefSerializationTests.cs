@@ -11,28 +11,13 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization;
 public class DeclarationRefSerializationTests : SerializationTestsBase
 {
     [Fact]
-    public void ValueTypedRef()
+    public void SymbolRef()
     {
         const string code = "public class C;";
         using var testContext = this.CreateTestContext( code );
         var initialRef = testContext.Compilation.Types.Single().ToRef();
 
-        var roundtripRef = this.TestSerialization( initialRef, testEquality: false );
-
-        var initialSymbol = initialRef.GetTarget( testContext.Compilation );
-        var roundtripSymbol = roundtripRef.GetTarget( testContext.Compilation );
-
-        Assert.Same( initialSymbol, roundtripSymbol );
-    }
-
-    [Fact]
-    public void BoxedRef()
-    {
-        const string code = "public class C;";
-        using var testContext = this.CreateTestContext( code );
-        var initialRef = testContext.Compilation.Types.Single().ToRef();
-
-        var roundtripRef = this.TestSerialization( initialRef, testEquality: false );
+        var roundtripRef = TestSerialization( testContext, initialRef, testEquality: false );
 
         var initialSymbol = initialRef.GetTarget( testContext.Compilation );
         var roundtripSymbol = roundtripRef.GetTarget( testContext.Compilation );

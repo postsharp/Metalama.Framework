@@ -61,7 +61,7 @@ internal class SyntaxAttributeRef : AttributeRef
         }
 
         // Find the parent declaration.
-        var (attributes, symbol) = this.ContainingDeclaration.AsRefImpl().GetAttributeData();
+        var (attributes, symbol) = ((ICompilationBoundRefImpl) this.ContainingDeclaration).GetAttributeData();
 
         // In the parent, find the AttributeData corresponding to the current item.
 

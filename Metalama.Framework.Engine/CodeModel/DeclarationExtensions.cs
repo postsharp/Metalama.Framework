@@ -51,7 +51,7 @@ public static class DeclarationExtensions
             IAssemblySymbol => DeclarationKind.AssemblyReference,
             IParameterSymbol => DeclarationKind.Parameter,
             IEventSymbol => DeclarationKind.Event,
-            ITypeSymbol => DeclarationKind.None,
+            ITypeSymbol => DeclarationKind.Type,
             IModuleSymbol => DeclarationKind.Compilation,
             _ => throw new ArgumentException( $"Unexpected symbol: {symbol.GetType().Name}.", nameof(symbol) )
         };

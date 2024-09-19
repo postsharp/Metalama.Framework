@@ -22,7 +22,7 @@ public static class RefExtensions
     // ReSharper disable once SuspiciousTypeConversion.Global
     public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference )
         where T : IRef<IDeclaration>
-        => ((IRefImpl) reference).GetClosestSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
+        => ((ICompilationBoundRefImpl) reference).GetClosestSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
 
     internal static Type GetRefInterfaceType( this DeclarationKind declarationKind, RefTargetKind refTargetKind = RefTargetKind.Default )
         => refTargetKind switch
@@ -46,7 +46,7 @@ public static class RefExtensions
             RefTargetKind.NamedType => typeof(INamedType),
             RefTargetKind.Default => declarationKind switch
             {
-                DeclarationKind.None => typeof(IType),
+                DeclarationKind.Type => typeof(IType),
                 DeclarationKind.Compilation => typeof(ICompilation),
                 DeclarationKind.NamedType => typeof(INamedType),
                 DeclarationKind.Method => typeof(IMethod),
@@ -70,7 +70,7 @@ public static class RefExtensions
         };
 
     internal static IRef<IDeclaration> ToRef( this ISymbol symbol, CompilationContext compilationContext )
-        => compilationContext.RefFactory.FromSymbol( symbol );
+        => compilationContext.RefFactory.FromDeclarationSymbol( symbol );
 
     internal static IRef<INamedType> ToRef( this INamedTypeSymbol symbol, CompilationContext compilationContext )
         => compilationContext.RefFactory.FromSymbol<INamedType>( symbol );

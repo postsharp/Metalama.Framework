@@ -27,7 +27,7 @@ internal class AttributeSerializationData
 
     public AttributeSerializationData( ISymbol symbol, AttributeData attributeData, CompilationContext compilationContext )
     {
-        this.ContainingDeclaration = compilationContext.RefFactory.FromSymbol( symbol );
+        this.ContainingDeclaration = compilationContext.RefFactory.FromDeclarationSymbol( symbol );
         compilationContext.RefFactory.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull() );
         this.Constructor = compilationContext.RefFactory.FromSymbol<IConstructor>( attributeData.AttributeConstructor.AssertSymbolNotNull() );
         this.Type = compilationContext.RefFactory.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull() );

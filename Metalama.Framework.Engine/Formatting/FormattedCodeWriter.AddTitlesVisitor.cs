@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
             private readonly SemanticModel _semanticModel;
-            private CompilationContext _compilationContext;
+            private readonly CompilationContext _compilationContext;
 
             public AddTitlesVisitor( ClassifiedTextSpanCollection textSpans, SemanticModel semanticModel )
             {

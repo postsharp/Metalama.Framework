@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
+internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
     where T : class, ICompilationElement
 {
     public ISymbol Symbol { get; }
@@ -42,6 +42,8 @@ internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
+        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
+
         var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( this.Symbol, compilation.RoslynCompilation );
 
         if ( translatedSymbol == null )

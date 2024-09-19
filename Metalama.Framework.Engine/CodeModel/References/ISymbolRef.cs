@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal interface ISymbolRef : IRefImpl
+internal interface ISymbolRef : ICompilationBoundRefImpl
 {
     ISymbol Symbol { get; }
 

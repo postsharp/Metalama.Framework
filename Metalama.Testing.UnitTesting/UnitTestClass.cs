@@ -93,6 +93,7 @@ namespace Metalama.Testing.UnitTesting
                 contextOptions ?? this.GetDefaultTestContextOptions(),
                 this.GetMockServices( services ) );
 
+        [MustDisposeResource]
         protected virtual TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
             => new( contextOptions, services );
 

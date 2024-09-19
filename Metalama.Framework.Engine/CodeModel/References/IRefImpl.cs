@@ -17,7 +17,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
         string Name { get; }
 
         IRefStrategy Strategy { get; }
+    }
 
+    internal interface ICompilationBoundRefImpl : IRefImpl
+    {
         CompilationContext CompilationContext { get; }
 
         ISymbol GetClosestSymbol();

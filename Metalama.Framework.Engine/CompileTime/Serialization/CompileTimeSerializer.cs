@@ -81,6 +81,8 @@ internal sealed class CompileTimeSerializer
         }
         catch ( CompileTimeSerializationException ) when ( stream.CanSeek )
         {
+            stream.Seek( 0, SeekOrigin.Begin );
+
             return Try( true );
         }
 

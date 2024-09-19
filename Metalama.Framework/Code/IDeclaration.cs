@@ -63,7 +63,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the kind of declaration.
         /// </summary>
-        public DeclarationKind DeclarationKind { get; }
+        DeclarationKind DeclarationKind { get; }
 
         /// <summary>
         /// Gets a value indicating whether the member is implicitly declared, i.e. declared without being represented in source code.

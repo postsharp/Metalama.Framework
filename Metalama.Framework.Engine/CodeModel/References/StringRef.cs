@@ -13,27 +13,28 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 {
     public string Id { get; }
 
-    public override CompilationContext CompilationContext { get; }
-
-    public StringRef( string id, CompilationContext compilationContext )
+    public StringRef( string id )
     {
         this.Id = id;
-        this.CompilationContext = compilationContext;
     }
 
     public override string Name => throw new NotSupportedException();
 
     public override SerializableDeclarationId ToSerializableId()
     {
-        if ( IsDeclarationId( this.Id ) && this.TargetKind == RefTargetKind.Default )
+        if ( IsDeclarationId( this.Id ) )
         {
             return new SerializableDeclarationId( this.Id );
         }
         else
         {
-            return base.ToSerializableId();
+            throw new InvalidOperationException( "The reference represents a non-named type." );
         }
     }
+
+    public override IRef<T> ToCompilationNeutral() => this;
+
+    public override bool IsCompilationNeutral => true;
 
     private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolverForSymbol.Prefix[0];
 
@@ -41,28 +42,28 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
         => id.StartsWith( SerializableTypeIdResolverForSymbol.LegacyPrefix, StringComparison.Ordinal )
            || id.StartsWith( SerializableTypeIdResolverForSymbol.Prefix, StringComparison.Ordinal );
 
-    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
+    protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {
         ISymbol? symbol;
 
         if ( IsDeclarationId( this.Id ) )
         {
-            symbol = new SerializableDeclarationId( this.Id ).ResolveToSymbolOrNull( this.CompilationContext );
+            symbol = new SerializableDeclarationId( this.Id ).ResolveToSymbolOrNull( compilationContext );
         }
         else if ( IsTypeId( this.Id ) )
         {
-            symbol = this.CompilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( this.Id ) );
+            symbol = compilationContext.SerializableTypeIdResolver.ResolveId( new SerializableTypeId( this.Id ) );
         }
         else
         {
             var symbolKey = new SymbolId( this.Id );
 
-            symbol = symbolKey.Resolve( this.CompilationContext.Compilation, ignoreAssemblyKey );
+            symbol = symbolKey.Resolve( compilationContext.Compilation, ignoreAssemblyKey );
         }
 
         if ( symbol == null )
         {
-            throw new SymbolNotFoundException( this.Id, this.CompilationContext.Compilation );
+            throw new SymbolNotFoundException( this.Id, compilationContext.Compilation );
         }
 
         return symbol;
@@ -114,8 +115,6 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
             return false;
         }
 
-        Invariant.Assert( this.CompilationContext == stringRef.CompilationContext, "Attempted to compare two symbols of different compilations." );
-
         return stringRef.Id == this.Id;
     }
 
@@ -130,5 +129,5 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 
     public override string ToString() => this.Id;
 
-    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new StringRef<TOut>( this.Id, this.CompilationContext );
+    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new StringRef<TOut>( this.Id );
 }
