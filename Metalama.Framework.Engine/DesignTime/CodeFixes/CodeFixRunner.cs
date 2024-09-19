@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -104,7 +105,7 @@ public abstract class CodeFixRunner
         else if ( !codeFix.IsLicensed && !isComputingPreview )
         {
             this._licenseVerifier?.DetectToastNotifications();
-            
+
             return CodeActionResult.Error(
                 LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic( null, (codeFixTitle, codeFix.Creator) ) );
         }
@@ -123,9 +124,9 @@ public abstract class CodeFixRunner
 
             var userCodeExecutionContext = new UserCodeExecutionContext(
                 codeActionContext.ServiceProvider,
-                diagnostics,
                 UserCodeDescription.Create( "executing {0}", codeFix ),
-                compilationModel: pipelineResult.Value.Compilation );
+                pipelineResult.Value.Compilation,
+                diagnostics: diagnostics );
 
             await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
 

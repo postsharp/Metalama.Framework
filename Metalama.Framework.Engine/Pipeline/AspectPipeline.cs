@@ -185,8 +185,9 @@ public abstract class AspectPipeline : IDisposable
 
                     var executionContext = new UserCodeExecutionContext(
                         projectServiceProviderWithoutPlugins,
-                        diagnosticAdder,
-                        UserCodeDescription.Create( "instantiating the plug-in {0}", type ) );
+                        UserCodeDescription.Create( "instantiating the plug-in {0}", type ),
+                        compilation.GetCompilationContext(),
+                        diagnostics: diagnosticAdder );
 
                     if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
                     {

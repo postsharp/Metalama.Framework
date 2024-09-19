@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -16,8 +17,7 @@ namespace Metalama.Framework.Engine.Advising
         private readonly ObjectReaderFactory _objectReaderFactory;
         private ObjectReaderTypeAdapter? _typeAdapter;
 
-        private ObjectReaderTypeAdapter TypeAdapter 
-            => this._typeAdapter ??= this._objectReaderFactory.GetTypeAdapter( this.Source.GetType() );
+        private ObjectReaderTypeAdapter TypeAdapter => this._typeAdapter ??= this._objectReaderFactory.GetTypeAdapter( this.Source.GetType() );
 
         public static readonly IObjectReader Empty = new ObjectReaderDictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 

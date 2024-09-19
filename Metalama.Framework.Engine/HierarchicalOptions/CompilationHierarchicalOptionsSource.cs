@@ -65,6 +65,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
                 var invokerContext = new UserCodeExecutionContext(
                     this._serviceProvider,
                     UserCodeDescription.Create( "executing GetOptions() for '{0}' applied to '{1}'", attributeType.Name, attribute.ContainingDeclaration ),
+                    context.Compilation.CompilationContext,
                     targetDeclaration: attribute.ContainingDeclaration );
 
                 var providerContext = new OptionsProviderContext(

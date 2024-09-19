@@ -6,9 +6,13 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class SystemAttributeDeserializer : AttributeDeserializer
 {
-    private SystemAttributeDeserializer( in ProjectServiceProvider serviceProvider, SystemTypeResolver systemTypeResolver ) : base(
+    private SystemAttributeDeserializer(
+        in ProjectServiceProvider serviceProvider,
+        SystemTypeResolver systemTypeResolver,
+        CompilationContext compilationContext ) : base(
         serviceProvider,
-        systemTypeResolver ) { }
+        systemTypeResolver,
+        compilationContext ) { }
 
     public sealed class Provider : CompilationServiceProvider<SystemAttributeDeserializer>
     {
@@ -18,7 +22,7 @@ internal sealed class SystemAttributeDeserializer : AttributeDeserializer
         {
             var resolver = this.ServiceProvider.GetRequiredService<SystemTypeResolver.Provider>().Get( compilationContext );
 
-            return new SystemAttributeDeserializer( this.ServiceProvider, resolver );
+            return new SystemAttributeDeserializer( this.ServiceProvider, resolver, compilationContext );
         }
     }
 }

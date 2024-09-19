@@ -225,7 +225,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         }
     }
 
-    private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory )
+    private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory, CompilationContext compilationContext )
     {
         if ( this.HasError )
         {
@@ -249,7 +249,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
                 this._eligibilityHelper.Add( typeof(IDeclaration), eligibilityRule );
             }
 
-            if ( !this._eligibilityHelper.PopulateRules( diagnosticAdder ) )
+            if ( !this._eligibilityHelper.PopulateRules( diagnosticAdder, compilationContext ) )
             {
                 return false;
             }
@@ -337,7 +337,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
             diagnosticAdder,
             templateReflectionContext );
 
-        if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory ) )
+        if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory, templateReflectionContext.CompilationContext ) )
         {
             aspectClass = null;
 
@@ -417,10 +417,13 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
         => this._eligibilityHelper.AssertNotNull().GetIneligibilityJustification( requestedEligibility, describedObject );
 
-    internal IAspect CreateDefaultInstance()
+    internal IAspect CreateDefaultInstance( CompilationContext compilationContext )
         => this._userCodeInvoker.Invoke(
             () => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull(),
-            new UserCodeExecutionContext( this.ServiceProvider, UserCodeDescription.Create( "executing the default constructor of {0}", this ) ) );
+            new UserCodeExecutionContext(
+                this.ServiceProvider,
+                UserCodeDescription.Create( "executing the default constructor of {0}", this ),
+                compilationContext ) );
 
     public override string ToString() => this.FullName;
 

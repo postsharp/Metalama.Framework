@@ -6,9 +6,13 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class UserCodeAttributeDeserializer : AttributeDeserializer
 {
-    private UserCodeAttributeDeserializer( in ProjectServiceProvider serviceProvider, CompileTimeTypeResolver resolver ) : base(
+    private UserCodeAttributeDeserializer(
+        in ProjectServiceProvider serviceProvider,
+        CompileTimeTypeResolver resolver,
+        CompilationContext compilationContext ) : base(
         serviceProvider,
-        resolver ) { }
+        resolver,
+        compilationContext ) { }
 
     public sealed class Provider : CompilationServiceProvider<UserCodeAttributeDeserializer>
     {
@@ -17,6 +21,7 @@ internal sealed class UserCodeAttributeDeserializer : AttributeDeserializer
         protected override UserCodeAttributeDeserializer Create( CompilationContext compilationContext )
             => new(
                 this.ServiceProvider,
-                this.ServiceProvider.GetRequiredService<CompilationServiceProvider<ProjectSpecificCompileTimeTypeResolver>>().Get( compilationContext ) );
+                this.ServiceProvider.GetRequiredService<CompilationServiceProvider<ProjectSpecificCompileTimeTypeResolver>>().Get( compilationContext ),
+                compilationContext );
     }
 }

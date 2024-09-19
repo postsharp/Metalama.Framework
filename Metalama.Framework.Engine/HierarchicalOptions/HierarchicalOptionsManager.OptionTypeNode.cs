@@ -5,6 +5,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
 using System;
@@ -34,7 +35,8 @@ public sealed partial class HierarchicalOptionsManager
             Type type,
             IUserDiagnosticSink diagnosticAdder,
             IHierarchicalOptions defaultOptions,
-            IHierarchicalOptions emptyOptions )
+            IHierarchicalOptions emptyOptions,
+            CompilationContext compilationContext )
         {
             this._parent = parent;
             this._type = type;
@@ -42,13 +44,13 @@ public sealed partial class HierarchicalOptionsManager
             this._emptyOptions = emptyOptions;
             this._typeName = type.FullName.AssertNotNull();
             var invoker = parent._serviceProvider.GetRequiredService<UserCodeInvoker>();
-            var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
+            var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ), compilationContext );
 
             var prototype =
                 invoker.Invoke( () => (IHierarchicalOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
 
             this._eligibilityHelper = new EligibilityHelper( prototype, parent._serviceProvider, type );
-            this._eligibilityHelper.PopulateRules( diagnosticAdder );
+            this._eligibilityHelper.PopulateRules( diagnosticAdder, compilationContext );
             this.Metadata = type.GetCustomAttributes<HierarchicalOptionsAttribute>().SingleOrDefault() ?? HierarchicalOptionsAttribute.Default;
         }
 

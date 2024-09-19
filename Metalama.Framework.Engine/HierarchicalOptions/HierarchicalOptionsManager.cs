@@ -77,9 +77,9 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         {
             var userCodeExecutionContext = new UserCodeExecutionContext(
                 this._serviceProvider,
-                diagnosticSink,
                 UserCodeDescription.Create( "Initializing options '{0}'", optionTypeName ),
-                compilationModel: compilationModel );
+                compilationModel,
+                diagnostics: diagnosticSink );
 
             var optionType = this.GetOptionType( optionTypeName, compilationModel );
 
@@ -117,7 +117,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
             this._optionTypes.TryAdd(
                 optionTypeName,
-                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions, emptyOptions ) );
+                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions, emptyOptions, compilationModel.CompilationContext ) );
         }
 
         if ( externalOptionsProvider != null )

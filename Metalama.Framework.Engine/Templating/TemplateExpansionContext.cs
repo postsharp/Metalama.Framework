@@ -103,7 +103,13 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     /// </summary>
     internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, in ProjectServiceProvider serviceProvider )
     {
-        var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, new AspectLayerId( "(test)" ) ) );
+        var handle = WithContext(
+            new UserCodeExecutionContext(
+                serviceProvider,
+                default,
+                serializationContext.CompilationContext,
+                new AspectLayerId( "(test)" ) ) );
+
         _currentSyntaxSerializationContext.Value = serializationContext;
 
         return new DisposeCookie(
@@ -147,15 +153,16 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
-        metaApi.Diagnostics,
         UserCodeDescription.Create(
             "executing the template method '{0}' in the context of the aspect '{1}' applied to '{2}'",
             template?.TemplateMember.Declaration.GetSymbol(),
             metaApi.AspectInstance?.AspectClass.FullName,
             metaApi.AspectInstance?.TargetDeclaration ),
+        syntaxGenerationContext.CompilationContext,
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,
+        diagnostics: metaApi.Diagnostics,
         metaApi: metaApi )
     {
         this._template = template?.TemplateMember;
