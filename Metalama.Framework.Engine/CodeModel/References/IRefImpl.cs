@@ -23,8 +23,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ISymbol GetClosestSymbol();
 
         (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData();
-
-        IRefImpl Unwrap();
     }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl

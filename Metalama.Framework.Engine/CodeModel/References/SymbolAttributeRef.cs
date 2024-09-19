@@ -7,14 +7,13 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SymbolAttributeRef : AttributeRef
+internal sealed class SymbolAttributeRef : AttributeRef
 {
-    public AttributeData AttributeData { get; }
+    private readonly AttributeData _attributeData;
 
     public SymbolAttributeRef( AttributeData attributeData, IRef<IDeclaration> containingDeclaration, CompilationContext compilationContext )
         : base(
@@ -27,12 +26,12 @@ internal class SymbolAttributeRef : AttributeRef
         // Note that Roslyn can return an AttributeData that does not belong to the same compilation
         // as the parent symbol, probably because of some bug or optimisation.
 
-        this.AttributeData = attributeData;
+        this._attributeData = attributeData;
     }
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {
-        if ( !this.AttributeData.IsValid() )
+        if ( !this._attributeData.IsValid() )
         {
             // Only return fully valid attributes.
             attribute = null;
@@ -40,21 +39,21 @@ internal class SymbolAttributeRef : AttributeRef
             return false;
         }
 
-        attribute = new Attribute( this.AttributeData, compilation, this.ContainingDeclaration.GetTarget( compilation ) );
+        attribute = new Attribute( this._attributeData, compilation, this.ContainingDeclaration.GetTarget( compilation ) );
 
         return true;
     }
 
     public override bool TryGetAttributeSerializationDataKey( [NotNullWhen( true )] out object? serializationDataKey )
     {
-        serializationDataKey = this.AttributeData;
+        serializationDataKey = this._attributeData;
 
         return true;
     }
 
     public override bool TryGetAttributeSerializationData( [NotNullWhen( true )] out AttributeSerializationData? serializationData )
     {
-        if ( !this.AttributeData.IsValid() )
+        if ( !this._attributeData.IsValid() )
         {
             // Only return fully valid attributes.
             serializationData = null;
@@ -64,15 +63,13 @@ internal class SymbolAttributeRef : AttributeRef
 
         serializationData = new AttributeSerializationData(
             this.ContainingDeclaration.GetSymbol( this.CompilationContext.Compilation ).AssertSymbolNotNull(),
-            this.AttributeData,
+            this._attributeData,
             this.CompilationContext );
 
         return true;
     }
 
-    protected override AttributeSyntax? AttributeSyntax => (AttributeSyntax?) this.AttributeData.ApplicationSyntaxReference?.GetSyntax();
+    protected override AttributeSyntax? AttributeSyntax => (AttributeSyntax?) this._attributeData.ApplicationSyntaxReference?.GetSyntax();
 
     protected override int GetHashCodeCore() => this.AttributeSyntax?.GetHashCode() ?? 0;
-
-    public override bool Equals( AttributeRef? other ) => throw new NotImplementedException();
 }

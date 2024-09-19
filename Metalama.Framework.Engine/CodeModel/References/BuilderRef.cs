@@ -13,6 +13,8 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
 {
     public BuilderRef( IDeclarationBuilder builder, CompilationContext compilationContext )
     {
+        Invariant.Assert( typeof(T) == builder.DeclarationKind.GetRefInterfaceType() );
+
         this.Builder = builder;
         this.CompilationContext = compilationContext;
     }
@@ -57,9 +59,12 @@ internal class BuilderRef<T> : BaseRef<T>, IBuilderRef
         return ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
     }
 
-    public override bool Equals( IRef? other ) => other?.Unwrap() is IBuilderRef builderRef && this.Builder == builderRef.Builder;
+    public override bool Equals( IRef? other ) => other is IBuilderRef builderRef && this.Builder == builderRef.Builder;
 
     protected override int GetHashCodeCore() => this.Builder.GetHashCode();
 
-    public override string ToString() => this.Builder.ToDisplayString();
+    public override string ToString() => this.Builder.ToString();
+
+    public override IRefImpl<TOut> As<TOut>()
+        => (IRefImpl<TOut>) this; // There should be no reason to upcast since we always create instances of the right type.
 }

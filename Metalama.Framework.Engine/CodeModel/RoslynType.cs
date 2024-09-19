@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         [Memo]
-        private IRef<IType> Ref => this.GetCompilationContext().RefFactory.FromSymbol<IType>( this.Symbol );
+        private IRef<IType> Ref => this.Symbol.ToRef( this.GetCompilationContext() );
 
         IRef<IType> IType.ToRef() => this.Ref;
 

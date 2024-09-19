@@ -15,14 +15,19 @@ internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
     public override CompilationContext CompilationContext { get; }
 
-    public override DeclarationRefTargetKind TargetKind { get; }
+    public override RefTargetKind TargetKind { get; }
 
     public override string Name => this.Symbol.Name;
 
     public override SerializableDeclarationId ToSerializableId() => this.Symbol.GetSerializableId();
 
-    public SymbolRef( ISymbol symbol, CompilationContext compilationContext, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
+    public SymbolRef( ISymbol symbol, CompilationContext compilationContext, RefTargetKind targetKind = RefTargetKind.Default )
     {
+        Invariant.Assert(
+            symbol.GetDeclarationKind( compilationContext ).GetRefInterfaceType( targetKind ) == typeof(T)
+            || (typeof(T) == typeof(ICompilation) && symbol.Kind == SymbolKind.Assembly),
+            $"Interface type mismatch: expected {symbol.GetDeclarationKind( compilationContext ).GetRefInterfaceType().Name} but got {typeof(T).Name}." );
+
         this.Symbol = symbol;
         this.TargetKind = targetKind;
         this.CompilationContext = compilationContext;
@@ -49,7 +54,7 @@ internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
 
     public override bool Equals( IRef? other )
     {
-        if ( other?.Unwrap() is not ISymbolRef symbolRef )
+        if ( other is not ISymbolRef symbolRef )
         {
             return false;
         }
@@ -66,7 +71,10 @@ internal sealed class SymbolRef<T> : BaseRef<T>, ISymbolRef
     public override string ToString()
         => this.TargetKind switch
         {
-            DeclarationRefTargetKind.Default => this.Symbol.ToString()!,
+            RefTargetKind.Default => this.Symbol.ToString()!,
             _ => $"{this.Symbol}:{this.TargetKind}"
         };
+
+    public override IRefImpl<TOut> As<TOut>()
+        => (IRefImpl<TOut>) (object) this; // There should be no reason to upcast since we always create instances of the right type.
 }

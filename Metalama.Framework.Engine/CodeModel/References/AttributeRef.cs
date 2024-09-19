@@ -19,22 +19,20 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.AttributeType = attributeType;
             this.CompilationContext = compilationContext;
         }
-        
+
         public IRef<IDeclaration> ContainingDeclaration { get; }
-        
+
         public IRef<INamedType> AttributeType { get; }
 
         public CompilationContext CompilationContext { get; }
 
-        public ISymbol GetClosestSymbol() => this.ContainingDeclaration.Unwrap().GetClosestSymbol();
+        public ISymbol GetClosestSymbol() => this.ContainingDeclaration.AsRefImpl().GetClosestSymbol();
 
         (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) IRefImpl.GetAttributeData() => throw new NotSupportedException();
 
         string IRefImpl.Name => throw new NotSupportedException();
 
         IRefStrategy IRefImpl.Strategy => throw new NotSupportedException();
-
-        public IRefImpl Unwrap() => this;
 
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
 

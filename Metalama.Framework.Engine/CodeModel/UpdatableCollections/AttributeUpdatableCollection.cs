@@ -23,7 +23,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
         this._moduleSymbol = moduleSymbol;
 
 #if DEBUG
-        (this._parent.Unwrap() as ISymbolRef)?.Symbol.ThrowIfBelongsToDifferentCompilationThan( compilation.CompilationContext );
+        (this._parent as ISymbolRef)?.Symbol.ThrowIfBelongsToDifferentCompilationThan( compilation.CompilationContext );
 #endif
     }
 

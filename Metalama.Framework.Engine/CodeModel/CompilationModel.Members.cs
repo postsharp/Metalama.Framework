@@ -255,7 +255,7 @@ public sealed partial class CompilationModel
 
     internal AttributeUpdatableCollection GetAttributeCollection( IRef<IDeclaration> parent, bool mutable = false )
     {
-        var moduleSymbol = parent.Unwrap() is ISymbolRef { Symbol: ISourceAssemblySymbol } ? this.RoslynCompilation.SourceModule : null;
+        var moduleSymbol = parent is ISymbolRef { Symbol: ISourceAssemblySymbol } ? this.RoslynCompilation.SourceModule : null;
 
         return this.GetMemberCollection<IDeclaration, IAttribute, AttributeRef, AttributeUpdatableCollection>(
             ref this._attributes,
@@ -266,14 +266,14 @@ public sealed partial class CompilationModel
 
     internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
     {
-        this._staticConstructors.TryGetValue( declaringType.ToRef<INamedType>( this.CompilationContext ), out var value );
+        this._staticConstructors.TryGetValue( declaringType.ToRef( this.CompilationContext ), out var value );
 
         return value;
     }
 
     internal IMethodBuilder? GetFinalizer( INamedTypeSymbol declaringType )
     {
-        this._finalizers.TryGetValue( declaringType.ToRef<INamedType>( this.CompilationContext ), out var value );
+        this._finalizers.TryGetValue( declaringType.ToRef( this.CompilationContext ), out var value );
 
         return value;
     }

@@ -80,7 +80,7 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
     private IRef<IParameter> Ref
         => this.RefFactory.FromSymbol<IParameter>(
             (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertSymbolNotNull(),
-            DeclarationRefTargetKind.Return );
+            RefTargetKind.Return );
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

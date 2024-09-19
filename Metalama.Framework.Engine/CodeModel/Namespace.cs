@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -91,7 +92,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamedTypeCollection TypesCore
         => new NamedTypeCollection(
             this.Compilation,
-            this.Compilation.GetNamedTypeCollection( this._symbol.ToRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamedTypeCollection( this._symbol.ToRef( this.Compilation.CompilationContext ) ) );
 
     // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
 
@@ -112,7 +113,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamespaceCollection NamespacesCore
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._symbol.ToRef<INamespace>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamespaceCollection( this._symbol.ToRef( this.Compilation.CompilationContext ) ) );
 
     public INamespace? GetDescendant( string ns )
     {

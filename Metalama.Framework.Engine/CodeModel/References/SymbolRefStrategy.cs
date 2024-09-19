@@ -25,12 +25,12 @@ internal class SymbolRefStrategy : IRefStrategy
 
     public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<IRef<IAttribute>> add )
     {
-        var symbolRef = (ISymbolRef) declaration.Unwrap();
+        var symbolRef = (ISymbolRef) declaration;
 
         var attributes = symbolRef.TargetKind switch
         {
-            DeclarationRefTargetKind.Return => ((IMethodSymbol) symbolRef.Symbol).GetReturnTypeAttributes(),
-            DeclarationRefTargetKind.Default => symbolRef.Symbol.GetAttributes(),
+            RefTargetKind.Return => ((IMethodSymbol) symbolRef.Symbol).GetReturnTypeAttributes(),
+            RefTargetKind.Default => symbolRef.Symbol.GetAttributes(),
             _ => throw new NotImplementedException()
         };
 
@@ -50,7 +50,7 @@ internal class SymbolRefStrategy : IRefStrategy
         if ( compilation.TryGetRedirectedDeclaration( declaration, out var redirectedDeclaration ) )
         {
             // If the declaration was redirected, we need to add the attributes from the builder.
-            if ( redirectedDeclaration.Unwrap() is IBuilderRef { Builder: { } redirectedBuilder } )
+            if ( redirectedDeclaration is IBuilderRef { Builder: { } redirectedBuilder } )
             {
                 foreach ( var attribute in redirectedBuilder.Attributes )
                 {
@@ -66,7 +66,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
     public void EnumerateAllImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
     {
-        var namedTypeSymbol = (INamedTypeSymbol) ((ISymbolRef) namedType.Unwrap()).Symbol;
+        var namedTypeSymbol = (INamedTypeSymbol) ((ISymbolRef) namedType).Symbol;
 
         foreach ( var i in namedTypeSymbol.AllInterfaces )
         {
@@ -81,7 +81,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
     public void EnumerateImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
     {
-        var namedTypeSymbol = (INamedTypeSymbol) ((ISymbolRef) namedType.Unwrap()).Symbol;
+        var namedTypeSymbol = (INamedTypeSymbol) ((ISymbolRef) namedType).Symbol;
 
         foreach ( var i in namedTypeSymbol.Interfaces )
         {
@@ -101,7 +101,7 @@ internal class SymbolRefStrategy : IRefStrategy
         {
             case DeclarationKind.Namespace:
                 {
-                    var symbol = (INamespaceSymbol) ((ISymbolRef) parent.Unwrap()).Symbol;
+                    var symbol = (INamespaceSymbol) ((ISymbolRef) parent).Symbol;
 
                     return symbol.GetNamespaceMembers()
                         .Where( ns => ns.Name == name && IsValidNamespace( ns, compilation ) )
@@ -110,7 +110,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
             default:
                 {
-                    var symbol = (INamespaceOrTypeSymbol) ((ISymbolRef) parent.Unwrap()).Symbol;
+                    var symbol = (INamespaceOrTypeSymbol) ((ISymbolRef) parent).Symbol;
 
                     var predicate = GetSymbolPredicate( kind );
 
@@ -124,7 +124,7 @@ internal class SymbolRefStrategy : IRefStrategy
     public IEnumerable<IRef<T>> GetMembers<T>( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation )
         where T : class, INamedDeclaration
     {
-        var parentSymbol = ((ISymbolRef) parent.Unwrap()).Symbol;
+        var parentSymbol = ((ISymbolRef) parent).Symbol;
 
         switch ( kind )
         {
@@ -161,7 +161,7 @@ internal class SymbolRefStrategy : IRefStrategy
 
     public bool Is( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
     {
-        if ( right.Unwrap() is not ISymbolRef rightSymbolRef )
+        if ( right is not ISymbolRef rightSymbolRef )
         {
             throw new ArgumentOutOfRangeException( nameof(right), "Introduced types on the left side of a comparison are not supported." );
         }
@@ -171,7 +171,7 @@ internal class SymbolRefStrategy : IRefStrategy
             throw new NotImplementedException( "Only TypeComparison.Default implemented on references." );
         }
 
-        var leftSymbol = (ITypeSymbol) ((ISymbolRef) left.Unwrap()).Symbol;
+        var leftSymbol = (ITypeSymbol) ((ISymbolRef) left).Symbol;
         var rightSymbol = (ITypeSymbol) rightSymbolRef.Symbol;
 
         switch ( kind )

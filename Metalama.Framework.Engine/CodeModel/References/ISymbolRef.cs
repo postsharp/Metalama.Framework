@@ -8,5 +8,5 @@ internal interface ISymbolRef : IRefImpl
 {
     ISymbol Symbol { get; }
 
-    DeclarationRefTargetKind TargetKind { get; }
+    RefTargetKind TargetKind { get; }
 }

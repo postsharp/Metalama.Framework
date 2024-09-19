@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -59,7 +60,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         // For test only.
         private static CompileTimeType Create( ITypeSymbol typeSymbol, CompilationContext compilationContext )
-            => new( compilationContext.RefFactory.FromSymbol<IType>( typeSymbol ), typeSymbol );
+            => new( typeSymbol.ToRef( compilationContext ), typeSymbol );
 
         public override string? Namespace { get; }
 

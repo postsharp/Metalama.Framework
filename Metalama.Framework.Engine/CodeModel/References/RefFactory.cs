@@ -39,7 +39,27 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
-        public IRef<ICompilationElement> FromSymbol( ISymbol symbol ) => new SymbolRef<ICompilationElement>( symbol, this._compilationContext );
+        public IRef<IDeclaration> FromSymbol( ISymbol symbol )
+            => symbol.GetDeclarationKind( this._compilationContext ) switch
+            {
+                DeclarationKind.Compilation => new SymbolRef<ICompilation>( symbol, this._compilationContext ),
+                DeclarationKind.NamedType => new SymbolRef<INamedType>( symbol, this._compilationContext ),
+                DeclarationKind.Method => new SymbolRef<IMethod>( symbol, this._compilationContext ),
+                DeclarationKind.Property => new SymbolRef<IProperty>( symbol, this._compilationContext ),
+                DeclarationKind.Indexer => new SymbolRef<IIndexer>( symbol, this._compilationContext ),
+                DeclarationKind.Field => new SymbolRef<IField>( symbol, this._compilationContext ),
+                DeclarationKind.Event => new SymbolRef<IEvent>( symbol, this._compilationContext ),
+                DeclarationKind.Parameter => new SymbolRef<IParameter>( symbol, this._compilationContext ),
+                DeclarationKind.TypeParameter => new SymbolRef<ITypeParameter>( symbol, this._compilationContext ),
+                DeclarationKind.Attribute => new SymbolRef<IAttribute>( symbol, this._compilationContext ),
+                DeclarationKind.ManagedResource => new SymbolRef<IManagedResource>( symbol, this._compilationContext ),
+                DeclarationKind.Constructor => new SymbolRef<IConstructor>( symbol, this._compilationContext ),
+                DeclarationKind.Finalizer => new SymbolRef<IMethod>( symbol, this._compilationContext ),
+                DeclarationKind.Operator => new SymbolRef<IMethod>( symbol, this._compilationContext ),
+                DeclarationKind.AssemblyReference => new SymbolRef<IAssembly>( symbol, this._compilationContext ),
+                DeclarationKind.Namespace => new SymbolRef<INamespace>( symbol, this._compilationContext ),
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         public IRef<IMethod> PseudoAccessor( IMethod accessor )
         {
@@ -74,10 +94,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 this._compilationContext,
                 accessor.MethodKind switch
                 {
-                    MethodKind.PropertySet when pseudoParameter.IsReturnParameter => DeclarationRefTargetKind.PropertySetReturnParameter,
-                    MethodKind.PropertySet => DeclarationRefTargetKind.PropertySetParameter,
-                    MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGetReturnParameter,
-                    MethodKind.EventRaise when pseudoParameter.IsReturnParameter => DeclarationRefTargetKind.EventRaiseReturnParameter,
+                    MethodKind.PropertySet when pseudoParameter.IsReturnParameter => RefTargetKind.PropertySetReturnParameter,
+                    MethodKind.PropertySet => RefTargetKind.PropertySetParameter,
+                    MethodKind.PropertyGet => RefTargetKind.PropertyGetReturnParameter,
+                    MethodKind.EventRaise when pseudoParameter.IsReturnParameter => RefTargetKind.EventRaiseReturnParameter,
                     MethodKind.EventRaise => throw new NotImplementedException(
                         $"Getting the reference of a pseudo event raiser parameter is not implemented." ),
                     _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
@@ -101,12 +121,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public IRef<T> FromSymbol<T>(
             ISymbol symbol,
-            DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
+            RefTargetKind targetKind = RefTargetKind.Default )
             where T : class, ICompilationElement
             => new SymbolRef<T>( symbol, this._compilationContext, targetKind );
 
         public IRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol )
-            => new SymbolRef<IParameter>( methodSymbol, this._compilationContext, DeclarationRefTargetKind.Return );
+            => new SymbolRef<IParameter>( methodSymbol, this._compilationContext, RefTargetKind.Return );
 
         internal IRef<ICompilation> Compilation( CompilationContext compilationContext )
         {

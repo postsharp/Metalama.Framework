@@ -13,7 +13,7 @@ internal class SyntaxRef<T> : BaseRef<T>
 {
     public SyntaxNode SyntaxNode { get; }
 
-    public SyntaxRef( SyntaxNode syntaxNode, DeclarationRefTargetKind targetKind, CompilationContext compilationContext )
+    public SyntaxRef( SyntaxNode syntaxNode, RefTargetKind targetKind, CompilationContext compilationContext )
     {
         this.SyntaxNode = syntaxNode.AssertNotNull();
         this.TargetKind = targetKind;
@@ -22,7 +22,7 @@ internal class SyntaxRef<T> : BaseRef<T>
 
     public override CompilationContext CompilationContext { get; }
 
-    public override DeclarationRefTargetKind TargetKind { get; }
+    public override RefTargetKind TargetKind { get; }
 
     public override string Name => throw new NotSupportedException();
 
@@ -71,7 +71,9 @@ internal class SyntaxRef<T> : BaseRef<T>
     public override string ToString()
         => this.TargetKind switch
         {
-            DeclarationRefTargetKind.Default => this.SyntaxNode.GetType().Name,
+            RefTargetKind.Default => this.SyntaxNode.GetType().Name,
             _ => $"{this.SyntaxNode.GetType().Name}:{this.TargetKind}"
         };
+
+    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.CompilationContext );
 }

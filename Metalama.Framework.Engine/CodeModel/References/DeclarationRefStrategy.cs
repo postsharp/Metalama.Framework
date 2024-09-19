@@ -23,7 +23,7 @@ internal class DeclarationRefStrategy : IRefStrategy
 
     public void EnumerateAllImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
     {
-        var resolvedNameType = (INamedType) ((IBuilderRef) namedType.Unwrap()).Builder;
+        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).Builder;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {
@@ -35,7 +35,7 @@ internal class DeclarationRefStrategy : IRefStrategy
     {
         // BUG: EnumerateAllImplementedInterfaces and EnumerateImplementedInterfaces should not have the same implementation.
 
-        var resolvedNameType = (INamedType) ((IBuilderRef) namedType.Unwrap()).Builder;
+        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).Builder;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {

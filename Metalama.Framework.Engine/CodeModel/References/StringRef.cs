@@ -25,7 +25,7 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 
     public override SerializableDeclarationId ToSerializableId()
     {
-        if ( IsDeclarationId( this.Id ) && this.TargetKind == DeclarationRefTargetKind.Default )
+        if ( IsDeclarationId( this.Id ) && this.TargetKind == RefTargetKind.Default )
         {
             return new SerializableDeclarationId( this.Id );
         }
@@ -109,7 +109,7 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
 
     public override bool Equals( IRef? other )
     {
-        if ( other?.Unwrap() is not IStringRef stringRef )
+        if ( other is not IStringRef stringRef )
         {
             return false;
         }
@@ -129,4 +129,6 @@ internal class StringRef<T> : BaseRef<T>, IStringRef
     }
 
     public override string ToString() => this.Id;
+
+    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new StringRef<TOut>( this.Id, this.CompilationContext );
 }

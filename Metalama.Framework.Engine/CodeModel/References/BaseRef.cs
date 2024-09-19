@@ -29,13 +29,11 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         }
     }
 
-    public virtual DeclarationRefTargetKind TargetKind => DeclarationRefTargetKind.Default;
+    public virtual RefTargetKind TargetKind => RefTargetKind.Default;
 
     public abstract string Name { get; }
 
     public virtual IRefStrategy Strategy => throw new NotSupportedException();
-
-    public IRefImpl Unwrap() => this;
 
     public virtual SerializableDeclarationId ToSerializableId()
     {
@@ -93,16 +91,16 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     /// </summary>
     public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData()
     {
-        if ( this.TargetKind != DeclarationRefTargetKind.Default )
+        if ( this.TargetKind != RefTargetKind.Default )
         {
             var baseSymbol = this.GetSymbolIgnoringKind();
 
             switch ( this.TargetKind )
             {
-                case DeclarationRefTargetKind.Return when baseSymbol is IMethodSymbol method:
+                case RefTargetKind.Return when baseSymbol is IMethodSymbol method:
                     return (method.GetReturnTypeAttributes(), method);
 
-                case DeclarationRefTargetKind.Field when baseSymbol is IEventSymbol @event:
+                case RefTargetKind.Field when baseSymbol is IEventSymbol @event:
                     // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
                     return (ImmutableArray<AttributeData>.Empty, @event);
             }
@@ -129,16 +127,16 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     private ISymbol GetSymbolWithKind( ISymbol symbol )
         => this.TargetKind switch
         {
-            DeclarationRefTargetKind.Assembly when symbol is IAssemblySymbol => symbol,
-            DeclarationRefTargetKind.Module when symbol is IModuleSymbol => symbol,
-            DeclarationRefTargetKind.NamedType when symbol is INamedTypeSymbol => symbol,
-            DeclarationRefTargetKind.Default => symbol,
-            DeclarationRefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
-            DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertSymbolNotNull(),
-            DeclarationRefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException( "Cannot get the underlying field of an event." ),
-            DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertSymbolNotNull().Parameters[0],
-            DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method => method.Parameters[0],
-            DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter => parameter.ContainingType.GetMembers( symbol.Name )
+            RefTargetKind.Assembly when symbol is IAssemblySymbol => symbol,
+            RefTargetKind.Module when symbol is IModuleSymbol => symbol,
+            RefTargetKind.NamedType when symbol is INamedTypeSymbol => symbol,
+            RefTargetKind.Default => symbol,
+            RefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
+            RefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertSymbolNotNull(),
+            RefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException( "Cannot get the underlying field of an event." ),
+            RefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertSymbolNotNull().Parameters[0],
+            RefTargetKind.Parameter when symbol is IMethodSymbol method => method.Parameters[0],
+            RefTargetKind.Property when symbol is IParameterSymbol parameter => parameter.ContainingType.GetMembers( symbol.Name )
                 .OfType<IPropertySymbol>()
                 .Single(),
             _ => throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." )
@@ -179,9 +177,8 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         return safeCast;
     }
 
-    public IRefImpl<TOut> As<TOut>()
-        where TOut : class, ICompilationElement
-        => this as IRefImpl<TOut> ?? new CastRef<TOut>( this );
+    public abstract IRefImpl<TOut> As<TOut>()
+        where TOut : class, ICompilationElement;
 
     public override int GetHashCode() => this.GetHashCodeCore();
 

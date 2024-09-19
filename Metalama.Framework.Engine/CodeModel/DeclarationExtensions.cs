@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public static class DeclarationExtensions
 {
-    public static DeclarationKind GetDeclarationKind( this ISymbol symbol )
+    public static DeclarationKind GetDeclarationKind( this ISymbol symbol, CompilationContext compilationContext )
         => symbol switch
         {
             INamespaceSymbol => DeclarationKind.Namespace,
@@ -43,10 +43,12 @@ public static class DeclarationExtensions
                     MethodKind.Destructor => DeclarationKind.Finalizer,
                     _ => DeclarationKind.Method
                 },
-            IPropertySymbol => DeclarationKind.Property,
+            IPropertySymbol { Parameters.Length: 0 } => DeclarationKind.Property,
+            IPropertySymbol { Parameters.Length: > 0 } => DeclarationKind.Indexer,
             IFieldSymbol => DeclarationKind.Field,
             ITypeParameterSymbol => DeclarationKind.TypeParameter,
-            IAssemblySymbol => DeclarationKind.Compilation,
+            IAssemblySymbol assemblySymbol when assemblySymbol.Equals( compilationContext.Compilation.Assembly ) => DeclarationKind.Compilation,
+            IAssemblySymbol => DeclarationKind.AssemblyReference,
             IParameterSymbol => DeclarationKind.Parameter,
             IEventSymbol => DeclarationKind.Event,
             ITypeSymbol => DeclarationKind.None,
@@ -82,21 +84,6 @@ public static class DeclarationExtensions
                 IHasAccessors member => member.Accessors,
                 _ => Enumerable.Empty<IDeclaration>()
             } );
-
-    [Obsolete]
-    internal static IRef<T> ToRef<T>( T declaration )
-        where T : class, IDeclaration
-        => (IRef<T>) declaration.ToRef();
-
-    internal static IRef<ICompilationElement> ToRef( this ISymbol symbol, CompilationContext compilationContext )
-        => compilationContext.RefFactory.FromSymbol( symbol );
-
-    internal static IRef<TDeclaration> ToRef<TDeclaration>( this ISymbol symbol, CompilationContext compilationContext )
-        where TDeclaration : class, IDeclaration
-        => compilationContext.RefFactory.FromSymbol<TDeclaration>( symbol );
-
-    internal static IRef<IType> ToRef( this ITypeSymbol symbol, CompilationContext compilationContext )
-        => compilationContext.RefFactory.FromSymbol<IType>( symbol );
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
         => declaration.GetSymbol() is { } symbol

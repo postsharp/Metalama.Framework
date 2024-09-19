@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -33,14 +34,14 @@ internal static class TypedConstantExtensions
 
     public static TypedConstantRef ToOurTypedConstantRef( this RoslynTypedConstant constant, CompilationContext compilationContext )
     {
-        var type = compilationContext.RefFactory.FromSymbol<IType>( constant.Type.AssertSymbolNotNull() );
+        var type = constant.Type.AssertSymbolNotNull().ToRef( compilationContext );
 
         return constant.Kind switch
         {
             TypedConstantKind.Enum => new TypedConstantRef( constant.Value, type ),
             Primitive => new TypedConstantRef( constant.Value, default ),
             TypedConstantKind.Type => new TypedConstantRef(
-                compilationContext.RefFactory.FromSymbol<IType>( (ITypeSymbol) constant.Value.AssertNotNull() ),
+                ((ITypeSymbol) constant.Value.AssertNotNull()).ToRef( compilationContext ),
                 type ),
             TypedConstantKind.Array => new TypedConstantRef(
                 constant.Values.Select( x => ToOurTypedConstantRef( x, compilationContext ) ).ToImmutableArray(),

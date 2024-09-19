@@ -153,14 +153,14 @@ public partial class DeclarationFactory
         return declaration != null;
     }
 
-    internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+    internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, RefTargetKind kind = RefTargetKind.Default )
         => this.GetCompilationElement( symbol, kind ) as IDeclaration;
 
     public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetSymbolId().Resolve( this.Compilation ).AssertSymbolNotNull() );
 
-    public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, DeclarationRefTargetKind.Default );
+    public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, RefTargetKind.Default );
 
-    internal IDeclaration GetDeclaration( ISymbol symbol, DeclarationRefTargetKind kind )
+    internal IDeclaration GetDeclaration( ISymbol symbol, RefTargetKind kind )
     {
         var compilationElement = this.GetCompilationElement( symbol, kind );
 
@@ -172,7 +172,7 @@ public partial class DeclarationFactory
         return declaration;
     }
 
-    internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
+    internal ICompilationElement? GetCompilationElement( ISymbol symbol, RefTargetKind targetKind = RefTargetKind.Default )
     {
         switch ( symbol.Kind )
         {
@@ -192,8 +192,8 @@ public partial class DeclarationFactory
 
                     return targetKind switch
                     {
-                        DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
-                        DeclarationRefTargetKind.Default => type,
+                        RefTargetKind.StaticConstructor => type.StaticConstructor,
+                        RefTargetKind.Default => type,
                         _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                     };
                 }
@@ -214,14 +214,15 @@ public partial class DeclarationFactory
                     return
                         targetKind switch
                         {
-                            DeclarationRefTargetKind.Return => this.GetReturnParameter( method ),
-                            DeclarationRefTargetKind.Parameter => this.GetParameter( method.Parameters[0] ),
-                            DeclarationRefTargetKind.Default => method.GetDeclarationKind() switch
+                            RefTargetKind.Return => this.GetReturnParameter( method ),
+                            RefTargetKind.Parameter => this.GetParameter( method.Parameters[0] ),
+                            RefTargetKind.Default => method.GetDeclarationKind( this.CompilationContext ) switch
                             {
                                 DeclarationKind.Method => this.GetMethod( method ),
                                 DeclarationKind.Constructor => this.GetConstructor( method ),
                                 DeclarationKind.Finalizer => this.GetFinalizer( method ),
-                                _ => throw new AssertionFailedException( $"Unexpected DeclarationRefTargetKind: {method.GetDeclarationKind()}." )
+                                _ => throw new AssertionFailedException(
+                                    $"Unexpected DeclarationRefTargetKind: {method.GetDeclarationKind( this.CompilationContext )}." )
                             },
                             _ => throw new AssertionFailedException( $"Unexpected TargetKind for method: {targetKind}" )
                         };
@@ -237,15 +238,15 @@ public partial class DeclarationFactory
                 return targetKind switch
                 {
                     // Implicit getter or setter.
-                    DeclarationRefTargetKind.PropertyGet => propertyOrIndexer.GetMethod,
-                    DeclarationRefTargetKind.PropertySet => propertyOrIndexer.SetMethod,
+                    RefTargetKind.PropertyGet => propertyOrIndexer.GetMethod,
+                    RefTargetKind.PropertySet => propertyOrIndexer.SetMethod,
 
                     // The property itself.
-                    DeclarationRefTargetKind.Default => propertyOrIndexer,
-                    DeclarationRefTargetKind.Property => propertyOrIndexer,
+                    RefTargetKind.Default => propertyOrIndexer,
+                    RefTargetKind.Property => propertyOrIndexer,
 
                     // The underlying field.
-                    DeclarationRefTargetKind.Field => this.GetField( propertySymbol.GetBackingField().AssertSymbolNotNull() ),
+                    RefTargetKind.Field => this.GetField( propertySymbol.GetBackingField().AssertSymbolNotNull() ),
 
                     _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                 };
@@ -256,13 +257,13 @@ public partial class DeclarationFactory
 
                     return targetKind switch
                     {
-                        DeclarationRefTargetKind.Default => field,
-                        DeclarationRefTargetKind.Field => field,
-                        DeclarationRefTargetKind.PropertyGet => field.GetMethod,
-                        DeclarationRefTargetKind.PropertySet => field.SetMethod,
-                        DeclarationRefTargetKind.PropertyGetReturnParameter => field.GetMethod?.ReturnParameter,
-                        DeclarationRefTargetKind.PropertySetParameter => field.SetMethod?.Parameters[0],
-                        DeclarationRefTargetKind.PropertySetReturnParameter => field.SetMethod?.ReturnParameter,
+                        RefTargetKind.Default => field,
+                        RefTargetKind.Field => field,
+                        RefTargetKind.PropertyGet => field.GetMethod,
+                        RefTargetKind.PropertySet => field.SetMethod,
+                        RefTargetKind.PropertyGetReturnParameter => field.GetMethod?.ReturnParameter,
+                        RefTargetKind.PropertySetParameter => field.SetMethod?.Parameters[0],
+                        RefTargetKind.PropertySetReturnParameter => field.SetMethod?.ReturnParameter,
                         _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                     };
                 }
@@ -279,10 +280,10 @@ public partial class DeclarationFactory
 
                     return targetKind switch
                     {
-                        DeclarationRefTargetKind.Default => @event,
-                        DeclarationRefTargetKind.EventRaise => @event.RaiseMethod,
-                        DeclarationRefTargetKind.EventRaiseParameter => throw new NotImplementedException(),
-                        DeclarationRefTargetKind.EventRaiseReturnParameter => @event.RaiseMethod?.ReturnParameter,
+                        RefTargetKind.Default => @event,
+                        RefTargetKind.EventRaise => @event.RaiseMethod,
+                        RefTargetKind.EventRaiseParameter => throw new NotImplementedException(),
+                        RefTargetKind.EventRaiseReturnParameter => @event.RaiseMethod?.ReturnParameter,
                         _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                     };
                 }

@@ -82,7 +82,7 @@ public class AttributeSerializationTests : SerializationTestsBase
         Assert.True( ((AttributeRef) attribute1.ToRef()).TryGetAttributeSerializationDataKey( out var attributeKey1 ) );
 
         var compilationModel2 = testContext.CreateCompilationModel( testContext.Compilation.RoslynCompilation );
-        var attribute2 = compilationModel1.Types.OfName( "C" ).Single().Attributes.Single();
+        var attribute2 = compilationModel2.Types.OfName( "C" ).Single().Attributes.Single();
 
         Assert.True( ((AttributeRef) attribute2.ToRef()).TryGetAttributeSerializationDataKey( out var attributeKey2 ) );
 

@@ -47,10 +47,16 @@ internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvid
         this.AddSerializer( typeof(ImmutableHashSet<>), typeof(ImmutableHashSetSerializer<>) );
 
         // Our own types.
-        this.AddSerializer( typeof(IRef<>), typeof(RefSerializer<>) );
-        this.AddSerializer( typeof(SerializableDeclarationId), typeof(SerializableDeclarationIdSerializer) );
-        this.AddSerializer( typeof(SerializableTypeId), typeof(SerializableTypeIdSerializer) );
-        this.AddSerializer<AttributeRef, AttributeRefSerializer>();
+        this.AddSerializer( typeof(SymbolRef<>), typeof(RefSerializer<>) );
+        this.AddSerializer( typeof(SyntaxRef<>), typeof(RefSerializer<>) );
+        this.AddSerializer( typeof(StringRef<>), typeof(RefSerializer<>) );
+        this.AddSerializer( typeof(BuilderRef<>), typeof(RefSerializer<>) );
+        this.AddSerializer<SerializableDeclarationId, SerializableDeclarationIdSerializer>();
+        this.AddSerializer<SerializableTypeId, SerializableTypeIdSerializer>();
+        this.AddSerializer<SymbolAttributeRef, AttributeRefSerializer>();
+        this.AddSerializer<DeserializedAttributeRef, AttributeRefSerializer>();
+        this.AddSerializer<SyntaxAttributeRef, AttributeRefSerializer>();
+        this.AddSerializer<BuilderAttributeRef, AttributeRefSerializer>();
         this.AddSerializer<TypedConstantRef, TypedConstantRefSerializer>();
         this.AddSerializer<AttributeSerializationData, AttributeSerializationDataSerializer>();
 

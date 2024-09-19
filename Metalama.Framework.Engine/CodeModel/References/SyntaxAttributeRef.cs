@@ -19,7 +19,7 @@ internal class SyntaxAttributeRef : AttributeRef
         AttributeSyntax attributeSyntax,
         SyntaxNode declaration,
         CompilationContext compilationContext,
-        DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default ) : base(
+        RefTargetKind targetKind = RefTargetKind.Default ) : base(
         new SyntaxRef<IDeclaration>( declaration, targetKind, compilationContext ),
         attributeType,
         compilationContext )
@@ -32,13 +32,13 @@ internal class SyntaxAttributeRef : AttributeRef
         AttributeSyntax attributeSyntax,
         ISymbol symbol,
         CompilationContext compilationContext ) : base(
-        symbol.ToRef<IDeclaration>( compilationContext ),
+        symbol.ToRef( compilationContext ),
         attributeType,
         compilationContext )
     {
         this._attributeSyntax = attributeSyntax;
     }
-    
+
     private ResolvedRef? _resolvedRef;
 
     protected record ResolvedRef( AttributeData AttributeData, ISymbol Parent )
@@ -61,7 +61,7 @@ internal class SyntaxAttributeRef : AttributeRef
         }
 
         // Find the parent declaration.
-        var (attributes, symbol) = this.ContainingDeclaration.Unwrap().GetAttributeData();
+        var (attributes, symbol) = this.ContainingDeclaration.AsRefImpl().GetAttributeData();
 
         // In the parent, find the AttributeData corresponding to the current item.
 

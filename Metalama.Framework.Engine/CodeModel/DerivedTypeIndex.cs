@@ -40,7 +40,7 @@ public sealed partial class DerivedTypeIndex
 
     private bool IsContainedInCurrentCompilation( IRef<INamedType> type )
     {
-        switch ( type.Unwrap() )
+        switch ( type )
         {
             case ISymbolRef { Symbol: INamedTypeSymbol symbol }:
                 return this.IsCurrentCompilation( symbol.ContainingAssembly );
@@ -175,7 +175,7 @@ public sealed partial class DerivedTypeIndex
     {
         foreach ( var baseType in this._relationships.Keys )
         {
-            if ( baseType.Unwrap() is ISymbolRef
+            if ( baseType is ISymbolRef
                 {
                     Symbol: INamedTypeSymbol { OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty: false } baseTypeSymbol
                 } )
@@ -189,7 +189,7 @@ public sealed partial class DerivedTypeIndex
     {
         foreach ( var derivedType in this._relationships[baseType] )
         {
-            if ( derivedType.Unwrap() is ISymbolRef { Symbol: INamedTypeSymbol derivedTypeSymbol } )
+            if ( derivedType is ISymbolRef { Symbol: INamedTypeSymbol derivedTypeSymbol } )
             {
                 collector.AddDependency( rootType, derivedTypeSymbol );
                 this.PopulateDependenciesCore( collector, rootType, derivedType );
@@ -203,7 +203,7 @@ public sealed partial class DerivedTypeIndex
 
         foreach ( var type in types )
         {
-            if ( !this._processedTypes.Contains( type.ToRef<INamedType>( this._compilationContext ) ) )
+            if ( !this._processedTypes.Contains( type.ToRef( this._compilationContext ) ) )
             {
                 builder ??= new Builder( this );
                 builder.AnalyzeType( type );

@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
-    internal enum DeclarationRefTargetKind
+    internal enum RefTargetKind
     {
         // WARNING! These values are serialized as strings and stored in compiled dlls. Do not rename.
 
@@ -23,6 +23,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         EventRaise,
         EventRaiseParameter,
         EventRaiseReturnParameter,
-        NamedType,
+        NamedType
     }
 }

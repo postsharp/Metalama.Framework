@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 var attributeType = this._compilationContext.RefFactory.FromSymbol<INamedType>( attributeConstructor.ContainingType );
 
                 // A local method that adds the attribute.
-                void IndexAttribute( SyntaxNode parentDeclaration, DeclarationRefTargetKind kind )
+                void IndexAttribute( SyntaxNode parentDeclaration, RefTargetKind kind )
                 {
                     void Add( SyntaxNode realDeclaration )
                     {
@@ -103,17 +103,17 @@ namespace Metalama.Framework.Engine.CodeModel
                             break;
 
                         case SyntaxKind.FieldKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Field );
+                            IndexAttribute( declaration, RefTargetKind.Field );
 
                             break;
 
                         case SyntaxKind.ReturnKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Return );
+                            IndexAttribute( declaration, RefTargetKind.Return );
 
                             break;
 
                         case SyntaxKind.ParamKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Parameter );
+                            IndexAttribute( declaration, RefTargetKind.Parameter );
 
                             break;
 
@@ -122,26 +122,26 @@ namespace Metalama.Framework.Engine.CodeModel
                             {
                                 foreach ( var accessor in property.AccessorList.Accessors )
                                 {
-                                    IndexAttribute( accessor, DeclarationRefTargetKind.Default );
+                                    IndexAttribute( accessor, RefTargetKind.Default );
                                 }
                             }
 
                             break;
 
                         case SyntaxKind.PropertyKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Property );
+                            IndexAttribute( declaration, RefTargetKind.Property );
 
                             break;
 
                         case SyntaxKind.EventKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Event );
+                            IndexAttribute( declaration, RefTargetKind.Event );
 
                             break;
 
                         case SyntaxKind.TypeKeyword:
                         case SyntaxKind.TypeVarKeyword:
                             // Using Default because we don't support types and generic parameter references at the moment.
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Default );
+                            IndexAttribute( declaration, RefTargetKind.Default );
 
                             break;
 
@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
                 else
                 {
-                    IndexAttribute( declaration, DeclarationRefTargetKind.Default );
+                    IndexAttribute( declaration, RefTargetKind.Default );
                 }
 
                 base.VisitAttribute( node );

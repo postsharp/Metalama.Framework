@@ -19,7 +19,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 
     protected override void PopulateAllItems( Action<IRef<IParameter>> action )
     {
-        switch ( this._parent.Unwrap() )
+        switch ( this._parent )
         {
             case ISymbolRef { Symbol: IMethodSymbol method }:
                 foreach ( var p in method.Parameters )

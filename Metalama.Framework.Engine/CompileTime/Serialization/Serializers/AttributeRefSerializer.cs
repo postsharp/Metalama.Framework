@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 
-public class AttributeRefSerializer : ReferenceTypeSerializer
+internal class AttributeRefSerializer : ReferenceTypeSerializer
 {
     public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
     {
@@ -20,7 +20,7 @@ public class AttributeRefSerializer : ReferenceTypeSerializer
     {
         var attributeRef = (AttributeRef) obj;
         var serializationContext = (ISerializationContext) constructorArguments;
-        
+
         // We're trying to deduplicate instances of the AttributeSerializationData class.
 
         if ( !attributeRef.TryGetAttributeSerializationDataKey( out var serializationDataKey ) )

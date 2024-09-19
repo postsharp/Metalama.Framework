@@ -7,19 +7,19 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal static class DeclarationRefTargetKindExtensions
 {
-    public static DeclarationRefTargetKind ToDeclarationRefTargetKind(
+    public static RefTargetKind ToDeclarationRefTargetKind(
         this MethodKind methodKind,
-        DeclarationRefTargetKind existingTargetKind = DeclarationRefTargetKind.Default )
+        RefTargetKind existingTargetKind = RefTargetKind.Default )
         => (methodKind, existingTargetKind) switch
         {
-            (MethodKind.PropertyGet, DeclarationRefTargetKind.Default) => DeclarationRefTargetKind.PropertyGet,
-            (MethodKind.PropertySet, DeclarationRefTargetKind.Default) => DeclarationRefTargetKind.PropertySet,
-            (MethodKind.EventRaise, DeclarationRefTargetKind.Default) => DeclarationRefTargetKind.EventRaise,
-            (MethodKind.PropertySet, DeclarationRefTargetKind.Parameter) => DeclarationRefTargetKind.PropertySetParameter,
-            (MethodKind.EventRaise, DeclarationRefTargetKind.Parameter) => DeclarationRefTargetKind.EventRaiseParameter,
-            (MethodKind.PropertyGet, DeclarationRefTargetKind.Return) => DeclarationRefTargetKind.PropertyGetReturnParameter,
-            (MethodKind.PropertySet, DeclarationRefTargetKind.Return) => DeclarationRefTargetKind.PropertySetReturnParameter,
-            (MethodKind.EventRaise, DeclarationRefTargetKind.Return) => DeclarationRefTargetKind.EventRaiseReturnParameter,
+            (MethodKind.PropertyGet, RefTargetKind.Default) => RefTargetKind.PropertyGet,
+            (MethodKind.PropertySet, RefTargetKind.Default) => RefTargetKind.PropertySet,
+            (MethodKind.EventRaise, RefTargetKind.Default) => RefTargetKind.EventRaise,
+            (MethodKind.PropertySet, RefTargetKind.Parameter) => RefTargetKind.PropertySetParameter,
+            (MethodKind.EventRaise, RefTargetKind.Parameter) => RefTargetKind.EventRaiseParameter,
+            (MethodKind.PropertyGet, RefTargetKind.Return) => RefTargetKind.PropertyGetReturnParameter,
+            (MethodKind.PropertySet, RefTargetKind.Return) => RefTargetKind.PropertySetReturnParameter,
+            (MethodKind.EventRaise, RefTargetKind.Return) => RefTargetKind.EventRaiseReturnParameter,
             _ => throw new InvalidOperationException( $"Unexpected combination: '{methodKind}', '{existingTargetKind}'." )
         };
 }
