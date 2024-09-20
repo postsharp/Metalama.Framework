@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Code.Comparers;
 
-public sealed class RefEqualityComparer : IEqualityComparer<IRef>
+public sealed class RefEqualityComparer : IEqualityComparer<IRef>, IRefEqualityComparer
 {
     public static RefEqualityComparer Default { get; } = new();
 

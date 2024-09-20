@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IPortableRef<T>
+internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
     where T : class, ICompilationElement
 {
     public string Id { get; }
@@ -32,7 +32,7 @@ internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IPortableRef<T>
         }
     }
 
-    public override IPortableRef<T> ToPortable() => this;
+    public override IDurableRef<T> ToDurable() => this;
 
     public override bool IsPortable => true;
 
@@ -118,7 +118,7 @@ internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IPortableRef<T>
         }
     }
 
-    public override bool Equals( IRef? other, RefComparisonOptions comparisonOptions )
+    public override bool Equals( IRef? other, RefComparison comparison )
     {
         if ( other == null )
         {
@@ -127,9 +127,9 @@ internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IPortableRef<T>
 
         if ( other is not IStringRef stringRef )
         {
-            if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
+            if ( comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability )
             {
-                return this.Equals( other.ToPortable(), comparisonOptions );
+                return this.Equals( other.ToDurable(), comparison );
             }
             else
             {
@@ -142,7 +142,7 @@ internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IPortableRef<T>
         return stringRef.Id == this.Id;
     }
 
-    public override int GetHashCode( RefComparisonOptions comparisonOptions )
+    public override int GetHashCode( RefComparison comparison )
     {
 #if NET5_0_OR_GREATER
         return this.Id.GetHashCode( StringComparison.Ordinal );

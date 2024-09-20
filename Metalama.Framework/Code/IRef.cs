@@ -7,19 +7,32 @@ using System;
 
 namespace Metalama.Framework.Code
 {
-    [Flags]
-    public enum RefComparisonOptions
+    public enum RefComparison
     {
+        /// <summary>
+        /// Does not support cross-compilation comparisons and ignores nullability when comparing <c>IRef{IType}</c>.
+        /// </summary>
         Default,
-        Structural = 1,
-        IncludeNullability = 2,
-        StructuralIncludeNullability = Structural | IncludeNullability
-    }
 
-    public enum RefOptions
-    {
-        Default,
-        CompilationNeutral
+        /// <summary>
+        /// Does not support cross-compilation comparisons and respects nullability when comparing <c>IRef{IType}</c>.
+        /// </summary>
+        IncludeNullability,
+
+        /// <summary>
+        /// Support cross-compilation comparisons and ignores nullability when comparing <c>IRef{IType}</c>.
+        /// </summary>
+        Structural,
+
+        /// <summary>
+        /// Support cross-compilation comparisons and respects nullability when comparing <c>IRef{IType}</c>.
+        /// </summary>
+        StructuralIncludeNullability,
+
+        /// <summary>
+        /// Supports the comparison of string-based references.
+        /// </summary>
+        Durable
     }
 
     /// <summary>
@@ -60,9 +73,9 @@ namespace Metalama.Framework.Code
             ReferenceResolutionOptions options = default,
             IGenericContext? genericContext = default );
 
-        bool Equals( IRef? other, RefComparisonOptions comparisonOptions = RefComparisonOptions.Default );
+        bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
-        int GetHashCode( RefComparisonOptions comparisonOptions );
+        int GetHashCode( RefComparison comparison );
     }
 
     /// <summary>

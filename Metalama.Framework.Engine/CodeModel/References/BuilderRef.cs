@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -54,12 +55,10 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
-        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
-
         return ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
     }
 
-    protected override bool EqualsCore( IRef? other, RefComparisonOptions options )
+    protected override bool EqualsCore( IRef? other, RefComparison options, IEqualityComparer<ISymbol> symbolComparer )
     {
         if ( other is not BuilderRef<T> builderRef )
         {
@@ -69,7 +68,7 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         return this.Builder == builderRef.Builder;
     }
 
-    protected override int GetHashCodeCore( RefComparisonOptions comparisonOptions ) => this.Builder.GetHashCode();
+    protected override int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer ) => this.Builder.GetHashCode();
 
     public override string ToString() => this.Builder.ToString()!;
 

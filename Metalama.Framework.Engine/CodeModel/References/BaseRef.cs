@@ -37,13 +37,13 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
         => this.GetTargetOrNull( compilation, options, genericContext );
 
-    public abstract IPortableRef<T> ToPortable();
+    public abstract IDurableRef<T> ToDurable();
 
     public abstract ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
 
     public abstract bool IsPortable { get; }
 
-    IRef IRefImpl.ToPortable() => this.ToPortable();
+    IRef IRefImpl.ToDurable() => this.ToDurable();
 
     IRef<TOut> IRef.As<TOut>() => this.As<TOut>();
 
@@ -117,11 +117,11 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public abstract IRefImpl<TOut> As<TOut>()
         where TOut : class, ICompilationElement;
 
-    public override int GetHashCode() => this.GetHashCode( RefComparisonOptions.Default );
+    public override int GetHashCode() => this.GetHashCode( RefComparison.Default );
 
-    public bool Equals( IRef? other ) => this.Equals( other, RefComparisonOptions.Default );
+    public bool Equals( IRef? other ) => this.Equals( other, RefComparison.Default );
 
-    public abstract bool Equals( IRef? other, RefComparisonOptions comparisonOptions );
+    public abstract bool Equals( IRef? other, RefComparison comparison );
 
-    public abstract int GetHashCode( RefComparisonOptions comparisonOptions );
+    public abstract int GetHashCode( RefComparison comparison );
 }

@@ -39,7 +39,7 @@ public sealed partial class InheritableAspectInstance : IAspectInstance, IAspect
     public InheritableAspectInstance( IAspectInstance aspectInstance )
     {
         var asPredecessor = (IAspectPredecessorImpl) aspectInstance;
-        this.TargetDeclaration = asPredecessor.TargetDeclaration.ToPortable();
+        this.TargetDeclaration = asPredecessor.TargetDeclaration.ToDurable();
         this.TargetDeclarationDepth = asPredecessor.TargetDeclarationDepth;
         this.Aspect = aspectInstance.Aspect;
         this._aspectClass = aspectInstance.AspectClass;

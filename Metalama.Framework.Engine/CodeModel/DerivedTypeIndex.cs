@@ -104,7 +104,7 @@ public sealed partial class DerivedTypeIndex
 
     private IEnumerable<IRef<INamedType>> GetFirstLevelDerivedTypesCore( IRef<INamedType> baseType )
     {
-        var set = new HashSet<IRef<INamedType>>();
+        var set = new HashSet<IRef<INamedType>>( RefEqualityComparer<INamedType>.Default );
         GetDerivedTypesRecursive( baseType );
 
         return set;

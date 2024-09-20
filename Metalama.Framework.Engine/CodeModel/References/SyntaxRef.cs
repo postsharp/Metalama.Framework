@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -55,8 +56,6 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
-        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
-
         return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
                     this.GetSymbol(),
@@ -65,7 +64,7 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
             compilation );
     }
 
-    protected override bool EqualsCore( IRef? other, RefComparisonOptions options )
+    protected override bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )
     {
         if ( other is not SyntaxRef<T> nodeRef )
         {
@@ -77,14 +76,19 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
             return false;
         }
 
-        return options switch
+        return comparison switch
         {
-            RefComparisonOptions.Default or RefComparisonOptions.IncludeNullability => nodeRef.SyntaxNode == this.SyntaxNode,
-            _ => options.GetSymbolComparer().Equals( this.GetSymbol(), nodeRef.GetSymbol() )
+            RefComparison.Default or RefComparison.IncludeNullability => nodeRef.SyntaxNode == this.SyntaxNode,
+            _ => symbolComparer.Equals( this.GetSymbol(), nodeRef.GetSymbol() )
         };
     }
 
-    protected override int GetHashCodeCore( RefComparisonOptions comparisonOptions ) => this.SyntaxNode.GetHashCode();
+    protected override int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )
+        => comparison switch
+        {
+            RefComparison.Structural or RefComparison.StructuralIncludeNullability => symbolComparer.GetHashCode( this.GetSymbol() ),
+            _ => this.SyntaxNode.GetHashCode()
+        };
 
     public override string ToString()
         => this.TargetKind switch

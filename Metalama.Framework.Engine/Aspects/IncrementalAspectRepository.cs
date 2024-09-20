@@ -20,6 +20,8 @@ internal sealed class IncrementalAspectRepository : AspectRepository
 
     private IncrementalAspectRepository( ImmutableDictionaryOfArray<IRef<IDeclaration>, IAspectInstance> aspects, CompilationModel compilation )
     {
+        Invariant.Assert( aspects.KeyComparer is IRefEqualityComparer );
+
         this._aspects = aspects;
         this._compilation = compilation;
     }

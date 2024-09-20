@@ -45,7 +45,7 @@ internal abstract partial class FabricDriver
         {
             this._project = project;
             this._fabricInstance = fabricInstance;
-            this.TargetDeclaration = targetDeclaration.ToPortable();
+            this.TargetDeclaration = targetDeclaration.ToDurable();
             this._fabricManager = fabricManager;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }

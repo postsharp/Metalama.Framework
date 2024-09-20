@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -43,9 +44,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
 
     protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
     {
-        Invariant.Assert( compilation.GetCompilationContext() == this.CompilationContext, "CompilationContext mismatch." );
-
-        var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( this.Symbol, compilation.RoslynCompilation );
+        var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( this.Symbol, this.CompilationContext.Compilation );
 
         if ( translatedSymbol == null )
         {
@@ -55,18 +54,18 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         return ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind ).AssertNotNull(), compilation );
     }
 
-    protected override bool EqualsCore( IRef? other, RefComparisonOptions comparisonOptions )
+    protected override bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )
     {
         if ( other is not SymbolRef<T> symbolRef )
         {
             return false;
         }
 
-        return comparisonOptions.GetSymbolComparer().Equals( symbolRef.Symbol, this.Symbol )
-               && this.TargetKind == symbolRef.TargetKind;
+        return this.TargetKind == symbolRef.TargetKind
+               && symbolComparer.Equals( symbolRef.Symbol, this.Symbol );
     }
 
-    protected override int GetHashCodeCore( RefComparisonOptions comparisonOptions ) => comparisonOptions.GetSymbolComparer().GetHashCode( this.Symbol );
+    protected override int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer ) => symbolComparer.GetHashCode( this.Symbol );
 
     public override string ToString()
         => this.TargetKind switch

@@ -15,25 +15,12 @@ public static class RefExtensions
 {
     internal static IRefStrategy GetStrategy( this IRef reference ) => ((IRefImpl) reference).Strategy;
 
-    // TODO: Portable references are useful only in design-time execution scenarios.
-    internal static IPortableRef<T> ToPortable<T>( this IRef<T> reference )
+    // TODO: Duravle references are useful only in design-time execution scenarios.
+    internal static IDurableRef<T> ToDurable<T>( this IRef<T> reference )
         where T : class, ICompilationElement
-        => ((IRefImpl<T>) reference).ToPortable();
+        => ((IRefImpl<T>) reference).ToDurable();
 
-    internal static IRef<T> AssertPortable<T>( this IRef<T> reference )
-        where T : class, ICompilationElement
-    {
-#if DEBUG
-        if ( !((IRefImpl) reference).IsPortable )
-        {
-            throw new AssertionFailedException( $"The reference '{reference}' must be portable." );
-        }
-#endif
-
-        return reference;
-    }
-
-    internal static IRef ToPortable( this IRef reference ) => ((IRefImpl) reference).ToPortable();
+    internal static IRef ToDurable( this IRef reference ) => ((IRefImpl) reference).ToDurable();
 
     // ReSharper disable once SuspiciousTypeConversion.Global
     public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference, CompilationContext compilationContext )
@@ -94,12 +81,6 @@ public static class RefExtensions
     internal static IRef<INamespace> ToRef( this INamespaceSymbol symbol, CompilationContext compilationContext )
         => compilationContext.RefFactory.FromSymbol<INamespace>( symbol );
 
-    /*
-    internal static IRef<TDeclaration> ToRef<TDeclaration>( this ISymbol symbol, CompilationContext compilationContext )
-        where TDeclaration : class, IDeclaration
-        => compilationContext.RefFactory.FromSymbol<TDeclaration>( symbol );
-        */
-
     internal static IRef<IType> ToRef( this ITypeSymbol symbol, CompilationContext compilationContext )
         => symbol.Kind switch
         {
@@ -108,13 +89,21 @@ public static class RefExtensions
             _ => compilationContext.RefFactory.FromSymbol<IType>( symbol )
         };
 
-    public static IEqualityComparer<ISymbol> GetSymbolComparer( this RefComparisonOptions comparisonOptions )
-        => comparisonOptions switch
+    internal static IEqualityComparer<ISymbol> GetSymbolComparer(
+        this RefComparison comparison,
+        CompilationContext compilationContext1,
+        CompilationContext compilationContext2 )
+        => comparison.GetSymbolComparer( compilationContext1 == compilationContext2 );
+
+    internal static IEqualityComparer<ISymbol> GetSymbolComparer( this RefComparison comparison, bool useReferential = false )
+        => comparison switch
         {
-            RefComparisonOptions.Default => SymbolEqualityComparer.Default,
-            RefComparisonOptions.Structural => StructuralSymbolComparer.Default,
-            RefComparisonOptions.Structural | RefComparisonOptions.IncludeNullability => StructuralSymbolComparer.IncludeNullability,
-            RefComparisonOptions.IncludeNullability => SymbolEqualityComparer.IncludeNullability,
+            RefComparison.Default => SymbolEqualityComparer.Default,
+            RefComparison.Structural when useReferential => SymbolEqualityComparer.Default,
+            RefComparison.Structural => StructuralSymbolComparer.Default,
+            RefComparison.StructuralIncludeNullability when useReferential => SymbolEqualityComparer.IncludeNullability,
+            RefComparison.StructuralIncludeNullability => StructuralSymbolComparer.IncludeNullability,
+            RefComparison.IncludeNullability => SymbolEqualityComparer.IncludeNullability,
             _ => throw new ArgumentOutOfRangeException()
         };
 }

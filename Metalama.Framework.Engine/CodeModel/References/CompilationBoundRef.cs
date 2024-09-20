@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -49,7 +50,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
     [Memo]
     private StringRef<T> CompilationNeutralRef => new( this.ToSerializableId().Id );
 
-    public sealed override IPortableRef<T> ToPortable() => this.CompilationNeutralRef;
+    public sealed override IDurableRef<T> ToDurable() => this.CompilationNeutralRef;
 
     public override SerializableDeclarationId ToSerializableId()
     {
@@ -70,36 +71,46 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
         return this.GetSymbolIgnoringKind();
     }
 
-    public sealed override bool Equals( IRef? other, RefComparisonOptions comparisonOptions )
+    public sealed override bool Equals( IRef? other, RefComparison comparison )
     {
-        if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
+        if ( comparison == RefComparison.Durable )
         {
-            return this.ToPortable().Equals( other, comparisonOptions );
+            return this.ToDurable().Equals( other, comparison );
         }
 
-        if ( other is not ICompilationBoundRefImpl symbolRef )
+        if ( other is not ICompilationBoundRefImpl otherRef )
         {
             return false;
         }
 
-        Invariant.Assert( this.CompilationContext == symbolRef.CompilationContext, "Compilation mistmatch in a non-portable comparison." );
+        Invariant.Assert(
+            this.CompilationContext == otherRef.CompilationContext ||
+            comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
+            "Compilation mistmatch in a non-structural comparison." );
 
-        return this.EqualsCore( other, comparisonOptions );
+        // When testing equality, we can use a referential comparer if both references belong to the same context.
+        var symbolComparer = comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext );
+
+        return this.EqualsCore( other, comparison, symbolComparer );
     }
 
-    public sealed override int GetHashCode( RefComparisonOptions comparisonOptions )
+    public sealed override int GetHashCode( RefComparison comparison )
     {
-        if ( (comparisonOptions & RefComparisonOptions.Structural) != 0 )
+        if ( comparison == RefComparison.Durable )
         {
-            return this.ToPortable().GetHashCode( comparisonOptions );
+            return this.ToDurable().GetHashCode( comparison );
         }
 
-        return this.GetHashCodeCore( comparisonOptions );
+        // When computing the hash code, we must be pessimistic whenever the comparison mode is structural,
+        // because we don't know if the other reference in the comparison will be in the same context.
+        var symbolComparer = comparison.GetSymbolComparer();
+
+        return this.GetHashCodeCore( comparison, symbolComparer );
     }
 
-    protected abstract bool EqualsCore( IRef? other, RefComparisonOptions comparisonOptions );
+    protected abstract bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer );
 
-    protected abstract int GetHashCodeCore( RefComparisonOptions comparisonOptions );
+    protected abstract int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer );
 
     private ISymbol GetSymbolWithKind( ISymbol symbol )
         => this.TargetKind switch

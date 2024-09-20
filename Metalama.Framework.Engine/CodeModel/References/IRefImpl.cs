@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         bool IsPortable { get; }
 
-        IRef ToPortable();
+        IRef ToDurable();
 
         ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
     }
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData();
     }
 
-    internal interface IPortableRef<out T> : IRefImpl<T>
+    internal interface IDurableRef<out T> : IRefImpl<T>
         where T : class, ICompilationElement { }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
@@ -46,6 +46,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         new IRefImpl<TOut> As<TOut>()
             where TOut : class, ICompilationElement;
 
-        new IPortableRef<T> ToPortable();
+        new IDurableRef<T> ToDurable();
     }
 }

@@ -49,25 +49,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
             => this.GetTargetOrNull( compilation, options, genericContext );
 
-        public IPortableRef<IAttribute> ToPortable() => throw new NotSupportedException();
+        public IDurableRef<IAttribute> ToDurable() => throw new NotSupportedException();
 
         public bool IsPortable => false;
 
-        IRef IRefImpl.ToPortable() => this.ToPortable();
-
-        public bool Equals( IRef? other, RefComparisonOptions comparisonOptions = RefComparisonOptions.Default )
-            => comparisonOptions switch
-            {
-                RefComparisonOptions.Default => this.Equals( other ),
-                _ => throw new NotSupportedException( "Compilation-neutral comparison of attributes is not supported." )
-            };
-
-        public int GetHashCode( RefComparisonOptions comparisonOptions )
-            => comparisonOptions switch
-            {
-                RefComparisonOptions.Default => this.GetHashCode(),
-                _ => throw new NotSupportedException( "Compilation-neutral comparison of attributes is not supported." )
-            };
+        IRef IRefImpl.ToDurable() => this.ToDurable();
 
         ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
             => this.GetTarget( compilation, options, genericContext );
@@ -97,6 +83,28 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ISymbol ISdkRef.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public bool IsSyntax( AttributeSyntax attribute ) => this.AttributeSyntax == attribute;
+
+        public bool Equals( IRef? other, RefComparison comparison = RefComparison.Default )
+        {
+            if ( comparison != RefComparison.Default )
+            {
+                throw new NotSupportedException( "Non-default comparison of attributes is not supported." );
+            }
+
+            if ( other is not AttributeRef otherAttributeRef )
+            {
+                return false;
+            }
+
+            return this.Equals( otherAttributeRef );
+        }
+
+        public int GetHashCode( RefComparison comparison )
+            => comparison switch
+            {
+                RefComparison.Default => this.GetHashCode(),
+                _ => throw new NotSupportedException( "Non-default comparison of attributes is not supported." )
+            };
 
         public virtual bool Equals( AttributeRef? other )
         {

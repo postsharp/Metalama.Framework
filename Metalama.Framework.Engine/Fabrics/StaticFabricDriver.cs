@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Fabrics
             private readonly List<IHierarchicalOptionsSource> _optionsSources = new();
 
             protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, IRef<T> targetDeclaration, string? ns ) :
-                base( project, fabricManager, fabricInstance, targetDeclaration.ToPortable() )
+                base( project, fabricManager, fabricInstance, targetDeclaration.ToDurable() )
             {
                 this.Namespace = ns;
             }

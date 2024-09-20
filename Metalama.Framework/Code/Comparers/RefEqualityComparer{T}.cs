@@ -4,23 +4,28 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Code.Comparers;
 
-public sealed class RefEqualityComparer<T> : IEqualityComparer<IRef<T>?>
+/// <summary>
+/// This interface exists to write assertions that a dictionary has been created with the proper comparer.
+/// </summary>
+public interface IRefEqualityComparer;
+
+public sealed class RefEqualityComparer<T> : IEqualityComparer<IRef<T>?>, IRefEqualityComparer
     where T : class, ICompilationElement
 {
-    private readonly RefComparisonOptions _comparisonOptions;
+    private readonly RefComparison _comparison;
 
-    public static RefEqualityComparer<T> Default { get; } = new( RefComparisonOptions.Default );
+    public static RefEqualityComparer<T> Default { get; } = new( RefComparison.Default );
 
-    public static RefEqualityComparer<T> IncludeNullability { get; } = new( RefComparisonOptions.IncludeNullability );
+    public static RefEqualityComparer<T> IncludeNullability { get; } = new( RefComparison.IncludeNullability );
 
-    public static RefEqualityComparer<T> Structural { get; } = new( RefComparisonOptions.Structural );
+    public static RefEqualityComparer<T> Structural { get; } = new( RefComparison.Structural );
 
     public static RefEqualityComparer<T> StructuralIncludeNullability { get; } =
-        new( RefComparisonOptions.Structural | RefComparisonOptions.IncludeNullability );
+        new( RefComparison.Structural | RefComparison.IncludeNullability );
 
-    private RefEqualityComparer( RefComparisonOptions comparisonOptions )
+    private RefEqualityComparer( RefComparison comparison )
     {
-        this._comparisonOptions = comparisonOptions;
+        this._comparison = comparison;
     }
 
     public bool Equals( IRef<T>? x, IRef<T>? y )
@@ -35,9 +40,8 @@ public sealed class RefEqualityComparer<T> : IEqualityComparer<IRef<T>?>
             return false;
         }
 
-        return x.Equals( y, this._comparisonOptions );
+        return x.Equals( y, this._comparison );
     }
 
-    public int GetHashCode( IRef<T> obj ) => obj.GetHashCode( this._comparisonOptions );
+    public int GetHashCode( IRef<T> obj ) => obj.GetHashCode( this._comparison );
 }
-
