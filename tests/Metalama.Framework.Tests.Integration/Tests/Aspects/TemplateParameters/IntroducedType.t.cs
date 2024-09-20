@@ -3,11 +3,11 @@ public class Target
 {
   private void FromBaseCompilation()
   {
-    global::System.Console.WriteLine("Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.IntroducedType.Target.IntroducedType");
+    global::System.Console.WriteLine("Target.IntroducedType");
   }
   private void FromMutableCompilation()
   {
-    global::System.Console.WriteLine("Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.IntroducedType.Target.IntroducedType");
+    global::System.Console.WriteLine("Target.IntroducedType");
   }
   class IntroducedType
   {

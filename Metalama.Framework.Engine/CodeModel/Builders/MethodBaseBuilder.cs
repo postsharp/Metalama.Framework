@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using System;
 using System.Linq;
 
@@ -60,10 +61,4 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
         string name )
         : base( targetType, name, advice ) { }
 
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-    {
-        var parameterTypes = this.Parameters.AsEnumerable<IParameter>().Select( p => p.Type );
-
-        return DisplayStringFormatter.Format( format, context, $"{this.DeclaringType}.{this.Name}({parameterTypes})" );
-    }
 }

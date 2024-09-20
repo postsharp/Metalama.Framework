@@ -112,7 +112,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
         {
             null => null,
             ITypeParameter typeParameter => this.Map( typeParameter ),
-            _ when type.SpecialType != SpecialType.None || TypeVisitor.Instance.Visit( type ) => type, // Fast oath
+            _ when type.SpecialType != SpecialType.None || !TypeVisitor.Instance.Visit( type ) => type, // Fast oath
             _ => this.TypeMapperInstance.Visit( type )
         };
     }

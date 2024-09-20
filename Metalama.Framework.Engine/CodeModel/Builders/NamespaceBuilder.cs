@@ -59,8 +59,6 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         return null;
     }
 
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
-
     [Memo]
     public IRef<INamespace> Ref => this.RefFactory.FromBuilder<INamespace>( this );
 

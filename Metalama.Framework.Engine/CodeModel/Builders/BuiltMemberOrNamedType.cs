@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Reflection;
 
@@ -24,6 +25,7 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
 
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
+    [Memo]
     public INamedType? DeclaringType => this.MapType( this.MemberOrNamedTypeBuilder.DeclaringType );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();

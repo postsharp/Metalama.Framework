@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -32,8 +33,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
 
     internal override GenericContext GenericContext { get; }
 
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => this.Builder.ToDisplayString( format, context );
+    public sealed override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => DisplayStringFormatter.Format( this );
 
     [Memo]
     public override IAssembly DeclaringAssembly => this.Compilation.Factory.Translate( this.Builder.DeclaringAssembly ).AssertNotNull();
@@ -73,7 +73,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
 
     public override bool CanBeInherited => this.Builder.CanBeInherited;
 
-    public override string ToString() => this.Builder.ToString();
+    public sealed override string ToString() => this.ToDisplayString();
 
     public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
 

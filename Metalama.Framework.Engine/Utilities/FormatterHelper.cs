@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal static class DisplayStringFormatter
+internal static class FormatterHelper
 {
     // Seems that ReSharper does not recognize the interpolation handler.
     // ReSharper disable EntityNameCapturedOnly.Global

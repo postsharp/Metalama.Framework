@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Validation;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Code;
 

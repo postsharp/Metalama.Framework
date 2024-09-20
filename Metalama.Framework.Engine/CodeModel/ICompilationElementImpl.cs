@@ -12,4 +12,5 @@ internal interface ICompilationElementImpl : ICompilationElement
         CompilationModel newCompilation,
         ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
         IGenericContext? genericContext = null );
+
 }

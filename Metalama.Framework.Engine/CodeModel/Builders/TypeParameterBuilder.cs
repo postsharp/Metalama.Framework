@@ -68,13 +68,7 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
         this.Index = index;
         this.Name = name;
     }
-
-    // TODO: How to implement this?
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-    {
-        return this.Name;
-    }
-
+    
     bool IType.Equals( SpecialType specialType ) => false;
 
     bool IEquatable<IType>.Equals( IType? other ) => this.Equals( other, TypeComparison.Default );

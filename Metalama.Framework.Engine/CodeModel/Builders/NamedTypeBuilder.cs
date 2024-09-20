@@ -227,8 +227,6 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
-
     public IntroduceNamedTypeTransformation ToTransformation()
     {
         this.Freeze();

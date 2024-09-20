@@ -42,10 +42,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
-
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => this.AttributeConstruction.ToString() ?? "";
-
+    
     public INamedType Type => this.Constructor.DeclaringType;
 
     public IConstructor Constructor => this.AttributeConstruction.Constructor;

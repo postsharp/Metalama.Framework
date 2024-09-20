@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -85,7 +86,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
         }
     }
 
-    public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
+    public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => DisplayStringFormatter.Format( this );
 
     public void AddAttribute( AttributeConstruction attribute )
     {
@@ -135,7 +136,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
-    public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
+    public sealed override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 
     public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -37,7 +38,7 @@ public class ReadAspect : TypeAspect
     [Introduce(WhenExists = OverrideStrategy.New)]
     public void PrintBaseConstructors()
     {
-        foreach (var c in meta.Target.Type.BaseType.Constructors)
+        foreach (var c in meta.Target.Type.BaseType.Constructors.OrderBy( c=>c.ToString() ))
         {
             Console.WriteLine( c.ToDisplayString(  ) );
         }
@@ -46,7 +47,7 @@ public class ReadAspect : TypeAspect
     [Introduce(WhenExists = OverrideStrategy.New)]
     public void PrintBaseMethods()
     {
-        foreach (var c in meta.Target.Type.BaseType.Methods)
+        foreach (var c in meta.Target.Type.BaseType.Methods.OrderBy( m=>m.ToString() ))
         {
             Console.WriteLine( c.ToDisplayString(  ) );
         }

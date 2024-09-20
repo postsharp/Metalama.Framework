@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -35,9 +36,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
         }
     }
 
-    // A builder is never accessed directly from user code and never represents a generic type instance,
-    // so we don't need an implementation of GenericArguments.
-    public IReadOnlyList<IType> TypeArguments => throw new NotSupportedException();
+    public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
     public IMethod? OverriddenMethod { get; set; }
 
@@ -169,13 +168,6 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
     public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
-
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-    {
-        var parameterTypes = this.Parameters.AsEnumerable<IParameter>().Select( p => p.Type );
-
-        return DisplayStringFormatter.Format( format, context, $"{this.DeclaringType}.{this.Name}({parameterTypes})" );
-    }
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
