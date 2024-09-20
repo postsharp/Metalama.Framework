@@ -43,7 +43,14 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     [return: NotNullIfNotNull( nameof(type) )]
     protected T? MapType<T>( T? type )
         where T : class, IType
-        => (T?) this.GenericMap.Map( this.Compilation.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ) );
+    {
+        if ( type == null )
+        {
+            return null;
+        }
+        
+        return (T) this.GenericMap.Map( this.Compilation.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ) ).AssertNotNull();
+    }
 
     [Memo]
     public override IDeclaration? ContainingDeclaration

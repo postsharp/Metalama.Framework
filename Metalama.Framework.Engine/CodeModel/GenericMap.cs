@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -109,7 +110,7 @@ internal partial class GenericMap : IEquatable<GenericMap?>, IGenericContextImpl
             return typeParameter;
         }
 
-        if ( typeParameter.ContainingSymbol.AssertSymbolNotNull().Kind != SymbolKind.NamedType )
+        if ( typeParameter.TypeParameterKind != TypeParameterKind.Type )
         {
             throw new NotImplementedException( "Method type parameters are not supported." );
         }
@@ -144,7 +145,8 @@ internal partial class GenericMap : IEquatable<GenericMap?>, IGenericContextImpl
         {
             null => null,
             ITypeParameter typeParameter => this.Map( typeParameter ),
-            _ => TypeVisitor.Instance.Visit( type ) ? this.TypeMapperInstance.Visit( type ) : null
+            _ when type.SpecialType != SpecialType.None || TypeVisitor.Instance.Visit( type ) => type, // Fast oath
+            _ =>  this.TypeMapperInstance.Visit( type )
         };
     }
 

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private IAttributeCollection AttributesImpl
             => new AttributeCollection(
                 this,
-                this.Compilation.GetAttributeCollection( this.ToDeclarationRef() ) );
+                this.Compilation.GetAttributeCollection( (IRef<IDeclaration>) this.ToDeclarationRef().GetDefinition() ) );
 
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );

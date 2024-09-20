@@ -112,4 +112,6 @@ public static class RefExtensions
     internal static IRef<T> GetDefinition<T>( this IRef<T> reference )
         where T : class, IMemberOrNamedType
         => (IRef<T>) ((ICompilationBoundRefImpl) reference).Definition;
+    internal static IRef GetDefinition( this IRef reference )
+        => ((ICompilationBoundRefImpl) reference).Definition;
 }

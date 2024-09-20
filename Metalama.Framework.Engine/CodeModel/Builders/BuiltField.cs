@@ -43,7 +43,7 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod );
 
     [Memo]
-    private IRef<IField> Ref => this.RefFactory.FromBuilt<IField>( this );
+    private IRef<IFieldOrProperty> Ref => this.RefFactory.FromBuilt<IFieldOrProperty>( this );
 
     public IRef<IFieldOrProperty> ToRef() => this.Ref;
 
