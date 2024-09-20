@@ -79,7 +79,11 @@ internal sealed class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
         return this.GetSymbol( compilationContext );
     }
 
-    protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+    protected override T? Resolve(
+        CompilationModel compilation,
+        ReferenceResolutionOptions options,
+        bool throwIfMissing,
+        IGenericContext? genericContext )
     {
         if ( IsDeclarationId( this.Id ) )
         {

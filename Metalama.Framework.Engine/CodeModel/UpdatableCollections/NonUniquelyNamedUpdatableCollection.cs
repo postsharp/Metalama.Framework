@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 

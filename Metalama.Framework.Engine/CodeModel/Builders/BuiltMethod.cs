@@ -48,19 +48,24 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
-    public IRef<IMethod> ToRef() => this._methodBuilder.Ref;
+    [Memo]
+    private IRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
+
+    public IRef<IMethod> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation, this.GenericContext );
+    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation, this.GenericMap );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.Translate( this._methodBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.MapType( this._methodBuilder.ReturnParameter.Type );
 
     [Memo]
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this._methodBuilder.TypeParameters.AsBuilderList.Select( this.RefFactory.FromBuilder<ITypeParameter> ).ToReadOnlyList() );
+            this._methodBuilder.TypeParameters.AsBuilderList.Select( x => this.RefFactory.FromBuilder<ITypeParameter>( x ) ).ToReadOnlyList() );
 
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
@@ -73,7 +78,10 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     [Memo]
     public IMethod? OverriddenMethod => this.Compilation.Factory.Translate( this._methodBuilder.OverriddenMethod );
 
-    IMethod IMethod.Definition => this;
+    [Memo]
+    public IMethod Definition => this.Compilation.Factory.GetMethod( this._methodBuilder ).AssertNotNull();
+
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     bool IMethod.IsPartial => false;
 

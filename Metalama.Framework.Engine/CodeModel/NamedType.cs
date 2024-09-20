@@ -59,16 +59,6 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public override IGenericContext GenericContext
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.GenericContext;
-            }
-        }
-
         public override ISymbol Symbol => this.Implementation.Symbol;
 
         public override MemberInfo ToMemberInfo()
@@ -551,7 +541,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this.OnUsingDeclaration();
 
-                return this.Implementation.TypeSymbol;
+                return this.Implementation.NamedTypeSymbol;
             }
         }
 
@@ -574,16 +564,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this.OnUsingDeclaration();
 
             return this.Implementation.GetHashCode();
-        }
-
-        public GenericMap GenericMap
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.GenericMap;
-            }
         }
     }
 }

@@ -128,7 +128,7 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
     public T? Translate<T>(
         T? compilationElement,
         ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-        IGenericContext? genericContext = null ) 
+        IGenericContext? genericContext = null )
         where T : class, ICompilationElement
         => (T?) ((ICompilationElementImpl?) compilationElement)?.Translate( this._compilationModel, options, genericContext );
 

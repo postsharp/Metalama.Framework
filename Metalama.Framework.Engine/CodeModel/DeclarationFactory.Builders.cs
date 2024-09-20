@@ -135,7 +135,7 @@ public partial class DeclarationFactory
             (me: this, fieldBuilder) );
     }
 
-    internal IFieldOrProperty? GetProperty(
+    internal IProperty? GetProperty(
         PropertyBuilder propertyBuilder,
         ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null,

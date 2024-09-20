@@ -22,7 +22,7 @@ internal sealed class BuilderAttributeRef : AttributeRef
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {
-        attribute = new BuiltAttribute( this.AttributeBuilder, compilation, genericContext ?? NullGenericContext.Instance );
+        attribute = new BuiltAttribute( this.AttributeBuilder, compilation, NullGenericContext.Instance );
 
         return true;
     }

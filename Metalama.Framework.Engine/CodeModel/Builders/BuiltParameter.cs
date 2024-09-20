@@ -23,7 +23,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     public RefKind RefKind => this._parameterBuilder.RefKind;
 
     [Memo]
-    public IType Type => this.Compilation.Factory.Translate( this._parameterBuilder.Type );
+    public IType Type => this.MapType( this._parameterBuilder.Type );
 
     public string Name => this._parameterBuilder.Name;
 
@@ -36,15 +36,21 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     [Memo]
     public IHasParameters DeclaringMember
         => this.Compilation.Factory.Translate(
-            this._parameterBuilder.DeclaringMember,
-            ReferenceResolutionOptions.CanBeMissing,
-            genericContext: this.GenericContext );
+                this._parameterBuilder.DeclaringMember,
+                ReferenceResolutionOptions.CanBeMissing,
+                genericContext: this.GenericMap )
+            .AssertNotNull();
 
     public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
 
     public bool IsReturnParameter => this._parameterBuilder.IsReturnParameter;
 
-    IRef<IParameter> IParameter.ToRef() => this._parameterBuilder.Ref;
+    [Memo]
+    private IRef<IParameter> Ref => this.RefFactory.FromBuilt<IParameter>( this );
+
+    public IRef<IParameter> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     bool IExpression.IsAssignable => true;
 

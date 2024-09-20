@@ -51,9 +51,13 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public bool HasDefaultConstructorConstraint => this._typeParameterBuilder.HasDefaultConstructorConstraint;
 
-    IRef<ITypeParameter> ITypeParameter.ToRef() => this._typeParameterBuilder.Ref;
+    private IRef<ITypeParameter> Ref => this.RefFactory.FromBuilt<ITypeParameter>( this );
 
-    IRef<IType> IType.ToRef() => this._typeParameterBuilder.Ref;
+    IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
+
+    IRef<IType> IType.ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 

@@ -56,7 +56,7 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the definition of the member or type. If the current declaration is a generic type instance, a generic method instance, or a member of
-        /// a generic type instance, this returns the generic definition. Otherwise, it returns the current instance.
+        /// a generic type instance, this returns the generic definition and the <see cref="IsDefinition"/> returns <c>true</c>. Otherwise, it returns the current instance.
         /// </summary>
         IMemberOrNamedType Definition { get; }
 

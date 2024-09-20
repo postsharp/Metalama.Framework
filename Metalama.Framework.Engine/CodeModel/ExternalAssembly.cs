@@ -25,8 +25,6 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
 
     public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
 
-    public override IGenericContext GenericContext => NullGenericContext.Instance;
-
     public override ISymbol Symbol => this._assemblySymbol;
 
     public override bool CanBeInherited => false;

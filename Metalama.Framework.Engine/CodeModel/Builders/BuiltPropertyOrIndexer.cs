@@ -20,28 +20,28 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
     public Writeability Writeability => this.PropertyOrIndexerBuilder.Writeability;
 
     [Memo]
-    public IType Type => this.Compilation.Factory.Translate( this.PropertyOrIndexerBuilder.Type );
+    public IType Type => this.MapType( this.PropertyOrIndexerBuilder.Type ).AssertNotNull();
 
     [Memo]
     public IMethod? GetMethod
         => this.PropertyOrIndexerBuilder.GetMethod != null
-            ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.GetMethod, this.GenericContext )
+            ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.GetMethod )
             : null;
 
     [Memo]
     public IMethod? SetMethod
         => this.PropertyOrIndexerBuilder.SetMethod != null
-            ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.SetMethod, this.GenericContext )
+            ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.SetMethod )
             : null;
 
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.PropertyOrIndexerBuilder.ToPropertyOrIndexerRef();
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => (IRef<IFieldOrPropertyOrIndexer>) this.ToDeclarationRef();
 
     public PropertyInfo ToPropertyInfo() => this.PropertyOrIndexerBuilder.ToPropertyInfo();
 
-    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => this.PropertyOrIndexerBuilder.ToPropertyOrIndexerRef();
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => (IRef<IPropertyOrIndexer>) this.ToDeclarationRef();
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
     public IEnumerable<IMethod> Accessors
-        => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.Translate( a, genericContext: this.GenericContext ) ).WhereNotNull();
+        => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.Translate( a, genericContext: this.GenericMap ) ).WhereNotNull();
 }

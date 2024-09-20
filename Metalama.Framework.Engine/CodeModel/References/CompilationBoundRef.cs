@@ -41,6 +41,12 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
         }
     }
 
+    public abstract bool IsDefinition { get; }
+
+    public abstract IRef Definition { get; }
+
+    public abstract GenericMap GenericMap { get; }
+
     [Memo]
     private StringRef<T> CompilationNeutralRef => new( this.ToSerializableId().Id );
 
@@ -86,6 +92,11 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
         var symbolComparer = comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext );
 
         return this.EqualsCore( other, comparison, symbolComparer );
+    }
+
+    protected GenericMap GetCombinedGenericMap( IGenericContext? genericContext )
+    {
+        return this.GenericMap.Apply( genericContext.GetGenericMap() );
     }
 
     public sealed override int GetHashCode( RefComparison comparison )

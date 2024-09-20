@@ -81,6 +81,9 @@ namespace Metalama.Framework.Code
         public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<Type> typeArguments )
             => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
 
+        public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<IType> typeArguments )
+            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
+
         /// <summary>
         /// Constructs a generic instance of an <see cref="IMethod"/>, with type arguments given as reflection <see cref="Type"/>.
         /// </summary>
@@ -104,6 +107,9 @@ namespace Metalama.Framework.Code
 
         public static IMethod WithTypeArguments( this IMethod method, Type[] typeTypeArguments, Type[] methodTypeArguments )
             => method.ForTypeInstance( method.DeclaringType.WithTypeArguments( typeTypeArguments ) ).WithTypeArguments( methodTypeArguments );
+
+        public static IMemberOrNamedType ForTypeInstance( this IMemberOrNamedType declaration, INamedType typeInstance )
+            => ForTypeInstanceImpl( declaration, typeInstance );
 
         /// <summary>
         /// Returns a representation of the current nested <see cref="INamedType"/>, but for a different generic instance

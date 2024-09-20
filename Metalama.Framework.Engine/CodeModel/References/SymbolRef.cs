@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
@@ -16,6 +15,14 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
     public ISymbol Symbol { get; }
 
     public override CompilationContext CompilationContext { get; }
+
+    public override bool IsDefinition => this.Symbol.IsDefinition;
+
+    [Memo]
+    public override IRef Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
+
+    [Memo]
+    public override GenericMap GenericMap => this.IsDefinition ? GenericMap.Empty : GenericMap.Get( this.Symbol, this.CompilationContext );
 
     public override RefTargetKind TargetKind { get; }
 
@@ -42,7 +49,11 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         return this.CompilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
     }
 
-    protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+    protected override T? Resolve(
+        CompilationModel compilation,
+        ReferenceResolutionOptions options,
+        bool throwIfMissing,
+        IGenericContext? genericContext )
     {
         var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( this.Symbol, this.CompilationContext.Compilation );
 
@@ -51,7 +62,8 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
             return ReturnNullOrThrow( MetalamaStringFormatter.Instance.Format( this.Symbol ), throwIfMissing, compilation );
         }
 
-        return ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind ).AssertNotNull(), compilation );
+        var combinedGenericMap = this.GetCombinedGenericMap( genericContext );
+        return ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, combinedGenericMap ).AssertNotNull(), compilation );
     }
 
     protected override bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )

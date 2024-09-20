@@ -159,11 +159,8 @@ public sealed partial class CompilationModel
         where TCollection : ISourceDeclarationCollection<TDeclaration, TRef>
         where TRef : IRef
     {
-        if ( requestMutableCollection && !this.IsMutable )
-        {
-            // Cannot get a mutable collection when the model is immutable.
-            throw new InvalidOperationException();
-        }
+        Invariant.Assert( !(requestMutableCollection && !this.IsMutable) );
+        Invariant.Assert( declaration.IsDefinition() );
 
         // If the model is mutable, we need to return a mutable collection because it may be mutated after the
         // front-end collection is returned.
@@ -178,8 +175,6 @@ public sealed partial class CompilationModel
                 collection = (TCollection) collection.Clone( this.Compilation );
                 dictionary = dictionary.SetItem( declaration, collection );
             }
-
-            return collection;
         }
         else
         {

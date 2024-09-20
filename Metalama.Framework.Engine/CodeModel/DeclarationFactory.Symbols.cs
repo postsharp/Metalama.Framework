@@ -172,7 +172,10 @@ public partial class DeclarationFactory
         return declaration;
     }
 
-    internal ICompilationElement? GetCompilationElement( ISymbol symbol, RefTargetKind targetKind = RefTargetKind.Default )
+    internal ICompilationElement? GetCompilationElement(
+        ISymbol symbol,
+        RefTargetKind targetKind = RefTargetKind.Default,
+        IGenericContext? genericContext = null )
     {
         switch ( symbol.Kind )
         {
@@ -183,6 +186,8 @@ public partial class DeclarationFactory
         }
 
         symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
+
+        symbol = genericContext.GetGenericMap().Map( symbol, this.CompilationContext );
 
         switch ( symbol.Kind )
         {

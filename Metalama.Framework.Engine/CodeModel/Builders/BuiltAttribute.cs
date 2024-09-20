@@ -21,15 +21,21 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 
     IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
-    IRef<IAttribute> IAttribute.ToRef() => this._attributeBuilder.ToAttributeRef();
+    [Memo]
+    private IRef<IAttribute> Ref => this._attributeBuilder.ToAttributeRef(); // TODO generic
+
+    public IRef<IAttribute> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public override DeclarationBuilder Builder => this._attributeBuilder;
 
     [Memo]
-    public INamedType Type => this.Constructor.DeclaringType;
+    public INamedType Type => this.MapType( this._attributeBuilder.Type );
 
     [Memo]
-    public IConstructor Constructor => this.Compilation.Factory.Translate( this._attributeBuilder.Constructor, genericContext: this.GenericContext );
+    public IConstructor Constructor
+        => this.Compilation.Factory.Translate( this._attributeBuilder.Constructor, genericContext: this.GenericMap ).AssertNotNull();
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments

@@ -28,15 +28,15 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     protected override MemberBuilder MemberBuilder => this.EventBuilder;
 
     [Memo]
-    public INamedType Type => this.Compilation.Factory.Translate( this.EventBuilder.Type );
+    public INamedType Type => this.MapType( this.EventBuilder.Type );
 
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
     [Memo]
-    public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod, this.GenericContext );
+    public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod );
 
     [Memo]
-    public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod, this.GenericContext );
+    public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod );
 
     public IMethod? RaiseMethod => null;
 
@@ -47,13 +47,21 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     [Memo]
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
         => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray(
-            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericContext ) );
+            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericMap ) );
 
-    IEvent IEvent.Definition => this;
+    [Memo]
+    public IEvent Definition => this.Compilation.Factory.GetEvent( this.EventBuilder ).AssertNotNull();
+
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-    IRef<IEvent> IEvent.ToRef() => this.EventBuilder.Ref;
+    [Memo]
+    private IRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
+
+    public IRef<IEvent> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public IEventInvoker With( InvokerOptions options ) => this.EventBuilder.With( options );
 

@@ -74,14 +74,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         // for instance the parameters of a method that has been introduced into the current compilation but is not included in the current compilation.
         protected TDeclaration GetItem( in TRef reference )
         {
-            var definition = reference.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
+            var declaration = reference.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing, genericContext: this._genericContext );
 
-            if ( !this._genericContext.IsEmptyOrIdentity && !ReferenceEquals( definition.GetDefinition(), definition ) )
-            {
-                // TODO: We must apply the mapping.
-            }
-
-            return (TDeclaration) definition;
+            return (TDeclaration) declaration;
         }
 
         protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references )

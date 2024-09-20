@@ -27,9 +27,13 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 
     public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
 
-    IRef<INamespace> INamespace.ToRef() => this._namespaceBuilder.Ref;
+    private IRef<INamespace> Ref => this._namespaceBuilder.Ref;
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this._namespaceBuilder.Ref;
+    IRef<INamespace> INamespace.ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 

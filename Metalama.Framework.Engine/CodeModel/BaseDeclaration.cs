@@ -71,7 +71,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract ImmutableArray<SourceReference> Sources { get; }
 
-        public abstract IGenericContext GenericContext { get; }
+        IGenericContext IDeclaration.GenericContext => this.GenericMap;
+
+        internal abstract GenericMap GenericMap { get; }
 
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.Compilation.GetParameterCollection( this.ToRef() ) );
+                this.Compilation.GetParameterCollection( this.ToRef().GetDefinition() ) );
 
         public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch

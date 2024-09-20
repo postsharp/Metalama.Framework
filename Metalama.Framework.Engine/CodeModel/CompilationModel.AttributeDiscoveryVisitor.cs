@@ -164,7 +164,5 @@ namespace Metalama.Framework.Engine.CodeModel
                 this.Visit( tree.GetRoot() );
             }
         }
-
-        public override IGenericContext GenericContext => NullGenericContext.Instance;
     }
 }

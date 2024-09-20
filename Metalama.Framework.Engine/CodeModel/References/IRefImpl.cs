@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 
 // ReSharper disable UnusedMemberInSuper.Global
 
@@ -35,6 +34,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         CompilationContext CompilationContext { get; }
 
         ResolvedAttributeRef GetAttributeData();
+
+        bool IsDefinition { get; }
+
+        IRef Definition { get; }
+
+        GenericMap GenericMap { get; }
     }
 
     internal interface IDurableRef<out T> : IRefImpl<T>

@@ -62,7 +62,7 @@ namespace Metalama.Framework.Code
         /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
         /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
         /// </summary>
-        ICompilationElement GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
+        ICompilationElement GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null );
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Code
         ICompilationElement? GetTargetOrNull(
             ICompilation compilation,
             ReferenceResolutionOptions options = default,
-            IGenericContext? genericContext = default );
+            IGenericContext? genericContext = null );
 
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
@@ -94,12 +94,12 @@ namespace Metalama.Framework.Code
         /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
         /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
         /// </summary>
-        new T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
+        new T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null );
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
         /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
         /// </summary>
-        new T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default );
+        new T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null );
     }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -27,31 +28,35 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public IRef<TCodeElement> FromBuilder<TCodeElement>( IDeclarationBuilder builder )
+        public IRef<TCodeElement> FromBuilder<TCodeElement>( IDeclarationBuilder builder, GenericMap? genericMap = null )
             where TCodeElement : class, IDeclaration
-            => new BuilderRef<TCodeElement>( builder, this._compilationContext );
+            => new BuilderRef<TCodeElement>( builder, genericMap, this._compilationContext );
+
+        public IRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
+            where T : class, IDeclaration
+            => this.FromBuilder<T>( builtDeclaration.Builder, builtDeclaration.GenericMap );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder )
+        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder, GenericMap? genericMap = null )
             => builder.DeclarationKind switch
             {
-                DeclarationKind.NamedType => new BuilderRef<INamedType>( builder, this._compilationContext ),
-                DeclarationKind.Method => new BuilderRef<IMethod>( builder, this._compilationContext ),
-                DeclarationKind.Property => new BuilderRef<IProperty>( builder, this._compilationContext ),
-                DeclarationKind.Indexer => new BuilderRef<IIndexer>( builder, this._compilationContext ),
-                DeclarationKind.Field => new BuilderRef<IFieldOrProperty>( builder, this._compilationContext ),
-                DeclarationKind.Event => new BuilderRef<IEvent>( builder, this._compilationContext ),
-                DeclarationKind.Parameter => new BuilderRef<IParameter>( builder, this._compilationContext ),
-                DeclarationKind.TypeParameter => new BuilderRef<ITypeParameter>( builder, this._compilationContext ),
-                DeclarationKind.Attribute => new BuilderRef<IAttribute>( builder, this._compilationContext ),
-                DeclarationKind.ManagedResource => new BuilderRef<IManagedResource>( builder, this._compilationContext ),
-                DeclarationKind.Constructor => new BuilderRef<IConstructor>( builder, this._compilationContext ),
-                DeclarationKind.Finalizer => new BuilderRef<IMethod>( builder, this._compilationContext ),
-                DeclarationKind.Operator => new BuilderRef<IMethod>( builder, this._compilationContext ),
-                DeclarationKind.AssemblyReference => new BuilderRef<IAssembly>( builder, this._compilationContext ),
-                DeclarationKind.Namespace => new BuilderRef<INamespace>( builder, this._compilationContext ),
+                DeclarationKind.NamedType => new BuilderRef<INamedType>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Method => new BuilderRef<IMethod>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Property => new BuilderRef<IProperty>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Indexer => new BuilderRef<IIndexer>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Field => new BuilderRef<IFieldOrProperty>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Event => new BuilderRef<IEvent>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Parameter => new BuilderRef<IParameter>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.TypeParameter => new BuilderRef<ITypeParameter>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Attribute => new BuilderRef<IAttribute>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.ManagedResource => new BuilderRef<IManagedResource>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Constructor => new BuilderRef<IConstructor>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Finalizer => new BuilderRef<IMethod>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Operator => new BuilderRef<IMethod>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.AssemblyReference => new BuilderRef<IAssembly>( builder, genericMap, this._compilationContext ),
+                DeclarationKind.Namespace => new BuilderRef<INamespace>( builder, genericMap, this._compilationContext ),
                 _ => throw new ArgumentOutOfRangeException( nameof(builder), $"Unexpected declaration kind: {builder.DeclarationKind}." )
             };
 

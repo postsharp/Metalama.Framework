@@ -34,11 +34,19 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     [Memo]
     public IProperty? OverriddenProperty => this.Compilation.Factory.Translate( this.PropertyBuilder.OverriddenProperty );
 
-    IProperty IProperty.Definition => this;
+    [Memo]
+    public IProperty Definition => this.Compilation.Factory.GetProperty( this.PropertyBuilder ).AssertNotNull();
 
-    IRef<IProperty> IProperty.ToRef() => this.PropertyBuilder.Ref;
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.PropertyBuilder.Ref;
+    [Memo]
+    private IRef<IProperty> Ref => this.RefFactory.FromBuilt<IProperty>( this );
+
+    IRef<IProperty> IProperty.ToRef() => this.Ref;
+
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]

@@ -32,19 +32,24 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 
     public bool? IsAutoPropertyOrField => this.FieldBuilder.IsAutoPropertyOrField;
 
-    public IType Type => this.FieldBuilder.Type;
+    public IType Type => this.MapType( this.FieldBuilder.Type );
 
     public RefKind RefKind => this.FieldBuilder.RefKind;
 
     [Memo]
-    public IMethod GetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod, this.GenericContext );
+    public IMethod GetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod );
 
     [Memo]
-    public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod, this.GenericContext );
+    public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod );
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.FieldBuilder.Ref;
+    [Memo]
+    private IRef<IField> Ref => this.RefFactory.FromBuilt<IField>( this );
 
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.FieldBuilder.Ref;
+    public IRef<IFieldOrProperty> ToRef() => this.Ref;
+
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
@@ -65,7 +70,10 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 
     public TypedConstant? ConstantValue => this.FieldBuilder.ConstantValue;
 
-    IField IField.Definition => this;
+    [Memo]
+    public IField Definition => this.Compilation.Factory.GetField( this.FieldBuilder ).AssertNotNull();
+
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

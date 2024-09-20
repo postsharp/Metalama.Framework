@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -37,27 +38,32 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
         => this.Compilation.Factory.Translate(
             this.TypeBuilder.BaseType,
             ReferenceResolutionOptions.CanBeMissing,
-            genericContext: this.GenericContext );
+            genericContext: this.GenericMap );
 
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(
             this,
-            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeBuilder.ToRef(), false ) );
+            this.Compilation.GetAllInterfaceImplementationCollection( this.Ref, false ) );
 
     public IImplementedInterfaceCollection ImplementedInterfaces
         => new ImplementedInterfacesCollection(
             this,
-            this.Compilation.GetInterfaceImplementationCollection( this.TypeBuilder.ToRef(), false ) );
+            this.Compilation.GetInterfaceImplementationCollection( this.Ref, false ) );
 
     INamespace INamedType.Namespace => this.ContainingNamespace;
 
     public INamespace ContainingNamespace => this.TypeBuilder.ContainingNamespace;
 
-    IRef<INamedType> INamedType.ToRef() => this.TypeBuilder.Ref;
+    [Memo]
+    private IRef<INamedType> Ref => this.RefFactory.FromBuilt<INamedType>( this );
 
-    IRef<IType> IType.ToRef() => this.TypeBuilder.Ref;
+    public IRef<INamedType> ToRef() => this.Ref;
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.TypeBuilder.Ref;
+    IRef<IType> IType.ToRef() => this.Ref;
+
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -67,7 +73,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this.TypeBuilder.ToRef() ) );
+            this.Compilation.GetNamedTypeCollection( this.Ref ) );
 
     [Memo]
     public INamedTypeCollection AllTypes => new AllTypesCollection( this );
@@ -76,7 +82,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IPropertyCollection Properties
         => new PropertyCollection(
             this,
-            this.Compilation.GetPropertyCollection( this.TypeBuilder.ToRef() ) );
+            this.Compilation.GetPropertyCollection( this.Ref.GetDefinition() ) );
 
     [Memo]
     public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
@@ -85,7 +91,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IIndexerCollection Indexers
         => new IndexerCollection(
             this,
-            this.Compilation.GetIndexerCollection( this.TypeBuilder.ToRef() ) );
+            this.Compilation.GetIndexerCollection( this.Ref.GetDefinition() ) );
 
     [Memo]
     public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
@@ -94,7 +100,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IFieldCollection Fields
         => new FieldCollection(
             this,
-            this.Compilation.GetFieldCollection( this.TypeBuilder.ToRef() ) );
+            this.Compilation.GetFieldCollection( this.Ref.GetDefinition() ) );
 
     [Memo]
     public IFieldCollection AllFields => new AllFieldsCollection( this );
@@ -108,7 +114,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IEventCollection Events
         => new EventCollection(
             this,
-            this.Compilation.GetEventCollection( this.TypeBuilder.ToRef() ) );
+            this.Compilation.GetEventCollection( this.Ref.GetDefinition() ) );
 
     [Memo]
     public IEventCollection AllEvents => new AllEventsCollection( this );
@@ -116,7 +122,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IMethodCollection Methods
         => new MethodCollection(
             this,
-            this.Compilation.GetMethodCollection( this.TypeBuilder.ToRef() ) );
+            this.Compilation.GetMethodCollection( this.Ref.GetDefinition() ) );
 
     public IMethodCollection AllMethods => new AllMethodsCollection( this );
 
@@ -125,7 +131,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IConstructorCollection Constructors
         => new ConstructorCollection(
             this,
-            this.Compilation.GetConstructorCollection( this.TypeBuilder.ToRef() ) );
+            this.Compilation.GetConstructorCollection( this.Ref.GetDefinition() ) );
 
     public IConstructor? StaticConstructor => this.TypeBuilder.StaticConstructor;
 
@@ -135,11 +141,14 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public bool IsRef => this.TypeBuilder.IsRef;
 
-    public INamedType TypeDefinition => this.TypeBuilder.TypeDefinition;
+    public INamedType TypeDefinition => this.Definition;
 
-    public INamedType Definition => this.TypeBuilder.Definition;
+    [Memo]
+    public INamedType Definition => this.Compilation.Factory.GetNamedType( this.TypeBuilder ).AssertNotNull();
 
-    public INamedType UnderlyingType => this.TypeBuilder.UnderlyingType;
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
+
+    public INamedType UnderlyingType => this.Definition;
 
     public TypeKind TypeKind => this.TypeBuilder.TypeKind;
 
@@ -151,7 +160,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public IGenericParameterList TypeParameters => this.TypeBuilder.TypeParameters;
 
-    public IReadOnlyList<IType> TypeArguments => this.TypeBuilder.TypeArguments;
+    public IReadOnlyList<IType> TypeArguments => this.TypeBuilder.TypeArguments; // TODO
 
     public bool IsGeneric => this.TypeBuilder.IsGeneric;
 
@@ -208,6 +217,4 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     {
         throw new NotSupportedException( "ConstructGenericInstance on introduced types is not yet supported." );
     }
-
-    public GenericMap GenericMap => GenericMap.Create( this.TypeArguments, this.IsCanonicalGenericInstance );
 }

@@ -56,8 +56,6 @@ internal sealed class Namespace : Declaration, INamespace
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
 
-    public override IGenericContext GenericContext => NullGenericContext.Instance;
-
     public override ISymbol Symbol => this._symbol;
 
     public string Name => this._symbol.IsGlobalNamespace ? "" : this._symbol.Name;

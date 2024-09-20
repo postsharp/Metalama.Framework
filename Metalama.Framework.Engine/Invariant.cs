@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -354,7 +355,7 @@ namespace Metalama.Framework.Engine
         public static TSymbol AssertSymbolNotNull<TSymbol>(
             this TSymbol? symbol,
             string? justification = null )
-            where TSymbol : Microsoft.CodeAnalysis.ISymbol
+            where TSymbol : class, ISymbol
         {
             if ( symbol == null )
             {
@@ -368,11 +369,12 @@ namespace Metalama.Framework.Engine
         public static TSymbol AssertSymbolNullNotImplemented<TSymbol>(
             this TSymbol? symbol,
             string? feature )
-            where TSymbol : Microsoft.CodeAnalysis.ISymbol
+            where TSymbol : ISymbol
         {
             if ( symbol == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof(TSymbol).Name} must not be null.{(feature != null ? $" Feature: {feature}" : "")}" );
+                throw new AssertionFailedException(
+                    $"The reference to {typeof(TSymbol).Name} must not be null.{(feature != null ? $" Feature: {feature}" : "")}" );
             }
 
             return symbol;

@@ -266,6 +266,4 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     IRef<IType> IType.ToRef() => this.Ref;
 
     public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
-
-    public GenericMap GenericMap => GenericMap.Create( this.TypeArguments, true );
 }

@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => this as IRefImpl<TOut> ?? throw new NotSupportedException();
 
-        public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default )
+        public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
         {
             if ( !this.TryGetTarget( (CompilationModel) compilation, genericContext, out var attribute ) )
             {
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
             => this.GetTarget( compilation, options, genericContext );
 
-        public IAttribute? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default )
+        public IAttribute? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
         {
             if ( !this.TryGetTarget( (CompilationModel) compilation, genericContext, out var attribute ) )
             {

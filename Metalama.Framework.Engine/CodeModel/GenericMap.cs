@@ -1,104 +1,195 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImpl
+internal partial class GenericMap : IEquatable<GenericMap?>, IGenericContextImpl
 {
-    private GenericMap( IReadOnlyList<IType> typeArguments, bool isIdentity )
+    public static GenericMap Empty { get; } = new( [], true, null, null );
+
+    // The implementation is currently hard-coded with ITypeSymbol[] for performance
+    // and because we don't support non-symbol types yet.
+    public IReadOnlyList<ITypeSymbol> TypeArguments { get; }
+
+    public CompilationContext? CompilationContext { get; }
+
+    public GenericMap? Parent { get; }
+
+    private GenericMap( IReadOnlyList<ITypeSymbol> typeArguments, bool isIdentity, CompilationContext? compilationContext, GenericMap? parent )
     {
         this.TypeArguments = typeArguments;
+        this.CompilationContext = compilationContext;
+        this.Parent = parent;
         this.IsEmptyOrIdentity = isIdentity || typeArguments.Count == 0;
     }
 
-    public static GenericMap Create( IReadOnlyList<IType> typeArguments, bool isIdentity ) => new( typeArguments, isIdentity );
+    public static GenericMap Get( ISymbol? symbol, CompilationContext compilationContext )
+    {
+        var closestType = symbol?.GetClosestContainingType();
+
+        if ( closestType is null )
+        {
+            return Empty;
+        }
+        else
+        {
+            return Get( closestType, compilationContext );
+        }
+    }
+
+    public static GenericMap Get( INamedTypeSymbol? symbol, CompilationContext compilationContext )
+    {
+        if ( symbol == null || symbol.IsDefinition )
+        {
+            return Empty;
+        }
+
+        return new GenericMap( symbol.TypeArguments, symbol.IsDefinition, compilationContext, Get( symbol.ContainingType, compilationContext ) );
+    }
 
     public bool IsEmptyOrIdentity { get; }
 
-    public IReadOnlyList<IType> TypeArguments { get; }
+    [Memo]
+    private TypeSymbolMapper TypeSymbolMapperInstance => new( this );
 
-#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
-    public static readonly GenericMap Empty;
-#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
+    [Memo]
+    private TypeMapper TypeMapperInstance => new( this );
 
-    public GenericMap Apply( in GenericMap map )
+    [Memo]
+    private SymbolMapper SymbolMapperInstance => new( this );
+
+    public GenericMap Apply( GenericMap map )
     {
         if ( map.IsEmptyOrIdentity )
         {
             return Empty;
         }
 
-        var results = new IType[map.TypeArguments.Count];
-        Mapper? mapper = null;
+        if ( this.IsEmptyOrIdentity )
+        {
+            return map;
+        }
+
+        Invariant.Assert( this.CompilationContext == map.CompilationContext );
+
+        var results = new ITypeSymbol[map.TypeArguments.Count];
+        TypeSymbolMapper? mapper = null;
 
         for ( var i = 0; i < map.TypeArguments.Count; i++ )
         {
             var type = map.TypeArguments[i];
 
-            if ( type is ITypeParameter typeParameter )
+            if ( type is ITypeParameterSymbol typeParameter )
             {
                 results[i] = this.Map( typeParameter );
             }
             else
             {
-                mapper ??= new Mapper( this );
+                mapper ??= new TypeSymbolMapper( this );
                 results[i] = mapper.Visit( type );
             }
         }
 
-        return new GenericMap( typeArguments: results, false );
+        // TODO: Nested (parent).
+        return new GenericMap( typeArguments: results, false, this.CompilationContext!, null );
+    }
+
+    public ITypeSymbol Map( ITypeParameterSymbol typeParameter )
+    {
+        if ( this.IsEmptyOrIdentity )
+        {
+            return typeParameter;
+        }
+
+        if ( typeParameter.ContainingSymbol.AssertSymbolNotNull().Kind != SymbolKind.NamedType )
+        {
+            throw new NotImplementedException( "Method type parameters are not supported." );
+        }
+
+        return this.TypeArguments[typeParameter.Ordinal];
     }
 
     public IType Map( ITypeParameter typeParameter )
     {
+        if ( this.IsEmptyOrIdentity )
+        {
+            return typeParameter;
+        }
+
         if ( typeParameter.ContainingDeclaration.AssertNotNull().DeclarationKind != DeclarationKind.NamedType )
         {
             throw new NotImplementedException( "Method type parameters are not supported." );
         }
 
-        return this.TypeArguments[typeParameter.Index];
+        return typeParameter.GetCompilationModel().Factory.GetIType( this.TypeArguments[typeParameter.Index] );
     }
 
-    public IType Map( IType type )
+    [return: NotNullIfNotNull( nameof(type) )]
+    public IType? Map( IType? type )
     {
-        if ( type is ITypeParameter typeParameter )
+        if ( this.IsEmptyOrIdentity )
         {
-            return this.Map( typeParameter );
+            return type;
         }
-        else
+
+        return type switch
         {
-            return new Mapper( this ).Visit( type );
-        }
+            null => null,
+            ITypeParameter typeParameter => this.Map( typeParameter ),
+            _ => TypeVisitor.Instance.Visit( type ) ? this.TypeMapperInstance.Visit( type ) : null
+        };
     }
 
-    private sealed class Mapper : TypeRewriter
+    [return: NotNullIfNotNull( nameof(type) )]
+    public ITypeSymbol? Map( ITypeSymbol? type )
     {
-        private readonly GenericMap _genericMap;
-
-        public Mapper( GenericMap genericMap )
+        if ( this.IsEmptyOrIdentity )
         {
-            this._genericMap = genericMap;
+            return type;
         }
 
-        internal override IType Visit( ITypeParameter typeParameter )
+        return type switch
         {
-            return this._genericMap.Map( typeParameter );
-        }
+            null => null,
+            ITypeParameterSymbol typeParameter => this.Map( typeParameter ),
+            _ => TypeSymbolVisitor.Instance.Visit( type ) ? this.TypeSymbolMapperInstance.Visit( type ) : null
+        };
     }
 
-    public bool Equals( GenericMap other )
+    [return: NotNullIfNotNull( nameof(symbol) )]
+    public ISymbol? Map( ISymbol? symbol, CompilationContext compilationContext )
     {
+        if ( this.IsEmptyOrIdentity )
+        {
+            return symbol;
+        }
+
+        if ( symbol == null )
+        {
+            return null;
+        }
+
+        return this.SymbolMapperInstance.Visit( symbol ).AssertSymbolNotNull();
+    }
+
+    public bool Equals( GenericMap? other )
+    {
+        if ( other == null )
+        {
+            return false;
+        }
+
         if ( Equals( other.TypeArguments, this.TypeArguments ) )
         {
             return true;
-        }
-
-        if ( this.TypeArguments == null || other.TypeArguments == null! )
-        {
-            return false;
         }
 
         if ( other.TypeArguments.Count != this.TypeArguments.Count )
@@ -123,22 +214,15 @@ internal readonly struct GenericMap : IEquatable<GenericMap>, IGenericContextImp
     {
         var hashCode = default(HashCode);
 
-        if ( this.TypeArguments == null )
-        {
-            return 0;
-        }
-
         foreach ( var type in this.TypeArguments )
         {
             hashCode.Add( type.GetHashCode() );
         }
 
+        hashCode.Add( this.Parent );
+
         return hashCode.ToHashCode();
     }
-
-    public static bool operator ==( GenericMap left, GenericMap right ) => left.Equals( right );
-
-    public static bool operator !=( GenericMap left, GenericMap right ) => !left.Equals( right );
 
     GenericMap IGenericContextImpl.GenericMap => this;
 }

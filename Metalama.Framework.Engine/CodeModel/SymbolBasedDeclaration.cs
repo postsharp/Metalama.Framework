@@ -17,6 +17,8 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public abstract ISymbol Symbol { get; }
 
+        internal sealed override GenericMap GenericMap => GenericMap.Get( this.Symbol, this.GetCompilationContext() );
+
         [Memo]
         public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
 

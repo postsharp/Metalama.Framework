@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -12,8 +13,6 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
     where T : class, ICompilationElement
 {
-    private ISymbol? _cachedSymbol;
-
     public SyntaxNode SyntaxNode { get; }
 
     public SyntaxRef( SyntaxNode syntaxNode, RefTargetKind targetKind, CompilationContext compilationContext )
@@ -25,41 +24,49 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     public override CompilationContext CompilationContext { get; }
 
+    public override bool IsDefinition => true;
+
+    public override IRef Definition => this;
+
+    public override GenericMap GenericMap => default;
+
     public override RefTargetKind TargetKind { get; }
 
     public override string Name => throw new NotSupportedException();
 
     protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
     {
-        return this.GetSymbol();
+        return this.Symbol;
     }
+
+    [Memo]
+    private ISymbol Symbol => this.GetSymbol();
 
     private ISymbol GetSymbol()
     {
-        if ( this._cachedSymbol != null )
-        {
-            return this._cachedSymbol;
-        }
-
         var semanticModel =
             this.CompilationContext.SemanticModelProvider.GetSemanticModel( this.SyntaxNode.SyntaxTree )
             ?? throw new AssertionFailedException( $"Cannot get a semantic model for '{this.SyntaxNode.SyntaxTree.FilePath}'." );
 
-        this._cachedSymbol =
-            (this.SyntaxNode is LambdaExpressionSyntax
-                ? semanticModel.GetSymbolInfo( this.SyntaxNode ).Symbol
-                : semanticModel.GetDeclaredSymbol( this.SyntaxNode ))
-            ?? throw new AssertionFailedException( $"Cannot get a symbol for {this.SyntaxNode.GetType().Name}." );
-
-        return this._cachedSymbol;
+        return (this.SyntaxNode is LambdaExpressionSyntax
+                   ? semanticModel.GetSymbolInfo( this.SyntaxNode ).Symbol
+                   : semanticModel.GetDeclaredSymbol( this.SyntaxNode ))
+               ?? throw new AssertionFailedException( $"Cannot get a symbol for {this.SyntaxNode.GetType().Name}." );
     }
 
-    protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+    protected override T? Resolve(
+        CompilationModel compilation,
+        ReferenceResolutionOptions options,
+        bool throwIfMissing,
+        IGenericContext? genericContext )
     {
+        var combinedGenericMap = this.GetCombinedGenericMap( genericContext );
+        
         return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
-                    this.GetSymbol(),
-                    this.TargetKind )
+                    this.Symbol,
+                    this.TargetKind,
+                    combinedGenericMap )
                 .AssertNotNull(),
             compilation );
     }
@@ -79,14 +86,14 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
         return comparison switch
         {
             RefComparison.Default or RefComparison.IncludeNullability => nodeRef.SyntaxNode == this.SyntaxNode,
-            _ => symbolComparer.Equals( this.GetSymbol(), nodeRef.GetSymbol() )
+            _ => symbolComparer.Equals( this.Symbol, nodeRef.Symbol )
         };
     }
 
     protected override int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )
         => comparison switch
         {
-            RefComparison.Structural or RefComparison.StructuralIncludeNullability => symbolComparer.GetHashCode( this.GetSymbol() ),
+            RefComparison.Structural or RefComparison.StructuralIncludeNullability => symbolComparer.GetHashCode( this.Symbol ),
             _ => this.SyntaxNode.GetHashCode()
         };
 

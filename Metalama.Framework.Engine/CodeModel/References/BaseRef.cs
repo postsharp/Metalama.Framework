@@ -48,13 +48,13 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     IRef<TOut> IRef.As<TOut>() => this.As<TOut>();
 
-    public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default )
+    public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
         => this.GetTargetImpl( compilation, options, true, genericContext )!;
 
-    public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = default )
+    public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
         => this.GetTargetImpl( compilation, options, false, genericContext );
 
-    private T? GetTargetImpl( ICompilation compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+    private T? GetTargetImpl( ICompilation compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext = null )
     {
         var compilationModel = (CompilationModel) compilation;
 

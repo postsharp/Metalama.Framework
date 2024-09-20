@@ -10,19 +10,26 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
-    where T : class, ICompilationElement
+    where T : class, IDeclaration
 {
-    public BuilderRef( IDeclarationBuilder builder, CompilationContext compilationContext )
+    public BuilderRef( IDeclarationBuilder builder, GenericMap? genericContext, CompilationContext compilationContext )
     {
         Invariant.Assert( typeof(T) == builder.DeclarationKind.GetRefInterfaceType() );
 
         this.Builder = builder;
+        this.GenericMap = genericContext ?? GenericMap.Empty;
         this.CompilationContext = compilationContext;
     }
 
     public override CompilationContext CompilationContext { get; }
 
+    public override bool IsDefinition => this.GenericMap.IsEmptyOrIdentity;
+
+    public override IRef Definition => this.IsDefinition ? this : this.Builder.ToRef();
+
     public IDeclarationBuilder Builder { get; }
+
+    public override GenericMap GenericMap { get; }
 
     public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
 
@@ -53,9 +60,17 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         throw new AssertionFailedException();
     }
 
-    protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+  
+
+    protected override T? Resolve(
+        CompilationModel compilation,
+        ReferenceResolutionOptions options,
+        bool throwIfMissing,
+        IGenericContext? genericContext )
     {
-        return ConvertOrThrow( compilation.Factory.GetDeclaration( this.Builder, options, genericContext, throwIfMissing ), compilation );
+        return ConvertOrThrow(
+            compilation.Factory.GetDeclaration( this.Builder, options, this.GetCombinedGenericMap( genericContext ), throwIfMissing ),
+            compilation );
     }
 
     protected override bool EqualsCore( IRef? other, RefComparison options, IEqualityComparer<ISymbol> symbolComparer )

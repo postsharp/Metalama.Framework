@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -20,7 +21,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     protected BuiltDeclaration( CompilationModel compilation, IGenericContext genericContext )
     {
         this.Compilation = compilation;
-        this.GenericContext = genericContext;
+        this.GenericMap = genericContext.GetGenericMap();
     }
 
     IDeclarationBuilder IBuilderBasedDeclaration.Builder => this.Builder;
@@ -29,15 +30,20 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
 
     public abstract DeclarationBuilder Builder { get; }
 
-    public override IGenericContext GenericContext { get; }
+    internal override GenericMap GenericMap { get; }
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => this.Builder.ToDisplayString( format, context );
 
     [Memo]
-    public override IAssembly DeclaringAssembly => this.Compilation.Factory.Translate( this.Builder.DeclaringAssembly );
+    public override IAssembly DeclaringAssembly => this.Compilation.Factory.Translate( this.Builder.DeclaringAssembly ).AssertNotNull();
 
     public override IDeclarationOrigin Origin => this.Builder.Origin;
+
+    [return: NotNullIfNotNull( nameof(type) )]
+    protected T? MapType<T>( T? type )
+        where T : class, IType
+        => (T?) this.GenericMap.Map( this.Compilation.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ) );
 
     [Memo]
     public override IDeclaration? ContainingDeclaration
@@ -52,8 +58,6 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
             this.Compilation.GetAttributeCollection( this.ToDeclarationRef() ) );
 
     public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
-
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Builder.ToDeclarationRef();
 
     public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
 

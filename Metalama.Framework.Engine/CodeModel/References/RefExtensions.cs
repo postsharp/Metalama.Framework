@@ -106,4 +106,10 @@ public static class RefExtensions
             RefComparison.IncludeNullability => SymbolEqualityComparer.IncludeNullability,
             _ => throw new ArgumentOutOfRangeException()
         };
+
+    internal static bool IsDefinition( this IRef reference ) => ((ICompilationBoundRefImpl) reference).IsDefinition;
+
+    internal static IRef<T> GetDefinition<T>( this IRef<T> reference )
+        where T : class, IMemberOrNamedType
+        => (IRef<T>) ((ICompilationBoundRefImpl) reference).Definition;
 }

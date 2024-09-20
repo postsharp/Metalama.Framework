@@ -88,8 +88,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
-        public override IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
-
         public override ISymbol Symbol => this._typeSymbol;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;

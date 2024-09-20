@@ -61,8 +61,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public override IGenericContext GenericContext => this.DeclaringMember.GenericContext;
-
         public override ISymbol Symbol => this._parameterSymbol;
 
         public override bool CanBeInherited => this.DeclaringMember.CanBeInherited;
