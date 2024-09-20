@@ -42,6 +42,5 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-    public IEnumerable<IMethod> Accessors
-        => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.Translate( a, genericContext: this.GenericContext ) ).WhereNotNull();
+    public IEnumerable<IMethod> Accessors => this.PropertyOrIndexerBuilder.Accessors.Select( this.MapDeclaration ).WhereNotNull();
 }

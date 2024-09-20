@@ -34,11 +34,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public bool HasDefaultConstructor => this.TypeBuilder.HasDefaultConstructor;
 
-    public INamedType? BaseType
-        => this.Compilation.Factory.Translate(
-            this.TypeBuilder.BaseType,
-            ReferenceResolutionOptions.CanBeMissing,
-            genericContext: this.GenericContext );
+    public INamedType? BaseType => this.MapType( this.TypeBuilder.BaseType );
 
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(

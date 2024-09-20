@@ -28,8 +28,6 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     public override IRef Definition => this;
 
-    public override GenericContext GenericContext => GenericContext.Empty;
-
     public override RefTargetKind TargetKind { get; }
 
     public override string Name => throw new NotSupportedException();
@@ -60,13 +58,11 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
         bool throwIfMissing,
         IGenericContext? genericContext )
     {
-        var combinedGenericMap = this.GetCombinedGenericMap( genericContext );
-
         return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
                     this.Symbol,
                     this.TargetKind,
-                    combinedGenericMap )
+                    genericContext )
                 .AssertNotNull(),
             compilation );
     }

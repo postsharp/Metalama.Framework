@@ -32,7 +32,7 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 
     [Memo]
-    public IProperty? OverriddenProperty => this.Compilation.Factory.Translate( this.PropertyBuilder.OverriddenProperty );
+    public IProperty? OverriddenProperty => this.MapDeclaration( this.PropertyBuilder.OverriddenProperty );
 
     [Memo]
     public IProperty Definition => this.Compilation.Factory.GetProperty( this.PropertyBuilder ).AssertNotNull();

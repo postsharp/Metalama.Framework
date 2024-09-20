@@ -38,8 +38,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         bool IsDefinition { get; }
 
         IRef Definition { get; }
-
-        GenericContext GenericContext { get; }
     }
 
     internal interface IDurableRef<out T> : IRefImpl<T>

@@ -35,10 +35,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     [Memo]
     public IHasParameters DeclaringMember
-        => this.Compilation.Factory.Translate(
-                this._parameterBuilder.DeclaringMember,
-                ReferenceResolutionOptions.CanBeMissing,
-                genericContext: this.GenericContext )
+        => this.MapDeclaration( this._parameterBuilder.DeclaringMember )
             .AssertNotNull();
 
     public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();

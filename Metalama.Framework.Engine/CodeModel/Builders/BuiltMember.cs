@@ -26,7 +26,7 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
     public bool HasImplementation => this.MemberBuilder.HasImplementation;
 
     [Memo]
-    public IMember? OverriddenMember => this.Compilation.Factory.Translate( this.MemberBuilder.OverriddenMember );
+    public IMember? OverriddenMember => this.MapDeclaration( this.MemberBuilder.OverriddenMember );
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
     {

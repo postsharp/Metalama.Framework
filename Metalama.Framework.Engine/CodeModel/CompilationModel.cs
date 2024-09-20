@@ -28,12 +28,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
     public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal, ISdkCompilation
     {
+        private static int _nextId;
+        private int _id = Interlocked.Increment( ref _nextId );
+
         static CompilationModel()
         {
             MetalamaEngineModuleInitializer.EnsureInitialized();
@@ -600,11 +604,11 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( this._debugLabel == null )
             {
-                return this.RoslynCompilation.AssemblyName ?? "<anonymous>";
+                return this.RoslynCompilation.AssemblyName ?? $"<anonymous> #{this._id}";
             }
             else
             {
-                return $"{this.RoslynCompilation.AssemblyName} ({this._debugLabel})";
+                return $"{this.RoslynCompilation.AssemblyName} ({this._debugLabel}) #{this._id}";
             }
         }
 

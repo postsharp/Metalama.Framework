@@ -21,9 +21,6 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
     [Memo]
     public override IRef Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
 
-    [Memo]
-    public override GenericContext GenericContext => this.IsDefinition ? GenericContext.Empty : GenericContext.Get( this.Symbol, this.CompilationContext );
-
     public override RefTargetKind TargetKind { get; }
 
     public override string Name => this.Symbol.Name;
@@ -62,10 +59,8 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
             return ReturnNullOrThrow( MetalamaStringFormatter.Instance.Format( this.Symbol ), throwIfMissing, compilation );
         }
 
-        var combinedGenericMap = this.GetCombinedGenericMap( genericContext );
-
         return ConvertOrThrow(
-            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, combinedGenericMap ).AssertNotNull(),
+            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, genericContext ).AssertNotNull(),
             compilation );
     }
 

@@ -29,7 +29,7 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     public IDeclarationBuilder Builder { get; }
 
-    public override GenericContext GenericContext { get; }
+    public GenericContext GenericContext { get; } // Gives the type arguments for the builder.
 
     public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
 
@@ -58,6 +58,23 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
         // We should always have an containing symbol.
         throw new AssertionFailedException();
+    }
+
+    // SMELL
+    private GenericContext GetCombinedGenericMap( IGenericContext? genericContext )
+    {
+        if ( this.GenericContext.IsEmptyOrIdentity )
+        {
+            return (GenericContext?) genericContext ?? GenericContext.Empty;
+        }
+        else if ( genericContext is null or { IsEmptyOrIdentity: true } )
+        {
+            return this.GenericContext;
+        }
+        else
+        {
+            throw new InvalidOperationException( "Cannot combine two non-empty generic contexts." );
+        }
     }
 
     protected override T? Resolve(

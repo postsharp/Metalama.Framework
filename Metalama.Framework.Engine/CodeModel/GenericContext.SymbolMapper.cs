@@ -21,12 +21,13 @@ internal partial class GenericContext
             where T : ISymbol
             => (T) this.Visit( symbol ).AssertSymbolNotNull();
 
-        private T MapMember<T>( T symbol ) where T : ISymbol
+        private T MapMember<T>( T symbol )
+            where T : ISymbol
         {
-            var containingType = this.Map( symbol.ContainingType );
+            var containingType = this._typeSymbolMapper.Visit( symbol.ContainingType );
             var members = containingType.GetMembers( symbol.Name );
 
-            return (T) members.Single( s => symbol.Equals( s.OriginalDefinition ) );
+            return (T) members.Single( s => symbol.OriginalDefinition.Equals( s.OriginalDefinition ) );
         }
 
         public override ISymbol? DefaultVisit( ISymbol symbol ) => throw new NotSupportedException();

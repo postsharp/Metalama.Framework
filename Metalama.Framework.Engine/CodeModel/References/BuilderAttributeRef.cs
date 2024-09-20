@@ -43,5 +43,8 @@ internal sealed class BuilderAttributeRef : AttributeRef
 
     protected override AttributeSyntax? AttributeSyntax => null;
 
+    public override bool Equals( AttributeRef? other )
+        => other is BuilderAttributeRef builderAttributeRef && this.AttributeBuilder.Equals( builderAttributeRef.AttributeBuilder );
+
     protected override int GetHashCodeCore() => this.AttributeBuilder.GetHashCode();
 }

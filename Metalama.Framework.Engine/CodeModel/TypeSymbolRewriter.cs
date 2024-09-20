@@ -82,32 +82,24 @@ internal abstract class TypeSymbolRewriter
             typeDefinition = namedTypeSymbol;
         }
 
-        if ( namedTypeSymbol.TypeArguments.Length == 0 )
+        if ( !typeDefinition.IsGenericType || !ReferenceEquals( typeDefinition, typeDefinition.ConstructedFrom ) )
         {
+            // The type is already constructed.
             return typeDefinition;
         }
         else
         {
+            // We must construct the type.
             var typeArguments = new ITypeSymbol[namedTypeSymbol.TypeArguments.Length];
-
-            var hasChange = false;
 
             for ( var index = 0; index < namedTypeSymbol.TypeArguments.Length; index++ )
             {
                 var t = namedTypeSymbol.TypeArguments[index];
                 var argumentTypeSymbol = this.Visit( t );
-                hasChange |= argumentTypeSymbol != t;
                 typeArguments[index] = argumentTypeSymbol;
             }
 
-            if ( hasChange )
-            {
-                return typeDefinition.Construct( typeArguments );
-            }
-            else
-            {
-                return typeDefinition;
-            }
+            return typeDefinition.Construct( typeArguments );
         }
     }
 

@@ -52,9 +52,12 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         return (T) this.GenericContext.Map( this.Compilation.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ) ).AssertNotNull();
     }
 
+    protected T? MapDeclaration<T>( T? declaration )
+        where T : class, ICompilationElement
+        => this.Compilation.Factory.Translate( declaration, ReferenceResolutionOptions.CanBeMissing, genericContext: this.GenericContext );
+
     [Memo]
-    public override IDeclaration? ContainingDeclaration
-        => this.Compilation.Factory.Translate( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
+    public override IDeclaration? ContainingDeclaration => this.MapDeclaration( this.Builder.ContainingDeclaration );
 
     public sealed override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
 

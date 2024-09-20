@@ -40,7 +40,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.Translate( i ) );
+        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 
     public MethodInfo ToMethodInfo() => this._methodBuilder.ToMethodInfo();
 
@@ -76,7 +76,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
     [Memo]
-    public IMethod? OverriddenMethod => this.Compilation.Factory.Translate( this._methodBuilder.OverriddenMethod );
+    public IMethod? OverriddenMethod => this.MapDeclaration( this._methodBuilder.OverriddenMethod );
 
     [Memo]
     public IMethod Definition => this.Compilation.Factory.GetMethod( this._methodBuilder ).AssertNotNull();

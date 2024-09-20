@@ -41,13 +41,12 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     public IMethod? RaiseMethod => null;
 
     [Memo]
-    public IEvent? OverriddenEvent => this.Compilation.Factory.Translate( this.EventBuilder.OverriddenEvent );
+    public IEvent? OverriddenEvent => this.MapDeclaration( this.EventBuilder.OverriddenEvent );
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-        => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray(
-            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericContext ) );
+        => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 
     [Memo]
     public IEvent Definition => this.Compilation.Factory.GetEvent( this.EventBuilder ).AssertNotNull();
