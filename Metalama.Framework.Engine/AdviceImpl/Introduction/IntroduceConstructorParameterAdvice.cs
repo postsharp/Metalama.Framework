@@ -101,6 +101,8 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
         this._buildAction?.Invoke( parameterBuilder );
 
+        parameterBuilder.Freeze();
+
         addTransformation( new IntroduceParameterTransformation( this, parameterBuilder ) );
 
         // Pull from constructors that call the current constructor, and recursively.
@@ -192,10 +194,11 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                             this ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
+                        recursiveParameterBuilder.Freeze();
 
                         addTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder ) );
 
-                        var recursiveParameter = recursiveParameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
+                        var recursiveParameter = recursiveParameterBuilder.ForCompilation<IParameter>( compilation, ReferenceResolutionOptions.CanBeMissing );
 
                         // Process all constructors calling this constructor.
                         PullConstructorParameterRecursive( chainedConstructor, recursiveParameter );

@@ -181,7 +181,12 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceMethodTransformation( this.ParentAdvice, this );
+    }
 
     [Memo]
     public IRef<IMethod> Ref => this.RefFactory.FromBuilder<IMethod>( this );

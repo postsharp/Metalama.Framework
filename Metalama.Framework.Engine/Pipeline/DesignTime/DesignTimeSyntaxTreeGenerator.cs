@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -62,7 +63,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                 IConstructor constructor => constructor.DeclaringType,
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
                             } )
-                    .ToDictionary( g => g.Key.ToRef(), g => g.AsEnumerable() );
+                    .ToDictionary( g => g.Key.ToRef(), g => g.AsEnumerable(), RefEqualityComparer<INamespaceOrNamedType>.Default );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 

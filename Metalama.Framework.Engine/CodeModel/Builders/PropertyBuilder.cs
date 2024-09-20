@@ -71,7 +71,12 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public virtual IInjectMemberTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
+    public virtual IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroducePropertyTransformation( this.ParentAdvice, this );
+    }
 
     public IExpression? InitializerExpression
     {

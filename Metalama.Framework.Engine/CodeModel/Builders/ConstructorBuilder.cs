@@ -64,9 +64,13 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public override bool IsExplicitInterfaceImplementation => false;
 
     public IInjectMemberTransformation ToTransformation()
-        => this.IsStatic
+    {
+        this.Freeze();
+
+        return this.IsStatic
             ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this )
             : new IntroduceConstructorTransformation( this.ParentAdvice, this );
+    }
 
     // This is implemented by BuiltConstructor and there is no point in supporting it here.
     public IConstructor GetBaseConstructor() => throw new NotSupportedException();

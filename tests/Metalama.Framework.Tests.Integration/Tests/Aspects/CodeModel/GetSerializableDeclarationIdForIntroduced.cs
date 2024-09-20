@@ -6,6 +6,7 @@ using Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDecla
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Code.DeclarationBuilders;
 
 #pragma warning disable CS0067, CS0169, CS0618, CS0649
 
@@ -52,21 +53,21 @@ internal class IntroduceMembersAttribute : TypeAspect
     {
         base.BuildAspect( builder );
 
-        var builderIds = new List<string>();
+        var builders = new List<IDeclarationBuilder>();
         var results = new List<IIntroductionAdviceResult<IDeclaration>>();
 
-        results.Add( builder.IntroduceMethod( nameof(M), buildMethod: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-        results.Add( builder.IntroduceField( nameof(_field), buildField: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-        results.Add( builder.IntroduceEvent( nameof(Event), buildEvent: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceMethod( nameof(M), buildMethod: builder => builders.Add( builder ) ) );
+        results.Add( builder.IntroduceField( nameof(_field), buildField: builder => builders.Add( builder ) ) );
+        results.Add( builder.IntroduceEvent( nameof(Event), buildEvent: builder => builders.Add( builder ) ) );
 
-        results.Add( builder.IntroduceProperty( nameof(Property), buildProperty: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceProperty( nameof(Property), buildProperty: builder => builders.Add( builder ) ) );
 
         results.Add(
             builder.IntroduceIndexer(
                 typeof(int),
                 nameof(IndexerGet),
                 nameof(IndexerSet),
-                buildIndexer: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+                buildIndexer: builder => builders.Add( builder ) ) );
 
         results.Add(
             builder.IntroduceUnaryOperator(
@@ -74,7 +75,7 @@ internal class IntroduceMembersAttribute : TypeAspect
                 builder.Target,
                 TypeFactory.GetType( typeof(bool) ),
                 OperatorKind.LogicalNot,
-                buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+                buildOperator: builder => builders.Add( builder ) ) );
 
         results.Add(
             builder.IntroduceBinaryOperator(
@@ -83,14 +84,14 @@ internal class IntroduceMembersAttribute : TypeAspect
                 builder.Target,
                 TypeFactory.GetType( typeof(int) ),
                 OperatorKind.Addition,
-                buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+                buildOperator: builder => builders.Add( builder ) ) );
 
         results.Add(
             builder.IntroduceConversionOperator(
                 nameof(CastOperator),
                 builder.Target,
                 TypeFactory.GetType( typeof(bool) ),
-                buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+                buildOperator: builder => builders.Add( builder ) ) );
 
         results.Add( builder.IntroduceFinalizer( nameof(Finalizer) ) );
 
@@ -102,14 +103,7 @@ internal class IntroduceMembersAttribute : TypeAspect
                     TypedConstant.Create( 42 ),
                     pullAction: ( p, c ) =>
                     {
-                        try
-                        {
-                            builderIds.Add( p.ToSerializableId().Id );
-                        }
-                        catch (NotSupportedException ex)
-                        {
-                            builderIds.Add( $"{ex.GetType()}: {ex.Message}" );
-                        }
+                        builders.Add( (IParameterBuilder)p );
 
                         return PullAction.None;
                     } ) );
@@ -117,7 +111,7 @@ internal class IntroduceMembersAttribute : TypeAspect
         builder.IntroduceMethod(
             nameof(GetIds),
             buildMethod: builder => builder.Name = "GetBuilderIds",
-            args: new { ids = builderIds.ToArray() } );
+            args: new { ids = builders.Select( b => b.ToSerializableId().Id ).ToArray() } );
 
         var builtIds = results.Select( r => r.Declaration.ToSerializableId().Id ).ToArray();
 

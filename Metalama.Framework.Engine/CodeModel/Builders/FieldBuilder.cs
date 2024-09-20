@@ -62,7 +62,12 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceFieldTransformation( this.ParentAdvice, this );
+    }
 
     public Writeability Writeability
     {

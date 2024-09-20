@@ -21,6 +21,16 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.Ref;
 
+    public override void Freeze()
+    {
+        base.Freeze();
+
+        foreach ( var p in this.Parameters )
+        {
+            p.Freeze();
+        }
+    }
+
     public override Writeability Writeability
     {
         get
@@ -78,7 +88,12 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceIndexerTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceIndexerTransformation( this.ParentAdvice, this );
+    }
 
     public IndexerBuilder(
         Advice advice,

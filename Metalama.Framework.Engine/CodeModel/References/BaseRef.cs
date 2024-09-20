@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -117,7 +118,9 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public abstract IRefImpl<TOut> As<TOut>()
         where TOut : class, ICompilationElement;
 
-    public override int GetHashCode() => this.GetHashCode( RefComparison.Default );
+    // We throw an exception when the vanilla GetHashCode is used to make sure that the caller specifies a RefEqualityComparer 
+    // when using IRef as a key of dictionaries.
+    public override int GetHashCode() => throw new InvalidOperationException( $"Specify a {nameof(RefEqualityComparer)} or a RefComparison." );
 
     public bool Equals( IRef? other ) => this.Equals( other, RefComparison.Default );
 

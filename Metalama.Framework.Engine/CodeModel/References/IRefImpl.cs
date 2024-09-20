@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     {
         CompilationContext CompilationContext { get; }
 
-        (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData();
+        ResolvedAttributeRef GetAttributeData();
     }
 
     internal interface IDurableRef<out T> : IRefImpl<T>

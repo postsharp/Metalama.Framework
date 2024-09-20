@@ -23,28 +23,22 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
     /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
     /// the code model.
     /// </summary>
-    public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData()
+    public ResolvedAttributeRef GetAttributeData()
     {
-        if ( this.TargetKind != RefTargetKind.Default )
+        switch ( this.TargetKind )
         {
-            var baseSymbol = this.GetSymbolIgnoringKind();
+            case RefTargetKind.Return when this.GetSymbolIgnoringKind() is IMethodSymbol method:
+                return new ResolvedAttributeRef( method.GetReturnTypeAttributes(), method, RefTargetKind.Return );
 
-            switch ( this.TargetKind )
-            {
-                case RefTargetKind.Return when baseSymbol is IMethodSymbol method:
-                    return (method.GetReturnTypeAttributes(), method);
+            case RefTargetKind.Field when this.GetSymbolIgnoringKind() is IEventSymbol @event:
+                // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
+                return new ResolvedAttributeRef( ImmutableArray<AttributeData>.Empty, @event, RefTargetKind.Field );
 
-                case RefTargetKind.Field when baseSymbol is IEventSymbol @event:
-                    // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
-                    return (ImmutableArray<AttributeData>.Empty, @event);
-            }
+            default:
+                var symbol = this.GetSymbol( this.CompilationContext, true );
 
-            // Fallback to the default GetSymbol implementation.
+                return new ResolvedAttributeRef( symbol.GetAttributes(), symbol, RefTargetKind.Default );
         }
-
-        var symbol = this.GetSymbol( this.CompilationContext, true );
-
-        return (symbol.GetAttributes(), symbol);
     }
 
     [Memo]

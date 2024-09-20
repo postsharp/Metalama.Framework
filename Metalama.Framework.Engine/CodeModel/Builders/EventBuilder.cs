@@ -129,7 +129,12 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceEventTransformation( this.ParentAdvice, this );
+    }
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

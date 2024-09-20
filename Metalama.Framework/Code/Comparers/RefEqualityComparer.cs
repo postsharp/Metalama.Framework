@@ -25,5 +25,5 @@ public sealed class RefEqualityComparer : IEqualityComparer<IRef>, IRefEqualityC
         return x.Equals( y );
     }
 
-    public int GetHashCode( IRef obj ) => obj.GetHashCode();
+    public int GetHashCode( IRef obj ) => obj.GetHashCode( RefComparison.Default );
 }

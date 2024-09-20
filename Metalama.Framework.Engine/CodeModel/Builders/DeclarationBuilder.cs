@@ -112,7 +112,15 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     public abstract IRef<IDeclaration> ToDeclarationRef();
 
-    public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
+    public SerializableDeclarationId ToSerializableId()
+    {
+        if ( !this.IsFrozen )
+        {
+            throw new InvalidOperationException( $"Cannot get the SerializableId of {this.DeclarationKind} '{this}' until it is frozen." );
+        }
+
+        return this.GetSerializableId();
+    }
 
     public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
 

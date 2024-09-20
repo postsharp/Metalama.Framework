@@ -39,7 +39,12 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public override bool CanBeInherited => false;
 
-    public IntroduceNamespaceTransformation ToTransformation() => new( this.ParentAdvice, this );
+    public IntroduceNamespaceTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceNamespaceTransformation( this.ParentAdvice, this );
+    }
 
     public NamespaceBuilder( Advice advice, INamespace containingNamespace, string name ) : base( advice, name )
     {

@@ -688,6 +688,11 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         templateProperty.Declaration.SetMethod.AssertNotNull(),
                                         (DeclarationBuilder) propertyBuilder.SetMethod.AssertNotNull() );
                                 }
+
+                                if ( isAutoProperty )
+                                {
+                                    propertyBuilder.InitializerTemplate = templateProperty.GetInitializerTemplate();
+                                }
                             }
 
                             AddTransformationNoDuplicates( propertyBuilder.ToTransformation() );
@@ -709,8 +714,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 }
                                 else
                                 {
-                                    propertyBuilder.InitializerTemplate = templateProperty.GetInitializerTemplate();
-
                                     OverrideHelper.AddTransformationsForStructField(
                                         targetType.ForCompilation( compilation ),
                                         this,

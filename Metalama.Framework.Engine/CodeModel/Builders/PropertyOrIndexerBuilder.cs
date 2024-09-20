@@ -102,5 +102,5 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => throw new NotImplementedException();
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => this.ToPropertyOrIndexerRef();
 }

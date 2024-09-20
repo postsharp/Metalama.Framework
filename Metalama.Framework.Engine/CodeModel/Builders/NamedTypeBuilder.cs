@@ -229,7 +229,12 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
-    public IntroduceNamedTypeTransformation ToTransformation() => new( this.ParentAdvice, this );
+    public IntroduceNamedTypeTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceNamedTypeTransformation( this.ParentAdvice, this );
+    }
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
         => throw new NotSupportedException( "This method is not supported on the builder." );

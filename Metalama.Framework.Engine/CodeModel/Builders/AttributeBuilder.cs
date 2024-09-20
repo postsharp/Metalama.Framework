@@ -64,7 +64,12 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     public override SyntaxTree PrimarySyntaxTree
         => this.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
-    public ITransformation ToTransformation() => new IntroduceAttributeTransformation( this.ParentAdvice, this );
+    public ITransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceAttributeTransformation( this.ParentAdvice, this );
+    }
 
     int IAspectPredecessor.PredecessorDegree => 0;
 

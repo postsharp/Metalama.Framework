@@ -39,7 +39,7 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
         => new(
             this.AdviceKind,
             AdviceOutcome.Ignore,
-            existingMember is TIntroduced typedMember ? typedMember.ToRef().As<TIntroduced>() : null,
+            existingMember is TIntroduced typedMember ? typedMember.ToRef() : null,
             existingMember.ToRef() );
 
     public override string ToString() => $"Introduce {this.Builder}";

@@ -59,7 +59,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
             return RuntimeHelpers.GetHashCode( attribute );
         }
 
-        return obj.ToRef().GetHashCode();
+        return obj.ToRef().GetHashCode( RefComparison.Default );
     }
 
     public bool Equals( IType? x, IType? y ) => (x == null && y == null) || (x != null && y != null && this._structuralDeclarationComparer.Equals( x, y ));

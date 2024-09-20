@@ -5,10 +5,16 @@ using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
+
+internal sealed record ResolvedAttributeRef( ImmutableArray<AttributeData> Attributes, ISymbol ParentSymbol, RefTargetKind ParentRefTargetKind )
+{
+    public static ResolvedAttributeRef Invalid { get; } = new( default, null!, default );
+}
 
 internal sealed class SyntaxAttributeRef : AttributeRef
 {
@@ -39,18 +45,13 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         this._attributeSyntax = attributeSyntax;
     }
 
-    private ResolvedRef? _resolvedRef;
+    private ResolvedAttributeRef? _resolvedRef;
 
-    private sealed record ResolvedRef( AttributeData AttributeData, ISymbol Parent )
-    {
-        public static ResolvedRef Invalid { get; } = new( null!, null! );
-    }
-
-    private ResolvedRef? ResolveAttributeData( AttributeSyntax attributeSyntax )
+    private ResolvedAttributeRef? ResolveAttributeData( AttributeSyntax attributeSyntax )
     {
         if ( this._resolvedRef != null )
         {
-            if ( this._resolvedRef == ResolvedRef.Invalid )
+            if ( this._resolvedRef == ResolvedAttributeRef.Invalid )
             {
                 return null;
             }
@@ -61,22 +62,27 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         }
 
         // Find the parent declaration.
-        var (attributes, symbol) = ((ICompilationBoundRefImpl) this.ContainingDeclaration).GetAttributeData();
+        var resolved = ((ICompilationBoundRefImpl) this.ContainingDeclaration).GetAttributeData();
 
         // In the parent, find the AttributeData corresponding to the current item.
 
-        var attributeData = attributes.SingleOrDefault(
+        var attributeData = resolved.Attributes.SingleOrDefault(
             a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span
                                                       && a.ApplicationSyntaxReference.SyntaxTree == attributeSyntax.SyntaxTree );
 
         if ( attributeData != null )
         {
+            if ( resolved.Attributes.Length != 1 )
+            {
+                resolved = resolved with { Attributes = ImmutableArray.Create( attributeData ) };
+            }
+
             // Save the resolved AttributeData.
-            return this._resolvedRef = new ResolvedRef( attributeData, symbol );
+            return this._resolvedRef = resolved;
         }
         else
         {
-            this._resolvedRef = ResolvedRef.Invalid;
+            this._resolvedRef = ResolvedAttributeRef.Invalid;
 
             return null;
         }
@@ -94,9 +100,9 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         }
 
         attribute = new Attribute(
-            resolved.AttributeData,
+            resolved.Attributes[0],
             compilation,
-            this.ContainingDeclaration.GetTarget( compilation, genericContext: genericContext ) );
+            compilation.Factory.GetDeclaration( resolved.ParentSymbol, resolved.ParentRefTargetKind ) );
 
         return true;
     }
@@ -119,7 +125,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
             return false;
         }
 
-        serializationData = new AttributeSerializationData( resolved.Parent, resolved.AttributeData, this.CompilationContext );
+        serializationData = new AttributeSerializationData( resolved.ParentSymbol, resolved.Attributes[0], this.CompilationContext );
 
         return true;
     }
