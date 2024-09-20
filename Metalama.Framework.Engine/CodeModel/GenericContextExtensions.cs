@@ -6,5 +6,5 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal static class GenericContextExtensions
 {
-    public static GenericMap GetGenericMap( this IGenericContext? genericContext ) => ((IGenericContextImpl?) genericContext)?.GenericMap ?? GenericMap.Empty;
+    public static GenericContext AsGenericContext( this IGenericContext? genericContext ) => ((GenericContext?) genericContext) ?? GenericContext.Empty;
 }

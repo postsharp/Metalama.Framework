@@ -1,26 +1,25 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Elfie.Model;
 using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal partial class GenericMap
+internal partial class GenericContext
 {
     private sealed class TypeSymbolMapper : TypeSymbolRewriter
     {
-        private readonly GenericMap _genericMap;
+        private readonly GenericContext _genericContext;
 
-        public TypeSymbolMapper( GenericMap genericMap ) : base( genericMap.CompilationContext.AssertNotNull().Compilation )
+        public TypeSymbolMapper( GenericContext genericContext ) : base( genericContext.CompilationContext.AssertNotNull().Compilation )
         {
-            this._genericMap = genericMap;
+            this._genericContext = genericContext;
         }
 
         internal override ITypeSymbol Visit( ITypeParameterSymbol typeSymbolParameter )
         {
-            return this._genericMap.Map( typeSymbolParameter );
+            return this._genericContext.Map( typeSymbolParameter );
         }
     }
 
@@ -33,7 +32,7 @@ internal partial class GenericMap
 
         public static TypeSymbolVisitor Instance { get; } = new();
 
-        public override bool Visit( ISymbol? symbol ) => throw new NotImplementedException( $"Symbol kind not handled: {symbol.Kind}." );
+        public override bool Visit( ISymbol? symbol ) => throw new NotImplementedException( $"Symbol kind not handled: {symbol?.Kind}." );
 
         public override bool VisitArrayType( IArrayTypeSymbol arrayTypeSymbol ) => this.Visit( arrayTypeSymbol.ElementType );
 

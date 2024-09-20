@@ -28,7 +28,7 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     public override IRef Definition => this;
 
-    public override GenericMap GenericMap => default;
+    public override GenericContext GenericContext => GenericContext.Empty;
 
     public override RefTargetKind TargetKind { get; }
 
@@ -61,7 +61,7 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
         IGenericContext? genericContext )
     {
         var combinedGenericMap = this.GetCombinedGenericMap( genericContext );
-        
+
         return ConvertOrThrow(
             compilation.Factory.GetCompilationElement(
                     this.Symbol,

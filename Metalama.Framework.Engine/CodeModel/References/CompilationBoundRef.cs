@@ -45,7 +45,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     public abstract IRef Definition { get; }
 
-    public abstract GenericMap GenericMap { get; }
+    public abstract GenericContext GenericContext { get; }
 
     [Memo]
     private StringRef<T> CompilationNeutralRef => new( this.ToSerializableId().Id );
@@ -94,9 +94,20 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
         return this.EqualsCore( other, comparison, symbolComparer );
     }
 
-    protected GenericMap GetCombinedGenericMap( IGenericContext? genericContext )
+    protected GenericContext GetCombinedGenericMap( IGenericContext? genericContext )
     {
-        return this.GenericMap.Apply( genericContext.GetGenericMap() );
+        if ( this.GenericContext.IsEmptyOrIdentity )
+        {
+            return (GenericContext?) genericContext ?? GenericContext.Empty;
+        }
+        else if ( genericContext is null or { IsEmptyOrIdentity: true } )
+        {
+            return this.GenericContext;
+        }
+        else
+        {
+            throw new InvalidOperationException( "Cannot combine two non-empty generic contexts." );
+        }
     }
 
     public sealed override int GetHashCode( RefComparison comparison )

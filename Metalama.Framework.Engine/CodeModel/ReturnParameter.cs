@@ -86,5 +86,5 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
 
     IRef<IParameter> IParameter.ToRef() => this.Ref;
 
-    internal override GenericMap GenericMap => (GenericMap) this.ContainingDeclaration.GenericContext;
+    internal override GenericContext GenericContext => (GenericContext) this.ContainingDeclaration.GenericContext;
 }

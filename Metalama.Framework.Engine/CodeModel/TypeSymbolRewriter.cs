@@ -2,6 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -69,9 +70,21 @@ internal abstract class TypeSymbolRewriter
 
     internal virtual ITypeSymbol Visit( INamedTypeSymbol namedTypeSymbol )
     {
+        INamedTypeSymbol typeDefinition;
+
+        if ( namedTypeSymbol.ContainingType != null )
+        {
+            var mappedDeclaringType = this.Visit( namedTypeSymbol.ContainingType );
+            typeDefinition = mappedDeclaringType.GetTypeMembers( namedTypeSymbol.Name, namedTypeSymbol.Arity ).Single();
+        }
+        else
+        {
+            typeDefinition = namedTypeSymbol;
+        }
+
         if ( namedTypeSymbol.TypeArguments.Length == 0 )
         {
-            return namedTypeSymbol;
+            return typeDefinition;
         }
         else
         {
@@ -89,11 +102,11 @@ internal abstract class TypeSymbolRewriter
 
             if ( hasChange )
             {
-                return namedTypeSymbol.OriginalDefinition.Construct( typeArguments );
+                return typeDefinition.Construct( typeArguments );
             }
             else
             {
-                return namedTypeSymbol;
+                return typeDefinition;
             }
         }
     }

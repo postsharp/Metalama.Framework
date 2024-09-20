@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         protected DeclarationCollection()
         {
             this.Source = ImmutableArray<TRef>.Empty;
-            this._genericContext = NullGenericContext.Instance;
+            this._genericContext = GenericContext.Empty;
         }
 
         public IEnumerator<TDeclaration> GetEnumerator()

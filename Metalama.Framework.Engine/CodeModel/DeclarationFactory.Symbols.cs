@@ -187,13 +187,13 @@ public partial class DeclarationFactory
 
         symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
-        symbol = genericContext.GetGenericMap().Map( symbol, this.CompilationContext );
+        var mappedSymbol = genericContext.AsGenericContext().Map( symbol, this.CompilationContext );
 
-        switch ( symbol.Kind )
+        switch ( mappedSymbol.Kind )
         {
             case SymbolKind.NamedType:
                 {
-                    var type = this.GetNamedType( (INamedTypeSymbol) symbol );
+                    var type = this.GetNamedType( (INamedTypeSymbol) mappedSymbol );
 
                     return targetKind switch
                     {
@@ -204,17 +204,17 @@ public partial class DeclarationFactory
                 }
 
             case SymbolKind.ArrayType:
-                return this.GetArrayType( (IArrayTypeSymbol) symbol );
+                return this.GetArrayType( (IArrayTypeSymbol) mappedSymbol );
 
             case SymbolKind.PointerType:
-                return this.GetPointerType( (IPointerTypeSymbol) symbol );
+                return this.GetPointerType( (IPointerTypeSymbol) mappedSymbol );
 
             case SymbolKind.DynamicType:
-                return this.GetDynamicType( (IDynamicTypeSymbol) symbol );
+                return this.GetDynamicType( (IDynamicTypeSymbol) mappedSymbol );
 
             case SymbolKind.Method:
                 {
-                    var method = (IMethodSymbol) symbol;
+                    var method = (IMethodSymbol) mappedSymbol;
 
                     return
                         targetKind switch
@@ -234,7 +234,7 @@ public partial class DeclarationFactory
                 }
 
             case SymbolKind.Property:
-                var propertySymbol = (IPropertySymbol) symbol;
+                var propertySymbol = (IPropertySymbol) mappedSymbol;
 
                 var propertyOrIndexer = propertySymbol.IsIndexer
                     ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol )
@@ -258,7 +258,7 @@ public partial class DeclarationFactory
 
             case SymbolKind.Field:
                 {
-                    var field = this.GetField( (IFieldSymbol) symbol );
+                    var field = this.GetField( (IFieldSymbol) mappedSymbol );
 
                     return targetKind switch
                     {
@@ -274,14 +274,14 @@ public partial class DeclarationFactory
                 }
 
             case SymbolKind.TypeParameter:
-                return this.GetGenericParameter( (ITypeParameterSymbol) symbol );
+                return this.GetGenericParameter( (ITypeParameterSymbol) mappedSymbol );
 
             case SymbolKind.Parameter:
-                return this.GetParameter( (IParameterSymbol) symbol );
+                return this.GetParameter( (IParameterSymbol) mappedSymbol );
 
             case SymbolKind.Event:
                 {
-                    var @event = this.GetEvent( (IEventSymbol) symbol );
+                    var @event = this.GetEvent( (IEventSymbol) mappedSymbol );
 
                     return targetKind switch
                     {
@@ -294,16 +294,16 @@ public partial class DeclarationFactory
                 }
 
             case SymbolKind.Assembly:
-                return this.GetAssembly( (IAssemblySymbol) symbol );
+                return this.GetAssembly( (IAssemblySymbol) mappedSymbol );
 
             case SymbolKind.Namespace:
-                return this.GetNamespace( (INamespaceSymbol) symbol );
+                return this.GetNamespace( (INamespaceSymbol) mappedSymbol );
 
             case SymbolKind.NetModule:
                 return this._compilationModel;
 
             default:
-                throw new AssertionFailedException( $"Don't know how to resolve a '{symbol.Kind}'." );
+                throw new AssertionFailedException( $"Don't know how to resolve a '{mappedSymbol.Kind}'." );
         }
     }
 

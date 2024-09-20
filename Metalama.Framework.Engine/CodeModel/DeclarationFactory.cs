@@ -148,5 +148,5 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
             this._compilationModel );
 
     // We store a GenericMap and not a GenericContext because GenericMap implements IEquatable.
-    private record struct BuilderCacheKey( IDeclarationBuilder Builder, GenericMap GenericMap );
+    private record struct BuilderCacheKey( IDeclarationBuilder Builder, GenericContext GenericContext );
 }

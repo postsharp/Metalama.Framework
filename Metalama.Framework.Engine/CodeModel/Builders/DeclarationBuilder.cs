@@ -61,7 +61,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     ImmutableArray<SourceReference> IDeclaration.Sources => ImmutableArray<SourceReference>.Empty;
 
-    IGenericContext IDeclaration.GenericContext => NullGenericContext.Instance;
+    IGenericContext IDeclaration.GenericContext => GenericContext.Empty;
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 

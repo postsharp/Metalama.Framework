@@ -15,8 +15,8 @@ public partial class DeclarationFactory
 
     internal IAttribute GetAttribute( AttributeBuilder attributeBuilder, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
         => (IAttribute) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( attributeBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltAttribute( x.attributeBuilder, x.me._compilationModel, key.GenericMap ),
+            new BuilderCacheKey( attributeBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltAttribute( x.attributeBuilder, x.me._compilationModel, key.GenericContext ),
             (me: this, attributeBuilder) );
 
     private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
@@ -41,8 +41,8 @@ public partial class DeclarationFactory
         }
 
         return (IParameter) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( parameterBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltParameter( x.parameterBuilder, x.me._compilationModel, key.GenericMap ),
+            new BuilderCacheKey( parameterBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltParameter( x.parameterBuilder, x.me._compilationModel, key.GenericContext ),
             (me: this, parameterBuilder) );
     }
 
@@ -51,8 +51,8 @@ public partial class DeclarationFactory
         ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
         => (ITypeParameter) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( typeParameterBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltTypeParameter( x.typeParameterBuilder, x.me._compilationModel, key.GenericMap ),
+            new BuilderCacheKey( typeParameterBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltTypeParameter( x.typeParameterBuilder, x.me._compilationModel, key.GenericContext ),
             (me: this, typeParameterBuilder) );
 
     internal IMethod? GetMethod(
@@ -74,16 +74,16 @@ public partial class DeclarationFactory
         }
 
         return (IMethod) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( methodBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltMethod( x.methodBuilder, x.me._compilationModel, key.GenericMap ),
+            new BuilderCacheKey( methodBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltMethod( x.methodBuilder, x.me._compilationModel, key.GenericContext ),
             (me: this, methodBuilder) );
     }
 
     internal IMethod GetAccessor( AccessorBuilder methodBuilder, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
         => (IMethod) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( methodBuilder, genericContext.GetGenericMap() ),
+            new BuilderCacheKey( methodBuilder, genericContext.AsGenericContext() ),
             static ( key, x )
-                => ((IHasAccessors) x.me.GetDeclaration( x.methodBuilder.ContainingMember, x.options, key.GenericMap ).AssertNotNull()).GetAccessor(
+                => ((IHasAccessors) x.me.GetDeclaration( x.methodBuilder.ContainingMember, x.options, key.GenericContext ).AssertNotNull()).GetAccessor(
                     x.methodBuilder.MethodKind )!,
             (me: this, options, methodBuilder) );
 
@@ -106,8 +106,8 @@ public partial class DeclarationFactory
         }
 
         return (IConstructor) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( constructorBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltConstructor( x.constructorBuilder, x.me._compilationModel, key.GenericMap ),
+            new BuilderCacheKey( constructorBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltConstructor( x.constructorBuilder, x.me._compilationModel, key.GenericContext ),
             (me: this, constructorBuilder) );
     }
 
@@ -130,8 +130,8 @@ public partial class DeclarationFactory
         }
 
         return (IField) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( fieldBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltField( x.fieldBuilder, x.me._compilationModel, key.GenericMap ),
+            new BuilderCacheKey( fieldBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltField( x.fieldBuilder, x.me._compilationModel, key.GenericContext ),
             (me: this, fieldBuilder) );
     }
 
@@ -171,8 +171,8 @@ public partial class DeclarationFactory
         }
 
         return (IProperty) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( propertyBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltProperty( x.me._compilationModel, x.propertyBuilder, key.GenericMap ),
+            new BuilderCacheKey( propertyBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltProperty( x.me._compilationModel, x.propertyBuilder, key.GenericContext ),
             (me: this, propertyBuilder) );
     }
 
@@ -195,8 +195,8 @@ public partial class DeclarationFactory
         }
 
         return (IIndexer) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( indexerBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltIndexer( x.me._compilationModel, x.indexerBuilder, key.GenericMap ),
+            new BuilderCacheKey( indexerBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltIndexer( x.me._compilationModel, x.indexerBuilder, key.GenericContext ),
             (me: this, indexerBuilder) );
     }
 
@@ -219,8 +219,8 @@ public partial class DeclarationFactory
         }
 
         return (IEvent) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( eventBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltEvent( x.me._compilationModel, x.eventBuilder, key.GenericMap ),
+            new BuilderCacheKey( eventBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltEvent( x.me._compilationModel, x.eventBuilder, key.GenericContext ),
             (me: this, eventBuilder) );
     }
 
@@ -243,8 +243,8 @@ public partial class DeclarationFactory
         }
 
         return (INamedType) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( namedTypeBuilder, genericContext.GetGenericMap() ),
-            static ( key, x ) => new BuiltNamedType( x.me._compilationModel, x.namedTypeBuilder, key.GenericMap ),
+            new BuilderCacheKey( namedTypeBuilder, genericContext.AsGenericContext() ),
+            static ( key, x ) => new BuiltNamedType( x.me._compilationModel, x.namedTypeBuilder, key.GenericContext ),
             (me: this, namedTypeBuilder) );
     }
 
@@ -267,7 +267,7 @@ public partial class DeclarationFactory
         }
 
         return (INamespace) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( namespaceBuilder, genericContext.GetGenericMap() ),
+            new BuilderCacheKey( namespaceBuilder, genericContext.AsGenericContext() ),
             static ( _, x ) => new BuiltNamespace( x.me._compilationModel, x.namespaceBuilder ),
             (me: this, namespaceBuilder) );
     }

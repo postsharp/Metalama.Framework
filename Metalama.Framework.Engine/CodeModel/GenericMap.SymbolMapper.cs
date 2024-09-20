@@ -6,18 +6,20 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal partial class GenericMap
+internal partial class GenericContext
 {
     private class SymbolMapper : SymbolVisitor<ISymbol>
     {
         private readonly TypeSymbolMapper _typeSymbolMapper;
 
-        public SymbolMapper( GenericMap parent )
+        public SymbolMapper( GenericContext parent )
         {
             this._typeSymbolMapper = parent.TypeSymbolMapperInstance;
         }
 
-        private T Map<T>( T symbol ) where T : ISymbol => (T) this.Visit( symbol ).AssertSymbolNotNull();
+        private T Map<T>( T symbol )
+            where T : ISymbol
+            => (T) this.Visit( symbol ).AssertSymbolNotNull();
 
         private T MapMember<T>( T symbol ) where T : ISymbol
         {
@@ -55,6 +57,7 @@ internal partial class GenericMap
             {
                 IMethodSymbol method => method.Parameters[symbol.Ordinal],
                 IPropertySymbol property => property.Parameters[symbol.Ordinal],
+                _ => throw new AssertionFailedException()
             };
         }
 

@@ -7,20 +7,20 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal partial class GenericMap
+internal partial class GenericContext
 {
     private sealed class TypeMapper : TypeRewriter
     {
-        private readonly GenericMap _genericMap;
+        private readonly GenericContext _genericContext;
 
-        public TypeMapper( GenericMap genericMap )
+        public TypeMapper( GenericContext genericContext )
         {
-            this._genericMap = genericMap;
+            this._genericContext = genericContext;
         }
 
         internal override IType Visit( ITypeParameter typeParameter )
         {
-            return this._genericMap.Map( typeParameter );
+            return this._genericContext.Map( typeParameter );
         }
     }
 

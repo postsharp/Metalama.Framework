@@ -35,7 +35,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 
     [Memo]
     public IConstructor Constructor
-        => this.Compilation.Factory.Translate( this._attributeBuilder.Constructor, genericContext: this.GenericMap ).AssertNotNull();
+        => this.Compilation.Factory.Translate( this._attributeBuilder.Constructor, genericContext: this.GenericContext ).AssertNotNull();
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments

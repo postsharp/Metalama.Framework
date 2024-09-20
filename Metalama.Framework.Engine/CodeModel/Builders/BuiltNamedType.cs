@@ -38,7 +38,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
         => this.Compilation.Factory.Translate(
             this.TypeBuilder.BaseType,
             ReferenceResolutionOptions.CanBeMissing,
-            genericContext: this.GenericMap );
+            genericContext: this.GenericContext );
 
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(

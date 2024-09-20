@@ -22,7 +22,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
     public override IRef Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
 
     [Memo]
-    public override GenericMap GenericMap => this.IsDefinition ? GenericMap.Empty : GenericMap.Get( this.Symbol, this.CompilationContext );
+    public override GenericContext GenericContext => this.IsDefinition ? GenericContext.Empty : GenericContext.Get( this.Symbol, this.CompilationContext );
 
     public override RefTargetKind TargetKind { get; }
 
@@ -63,7 +63,10 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         }
 
         var combinedGenericMap = this.GetCombinedGenericMap( genericContext );
-        return ConvertOrThrow( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, combinedGenericMap ).AssertNotNull(), compilation );
+
+        return ConvertOrThrow(
+            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, combinedGenericMap ).AssertNotNull(),
+            compilation );
     }
 
     protected override bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )

@@ -47,7 +47,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     [Memo]
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
         => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray(
-            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericMap ) );
+            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericContext ) );
 
     [Memo]
     public IEvent Definition => this.Compilation.Factory.GetEvent( this.EventBuilder ).AssertNotNull();

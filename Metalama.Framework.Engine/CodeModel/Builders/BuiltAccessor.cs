@@ -18,7 +18,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     private readonly BuiltMember _builtMember;
     private readonly AccessorBuilder _accessorBuilder;
 
-    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builtMember.GenericMap )
+    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builtMember.GenericContext )
     {
         this._builtMember = builtMember;
         this._accessorBuilder = builder;
@@ -102,7 +102,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public object? Invoke( IEnumerable<IExpression> args ) => this._accessorBuilder.Invoke( args );
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericMap );
+    public IParameter ReturnParameter
+        => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext );
 
     [Memo]
     public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
@@ -134,7 +135,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
     [Memo]
-    public IMember? OverriddenMember => this.Compilation.Factory.Translate( this._accessorBuilder.OverriddenMember, genericContext: this.GenericMap );
+    public IMember? OverriddenMember => this.Compilation.Factory.Translate( this._accessorBuilder.OverriddenMember, genericContext: this.GenericContext );
 
     public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
 

@@ -36,7 +36,7 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
             this.Compilation.GetParameterCollection( this.Ref ) );
 
     [Memo]
-    public IIndexer? OverriddenIndexer => this.Compilation.Factory.Translate( this._indexerBuilder.OverriddenIndexer, genericContext: this.GenericMap );
+    public IIndexer? OverriddenIndexer => this.Compilation.Factory.Translate( this._indexerBuilder.OverriddenIndexer, genericContext: this.GenericContext );
 
     [Memo]
     public IIndexer Definition => this.Compilation.Factory.GetIndexer( this._indexerBuilder ).AssertNotNull();
@@ -62,5 +62,5 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
     [Memo]
     public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
         => this._indexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray(
-            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericMap ) );
+            i => this.Compilation.Factory.Translate( i, genericContext: this.GenericContext ) );
 }

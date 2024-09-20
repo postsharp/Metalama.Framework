@@ -12,7 +12,7 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 {
     private readonly NamespaceBuilder _namespaceBuilder;
 
-    public BuiltNamespace( CompilationModel compilation, NamespaceBuilder builder ) : base( compilation, NullGenericContext.Instance )
+    public BuiltNamespace( CompilationModel compilation, NamespaceBuilder builder ) : base( compilation, GenericContext.Empty )
     {
         this._namespaceBuilder = builder;
     }

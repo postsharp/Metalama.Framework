@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 
-        internal override GenericMap GenericMap => (GenericMap) this.ContainingDeclaration.GenericContext;
+        internal override GenericContext GenericContext => (GenericContext) this.ContainingDeclaration.GenericContext;
 
         [Memo]
         private IRef<IParameter> Ref => this.RefFactory.PseudoParameter( this );

@@ -12,24 +12,24 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     where T : class, IDeclaration
 {
-    public BuilderRef( IDeclarationBuilder builder, GenericMap? genericContext, CompilationContext compilationContext )
+    public BuilderRef( IDeclarationBuilder builder, GenericContext? genericContext, CompilationContext compilationContext )
     {
         Invariant.Assert( typeof(T) == builder.DeclarationKind.GetRefInterfaceType() );
 
         this.Builder = builder;
-        this.GenericMap = genericContext ?? GenericMap.Empty;
+        this.GenericContext = genericContext ?? GenericContext.Empty;
         this.CompilationContext = compilationContext;
     }
 
     public override CompilationContext CompilationContext { get; }
 
-    public override bool IsDefinition => this.GenericMap.IsEmptyOrIdentity;
+    public override bool IsDefinition => this.GenericContext.IsEmptyOrIdentity;
 
     public override IRef Definition => this.IsDefinition ? this : this.Builder.ToRef();
 
     public IDeclarationBuilder Builder { get; }
 
-    public override GenericMap GenericMap { get; }
+    public override GenericContext GenericContext { get; }
 
     public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
 
@@ -59,8 +59,6 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         // We should always have an containing symbol.
         throw new AssertionFailedException();
     }
-
-  
 
     protected override T? Resolve(
         CompilationModel compilation,

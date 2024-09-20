@@ -21,7 +21,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     protected BuiltDeclaration( CompilationModel compilation, IGenericContext genericContext )
     {
         this.Compilation = compilation;
-        this.GenericMap = genericContext.GetGenericMap();
+        this.GenericContext = genericContext.AsGenericContext();
     }
 
     IDeclarationBuilder IBuilderBasedDeclaration.Builder => this.Builder;
@@ -30,7 +30,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
 
     public abstract DeclarationBuilder Builder { get; }
 
-    internal override GenericMap GenericMap { get; }
+    internal override GenericContext GenericContext { get; }
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => this.Builder.ToDisplayString( format, context );
@@ -48,8 +48,8 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         {
             return null;
         }
-        
-        return (T) this.GenericMap.Map( this.Compilation.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ) ).AssertNotNull();
+
+        return (T) this.GenericContext.Map( this.Compilation.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ) ).AssertNotNull();
     }
 
     [Memo]

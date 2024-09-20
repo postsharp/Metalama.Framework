@@ -28,18 +28,18 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public IRef<TCodeElement> FromBuilder<TCodeElement>( IDeclarationBuilder builder, GenericMap? genericMap = null )
+        public IRef<TCodeElement> FromBuilder<TCodeElement>( IDeclarationBuilder builder, GenericContext? genericMap = null )
             where TCodeElement : class, IDeclaration
             => new BuilderRef<TCodeElement>( builder, genericMap, this._compilationContext );
 
         public IRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
             where T : class, IDeclaration
-            => this.FromBuilder<T>( builtDeclaration.Builder, builtDeclaration.GenericMap );
+            => this.FromBuilder<T>( builtDeclaration.Builder, builtDeclaration.GenericContext );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder, GenericMap? genericMap = null )
+        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder, GenericContext? genericMap = null )
             => builder.DeclarationKind switch
             {
                 DeclarationKind.NamedType => new BuilderRef<INamedType>( builder, genericMap, this._compilationContext ),
