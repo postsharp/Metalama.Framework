@@ -358,7 +358,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
             typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
         var typeSymbol = this.NamedTypeSymbol;
-        var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );
+        var constructedTypeSymbol = typeSymbol.ConstructedFrom.Construct( typeArgumentSymbols );
 
         return this.Compilation.Factory.GetNamedType( constructedTypeSymbol );
     }
