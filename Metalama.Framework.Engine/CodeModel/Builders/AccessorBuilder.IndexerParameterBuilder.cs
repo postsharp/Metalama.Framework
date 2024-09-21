@@ -107,6 +107,5 @@ internal partial class AccessorBuilder
         {
             throw new NotImplementedException();
         }
-
     }
 }

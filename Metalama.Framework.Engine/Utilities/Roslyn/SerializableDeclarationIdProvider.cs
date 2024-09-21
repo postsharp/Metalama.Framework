@@ -244,7 +244,6 @@ public static class SerializableDeclarationIdProvider
         return isReturnParameter ? null : symbol;
     }
 
-    /// <remarks>This overload is only used for aspect targets, so it doesn't need to handle the other target kinds.</remarks>
     public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, CompilationContext compilationContext, out bool isReturnParameter )
     {
         var compilation = compilationContext.Compilation;
@@ -305,7 +304,7 @@ public static class SerializableDeclarationIdProvider
             {
                 return compilation.Assembly.GlobalNamespace;
             }
-            else if ( id.Id.StartsWith( SerializableTypeIdResolverForSymbol.Prefix, StringComparison.Ordinal ) )
+            else if ( id.Id.StartsWith( SerializableTypeId.Prefix, StringComparison.Ordinal ) )
             {
                 if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( id.Id ), out var typeSymbol ) )
                 {
@@ -321,7 +320,7 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    internal static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
+    internal static ICompilationElement? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
     {
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 
@@ -362,6 +361,17 @@ public static class SerializableDeclarationIdProvider
             }
 
             return compilation.Factory.GetAssembly( assemblyIdentity );
+        }
+        else if ( id.Id.StartsWith( SerializableTypeId.Prefix, StringComparison.Ordinal ) )
+        {
+            if ( !compilation.CompilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( id.Id ), out var typeSymbol ) )
+            {
+                return null;
+            }
+            else
+            {
+                return compilation.Factory.GetIType( typeSymbol );
+            }
         }
         else
         {

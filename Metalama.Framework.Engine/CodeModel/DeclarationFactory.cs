@@ -122,7 +122,7 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
             ?? throw new InvalidOperationException(
                 $"Cannot find the symbol '{declarationId}' in compilation '{this._compilationModel.RoslynCompilation.Assembly.Name}'." );
 
-        return declaration;
+        return (IDeclaration) declaration;
     }
 
     public T? Translate<T>(

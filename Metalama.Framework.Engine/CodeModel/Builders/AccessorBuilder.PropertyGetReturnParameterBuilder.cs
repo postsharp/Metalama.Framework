@@ -38,6 +38,5 @@ internal partial class AccessorBuilder
             get => throw new NotSupportedException( "Cannot get the name of a return parameter." );
             set => throw new NotSupportedException( "Cannot set the name of a return parameter." );
         }
-
     }
 }

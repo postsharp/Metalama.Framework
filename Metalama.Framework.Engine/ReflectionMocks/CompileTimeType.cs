@@ -46,9 +46,6 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = targetRef;
         }
 
-        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, ITypeSymbol symbolForMetadata, CompilationContext compilationContext )
-            => new( compilationContext.RefFactory.FromSymbolId<IType>( symbolId ), symbolForMetadata );
-
         internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, ITypeSymbol symbolForMetadata, CompilationContext compilationContext )
             => new( compilationContext.RefFactory.FromTypeId<IType>( typeId ), symbolForMetadata );
 

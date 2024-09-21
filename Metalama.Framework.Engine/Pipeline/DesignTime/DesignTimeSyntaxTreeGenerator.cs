@@ -199,11 +199,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
 
                             break;
-                        
+
                         case IntroduceParameterTransformation:
                             // Parameter introductions are processed by CreateInjectedConstructors but they still need to be observable.
                             break;
-                        
 
                         default:
                             throw new AssertionFailedException( $"Don't know how to process {transformation.GetType().Name} at design time." );
@@ -376,8 +375,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 existingSignatures.Add(
                     introducedConstructor.Parameters
                         .SelectAsArray(
-                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
-                              p.RefKind) ) );
+                            p => (
+                                (ISymbol) p.Type.GetSymbol()
+                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                                p.RefKind) ) );
             }
 
             foreach ( var constructor in type.Constructors )

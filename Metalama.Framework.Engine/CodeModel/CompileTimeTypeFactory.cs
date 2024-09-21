@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -33,27 +32,15 @@ namespace Metalama.Framework.Engine.CodeModel
                 IDynamicTypeSymbol => throw new AssertionFailedException( "Cannot get a System.Type for the 'dynamic' type." ),
                 IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(
                     "Cannot get a System.Type for the 'dynamic[]' type." ),
-                _ => this.Get( ContainsTypeParameters( symbol ) ? symbol.GetSymbolId().Id : symbol.GetSerializableTypeId().Id, symbol )
-            };
-
-        private static bool ContainsTypeParameters( ITypeSymbol symbol )
-            => symbol switch
-            {
-                ITypeParameterSymbol => true,
-                IDynamicTypeSymbol => false,
-                INamedTypeSymbol namedType => namedType.TypeParameters.Any( ContainsTypeParameters ),
-                IArrayTypeSymbol arrayType => ContainsTypeParameters( arrayType.ElementType ),
-                IPointerTypeSymbol pointerType => ContainsTypeParameters( pointerType.PointedAtType ),
-                _ => throw new AssertionFailedException( $"Unexpected symbol {symbol} of type {symbol.GetType()}." )
+                _ => this.Get( symbol.GetSerializableTypeId( true ).Id, symbol )
             };
 
         private CompileTimeType Get( string id, ITypeSymbol symbolForMetadata )
         {
             return this._instances.GetOrAdd(
                 id,
-                static ( key, x ) => key.StartsWith( "typeof(", StringComparison.Ordinal )
-                    ? CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), x.symbolForMetadata, x.me._compilationContext )
-                    : CompileTimeType.CreateFromSymbolId( new SymbolId( key ), x.symbolForMetadata, x.me._compilationContext ),
+                static ( key, x ) =>
+                    CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), x.symbolForMetadata, x.me._compilationContext ),
                 (me: this, symbolForMetadata) );
         }
 

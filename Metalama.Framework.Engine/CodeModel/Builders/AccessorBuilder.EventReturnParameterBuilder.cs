@@ -31,4 +31,3 @@ internal partial class AccessorBuilder
         }
     }
 }
-

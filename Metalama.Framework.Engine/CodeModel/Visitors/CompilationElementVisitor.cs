@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using System;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.Visitors;
 
 internal abstract class CompilationElementVisitor<T>
 {
@@ -41,7 +41,8 @@ internal abstract class CompilationElementVisitor<T>
                 DeclarationKind.AssemblyReference => this.VisitAssemblyReference( (IAssembly) declaration ),
                 DeclarationKind.Namespace => this.VisitNamespace( (INamespace) declaration ),
                 _ => throw new ArgumentOutOfRangeException()
-            }
+            },
+            _ => throw new AssertionFailedException()
         };
 
     protected abstract T DefaultVisit( ICompilationElement element );

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,20 +10,20 @@ namespace Metalama.Framework.Engine.CodeModel.Visitors;
 internal class DisplayStringFormatter : CompilationElementVisitor
 {
     private readonly StringBuilder _stringBuilder = new();
-    
+
     private DisplayStringFormatter() { }
 
     public static string Format( ICompilationElement element )
     {
         var formatter = new DisplayStringFormatter();
         formatter.Visit( element );
+
         return formatter.ToString();
     }
 
     public override string ToString() => this._stringBuilder.ToString();
 
     private void Append( string text ) => this._stringBuilder.Append( text );
-    
 
     private void VisitParameterList( IParameterList parameterList )
     {
@@ -64,7 +63,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
         if ( declaration.IsStatic )
         {
-            this.Append( "..cctor" ); 
+            this.Append( "..cctor" );
         }
         else
         {
@@ -88,7 +87,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
     {
         this.Visit( declaration.DeclaringMember );
         this.Append( "@" );
-        
+
         if ( declaration.IsReturnParameter )
         {
             this.Append( "<return>" );
@@ -138,40 +137,45 @@ internal class DisplayStringFormatter : CompilationElementVisitor
             case MethodKind.PropertyGet:
                 this.Append( declaration.DeclaringMember!.Name );
                 this.Append( ".get" );
+
                 break;
-            
+
             case MethodKind.PropertySet:
                 this.Append( declaration.DeclaringMember!.Name );
                 this.Append( ".set" );
+
                 break;
-            
+
             case MethodKind.EventAdd:
                 this.Append( declaration.DeclaringMember!.Name );
                 this.Append( ".add" );
+
                 break;
-            
+
             case MethodKind.EventRemove:
                 this.Append( declaration.DeclaringMember!.Name );
                 this.Append( ".remove" );
+
                 break;
-            
+
             case MethodKind.EventRaise:
                 this.Append( declaration.DeclaringMember!.Name );
                 this.Append( ".raise" );
+
                 break;
-            
+
             case MethodKind.Finalizer:
                 this.Append( "~" );
                 this.Append( declaration.DeclaringType.Name );
+
                 break;
-            
+
             default:
                 this.Append( declaration.Name );
+
                 break;
-        
         }
-        
-        
+
         if ( declaration.TypeArguments.Count > 0 )
         {
             this.Append( "<" );
@@ -202,7 +206,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
                 this.VisitNamedType( namedType.DeclaringType );
                 this.Append( "." );
             }
-            
+
             this.Append( namedType.Name );
 
             if ( namedType.TypeArguments.Count > 0 )
@@ -219,7 +223,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
         if ( this.RecursionDepth > 1 )
         {
             // Make sure we are not recurring.
-            this.Append( typeParameter.Name );    
+            this.Append( typeParameter.Name );
         }
         else
         {

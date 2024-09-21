@@ -16,11 +16,7 @@ internal partial class GenericContext
         {
             this._typeSymbolMapper = parent.TypeSymbolMapperInstance;
         }
-
-        private T Map<T>( T symbol )
-            where T : ISymbol
-            => (T) this.Visit( symbol ).AssertSymbolNotNull();
-
+        
         private T MapMember<T>( T symbol )
             where T : ISymbol
         {

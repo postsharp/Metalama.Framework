@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -14,8 +13,6 @@ internal class DeclarationIdRef<T> : StringRef<T>
     private DeclarationIdRef( string id ) : base( id ) { }
 
     public DeclarationIdRef( SerializableDeclarationId id ) : base( id.Id ) { }
-
-    public DeclarationIdRef( SerializableTypeId id ) : base( id.Id ) { }
 
     public override SerializableDeclarationId ToSerializableId() => new( this.Id );
 

@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public IRef<T> FromTypeId<T>( SerializableTypeId id )
             where T : class, IType
-            => new DeclarationIdRef<T>( id );
+            => new TypeIdRef<T>( id );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
