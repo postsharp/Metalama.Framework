@@ -59,6 +59,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
+        IField? IProperty.OriginalField => null;
+
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
         public IMember? OverriddenMember => this.OverriddenProperty;

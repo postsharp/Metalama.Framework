@@ -69,4 +69,7 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
         => this.PropertyBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+    [Memo]
+    public IField? OriginalField => this.MapDeclaration( (IFieldOrProperty?) this.PropertyBuilder.OriginalField ) as IField;
 }

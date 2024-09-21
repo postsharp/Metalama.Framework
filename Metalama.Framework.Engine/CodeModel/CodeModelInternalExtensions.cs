@@ -61,7 +61,7 @@ internal static class CodeModelInternalExtensions
             // TODO: This is a hack (since splitting transformations and builders).
             // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
             case PromotedField promotedField:
-                return promotedField.Field.ToInsertPosition();
+                return promotedField.OriginalField.ToInsertPosition();
 
             case NamedTypeBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
                 return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );

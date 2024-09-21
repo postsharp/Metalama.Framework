@@ -27,5 +27,12 @@ namespace Metalama.Framework.Code
         new IProperty Definition { get; }
 
         new IRef<IProperty> ToRef();
+
+        /// <summary>
+        /// Gets the <see cref="IField"/> from which the current property was generated. This property returns
+        /// <c>null</c> in compilations in which the field has <i>already</i> been transformed into a property.
+        /// It returns non-null only if the field is <i>being</i> transformed into a property.
+        /// </summary>
+        IField? OriginalField { get; }
     }
 }

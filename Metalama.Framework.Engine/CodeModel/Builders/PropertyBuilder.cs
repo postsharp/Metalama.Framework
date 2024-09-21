@@ -61,6 +61,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
+    public virtual IField? OriginalField => null;
+
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
     public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IProperty>();

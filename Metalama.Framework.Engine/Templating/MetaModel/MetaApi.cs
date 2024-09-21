@@ -53,7 +53,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public IMethodBase MethodBase
             => (IMethodBase?) this._method ?? (IMethodBase?) this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IField Field => this._fieldOrPropertyOrIndexer as IField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+        public IField Field
+            => this._fieldOrPropertyOrIndexer switch
+            {
+                IField field => field,
+                IProperty { OriginalField: { } field } => field,
+                _ => throw this.CreateInvalidOperationException( nameof(this.Field) )
+            };
 
         public IFieldOrProperty FieldOrProperty
             => this._fieldOrPropertyOrIndexer as IFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );

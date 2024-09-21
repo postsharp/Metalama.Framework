@@ -16,15 +16,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class PromotedField : PropertyBuilder
 {
-    internal IFieldImpl Field { get; }
+    public override IField OriginalField { get; }
 
     public override Writeability Writeability
-        => this.Field.Writeability switch
+        => this.OriginalField.Writeability switch
         {
             Writeability.None => Writeability.None,
             Writeability.ConstructorOnly => Writeability.InitOnly, // Read-only fields are promoted to init-only properties.
             Writeability.All => Writeability.All,
-            _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.Field.Writeability}." )
+            _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.OriginalField.Writeability}." )
         };
 
     public PromotedField( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
@@ -39,21 +39,21 @@ internal sealed class PromotedField : PropertyBuilder
         true,
         initializerTags )
     {
-        this.Field = (IFieldImpl) field;
+        this.OriginalField = (IFieldImpl) field;
         this.Type = field.Type;
-        this.Accessibility = this.Field.Accessibility;
-        this.IsStatic = this.Field.IsStatic;
-        this.IsRequired = this.Field.IsRequired;
-        this.IsNew = this.Field.IsNew;
-        this.HasNewKeyword = this.Field.HasNewKeyword.AssertNotNull();
+        this.Accessibility = this.OriginalField.Accessibility;
+        this.IsStatic = this.OriginalField.IsStatic;
+        this.IsRequired = this.OriginalField.IsRequired;
+        this.IsNew = this.OriginalField.IsNew;
+        this.HasNewKeyword = ((IFieldImpl) this.OriginalField).HasNewKeyword.AssertNotNull();
 
-        this.GetMethod.AssertNotNull().Accessibility = this.Field.Accessibility;
+        this.GetMethod.AssertNotNull().Accessibility = this.OriginalField.Accessibility;
 
         this.SetMethod.AssertNotNull().Accessibility =
-            this.Field switch
+            this.OriginalField switch
             {
                 { Writeability: Writeability.ConstructorOnly } => Accessibility.Private,
-                _ => this.Field.Accessibility
+                _ => this.OriginalField.Accessibility
             };
 
         if ( field.Attributes.Count > 0 )
@@ -75,7 +75,7 @@ internal sealed class PromotedField : PropertyBuilder
         }
     }
 
-    public override SyntaxTree? PrimarySyntaxTree => this.Field.PrimarySyntaxTree;
+    public override SyntaxTree? PrimarySyntaxTree => ((IFieldImpl) this.OriginalField).PrimarySyntaxTree;
 
     protected internal override bool GetPropertyInitializerExpressionOrMethod(
         Advice advice,
@@ -83,7 +83,7 @@ internal sealed class PromotedField : PropertyBuilder
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
     {
-        if ( this.Field is BuiltField builtField )
+        if ( this.OriginalField is BuiltField builtField )
         {
             var fieldBuilder = builtField.FieldBuilder;
 
@@ -100,7 +100,7 @@ internal sealed class PromotedField : PropertyBuilder
         else
         {
             // For original code fields, copy the initializer syntax.
-            var fieldDeclaration = (VariableDeclaratorSyntax) this.Field.GetPrimaryDeclarationSyntax().AssertNotNull();
+            var fieldDeclaration = (VariableDeclaratorSyntax) this.OriginalField.GetPrimaryDeclarationSyntax().AssertNotNull();
 
             if ( fieldDeclaration.Initializer != null )
             {
@@ -123,8 +123,10 @@ internal sealed class PromotedField : PropertyBuilder
         }
     }
 
-    public override IInjectMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this.Field, this );
+    public override IInjectMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalField, this );
 
     public override bool Equals( IDeclaration? other )
-        => ReferenceEquals( this, other ) || (other is PromotedField otherPromotedField && otherPromotedField.Field.Equals( this.Field ));
+        => ReferenceEquals( this, other ) || (other is PromotedField otherPromotedField && otherPromotedField.OriginalField.Equals( this.OriginalField ));
+
+    public override bool IsDesignTimeObservable => false;
 }
