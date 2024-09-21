@@ -34,6 +34,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
 
+        SerializableDeclarationId IRefImpl.ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();
+
         IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => this as IRefImpl<TOut> ?? throw new NotSupportedException();
 
         public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )

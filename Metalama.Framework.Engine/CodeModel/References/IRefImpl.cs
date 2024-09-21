@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         IRef ToDurable();
 
         ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
+
+        SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
     }
 
     internal interface ICompilationBoundRefImpl : IRefImpl

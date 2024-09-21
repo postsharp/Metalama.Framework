@@ -32,6 +32,8 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     public abstract SerializableDeclarationId ToSerializableId();
 
+    public abstract SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
+
     ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
         => this.GetTarget( compilation, options, genericContext );
 

@@ -32,8 +32,10 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     public override string Name => throw new NotSupportedException();
 
-    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false )
+    protected override ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {
+        Invariant.Assert( this.CompilationContext == compilationContext );
+
         return this.Symbol;
     }
 

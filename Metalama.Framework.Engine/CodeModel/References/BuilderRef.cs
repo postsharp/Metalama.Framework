@@ -42,7 +42,8 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     public override SerializableDeclarationId ToSerializableId() => this.Builder.ToSerializableId();
 
-    protected override ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false ) => throw new NotSupportedException();
+    protected override ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
+        => throw new NotSupportedException();
 
     public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
     {

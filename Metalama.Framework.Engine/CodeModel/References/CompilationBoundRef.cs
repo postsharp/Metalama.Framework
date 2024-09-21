@@ -27,10 +27,10 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
     {
         switch ( this.TargetKind )
         {
-            case RefTargetKind.Return when this.GetSymbolIgnoringKind() is IMethodSymbol method:
+            case RefTargetKind.Return when this.GetSymbolIgnoringKind( this.CompilationContext ) is IMethodSymbol method:
                 return new ResolvedAttributeRef( method.GetReturnTypeAttributes(), method, RefTargetKind.Return );
 
-            case RefTargetKind.Field when this.GetSymbolIgnoringKind() is IEventSymbol @event:
+            case RefTargetKind.Field when this.GetSymbolIgnoringKind( this.CompilationContext ) is IEventSymbol @event:
                 // Roslyn does not expose the backing field of an event, so we don't have access to its attributes.
                 return new ResolvedAttributeRef( ImmutableArray<AttributeData>.Empty, @event, RefTargetKind.Field );
 
@@ -46,27 +46,29 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
     public abstract IRef Definition { get; }
 
     [Memo]
-    private StringRef<T> CompilationNeutralRef => new( this.ToSerializableId().Id );
+    private DeclarationIdRef<T> CompilationNeutralRef => new( this.ToSerializableId() );
 
     public sealed override IDurableRef<T> ToDurable() => this.CompilationNeutralRef;
 
-    public override SerializableDeclarationId ToSerializableId()
+    public override SerializableDeclarationId ToSerializableId() => this.ToSerializableId( this.CompilationContext );
+
+    public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext )
     {
-        var symbol = this.GetSymbolIgnoringKind( true );
+        var symbol = this.GetSymbolIgnoringKind( compilationContext, true );
 
         return symbol.GetSerializableId( this.TargetKind );
     }
 
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
-        => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( ignoreAssemblyKey ) );
+        => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilationContext, ignoreAssemblyKey ) );
 
-    protected abstract ISymbol GetSymbolIgnoringKind( bool ignoreAssemblyKey = false );
+    protected abstract ISymbol GetSymbolIgnoringKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false );
 
     public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
     {
         Invariant.Assert( compilationContext == this.CompilationContext );
 
-        return this.GetSymbolIgnoringKind();
+        return this.GetSymbolIgnoringKind( this.CompilationContext );
     }
 
     public sealed override bool Equals( IRef? other, RefComparison comparison )

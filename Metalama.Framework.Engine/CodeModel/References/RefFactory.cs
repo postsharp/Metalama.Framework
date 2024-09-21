@@ -131,17 +131,17 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 } );
         }
 
-        public IRef<T> FromSymbolId<T>( SymbolId symbolKey )
+        public IRef<T> FromSymbolId<T>( in SymbolId symbolKey )
             where T : class, ICompilationElement
-            => new StringRef<T>( symbolKey.Id );
+            => new SymbolIdRef<T>( symbolKey );
 
         public IRef<T> FromDeclarationId<T>( SerializableDeclarationId id )
             where T : class, ICompilationElement
-            => new StringRef<T>( id.Id );
+            => new DeclarationIdRef<T>( id );
 
         public IRef<T> FromTypeId<T>( SerializableTypeId id )
             where T : class, IType
-            => new StringRef<T>( id.Id );
+            => new DeclarationIdRef<T>( id );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.

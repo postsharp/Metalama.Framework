@@ -13,14 +13,18 @@ internal sealed class RefSerializer<T> : ReferenceTypeSerializer<BaseRef<T>>
     {
         var id = constructorArguments.GetValue<string>( "id" ).AssertNotNull();
 
+        var compilationContext = ((ISerializationContext) constructorArguments).CompilationContext;
+
         return
             (BaseRef<T>)
-            ((ISerializationContext) constructorArguments).CompilationContext.RefFactory.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
+            compilationContext.RefFactory.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
     }
 
     public override void SerializeObject( BaseRef<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
     {
-        constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
+        var compilationContext = ((ISerializationContext) constructorArguments).CompilationContext;
+
+        constructorArguments.SetValue( "id", obj.ToSerializableId( compilationContext ).Id );
     }
 
     public override void DeserializeFields( BaseRef<T> obj, IArgumentsReader initializationArguments ) { }
