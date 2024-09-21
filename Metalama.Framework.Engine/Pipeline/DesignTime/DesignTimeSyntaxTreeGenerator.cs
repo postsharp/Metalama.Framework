@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -48,26 +49,24 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var injectionNameProvider = new LinkerInjectionNameProvider( finalCompilationModel, injectionHelperProvider );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
-            // Get all observable transformations except replacements, because replacements are not visible at design time.
-            var transformationsByTarget =
+            // Get all transformations that are observable at design time and group them by future target file.
+            var transformationsByBucket =
                 transformations
-                    .Where(
-                        t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation { }
-                                                                                   && t.TargetDeclaration is INamedType or IConstructor or INamespace )
+                    .Where( t => t.Observability == TransformationObservability.Always )
                     .GroupBy(
                         t =>
                             t.TargetDeclaration switch
                             {
                                 INamespace @namespace => (INamespaceOrNamedType) @namespace,
                                 INamedType namedType => namedType,
-                                IConstructor constructor => constructor.DeclaringType,
+                                IMember member => member.DeclaringType,
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
                             } )
                     .ToDictionary( g => g.Key.ToRef(), g => g.AsEnumerable(), RefEqualityComparer<INamespaceOrNamedType>.Default );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-            await taskScheduler.RunConcurrentlyAsync( transformationsByTarget, ProcessTransformationsOnTypeOrNamespace, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( transformationsByBucket, ProcessTransformationsOnTypeOrNamespace, cancellationToken );
 
             void ProcessTransformationsOnTypeOrNamespace( KeyValuePair<IRef<INamespaceOrNamedType>, IEnumerable<ITransformation>> transformationGroup )
             {
@@ -102,7 +101,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                          {
                              DeclarationBuilder: INamedType namedTypeBuilder
                          } introduceDeclarationTransformation
-                         && !transformationsByTarget.ContainsKey( introduceDeclarationTransformation.DeclarationBuilder.ToRef().As<INamespaceOrNamedType>() ) )
+                         && !transformationsByBucket.ContainsKey( introduceDeclarationTransformation.DeclarationBuilder.ToRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
                         ProcessTransformationsOnType( namedTypeBuilder.ToRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
@@ -200,6 +199,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
 
                             break;
+                        
+                        case IntroduceParameterTransformation:
+                            // Parameter introductions are processed by CreateInjectedConstructors but they still need to be observable.
+                            break;
+                        
+
+                        default:
+                            throw new AssertionFailedException( $"Don't know how to process {transformation.GetType().Name} at design time." );
                     }
                 }
 
@@ -367,7 +374,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 existingSignatures.Add(
-                    introducedConstructor.Parameters.SelectAsArray(
+                    introducedConstructor.Parameters
+                        .SelectAsArray(
                         p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
                               p.RefKind) ) );
             }
@@ -386,9 +394,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 var finalConstructor = constructor.Translate( finalCompilationModel );
 
-                // TODO: Currently we don't see introduced parameters in builder code model.
+                // Note that ParameterBuilder.Parameter does not include parameters added by advice, so we
+                // must see the final parameters in the final compilation.
                 var finalParameters = finalConstructor.Parameters.ToImmutableArray();
-
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
 
                 if ( !existingSignatures.Add(

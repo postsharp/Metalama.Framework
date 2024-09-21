@@ -112,4 +112,10 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public new IRef<IConstructor> ToRef() => this.Ref;
+
+    public override ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
+        IGenericContext? genericContext = null )
+        => this.ReplacedImplicit?.GetTarget( newCompilation, options, genericContext ) ?? base.Translate( newCompilation, options, genericContext );
 }

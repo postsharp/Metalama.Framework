@@ -66,7 +66,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    public ICompilationElement? Translate(
+    public virtual ICompilationElement? Translate(
         CompilationModel newCompilation,
         ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
         IGenericContext? genericContext = null )
