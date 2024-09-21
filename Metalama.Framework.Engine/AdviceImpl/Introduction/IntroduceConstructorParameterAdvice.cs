@@ -97,7 +97,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             RefKind.None,
             this ) { DefaultValue = this._defaultValue };
 
-        var parameter = parameterBuilder.ForCompilation<IParameter>( compilation, ReferenceResolutionOptions.CanBeMissing );
+        var parameter = parameterBuilder.ForCompilation<IParameter>( compilation );
 
         this._buildAction?.Invoke( parameterBuilder );
 
@@ -198,7 +198,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                         addTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder ) );
 
-                        var recursiveParameter = recursiveParameterBuilder.ForCompilation<IParameter>( compilation, ReferenceResolutionOptions.CanBeMissing );
+                        var recursiveParameter = recursiveParameterBuilder.ForCompilation<IParameter>( compilation );
 
                         // Process all constructors calling this constructor.
                         PullConstructorParameterRecursive( chainedConstructor, recursiveParameter );

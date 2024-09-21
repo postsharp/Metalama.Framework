@@ -20,6 +20,7 @@ public enum ReferenceResolutionOptions
     /// <summary>
     /// Returns a representation of the declaration even if the declaration does not exist in that compilation.
     /// </summary>
+    [Obsolete( "This flag is not default." )]
     CanBeMissing = 1,
 
     /// <summary>

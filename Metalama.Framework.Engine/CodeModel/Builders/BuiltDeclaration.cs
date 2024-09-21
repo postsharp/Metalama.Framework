@@ -33,7 +33,8 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
 
     internal override GenericContext GenericContext { get; }
 
-    public sealed override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => DisplayStringFormatter.Format( this );
+    public sealed override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        => DisplayStringFormatter.Format( this );
 
     [Memo]
     public override IAssembly DeclaringAssembly => this.Compilation.Factory.Translate( this.Builder.DeclaringAssembly ).AssertNotNull();
@@ -49,12 +50,12 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
             return null;
         }
 
-        return (T) this.GenericContext.Map( this.Compilation.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ) ).AssertNotNull();
+        return (T) this.GenericContext.Map( this.Compilation.Factory.Translate( type ) ).AssertNotNull();
     }
 
     protected T? MapDeclaration<T>( T? declaration )
         where T : class, ICompilationElement
-        => this.Compilation.Factory.Translate( declaration, ReferenceResolutionOptions.CanBeMissing, genericContext: this.GenericContext );
+        => this.Compilation.Factory.Translate( declaration, genericContext: this.GenericContext );
 
     [Memo]
     public override IDeclaration? ContainingDeclaration => this.MapDeclaration( this.Builder.ContainingDeclaration );

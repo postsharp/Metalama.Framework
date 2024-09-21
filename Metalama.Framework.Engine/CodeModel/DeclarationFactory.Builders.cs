@@ -28,18 +28,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( parameterBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (IParameter) this._builderCache.GetOrAdd(
             new BuilderCacheKey( parameterBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltParameter( x.parameterBuilder, x.me._compilationModel, key.GenericContext ),
@@ -61,18 +49,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( methodBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (IMethod) this._builderCache.GetOrAdd(
             new BuilderCacheKey( methodBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltMethod( x.methodBuilder, x.me._compilationModel, key.GenericContext ),
@@ -93,18 +69,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( constructorBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( constructorBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (IConstructor) this._builderCache.GetOrAdd(
             new BuilderCacheKey( constructorBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltConstructor( x.constructorBuilder, x.me._compilationModel, key.GenericContext ),
@@ -117,18 +81,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( fieldBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( fieldBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (IField) this._builderCache.GetOrAdd(
             new BuilderCacheKey( fieldBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltField( x.fieldBuilder, x.me._compilationModel, key.GenericContext ),
@@ -141,35 +93,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        /*
-        if ( propertyBuilder is PromotedField promotedField )
-        {
-            // When getting a promoted field, we need to look at the current CompilationModel. Are we before or after
-            // promotion? The result will be different
-
-
-            return promotedField.Field switch
-            {
-                BuiltField builtField => this.GetField( builtField.FieldBuilder, options ),
-                FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
-                Field field => this.GetField( field.GetSymbol().AssertNotNull( ) ),
-                _ => throw new AssertionFailedException()
-            };
-        }
-        */
-
-        if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( propertyBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (IProperty) this._builderCache.GetOrAdd(
             new BuilderCacheKey( propertyBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltProperty( x.me._compilationModel, x.propertyBuilder, key.GenericContext ),
@@ -182,18 +105,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( indexerBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( indexerBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (IIndexer) this._builderCache.GetOrAdd(
             new BuilderCacheKey( indexerBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltIndexer( x.me._compilationModel, x.indexerBuilder, key.GenericContext ),
@@ -206,18 +117,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( eventBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( eventBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (IEvent) this._builderCache.GetOrAdd(
             new BuilderCacheKey( eventBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltEvent( x.me._compilationModel, x.eventBuilder, key.GenericContext ),
@@ -230,18 +129,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( namedTypeBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( namedTypeBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (INamedType) this._builderCache.GetOrAdd(
             new BuilderCacheKey( namedTypeBuilder, genericContext.AsGenericContext() ),
             static ( key, x ) => new BuiltNamedType( x.me._compilationModel, x.namedTypeBuilder, key.GenericContext ),
@@ -254,18 +141,6 @@ public partial class DeclarationFactory
         IGenericContext? genericContext = null,
         bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( namespaceBuilder ) )
-        {
-            if ( throwIfMissing )
-            {
-                throw CreateBuilderNotExists( namespaceBuilder );
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         return (INamespace) this._builderCache.GetOrAdd(
             new BuilderCacheKey( namespaceBuilder, genericContext.AsGenericContext() ),
             static ( _, x ) => new BuiltNamespace( x.me._compilationModel, x.namespaceBuilder ),

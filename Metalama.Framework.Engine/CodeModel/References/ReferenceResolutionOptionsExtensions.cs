@@ -6,8 +6,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
 {
     internal static class ReferenceResolutionOptionsExtensions
     {
-        public static bool MustExist( this ReferenceResolutionOptions options ) => (options & ReferenceResolutionOptions.CanBeMissing) == 0;
-
         public static bool FollowRedirections( this ReferenceResolutionOptions options ) => (options & ReferenceResolutionOptions.DoNotFollowRedirections) == 0;
     }
 }

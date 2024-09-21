@@ -340,8 +340,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             INamedType type )
         {
             // TODO: This will not work properly with universal constructor builders.
-            var initialType = type.Translate( initialCompilationModel, ReferenceResolutionOptions.CanBeMissing );
-            var finalType = type.Translate( finalCompilationModel, ReferenceResolutionOptions.CanBeMissing );
+            var initialType = type.Translate( initialCompilationModel );
+            var finalType = type.Translate( finalCompilationModel );
 
             var constructors = new List<ConstructorDeclarationSyntax>();
             var existingSignatures = new HashSet<(ISymbol Type, RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );

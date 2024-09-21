@@ -1,3 +1,32 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2; public class MementoAttribute : TypeAspect { [CompileTime] private sealed record Tags( INamedType SnapshopType, IReadOnlyList<(IFieldOrProperty Source, IField Snapshot)> Fields ); public override void BuildAspect( IAspectBuilder<INamedType> builder ) { var snapshotType = builder.IntroduceClass( "Snapshot", buildType: b => { b.Accessibility = Accessibility.Private; } ); var fields = new List<(IFieldOrProperty Source, IField Snapshot)>(); var sourceFields = builder.Target.FieldsAndProperties .Where( f => f is { IsAutoPropertyOrField: true, IsImplicitlyDeclared: false, Writeability: Writeability.All } ); foreach ( var sourceField in sourceFields ) { var fieldIntroduction = snapshotType.IntroduceField( sourceField.Name, sourceField.Type, buildField: b => { b.Accessibility = Accessibility.Public; b.Writeability = Writeability.ConstructorOnly; } ); fields.Add( (sourceField, fieldIntroduction.Declaration) ); } snapshotType.IntroduceConstructor( nameof(this.MementoConstructorTemplate), buildConstructor: b => { foreach ( var field in fields ) { b.AddParameter( field.Snapshot.Name, field.Snapshot.Type ); } } ); builder.Tags = new Tags( snapshotType.Declaration, fields ); } [Introduce] public object Save() { var tags = (Tags) meta.Tags.Source!; #pragma warning disable CS0618 // Type or member is obsolete return tags.SnapshopType.Constructors.Single().Invoke( tags.Fields.Select( f=>f.Source ) )!; #pragma warning restore CS0618 // Type or member is obsolete } [Introduce] public void Restore( object snapshot ) { var tags = (Tags) meta.Tags.Source!; var typedSnapshot = (IExpression) meta.Cast( tags.SnapshopType, snapshot ); foreach ( var field in tags.Fields ) { field.Source.Value = field.Snapshot.With( typedSnapshot ).Value; } } [Template] public void MementoConstructorTemplate() { var tags = (Tags) meta.Tags.Source!; var i = meta.CompileTime( 0 ); foreach ( var parameter in meta.Target.Constructor.Parameters ) { tags.Fields[i].Snapshot.Value = parameter.Value; i++; } } } // <target> [Memento] public class Vehicle { public string Name { get; } public decimal Payload { get; set; } public string Fuel { get; set; } public Vehicle( string name, decimal payload, string fuel ) { Name = name; Payload = payload; Fuel = fuel; } }`: `'Exception of type 'System.InvalidOperationException' thrown while executing the template method 'MementoAttribute.MementoConstructorTemplate()' in the context of the aspect 'Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2.MementoAttribute' applied to 'Vehicle': The declaration 'Vehicle.Snapshot' does not exist in the current compilation. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
-// Error LAMA0041 on `namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2; public class MementoAttribute : TypeAspect { [CompileTime] private sealed record Tags( INamedType SnapshopType, IReadOnlyList<(IFieldOrProperty Source, IField Snapshot)> Fields ); public override void BuildAspect( IAspectBuilder<INamedType> builder ) { var snapshotType = builder.IntroduceClass( "Snapshot", buildType: b => { b.Accessibility = Accessibility.Private; } ); var fields = new List<(IFieldOrProperty Source, IField Snapshot)>(); var sourceFields = builder.Target.FieldsAndProperties .Where( f => f is { IsAutoPropertyOrField: true, IsImplicitlyDeclared: false, Writeability: Writeability.All } ); foreach ( var sourceField in sourceFields ) { var fieldIntroduction = snapshotType.IntroduceField( sourceField.Name, sourceField.Type, buildField: b => { b.Accessibility = Accessibility.Public; b.Writeability = Writeability.ConstructorOnly; } ); fields.Add( (sourceField, fieldIntroduction.Declaration) ); } snapshotType.IntroduceConstructor( nameof(this.MementoConstructorTemplate), buildConstructor: b => { foreach ( var field in fields ) { b.AddParameter( field.Snapshot.Name, field.Snapshot.Type ); } } ); builder.Tags = new Tags( snapshotType.Declaration, fields ); } [Introduce] public object Save() { var tags = (Tags) meta.Tags.Source!; #pragma warning disable CS0618 // Type or member is obsolete return tags.SnapshopType.Constructors.Single().Invoke( tags.Fields.Select( f=>f.Source ) )!; #pragma warning restore CS0618 // Type or member is obsolete } [Introduce] public void Restore( object snapshot ) { var tags = (Tags) meta.Tags.Source!; var typedSnapshot = (IExpression) meta.Cast( tags.SnapshopType, snapshot ); foreach ( var field in tags.Fields ) { field.Source.Value = field.Snapshot.With( typedSnapshot ).Value; } } [Template] public void MementoConstructorTemplate() { var tags = (Tags) meta.Tags.Source!; var i = meta.CompileTime( 0 ); foreach ( var parameter in meta.Target.Constructor.Parameters ) { tags.Fields[i].Snapshot.Value = parameter.Value; i++; } } } // <target> [Memento] public class Vehicle { public string Name { get; } public decimal Payload { get; set; } public string Fuel { get; set; } public Vehicle( string name, decimal payload, string fuel ) { Name = name; Payload = payload; Fuel = fuel; } }`: `'Exception of type 'System.InvalidOperationException' thrown while executing the template method 'MementoAttribute.Restore(object)' in the context of the aspect 'Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2.MementoAttribute' applied to 'Vehicle': The declaration 'Vehicle.Snapshot' does not exist in the current compilation. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+[Memento]
+public class Vehicle
+{
+  public string Name { get; }
+  public decimal Payload { get; set; }
+  public string Fuel { get; set; }
+  public Vehicle(string name, decimal payload, string fuel)
+  {
+    Name = name;
+    Payload = payload;
+    Fuel = fuel;
+  }
+  public void Restore(object snapshot)
+  {
+    Payload = ((Snapshot)snapshot).Payload;
+    Fuel = ((Snapshot)snapshot).Fuel;
+  }
+  public object Save()
+  {
+    return new Snapshot(Payload, Fuel);
+  }
+  private class Snapshot
+  {
+    public readonly string Fuel;
+    public readonly decimal Payload;
+    public Snapshot(decimal Payload, string Fuel)
+    {
+      this.Payload = Payload;
+      this.Fuel = Fuel;
+    }
+  }
+}

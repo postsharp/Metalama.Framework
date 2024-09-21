@@ -40,7 +40,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     protected T Translate<T>( T compilationElement )
         where T : class, ICompilationElement
-        => compilationElement.ForCompilation( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
+        => compilationElement.ForCompilation( this.Compilation );
 
     protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
