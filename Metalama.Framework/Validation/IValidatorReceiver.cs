@@ -186,6 +186,7 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// <summary>
     /// Evaluates the current query into a collection. This method should only be used for debugging or testing purposes.
     /// </summary>
+    [Obsolete( "The ToCollection method is meant for debugging and testing only. It does not work at design time." )]
     IReadOnlyCollection<TDeclaration> ToCollection( ICompilation? compilation = null );
 }
 

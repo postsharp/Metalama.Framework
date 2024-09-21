@@ -50,18 +50,15 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
         int stepIndex,
         CancellationToken cancellationToken )
     {
-        IEnumerable<IGrouping<INamedType?, (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>> instancesByType;
+        // ReSharper disable once InconsistentlySynchronizedField
+        var aggregateInstances = this._aspectInstances
+            .GroupBy( a => a.TargetDeclaration, RefEqualityComparer<IDeclaration>.Default )
+            .Select( AggregateAspectInstance.GetInstance )
+            .WhereNotNull()
+            .Select( a => (TargetDeclaration: a.TargetDeclaration.GetTarget( compilation ), AspectInstance: a) );
 
-        lock ( this._aspectInstances )
-        {
-            var aggregateInstances = this._aspectInstances
-                .GroupBy( a => a.TargetDeclaration, RefEqualityComparer<IDeclaration>.Default )
-                .Select( AggregateAspectInstance.GetInstance )
-                .WhereNotNull()
-                .Select( a => (TargetDeclaration: a.TargetDeclaration.GetTarget( compilation ), AspectInstance: a) );
-
-            instancesByType = aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
-        }
+        var instancesByType = 
+            aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
 
         // This collection will contain the observable transformations that need to be replayed on the compilation.
         var observableTransformations = new ConcurrentQueue<ITransformation>();

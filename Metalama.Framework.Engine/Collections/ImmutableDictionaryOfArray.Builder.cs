@@ -112,7 +112,8 @@ namespace Metalama.Framework.Engine.Collections
 
                     foreach ( var modifiedGroup in this._modifiedValuesBuilder )
                     {
-                        dictionaryBuilder[modifiedGroup.Key] = new Group( modifiedGroup.Key, modifiedGroup.Value.ToImmutable(), dictionaryBuilder.KeyComparer );
+                        var group = new Group( modifiedGroup.Key, modifiedGroup.Value.ToImmutable(), dictionaryBuilder.KeyComparer );
+                        dictionaryBuilder[modifiedGroup.Key] = group;
                     }
 
                     return new ImmutableDictionaryOfArray<TKey, TValue>( dictionaryBuilder.ToImmutable() );

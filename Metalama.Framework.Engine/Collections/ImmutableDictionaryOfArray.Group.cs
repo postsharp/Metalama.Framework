@@ -46,15 +46,11 @@ namespace Metalama.Framework.Engine.Collections
 
             public override string ToString() => $"Key={this.Key}, Items={this.Items.Length}";
 
-            public bool Equals( Group other ) => this._keyComparer.Equals( this.Key, other.Key );
+            public bool Equals( Group other ) => this.Items == other.Items && this._keyComparer.Equals( this.Key, other.Key );
 
             public override bool Equals( object? obj ) => obj is Group other && this.Equals( other );
 
-            public override int GetHashCode() => this._keyComparer.GetHashCode( this.Key );
-
-            public static bool operator ==( Group left, Group right ) => left.Equals( right );
-
-            public static bool operator !=( Group left, Group right ) => !left.Equals( right );
+            public override int GetHashCode() => HashCode.Combine( this._keyComparer.GetHashCode( this.Key ), this.Items );
         }
     }
 }
