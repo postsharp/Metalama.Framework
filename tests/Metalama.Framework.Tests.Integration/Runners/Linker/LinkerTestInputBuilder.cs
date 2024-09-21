@@ -295,8 +295,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                             A.CallTo( () => replaceMember.ReplacedMember )
                                 .Returns(
-                                    initialCompilationModel.CompilationContext.RefFactory.FromBuilder<IMember>(
-                                        (IMemberOrNamedTypeBuilder) replacedTransformation ) );
+                                    (IRef<IMember>)
+                                    initialCompilationModel.CompilationContext.RefFactory.FromBuilder( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
                         }
                     }
 
