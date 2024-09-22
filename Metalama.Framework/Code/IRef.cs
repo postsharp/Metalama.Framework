@@ -7,34 +7,6 @@ using System;
 
 namespace Metalama.Framework.Code
 {
-    public enum RefComparison
-    {
-        /// <summary>
-        /// Does not support cross-compilation comparisons and ignores nullability when comparing <c>IRef{IType}</c>.
-        /// </summary>
-        Default,
-
-        /// <summary>
-        /// Does not support cross-compilation comparisons and respects nullability when comparing <c>IRef{IType}</c>.
-        /// </summary>
-        IncludeNullability,
-
-        /// <summary>
-        /// Support cross-compilation comparisons and ignores nullability when comparing <c>IRef{IType}</c>.
-        /// </summary>
-        Structural,
-
-        /// <summary>
-        /// Support cross-compilation comparisons and respects nullability when comparing <c>IRef{IType}</c>.
-        /// </summary>
-        StructuralIncludeNullability,
-
-        /// <summary>
-        /// Supports the comparison of string-based references.
-        /// </summary>
-        Durable
-    }
-
     /// <summary>
     /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
     /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
@@ -55,8 +27,18 @@ namespace Metalama.Framework.Code
         /// <returns>A string, or <c>null</c> if the current reference cannot be serialized to a public id.</returns>
         SerializableDeclarationId ToSerializableId();
 
+        /// <summary>
+        /// Up-type the reference. Use this method instead of a C# cast with durable (see <see cref="IsDurable"/>) references.
+        /// </summary>
         IRef<TOut> As<TOut>()
             where TOut : class, ICompilationElement;
+        
+        /// <summary>
+        /// Gets a value indicating whether the reference can be kept in memory without keeping a reference to the state of the project.
+        /// Most references are bound to a specific state of the project. They are faster to resolve but prevent that specific project state to be garbage-collected.
+        /// Durable references are slower to resolve but not cause a memory leak if they stay in memory for a long time.
+        /// </summary>
+        bool IsDurable { get; }
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
@@ -76,30 +58,5 @@ namespace Metalama.Framework.Code
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
         int GetHashCode( RefComparison comparison );
-    }
-
-    /// <summary>
-    /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
-    /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
-    /// given an compilation, or using the <see cref="RefExtensions.GetTarget{T}"/> extension method for the compilation of the current context.
-    /// </summary>
-    /// <typeparam name="T">The type of the target object of the declaration or type.</typeparam>
-    /// <remarks>
-    /// <para>Use <see cref="RefEqualityComparer{T}"/> to compare instances of <see cref="IRef"/>.</para>
-    /// </remarks>
-    public interface IRef<out T> : IRef
-        where T : class, ICompilationElement
-    {
-        /// <summary>
-        /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
-        /// </summary>
-        new T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null );
-
-        /// <summary>
-        /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
-        /// </summary>
-        new T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null );
     }
 }

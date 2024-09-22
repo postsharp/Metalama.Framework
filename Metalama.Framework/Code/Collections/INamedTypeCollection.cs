@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Code.Collections
@@ -20,11 +19,5 @@ namespace Metalama.Framework.Code.Collections
         /// <param name="typeDefinition"></param>
         /// <returns></returns>
         IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition );
-    }
-
-    [CompileTime]
-    public interface IAssemblyCollection : IReadOnlyCollection<IAssembly>
-    {
-        IEnumerable<IAssembly> OfName( string name );
     }
 }

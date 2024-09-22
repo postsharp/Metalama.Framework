@@ -44,7 +44,7 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     public abstract ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
 
-    public abstract bool IsPortable { get; }
+    public abstract bool IsDurable { get; }
 
     IRef IRefImpl.ToDurable() => this.ToDurable();
 

@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRefImpl
     where T : class, ICompilationElement
 {
-    public sealed override bool IsPortable => false;
+    public sealed override bool IsDurable => false;
 
     public abstract CompilationContext CompilationContext { get; }
 

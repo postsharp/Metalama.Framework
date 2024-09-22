@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public IDurableRef<IAttribute> ToDurable() => throw new NotSupportedException();
 
-        public bool IsPortable => false;
+        public bool IsDurable => false;
 
         IRef IRefImpl.ToDurable() => this.ToDurable();
 

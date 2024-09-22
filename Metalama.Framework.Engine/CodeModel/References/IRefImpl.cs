@@ -17,13 +17,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         IRefStrategy Strategy { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether the reference is portable to a different edition of the project. Most references are bound to a
-        /// specific state of the project. They are faster to resolve but prevent that specific project state to be garbage-collected. Portable
-        /// references are slower to resolve but not cause a memory leak if they stay in memory for a long time.
-        /// </summary>
-        bool IsPortable { get; }
-
         IRef ToDurable();
 
         ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );

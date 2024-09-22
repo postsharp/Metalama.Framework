@@ -21,7 +21,7 @@ internal abstract class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
 
     public override IDurableRef<T> ToDurable() => this;
 
-    public override bool IsPortable => true;
+    public override bool IsDurable => true;
 
     public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
     {

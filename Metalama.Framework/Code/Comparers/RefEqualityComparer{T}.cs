@@ -16,7 +16,7 @@ public sealed class RefEqualityComparer<T> : IEqualityComparer<IRef<T>?>, IRefEq
     public static RefEqualityComparer<T> Structural { get; } = new( RefComparison.Structural );
 
     public static RefEqualityComparer<T> StructuralIncludeNullability { get; } =
-        new( RefComparison.Structural | RefComparison.IncludeNullability );
+        new( RefComparison.StructuralIncludeNullability );
 
     private RefEqualityComparer( RefComparison comparison )
     {
