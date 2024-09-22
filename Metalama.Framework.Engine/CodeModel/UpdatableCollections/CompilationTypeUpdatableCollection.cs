@@ -84,6 +84,6 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 
     public IEnumerable<IRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )
     {
-        return this.GetMemberRefs().Where( r => r.GetStrategy().Is( r, typeDefinition.ToRef(), ConversionKind.TypeDefinition ) );
+        return this.GetMemberRefs().Where( r => r.GetCollectionStrategy().IsConvertibleTo( r, typeDefinition.ToRef(), ConversionKind.TypeDefinition ) );
     }
 }

@@ -13,11 +13,9 @@ internal sealed class TypeIdRefSerializer<T> : ReferenceTypeSerializer<TypeIdRef
     {
         var id = constructorArguments.GetValue<string>( "id" ).AssertNotNull();
 
-        var compilationContext = ((ISerializationContext) constructorArguments).CompilationContext;
-
         return
             (TypeIdRef<T>)
-            compilationContext.RefFactory.FromTypeId<T>( new SerializableTypeId( id ) );
+            DurableRefFactory.FromTypeId<T>( new SerializableTypeId( id ) );
     }
 
     public override void SerializeObject( TypeIdRef<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )

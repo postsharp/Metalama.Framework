@@ -29,7 +29,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
 
     protected override void PopulateAllItems( Action<AttributeRef> action )
     {
-        this._parent.GetStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
+        this._parent.GetCollectionStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
 
         // HACK!
         if ( this._moduleSymbol != null )

@@ -21,7 +21,7 @@ internal abstract class UpdatableMemberCollection<TDeclaration, TRef> : Updatabl
     protected abstract DeclarationKind DeclarationKind { get; }
 
     protected virtual IEnumerable<TRef> GetMemberRefsOfName( string name )
-        => this.DeclaringTypeOrNamespace.GetStrategy()
+        => this.DeclaringTypeOrNamespace.GetCollectionStrategy()
             .GetMembersOfName(
                 this.DeclaringTypeOrNamespace,
                 name,
@@ -30,7 +30,7 @@ internal abstract class UpdatableMemberCollection<TDeclaration, TRef> : Updatabl
             .Cast<TRef>();
 
     protected virtual IEnumerable<TRef> GetMemberRefs()
-        => this.DeclaringTypeOrNamespace.GetStrategy()
+        => this.DeclaringTypeOrNamespace.GetCollectionStrategy()
             .GetMembers( this.DeclaringTypeOrNamespace, this.DeclarationKind, this.Compilation )
             .Cast<TRef>();
 }

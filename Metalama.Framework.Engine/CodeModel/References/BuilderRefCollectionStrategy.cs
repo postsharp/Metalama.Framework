@@ -9,7 +9,10 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class BuilderRefStrategy : IRefStrategy
+/// <summary>
+/// Implementation of <see cref="IRefCollectionStrategy"/> for <see cref="BuilderRef{T}"/>.
+/// </summary>
+internal sealed class BuilderRefCollectionStrategy : IRefCollectionStrategy
 {
     public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add )
     {
@@ -81,8 +84,8 @@ internal sealed class BuilderRefStrategy : IRefStrategy
         return collection.SelectAsReadOnlyCollection( x => x.ToRef() );
     }
 
-    public bool Is( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
+    public bool IsConvertibleTo( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
         => throw new NotImplementedException();
 
-    public static IRefStrategy Instance { get; } = new BuilderRefStrategy();
+    public static IRefCollectionStrategy Instance { get; } = new BuilderRefCollectionStrategy();
 }

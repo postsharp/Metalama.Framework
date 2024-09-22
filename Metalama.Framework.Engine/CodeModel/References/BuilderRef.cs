@@ -9,6 +9,9 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
+/// <summary>
+/// An implementation of <see cref="IRef"/> based on <see cref="IDeclarationBuilder"/>.
+/// </summary>
 internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     where T : class, IDeclaration
 {
@@ -33,7 +36,7 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     public GenericContext GenericContext { get; } // Gives the type arguments for the builder.
 
-    public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
+    public override IRefCollectionStrategy CollectionStrategy => BuilderRefCollectionStrategy.Instance;
 
     public override string Name
         => this.Builder switch
@@ -65,8 +68,7 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         throw new AssertionFailedException();
     }
 
-    // SMELL
-    private GenericContext GetCombinedGenericMap( IGenericContext? genericContext )
+    private GenericContext SelectGenericContext( IGenericContext? genericContext )
     {
         if ( this.GenericContext.IsEmptyOrIdentity )
         {
@@ -87,11 +89,9 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         ReferenceResolutionOptions options,
         bool throwIfMissing,
         IGenericContext? genericContext )
-    {
-        return ConvertOrThrow(
-            compilation.Factory.GetDeclaration( this.Builder, options, this.GetCombinedGenericMap( genericContext ) ),
+        => ConvertOrThrow(
+            compilation.Factory.GetDeclaration( this.Builder, options, this.SelectGenericContext( genericContext ) ),
             compilation );
-    }
 
     protected override bool EqualsCore( IRef? other, RefComparison options, IEqualityComparer<ISymbol> symbolComparer )
     {

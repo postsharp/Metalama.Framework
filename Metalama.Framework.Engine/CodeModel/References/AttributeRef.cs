@@ -10,6 +10,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
+    /// <summary>
+    /// Base implementation of <see cref="IRef"/> for <see cref="IAttribute"/>.
+    /// </summary>
     internal abstract class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
         protected AttributeRef( IRef<IDeclaration> containingDeclaration, IRef<INamedType> attributeType, CompilationContext compilationContext )
@@ -29,9 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
 
         string IRefImpl.Name => throw new NotSupportedException();
-
-        IRefStrategy IRefImpl.Strategy => throw new NotSupportedException();
-
+        
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
 
         SerializableDeclarationId IRefImpl.ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();

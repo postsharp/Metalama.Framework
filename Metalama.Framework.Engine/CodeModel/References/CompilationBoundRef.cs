@@ -12,12 +12,17 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
+/// <summary>
+/// Specialization of <see cref="BaseRef{T}"/> for references bound to a <see cref="CompilationContext"/>.
+/// </summary>
 internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRefImpl
     where T : class, ICompilationElement
 {
     public sealed override bool IsDurable => false;
 
     public abstract CompilationContext CompilationContext { get; }
+
+    public abstract IRefCollectionStrategy CollectionStrategy { get; }
 
     /// <summary>
     /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to

@@ -4,15 +4,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
-#pragma warning disable CA1822
-
     /// <summary>
     /// Builds instances of the <see cref="IRef{T}"/> interface.
     /// </summary>
@@ -91,6 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public IRef<IMethod> PseudoAccessor( IMethod accessor )
         {
             Invariant.Assert( accessor.IsImplicitlyDeclared );
+            Invariant.Assert( accessor.GetCompilationContext() == this._compilationContext );
 
             if ( accessor.ContainingDeclaration is not IHasAccessors declaringMember )
             {
@@ -130,18 +128,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
                 } );
         }
-
-        public IRef<T> FromSymbolId<T>( in SymbolId symbolKey )
-            where T : class, ICompilationElement
-            => new SymbolIdRef<T>( symbolKey );
-
-        public IRef<T> FromDeclarationId<T>( SerializableDeclarationId id )
-            where T : class, ICompilationElement
-            => new DeclarationIdRef<T>( id );
-
-        public IRef<T> FromTypeId<T>( SerializableTypeId id )
-            where T : class, IType
-            => new TypeIdRef<T>( id );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.

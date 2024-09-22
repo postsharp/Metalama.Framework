@@ -2,12 +2,17 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal interface IRefStrategy
+/// <summary>
+/// Methods used by <see cref="UpdatableDeclarationCollection{TDeclaration,TRef}"/>, whose implementation
+/// differs by kinds of references.
+/// </summary>
+internal interface IRefCollectionStrategy
 {
     void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add );
 
@@ -19,5 +24,5 @@ internal interface IRefStrategy
 
     IEnumerable<IRef> GetMembers( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation );
 
-    bool Is( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default );
+    bool IsConvertibleTo( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default );
 }

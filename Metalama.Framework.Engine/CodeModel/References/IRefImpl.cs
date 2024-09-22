@@ -14,29 +14,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
     internal interface IRefImpl : IRef
     {
         string Name { get; }
-
-        IRefStrategy Strategy { get; }
-
+        
         IRef ToDurable();
 
         ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
 
         SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
     }
-
-    internal interface ICompilationBoundRefImpl : IRefImpl
-    {
-        CompilationContext CompilationContext { get; }
-
-        ResolvedAttributeRef GetAttributeData();
-
-        bool IsDefinition { get; }
-
-        IRef Definition { get; }
-    }
-
-    internal interface IDurableRef<out T> : IRefImpl<T>
-        where T : class, ICompilationElement { }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
         where T : class, ICompilationElement

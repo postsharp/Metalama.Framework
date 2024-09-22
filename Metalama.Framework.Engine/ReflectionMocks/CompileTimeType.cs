@@ -46,11 +46,11 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = targetRef;
         }
 
-        internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, ITypeSymbol symbolForMetadata, CompilationContext compilationContext )
-            => new( compilationContext.RefFactory.FromTypeId<IType>( typeId ), symbolForMetadata );
+        internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, ITypeSymbol symbolForMetadata )
+            => new( DurableRefFactory.FromTypeId<IType>( typeId ), symbolForMetadata );
 
-        internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, CompileTimeTypeMetadata metadata, CompilationContext compilationContext )
-            => new( compilationContext.RefFactory.FromTypeId<IType>( typeId ), metadata );
+        internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, CompileTimeTypeMetadata metadata )
+            => new( DurableRefFactory.FromTypeId<IType>( typeId ), metadata );
 
         // For test only.
         internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol().AssertSymbolNotNull(), type.GetCompilationContext() );

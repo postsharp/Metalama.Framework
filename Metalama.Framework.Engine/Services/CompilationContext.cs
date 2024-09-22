@@ -34,7 +34,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     public int Id { get; } = Interlocked.Increment( ref _nextId );
 
     [Memo]
-    internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver, this );
+    internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver );
 
     [Memo]
     internal CompilationComparers Comparers => new( this.Compilation );
@@ -124,7 +124,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
 
     [Memo]
-    internal SymbolRefStrategy SymbolRefStrategy => new( this );
+    internal SymbolRefCollectionStrategy SymbolRefCollectionStrategy => new( this );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );

@@ -39,7 +39,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         this.CompilationContext = compilationContext;
     }
 
-    public override IRefStrategy Strategy => this.CompilationContext.SymbolRefStrategy;
+    public override IRefCollectionStrategy CollectionStrategy => this.CompilationContext.SymbolRefCollectionStrategy;
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();

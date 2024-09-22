@@ -30,6 +30,6 @@ internal sealed class AllInterfaceUpdatableCollection : UpdatableDeclarationColl
 
     protected override void PopulateAllItems( Action<IRef<INamedType>> action )
     {
-        this._declaringType.GetStrategy().EnumerateAllImplementedInterfaces( this._declaringType, this.Compilation, action );
+        this._declaringType.GetCollectionStrategy().EnumerateAllImplementedInterfaces( this._declaringType, this.Compilation, action );
     }
 }

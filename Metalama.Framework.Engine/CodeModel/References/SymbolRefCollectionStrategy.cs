@@ -14,11 +14,11 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRefStrategy : IRefStrategy
+internal sealed class SymbolRefCollectionStrategy : IRefCollectionStrategy
 {
     private readonly CompilationContext _compilationContext;
 
-    public SymbolRefStrategy( CompilationContext compilationContext )
+    public SymbolRefCollectionStrategy( CompilationContext compilationContext )
     {
         this._compilationContext = compilationContext;
     }
@@ -161,7 +161,7 @@ internal sealed class SymbolRefStrategy : IRefStrategy
         }
     }
 
-    public bool Is( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
+    public bool IsConvertibleTo( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
     {
         if ( right is not ISymbolRef rightSymbolRef )
         {

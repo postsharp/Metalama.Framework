@@ -434,21 +434,27 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public IReadOnlyCollection<TDeclaration> ToCollection( ICompilation? compilation )
         {
+            var compilationModel = (CompilationModel?) compilation ?? UserCodeExecutionContext.Current.Compilation.AssertNotNull();
+
+            if ( compilationModel.IsPartial )
+            {
+                throw new InvalidOperationException( "This method cannot be used with a partial compilation (typically at design time." );
+            }
+
             var bag = new ConcurrentQueue<TDeclaration>();
 
             this.Parent.ServiceProvider.Global.GetRequiredService<ITaskRunner>()
                 .RunSynchronously(
-                    () =>
-                        this.InvokeAdderAsync(
-                            new DeclarationSelectionContext(
-                                (CompilationModel?) compilation ?? UserCodeExecutionContext.Current.Compilation.AssertNotNull(),
-                                CancellationToken.None ),
-                            ( declaration, _, _ ) =>
-                            {
-                                bag.Enqueue( declaration );
+                    () => this.InvokeAdderAsync(
+                        new DeclarationSelectionContext(
+                            compilationModel,
+                            CancellationToken.None ),
+                        ( declaration, _, _ ) =>
+                        {
+                            bag.Enqueue( declaration );
 
-                                return Task.CompletedTask;
-                            } ) );
+                            return Task.CompletedTask;
+                        } ) );
 
             return bag;
         }

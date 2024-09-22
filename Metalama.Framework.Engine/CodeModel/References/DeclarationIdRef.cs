@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
+/// <summary>
+/// Implementation of <see cref="IDurableRef{T}"/> based on <see cref="SerializableDeclarationId"/>.
+/// </summary>
 internal class DeclarationIdRef<T> : StringRef<T>
     where T : class, ICompilationElement
 {

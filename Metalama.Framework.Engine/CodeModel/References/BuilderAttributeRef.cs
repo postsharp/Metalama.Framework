@@ -8,6 +8,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
+/// <summary>
+/// An implementation of <see cref="AttributeRef"/> based on <see cref="AttributeBuilder"/>.
+/// </summary>
 internal sealed class BuilderAttributeRef : AttributeRef
 {
     public AttributeBuilder AttributeBuilder { get; }

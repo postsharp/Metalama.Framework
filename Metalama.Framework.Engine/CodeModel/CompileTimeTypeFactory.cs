@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -19,12 +18,6 @@ namespace Metalama.Framework.Engine.CodeModel
         // we want the lifetime and scope of this dictionary to be project-scoped.
         // Key is SerializableTypeId for most types. Only type parameters can't be represented using just that, so they use SymbolId.
         private readonly ConcurrentDictionary<string, CompileTimeType> _instances = new( StringComparer.Ordinal );
-        private readonly CompilationContext _compilationContext;
-
-        protected CompileTimeTypeFactory( CompilationContext compilationContext )
-        {
-            this._compilationContext = compilationContext;
-        }
 
         public CompileTimeType Get( ITypeSymbol symbol )
             => symbol switch
@@ -40,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return this._instances.GetOrAdd(
                 id,
                 static ( key, x ) =>
-                    CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), x.symbolForMetadata, x.me._compilationContext ),
+                    CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), x.symbolForMetadata ),
                 (me: this, symbolForMetadata) );
         }
 
@@ -48,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             return this._instances.GetOrAdd(
                 declarationId.ToString(),
-                static ( id, x ) => CompileTimeType.CreateFromTypeId( new SerializableTypeId( id ), x.metadata, x.me._compilationContext ),
+                static ( id, x ) => CompileTimeType.CreateFromTypeId( new SerializableTypeId( id ), x.metadata ),
                 (me: this, metadata) );
         }
     }

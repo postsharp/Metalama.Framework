@@ -13,9 +13,8 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 public static class RefExtensions
 {
-    internal static IRefStrategy GetStrategy( this IRef reference ) => ((IRefImpl) reference).Strategy;
+    internal static IRefCollectionStrategy GetCollectionStrategy( this IRef reference ) => ((ICompilationBoundRefImpl) reference).CollectionStrategy;
 
-    // TODO: Duravle references are useful only in design-time execution scenarios.
     internal static IDurableRef<T> ToDurable<T>( this IRef<T> reference )
         where T : class, ICompilationElement
         => ((IRefImpl<T>) reference).ToDurable();

@@ -5,7 +5,10 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal static class DeclarationRefTargetKindExtensions
+/// <summary>
+/// Extension methods for <see cref="RefTargetKind"/>.
+/// </summary>
+internal static class RefTargetKindExtensions
 {
     public static RefTargetKind ToDeclarationRefTargetKind(
         this MethodKind methodKind,

@@ -27,9 +27,7 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public virtual RefTargetKind TargetKind => RefTargetKind.Default;
 
     public abstract string Name { get; }
-
-    public virtual IRefStrategy Strategy => throw new NotSupportedException();
-
+    
     public abstract SerializableDeclarationId ToSerializableId();
 
     public abstract SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );

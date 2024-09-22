@@ -45,7 +45,7 @@ internal abstract partial class FabricDriver
         {
             this._project = project;
             this._fabricInstance = fabricInstance;
-            this.TargetDeclaration = targetDeclaration.ToDurable();
+            this.TargetDeclaration = targetDeclaration.ToDurable(); // TODO PERF: ToDurable is useful only at design time.
             this._fabricManager = fabricManager;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
