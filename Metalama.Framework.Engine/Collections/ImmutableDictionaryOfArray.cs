@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Collections
 
             this._dictionary = dictionary.ToImmutableDictionary(
                 x => x.Key,
-                x => new Group( x.Key, x.Value, keyComparer ),
+                x => new Group( x.Key, x.Value ),
                 keyComparer );
         }
 
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Collections
             else
             {
                 return new ImmutableDictionaryOfArray<TKey, TValue>(
-                    this._dictionary.Add( key, new Group( key, ImmutableArray.Create( value ), this._dictionary.KeyComparer ) ) );
+                    this._dictionary.Add( key, new Group( key, ImmutableArray.Create( value ) ) ) );
             }
         }
 
@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Collections
                 {
                     if ( builder.TryGetValue( pair.Key, out var currentGroup ) )
                     {
-                        builder[pair.Key] = new Group( pair.Key, currentGroup.Items.AddRange( pair.Value.Items ), this._dictionary.KeyComparer );
+                        builder[pair.Key] = new Group( pair.Key, currentGroup.Items.AddRange( pair.Value.Items ) );
                     }
                     else
                     {

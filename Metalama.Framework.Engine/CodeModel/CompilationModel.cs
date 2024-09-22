@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel
     public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal, ISdkCompilation
     {
         private static int _nextId;
-        private int _id = Interlocked.Increment( ref _nextId );
+        private readonly int _id = Interlocked.Increment( ref _nextId );
 
         static CompilationModel()
         {

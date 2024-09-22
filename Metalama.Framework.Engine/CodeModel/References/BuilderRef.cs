@@ -14,8 +14,9 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 {
     public BuilderRef( IDeclarationBuilder builder, GenericContext? genericContext, CompilationContext compilationContext )
     {
-        Invariant.Assert( typeof(T) == builder.DeclarationKind.GetRefInterfaceType(), 
-                          $"The interface type was expected to be { builder.DeclarationKind.GetRefInterfaceType()} but was {typeof(T)}." );
+        Invariant.Assert(
+            typeof(T) == builder.DeclarationKind.GetRefInterfaceType(),
+            $"The interface type was expected to be {builder.DeclarationKind.GetRefInterfaceType()} but was {typeof(T)}." );
 
         this.Builder = builder;
         this.GenericContext = genericContext ?? GenericContext.Empty;
@@ -88,7 +89,7 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         IGenericContext? genericContext )
     {
         return ConvertOrThrow(
-            compilation.Factory.GetDeclaration( this.Builder, options, this.GetCombinedGenericMap( genericContext ), throwIfMissing ),
+            compilation.Factory.GetDeclaration( this.Builder, options, this.GetCombinedGenericMap( genericContext ) ),
             compilation );
     }
 

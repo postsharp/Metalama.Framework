@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Collections
                     {
                         if ( newGroup.Value.Count > 0 )
                         {
-                            var group = new Group( newGroup.Key, newGroup.Value.ToImmutable(), this._newValuesBuilder.KeyComparer );
+                            var group = new Group( newGroup.Key, newGroup.Value.ToImmutable() );
 
                             dictionaryBuilder[group.Key] = group;
                         }

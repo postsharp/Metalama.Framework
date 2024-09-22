@@ -10,13 +10,11 @@ namespace Metalama.Framework.Engine.Collections
 {
     public sealed partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
-        internal readonly struct Group : IGrouping<TKey, TValue>, IEquatable<Group>
+        internal class Group : IGrouping<TKey, TValue>
         {
-            private readonly IEqualityComparer<TKey> _keyComparer;
-
             public ImmutableArray<TValue> Items { get; }
 
-            public Group( TKey key, ImmutableArray<TValue> items, IEqualityComparer<TKey> keyComparer )
+            public Group( TKey key, ImmutableArray<TValue> items )
             {
 #if DEBUG
                 if ( items.IsDefault )
@@ -27,7 +25,6 @@ namespace Metalama.Framework.Engine.Collections
 
                 this.Key = key;
                 this.Items = items;
-                this._keyComparer = keyComparer;
             }
 
             public TKey Key { get; }
@@ -42,15 +39,9 @@ namespace Metalama.Framework.Engine.Collections
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-            public Group Add( TValue value ) => new( this.Key, this.Items.Add( value ), this._keyComparer );
+            public Group Add( TValue value ) => new( this.Key, this.Items.Add( value ) );
 
             public override string ToString() => $"Key={this.Key}, Items={this.Items.Length}";
-
-            public bool Equals( Group other ) => this.Items == other.Items && this._keyComparer.Equals( this.Key, other.Key );
-
-            public override bool Equals( object? obj ) => obj is Group other && this.Equals( other );
-
-            public override int GetHashCode() => HashCode.Combine( this._keyComparer.GetHashCode( this.Key ), this.Items );
         }
     }
 }

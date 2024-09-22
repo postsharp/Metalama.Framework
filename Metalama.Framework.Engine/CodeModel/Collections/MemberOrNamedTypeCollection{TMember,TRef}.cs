@@ -7,13 +7,6 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal abstract class MemberOrNamedTypeCollection<TMember> : MemberOrNamedTypeCollection<TMember, IRef<TMember>>
-    where TMember : class, IMemberOrNamedType
-{
-    protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, ISourceDeclarationCollection<TMember, IRef<TMember>> sourceItems )
-        : base( containingDeclaration, sourceItems ) { }
-}
-
 internal abstract class MemberOrNamedTypeCollection<TMember, TRef> : DeclarationCollection<TMember, TRef>, IMemberOrNamedTypeCollection<TMember>
     where TMember : class, IMemberOrNamedType
     where TRef : class, IRef<IDeclaration>

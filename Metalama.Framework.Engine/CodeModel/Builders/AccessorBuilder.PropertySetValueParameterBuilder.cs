@@ -36,6 +36,5 @@ internal partial class AccessorBuilder
             get => "value";
             set => throw new NotSupportedException( "Cannot set the name of a value parameter." );
         }
-
     }
 }

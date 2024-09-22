@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Collections
         {
             this._dictionary = items.ToImmutableDictionary(
                 i => i.Key,
-                i => new Group( i.Key, i.Value, keyComparer ),
+                i => new Group( i.Key, i.Value ),
                 keyComparer );
 
             this.ValueComparer = EqualityComparer<TValue>.Default;
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.Collections
                 {
                     if ( builder.TryGetValue( pair.Key, out var currentGroup ) )
                     {
-                        builder[pair.Key] = new Group( pair.Key, currentGroup.Items.AddRange( pair.Value.Items ), this.KeyComparer );
+                        builder[pair.Key] = new Group( pair.Key, currentGroup.Items.AddRange( pair.Value.Items ) );
                     }
                     else
                     {
