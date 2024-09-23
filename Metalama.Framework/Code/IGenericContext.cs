@@ -6,7 +6,7 @@ using Metalama.Framework.Validation;
 namespace Metalama.Framework.Code;
 
 /// <summary>
-/// Represents a mapping between type parameters and type arguments.
+/// Represents a context in which type parameters are mapped to their values.
 /// </summary>
 [CompileTime]
 [InternalImplement]

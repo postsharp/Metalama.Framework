@@ -98,7 +98,7 @@ namespace Metalama.Framework.Code
         Namespace,
 
         /// <summary>
-        /// <see cref="IType"/>, but nor an <see cref="INamedType"/> or an <see cref="ITypeParameter"/>.
+        /// <see cref="IType"/>, but neither an <see cref="INamedType"/> nor an <see cref="ITypeParameter"/>.
         /// Note that <see cref="IType"/> is not an <see cref="IDeclaration"/>.
         /// </summary>
         Type
