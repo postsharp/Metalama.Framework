@@ -47,6 +47,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         }
         else
         {
+            // TODO: Test.
             var mappedSymbol =
                 genericContext.NamedTypeSymbol!.GetMembers( this.Symbol.Name ).Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
 
