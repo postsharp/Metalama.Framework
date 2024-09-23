@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class ImplementedInterfacesCollection : DeclarationCollection<INamedType, IRef<INamedType>>, IImplementedInterfaceCollection
+    internal sealed class ImplementedInterfacesCollection : DeclarationCollection<INamedType>, IImplementedInterfaceCollection
     {
         public ImplementedInterfacesCollection( INamedType declaringType, InterfaceUpdatableCollection source ) : base( declaringType, source ) { }
 

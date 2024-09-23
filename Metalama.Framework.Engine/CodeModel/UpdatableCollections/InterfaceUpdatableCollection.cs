@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollection<INamedType, IRef<INamedType>>
+internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollection<INamedType>
 {
     private readonly IRef<INamedType> _declaringType;
 

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute, AttributeRef>
+internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute>
 {
     private readonly IRef<IDeclaration> _parent;
 
@@ -27,7 +27,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
 #endif
     }
 
-    protected override void PopulateAllItems( Action<AttributeRef> action )
+    protected override void PopulateAllItems( Action<IRef<IAttribute>> action )
     {
         this._parent.GetCollectionStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
 

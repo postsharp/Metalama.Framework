@@ -142,7 +142,7 @@ public sealed partial class CompilationModel
         Func<CompilationModel, IRef<TOwner>, TCollection> createCollection )
         where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
-        where TCollection : ISourceDeclarationCollection<TDeclaration, IRef<TDeclaration>>
+        where TCollection : ISourceDeclarationCollection<TDeclaration>
         => this.GetMemberCollection<TOwner, TDeclaration, IRef<TDeclaration>, TCollection>(
             ref dictionary,
             requestMutableCollection,
@@ -156,7 +156,7 @@ public sealed partial class CompilationModel
         Func<CompilationModel, IRef<TOwner>, TCollection> createCollection )
         where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
-        where TCollection : ISourceDeclarationCollection<TDeclaration, TRef>
+        where TCollection : ISourceDeclarationCollection<TDeclaration>
         where TRef : IRef
     {
         Invariant.Assert( !(requestMutableCollection && !this.IsMutable) );

@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 internal abstract class MemberCollection<TMember> : MemberCollection<TMember, IRef<TMember>>
     where TMember : class, IMember
 {
-    protected MemberCollection( INamedType declaringType, ISourceDeclarationCollection<TMember, IRef<TMember>> sourceItems ) : base(
+    protected MemberCollection( INamedType declaringType, ISourceDeclarationCollection<TMember> sourceItems ) : base(
         declaringType,
         sourceItems ) { }
 }

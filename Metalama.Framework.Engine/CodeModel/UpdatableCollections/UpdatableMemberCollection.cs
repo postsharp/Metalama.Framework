@@ -7,9 +7,8 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class UpdatableMemberCollection<TDeclaration, TRef> : UpdatableDeclarationCollection<TDeclaration, TRef>
-    where TDeclaration : class, INamedDeclaration
-    where TRef : class, IRef
+internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationCollection<T>
+    where T : class, INamedDeclaration
 {
     protected UpdatableMemberCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringType ) : base( compilation )
     {
@@ -20,17 +19,17 @@ internal abstract class UpdatableMemberCollection<TDeclaration, TRef> : Updatabl
 
     protected abstract DeclarationKind DeclarationKind { get; }
 
-    protected virtual IEnumerable<TRef> GetMemberRefsOfName( string name )
+    protected virtual IEnumerable<IRef<T>> GetMemberRefsOfName( string name )
         => this.DeclaringTypeOrNamespace.GetCollectionStrategy()
             .GetMembersOfName(
                 this.DeclaringTypeOrNamespace,
                 name,
                 this.DeclarationKind,
                 this.Compilation )
-            .Cast<TRef>();
+            .Cast<IRef<T>>();
 
-    protected virtual IEnumerable<TRef> GetMemberRefs()
+    protected virtual IEnumerable<IRef<T>> GetMemberRefs()
         => this.DeclaringTypeOrNamespace.GetCollectionStrategy()
             .GetMembers( this.DeclaringTypeOrNamespace, this.DeclarationKind, this.Compilation )
-            .Cast<TRef>();
+            .Cast<IRef<T>>();
 }

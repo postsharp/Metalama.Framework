@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class TypeParameterList : DeclarationCollection<ITypeParameter, IRef<ITypeParameter>>, IGenericParameterList
+    internal sealed class TypeParameterList : DeclarationCollection<ITypeParameter>, IGenericParameterList
     {
         public static TypeParameterList Empty { get; } = new();
 

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class NamespaceCollection : DeclarationCollection<INamespace, IRef<INamespace>>, INamespaceCollection
+    internal sealed class NamespaceCollection : DeclarationCollection<INamespace>, INamespaceCollection
     {
         public NamespaceCollection( INamespace declaringType, IReadOnlyList<IRef<INamespace>> sourceItems ) : base(
             declaringType,

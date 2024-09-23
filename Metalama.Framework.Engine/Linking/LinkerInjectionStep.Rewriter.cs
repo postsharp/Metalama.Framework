@@ -171,7 +171,7 @@ internal sealed partial class LinkerInjectionStep
 
                 foreach ( var attribute in list.Attributes )
                 {
-                    if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
+                    if ( !finalModelAttributes.Any( a => ((AttributeRef) a).IsSyntax( attribute ) ) )
                     {
                         modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives )!;
                     }

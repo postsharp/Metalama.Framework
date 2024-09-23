@@ -10,19 +10,18 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal abstract class DeclarationCollection<TDeclaration, TRef> : IReadOnlyCollection<TDeclaration>
-        where TDeclaration : class, IDeclaration
-        where TRef : class, IRef<IDeclaration>
+    internal abstract class DeclarationCollection<T> : IReadOnlyCollection<T>
+        where T : class, IDeclaration
     {
         private readonly IGenericContext _genericContext;
 
         internal IDeclaration? ContainingDeclaration { get; }
 
-        protected IReadOnlyList<TRef> Source { get; }
+        protected IReadOnlyList<IRef<T>> Source { get; }
 
         internal CompilationModel Compilation => (CompilationModel) this.ContainingDeclaration.AssertNotNull().Compilation;
 
-        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<TRef> source )
+        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<IRef<T>> source )
         {
 #if DEBUG
             if ( containingDeclaration is NamedTypeImpl )
@@ -37,17 +36,17 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration, TRef}"/> class representing an empty list.
+        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration}"/> class representing an empty list.
         /// </summary>
         protected DeclarationCollection()
         {
-            this.Source = ImmutableArray<TRef>.Empty;
+            this.Source = ImmutableArray<IRef<T>>.Empty;
             this._genericContext = GenericContext.Empty;
         }
 
-        public IEnumerator<TDeclaration> GetEnumerator()
+        public IEnumerator<T> GetEnumerator()
         {
-            if ( this.Source is UpdatableDeclarationCollection<TDeclaration, TRef> updatableCollection )
+            if ( this.Source is UpdatableDeclarationCollection<T> updatableCollection )
             {
                 // We don't use the list enumeration pattern because this may lead to infinite recursions
                 // if the loop body adds items during the enumeration.
@@ -72,15 +71,14 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         // We allow resolving references to missing declarations because the collection may be a child collection of a missing declaration,
         // for instance the parameters of a method that has been introduced into the current compilation but is not included in the current compilation.
-        protected TDeclaration GetItem( in TRef reference )
+        protected T GetItem( in IRef<T> reference )
         {
             var declaration = reference.GetTarget( this.Compilation, genericContext: this._genericContext );
 
-            return (TDeclaration) declaration;
+            return declaration;
         }
 
-        protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references )
-            => references.Select( x => (TDeclaration) x.GetTarget( this.Compilation ) );
+        protected IEnumerable<T> GetItems( IEnumerable<IRef<T>> references ) => references.Select( x => (T) x.GetTarget( this.Compilation ) );
 
         public override string ToString()
         {

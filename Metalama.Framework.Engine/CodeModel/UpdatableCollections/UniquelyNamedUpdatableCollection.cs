@@ -1,29 +1,26 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class UniquelyNamedUpdatableCollection<TDeclaration, TRef> : UpdatableMemberCollection<TDeclaration, TRef>
-    where TDeclaration : class, INamedDeclaration
-    where TRef : class, IRef
+internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCollection<T>
+    where T : class, INamedDeclaration
 {
-    private ImmutableDictionary<string, TRef?>? _dictionary;
+    private ImmutableDictionary<string, IRef<T>?>? _dictionary;
 
     protected UniquelyNamedUpdatableCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringType ) :
         base( compilation, declaringType ) { }
 
-    private ImmutableDictionary<string, TRef?> GetInitializedDictionary()
-        => this._dictionary ??= ImmutableDictionary<string, TRef?>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );
+    private ImmutableDictionary<string, IRef<T>?> GetInitializedDictionary()
+        => this._dictionary ??= ImmutableDictionary<string, IRef<T>?>.Empty.WithComparers( StringComparer.Ordinal, RefEqualityComparer<T>.Default );
 
-    protected abstract IEqualityComparer<TRef?> MemberRefComparer { get; }
-
-    public void Add( TRef member )
+    public void Add( IRef<T> member )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -49,7 +46,7 @@ internal abstract class UniquelyNamedUpdatableCollection<TDeclaration, TRef> : U
         this.AddItem( member );
     }
 
-    public void Remove( TRef member )
+    public void Remove( IRef<T> member )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -74,7 +71,7 @@ internal abstract class UniquelyNamedUpdatableCollection<TDeclaration, TRef> : U
         this.RemoveItem( member );
     }
 
-    protected override void PopulateAllItems( Action<TRef> action )
+    protected override void PopulateAllItems( Action<IRef<T>> action )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -108,7 +105,7 @@ internal abstract class UniquelyNamedUpdatableCollection<TDeclaration, TRef> : U
         this._dictionary = dictionaryBuilder.ToImmutable();
     }
 
-    public override ImmutableArray<TRef> OfName( string name )
+    public override ImmutableArray<IRef<T>> OfName( string name )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -124,7 +121,7 @@ internal abstract class UniquelyNamedUpdatableCollection<TDeclaration, TRef> : U
         }
         else
         {
-            return ImmutableArray<TRef>.Empty;
+            return ImmutableArray<IRef<T>>.Empty;
         }
     }
 }

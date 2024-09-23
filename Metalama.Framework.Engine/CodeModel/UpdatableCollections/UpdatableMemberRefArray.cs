@@ -1,36 +1,33 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using System.Collections.Generic;
+using Metalama.Framework.Code.Comparers;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class UpdatableMemberRefArray<T>
-    where T : class, IRef
+    where T : class, ICompilationElement
 {
-    private readonly IEqualityComparer<T> _comparer;
-
     // This is the only compilation in which the current object is mutable. It should not be mutable in other transformations.
     public CompilationModel ParentCompilation { get; }
 
-    public UpdatableMemberRefArray( ImmutableArray<T> array, CompilationModel parentCompilation, IEqualityComparer<T> comparer )
+    public UpdatableMemberRefArray( ImmutableArray<IRef<T>> array, CompilationModel parentCompilation )
     {
         this.Array = array;
         this.ParentCompilation = parentCompilation;
-        this._comparer = comparer;
     }
 
-    public ImmutableArray<T> Array { get; private set; }
+    public ImmutableArray<IRef<T>> Array { get; private set; }
 
-    public void Add( T member )
+    public void Add( IRef<T> member )
     {
         this.Array = this.Array.Add( member );
     }
 
-    public void Remove( T member )
+    public void Remove( IRef<T> member )
     {
-        var index = this.Array.IndexOf( member, this._comparer );
+        var index = this.Array.IndexOf( member, RefEqualityComparer<T>.Default );
 
         if ( index < 0 )
         {

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class ParameterList : DeclarationCollection<IParameter, IRef<IParameter>>, IParameterList
+    internal sealed class ParameterList : DeclarationCollection<IParameter>, IParameterList
     {
         public ParameterList( IMethodBase declaringMethod, IReadOnlyList<IRef<IParameter>> sourceItems )
             : base( declaringMethod, sourceItems ) { }

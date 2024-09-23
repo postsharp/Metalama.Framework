@@ -13,11 +13,10 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 #pragma warning disable SA1402
 
-internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : BaseDeclarationCollection, ILazy, ISourceDeclarationCollection<TDeclaration, TRef>
-    where TDeclaration : class, IDeclaration
-    where TRef : class, IRef
+internal abstract class UpdatableDeclarationCollection<T> : BaseDeclarationCollection, ILazy, ISourceDeclarationCollection<T>
+    where T : class, IDeclaration
 {
-    private List<TRef>? _allItems;
+    private List<IRef<T>>? _allItems;
     private volatile int _removeOperationsCount;
 
     protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }
@@ -41,7 +40,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
                 return;
             }
 
-            this._allItems = new List<TRef>();
+            this._allItems = new List<IRef<T>>();
 
 #if DEBUG
             this.PopulateAllItems( r => this._allItems.Add( r ) );
@@ -52,9 +51,9 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         }
     }
 
-    protected abstract void PopulateAllItems( Action<TRef> action );
+    protected abstract void PopulateAllItems( Action<IRef<T>> action );
 
-    protected void AddItem( in TRef item )
+    protected void AddItem( in IRef<T> item )
     {
         if ( this.IsComplete )
         {
@@ -62,7 +61,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         }
     }
 
-    protected void InsertItem( int index, in TRef item )
+    protected void InsertItem( int index, in IRef<T> item )
     {
         if ( this.IsComplete )
         {
@@ -70,7 +69,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         }
     }
 
-    protected void RemoveItem( in TRef item )
+    protected void RemoveItem( in IRef<T> item )
     {
         if ( this.IsComplete )
         {
@@ -90,23 +89,23 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         }
     }
 
-    public bool Contains( TRef item )
+    public bool Contains( IRef<T> item )
     {
         this.EnsureComplete();
 
         return this._allItems!.Any( i => i.Equals( item ) );
     }
 
-    public ISourceDeclarationCollection<TDeclaration, TRef> Clone( CompilationModel compilation )
+    public ISourceDeclarationCollection<T> Clone( CompilationModel compilation )
     {
-        var clone = (UpdatableDeclarationCollection<TDeclaration, TRef>) this.MemberwiseClone();
+        var clone = (UpdatableDeclarationCollection<T>) this.MemberwiseClone();
         clone.Compilation = compilation;
 
         if ( this._allItems != null )
         {
             lock ( this )
             {
-                clone._allItems = new List<TRef>( this._allItems.Count );
+                clone._allItems = new List<IRef<T>>( this._allItems.Count );
                 clone._allItems.AddRange( this._allItems );
             }
         }
@@ -114,15 +113,15 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         return clone;
     }
 
-    public virtual ImmutableArray<TRef> OfName( string name ) => this.Where( r => ((IRefImpl) r).Name == name ).ToImmutableArray();
+    public virtual ImmutableArray<IRef<T>> OfName( string name ) => this.Where( r => ((IRefImpl) r).Name == name ).ToImmutableArray();
 
-    IEnumerator<TRef> IEnumerable<TRef>.GetEnumerator() => this.GetEnumerator();
+    IEnumerator<IRef<T>> IEnumerable<IRef<T>>.GetEnumerator() => this.GetEnumerator();
 
     public Enumerator GetEnumerator() => new( this );
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    public TRef this[ int index ]
+    public IRef<T> this[ int index ]
     {
         get
         {
@@ -132,14 +131,14 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         }
     }
 
-    public struct Enumerator : IEnumerator<TRef>
+    public struct Enumerator : IEnumerator<IRef<T>>
     {
-        private readonly UpdatableDeclarationCollection<TDeclaration, TRef> _parent;
+        private readonly UpdatableDeclarationCollection<T> _parent;
         private readonly int _initialCount;
         private readonly int _initialRemoveOperationsCount;
         private int _index = -1;
 
-        internal Enumerator( UpdatableDeclarationCollection<TDeclaration, TRef> parent )
+        internal Enumerator( UpdatableDeclarationCollection<T> parent )
         {
             this._parent = parent;
 
@@ -171,7 +170,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
 
         public void Reset() => this._index = -1;
 
-        public readonly TRef Current => this._parent[this._index];
+        public readonly IRef<T> Current => this._parent[this._index];
 
         readonly object IEnumerator.Current => this.Current;
 

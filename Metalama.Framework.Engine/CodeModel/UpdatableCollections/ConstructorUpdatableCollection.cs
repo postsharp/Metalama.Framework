@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class ConstructorUpdatableCollection : NonUniquelyNamedUpdatableCollection<IConstructor, IRef<IConstructor>>
+internal sealed class ConstructorUpdatableCollection : NonUniquelyNamedUpdatableCollection<IConstructor>
 {
     public ConstructorUpdatableCollection( CompilationModel compilation, IRef<INamedType> declaringType ) : base(
         compilation,

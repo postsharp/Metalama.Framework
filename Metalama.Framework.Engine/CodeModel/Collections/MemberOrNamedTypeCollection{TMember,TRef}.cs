@@ -7,16 +7,16 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal abstract class MemberOrNamedTypeCollection<TMember, TRef> : DeclarationCollection<TMember, TRef>, IMemberOrNamedTypeCollection<TMember>
+internal abstract class MemberOrNamedTypeCollection<TMember, TRef> : DeclarationCollection<TMember>, IMemberOrNamedTypeCollection<TMember>
     where TMember : class, IMemberOrNamedType
     where TRef : class, IRef<IDeclaration>
 {
-    protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, ISourceDeclarationCollection<TMember, TRef> sourceItems )
+    protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, ISourceDeclarationCollection<TMember> sourceItems )
         : base( containingDeclaration, sourceItems ) { }
 
     public IEnumerable<TMember> OfName( string name )
     {
-        var typedSource = (ISourceDeclarationCollection<TMember, TRef>) this.Source;
+        var typedSource = (ISourceDeclarationCollection<TMember>) this.Source;
 
         // Enumerate the source without causing a resolution of the reference.
         foreach ( var sourceItem in typedSource.OfName( name ) )

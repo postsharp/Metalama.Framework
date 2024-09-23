@@ -11,7 +11,7 @@ internal abstract class MemberCollection<TMember, TRef> : MemberOrNamedTypeColle
 {
     public INamedType DeclaringType { get; }
 
-    protected MemberCollection( INamedType declaringType, ISourceDeclarationCollection<TMember, TRef> sourceItems )
+    protected MemberCollection( INamedType declaringType, ISourceDeclarationCollection<TMember> sourceItems )
         : base( declaringType, sourceItems )
     {
         this.DeclaringType = declaringType;

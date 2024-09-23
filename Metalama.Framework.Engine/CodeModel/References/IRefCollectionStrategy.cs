@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 /// <summary>
-/// Methods used by <see cref="UpdatableDeclarationCollection{TDeclaration,TRef}"/>, whose implementation
+/// Methods used by <see cref="UpdatableDeclarationCollection{TDeclaration}"/>, whose implementation
 /// differs by kinds of references.
 /// </summary>
 internal interface IRefCollectionStrategy
