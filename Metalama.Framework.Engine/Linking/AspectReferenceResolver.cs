@@ -197,7 +197,7 @@ internal sealed class AspectReferenceResolver
 
             if ( targetIntroductionInjectedMember == null
                  || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                     && replacedMember.GetTarget( this._finalCompilationModel ).GetSymbol() != null) )
+                     && replacedMember.GetSymbol() != null) )
             {
                 // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
                 var declaredInCurrentType = this._comparer.Equals( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType );
@@ -222,7 +222,7 @@ internal sealed class AspectReferenceResolver
             // Resolved to a version before the symbol was introduced.
             // The only valid case are introduced promoted fields.
             if ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                 && replacedMember.GetTarget( this._finalCompilationModel ).GetSymbol() == null )
+                 && replacedMember.GetSymbol() == null )
             {
                 // This is the same as targeting the property.
                 return CreateResolved( resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
@@ -414,10 +414,8 @@ internal sealed class AspectReferenceResolver
             return null;
         }
 
-        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
+        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
         {
-            var replacedMember = replacedMemberRef.GetTarget( this._finalCompilationModel );
-
             IDeclaration canonicalReplacedMember = replacedMember switch
             {
                 BuiltDeclaration builtDeclaration => builtDeclaration.Builder,

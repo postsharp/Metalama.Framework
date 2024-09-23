@@ -45,9 +45,9 @@ public partial class DeclarationFactory
                 {
                     if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
                             x.me.CompilationContext.RefFactory.FromSymbol<TDeclaration>( x.symbol ),
-                            out var redirectedRef ) )
+                            out var redirected ) )
                     {
-                        return redirectedRef.As<TDeclaration>().GetTarget( x.me._compilationModel );
+                        return x.me.GetDeclaration( redirected, GenericContext.Empty, typeof(TDeclaration) );
                     }
 
                     return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me ) );
@@ -177,7 +177,8 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromSymbol<IConstructor, IMethodSymbol>(
             methodSymbol,
             static ( in CreateFromSymbolArgs<IMethodSymbol> args ) =>
-                new Constructor( args.Symbol, args.Compilation ) );
+                new Constructor( args.Symbol, args.Compilation ),
+            true );
 
     public IParameter GetParameter( IParameterSymbol parameterSymbol )
         => this.GetDeclarationFromSymbol<IParameter, IParameterSymbol>(

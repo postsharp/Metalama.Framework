@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,10 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     [Memo]
-    private IRef<IConstructor> Ref => this.RefFactory.FromBuilt<IConstructor>( this );
+    private IRef<IConstructor> Ref
+        => (IRef<IConstructor>?) ((ICompilationBoundRefImpl?) this._constructorBuilder.ReplacedImplicitConstructor?.ToRef())?.WithGenericContext(
+               this.GenericContext )
+           ?? this.RefFactory.FromBuilt<IConstructor>( this );
 
     public IRef<IConstructor> ToRef() => this.Ref;
 

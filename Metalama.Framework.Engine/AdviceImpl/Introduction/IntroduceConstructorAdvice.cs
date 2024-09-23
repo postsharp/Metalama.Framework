@@ -94,7 +94,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             if ( existingImplicitConstructor != null && this.Builder.Parameters.Count == 0 )
             {
                 // Redirect if the builder has no parameters and the existing constructor is implicit.
-                this.Builder.ReplacedImplicit = existingImplicitConstructor.ToRef();
+                this.Builder.ReplacedImplicitConstructor = existingImplicitConstructor;
             }
 
             // There is no existing declaration, we will introduce and override the introduced.

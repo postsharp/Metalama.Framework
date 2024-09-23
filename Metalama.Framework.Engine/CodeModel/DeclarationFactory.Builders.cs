@@ -38,10 +38,12 @@ public partial class DeclarationFactory
                 static ( _, gc, x ) =>
                 {
                     if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
-                            x.me._compilationModel.CompilationContext.RefFactory.FromBuilder<TDeclaration>( x.builder ),
+                            x.builder.ToRef(),
                             out var redirected ) )
                     {
-                        return redirected.As<TDeclaration>().GetTarget( x.me._compilationModel );
+                        // It's normal that redirections redirect to builders that have the same reference!
+                        // Beware not to enable redirections for this call, as this would cause an infinite recursion.
+                        return x.me.GetDeclarationFromBuilder( (TBuilder) redirected, gc, x.createBuiltDeclaration );
                     }
 
                     return x.createBuiltDeclaration( new CreateFromBuilderArgs<TBuilder>( x.builder, gc, x.me ) );

@@ -34,30 +34,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => this.FromBuilder<T>( builtDeclaration.Builder, builtDeclaration.GenericContext );
 
         /// <summary>
-        /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
-        /// </summary>
-        public IRef<IDeclaration> FromBuilder( IDeclarationBuilder builder, GenericContext? genericMap = null )
-            => builder.DeclarationKind switch
-            {
-                DeclarationKind.NamedType => new BuilderRef<INamedType>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Method => new BuilderRef<IMethod>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Property => new BuilderRef<IProperty>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Indexer => new BuilderRef<IIndexer>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Field => new BuilderRef<IField>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Event => new BuilderRef<IEvent>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Parameter => new BuilderRef<IParameter>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.TypeParameter => new BuilderRef<ITypeParameter>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Attribute => new BuilderRef<IAttribute>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.ManagedResource => new BuilderRef<IManagedResource>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Constructor => new BuilderRef<IConstructor>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Finalizer => new BuilderRef<IMethod>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Operator => new BuilderRef<IMethod>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.AssemblyReference => new BuilderRef<IAssembly>( builder, genericMap, this._compilationContext ),
-                DeclarationKind.Namespace => new BuilderRef<INamespace>( builder, genericMap, this._compilationContext ),
-                _ => throw new ArgumentOutOfRangeException( nameof(builder), $"Unexpected declaration kind: {builder.DeclarationKind}." )
-            };
-
-        /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
         public IRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (IRef<IDeclaration>) this.FromAnySymbol( symbol );

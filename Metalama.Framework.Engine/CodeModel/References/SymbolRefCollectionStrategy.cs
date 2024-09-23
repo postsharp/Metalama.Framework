@@ -50,16 +50,9 @@ internal sealed class SymbolRefCollectionStrategy : IRefCollectionStrategy
         if ( compilation.TryGetRedirectedDeclaration( declaration, out var redirectedDeclaration ) )
         {
             // If the declaration was redirected, we need to add the attributes from the builder.
-            if ( redirectedDeclaration is IBuilderRef { Builder: { } redirectedBuilder } )
+            foreach ( var attribute in redirectedDeclaration.Attributes )
             {
-                foreach ( var attribute in redirectedBuilder.Attributes )
-                {
-                    add( (AttributeRef) attribute.ToRef() );
-                }
-            }
-            else
-            {
-                Invariant.Assert( false );
+                add( (AttributeRef) attribute.ToRef() );
             }
         }
     }

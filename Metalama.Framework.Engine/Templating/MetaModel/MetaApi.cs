@@ -73,7 +73,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IProperty Property => this._fieldOrPropertyOrIndexer as IProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IProperty Property
+            => this._fieldOrPropertyOrIndexer switch
+            {
+                IProperty property => property,
+                IField { OverridingProperty: { } property } => property,
+                _ => throw this.CreateInvalidOperationException( nameof(this.Property) )
+            };
 
         public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 

@@ -22,6 +22,8 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     public abstract CompilationContext CompilationContext { get; }
 
+    public abstract ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext );
+
     public abstract IRefCollectionStrategy CollectionStrategy { get; }
 
     /// <summary>

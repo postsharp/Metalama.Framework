@@ -406,15 +406,14 @@ public sealed partial class CompilationModel
             return;
         }
 
-        var replacedRef = transformation.ReplacedMember;
-        var replaced = replacedRef.GetTarget( this );
+        var replaced = transformation.ReplacedMember;
         this.Factory.Invalidate( replaced );
 
         switch ( replaced )
         {
             case IConstructor { IsStatic: false } replacedConstructor:
                 var constructors = this.GetConstructorCollection( replacedConstructor.DeclaringType.ToRef(), true );
-                constructors.Remove( replacedRef.As<IConstructor>() );
+                constructors.Remove( replacedConstructor.ToRef() );
 
                 break;
 
@@ -424,7 +423,7 @@ public sealed partial class CompilationModel
 
             case IField replacedField:
                 var fields = this.GetFieldCollection( replacedField.DeclaringType.ToRef(), true );
-                fields.Remove( replacedRef.As<IFieldOrProperty>() );
+                fields.Remove( replacedField.ToRef() );
 
                 break;
 
@@ -437,9 +436,11 @@ public sealed partial class CompilationModel
         {
             if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                this._redirections = this._redirections.Add(
-                    replacedMember,
-                    this.RefFactory.FromBuilder( introduceDeclarationTransformation.DeclarationBuilder ) );
+                var newBuilder = introduceDeclarationTransformation.DeclarationBuilder;
+
+                Invariant.Assert( !(replacedMember is IBuilderRef replacedBuilderRef && newBuilder.Equals( replacedBuilderRef.Builder )) );
+
+                this._redirections = this._redirections.Add( replacedMember.ToRef(), newBuilder );
             }
             else
             {

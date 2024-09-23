@@ -44,7 +44,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
         //       now the reference to promoted field is resolved to the original field, which has incorrect attributes.
         var property =
             PropertyDeclaration(
-                propertyBuilder.GetAttributeLists( context, context.Compilation.CompilationContext.RefFactory.FromBuilder( this.IntroducedDeclaration ) )
+                propertyBuilder.GetAttributeLists( context, this.IntroducedDeclaration.ToRef() )
                     .AddRange( GetAdditionalAttributeLists() ),
                 propertyBuilder.GetSyntaxModifierList(),
                 syntaxGenerator.Type( propertyBuilder.Type ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),

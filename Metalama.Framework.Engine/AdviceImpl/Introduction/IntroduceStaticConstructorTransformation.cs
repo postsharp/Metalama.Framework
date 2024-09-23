@@ -20,7 +20,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         Invariant.Assert( introducedDeclaration.IsStatic );
 
         var targetType = introducedDeclaration.DeclaringType;
-        this.ReplacedMember = targetType.StaticConstructor?.ToRef() ?? default;
+        this.ReplacedMember = targetType.StaticConstructor;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
@@ -48,12 +48,9 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         };
     }
 
-    public IRef<IMember>? ReplacedMember { get; }
+    public IMember? ReplacedMember { get; }
 
-    public override InsertPosition InsertPosition
-        => this.ReplacedMember != null
-            ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
-            : this.IntroducedDeclaration.ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.IntroducedDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 

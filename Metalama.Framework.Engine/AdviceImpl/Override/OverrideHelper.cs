@@ -65,7 +65,7 @@ internal static class OverrideHelper
             {
                 var constructorBuilder = new ConstructorBuilder( advice, type )
                 {
-                    ReplacedImplicit = implicitConstructor.ToRef(), Accessibility = Accessibility.Public
+                    ReplacedImplicitConstructor = implicitConstructor, Accessibility = Accessibility.Public
                 };
 
                 addTransformation( constructorBuilder.ToTransformation() );

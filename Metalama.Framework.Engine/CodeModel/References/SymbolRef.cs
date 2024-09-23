@@ -39,6 +39,21 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         this.CompilationContext = compilationContext;
     }
 
+    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext )
+    {
+        if ( genericContext.IsEmptyOrIdentity )
+        {
+            return this;
+        }
+        else
+        {
+            var mappedSymbol =
+                genericContext.NamedTypeSymbol!.GetMembers( this.Symbol.Name ).Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
+
+            return new SymbolRef<T>( mappedSymbol, this.CompilationContext, this.TargetKind );
+        }
+    }
+
     public override IRefCollectionStrategy CollectionStrategy => this.CompilationContext.SymbolRefCollectionStrategy;
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )

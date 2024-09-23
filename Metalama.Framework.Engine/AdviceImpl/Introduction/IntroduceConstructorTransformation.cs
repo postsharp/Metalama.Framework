@@ -25,7 +25,7 @@ internal sealed class IntroduceConstructorTransformation
         Invariant.Assert( !introducedDeclaration.IsStatic );
         Invariant.Assert( !introducedDeclaration.IsRecordCopyConstructor() );
 
-        this.ReplacedMember = introducedDeclaration.ReplacedImplicit;
+        this.ReplacedMember = introducedDeclaration.ReplacedImplicitConstructor;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
@@ -88,12 +88,9 @@ internal sealed class IntroduceConstructorTransformation
         };
     }
 
-    public IRef<IMember>? ReplacedMember { get; }
+    public IMember? ReplacedMember { get; }
 
-    public override InsertPosition InsertPosition
-        => this.ReplacedMember != null
-            ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
-            : this.IntroducedDeclaration.ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.IntroducedDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability
         => this.ReplacedMember == null

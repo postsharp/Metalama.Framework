@@ -15,16 +15,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
-    private IRef<IConstructor>? _replacedImplicit;
+    private IConstructor? _replacedImplicitConstructor;
     private ConstructorInitializerKind _initializerKind;
 
-    public IRef<IConstructor>? ReplacedImplicit
+    public IConstructor? ReplacedImplicitConstructor
     {
-        get => this._replacedImplicit;
+        get => this._replacedImplicitConstructor;
         set
         {
+            Invariant.Assert( value is null or Constructor or ConstructorBuilder );
             this.CheckNotFrozen();
-            this._replacedImplicit = value;
+            this._replacedImplicitConstructor = value;
         }
     }
 
@@ -107,7 +108,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
     [Memo]
-    public IRef<IConstructor> Ref => this.RefFactory.FromBuilder<IConstructor>( this );
+    private IRef<IConstructor> Ref => this._replacedImplicitConstructor?.ToRef() ?? this.RefFactory.FromBuilder<IConstructor>( this );
 
     public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
@@ -117,5 +118,5 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
-        => this.ReplacedImplicit?.GetTarget( newCompilation, genericContext ) ?? base.Translate( newCompilation, genericContext );
+        => this.ReplacedImplicitConstructor?.Translate( newCompilation ) ?? base.Translate( newCompilation, genericContext );
 }

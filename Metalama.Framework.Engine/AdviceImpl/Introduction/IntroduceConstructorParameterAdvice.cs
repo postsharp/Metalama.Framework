@@ -81,7 +81,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         {
             var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType )
             {
-                ReplacedImplicit = constructor.ToRef(), Accessibility = Accessibility.Public
+                ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
 
             initializedConstructor = constructorBuilder;
@@ -158,7 +158,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 {
                     var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType )
                     {
-                        ReplacedImplicit = chainedConstructor.ToRef(), Accessibility = Accessibility.Public
+                        ReplacedImplicitConstructor = chainedConstructor, Accessibility = Accessibility.Public
                     };
 
                     addTransformation( derivedConstructorBuilder.ToTransformation() );

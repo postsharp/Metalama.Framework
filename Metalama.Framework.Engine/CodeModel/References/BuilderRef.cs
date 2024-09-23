@@ -23,6 +23,9 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
             builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Contains( typeof(T) ),
             $"The interface type was expected to be of type {builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes()} but was {typeof(T)}." );
 
+        // Constructor replacements must be resolved upstream.
+        Invariant.Assert( builder is not ConstructorBuilder { ReplacedImplicitConstructor: not null } );
+
         this.Builder = builder;
         this.GenericContext = genericContext ?? GenericContext.Empty;
         this.CompilationContext = compilationContext;
@@ -37,6 +40,9 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     public IDeclarationBuilder Builder { get; }
 
     public GenericContext GenericContext { get; } // Gives the type arguments for the builder.
+
+    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext )
+        => genericContext.IsEmptyOrIdentity ? this : new BuilderRef<T>( this.Builder, genericContext, this.CompilationContext );
 
     public override IRefCollectionStrategy CollectionStrategy => BuilderRefCollectionStrategy.Instance;
 

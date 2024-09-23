@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 

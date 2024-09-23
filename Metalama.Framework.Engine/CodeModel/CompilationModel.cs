@@ -27,6 +27,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -134,8 +135,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
-        private ImmutableDictionary<IRef, IRef> _redirections =
-            ImmutableDictionary.Create<IRef, IRef>( RefEqualityComparer.Default );
+        private ImmutableDictionary<IRef, IDeclarationBuilder> _redirections =
+            ImmutableDictionary.Create<IRef, IDeclarationBuilder>( RefEqualityComparer.Default );
 
         private ImmutableDictionary<IRef<IDeclaration>, int> _depthsCache =
             ImmutableDictionary.Create<IRef<IDeclaration>, int>( RefEqualityComparer<IDeclaration>.Default );
@@ -558,24 +559,9 @@ namespace Metalama.Framework.Engine.CodeModel
             return reference is IRef<IDeclaration> declarationRef && this._redirections.ContainsKey( declarationRef );
         }
 
-        internal bool TryGetRedirectedDeclaration( IRef reference, out IRef redirected )
+        internal bool TryGetRedirectedDeclaration( IRef reference, [NotNullWhen( true )] out IDeclarationBuilder? redirected )
         {
-            var result = false;
-
-            while ( true )
-            {
-                if ( this._redirections.TryGetValue( reference, out var target ) )
-                {
-                    result = true;
-                    reference = target;
-                }
-                else
-                {
-                    redirected = reference;
-
-                    return result;
-                }
-            }
+            return this._redirections.TryGetValue( reference, out redirected );
         }
 
         [Memo]

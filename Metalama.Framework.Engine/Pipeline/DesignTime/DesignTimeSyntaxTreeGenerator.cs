@@ -366,7 +366,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 var constructorBuilder = (introducedConstructor.ToRef() as IBuilderRef)?.Builder as ConstructorBuilder;
 
-                if ( constructorBuilder is null || constructorBuilder.ReplacedImplicit != null )
+                if ( constructorBuilder is null || constructorBuilder.ReplacedImplicitConstructor != null )
                 {
                     // Skip introduced constructors that are replacements.
                     continue;

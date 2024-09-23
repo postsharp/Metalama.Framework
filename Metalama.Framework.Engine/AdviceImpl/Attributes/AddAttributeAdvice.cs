@@ -83,7 +83,10 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicitlyDeclared: true } constructor )
             {
                 addTransformation(
-                    new ConstructorBuilder( this, constructor.DeclaringType ) { ReplacedImplicit = constructor.ToRef(), Accessibility = Accessibility.Public }
+                    new ConstructorBuilder( this, constructor.DeclaringType )
+                        {
+                            ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
+                        }
                         .ToTransformation() );
             }
 
