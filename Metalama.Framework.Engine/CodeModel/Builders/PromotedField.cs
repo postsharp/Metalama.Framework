@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 internal sealed class PromotedField : PropertyBuilder, IFieldImpl, IFieldBuilder
 {
     /// <summary>
-    /// The original <see cref="Field"/> or <see cref="FieldBuilder"/>.
+    /// Gets the original <see cref="Field"/> or <see cref="FieldBuilder"/>.
     /// </summary>
     public IFieldImpl OriginalSourceFieldOrFieldBuilder { get; }
 
@@ -99,7 +99,6 @@ internal sealed class PromotedField : PropertyBuilder, IFieldImpl, IFieldBuilder
             _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.OriginalSourceFieldOrFieldBuilder.Writeability}." )
         };
 
-    
     public override SyntaxTree? PrimarySyntaxTree => this.OriginalSourceFieldOrFieldBuilder.PrimarySyntaxTree;
 
     protected internal override bool GetPropertyInitializerExpressionOrMethod(
@@ -146,10 +145,12 @@ internal sealed class PromotedField : PropertyBuilder, IFieldImpl, IFieldBuilder
         }
     }
 
-    public override IInjectMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalSourceFieldOrFieldBuilder, this );
+    public override IInjectMemberTransformation ToTransformation()
+        => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalSourceFieldOrFieldBuilder, this );
 
     public override bool Equals( IDeclaration? other )
-        => ReferenceEquals( this, other ) || (other is PromotedField otherPromotedField && otherPromotedField.OriginalSourceFieldOrFieldBuilder.Equals( this.OriginalSourceFieldOrFieldBuilder ));
+        => ReferenceEquals( this, other ) || (other is PromotedField otherPromotedField
+                                              && otherPromotedField.OriginalSourceFieldOrFieldBuilder.Equals( this.OriginalSourceFieldOrFieldBuilder ));
 
     public override bool IsDesignTimeObservable => false;
 
@@ -166,5 +167,4 @@ internal sealed class PromotedField : PropertyBuilder, IFieldImpl, IFieldBuilder
     public IProperty? OverridingProperty => this;
 
     public override IField OriginalField => this;
-
 }

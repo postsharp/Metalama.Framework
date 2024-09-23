@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             return declaration;
         }
 
-        protected IEnumerable<T> GetItems( IEnumerable<IRef<T>> references ) => references.Select( x => (T) x.GetTarget( this.Compilation ) );
+        protected IEnumerable<T> GetItems( IEnumerable<IRef<T>> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
 
         public override string ToString()
         {

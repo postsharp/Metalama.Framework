@@ -75,14 +75,12 @@ internal sealed class AspectReferenceResolver
     private readonly LinkerInjectionRegistry _injectionRegistry;
     private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
     private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
-    private readonly CompilationModel _finalCompilationModel;
     private readonly SafeSymbolComparer _comparer;
     private readonly ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>> _overrideIndicesCache;
 
     public AspectReferenceResolver(
         LinkerInjectionRegistry injectionRegistry,
         IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
-        CompilationModel finalCompilationModel,
         CompilationContext intermediateCompilationContext )
     {
         this._injectionRegistry = injectionRegistry;
@@ -94,7 +92,6 @@ internal sealed class AspectReferenceResolver
 
         this._orderedLayers = indexedLayers.SelectAsImmutableArray( x => x.AspectLayerId );
         this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
-        this._finalCompilationModel = finalCompilationModel;
         this._comparer = intermediateCompilationContext.SymbolComparer;
         this._overrideIndicesCache = new ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>>( intermediateCompilationContext.SymbolComparer );
     }
