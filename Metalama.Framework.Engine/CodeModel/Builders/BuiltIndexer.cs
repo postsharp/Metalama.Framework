@@ -14,7 +14,7 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 {
     private readonly IndexerBuilder _indexerBuilder;
 
-    public BuiltIndexer( CompilationModel compilation, IndexerBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltIndexer( IndexerBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._indexerBuilder = builder;
     }

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -40,9 +41,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal override ICompilationElement? Translate(
             CompilationModel newCompilation,
-            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-            IGenericContext? genericContext = null )
-            => ((IMethod?) this.DeclaringMethod.Translate( newCompilation, options, genericContext ))?.ReturnParameter;
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null )
+            => ((IMethod?) this.DeclaringMethod.Translate( newCompilation, genericContext ))?.ReturnParameter;
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
             => this.DeclaringMethod.GetDerivedDeclarations( options ).Select( d => ((IMethod) d).ReturnParameter );

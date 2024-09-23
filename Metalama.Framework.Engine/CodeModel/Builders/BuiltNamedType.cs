@@ -19,7 +19,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
     public NamedTypeBuilder TypeBuilder { get; }
 
-    public BuiltNamedType( CompilationModel compilation, NamedTypeBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltNamedType( NamedTypeBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.TypeBuilder = builder;
     }

@@ -3,7 +3,9 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
@@ -25,9 +27,6 @@ namespace Metalama.Framework.Engine.CodeModel;
 [PublicAPI]
 public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFactory
 {
-    // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
-    private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache;
-
     private readonly ConcurrentDictionary<AttributeSerializationData, DeserializedAttribute> _deserializedAttributes = new();
 
     private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
@@ -39,8 +38,9 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
     internal DeclarationFactory( CompilationModel compilation )
     {
         this._compilationModel = compilation;
-        this._symbolCache = new ConcurrentDictionary<ISymbol, IDeclaration>( compilation.CompilationContext.SymbolComparer );
-        this._typeCache = new ConcurrentDictionary<ITypeSymbol, IType>( compilation.CompilationContext.SymbolComparerIncludingNullability );
+        this._builderCache = new Cache<IDeclarationBuilder, IDeclaration>( ReferenceEqualityComparer<IDeclarationBuilder>.Instance );
+        this._symbolCache = new Cache<ISymbol, IDeclaration>( compilation.CompilationContext.SymbolComparer );
+        this._typeCache = new Cache<ITypeSymbol, IType>( compilation.CompilationContext.SymbolComparerIncludingNullability );
 
         this._systemTypeResolver = compilation.Project.ServiceProvider.GetRequiredService<SystemTypeResolver.Provider>()
             .Get( compilation.CompilationContext );
@@ -127,10 +127,9 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
 
     public T? Translate<T>(
         T? compilationElement,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
         IGenericContext? genericContext = null )
         where T : class, ICompilationElement
-        => (T?) ((ICompilationElementImpl?) compilationElement)?.Translate( this._compilationModel, options, genericContext );
+        => (T?) ((ICompilationElementImpl?) compilationElement)?.Translate( this._compilationModel, genericContext, typeof(T) );
 
     public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
         => this._compilationModel.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
@@ -147,6 +146,27 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
             static ( data, compilation ) => new DeserializedAttribute( data, compilation ),
             this._compilationModel );
 
-    // We store a GenericMap and not a GenericContext because GenericMap implements IEquatable.
-    private record struct BuilderCacheKey( IDeclarationBuilder Builder, GenericContext GenericContext );
+    public void Invalidate( IDeclaration declaration )
+    {
+        switch ( declaration )
+        {
+            case SymbolBasedDeclaration symbolBasedDeclaration:
+                this._symbolCache.Remove( symbolBasedDeclaration.Symbol.AssertSymbolNotNull() );
+
+                break;
+
+            case IDeclarationBuilder declarationBuilder:
+                this._builderCache.Remove( declarationBuilder );
+
+                break;
+
+            case BuiltDeclaration builtDeclaration:
+                this._builderCache.Remove( builtDeclaration.Builder );
+
+                break;
+
+            default:
+                throw new AssertionFailedException();
+        }
+    }
 }

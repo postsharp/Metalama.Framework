@@ -443,7 +443,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         A.CallTo(
                                 () => ((IRefImpl<IMethod>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
-                                    A<ReferenceResolutionOptions>.Ignored,
                                     null ) )
                             .Returns( (IMethod) transformation );
 
@@ -455,7 +454,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         A.CallTo(
                                 () => ((IRefImpl<IProperty>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
-                                    A<ReferenceResolutionOptions>.Ignored,
                                     null ) )
                             .Returns( (IProperty) transformation );
 
@@ -470,7 +468,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         A.CallTo(
                                 () => ((IRefImpl<IEvent>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
-                                    A<ReferenceResolutionOptions>.Ignored,
                                     null ) )
                             .Returns( (IEvent) transformation );
 
@@ -485,7 +482,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         A.CallTo(
                                 () => ((IRefImpl<IField>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
-                                    A<ReferenceResolutionOptions>.Ignored,
                                     null ) )
                             .Returns( (IField) transformation );
 

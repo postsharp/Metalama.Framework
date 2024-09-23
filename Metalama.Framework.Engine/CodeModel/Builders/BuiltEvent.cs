@@ -14,7 +14,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 {
     public EventBuilder EventBuilder { get; }
 
-    public BuiltEvent( CompilationModel compilation, EventBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltEvent( EventBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.EventBuilder = builder;
     }

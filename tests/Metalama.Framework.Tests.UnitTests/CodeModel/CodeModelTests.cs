@@ -1821,12 +1821,12 @@ public partial class C
             var factory = compilation.Factory;
 
             var asType = factory.GetIType( typeParameterSymbol );
-            var asTypeParameter = factory.GetGenericParameter( typeParameterSymbol );
+            var asTypeParameter = factory.GetTypeParameter( typeParameterSymbol );
 
             var nullableAsType = factory.GetIType( typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
 
             var nullableAsTypeParameter =
-                factory.GetGenericParameter( (ITypeParameterSymbol) typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+                factory.GetTypeParameter( (ITypeParameterSymbol) typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
 
             var nullableFromIType = asType.ToNullableType();
 

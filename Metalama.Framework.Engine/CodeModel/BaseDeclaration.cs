@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -24,14 +25,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilationElement? ICompilationElementImpl.Translate(
             CompilationModel newCompilation,
-            ReferenceResolutionOptions options,
-            IGenericContext? genericContext )
-            => this.Translate( newCompilation, options, genericContext );
+            IGenericContext? genericContext,
+            Type? interfaceType )
+            => this.Translate( newCompilation, genericContext );
 
         internal abstract ICompilationElement? Translate(
             CompilationModel newCompilation,
-            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-            IGenericContext? genericContext = null );
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null );
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -30,9 +31,8 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
     public SymbolRef( ISymbol symbol, CompilationContext compilationContext, RefTargetKind targetKind = RefTargetKind.Default )
     {
         Invariant.Assert(
-            symbol.GetDeclarationKind( compilationContext ).GetRefInterfaceType( targetKind ) == typeof(T)
-            || (typeof(T) == typeof(ICompilation) && symbol.Kind == SymbolKind.Assembly),
-            $"Interface type mismatch: expected {symbol.GetDeclarationKind( compilationContext ).GetRefInterfaceType().Name} but got {typeof(T).Name}." );
+            symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
+            $"The interface type was expected to be of type {symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind )} but was {typeof(T)}." );
 
         this.Symbol = symbol;
         this.TargetKind = targetKind;
@@ -46,7 +46,6 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
 
     protected override T? Resolve(
         CompilationModel compilation,
-        ReferenceResolutionOptions options,
         bool throwIfMissing,
         IGenericContext? genericContext )
     {
@@ -57,7 +56,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
             return ReturnNullOrThrow( MetalamaStringFormatter.Instance.Format( this.Symbol ), throwIfMissing, compilation );
         }
 
-        return ConvertOrThrow(
+        return ConvertDeclarationOrThrow(
             compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, genericContext ).AssertNotNull(),
             compilation );
     }

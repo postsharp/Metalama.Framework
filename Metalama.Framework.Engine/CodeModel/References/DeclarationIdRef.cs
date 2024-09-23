@@ -24,7 +24,7 @@ internal class DeclarationIdRef<T> : StringRef<T>
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => new SerializableDeclarationId( this.Id ).ResolveToSymbol( compilationContext );
 
-    protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+    protected override T? Resolve( CompilationModel compilation, bool throwIfMissing, IGenericContext? genericContext )
     {
         var declaration = new SerializableDeclarationId( this.Id ).ResolveToDeclaration( compilation );
 
@@ -33,7 +33,7 @@ internal class DeclarationIdRef<T> : StringRef<T>
             return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
         }
 
-        return ConvertOrThrow( declaration, compilation );
+        return ConvertDeclarationOrThrow( declaration, compilation );
     }
 
     public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new DeclarationIdRef<TOut>( this.Id );

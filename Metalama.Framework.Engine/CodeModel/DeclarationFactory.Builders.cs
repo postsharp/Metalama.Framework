@@ -4,140 +4,181 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using System.Collections.Concurrent;
+using Metalama.Framework.Engine.Utilities;
+using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
 public partial class DeclarationFactory
 {
-    private readonly ConcurrentDictionary<BuilderCacheKey, IDeclaration> _builderCache = new();
+    private readonly Cache<IDeclarationBuilder, IDeclaration> _builderCache;
 
-    internal IAttribute GetAttribute( AttributeBuilder attributeBuilder, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
-        => (IAttribute) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( attributeBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltAttribute( x.attributeBuilder, x.me._compilationModel, key.GenericContext ),
-            (me: this, attributeBuilder) );
+    private readonly record struct CreateFromBuilderArgs<TBuilder>( TBuilder Builder, GenericContext GenericContext, DeclarationFactory Factory )
+    {
+        public CompilationModel Compilation => this.Factory._compilationModel;
+    }
+
+    private delegate TDeclaration CreateFromBuilderDelegate<out TDeclaration, TBuilder>( in CreateFromBuilderArgs<TBuilder> args );
+
+    private TDeclaration GetDeclarationFromBuilder<TDeclaration, TBuilder>(
+        TBuilder builder,
+        IGenericContext? genericContext,
+        CreateFromBuilderDelegate<TDeclaration, TBuilder> createBuiltDeclaration,
+        bool supportsRedirection = false )
+        where TDeclaration : class, IDeclaration
+        where TBuilder : IDeclarationBuilder, TDeclaration
+    {
+        using ( StackOverflowHelper.Detect() )
+        {
+            return (TDeclaration) this._builderCache.GetOrAdd(
+                builder,
+                genericContext.AsGenericContext(),
+                typeof(TDeclaration),
+                static ( _, gc, x ) =>
+                {
+                    if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
+                            x.me._compilationModel.CompilationContext.RefFactory.FromBuilder<TDeclaration>( x.builder ),
+                            out var redirected ) )
+                    {
+                        return redirected.As<TDeclaration>().GetTarget( x.me._compilationModel );
+                    }
+
+                    return x.createBuiltDeclaration( new CreateFromBuilderArgs<TBuilder>( x.builder, gc, x.me ) );
+                },
+                (me: this, builder, createBuiltDeclaration, supportsRedirection) );
+        }
+    }
+
+    internal IAttribute GetAttribute( AttributeBuilder attributeBuilder, IGenericContext? genericContext = null )
+        => this.GetDeclarationFromBuilder<IAttribute, AttributeBuilder>(
+            attributeBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<AttributeBuilder> args ) => new BuiltAttribute( args.Builder, args.Compilation, args.GenericContext ) );
 
     private IParameter GetParameter(
         BaseParameterBuilder parameterBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (IParameter) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( parameterBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltParameter( x.parameterBuilder, x.me._compilationModel, key.GenericContext ),
-            (me: this, parameterBuilder) );
+        => this.GetDeclarationFromBuilder<IParameter, BaseParameterBuilder>(
+            parameterBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<BaseParameterBuilder> args ) => new BuiltParameter( args.Builder, args.Compilation, args.GenericContext ) );
 
-    internal ITypeParameter GetGenericParameter(
+    internal ITypeParameter GetTypeParameter(
         TypeParameterBuilder typeParameterBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (ITypeParameter) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( typeParameterBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltTypeParameter( x.typeParameterBuilder, x.me._compilationModel, key.GenericContext ),
-            (me: this, typeParameterBuilder) );
+        => this.GetDeclarationFromBuilder<ITypeParameter, TypeParameterBuilder>(
+            typeParameterBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<TypeParameterBuilder> args ) => new BuiltTypeParameter( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IMethod GetMethod(
         MethodBuilder methodBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (IMethod) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( methodBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltMethod( x.methodBuilder, x.me._compilationModel, key.GenericContext ),
-            (me: this, methodBuilder) );
+        => this.GetDeclarationFromBuilder<IMethod, MethodBuilder>(
+            methodBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<MethodBuilder> args ) => new BuiltMethod( args.Builder, args.Compilation, args.GenericContext ) );
 
-    internal IMethod GetAccessor( AccessorBuilder methodBuilder, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
-        => (IMethod) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( methodBuilder, genericContext.AsGenericContext() ),
-            static ( key, x )
-                => ((IHasAccessors) x.me.GetDeclaration( x.methodBuilder.ContainingMember, x.options, key.GenericContext ).AssertNotNull()).GetAccessor(
-                    x.methodBuilder.MethodKind )!,
-            (me: this, options, methodBuilder) );
+    internal IMethod GetAccessor( AccessorBuilder methodBuilder, IGenericContext? genericContext = null )
+        => this.GetDeclarationFromBuilder<IMethod, AccessorBuilder>(
+            methodBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<AccessorBuilder> args ) =>
+                ((IHasAccessors) args.Factory.GetDeclaration( args.Builder.ContainingMember, args.GenericContext )).AssertNotNull()
+                .GetAccessor( args.Builder.MethodKind )
+                .AssertNotNull() );
 
     internal IConstructor GetConstructor(
         ConstructorBuilder constructorBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (IConstructor) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( constructorBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltConstructor( x.constructorBuilder, x.me._compilationModel, key.GenericContext ),
-            (me: this, constructorBuilder) );
+        => this.GetDeclarationFromBuilder<IConstructor, ConstructorBuilder>(
+            constructorBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<ConstructorBuilder> args ) => new BuiltConstructor( args.Builder, args.Compilation, args.GenericContext ),
+            true );
 
     internal IField GetField(
-        FieldBuilder fieldBuilder,
-        ReferenceResolutionOptions options = default,
+        IFieldBuilder fieldBuilder,
         IGenericContext? genericContext = null )
-        => (IField) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( fieldBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltField( x.fieldBuilder, x.me._compilationModel, key.GenericContext ),
-            (me: this, fieldBuilder) );
+        => this.GetDeclarationFromBuilder<IField, IFieldBuilder>(
+            fieldBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<IFieldBuilder> args ) => new BuiltField( args.Builder, args.Compilation, args.GenericContext ),
+            true );
 
     internal IProperty GetProperty(
         PropertyBuilder propertyBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (IProperty) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( propertyBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltProperty( x.me._compilationModel, x.propertyBuilder, key.GenericContext ),
-            (me: this, propertyBuilder) );
+        => this.GetDeclarationFromBuilder<IProperty, PropertyBuilder>(
+            propertyBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<PropertyBuilder> args ) => new BuiltProperty( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IIndexer GetIndexer(
         IndexerBuilder indexerBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (IIndexer) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( indexerBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltIndexer( x.me._compilationModel, x.indexerBuilder, key.GenericContext ),
-            (me: this, indexerBuilder) );
+        => this.GetDeclarationFromBuilder<IIndexer, IndexerBuilder>(
+            indexerBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<IndexerBuilder> args ) => new BuiltIndexer( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IEvent GetEvent(
         EventBuilder eventBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (IEvent) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( eventBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltEvent( x.me._compilationModel, x.eventBuilder, key.GenericContext ),
-            (me: this, eventBuilder) );
+        => this.GetDeclarationFromBuilder<IEvent, EventBuilder>(
+            eventBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<EventBuilder> args ) => new BuiltEvent( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal INamedType GetNamedType(
         NamedTypeBuilder namedTypeBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (INamedType) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( namedTypeBuilder, genericContext.AsGenericContext() ),
-            static ( key, x ) => new BuiltNamedType( x.me._compilationModel, x.namedTypeBuilder, key.GenericContext ),
-            (me: this, namedTypeBuilder) );
+        => this.GetDeclarationFromBuilder<INamedType, NamedTypeBuilder>(
+            namedTypeBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<NamedTypeBuilder> args ) => new BuiltNamedType( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal INamespace GetNamespace(
         NamespaceBuilder namespaceBuilder,
-        ReferenceResolutionOptions options = default,
         IGenericContext? genericContext = null )
-        => (INamespace) this._builderCache.GetOrAdd(
-            new BuilderCacheKey( namespaceBuilder, genericContext.AsGenericContext() ),
-            static ( _, x ) => new BuiltNamespace( x.me._compilationModel, x.namespaceBuilder ),
-            (me: this, namespaceBuilder) );
+        => this.GetDeclarationFromBuilder<INamespace, NamespaceBuilder>(
+            namespaceBuilder,
+            genericContext,
+            static ( in CreateFromBuilderArgs<NamespaceBuilder> args ) => new BuiltNamespace( args.Builder, args.Compilation ) );
 
     internal IDeclaration GetDeclaration(
         IDeclarationBuilder builder,
-        ReferenceResolutionOptions options = default,
-        IGenericContext? genericContext = null )
-        => builder switch
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+    {
+        // Note that interfaceType may be a non-final interface, e.g. IFieldOrProperty.
+        Invariant.Assert( interfaceType == null || builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Any( interfaceType.IsAssignableFrom ) );
+
+        return builder switch
         {
-            MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options, genericContext ),
-            FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options, genericContext ),
-            PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options, genericContext ),
-            IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, options, genericContext ),
-            EventBuilder eventBuilder => this.GetEvent( eventBuilder, options, genericContext ),
-            BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options, genericContext ),
-            AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options, genericContext ),
-            TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options, genericContext ),
-            AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options, genericContext ),
-            ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options, genericContext ),
-            NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options, genericContext ),
-            NamespaceBuilder namespaceBuilder => this.GetNamespace( namespaceBuilder, options, genericContext ),
+            // TODO PERF: switch based on DeclarationKind or use an array of delegates.
+
+            MethodBuilder methodBuilder => this.GetMethod( methodBuilder, genericContext ),
+            IFieldBuilder fieldBuilder when interfaceType == null || interfaceType != typeof(IProperty) => this.GetField( fieldBuilder, genericContext ),
+            IFieldBuilder fieldBuilder when interfaceType == typeof(IProperty) => this.GetProperty( (PropertyBuilder) fieldBuilder, genericContext ),
+            PropertyBuilder propertyBuilder when interfaceType == null || interfaceType != typeof(IField) =>
+                this.GetProperty( propertyBuilder, genericContext ),
+            PropertyBuilder propertyBuilder when interfaceType == typeof(IField) => this.GetField( (IFieldBuilder) propertyBuilder, genericContext ),
+            IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, genericContext ),
+            EventBuilder eventBuilder => this.GetEvent( eventBuilder, genericContext ),
+            BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, genericContext ),
+            AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, genericContext ),
+            TypeParameterBuilder genericParameterBuilder => this.GetTypeParameter( genericParameterBuilder, genericContext ),
+            AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, genericContext ),
+            ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, genericContext ),
+            NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, genericContext ),
+            NamespaceBuilder namespaceBuilder => this.GetNamespace( namespaceBuilder, genericContext ),
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global
             ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
             _ => throw new AssertionFailedException( $"Cannot get a declaration for a {builder.GetType()}" )
         };
+    }
 }

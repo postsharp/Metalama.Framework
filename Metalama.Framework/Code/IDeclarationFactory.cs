@@ -71,7 +71,6 @@ namespace Metalama.Framework.Code
 
         T? Translate<T>(
             T? compilationElement,
-            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
             IGenericContext? genericContext = null )
             where T : class, ICompilationElement;
 

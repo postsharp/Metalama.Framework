@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
-        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.TypeParameter;
+        DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.TypeParameter;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

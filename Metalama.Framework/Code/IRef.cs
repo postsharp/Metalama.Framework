@@ -32,7 +32,7 @@ namespace Metalama.Framework.Code
         /// </summary>
         IRef<TOut> As<TOut>()
             where TOut : class, ICompilationElement;
-        
+
         /// <summary>
         /// Gets a value indicating whether the reference can be kept in memory without keeping a reference to the state of the project.
         /// Most references are bound to a specific state of the project. They are faster to resolve but prevent that specific project state to be garbage-collected.
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Code
         /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
         /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
         /// </summary>
-        ICompilationElement GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null );
+        ICompilationElement GetTarget( ICompilation compilation, IGenericContext? genericContext = null );
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
@@ -52,7 +52,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         ICompilationElement? GetTargetOrNull(
             ICompilation compilation,
-            ReferenceResolutionOptions options = default,
             IGenericContext? genericContext = null );
 
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );

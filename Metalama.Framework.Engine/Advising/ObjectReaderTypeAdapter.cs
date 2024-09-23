@@ -57,7 +57,7 @@ internal sealed class ObjectReaderTypeAdapter
         {
             var getter = property.GetMethod;
 
-            if ( getter == null || getter.GetParameters().Length != 0 )
+            if ( getter == null || getter.GetParameters().Length != 0 || getter.ReturnType.IsByRef )
             {
                 continue;
             }
@@ -67,6 +67,11 @@ internal sealed class ObjectReaderTypeAdapter
 
         foreach ( var field in type.GetFields( BindingFlags.Public | BindingFlags.Instance ) )
         {
+            if ( field.FieldType.IsByRef )
+            {
+                continue;
+            }
+
             properties[field.Name] = CreateCompiledGetter( field );
         }
 

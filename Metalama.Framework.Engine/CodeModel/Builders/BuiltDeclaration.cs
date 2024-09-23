@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -101,7 +102,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
 
     internal override ICompilationElement? Translate(
         CompilationModel newCompilation,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-        IGenericContext? genericContext = null )
-        => this.Builder.Translate( newCompilation, options, genericContext );
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => this.Builder.Translate( newCompilation, genericContext );
 }

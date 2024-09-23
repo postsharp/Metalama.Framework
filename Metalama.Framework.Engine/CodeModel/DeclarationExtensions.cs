@@ -562,12 +562,11 @@ public static class DeclarationExtensions
 
     internal static T Translate<T>(
         this T declaration,
-        ICompilation newCompilation,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+        ICompilation newCompilation )
         where T : class, IDeclaration
         => declaration.Compilation == newCompilation
             ? declaration
-            : ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
+            : ((CompilationModel) newCompilation).Factory.Translate( declaration ).AssertNotNull();
 
     /// <summary>
     /// Version of <see cref="IDeclaration.ContainingDeclaration"/> that behaves like <see cref="ISymbol.ContainingSymbol"/>,

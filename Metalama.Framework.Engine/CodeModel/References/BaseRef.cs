@@ -3,8 +3,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -27,16 +29,15 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public virtual RefTargetKind TargetKind => RefTargetKind.Default;
 
     public abstract string Name { get; }
-    
+
     public abstract SerializableDeclarationId ToSerializableId();
 
     public abstract SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
 
-    ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
-        => this.GetTarget( compilation, options, genericContext );
+    ICompilationElement IRef.GetTarget( ICompilation compilation, IGenericContext? genericContext ) => this.GetTarget( compilation, genericContext );
 
-    ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
-        => this.GetTargetOrNull( compilation, options, genericContext );
+    ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext )
+        => this.GetTargetOrNull( compilation, genericContext );
 
     public abstract IDurableRef<T> ToDurable();
 
@@ -48,31 +49,17 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     IRef<TOut> IRef.As<TOut>() => this.As<TOut>();
 
-    public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
-        => this.GetTargetImpl( compilation, options, true, genericContext )!;
+    public T GetTarget( ICompilation compilation, IGenericContext? genericContext = null ) => this.GetTargetImpl( compilation, true, genericContext )!;
 
-    public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
-        => this.GetTargetImpl( compilation, options, false, genericContext );
+    public T? GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext = null ) => this.GetTargetImpl( compilation, false, genericContext );
 
-    private T? GetTargetImpl( ICompilation compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext = null )
+    private T? GetTargetImpl( ICompilation compilation, bool throwIfMissing, IGenericContext? genericContext = null )
     {
-        var compilationModel = (CompilationModel) compilation;
+        using ( StackOverflowHelper.Detect() )
+        {
+            var compilationModel = (CompilationModel) compilation;
 
-        if ( options.FollowRedirections() && compilationModel.TryGetRedirectedDeclaration( this, out var redirected ) )
-        {
-            // Referencing redirected declaration.
-            if ( throwIfMissing )
-            {
-                return (T) redirected.GetTarget( compilation, options, genericContext );
-            }
-            else
-            {
-                return (T?) redirected.GetTargetOrNull( compilation, options, genericContext );
-            }
-        }
-        else
-        {
-            return this.Resolve( compilationModel, options, throwIfMissing, genericContext );
+            return this.Resolve( compilationModel, throwIfMissing, genericContext );
         }
     }
 
@@ -82,7 +69,6 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     protected abstract T? Resolve(
         CompilationModel compilation,
-        ReferenceResolutionOptions options,
         bool throwIfMissing,
         IGenericContext? genericContext );
 
@@ -98,21 +84,20 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         }
     }
 
-    protected static T? ConvertOrThrow( ICompilationElement? compilationElement, CompilationModel compilation )
+    protected static T? ConvertDeclarationOrThrow( ICompilationElement? compilationElement, CompilationModel compilation, bool throwOnError = true )
     {
-        if ( compilationElement == null )
+        var result = compilationElement switch
         {
-            return null;
-        }
+            null => null,
+            T desired => desired,
+            IProperty property when typeof(T) == typeof(IField) && property.OriginalField != null => (T) property.OriginalField,
+            IField field when typeof(T) == typeof(IProperty) && field.OverridingProperty != null => (T) field.OverridingProperty,
+            _ when throwOnError => throw new InvalidCastException(
+                $"Cannot convert the '{compilationElement}' {compilationElement.DeclarationKind.ToDisplayString()} into a {typeof(T).Name} within the compilation '{compilation.Identity}'." ),
+            _ => null
+        };
 
-        if ( compilationElement is not T safeCast )
-        {
-            // Throw an exception with a better exception message for better troubleshooting.
-            throw new InvalidOperationException(
-                $"Cannot convert '{compilationElement}' into a {typeof(T).Name} within the compilation '{compilation.Identity}'." );
-        }
-
-        return safeCast;
+        return result;
     }
 
     public abstract IRefImpl<TOut> As<TOut>()

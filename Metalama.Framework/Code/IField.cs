@@ -26,7 +26,12 @@ namespace Metalama.Framework.Code
         /// </summary>
         new IField Definition { get; }
 
-        // There is intentionally no ToRef() method returning an IRef<IField> because fields can be changed to property,
-        // e.g. returning IRef<IFieldOrProperty> is correct, which is that IFieldOrProperty.ToRef does.
+        new IRef<IField> ToRef();
+
+        /// <summary>
+        /// Gets the property that this field has been overridden into. The opposite side of this relationship is the <see cref="IProperty.OriginalField"/>
+        /// of the <see cref="IProperty"/> interface.
+        /// </summary>
+        IProperty? OverridingProperty { get; }
     }
 }

@@ -23,30 +23,36 @@ internal static class OverrideHelper
         IObjectReader tags,
         Action<ITransformation> addTransformation )
     {
-        if ( targetDeclaration is IField field )
+        switch ( targetDeclaration )
         {
-            var propertyBuilder = new PromotedField( serviceProvider, field, tags, advice );
-            addTransformation( propertyBuilder.ToTransformation() );
-            addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
+            case IField { OverridingProperty: { } overridingProperty }:
+                return OverrideProperty( serviceProvider, advice, overridingProperty, getTemplate, setTemplate, tags, addTransformation );
 
-            AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+            case IField field:
+                {
+                    var propertyBuilder = PromotedField.Create( serviceProvider, field, tags, advice );
+                    addTransformation( propertyBuilder.ToTransformation() );
+                    addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
 
-            return propertyBuilder;
-        }
-        else if ( targetDeclaration is IProperty property )
-        {
-            addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
+                    AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
 
-            if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
-            {
-                AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
-            }
+                    return propertyBuilder;
+                }
 
-            return property;
-        }
-        else
-        {
-            throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." );
+            case IProperty property:
+                {
+                    addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
+
+                    if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
+                    {
+                        AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+                    }
+
+                    return property;
+                }
+
+            default:
+                throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." );
         }
     }
 

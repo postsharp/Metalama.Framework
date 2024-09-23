@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -110,19 +111,22 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal override ICompilationElement? Translate(
             CompilationModel newCompilation,
-            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-            IGenericContext? genericContext = null )
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null )
         {
-            var translatedSymbol = newCompilation.CompilationContext.SymbolTranslator.Translate(
-                this.Symbol,
-                symbolCompilationContext: this.Compilation.CompilationContext );
-
-            if ( translatedSymbol == null )
+            using ( StackOverflowHelper.Detect() )
             {
-                return null;
-            }
+                var translatedSymbol = newCompilation.CompilationContext.SymbolTranslator.Translate(
+                    this.Symbol,
+                    symbolCompilationContext: this.Compilation.CompilationContext );
 
-            return newCompilation.Factory.GetCompilationElement( this.Symbol );
+                if ( translatedSymbol == null )
+                {
+                    return null;
+                }
+
+                return newCompilation.Factory.GetCompilationElement( this.Symbol, genericContext: genericContext );
+            }
         }
     }
 }

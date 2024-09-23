@@ -23,7 +23,7 @@ internal class SymbolIdRef<T> : StringRef<T>
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => new SymbolId( this.Id ).Resolve( compilationContext.Compilation, ignoreAssemblyKey ).AssertSymbolNotNull();
 
-    protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+    protected override T? Resolve( CompilationModel compilation, bool throwIfMissing, IGenericContext? genericContext )
     {
         var symbol = new SymbolId( this.Id ).Resolve( compilation.RoslynCompilation );
 
@@ -32,7 +32,7 @@ internal class SymbolIdRef<T> : StringRef<T>
             return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
         }
 
-        return ConvertOrThrow( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull(), compilation );
+        return ConvertDeclarationOrThrow( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull(), compilation );
     }
 
     public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new SymbolIdRef<TOut>( this.Id );

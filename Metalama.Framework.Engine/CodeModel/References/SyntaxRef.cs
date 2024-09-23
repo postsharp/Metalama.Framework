@@ -58,11 +58,10 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     protected override T? Resolve(
         CompilationModel compilation,
-        ReferenceResolutionOptions options,
         bool throwIfMissing,
         IGenericContext? genericContext )
     {
-        return ConvertOrThrow(
+        return ConvertDeclarationOrThrow(
             compilation.Factory.GetCompilationElement(
                     this.Symbol,
                     this.TargetKind,

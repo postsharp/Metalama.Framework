@@ -33,10 +33,10 @@ internal sealed class Attribute : IAttributeImpl
 
     public CompilationModel Compilation { get; }
 
-    public ICompilationElement Translate(
+    public ICompilationElement? Translate(
         CompilationModel newCompilation,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-        IGenericContext? genericContext = null )
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
         => throw new NotImplementedException();
 
     public AttributeData AttributeData { get; }
@@ -78,14 +78,12 @@ internal sealed class Attribute : IAttributeImpl
     [Memo]
     public INamedType Type
         => this.Compilation.Factory.GetNamedType(
-            this.AttributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ),
-            true );
+            this.AttributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ) );
 
     [Memo]
     public IConstructor Constructor
         => this.Compilation.Factory.GetConstructor(
-            this.AttributeData.AttributeConstructor.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ),
-            true );
+            this.AttributeData.AttributeConstructor.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ) );
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments

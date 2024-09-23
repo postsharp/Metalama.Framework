@@ -32,14 +32,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
 
         string IRefImpl.Name => throw new NotSupportedException();
-        
+
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
 
         SerializableDeclarationId IRefImpl.ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();
 
         IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => this as IRefImpl<TOut> ?? throw new NotSupportedException();
 
-        public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
+        public IAttribute GetTarget( ICompilation compilation, IGenericContext? genericContext = null )
         {
             if ( !this.TryGetTarget( (CompilationModel) compilation, genericContext, out var attribute ) )
             {
@@ -49,8 +49,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return attribute;
         }
 
-        ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
-            => this.GetTargetOrNull( compilation, options, genericContext );
+        ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext )
+            => this.GetTargetOrNull( compilation, genericContext );
 
         public IDurableRef<IAttribute> ToDurable() => throw new NotSupportedException();
 
@@ -58,10 +58,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         IRef IRefImpl.ToDurable() => this.ToDurable();
 
-        ICompilationElement IRef.GetTarget( ICompilation compilation, ReferenceResolutionOptions options, IGenericContext? genericContext )
-            => this.GetTarget( compilation, options, genericContext );
+        ICompilationElement IRef.GetTarget( ICompilation compilation, IGenericContext? genericContext ) => this.GetTarget( compilation );
 
-        public IAttribute? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default, IGenericContext? genericContext = null )
+        public IAttribute? GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext = null )
         {
             if ( !this.TryGetTarget( (CompilationModel) compilation, genericContext, out var attribute ) )
             {

@@ -115,7 +115,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public override ICompilationElement? Translate(
         CompilationModel newCompilation,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-        IGenericContext? genericContext = null )
-        => this.ReplacedImplicit?.GetTarget( newCompilation, options, genericContext ) ?? base.Translate( newCompilation, options, genericContext );
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => this.ReplacedImplicit?.GetTarget( newCompilation, genericContext ) ?? base.Translate( newCompilation, genericContext );
 }

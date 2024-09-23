@@ -433,22 +433,26 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
             // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
             // TODO: the target may have been removed from the
-            var replacedDeclaration = (IDeclaration) replaceMemberTransformation.ReplacedMember.GetTarget(
-                compilation,
-                ReferenceResolutionOptions.DoNotFollowRedirections );
+            var replacedDeclaration = (IDeclaration) replaceMemberTransformation.ReplacedMember.GetTarget( compilation );
 
-            replacedDeclaration = replacedDeclaration switch
+            replacedDeclaration = GetReplacedDeclarationRecursive( replacedDeclaration );
+
+            static IDeclaration GetReplacedDeclarationRecursive( IDeclaration d )
             {
-                BuiltDeclaration declaration => declaration.Builder,
-                _ => replacedDeclaration
-            };
+                return d switch
+                {
+                    BuiltDeclaration declaration => GetReplacedDeclarationRecursive( declaration.Builder ),
+                    PromotedField promotedField => promotedField.OriginalSourceFieldOrFieldBuilder,
+                    _ => d
+                };
+            }
 
             switch ( replacedDeclaration )
             {
-                case Field replacedField:
+                case Field sourceField:
                     var fieldSyntaxReference =
-                        replacedField.Symbol.GetPrimarySyntaxReference()
-                        ?? throw new AssertionFailedException( $"The field '{replacedField.Symbol}' does not have syntax." );
+                        sourceField.Symbol.GetPrimarySyntaxReference()
+                        ?? throw new AssertionFailedException( $"The field '{sourceField}' does not have syntax." );
 
                     var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
                     transformationCollection.AddRemovedSyntax( removedFieldSyntax );

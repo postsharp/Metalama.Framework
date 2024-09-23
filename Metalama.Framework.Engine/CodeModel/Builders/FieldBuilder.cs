@@ -52,15 +52,26 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     [Memo]
     public IMethod SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
-
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Ref;
-
     public override bool IsExplicitInterfaceImplementation => false;
 
     public override IMember? OverriddenMember => null;
 
+    public IProperty? OverridingProperty => null;
+
+    public new IRef<IField> ToRef() => this.Ref;
+
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
+
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Ref;
+
     public override IRef<IMember> ToMemberRef() => this.Ref;
+
+    [Memo]
+    public IRef<IField> Ref => this.RefFactory.FromBuilder<IField>( this );
+
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 
     public IInjectMemberTransformation ToTransformation()
     {
@@ -130,11 +141,4 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     public bool IsRequired { get; set; }
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
-
-    [Memo]
-    public IRef<IFieldOrProperty> Ref => this.RefFactory.FromBuilder<IFieldOrProperty>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

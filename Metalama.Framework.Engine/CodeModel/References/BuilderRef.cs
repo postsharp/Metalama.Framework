@@ -2,10 +2,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -18,8 +20,8 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     public BuilderRef( IDeclarationBuilder builder, GenericContext? genericContext, CompilationContext compilationContext )
     {
         Invariant.Assert(
-            typeof(T) == builder.DeclarationKind.GetRefInterfaceType(),
-            $"The interface type was expected to be {builder.DeclarationKind.GetRefInterfaceType()} but was {typeof(T)}." );
+            builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Contains( typeof(T) ),
+            $"The interface type was expected to be of type {builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes()} but was {typeof(T)}." );
 
         this.Builder = builder;
         this.GenericContext = genericContext ?? GenericContext.Empty;
@@ -86,11 +88,10 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     protected override T? Resolve(
         CompilationModel compilation,
-        ReferenceResolutionOptions options,
         bool throwIfMissing,
         IGenericContext? genericContext )
-        => ConvertOrThrow(
-            compilation.Factory.GetDeclaration( this.Builder, options, this.SelectGenericContext( genericContext ) ),
+        => ConvertDeclarationOrThrow(
+            compilation.Factory.GetDeclaration( this.Builder, this.SelectGenericContext( genericContext ), typeof(T) ),
             compilation );
 
     protected override bool EqualsCore( IRef? other, RefComparison options, IEqualityComparer<ISymbol> symbolComparer )
@@ -108,5 +109,13 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     public override string ToString() => this.Builder.ToString()!;
 
     public override IRefImpl<TOut> As<TOut>()
-        => (IRefImpl<TOut>) (object) this; // There should be no reason to upcast since we always create instances of the right type.
+        => this switch
+        {
+            IRefImpl<TOut> desired => desired,
+            IRef<IField> when this.Builder is PromotedField && typeof(TOut) == typeof(IProperty) =>
+                (IRefImpl<TOut>) (object) new BuilderRef<IProperty>( this.Builder, this.GenericContext, this.CompilationContext ),
+            IRef<IProperty> when this.Builder is PromotedField && typeof(TOut) == typeof(IField) =>
+                (IRefImpl<TOut>) (object) new BuilderRef<IField>( this.Builder, this.GenericContext, this.CompilationContext ),
+            _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
+        };
 }

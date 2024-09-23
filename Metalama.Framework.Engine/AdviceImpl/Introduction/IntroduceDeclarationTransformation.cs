@@ -37,5 +37,5 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
         => $"Introduce {this.IntroducedDeclaration.DeclarationKind} '{this.IntroducedDeclaration.ToDisplayString()}'.";
 
     public override string ToString()
-        => $"{{{this.GetType().Name} Builder={{{this.IntroducedDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}";
+        => $"{{{this.GetType().Name} Builder={{{this.IntroducedDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}}}";
 }

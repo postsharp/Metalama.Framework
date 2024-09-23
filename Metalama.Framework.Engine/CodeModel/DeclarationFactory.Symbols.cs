@@ -3,10 +3,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -14,48 +14,115 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public partial class DeclarationFactory
 {
-    private readonly ConcurrentDictionary<ISymbol, IDeclaration> _symbolCache;
+    private readonly Cache<ISymbol, IDeclaration> _symbolCache;
+
+// For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
+    private readonly Cache<ITypeSymbol, IType> _typeCache;
+
+    private readonly record struct CreateFromSymbolArgs<TSymbol>( TSymbol Symbol, DeclarationFactory Factory )
+    {
+        public CompilationModel Compilation => this.Factory._compilationModel;
+    }
+
+    private delegate TDeclaration CreateFromSymbolDelegate<out TDeclaration, TSymbol>( in CreateFromSymbolArgs<TSymbol> args );
+
+    private TDeclaration GetDeclarationFromSymbol<TDeclaration, TSymbol>(
+        TSymbol symbol,
+        CreateFromSymbolDelegate<TDeclaration, TSymbol> createDeclaration,
+        bool supportsRedirection = false )
+        where TSymbol : ISymbol
+        where TDeclaration : class, IDeclaration
+    {
+        using ( StackOverflowHelper.Detect() )
+        {
+            symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
+
+            return (TDeclaration) this._symbolCache.GetOrAdd(
+                symbol,
+                GenericContext.Empty,
+                typeof(TDeclaration),
+                static ( _, _, x ) =>
+                {
+                    if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
+                            x.me.CompilationContext.RefFactory.FromSymbol<TDeclaration>( x.symbol ),
+                            out var redirectedRef ) )
+                    {
+                        return redirectedRef.As<TDeclaration>().GetTarget( x.me._compilationModel );
+                    }
+
+                    return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me ) );
+                },
+                (me: this, symbol, createDeclaration, supportsRedirection) );
+        }
+    }
+
+    private TType GetTypeFromSymbol<TType, TSymbol>(
+        TSymbol symbol,
+        CreateFromSymbolDelegate<TType, TSymbol> createType,
+        bool supportsRedirection = false )
+        where TSymbol : ITypeSymbol
+        where TType : class, IType
+    {
+        using ( StackOverflowHelper.Detect() )
+        {
+            symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
+
+            return (TType) this._typeCache.GetOrAdd(
+                symbol,
+                GenericContext.Empty,
+                typeof(IType),
+                static ( a, b, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me ) ),
+                (me: this, symbol, createDeclaration: createType, supportsRedirection) );
+        }
+    }
 
     internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
-        => (INamespace) this._symbolCache.GetOrAdd(
+        => this.GetDeclarationFromSymbol<INamespace, INamespaceSymbol>(
             namespaceSymbol,
-            static ( l, c ) => new Namespace( (INamespaceSymbol) l, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<INamespaceSymbol> args ) => new Namespace( args.Symbol, args.Compilation ) );
 
     internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
-        => (IAssembly) this._symbolCache.GetOrAdd(
+        => this.GetDeclarationFromSymbol<IAssembly, IAssemblySymbol>(
             assemblySymbol,
-            static ( _, x )
-                => !x.assemblySymbol.Identity.Equals( x.me._compilationModel.RoslynCompilation.Assembly.Identity )
-                    ? new ExternalAssembly( x.assemblySymbol, x.me._compilationModel )
-                    : x.me._compilationModel,
-            (me: this, assemblySymbol) );
+            static ( in CreateFromSymbolArgs<IAssemblySymbol> args ) =>
+                !args.Symbol.Identity.Equals( args.Compilation.RoslynCompilation.Assembly.Identity )
+                    ? new ExternalAssembly( args.Symbol, args.Compilation )
+                    : args.Compilation );
 
     public IType GetIType( ITypeSymbol typeSymbol )
-        => this._typeCache.GetOrAdd(
-            typeSymbol,
-            static ( l, c ) => CodeModelFactory.CreateIType( l, c ),
-            this._compilationModel );
+        => typeSymbol switch
+        {
+            // TODO PERF: switch by SymbolKind.
+            INamedTypeSymbol namedType => this.GetNamedType( namedType ),
+            IArrayTypeSymbol arrayType => this.GetArrayType( arrayType ),
+            IPointerTypeSymbol pointerType => this.GetPointerType( pointerType ),
+            ITypeParameterSymbol typeParameter => this.GetTypeParameter( typeParameter ),
+            IDynamicTypeSymbol dynamicType => this.GetDynamicType( dynamicType ),
+            IFunctionPointerTypeSymbol functionPointerType => this.GetFunctionPointerType( functionPointerType ),
+            _ => throw new NotImplementedException( $"Types of kind {typeSymbol.Kind} are not implemented." )
+        };
 
     private IArrayType GetArrayType( IArrayTypeSymbol typeSymbol )
-        => (ArrayType) this._typeCache.GetOrAdd(
+        => this.GetTypeFromSymbol<IArrayType, IArrayTypeSymbol>(
             typeSymbol,
-            static ( s, c ) => new ArrayType( (IArrayTypeSymbol) s, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IArrayTypeSymbol> args ) => new ArrayType( args.Symbol, args.Compilation ) );
 
     private IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
-        => (DynamicType) this._typeCache.GetOrAdd(
+        => this.GetTypeFromSymbol<IDynamicType, IDynamicTypeSymbol>(
             typeSymbol,
-            static ( s, c ) => new DynamicType( (IDynamicTypeSymbol) s, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IDynamicTypeSymbol> args ) => new DynamicType( args.Symbol, args.Compilation ) );
 
     private IPointerType GetPointerType( IPointerTypeSymbol typeSymbol )
-        => (PointerType) this._typeCache.GetOrAdd(
+        => this.GetTypeFromSymbol<IPointerType, IPointerTypeSymbol>(
             typeSymbol,
-            static ( s, c ) => new PointerType( (IPointerTypeSymbol) s, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IPointerTypeSymbol> args ) => new PointerType( args.Symbol, args.Compilation ) );
 
-    public INamedType GetNamedType( INamedTypeSymbol typeSymbol, bool translateToCurrentCompilation = false, IGenericContext? genericContext = null )
+    private IFunctionPointerType GetFunctionPointerType( IFunctionPointerTypeSymbol typeSymbol )
+        => this.GetTypeFromSymbol<IFunctionPointerType, IFunctionPointerTypeSymbol>(
+            typeSymbol,
+            static ( in CreateFromSymbolArgs<IFunctionPointerTypeSymbol> args ) => new FunctionPointerType( args.Symbol, args.Compilation ) );
+
+    public INamedType GetNamedType( INamedTypeSymbol typeSymbol, IGenericContext? genericContext = null )
     {
         // Roslyn considers the type in e.g. typeof(List<>) to be different from e.g. List<T>.
         // That distinction makes things more complicated for us (e.g. it's not representable using Type), so get rid of it.
@@ -64,86 +131,65 @@ public partial class DeclarationFactory
             typeSymbol = typeSymbol.ConstructedFrom;
         }
 
-        if ( translateToCurrentCompilation )
-        {
-            typeSymbol = typeSymbol.TranslateIfNecessary( this.CompilationContext );
-        }
-        else
-        {
-            typeSymbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
-        }
-
-        return (INamedType) this._typeCache.GetOrAdd(
+        return this.GetTypeFromSymbol<INamedType, INamedTypeSymbol>(
             typeSymbol,
-            static ( s, c ) => new NamedType( (INamedTypeSymbol) s, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<INamedTypeSymbol> args ) =>
+                new NamedType( args.Symbol, args.Compilation ) );
     }
 
-    public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-        => (TypeParameter) this._typeCache.GetOrAdd(
+    public ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol )
+        => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
             typeParameterSymbol,
-            static ( tp, c ) => new TypeParameter( (ITypeParameterSymbol) tp, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
+                new TypeParameter( args.Symbol, args.Compilation ) );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
     {
         // Standardize on the partial definition part for partial methods.
         methodSymbol = methodSymbol.PartialDefinitionPart ?? methodSymbol;
 
-        return (IMethod) this._symbolCache.GetOrAdd(
+        return this.GetDeclarationFromSymbol<IMethod, IMethodSymbol>(
             methodSymbol,
-            static ( ms, c ) => new Method( (IMethodSymbol) ms, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IMethodSymbol> args ) =>
+                new Method( args.Symbol, args.Compilation ) );
     }
 
     public IProperty GetProperty( IPropertySymbol propertySymbol )
-        => (IProperty) this._symbolCache.GetOrAdd(
+        => this.GetDeclarationFromSymbol<IProperty, IPropertySymbol>(
             propertySymbol,
-            static ( ms, c ) => new Property( (IPropertySymbol) ms, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IPropertySymbol> args ) =>
+                new Property( args.Symbol, args.Compilation ) );
 
     public IIndexer GetIndexer( IPropertySymbol propertySymbol )
-        => (IIndexer) this._symbolCache.GetOrAdd(
+        => this.GetDeclarationFromSymbol<IIndexer, IPropertySymbol>(
             propertySymbol,
-            static ( ms, c ) => new Indexer( (IPropertySymbol) ms, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IPropertySymbol> args ) =>
+                new Indexer( args.Symbol, args.Compilation ) );
 
     public IField GetField( IFieldSymbol fieldSymbol )
-        => (IField) this._symbolCache.GetOrAdd(
+        => this.GetDeclarationFromSymbol<IField, IFieldSymbol>(
             fieldSymbol,
-            static ( ms, c ) => new Field( (IFieldSymbol) ms, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IFieldSymbol> args ) =>
+                new Field( args.Symbol, args.Compilation ),
+            true );
 
-    public IConstructor GetConstructor( IMethodSymbol methodSymbol, bool translateToCurrentCompilation = false )
-    {
-        if ( translateToCurrentCompilation )
-        {
-            methodSymbol = methodSymbol.TranslateIfNecessary( this.CompilationContext );
-        }
-
-        return (IConstructor) this._symbolCache.GetOrAdd(
+    public IConstructor GetConstructor( IMethodSymbol methodSymbol )
+        => this.GetDeclarationFromSymbol<IConstructor, IMethodSymbol>(
             methodSymbol,
-            static ( ms, c ) => new Constructor( (IMethodSymbol) ms, c ),
-            this._compilationModel );
-    }
-
-    public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
-        => (IMethod) this._symbolCache.GetOrAdd(
-            finalizerSymbol,
-            static ( ms, c ) => new Method( (IMethodSymbol) ms, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IMethodSymbol> args ) =>
+                new Constructor( args.Symbol, args.Compilation ) );
 
     public IParameter GetParameter( IParameterSymbol parameterSymbol )
-        => (IParameter) this._symbolCache.GetOrAdd(
+        => this.GetDeclarationFromSymbol<IParameter, IParameterSymbol>(
             parameterSymbol,
-            static ( ms, c ) => new Parameter( (IParameterSymbol) ms, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IParameterSymbol> args ) =>
+                new Parameter( args.Symbol, args.Compilation ) );
 
     public IEvent GetEvent( IEventSymbol eventSymbol )
-        => (IEvent) this._symbolCache.GetOrAdd(
+        => this.GetDeclarationFromSymbol<IEvent, IEventSymbol>(
             eventSymbol,
-            static ( ms, c ) => new Event( (IEventSymbol) ms, c ),
-            this._compilationModel );
+            static ( in CreateFromSymbolArgs<IEventSymbol> args ) =>
+                new Event( args.Symbol, args.Compilation ) );
 
     public bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
     {
@@ -175,7 +221,8 @@ public partial class DeclarationFactory
     internal ICompilationElement? GetCompilationElement(
         ISymbol symbol,
         RefTargetKind targetKind = RefTargetKind.Default,
-        IGenericContext? genericContext = null )
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
     {
         switch ( symbol.Kind )
         {
@@ -223,9 +270,8 @@ public partial class DeclarationFactory
                             RefTargetKind.Parameter => this.GetParameter( method.Parameters[0] ),
                             RefTargetKind.Default => method.GetDeclarationKind( this.CompilationContext ) switch
                             {
-                                DeclarationKind.Method => this.GetMethod( method ),
+                                DeclarationKind.Method or DeclarationKind.Finalizer => this.GetMethod( method ),
                                 DeclarationKind.Constructor => this.GetConstructor( method ),
-                                DeclarationKind.Finalizer => this.GetFinalizer( method ),
                                 _ => throw new AssertionFailedException(
                                     $"Unexpected DeclarationRefTargetKind: {method.GetDeclarationKind( this.CompilationContext )}." )
                             },
@@ -274,7 +320,7 @@ public partial class DeclarationFactory
                 }
 
             case SymbolKind.TypeParameter:
-                return this.GetGenericParameter( (ITypeParameterSymbol) mappedSymbol );
+                return this.GetTypeParameter( (ITypeParameterSymbol) mappedSymbol );
 
             case SymbolKind.Parameter:
                 return this.GetParameter( (IParameterSymbol) mappedSymbol );

@@ -117,10 +117,10 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
 
-        internal override ICompilationElement Translate(
+        internal override ICompilationElement? Translate(
             CompilationModel newCompilation,
-            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-            IGenericContext? genericContext = null )
-            => newCompilation.Factory.Translate( this.DeclaringMember, options, genericContext ).AssertNotNull().Parameters[this.Index];
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null )
+            => newCompilation.Factory.Translate( this.DeclaringMember, genericContext ).AssertNotNull().Parameters[this.Index];
     }
 }

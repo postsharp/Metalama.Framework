@@ -31,14 +31,14 @@ internal class TypeIdRef<T> : StringRef<T>
         return symbol;
     }
 
-    protected override T? Resolve( CompilationModel compilation, ReferenceResolutionOptions options, bool throwIfMissing, IGenericContext? genericContext )
+    protected override T? Resolve( CompilationModel compilation, bool throwIfMissing, IGenericContext? genericContext )
     {
         if ( !compilation.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( this.Id ), out var symbol ) )
         {
             return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
         }
 
-        return ConvertOrThrow( symbol, compilation );
+        return ConvertDeclarationOrThrow( symbol, compilation );
     }
 
     public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new TypeIdRef<TOut>( this.Id );

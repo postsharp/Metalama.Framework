@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -53,67 +54,73 @@ internal static class CodeModelInternalExtensions
 
     public static InsertPosition ToInsertPosition( this IDeclaration declaration )
     {
-        switch ( declaration )
+        using ( StackOverflowHelper.Detect() )
         {
-            case BuiltDeclaration builtDeclaration:
-                return builtDeclaration.Builder.ToInsertPosition();
+            switch ( declaration )
+            {
+                case BuiltDeclaration builtDeclaration:
+                    return builtDeclaration.Builder.ToInsertPosition();
 
-            // TODO: This is a hack (since splitting transformations and builders).
-            // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
-            case PromotedField promotedField:
-                return promotedField.OriginalField.ToInsertPosition();
+#pragma warning disable CS0618 // Type or member is obsolete
 
-            case NamedTypeBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
-                return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
+                // TODO: This is a hack (since splitting transformations and builders).
+                // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
+                case PromotedField promotedField:
+                    return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
+#pragma warning restore CS0618 // Type or member is obsolete
 
-            case NamedTypeBuilder { DeclaringType: BuiltNamedType builtNamedType }:
-                return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
+                case NamedTypeBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
+                    return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
 
-            case NamedTypeBuilder { DeclaringType: { } declaringType }:
-                return new InsertPosition(
-                    InsertPositionRelation.Within,
-                    (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+                case NamedTypeBuilder { DeclaringType: BuiltNamedType builtNamedType }:
+                    return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
 
-            case NamedTypeBuilder topLevelType:
-                return new InsertPosition( topLevelType.PrimarySyntaxTree );
+                case NamedTypeBuilder { DeclaringType: { } declaringType }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within,
+                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
-            case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
-                return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
+                case NamedTypeBuilder topLevelType:
+                    return new InsertPosition( topLevelType.PrimarySyntaxTree );
 
-            case IMemberBuilder { DeclaringType: BuiltNamedType builtNamedType }:
-                return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
+                case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
+                    return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
 
-            case IMemberBuilder { DeclaringType: { } declaringType }:
-                return new InsertPosition(
-                    InsertPositionRelation.Within,
-                    (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+                case IMemberBuilder { DeclaringType: BuiltNamedType builtNamedType }:
+                    return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
 
-            case SymbolBasedDeclaration baseDeclaration:
-                var symbol = baseDeclaration.Symbol;
-                var primaryDeclaration = symbol.GetPrimaryDeclaration();
+                case IMemberBuilder { DeclaringType: { } declaringType }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within,
+                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
-                if ( primaryDeclaration != null )
-                {
-                    var memberDeclaration = primaryDeclaration.FindMemberDeclaration();
+                case SymbolBasedDeclaration baseDeclaration:
+                    var symbol = baseDeclaration.Symbol;
+                    var primaryDeclaration = symbol.GetPrimaryDeclaration();
 
-                    if ( memberDeclaration is BaseTypeDeclarationSyntax )
+                    if ( primaryDeclaration != null )
                     {
-                        return new InsertPosition( InsertPositionRelation.Within, memberDeclaration );
+                        var memberDeclaration = primaryDeclaration.FindMemberDeclaration();
+
+                        if ( memberDeclaration is BaseTypeDeclarationSyntax )
+                        {
+                            return new InsertPosition( InsertPositionRelation.Within, memberDeclaration );
+                        }
+                        else
+                        {
+                            return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+                        }
                     }
                     else
                     {
-                        return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
+
+                        return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
                     }
-                }
-                else
-                {
-                    var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
 
-                    return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
-                }
-
-            default:
-                throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
+            }
         }
     }
 

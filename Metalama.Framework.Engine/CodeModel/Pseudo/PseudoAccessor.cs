@@ -168,9 +168,9 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public ICompilationElement? Translate(
         CompilationModel newCompilation,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-        IGenericContext? genericContext = null )
-        => newCompilation.Factory.Translate( this.DeclaringMember, options, genericContext ).AssertNotNull().GetAccessor( this.MethodKind );
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => newCompilation.Factory.Translate( this.DeclaringMember, genericContext ).AssertNotNull().GetAccessor( this.MethodKind );
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
 

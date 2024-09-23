@@ -61,11 +61,6 @@ namespace Metalama.Framework.Code
         IAttributeCollection Attributes { get; }
 
         /// <summary>
-        /// Gets the kind of declaration.
-        /// </summary>
-        DeclarationKind DeclarationKind { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the member is implicitly declared, i.e. declared without being represented in source code.
         /// Returns <c>false</c> if it is explicitly declared in code.
         /// </summary>

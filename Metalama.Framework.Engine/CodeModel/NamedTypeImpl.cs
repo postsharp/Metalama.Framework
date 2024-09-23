@@ -261,7 +261,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
         if ( symbol != null )
         {
-            return this.Compilation.Factory.GetFinalizer( symbol );
+            return this.Compilation.Factory.GetMethod( symbol );
         }
 
         return null;

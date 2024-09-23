@@ -406,13 +406,15 @@ public sealed partial class CompilationModel
             return;
         }
 
-        var replaced = transformation.ReplacedMember;
+        var replacedRef = transformation.ReplacedMember;
+        var replaced = replacedRef.GetTarget( this );
+        this.Factory.Invalidate( replaced );
 
-        switch ( replaced.GetTarget( this ) )
+        switch ( replaced )
         {
             case IConstructor { IsStatic: false } replacedConstructor:
                 var constructors = this.GetConstructorCollection( replacedConstructor.DeclaringType.ToRef(), true );
-                constructors.Remove( replaced.As<IConstructor>() );
+                constructors.Remove( replacedRef.As<IConstructor>() );
 
                 break;
 
@@ -422,12 +424,12 @@ public sealed partial class CompilationModel
 
             case IField replacedField:
                 var fields = this.GetFieldCollection( replacedField.DeclaringType.ToRef(), true );
-                fields.Remove( replaced.As<IFieldOrProperty>() );
+                fields.Remove( replacedRef.As<IFieldOrProperty>() );
 
                 break;
 
             default:
-                throw new AssertionFailedException( $"Unexpected declaration: '{replaced.GetTarget( this )}'." );
+                throw new AssertionFailedException( $"Unexpected declaration: '{replaced}'." );
         }
 
         // Update the redirection cache.

@@ -423,7 +423,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IDeclaration? ContainingDeclaration => null;
 
-        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
+        DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.Compilation;
 
         public override bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 

@@ -18,11 +18,13 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public CompilationModel Compilation { get; }
 
+        DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.Type;
+
         public ICompilationElement? Translate(
             CompilationModel newCompilation,
-            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-            IGenericContext? genericContext = null )
-            => newCompilation.Factory.GetCompilationElement( this.Symbol );
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null )
+            => newCompilation.Factory.GetCompilationElement( this.Symbol, RefTargetKind.Default, genericContext, interfaceType );
 
         ISymbol ISymbolBasedCompilationElement.Symbol => this.Symbol;
 

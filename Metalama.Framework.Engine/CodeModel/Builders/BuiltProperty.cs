@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
@@ -10,11 +11,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
+internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 {
     public PropertyBuilder PropertyBuilder { get; }
 
-    public BuiltProperty( CompilationModel compilation, PropertyBuilder builder, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltProperty( PropertyBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.PropertyBuilder = builder;
     }
@@ -71,5 +72,24 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
     [Memo]
-    public IField? OriginalField => this.MapDeclaration( (IFieldOrProperty?) this.PropertyBuilder.OriginalField ) as IField;
+    public IField? OriginalField => this.GetOriginalField();
+
+    private IField? GetOriginalField()
+    {
+        using ( StackOverflowHelper.Detect() )
+        {
+            // Intentionally not using MapDeclaration to avoid the strong typing.
+
+            var originalField = (IFieldBuilder?) this.PropertyBuilder.OriginalField;
+
+            if ( originalField != null )
+            {
+                return this.Compilation.Factory.GetField( originalField, this.GenericContext );
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
 }

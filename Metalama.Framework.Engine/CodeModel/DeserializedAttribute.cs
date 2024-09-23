@@ -32,10 +32,10 @@ internal class DeserializedAttribute : IAttributeImpl
 
     internal CompilationModel Compilation { get; }
 
-    public ICompilationElement Translate(
+    public ICompilationElement? Translate(
         CompilationModel newCompilation,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default,
-        IGenericContext? genericContext = null )
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
         => throw new NotImplementedException();
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
@@ -68,7 +68,7 @@ internal class DeserializedAttribute : IAttributeImpl
 
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
-    DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Attribute;
+    DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.Attribute;
 
     bool IDeclaration.IsImplicitlyDeclared => false;
 
