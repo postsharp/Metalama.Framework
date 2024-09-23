@@ -10,8 +10,9 @@ internal class C<T>
   private C(T x)
   {
   }
-  private void IntroducedMethod()
+  private T IntroducedMethod(T arg)
   {
+    return default;
   }
   public void PrintBaseConstructors()
   {
@@ -38,7 +39,7 @@ internal class D : C<int>
   }
   public new void PrintBaseMethods()
   {
-    global::System.Console.WriteLine("C<int>.IntroducedMethod()");
+    global::System.Console.WriteLine("C<int>.IntroducedMethod(int)");
     global::System.Console.WriteLine("C<int>.M()");
     global::System.Console.WriteLine("C<int>.PrintBaseConstructors()");
     global::System.Console.WriteLine("C<int>.PrintBaseMethods()");

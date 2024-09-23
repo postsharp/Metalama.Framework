@@ -21,15 +21,23 @@ public class IntroductionAspect : TypeAspect
             {
                 c.Parameters[0].Type = builder.Target.TypeArguments[0];
             } );
+
+        builder.IntroduceMethod(
+            nameof(IntroducedMethod),
+            buildMethod: m =>
+            {
+                m.ReturnType = builder.Target.TypeArguments[0];
+                m.Parameters[0].Type = builder.Target.TypeArguments[0];
+            } );
     }
 
     [Template]
     void ConstructorTemplate( dynamic x ) { }
 
-    [Introduce]
-    void IntroducedMethod()
+    [Template]
+    dynamic IntroducedMethod( dynamic arg )
     {
-        
+        return default;
     }
 }
 
