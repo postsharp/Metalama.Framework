@@ -5,10 +5,14 @@ using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal abstract class MemberCollection<TMember> : MemberCollection<TMember, IRef<TMember>>
+internal abstract class MemberCollection<TMember> : MemberOrNamedTypeCollection<TMember>
     where TMember : class, IMember
 {
-    protected MemberCollection( INamedType declaringType, ISourceDeclarationCollection<TMember> sourceItems ) : base(
-        declaringType,
-        sourceItems ) { }
+    public INamedType DeclaringType { get; }
+
+    protected MemberCollection( INamedType declaringType, ISourceDeclarationCollection<TMember> sourceItems )
+        : base( declaringType, sourceItems )
+    {
+        this.DeclaringType = declaringType;
+    }
 }
