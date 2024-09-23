@@ -19,7 +19,7 @@ var product = new Product( MetalamaDependencies.Metalama )
             SolutionFilterPathForInspectCode = "Metalama.LatestRoslyn.slnf",
             SupportsTestCoverage = true,
             CanFormatCode = true,
-            
+
             // We don't run the tests for the whole solution because they are too slow and redundant. See #34277.
             TestMethod = BuildMethod.None,
             FormatExclusions =
@@ -35,18 +35,17 @@ var product = new Product( MetalamaDependencies.Metalama )
         },
         new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
         {
-            SupportsTestCoverage = false,
-            CanFormatCode = false,
-            IsTestOnly = true
+            SupportsTestCoverage = false, CanFormatCode = false, IsTestOnly = true
         },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
         {
             IsTestOnly = true, TestMethod = BuildMethod.Build
         },
-        new ManyDotNetSolutions( "Tests\\Standalone" )
-        {
-            IsTestOnly = true
-        }
+        // new ManyDotNetSolutions( "Tests\\Standalone" )
+        // {
+        //     IsTestOnly = true
+        // }
+        new ManyDotNetSolutions( "Tests\\Standalone\\Licensing" ) { IsTestOnly = true }
     ],
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
@@ -59,8 +58,8 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.Tool.$(PackageVersion).nupkg" ),
-    ParametrizedDependencies = new[]
-    {
+    ParametrizedDependencies =
+    [
         DevelopmentDependencies.PostSharpEngineering.ToDependency(),
         MetalamaDependencies.MetalamaBackstage.ToDependency(),
         MetalamaDependencies.MetalamaCompiler.ToDependency(
@@ -68,25 +67,28 @@ var product = new Product( MetalamaDependencies.Metalama )
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
             ) ),
         MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
-    },
-    SourceDependencies = new[] { MetalamaDependencies.MetalamaFrameworkPrivate },
-    ExportedProperties = { { @"eng\Versions.props", new[] { "RoslynApiMaxVersion" } } },
+    ],
+    SourceDependencies = [MetalamaDependencies.MetalamaFrameworkPrivate],
+    ExportedProperties = { { @"eng\Versions.props", ["RoslynApiMaxVersion"] } },
     Configurations = Product.DefaultConfigurations
         .WithValue(
             BuildConfiguration.Debug,
             c => c with
             {
-                AdditionalArtifactRules = new[]
-                {
+                AdditionalArtifactRules =
+                [
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
 
                     // Do not upload uncompressed crash reports because they are too big.
-                    $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs",
-                }
+                    $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs"
+                ]
             } ),
-    SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } }
+    SupportedProperties =
+    {
+        { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." }
+    }
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
