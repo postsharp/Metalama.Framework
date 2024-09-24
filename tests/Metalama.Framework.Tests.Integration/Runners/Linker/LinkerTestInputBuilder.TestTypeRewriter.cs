@@ -3,6 +3,7 @@
 using FakeItEasy;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advising;
@@ -41,6 +42,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPosition? _currentInsertPosition;
             private int _nextTransformationOrdinal;
+            private int _nextDeclarationOrdinal;
 
             public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
 
@@ -411,6 +413,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     o =>
                     {
                         _ = o
+                            .Strict()
                             .Named( $"IInjectMemberTransformation({node.Span.Start})" )
                             .Implements<ITransformation>()
                             .Implements<IInjectMemberTransformation>()
@@ -438,8 +441,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 switch ( declarationKind )
                 {
                     case DeclarationKind.Method:
-                        //A.CallTo( () => ((IRefImpl<IMethod>) transformation).Target ).Returns( transformation );
-
                         A.CallTo(
                                 () => ((IRefImpl<IMethod>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
@@ -449,51 +450,78 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         break;
 
                     case DeclarationKind.Property:
-                        // A.CallTo( () => ((IRefImpl<IProperty>) transformation).Target ).Returns( transformation );
-
                         A.CallTo(
                                 () => ((IRefImpl<IProperty>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
                                     null ) )
                             .Returns( (IProperty) transformation );
 
-                        A.CallTo( () => ((IProperty) transformation).GetMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "GetMethod" ) ) );
-                        A.CallTo( () => ((IProperty) transformation).SetMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "SetMethod" ) ) );
+                        var getAccessor = A.Fake<IMethodImpl>( m => m.Named( "GetMethod" ) );
+                        var setAccessor = A.Fake<IMethodImpl>( m => m.Named( "SetMethod" ) );
+
+                        A.CallTo( () => ((IProperty) transformation).Accessors ).Returns( new[] { getAccessor, setAccessor } );
+                        A.CallTo( () => ((IProperty) transformation).GetMethod ).Returns( getAccessor );
+                        A.CallTo( () => ((IProperty) transformation).SetMethod ).Returns( setAccessor );
+                        A.CallTo( () => ((IProperty) transformation).IsAutoPropertyOrField ).Returns( false );
 
                         break;
 
                     case DeclarationKind.Event:
-                        //A.CallTo( () => ((IRefImpl<IEvent>) transformation).Target ).Returns( transformation );
-
                         A.CallTo(
                                 () => ((IRefImpl<IEvent>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
                                     null ) )
                             .Returns( (IEvent) transformation );
 
-                        A.CallTo( () => ((IEvent) transformation).AddMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "AddMethod" ) ) );
-                        A.CallTo( () => ((IEvent) transformation).RemoveMethod ).Returns( A.Fake<IMethodImpl>( m => m.Named( "RemoveMethod" ) ) );
+                        var addAccessor = A.Fake<IMethodImpl>( m => m.Named( "AddMethod" ) );
+                        var removeAccessor = A.Fake<IMethodImpl>( m => m.Named( "RemoveMethod" ) );
+
+                        A.CallTo( () => ((IEvent) transformation).Accessors ).Returns( new[] { addAccessor, removeAccessor } );
+                        A.CallTo( () => ((IEvent) transformation).AddMethod ).Returns( addAccessor );
+                        A.CallTo( () => ((IEvent) transformation).RemoveMethod ).Returns( removeAccessor );
 
                         break;
 
                     case DeclarationKind.Field:
-                        //A.CallTo( () => ((IRefImpl<IField>) transformation).Target ).Returns( transformation );
-
                         A.CallTo(
                                 () => ((IRefImpl<IField>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
                                     null ) )
                             .Returns( (IField) transformation );
 
+                        var pseudoGetAccessor = A.Fake<IMethodImpl>( m => m.Named( "PseudoGetMethod" ) );
+                        var pseudoSetAccessor = A.Fake<IMethodImpl>( m => m.Named( "PseudoSetMethod" ) );
+
+                        A.CallTo( () => ((IField) transformation).Accessors ).Returns( new[] { pseudoGetAccessor, pseudoSetAccessor } );
+                        A.CallTo( () => ((IField) transformation).GetMethod ).Returns( pseudoGetAccessor );
+                        A.CallTo( () => ((IField) transformation).SetMethod ).Returns( pseudoSetAccessor );
+                        A.CallTo( () => ((IField) transformation).IsAutoPropertyOrField ).Returns( true );
+
                         break;
                 }
 
+                var declarationOrdinal = this._nextDeclarationOrdinal++;
+
+                A.CallTo( () => transformation.Observability ).Returns( TransformationObservability.None );
                 A.CallTo( () => ((ISdkDeclaration) transformation).Symbol ).Returns( null );
-                A.CallTo( () => ((IDeclaration) transformation).DeclarationKind ).Returns( declarationKind );
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( $"Introduced {declarationKind}" );
+
+                A.CallTo( () => transformation.OrderWithinPipeline ).Returns( 0 );
+                A.CallTo( () => transformation.OrderWithinPipelineStepAndType ).Returns( 0 );
+                A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( 0 );
+
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
                 A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder) transformation );
+
+                A.CallTo( () => ((IDeclaration) transformation).DeclarationKind ).Returns( declarationKind );
+                A.CallTo( () => ((IDeclaration) transformation).ToRef() ).Returns( (IRef<IDeclaration>)transformation );
+                A.CallTo( () => ((IMember) transformation).IsExplicitInterfaceImplementation).Returns( false);
+
+                A.CallTo( () => transformation.Equals( A<object>._ ) ).ReturnsLazily( x => ReferenceEquals( x.Arguments[0], transformation ) );
+                A.CallTo( () => transformation.GetHashCode() ).Returns( declarationOrdinal );
+                A.CallTo( () => ((IRef) transformation).Equals( A<IRef>._, A<RefComparison>._ ) ).ReturnsLazily( x => ReferenceEquals( x.Arguments[0], transformation ) );
+                A.CallTo( () => ((IRef) transformation).GetHashCode( A<RefComparison>._ ) ).Returns( declarationOrdinal );
 
                 A.CallTo( () => transformation.TargetDeclaration ).ReturnsLazily( () => ((IMemberBuilder) transformation).DeclaringType );
 
@@ -695,7 +723,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
-                A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( this._nextTransformationOrdinal++ );
+
+                var ordinal = this._nextTransformationOrdinal++;
+
+                A.CallTo( () => transformation.OrderWithinPipeline ).Returns( 0 );
+                A.CallTo( () => transformation.OrderWithinPipelineStepAndType ).Returns( 0 );
+                A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( ordinal );
 
                 A.CallTo( () => transformation.TargetDeclaration )
                     .ReturnsLazily( () => (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
