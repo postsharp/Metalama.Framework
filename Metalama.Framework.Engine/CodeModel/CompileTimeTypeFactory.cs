@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel
                     "Cannot get a System.Type for the 'dynamic[]' type." ),
                 _ => this.Get( symbol.GetSerializableTypeId( true ).Id, symbol )
             };
+        
+        // TODO: Backward compatibility with SymbolId-backed types.
 
         private CompileTimeType Get( string id, ITypeSymbol symbolForMetadata )
         {

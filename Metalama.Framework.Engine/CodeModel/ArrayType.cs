@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;

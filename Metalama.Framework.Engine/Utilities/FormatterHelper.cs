@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.Utilities;
 
 internal static class FormatterHelper
 {

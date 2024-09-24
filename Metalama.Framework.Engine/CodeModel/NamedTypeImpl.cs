@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;

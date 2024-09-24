@@ -19,12 +19,16 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 {
     public BuilderRef( IDeclarationBuilder builder, GenericContext? genericContext, CompilationContext compilationContext )
     {
+        // Type parameter must match the builder type.
         Invariant.Assert(
             builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Contains( typeof(T) ),
             $"The interface type was expected to be of type {builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes()} but was {typeof(T)}." );
 
         // Constructor replacements must be resolved upstream.
         Invariant.Assert( builder is not ConstructorBuilder { ReplacedImplicitConstructor: not null } );
+        
+        // References to promoted fields must be a SymbolRef to the IFieldSymbol if it is an IRef<IField>.
+        Invariant.Assert( !(typeof(T) == typeof(IField) && builder is PromotedField ));
 
         this.Builder = builder;
         this.GenericContext = genericContext ?? GenericContext.Empty;
@@ -118,10 +122,10 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         => this switch
         {
             IRefImpl<TOut> desired => desired,
-            IRef<IField> when this.Builder is PromotedField && typeof(TOut) == typeof(IProperty) =>
-                (IRefImpl<TOut>) (object) new BuilderRef<IProperty>( this.Builder, this.GenericContext, this.CompilationContext ),
-            IRef<IProperty> when this.Builder is PromotedField && typeof(TOut) == typeof(IField) =>
-                (IRefImpl<TOut>) (object) new BuilderRef<IField>( this.Builder, this.GenericContext, this.CompilationContext ),
-            _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
+            IRef<IField> when this.Builder is PromotedField promotedField && typeof(TOut) == typeof(IProperty) =>
+                (IRefImpl<TOut>) promotedField.Ref.WithGenericContext( this.GenericContext ),
+            IRef<IProperty> when this.Builder is PromotedField promotedField && typeof(TOut) == typeof(IField) =>
+                (IRefImpl<TOut>) promotedField.FieldRef.WithGenericContext( this.GenericContext ),
+                 _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
         };
 }

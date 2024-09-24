@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.Visitors;
 
 internal abstract class TypeSymbolRewriter
 {

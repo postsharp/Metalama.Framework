@@ -28,7 +28,7 @@ namespace Metalama.Framework.Code
         SerializableDeclarationId ToSerializableId();
 
         /// <summary>
-        /// Up-type the reference. This method can be used in two scenarios: instead of a C# cast with durable references (see <see cref="IsDurable"/>),
+        /// Changes the reference type. This method can be used in two scenarios: instead of a C# cast with durable references (see <see cref="IsDurable"/>),
         /// or between <see cref="IField"/> and <see cref="IProperty"/> when a field is overridden into a property (see <see cref="IField.OverridingProperty"/>
         /// and <see cref="IProperty.OriginalField"/>).
         /// </summary>

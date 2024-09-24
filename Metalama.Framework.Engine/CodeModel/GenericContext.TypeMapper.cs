@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using System;
 using System.Linq;
 

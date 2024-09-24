@@ -25,11 +25,21 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public IRef<TCodeElement> FromBuilder<TCodeElement>( IDeclarationBuilder builder, GenericContext? genericMap = null )
-            where TCodeElement : class, IDeclaration
-            => new BuilderRef<TCodeElement>( builder, genericMap, this._compilationContext );
+        public CompilationBoundRef<T> FromBuilder<T>( IDeclarationBuilder builder, GenericContext? genericContext = null )
+            where T : class, IDeclaration
+        {
+            if ( typeof(T) == typeof(IField) && builder is PromotedField promotedField )
+            {
+                return (CompilationBoundRef<T>) ((ICompilationBoundRefImpl) promotedField.OriginalSourceFieldOrFieldBuilder.ToRef())
+                    .WithGenericContext( genericContext ?? GenericContext.Empty );
+            }
+            else
+            {
+                return new BuilderRef<T>( builder, genericContext, this._compilationContext );
+            }
+        }
 
-        public IRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
+        public CompilationBoundRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
             where T : class, IDeclaration
             => this.FromBuilder<T>( builtDeclaration.Builder, builtDeclaration.GenericContext );
 
@@ -61,7 +71,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-        public IRef<IMethod> PseudoAccessor( IMethod accessor )
+        public SymbolRef<IMethod> PseudoAccessor( IMethod accessor )
         {
             Invariant.Assert( accessor.IsImplicitlyDeclared );
             Invariant.Assert( accessor.GetCompilationContext() == this._compilationContext );
@@ -77,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 accessor.MethodKind.ToDeclarationRefTargetKind() );
         }
 
-        public IRef<IParameter> PseudoParameter( IParameter pseudoParameter )
+        public SymbolRef<IParameter> PseudoParameter( IParameter pseudoParameter )
         {
             Invariant.Assert( pseudoParameter.GetCompilationContext() == this._compilationContext );
 
@@ -108,23 +118,23 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
-        public IRef<T> FromSymbol<T>(
+        public SymbolRef<T> FromSymbol<T>(
             ISymbol symbol,
             RefTargetKind targetKind = RefTargetKind.Default )
             where T : class, ICompilationElement
             => new SymbolRef<T>( symbol, this._compilationContext, targetKind );
 
-        public IRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol )
+        public SymbolRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol )
             => new SymbolRef<IParameter>( methodSymbol, this._compilationContext, RefTargetKind.Return );
 
-        internal IRef<ICompilation> Compilation( CompilationContext compilationContext )
+        internal SymbolRef<ICompilation> Compilation( CompilationContext compilationContext )
         {
             Invariant.Assert( compilationContext == this._compilationContext );
 
             return this.FromSymbol<ICompilation>( compilationContext.Compilation.Assembly );
         }
 
-        public IRef<T> FromSymbolBasedDeclaration<T>( SymbolBasedDeclaration declaration )
+        public SymbolRef<T> FromSymbolBasedDeclaration<T>( SymbolBasedDeclaration declaration )
             where T : class, IDeclaration
         {
             Invariant.Assert( declaration.GetCompilationContext() == this._compilationContext );

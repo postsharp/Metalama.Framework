@@ -19,6 +19,8 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 
     protected override void PopulateAllItems( Action<IRef<IParameter>> action )
     {
+        // TODO: Move to IRefCollectionStrategy.
+        
         switch ( this._parent )
         {
             case ISymbolRef { Symbol: IMethodSymbol method }:

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;

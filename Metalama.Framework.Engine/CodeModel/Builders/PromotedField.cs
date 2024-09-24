@@ -5,9 +5,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -160,9 +162,10 @@ internal sealed class PromotedField : PropertyBuilder, IFieldImpl, IFieldBuilder
 
     public IField Definition => this;
 
-    private IRef<IField> RefAsField => this.RefFactory.FromBuilder<IField>( this );
+    [Memo]
+    public CompilationBoundRef<IField> FieldRef => (CompilationBoundRef<IField>) this.OriginalSourceFieldOrFieldBuilder.ToRef();
 
-    IRef<IField> IField.ToRef() => this.RefAsField;
+    IRef<IField> IField.ToRef() => this.FieldRef;
 
     public IProperty? OverridingProperty => this;
 

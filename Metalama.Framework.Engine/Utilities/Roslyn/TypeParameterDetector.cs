@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using System;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
@@ -11,7 +11,7 @@ internal static class TypeParameterDetector
 {
     public static IDeclaration? GetTypeContext( IType type ) => Visitor.Instance.Visit( type )?.ContainingDeclaration;
 
-    private class Visitor : TypeVisitor<ITypeParameter?>
+    private sealed class Visitor : TypeVisitor<ITypeParameter?>
     {
         public static Visitor Instance { get; } = new();
 

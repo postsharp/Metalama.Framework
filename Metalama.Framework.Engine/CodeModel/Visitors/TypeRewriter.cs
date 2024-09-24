@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Types;
 using System;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel.Visitors
 {
     /// <summary>
     /// A rewriter that allows to rewrite instances of the <see cref="IType"/> interface.

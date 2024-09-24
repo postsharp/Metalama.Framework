@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.Visitors;
 
 /// <summary>
 /// Visitor for <see cref="IType"/>.
