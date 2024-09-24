@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Testing.UnitTesting;
@@ -46,13 +47,66 @@ class C
         var compilation = immutableCompilation.CreateMutableClone();
         compilation.AddTransformation( promotedField.ToTransformation() );
 
-        // Assertions.
+        // Assertions on declarations.
         var fieldAfter = field.ForCompilation( compilation );
         Assert.IsType<BuiltField>( fieldAfter );
         Assert.NotNull( fieldAfter.OverridingProperty );
-
-        // Continue assertions.
         Assert.NotNull( fieldAfter.OverridingProperty.OriginalField );
         Assert.Same( fieldAfter, fieldAfter.OverridingProperty.OriginalField );
+        Assert.Equal( DeclarationKind.Field, fieldAfter.DeclarationKind );
+        Assert.Equal( DeclarationKind.Property, fieldAfter.OverridingProperty.DeclarationKind );
+
+        // Declaration on references.
+        Assert.Same( fieldAfter, field.ToRef().GetTarget( compilation ) );
+        Assert.True( RefEqualityComparer<IField>.Default.Equals( field.ToRef(), promotedField.ToRef().As<IField>() ) );
+        Assert.NotEqual<IRef>( promotedField.ToRef(), promotedField.ToRef().As<IField>() );
+    }
+
+    [Fact]
+    public void GenericTest()
+    {
+        using var testContext = this.CreateTestContext();
+
+        // Create original compilation.
+        const string code = @"
+class C<T>
+{    
+ int _f;
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+
+        using ( testContext.WithExecutionContext( immutableCompilation ) )
+        {
+            var field = immutableCompilation.Types.Single().Fields.Single();
+
+            // Create a PromotedField.
+            var promotedField = PromotedField.Create( testContext.ServiceProvider, field, null!, null! );
+            Assert.Same( promotedField.Definition, promotedField );
+            Assert.Same( promotedField.OverridingProperty, promotedField );
+            Assert.Same( promotedField.OriginalField, promotedField );
+
+            // Add the PromotedField to a compilation.
+            var compilation = immutableCompilation.CreateMutableClone();
+            compilation.AddTransformation( promotedField.ToTransformation() );
+            var builtPromotedField = field.ForCompilation( compilation );
+
+            // Get generic instances.
+            var genericField = field.ForTypeInstance( field.DeclaringType.WithTypeArguments( typeof(int) ) );
+            var genericPromotedField = builtPromotedField.ForTypeInstance( builtPromotedField.DeclaringType.WithTypeArguments( typeof(int) ) );
+
+            // Assertions on declarations.
+            var genericFieldAfter = genericField.ForCompilation( compilation );
+            Assert.IsType<BuiltField>( genericFieldAfter );
+            Assert.NotNull( genericFieldAfter.OverridingProperty );
+            Assert.NotNull( genericFieldAfter.OverridingProperty.OriginalField );
+            Assert.Same( genericFieldAfter, genericFieldAfter.OverridingProperty.OriginalField );
+            Assert.Equal( DeclarationKind.Field, genericFieldAfter.DeclarationKind );
+            Assert.Equal( DeclarationKind.Property, genericFieldAfter.OverridingProperty.DeclarationKind );
+
+            // Declaration on references.
+            Assert.Same( genericFieldAfter, genericField.ToRef().GetTarget( compilation ) );
+            Assert.True( RefEqualityComparer<IField>.Default.Equals( genericField.ToRef(), genericPromotedField.ToRef().As<IField>() ) );
+        }
     }
 }

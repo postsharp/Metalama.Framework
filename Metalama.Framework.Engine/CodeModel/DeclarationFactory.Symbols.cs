@@ -44,10 +44,12 @@ public partial class DeclarationFactory
                 static ( _, _, x ) =>
                 {
                     if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
-                            x.me.CompilationContext.RefFactory.FromSymbol<TDeclaration>( x.symbol ),
-                            out var redirected ) )
+                            x.me.CompilationContext.RefFactory.FromSymbol<TDeclaration>( x.symbol.OriginalDefinition ),
+                            out var redirectedDefinition ) )
                     {
-                        return x.me.GetDeclaration( redirected, GenericContext.Empty, typeof(TDeclaration) );
+                        var genericContext = GenericContext.Get( x.symbol, x.me.CompilationContext );
+                        
+                        return x.me.GetDeclaration( redirectedDefinition, genericContext, typeof(TDeclaration) );
                     }
 
                     return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me ) );

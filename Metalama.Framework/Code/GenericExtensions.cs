@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.DeclarationBuilders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -161,7 +162,7 @@ namespace Metalama.Framework.Code
         {
             if ( declaration.DeclaringType == null )
             {
-                throw new InvalidOperationException( $"The type '{declaration.ToDisplayString()}' is not a nested type." );
+                throw new InvalidOperationException( $"The type '{declaration.ToDisplayString()}' is not a type member or nested type." );
             }
 
             var thisOriginalDeclaration = declaration.Definition;
@@ -173,13 +174,20 @@ namespace Metalama.Framework.Code
                     $"The type must be identical to or constructed from '{thisOriginalDeclaration.DeclaringType!.ToDisplayString()}'." );
             }
 
+            if ( declaration is IDeclarationBuilder )
+            {
+                throw new ArgumentOutOfRangeException( nameof(declaration), "The declaration must not be an IDeclarationBuilder." );
+            }
+
             if ( !declaration.DeclaringType.IsSelfOrDeclaringTypeGeneric() )
             {
                 return declaration;
             }
-
+            
             IEnumerable<IMemberOrNamedType> candidates;
-
+            
+            // TODO PERF: Implement the switch based on DeclarationKind. 
+            
             switch ( declaration )
             {
                 case INamedType namedType:
