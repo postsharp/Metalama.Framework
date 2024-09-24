@@ -76,7 +76,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
             compilation );
     }
 
-    public override RefComparisonKey GetComparisonKey() => new( this.Symbol );
+    public override RefComparisonKey GetComparisonKey() => new RefComparisonKey( this.Symbol, this.TargetKind );
 
     public override string ToString()
         => this.TargetKind switch

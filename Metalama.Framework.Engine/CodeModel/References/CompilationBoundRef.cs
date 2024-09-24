@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Transactions;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -104,13 +104,16 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
         var symbolOrBuilderEqual = (thisKey.SymbolOrBuilder, otherKey.SymbolOrBuilder) switch
         {
-            (ISymbol thisSymbol, ISymbol otherSymbol) => comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext )
+            (ISymbol thisSymbol, ISymbol otherSymbol) => 
+                comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext )
                 .Equals( thisSymbol, otherSymbol ),
             (IDeclarationBuilder thisBuilder, IDeclarationBuilder otherBuilder) => ReferenceEquals( thisBuilder, otherBuilder ),
             _ => false
         };
 
-        return symbolOrBuilderEqual && thisKey.GenericContext.Equals( otherKey.GenericContext );
+        // TODO: We might need to normalize the targets if we ever get reference to a property accessor directly and through target kind.
+
+        return symbolOrBuilderEqual && thisKey.TargetKind == otherKey.TargetKind && thisKey.GenericContext.Equals( otherKey.GenericContext );
     }
 
     public abstract RefComparisonKey GetComparisonKey();

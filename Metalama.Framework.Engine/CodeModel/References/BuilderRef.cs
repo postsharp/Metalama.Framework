@@ -49,7 +49,7 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     public override IRefCollectionStrategy CollectionStrategy => BuilderRefCollectionStrategy.Instance;
 
-    public override RefComparisonKey GetComparisonKey() => new( this.Builder, this.GenericContext );
+    public override RefComparisonKey GetComparisonKey() => new( this.Builder, this.TargetKind, this.GenericContext );
 
     public override string Name
         => this.Builder switch
