@@ -49,7 +49,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
             return ReferenceEquals( xAttribute, yAttribute );
         }
 
-        return x.ToRef().Equals( y.ToRef() );
+        return x.ToRef().Equals( y.ToRef(), RefComparison.Structural );
     }
 
     public int GetHashCode( IDeclaration obj )

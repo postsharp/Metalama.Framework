@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -72,31 +71,7 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
             compilation );
     }
 
-    protected override bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )
-    {
-        if ( other is not SyntaxRef<T> nodeRef )
-        {
-            return false;
-        }
-
-        if ( this.TargetKind != nodeRef.TargetKind )
-        {
-            return false;
-        }
-
-        return comparison switch
-        {
-            RefComparison.Default or RefComparison.IncludeNullability => nodeRef.SyntaxNode == this.SyntaxNode,
-            _ => symbolComparer.Equals( this.Symbol, nodeRef.Symbol )
-        };
-    }
-
-    protected override int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )
-        => comparison switch
-        {
-            RefComparison.Structural or RefComparison.StructuralIncludeNullability => symbolComparer.GetHashCode( this.Symbol ),
-            _ => this.SyntaxNode.GetHashCode()
-        };
+    public override RefComparisonKey GetComparisonKey() => new( this.Symbol );
 
     public override string ToString()
         => this.TargetKind switch

@@ -1,14 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Transactions;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -80,6 +81,9 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     public sealed override bool Equals( IRef? other, RefComparison comparison )
     {
+        // NOTE: By convention, we want references to be considered different if they resolve to different targets. Therefore, for promoted fields,
+        // an IRef<IField> or an IRef<IProperty> to the same PromotedField will be considered different.
+
         if ( comparison == RefComparison.Durable )
         {
             return this.ToDurable().Equals( other, comparison );
@@ -95,11 +99,21 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
             comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
             "Compilation mistmatch in a non-structural comparison." );
 
-        // When testing equality, we can use a referential comparer if both references belong to the same context.
-        var symbolComparer = comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext );
+        var thisKey = this.GetComparisonKey();
+        var otherKey = otherRef.GetComparisonKey();
 
-        return this.EqualsCore( other, comparison, symbolComparer );
+        var symbolOrBuilderEqual = (thisKey.SymbolOrBuilder, otherKey.SymbolOrBuilder) switch
+        {
+            (ISymbol thisSymbol, ISymbol otherSymbol) => comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext )
+                .Equals( thisSymbol, otherSymbol ),
+            (IDeclarationBuilder thisBuilder, IDeclarationBuilder otherBuilder) => ReferenceEquals( thisBuilder, otherBuilder ),
+            _ => false
+        };
+
+        return symbolOrBuilderEqual && thisKey.GenericContext.Equals( otherKey.GenericContext );
     }
+
+    public abstract RefComparisonKey GetComparisonKey();
 
     public sealed override int GetHashCode( RefComparison comparison )
     {
@@ -107,17 +121,22 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
         {
             return this.ToDurable().GetHashCode( comparison );
         }
+        else
+        {
+            var key = this.GetComparisonKey();
 
-        // When computing the hash code, we must be pessimistic whenever the comparison mode is structural,
-        // because we don't know if the other reference in the comparison will be in the same context.
-        var symbolComparer = comparison.GetSymbolComparer();
+            var symbolOrBuilderHashCode = key.SymbolOrBuilder switch
+            {
+                // When computing the hash code, we must be pessimistic whenever the comparison mode is structural,
+                // because we don't know if the other reference in the comparison will be in the same context.
+                ISymbol symbol => comparison.GetSymbolComparer().GetHashCode( symbol ),
+                IDeclarationBuilder builder => builder.GetHashCode(),
+                _ => throw new AssertionFailedException()
+            };
 
-        return this.GetHashCodeCore( comparison, symbolComparer );
+            return HashCode.Combine( symbolOrBuilderHashCode, key.GenericContext );
+        }
     }
-
-    protected abstract bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer );
-
-    protected abstract int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer );
 
     private ISymbol ApplyRefKind( ISymbol symbol )
         => this.TargetKind switch

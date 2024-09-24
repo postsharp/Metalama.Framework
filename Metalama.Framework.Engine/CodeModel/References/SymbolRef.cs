@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
@@ -77,18 +76,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
             compilation );
     }
 
-    protected override bool EqualsCore( IRef? other, RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer )
-    {
-        if ( other is not SymbolRef<T> symbolRef )
-        {
-            return false;
-        }
-
-        return this.TargetKind == symbolRef.TargetKind
-               && symbolComparer.Equals( symbolRef.Symbol, this.Symbol );
-    }
-
-    protected override int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer ) => symbolComparer.GetHashCode( this.Symbol );
+    public override RefComparisonKey GetComparisonKey() => new( this.Symbol );
 
     public override string ToString()
         => this.TargetKind switch

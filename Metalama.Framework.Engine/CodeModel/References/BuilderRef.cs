@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
@@ -26,9 +25,9 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
         // Constructor replacements must be resolved upstream.
         Invariant.Assert( builder is not ConstructorBuilder { ReplacedImplicitConstructor: not null } );
-        
+
         // References to promoted fields must be a SymbolRef to the IFieldSymbol if it is an IRef<IField>.
-        Invariant.Assert( !(typeof(T) == typeof(IField) && builder is PromotedField ));
+        Invariant.Assert( !(typeof(T) == typeof(IField) && builder is PromotedField) );
 
         this.Builder = builder;
         this.GenericContext = genericContext ?? GenericContext.Empty;
@@ -49,6 +48,8 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
         => genericContext.IsEmptyOrIdentity ? this : new BuilderRef<T>( this.Builder, genericContext, this.CompilationContext );
 
     public override IRefCollectionStrategy CollectionStrategy => BuilderRefCollectionStrategy.Instance;
+
+    public override RefComparisonKey GetComparisonKey() => new( this.Builder, this.GenericContext );
 
     public override string Name
         => this.Builder switch
@@ -104,18 +105,6 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
             compilation.Factory.GetDeclaration( this.Builder, this.SelectGenericContext( genericContext ), typeof(T) ),
             compilation );
 
-    protected override bool EqualsCore( IRef? other, RefComparison options, IEqualityComparer<ISymbol> symbolComparer )
-    {
-        if ( other is not BuilderRef<T> builderRef )
-        {
-            return false;
-        }
-
-        return this.Builder == builderRef.Builder;
-    }
-
-    protected override int GetHashCodeCore( RefComparison comparison, IEqualityComparer<ISymbol> symbolComparer ) => this.Builder.GetHashCode();
-
     public override string ToString() => this.Builder.ToString()!;
 
     public override IRefImpl<TOut> As<TOut>()
@@ -126,6 +115,6 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
                 (IRefImpl<TOut>) promotedField.Ref.WithGenericContext( this.GenericContext ),
             IRef<IProperty> when this.Builder is PromotedField promotedField && typeof(TOut) == typeof(IField) =>
                 (IRefImpl<TOut>) promotedField.FieldRef.WithGenericContext( this.GenericContext ),
-                 _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
+            _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
         };
 }
