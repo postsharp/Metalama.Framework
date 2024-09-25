@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -79,7 +78,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
         return this.GetSymbolIgnoringRefKind( this.CompilationContext );
     }
 
-    public sealed override bool Equals( IRef? other, RefComparison comparison )
+    public override bool Equals( IRef? other, RefComparison comparison )
     {
         // NOTE: By convention, we want references to be considered different if they resolve to different targets. Therefore, for promoted fields,
         // an IRef<IField> or an IRef<IProperty> to the same PromotedField will be considered different.
@@ -118,7 +117,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     public abstract RefComparisonKey GetComparisonKey();
 
-    public sealed override int GetHashCode( RefComparison comparison )
+    public override int GetHashCode( RefComparison comparison )
     {
         if ( comparison == RefComparison.Durable )
         {

@@ -81,4 +81,37 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
         };
 
     public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.CompilationContext );
+
+    public override bool Equals( IRef? other, RefComparison comparison )
+    {
+        if ( comparison != RefComparison.Default )
+        {
+            throw new ArgumentOutOfRangeException( nameof(comparison), "Only RefComparison.Default is supported for SyntaxRef." );
+        }
+
+        if ( other is null )
+        {
+            return false;
+        }
+
+        // The whole point of SyntaxRef is to avoid resolving the semantic model until and if necessary.
+        // Therefore, by design, we don't resolve to symbols before comparing, which means that we cannot
+        // compare to other kind of references.
+        if ( other is not SyntaxRef<T> syntaxRef )
+        {
+            throw new NotSupportedException( "A SyntaxRef can only be compared to another SyntaxRef." );
+        }
+
+        return this.SyntaxNode == syntaxRef.SyntaxNode && this.TargetKind == syntaxRef.TargetKind;
+    }
+
+    public override int GetHashCode( RefComparison comparison )
+    {
+        if ( comparison != RefComparison.Default )
+        {
+            throw new ArgumentOutOfRangeException( nameof(comparison), "Only RefComparison.Default is supported for SyntaxRef." );
+        }
+        
+        return HashCode.Combine( this.SyntaxNode, this.TargetKind );
+    }
 }
