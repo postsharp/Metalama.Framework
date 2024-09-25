@@ -77,69 +77,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
         return this.GetSymbolIgnoringRefKind( this.CompilationContext );
     }
-
-    public override bool Equals( IRef? other, RefComparison comparison )
-    {
-        // NOTE: By convention, we want references to be considered different if they resolve to different targets. Therefore, for promoted fields,
-        // an IRef<IField> or an IRef<IProperty> to the same PromotedField will be considered different.
-
-        if ( comparison == RefComparison.Durable )
-        {
-            return this.ToDurable().Equals( other, comparison );
-        }
-
-        if ( other is not ICompilationBoundRefImpl otherRef )
-        {
-            return false;
-        }
-
-        Invariant.Assert(
-            this.CompilationContext == otherRef.CompilationContext ||
-            comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
-            "Compilation mistmatch in a non-structural comparison." );
-
-        var thisKey = this.GetComparisonKey();
-        var otherKey = otherRef.GetComparisonKey();
-
-        var symbolOrBuilderEqual = (thisKey.SymbolOrBuilder, otherKey.SymbolOrBuilder) switch
-        {
-            (ISymbol thisSymbol, ISymbol otherSymbol) => 
-                comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext )
-                .Equals( thisSymbol, otherSymbol ),
-            (IDeclarationBuilder thisBuilder, IDeclarationBuilder otherBuilder) => ReferenceEquals( thisBuilder, otherBuilder ),
-            _ => false
-        };
-
-        // TODO: We might need to normalize the targets if we ever get reference to a property accessor directly and through target kind.
-
-        return symbolOrBuilderEqual && thisKey.TargetKind == otherKey.TargetKind && thisKey.GenericContext.Equals( otherKey.GenericContext );
-    }
-
-    public abstract RefComparisonKey GetComparisonKey();
-
-    public override int GetHashCode( RefComparison comparison )
-    {
-        if ( comparison == RefComparison.Durable )
-        {
-            return this.ToDurable().GetHashCode( comparison );
-        }
-        else
-        {
-            var key = this.GetComparisonKey();
-
-            var symbolOrBuilderHashCode = key.SymbolOrBuilder switch
-            {
-                // When computing the hash code, we must be pessimistic whenever the comparison mode is structural,
-                // because we don't know if the other reference in the comparison will be in the same context.
-                ISymbol symbol => comparison.GetSymbolComparer().GetHashCode( symbol ),
-                IDeclarationBuilder builder => builder.GetHashCode(),
-                _ => throw new AssertionFailedException()
-            };
-
-            return HashCode.Combine( symbolOrBuilderHashCode, key.GenericContext );
-        }
-    }
-
+    
     private ISymbol ApplyRefKind( ISymbol symbol )
         => this.TargetKind switch
         {

@@ -49,8 +49,6 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     public override IRefCollectionStrategy CollectionStrategy => BuilderRefCollectionStrategy.Instance;
 
-    public override RefComparisonKey GetComparisonKey() => new( this.Builder, this.TargetKind, this.GenericContext );
-
     public override string Name
         => this.Builder switch
         {
@@ -117,4 +115,26 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
                 (IRefImpl<TOut>) promotedField.FieldRef.WithGenericContext( this.GenericContext ),
             _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
         };
+
+    public override bool Equals( IRef? other, RefComparison comparison )
+    {
+        // NOTE: By convention, we want references to be considered different if they resolve to different targets. Therefore, for promoted fields,
+        // an IRef<IField> or an IRef<IProperty> to the same PromotedField will be considered different.
+        // Since all references are canonical, we only need to support comparison of references of the same type.
+        // A reference of any other type is not equal.
+
+        if ( other is not BuilderRef<T> otherRef )
+        {
+            return false;
+        }
+
+        Invariant.Assert(
+            this.CompilationContext == otherRef.CompilationContext ||
+            comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
+            "Compilation mistmatch in a non-structural comparison." );
+
+        return ReferenceEquals( this.Builder, otherRef.Builder );
+    }
+
+    public override int GetHashCode( RefComparison comparison ) => this.Builder.GetHashCode();
 }

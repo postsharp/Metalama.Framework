@@ -24,9 +24,4 @@ public enum RefComparison
     /// Support cross-compilation comparisons and respects nullability when comparing <c>IRef{IType}</c>.
     /// </summary>
     StructuralIncludeNullability,
-
-    /// <summary>
-    /// Supports the comparison of string-based references.
-    /// </summary>
-    Durable
 }
