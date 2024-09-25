@@ -127,7 +127,7 @@ class C
         introducedField.Accessibility = Accessibility.Private;
         introducedField.Type = immutableCompilation1.Factory.GetSpecialType( SpecialType.Int32 );
 
-        // Add the PromotedField to a compilation.
+        // Add an introduced field to a compilation.
         var compilation1 = immutableCompilation1.CreateMutableClone();
         compilation1.AddTransformation( introducedField.ToTransformation() );
 
