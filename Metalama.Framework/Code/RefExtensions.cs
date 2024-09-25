@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Project;
+using System;
 
 namespace Metalama.Framework.Code
 {
@@ -13,6 +14,10 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public static class RefExtensions
     {
+        [Obsolete( "Use the overload that accepts a RefComparison" )]
+        public static bool Equals( this IRef a, IRef? b, bool includeNullability )
+            => a.Equals( b, includeNullability ? RefComparison.IncludeNullability : RefComparison.Default );
+
         /// <summary>
         /// Gets the target of the reference for the current execution context, or throws an exception if the reference cannot be resolved.
         /// </summary>
