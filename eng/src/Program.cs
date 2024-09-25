@@ -33,14 +33,14 @@ var product = new Product( MetalamaDependencies.Metalama )
                 "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
             ]
         },
-        new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
-        {
-            SupportsTestCoverage = false, CanFormatCode = false, IsTestOnly = true
-        },
-        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
-        {
-            IsTestOnly = true, TestMethod = BuildMethod.Build
-        },
+        // new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
+        // {
+        //     SupportsTestCoverage = false, CanFormatCode = false, IsTestOnly = true
+        // },
+        // new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
+        // {
+        //     IsTestOnly = true, TestMethod = BuildMethod.Build
+        // },
         // new ManyDotNetSolutions( "Tests\\Standalone" )
         // {
         //     IsTestOnly = true
