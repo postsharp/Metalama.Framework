@@ -1,1 +1,1 @@
-// This test should fail with an exception.
+// This test should fail with an exception as per @ExpectedException in the SimpleLogging.cs.

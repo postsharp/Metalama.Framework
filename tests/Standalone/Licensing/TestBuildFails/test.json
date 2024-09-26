@@ -1,4 +1,6 @@
 {
     "IgnoreExitCode": true,
-    "ErrorRegexes": [ "LAMA0800" ]
+    "ExpectedDiagnosticsRegexes": [ "LAMA0800" ],
+    "FailOnUnexpectedDiagnostics": true,
+    "BuildOnly": true
 }
