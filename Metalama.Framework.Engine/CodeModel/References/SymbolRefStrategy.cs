@@ -171,7 +171,8 @@ internal sealed class SymbolRefStrategy : IRefStrategy
 
         switch ( kind )
         {
-            case ConversionKind.Implicit:
+            // TODO: Process Default separately from Implicit.
+            case ConversionKind.Implicit or ConversionKind.Default:
                 return this._compilationContext.Compilation.HasImplicitConversion( leftSymbol, rightSymbol );
 
             case ConversionKind.TypeDefinition:
