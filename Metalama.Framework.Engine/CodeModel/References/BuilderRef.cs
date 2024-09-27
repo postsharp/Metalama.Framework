@@ -49,11 +49,11 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
 
     public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
 
-    public override string Name
+    public override string? Name
         => this.Builder switch
         {
             INamedDeclaration named => named.Name,
-            _ => throw new NotSupportedException( $"Declarations of kind {this.Builder.DeclarationKind} have no name." )
+            _ => null
         };
 
     public override SerializableDeclarationId ToSerializableId() => this.Builder.ToSerializableId();

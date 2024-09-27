@@ -33,7 +33,7 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     public override RefTargetKind TargetKind { get; }
 
-    public override string Name => throw new NotSupportedException();
+    public override string? Name => null;
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {

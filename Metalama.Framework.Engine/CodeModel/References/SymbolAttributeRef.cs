@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
@@ -69,7 +70,7 @@ internal sealed class SymbolAttributeRef : AttributeRef
         return true;
     }
 
-    public override string Name => this._attributeData.AttributeClass.Name;
+    public override string Name => this._attributeData.AttributeClass?.Name ?? throw new NotSupportedException();
 
     protected override AttributeSyntax? AttributeSyntax => (AttributeSyntax?) this._attributeData.ApplicationSyntaxReference?.GetSyntax();
 

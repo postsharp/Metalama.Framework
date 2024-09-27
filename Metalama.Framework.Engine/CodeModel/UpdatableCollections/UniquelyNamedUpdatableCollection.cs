@@ -23,7 +23,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : MemberUpdatableCol
     {
         var dictionary = this.GetInitializedDictionary();
 
-        var name = member.Name;
+        var name = member.Name.AssertNotNull();
 
         if ( dictionary.TryGetValue( name, out _ ) )
         {
@@ -49,7 +49,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : MemberUpdatableCol
     {
         var dictionary = this.GetInitializedDictionary();
 
-        var name = member.Name;
+        var name = member.Name.AssertNotNull();
 
         if ( dictionary.TryGetValue( name, out _ ) )
         {

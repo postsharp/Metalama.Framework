@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
             => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
 
-        public abstract string Name { get; }
+        public abstract string? Name { get; }
 
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
 

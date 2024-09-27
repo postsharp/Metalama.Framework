@@ -60,7 +60,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : MemberUpdatable
         // Discover from source.
         foreach ( var memberRef in this.GetMemberRefs() )
         {
-            var name = memberRef.Name;
+            var name = memberRef.Name.AssertNotNull();
 
             // We intentionally look in the initial dictionary (not the builder). If there is no value for this name, it means
             // that the collection was not built for that name, and we need to create it now.
@@ -88,7 +88,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : MemberUpdatable
 
     public void Add( IRef<T> member )
     {
-        var name = member.Name;
+        var name = member.Name.AssertNotNull();
 
         var byNameDictionary = this.GetInitializedByNameDictionary();
 
@@ -136,7 +136,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : MemberUpdatable
     {
         var byNameDictionary = this.GetInitializedByNameDictionary();
 
-        var name = member.Name;
+        var name = member.Name.AssertNotNull();
 
         if ( !byNameDictionary.TryGetValue( name, out var members ) )
         {

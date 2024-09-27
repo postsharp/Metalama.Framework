@@ -46,8 +46,8 @@ public sealed partial class CodeModelUpdateTests
 
         Assert.NotNull( ns );
 
-        Assert.Single( ns.Types.OfName( "C" ) );          // Fails
-        Assert.Single( compilation.Types.OfName( "C" ) ); // Fails
+        Assert.Single( ns.Types.OfName( "C" ) );          
+        Assert.Single( compilation.Types.OfName( "C" ) ); 
     }
 
     [Fact]
