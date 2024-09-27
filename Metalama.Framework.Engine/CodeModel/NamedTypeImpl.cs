@@ -43,7 +43,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     internal NamedTypeImpl( NamedType facade, INamedTypeSymbol namedTypeSymbol, CompilationModel compilation ) : base( compilation )
     {
         this._facade = facade;
-        this.NamedTypeSymbol = namedTypeSymbol;
+        this.NamedTypeSymbol = namedTypeSymbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
     }
 
     TypeKind IType.TypeKind

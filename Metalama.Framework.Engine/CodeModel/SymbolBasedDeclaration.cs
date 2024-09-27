@@ -125,7 +125,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return null;
                 }
 
-                return newCompilation.Factory.GetCompilationElement( this.Symbol, genericContext: genericContext );
+                return newCompilation.Factory.GetCompilationElement( translatedSymbol, genericContext: genericContext );
             }
         }
     }

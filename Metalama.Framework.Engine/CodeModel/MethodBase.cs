@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         protected MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
-            this.MethodSymbol = symbol;
+            this.MethodSymbol = symbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
         }
 
         [Memo]
