@@ -17,5 +17,5 @@ internal interface ICompilationBoundRefImpl : IRefImpl
 
     ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext );
 
-    IRefCollectionStrategy CollectionStrategy { get; }
+    IRefStrategy Strategy { get; }
 }

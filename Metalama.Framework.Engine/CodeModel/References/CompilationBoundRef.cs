@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -24,7 +23,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     public abstract ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext );
 
-    public abstract IRefCollectionStrategy CollectionStrategy { get; }
+    public abstract IRefStrategy Strategy { get; }
 
     /// <summary>
     /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to

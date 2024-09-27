@@ -25,7 +25,7 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext ) => throw new NotImplementedException();
 
-    public override IRefCollectionStrategy CollectionStrategy => throw new NotSupportedException();
+    public override IRefStrategy Strategy => throw new NotSupportedException();
 
     public override bool IsDefinition => true;
 

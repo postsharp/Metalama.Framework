@@ -47,7 +47,7 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext )
         => genericContext.IsEmptyOrIdentity ? this : new BuilderRef<T>( this.Builder, genericContext, this.CompilationContext );
 
-    public override IRefCollectionStrategy CollectionStrategy => BuilderRefCollectionStrategy.Instance;
+    public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
 
     public override string Name
         => this.Builder switch

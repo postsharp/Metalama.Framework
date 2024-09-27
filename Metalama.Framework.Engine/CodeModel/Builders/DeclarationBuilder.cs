@@ -117,7 +117,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
     {
         if ( !this.IsFrozen )
         {
-            throw new InvalidOperationException( $"Cannot get the SerializableId of {this.DeclarationKind} '{this}' until it is frozen." );
+            throw new InvalidOperationException( $"Cannot get the SerializableId of {this.DeclarationKind.ToDisplayString()} '{this}' until it is frozen." );
         }
 
         return this.GetSerializableId();

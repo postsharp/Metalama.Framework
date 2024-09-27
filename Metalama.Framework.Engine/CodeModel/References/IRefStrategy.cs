@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// Methods used by <see cref="UpdatableDeclarationCollection{TDeclaration}"/>, whose implementation
 /// differs by kinds of references.
 /// </summary>
-internal interface IRefCollectionStrategy
+internal interface IRefStrategy
 {
     void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add );
 

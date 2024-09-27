@@ -7,11 +7,11 @@ using System.Linq;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using  Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.BugXXX;
+using  Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug35474;
 
 [assembly: AspectOrder( AspectOrderDirection.CompileTime, typeof(IntroductionAspect), typeof(ReadAspect))]
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.BugXXX;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug35474;
 
 public class IntroductionAspect : TypeAspect
 {

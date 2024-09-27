@@ -85,7 +85,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this.Definition;
 
-    IMember IMember.Definition => this;
+    IMember IMember.Definition => this.Definition;
 
     bool IMethod.IsExtern => false;
 

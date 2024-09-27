@@ -14,11 +14,11 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRefCollectionStrategy : IRefCollectionStrategy
+internal sealed class SymbolRefStrategy : IRefStrategy
 {
     private readonly CompilationContext _compilationContext;
 
-    public SymbolRefCollectionStrategy( CompilationContext compilationContext )
+    public SymbolRefStrategy( CompilationContext compilationContext )
     {
         this._compilationContext = compilationContext;
     }

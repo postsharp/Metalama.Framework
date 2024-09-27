@@ -124,7 +124,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
 
     [Memo]
-    internal SymbolRefCollectionStrategy SymbolRefCollectionStrategy => new( this );
+    internal SymbolRefStrategy SymbolRefStrategy => new( this );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );

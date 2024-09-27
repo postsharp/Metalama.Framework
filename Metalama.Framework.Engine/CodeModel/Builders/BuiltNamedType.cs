@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -116,6 +117,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     [Memo]
     public IEventCollection AllEvents => new AllEventsCollection( this );
 
+    [Memo]
     public IMethodCollection Methods
         => new MethodCollection(
             this,
@@ -157,7 +159,8 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public IGenericParameterList TypeParameters => this.TypeBuilder.TypeParameters;
 
-    public IReadOnlyList<IType> TypeArguments => this.TypeBuilder.TypeArguments; // TODO
+    [Memo]
+    public IReadOnlyList<IType> TypeArguments => this.TypeParameters.SelectAsImmutableArray( this.MapType );
 
     public bool IsGeneric => this.TypeBuilder.IsGeneric;
 
