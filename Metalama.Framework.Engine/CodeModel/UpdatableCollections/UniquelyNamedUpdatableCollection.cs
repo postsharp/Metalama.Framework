@@ -88,7 +88,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : MemberUpdatableCol
         // Add items discovered from source code.
         foreach ( var memberRef in this.GetMemberRefs() )
         {
-            var name = memberRef.Name;
+            var name = memberRef.Name.AssertNotNull();
 
             if ( !dictionary.ContainsKey( name ) )
             {
