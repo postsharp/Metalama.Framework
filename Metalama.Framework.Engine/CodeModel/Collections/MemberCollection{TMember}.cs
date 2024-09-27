@@ -10,7 +10,7 @@ internal abstract class MemberCollection<TMember> : MemberOrNamedTypeCollection<
 {
     public INamedType DeclaringType { get; }
 
-    protected MemberCollection( INamedType declaringType, ISourceDeclarationCollection<TMember> sourceItems )
+    protected MemberCollection( INamedType declaringType, IUpdatableCollection<TMember> sourceItems )
         : base( declaringType, sourceItems )
     {
         this.DeclaringType = declaringType;

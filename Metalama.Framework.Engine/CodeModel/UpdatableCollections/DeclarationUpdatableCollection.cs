@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,13 +12,13 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 #pragma warning disable SA1402
 
-internal abstract class UpdatableDeclarationCollection<T> : BaseDeclarationCollection, ILazy, ISourceDeclarationCollection<T>
+internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationCollection, ILazy, IUpdatableCollection<T>
     where T : class, IDeclaration
 {
     private List<IRef<T>>? _allItems;
     private volatile int _removeOperationsCount;
 
-    protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }
+    protected DeclarationUpdatableCollection( CompilationModel compilation ) : base( compilation ) { }
 
     /// <summary>
     /// Gets a value indicating whether the construction has been populated for all names.
@@ -96,9 +95,9 @@ internal abstract class UpdatableDeclarationCollection<T> : BaseDeclarationColle
         return this._allItems!.Any( i => i.Equals( item ) );
     }
 
-    public ISourceDeclarationCollection<T> Clone( CompilationModel compilation )
+    public IUpdatableCollection<T> Clone( CompilationModel compilation )
     {
-        var clone = (UpdatableDeclarationCollection<T>) this.MemberwiseClone();
+        var clone = (DeclarationUpdatableCollection<T>) this.MemberwiseClone();
         clone.Compilation = compilation;
 
         if ( this._allItems != null )
@@ -113,7 +112,7 @@ internal abstract class UpdatableDeclarationCollection<T> : BaseDeclarationColle
         return clone;
     }
 
-    public virtual ImmutableArray<IRef<T>> OfName( string name ) => this.Where( r => ((IRefImpl) r).Name == name ).ToImmutableArray();
+    public virtual ImmutableArray<IRef<T>> OfName( string name ) => this.Where( r => r.Name == name ).ToImmutableArray();
 
     IEnumerator<IRef<T>> IEnumerable<IRef<T>>.GetEnumerator() => this.GetEnumerator();
 
@@ -133,12 +132,12 @@ internal abstract class UpdatableDeclarationCollection<T> : BaseDeclarationColle
 
     public struct Enumerator : IEnumerator<IRef<T>>
     {
-        private readonly UpdatableDeclarationCollection<T> _parent;
+        private readonly DeclarationUpdatableCollection<T> _parent;
         private readonly int _initialCount;
         private readonly int _initialRemoveOperationsCount;
         private int _index = -1;
 
-        internal Enumerator( UpdatableDeclarationCollection<T> parent )
+        internal Enumerator( DeclarationUpdatableCollection<T> parent )
         {
             this._parent = parent;
 

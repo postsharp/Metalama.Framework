@@ -10,5 +10,5 @@ internal sealed class EventUpdatableCollection : UniquelyNamedUpdatableCollectio
         compilation,
         declaringType.As<INamespaceOrNamedType>() ) { }
 
-    protected override DeclarationKind DeclarationKind => DeclarationKind.Event;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Event;
 }

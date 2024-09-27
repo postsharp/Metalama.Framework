@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -124,6 +125,8 @@ internal sealed class SyntaxAttributeRef : AttributeRef
 
         return true;
     }
+
+    public override string Name => throw new NotSupportedException();
 
     protected override AttributeSyntax? AttributeSyntax => this._attributeSyntax;
 

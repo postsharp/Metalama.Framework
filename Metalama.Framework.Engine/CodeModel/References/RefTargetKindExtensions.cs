@@ -25,4 +25,28 @@ internal static class RefTargetKindExtensions
             (MethodKind.EventRaise, RefTargetKind.Return) => RefTargetKind.EventRaiseReturnParameter,
             _ => throw new InvalidOperationException( $"Unexpected combination: '{methodKind}', '{existingTargetKind}'." )
         };
+
+    public static DeclarationKind? ToDeclarationKind( this RefTargetKind kind )
+        => kind switch
+        {
+            RefTargetKind.Default => null,
+            RefTargetKind.Return => DeclarationKind.Parameter,
+            RefTargetKind.Assembly => DeclarationKind.AssemblyReference,
+            RefTargetKind.Module => DeclarationKind.Compilation,
+            RefTargetKind.Field => DeclarationKind.Field,
+            RefTargetKind.Parameter => DeclarationKind.Parameter,
+            RefTargetKind.Property => DeclarationKind.Property,
+            RefTargetKind.Event => DeclarationKind.Event,
+            RefTargetKind.PropertyGet => DeclarationKind.Method,
+            RefTargetKind.PropertySet => DeclarationKind.Method,
+            RefTargetKind.StaticConstructor => DeclarationKind.Constructor,
+            RefTargetKind.PropertySetParameter => DeclarationKind.Parameter,
+            RefTargetKind.PropertyGetReturnParameter => DeclarationKind.Parameter,
+            RefTargetKind.PropertySetReturnParameter => DeclarationKind.Parameter,
+            RefTargetKind.EventRaise => DeclarationKind.Method,
+            RefTargetKind.EventRaiseParameter => DeclarationKind.Parameter,
+            RefTargetKind.EventRaiseReturnParameter => DeclarationKind.Parameter,
+            RefTargetKind.NamedType => DeclarationKind.NamedType,
+            _ => throw new ArgumentOutOfRangeException( nameof(kind), kind, null )
+        };
 }

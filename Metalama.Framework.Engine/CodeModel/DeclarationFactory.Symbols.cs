@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -48,7 +49,7 @@ public partial class DeclarationFactory
                             out var redirectedDefinition ) )
                     {
                         var genericContext = GenericContext.Get( x.symbol, x.me.CompilationContext );
-                        
+
                         return x.me.GetDeclaration( redirectedDefinition, genericContext, typeof(TDeclaration) );
                     }
 
@@ -131,6 +132,11 @@ public partial class DeclarationFactory
         if ( typeSymbol.IsUnboundGenericType )
         {
             typeSymbol = typeSymbol.ConstructedFrom;
+        }
+
+        if ( typeSymbol.Kind == SymbolKind.ErrorType )
+        {
+            return this.GetSpecialType( SpecialType.Object );
         }
 
         return this.GetTypeFromSymbol<INamedType, INamedTypeSymbol>(

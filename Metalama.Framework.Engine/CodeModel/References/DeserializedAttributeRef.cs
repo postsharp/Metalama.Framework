@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
@@ -40,6 +41,8 @@ internal sealed class DeserializedAttributeRef : AttributeRef
 
         return true;
     }
+
+    public override string Name => throw new NotSupportedException();
 
     protected override AttributeSyntax? AttributeSyntax => null;
 

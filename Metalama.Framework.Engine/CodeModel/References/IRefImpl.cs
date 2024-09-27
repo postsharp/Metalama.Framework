@@ -13,8 +13,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// </summary>
     internal interface IRefImpl : IRef
     {
-        string Name { get; }
-        
         IRef ToDurable();
 
         ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );

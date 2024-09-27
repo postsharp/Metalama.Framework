@@ -111,4 +111,6 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public abstract bool Equals( IRef? other, RefComparison comparison );
 
     public abstract int GetHashCode( RefComparison comparison );
+
+    public abstract DeclarationKind DeclarationKind { get; }
 }

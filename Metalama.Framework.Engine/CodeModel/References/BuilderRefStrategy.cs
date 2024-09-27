@@ -63,7 +63,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
     }
 
     public IEnumerable<IRef> GetMembersOfName(
-        IRef<INamespaceOrNamedType> parent,
+        IRef parent,
         string name,
         DeclarationKind kind,
         CompilationModel compilation )
@@ -75,7 +75,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
         return collection.OfName( name ).Select( x => x.ToRef() );
     }
 
-    public IEnumerable<IRef> GetMembers( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation )
+    public IEnumerable<IRef> GetMembers( IRef parent, DeclarationKind kind, CompilationModel compilation )
     {
         var parentDeclaration = ((IBuilderRef) parent).Builder;
 

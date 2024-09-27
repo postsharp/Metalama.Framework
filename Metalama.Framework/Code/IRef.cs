@@ -59,5 +59,9 @@ namespace Metalama.Framework.Code
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
         int GetHashCode( RefComparison comparison );
+
+        DeclarationKind DeclarationKind { get; }
+
+        string Name { get; }
     }
 }

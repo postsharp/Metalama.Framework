@@ -6,13 +6,13 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class UpdatableMemberRefArray<T>
+internal sealed class MemberRefUpdatableArray<T>
     where T : class, ICompilationElement
 {
     // This is the only compilation in which the current object is mutable. It should not be mutable in other transformations.
     public CompilationModel ParentCompilation { get; }
 
-    public UpdatableMemberRefArray( ImmutableArray<IRef<T>> array, CompilationModel parentCompilation )
+    public MemberRefUpdatableArray( ImmutableArray<IRef<T>> array, CompilationModel parentCompilation )
     {
         this.Array = array;
         this.ParentCompilation = parentCompilation;

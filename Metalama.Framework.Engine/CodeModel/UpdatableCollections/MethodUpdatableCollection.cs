@@ -13,5 +13,5 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedUpdatableColle
 
     protected override IEqualityComparer<IRef<IMethod>> MemberRefComparer => this.Compilation.CompilationContext.MethodRefComparer;
 
-    protected override DeclarationKind DeclarationKind => DeclarationKind.Method;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Method;
 }

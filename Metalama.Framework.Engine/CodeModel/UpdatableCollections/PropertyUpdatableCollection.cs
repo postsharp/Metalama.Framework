@@ -10,5 +10,5 @@ internal sealed class PropertyUpdatableCollection : UniquelyNamedUpdatableCollec
         compilation,
         declaringType.As<INamespaceOrNamedType>() ) { }
 
-    protected override DeclarationKind DeclarationKind => DeclarationKind.Property;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Property;
 }

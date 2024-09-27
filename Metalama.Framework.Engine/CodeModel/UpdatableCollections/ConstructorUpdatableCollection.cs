@@ -14,5 +14,5 @@ internal sealed class ConstructorUpdatableCollection : NonUniquelyNamedUpdatable
     // TODO: define implicit constructor
     protected override IEqualityComparer<IRef<IConstructor>> MemberRefComparer => this.Compilation.CompilationContext.ConstructorRefComparer;
 
-    protected override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Constructor;
 }

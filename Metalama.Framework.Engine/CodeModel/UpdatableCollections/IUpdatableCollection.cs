@@ -6,12 +6,12 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal interface ISourceDeclarationCollection<T> : IReadOnlyList<IRef<T>>
+internal interface IUpdatableCollection<T> : IReadOnlyList<IRef<T>>
     where T : class, IDeclaration
 {
     CompilationModel Compilation { get; }
 
-    ISourceDeclarationCollection<T> Clone( CompilationModel compilation );
+    IUpdatableCollection<T> Clone( CompilationModel compilation );
 
     ImmutableArray<IRef<T>> OfName( string name );
 }

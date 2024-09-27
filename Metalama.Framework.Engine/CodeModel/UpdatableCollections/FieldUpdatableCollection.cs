@@ -6,9 +6,9 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class FieldUpdatableCollection : UniquelyNamedUpdatableCollection<IField>
 {
-    public FieldUpdatableCollection( CompilationModel compilation, IRef<INamedType> declaringType ) : base(
+    public FieldUpdatableCollection( CompilationModel compilation, IRef<INamedType> containingDeclaration ) : base(
         compilation,
-        declaringType ) { }
+        containingDeclaration ) { }
 
-    protected override DeclarationKind DeclarationKind => DeclarationKind.Field;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Field;
 }

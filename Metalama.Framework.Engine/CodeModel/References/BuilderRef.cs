@@ -137,4 +137,6 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
     }
 
     public override int GetHashCode( RefComparison comparison ) => this.Builder.GetHashCode();
+
+    public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 }

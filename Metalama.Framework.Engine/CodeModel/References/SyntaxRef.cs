@@ -109,7 +109,9 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
         {
             throw new ArgumentOutOfRangeException( nameof(comparison), "Only RefComparison.Default is supported for SyntaxRef." );
         }
-        
+
         return HashCode.Combine( this.SyntaxNode, this.TargetKind );
     }
+
+    public override DeclarationKind DeclarationKind => throw new NotSupportedException();
 }

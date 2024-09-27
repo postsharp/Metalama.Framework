@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 /// <summary>
-/// Methods used by <see cref="UpdatableDeclarationCollection{TDeclaration}"/>, whose implementation
+/// Methods used by <see cref="DeclarationUpdatableCollection{T}"/>, whose implementation
 /// differs by kinds of references.
 /// </summary>
 internal interface IRefStrategy
@@ -20,9 +20,9 @@ internal interface IRefStrategy
 
     void EnumerateImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add );
 
-    IEnumerable<IRef> GetMembersOfName( IRef<INamespaceOrNamedType> parent, string name, DeclarationKind kind, CompilationModel compilation );
+    IEnumerable<IRef> GetMembersOfName( IRef parent, string name, DeclarationKind kind, CompilationModel compilation );
 
-    IEnumerable<IRef> GetMembers( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation );
+    IEnumerable<IRef> GetMembers( IRef parent, DeclarationKind kind, CompilationModel compilation );
 
     bool IsConvertibleTo( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default );
 }

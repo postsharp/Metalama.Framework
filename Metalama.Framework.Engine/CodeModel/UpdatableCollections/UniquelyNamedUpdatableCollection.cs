@@ -2,20 +2,19 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCollection<T>
+internal abstract class UniquelyNamedUpdatableCollection<T> : MemberUpdatableCollection<T>
     where T : class, INamedDeclaration
 {
     private ImmutableDictionary<string, IRef<T>?>? _dictionary;
 
-    protected UniquelyNamedUpdatableCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> declaringType ) :
-        base( compilation, declaringType ) { }
+    protected UniquelyNamedUpdatableCollection( CompilationModel compilation, IRef<INamespaceOrNamedType> containingDeclaration ) :
+        base( compilation, containingDeclaration ) { }
 
     private ImmutableDictionary<string, IRef<T>?> GetInitializedDictionary()
         => this._dictionary ??= ImmutableDictionary<string, IRef<T>?>.Empty.WithComparers( StringComparer.Ordinal, RefEqualityComparer<T>.Default );
@@ -24,7 +23,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
     {
         var dictionary = this.GetInitializedDictionary();
 
-        var name = ((IRefImpl) member).Name;
+        var name = member.Name;
 
         if ( dictionary.TryGetValue( name, out _ ) )
         {
@@ -50,7 +49,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
     {
         var dictionary = this.GetInitializedDictionary();
 
-        var name = ((IRefImpl) member).Name;
+        var name = member.Name;
 
         if ( dictionary.TryGetValue( name, out _ ) )
         {
@@ -89,7 +88,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         // Add items discovered from source code.
         foreach ( var memberRef in this.GetMemberRefs() )
         {
-            var name = ((IRefImpl) memberRef).Name;
+            var name = memberRef.Name;
 
             if ( !dictionary.ContainsKey( name ) )
             {

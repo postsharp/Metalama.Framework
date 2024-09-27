@@ -4,23 +4,18 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute>
+internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollection<IAttribute>
 {
     private readonly IRef<IDeclaration> _parent;
 
-    // HACK! This field is set only when _parent is the ISourceAssemblySymbol.
-    private readonly IModuleSymbol? _moduleSymbol;
-
-    public AttributeUpdatableCollection( CompilationModel compilation, IRef<IDeclaration> parent, IModuleSymbol? moduleSymbol ) : base( compilation )
+    public AttributeUpdatableCollection( CompilationModel compilation, IRef<IDeclaration> parent ) : base( compilation )
     {
         this._parent = parent;
-        this._moduleSymbol = moduleSymbol;
 
 #if DEBUG
         (this._parent as ISymbolRef)?.Symbol.ThrowIfBelongsToDifferentCompilationThan( compilation.CompilationContext );
@@ -30,20 +25,6 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
     protected override void PopulateAllItems( Action<IRef<IAttribute>> action )
     {
         this._parent.GetCollectionStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
-
-        // HACK!
-        if ( this._moduleSymbol != null )
-        {
-            foreach ( var attribute in this._moduleSymbol.GetAttributes() )
-            {
-                if ( attribute.AttributeConstructor == null )
-                {
-                    continue;
-                }
-
-                action( new SymbolAttributeRef( attribute, this._parent, this.Compilation.CompilationContext ) );
-            }
-        }
     }
 
     public void Add( AttributeBuilder attribute )

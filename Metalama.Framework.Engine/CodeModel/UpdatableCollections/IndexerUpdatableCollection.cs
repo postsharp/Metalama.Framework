@@ -13,5 +13,5 @@ internal sealed class IndexerUpdatableCollection : NonUniquelyNamedUpdatableColl
 
     protected override IEqualityComparer<IRef<IIndexer>> MemberRefComparer => this.Compilation.CompilationContext.IndexerRefComparer;
 
-    protected override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Indexer;
 }

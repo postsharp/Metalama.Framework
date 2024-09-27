@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollection<IParameter>
+internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollection<IParameter>
 {
     private readonly IRef<IHasParameters> _parent;
 
@@ -20,7 +20,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
     protected override void PopulateAllItems( Action<IRef<IParameter>> action )
     {
         // TODO: Move to IRefCollectionStrategy.
-        
+
         switch ( this._parent )
         {
             case ISymbolRef { Symbol: IMethodSymbol method }:

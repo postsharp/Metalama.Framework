@@ -139,7 +139,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this._facade,
-            this.Compilation.GetNamedTypeCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 

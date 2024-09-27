@@ -71,7 +71,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this.Ref ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this.Ref ) );
 
     [Memo]
     public INamedTypeCollection AllTypes => new AllTypesCollection( this );

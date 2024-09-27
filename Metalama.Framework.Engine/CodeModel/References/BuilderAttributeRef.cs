@@ -44,6 +44,8 @@ internal sealed class BuilderAttributeRef : AttributeRef
         return true;
     }
 
+    public override string Name => this.AttributeBuilder.Type.Name;
+
     protected override AttributeSyntax? AttributeSyntax => null;
 
     public override bool Equals( AttributeRef? other )

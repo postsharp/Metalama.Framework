@@ -216,7 +216,7 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
-            this._namedTypes =
+            this._namedTypesByParent =
                 ImmutableDictionary.Create<IRef<INamespaceOrNamedType>, TypeUpdatableCollection>( RefEqualityComparer<INamespaceOrNamedType>.Default );
 
             this._namespaces = ImmutableDictionary.Create<IRef<INamespace>, NamespaceUpdatableCollection>( RefEqualityComparer<INamespace>.Default );
@@ -327,7 +327,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Annotations = prototype.Annotations;
             this._parameters = prototype._parameters;
             this._attributes = prototype._attributes;
-            this._namedTypes = prototype._namedTypes;
+            this._namedTypesByParent = prototype._namedTypesByParent;
             this._namespaces = prototype._namespaces;
 
             this.Factory = new DeclarationFactory( this );
@@ -369,18 +369,14 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamedTypeCollection Types
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection(
-                    this,
-                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
-                    false ) );
+                this.GetTopLevelNamedTypeCollection() );
 
+        [Memo]
         public INamedTypeCollection AllTypes
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection(
-                    this,
-                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
-                    true ) );
+                this.GetTopLevelNamedTypeCollection(),
+                true );
 
         [Memo]
         public override IAttributeCollection Attributes

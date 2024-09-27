@@ -10,5 +10,5 @@ internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableColle
         compilation,
         declaringNamespace.As<INamespaceOrNamedType>() ) { }
 
-    protected override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Namespace;
 }

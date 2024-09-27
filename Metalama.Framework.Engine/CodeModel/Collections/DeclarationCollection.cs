@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public IEnumerator<T> GetEnumerator()
         {
-            if ( this.Source is UpdatableDeclarationCollection<T> updatableCollection )
+            if ( this.Source is DeclarationUpdatableCollection<T> updatableCollection )
             {
                 // We don't use the list enumeration pattern because this may lead to infinite recursions
                 // if the loop body adds items during the enumeration.

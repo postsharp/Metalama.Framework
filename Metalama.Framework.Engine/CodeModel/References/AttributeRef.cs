@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
             => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
 
-        string IRefImpl.Name => throw new NotSupportedException();
+        public abstract string Name { get; }
 
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
 
@@ -107,6 +107,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 RefComparison.Default => this.GetHashCode(),
                 _ => throw new NotSupportedException( "Non-default comparison of attributes is not supported." )
             };
+
+        public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
         public virtual bool Equals( AttributeRef? other )
         {

@@ -40,7 +40,7 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this._namespaceBuilder.ToRef() ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this._namespaceBuilder.ToRef() ) );
 
     public INamespaceCollection Namespaces
         => new NamespaceCollection(

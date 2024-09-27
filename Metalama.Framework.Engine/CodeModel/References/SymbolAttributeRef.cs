@@ -69,6 +69,8 @@ internal sealed class SymbolAttributeRef : AttributeRef
         return true;
     }
 
+    public override string Name => this._attributeData.AttributeClass.Name;
+
     protected override AttributeSyntax? AttributeSyntax => (AttributeSyntax?) this._attributeData.ApplicationSyntaxReference?.GetSyntax();
 
     protected override int GetHashCodeCore() => this.AttributeSyntax?.GetHashCode() ?? 0;

@@ -63,4 +63,6 @@ internal abstract class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
     }
 
     public override string ToString() => this.Id;
+
+    public sealed override DeclarationKind DeclarationKind => throw new NotSupportedException();
 }

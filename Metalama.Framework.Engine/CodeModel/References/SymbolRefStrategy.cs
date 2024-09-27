@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Services;
@@ -27,12 +28,18 @@ internal sealed class SymbolRefStrategy : IRefStrategy
     {
         var symbolRef = (ISymbolRef) declaration;
 
-        var attributes = symbolRef.TargetKind switch
+        IEnumerable<AttributeData> attributes = symbolRef.TargetKind switch
         {
             RefTargetKind.Return => ((IMethodSymbol) symbolRef.Symbol).GetReturnTypeAttributes(),
             RefTargetKind.Default => symbolRef.Symbol.GetAttributes(),
-            _ => throw new NotImplementedException()
+            _ => throw new AssertionFailedException()
         };
+
+        if ( symbolRef.Symbol is ISourceAssemblySymbol sourceAssemblySymbol )
+        {
+            // Also add [module:*] attributes.
+            attributes = attributes.Concat( sourceAssemblySymbol.Modules.SelectMany( m => m.GetAttributes() ) );
+        }
 
         foreach ( var attribute in attributes )
         {
@@ -88,7 +95,7 @@ internal sealed class SymbolRefStrategy : IRefStrategy
     }
 
     public IEnumerable<IRef> GetMembersOfName(
-        IRef<INamespaceOrNamedType> parent,
+        IRef parent,
         string name,
         DeclarationKind kind,
         CompilationModel compilation )
@@ -104,6 +111,11 @@ internal sealed class SymbolRefStrategy : IRefStrategy
                         .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
                 }
 
+            case DeclarationKind.NamedType when parent.DeclarationKind == DeclarationKind.Compilation:
+                return compilation.PartialCompilation.Types
+                    .Where( t => t.Name == name && IsValidNamedType( t, compilation ) )
+                    .Select( s => this._compilationContext.RefFactory.FromSymbol<INamedType>( s ) );
+
             default:
                 {
                     var symbol = (INamespaceOrTypeSymbol) ((ISymbolRef) parent).Symbol;
@@ -117,7 +129,7 @@ internal sealed class SymbolRefStrategy : IRefStrategy
         }
     }
 
-    public IEnumerable<IRef> GetMembers( IRef<INamespaceOrNamedType> parent, DeclarationKind kind, CompilationModel compilation )
+    public IEnumerable<IRef> GetMembers( IRef parent, DeclarationKind kind, CompilationModel compilation )
     {
         var parentSymbol = ((ISymbolRef) parent).Symbol;
 
@@ -132,13 +144,20 @@ internal sealed class SymbolRefStrategy : IRefStrategy
                         .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
                 }
 
-            case DeclarationKind.NamedType:
+            case DeclarationKind.NamedType when parent.DeclarationKind is DeclarationKind.Namespace or DeclarationKind.NamedType:
                 {
                     var parentScope = (INamespaceOrTypeSymbol) parentSymbol;
 
                     return parentScope.GetTypeMembers()
                         .Where( t => IsValidNamedType( t, compilation ) )
                         .Select( t => this._compilationContext.RefFactory.FromAnySymbol( t ) );
+                }
+
+            case DeclarationKind.NamedType when parent.DeclarationKind is DeclarationKind.Compilation:
+                {
+                    return compilation.PartialCompilation.Types
+                        .Where( t => IsValidNamedType( t, compilation ) )
+                        .Select( s => this._compilationContext.RefFactory.FromSymbol<INamedType>( s ) );
                 }
 
             default:

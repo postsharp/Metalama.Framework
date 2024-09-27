@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class MethodCollection : MethodBaseCollection<IMethod>, IMethodCollection
     {
-        public MethodCollection( INamedType declaringType, ISourceDeclarationCollection<IMethod> sourceItems ) : base(
+        public MethodCollection( INamedType declaringType, IUpdatableCollection<IMethod> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
 

@@ -103,6 +103,8 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
     public override int GetHashCode( RefComparison comparison )
         => HashCode.Combine( comparison.GetSymbolComparer().GetHashCode( this.Symbol ), this.TargetKind );
 
+    public override DeclarationKind DeclarationKind => this.TargetKind.ToDeclarationKind() ?? this.Symbol.GetDeclarationKind( this.CompilationContext );
+
     public override bool Equals( IRef? other, RefComparison comparison )
     {
         // NOTE: By convention, we want references to be considered different if they resolve to different targets. Therefore, for promoted fields,

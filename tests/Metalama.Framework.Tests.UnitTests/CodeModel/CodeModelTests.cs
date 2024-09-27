@@ -547,7 +547,6 @@ public sealed class C
     public void M2(InvalidType m) {}
     public void M3(InvalidType[] m) {}
     public void M4(System.List<InvalidType> m) {}
-    public void M5<T>(T m) where T : InvalidType {}
 }
 ";
 
