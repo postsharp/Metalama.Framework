@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine
 #else
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
             [DebuggerStepThrough]
-        public static void Assert( [DoesNotReturnIf( false )] bool condition ) { }
+        public static void Assert( [DoesNotReturnIf( false )] bool condition, string? expression = null ) { }
 #endif
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine
 #else
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
             [DebuggerStepThrough]
-        public static void AssertNot( [DoesNotReturnIf( false )] bool condition ) { }
+        public static void AssertNot( [DoesNotReturnIf( false )] bool condition, string? expression = null ) { }
 #endif
 
 #if !DEBUG
