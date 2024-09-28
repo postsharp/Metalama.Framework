@@ -12,16 +12,20 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ILogger = Metalama.Backstage.Diagnostics.ILogger;
 
 namespace Metalama.Framework.Workspaces
 {
@@ -49,6 +53,10 @@ namespace Metalama.Framework.Workspaces
 
         static Workspace()
         {
+            // Set the current UI culture to invariant so we get MSBuild error messages in English and we can parse them. 
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            Environment.SetEnvironmentVariable( "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT", "1" );
+            
             WorkspaceServices.Initialize();
             _logger = BackstageServiceFactory.ServiceProvider.GetLoggerFactory().GetLogger( "Workspace" );
         }
@@ -293,7 +301,11 @@ namespace Metalama.Framework.Workspaces
                 }
             }
 
+            
+            
             using var msbuildProjectCollection = new ProjectCollection( allProperties );
+            msbuildProjectCollection.RegisterLogger( new MSBuildLogger( _logger ) );
+
 
             // Start all tasks in parallel because even that may be expensive.
             var loadProjectTasks = roslynWorkspace.CurrentSolution.Projects.AsParallel().Select( GetOurProjectAsync ).ToArray();
@@ -303,10 +315,11 @@ namespace Metalama.Framework.Workspaces
             var projectSet = new ProjectSet( ourProjects, name ?? $"{ourProjects.Length} projects" );
 
             // Throw an exception upon failure because otherwise it's too difficult to diagnose.
-            var errors = roslynWorkspace.Diagnostics.Where( d => d.Kind == WorkspaceDiagnosticKind.Failure ).ToReadOnlyList();
+            var diagnostics = roslynWorkspace.Diagnostics.ToReadOnlyList();
 
-            if ( errors.Any() )
+            if ( diagnostics.Any() )
             {
+                // Log,
                 foreach ( var diagnostic in roslynWorkspace.Diagnostics )
                 {
                     (diagnostic.Kind == WorkspaceDiagnosticKind.Failure ? _logger.Error : _logger.Warning)?.Log( diagnostic.Message );
@@ -319,9 +332,21 @@ namespace Metalama.Framework.Workspaces
 
                 if ( !collection.IgnoreLoadErrors )
                 {
-                    throw new WorkspaceLoadException(
-                        "Cannot load the projects." + Environment.NewLine + string.Join( Environment.NewLine, errors ),
-                        errors.SelectAsImmutableArray( e => e.Message ) );
+                    // Fail upon error.
+                    // Note that some warnings are reported as failures, e.g.:
+                    //   CodeQualityTalk.Analyzers depends on Microsoft.CodeAnalysis.CSharp (>= 4.9.0) but Microsoft.CodeAnalysis.CSharp 4.9.0 was not found.
+                    //   An approximate best match of Microsoft.CodeAnalysis.CSharp 4.9.2 was resolved.
+                    // This text is localized, but we changed the culture to invariant so we can match them.
+                    var errors = diagnostics.Where( d => d.Kind == WorkspaceDiagnosticKind.Failure 
+                                                    || d.Message.Contains( "An approximate best match", StringComparison.InvariantCulture )).ToReadOnlyList();
+
+                    if ( errors.Any() && !collection.IgnoreLoadErrors )
+                    {
+                        throw new WorkspaceLoadException(
+                            "Cannot load the projects. Set the IgnoreLoadErrors property to true to ignore these errors." + Environment.NewLine
+                            + string.Join( Environment.NewLine, diagnostics ),
+                            errors.SelectAsImmutableArray( e => e.Message ) );
+                    }
                 }
             }
 
@@ -329,7 +354,7 @@ namespace Metalama.Framework.Workspaces
 
             async Task<Project> GetOurProjectAsync( Microsoft.CodeAnalysis.Project roslynProject )
             {
-                // Get an evaluated MSBuild project (the Roslyn workspace presumably does but it the result is not made available). 
+                // Get an evaluated MSBuild project (the Roslyn workspace presumably does but the result is not made available). 
                 var targetFramework = WorkspaceProjectOptions.GetTargetFrameworkFromRoslynProject( roslynProject );
 
                 Dictionary<string, string>? projectProperties = null;
@@ -339,6 +364,7 @@ namespace Metalama.Framework.Workspaces
                     projectProperties = new Dictionary<string, string> { ["TargetFramework"] = targetFramework };
                 }
 
+                
                 // ReSharper disable once AccessToDisposedClosure
                 var msbuildProject = msbuildProjectCollection.LoadProject( roslynProject.FilePath!, projectProperties, null );
 
@@ -454,5 +480,50 @@ namespace Metalama.Framework.Workspaces
         }
 
 #pragma warning restore CA1822
+    }
+
+    internal class MSBuildLogger : Microsoft.Build.Framework.ILogger
+    {
+        private readonly ILogger _logger;
+
+        public MSBuildLogger( ILogger logger )
+        {
+            this._logger = logger;
+        }
+
+        public void Initialize( IEventSource eventSource )
+        {
+            eventSource.MessageRaised += this.OnMessageRaised;
+            eventSource.WarningRaised += this.OnWarningRaised;
+            eventSource.ErrorRaised += this.OnErrorRaised;
+        }
+
+        private void OnMessageRaised( object sender, BuildMessageEventArgs e )
+        {
+            if ( e.Importance == MessageImportance.Low )
+            {
+                this._logger.Trace?.Log( $"{e.Code} {e.Message}" );
+            }
+            else
+            {
+                this._logger.Info?.Log( $"{e.Code} {e.Message}" );
+            }
+        }
+
+        private void OnWarningRaised( object sender, BuildWarningEventArgs e )
+        {
+            this._logger.Warning?.Log( $"{e.Code} {e.Message}" );
+        }
+
+        private void OnErrorRaised( object sender, BuildErrorEventArgs e )
+        {
+            this._logger.Error?.Log( $"{e.Code} {e.Message}" );
+        }
+
+        public void Shutdown() { }
+
+        public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
+
+        public string? Parameters { get; set; }
     }
 }
