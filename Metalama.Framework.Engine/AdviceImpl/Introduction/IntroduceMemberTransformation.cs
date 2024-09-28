@@ -12,5 +12,5 @@ internal abstract class IntroduceMemberTransformation<T> : IntroduceDeclarationT
     protected IntroduceMemberTransformation( Advice advice, T introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override TransformationObservability Observability
-        => this.IntroducedDeclaration.IsDesignTime ? TransformationObservability.Always : TransformationObservability.CompileTimeOnly;
+        => this.IntroducedDeclaration.IsDesignTimeObservable ? TransformationObservability.Always : TransformationObservability.CompileTimeOnly;
 }

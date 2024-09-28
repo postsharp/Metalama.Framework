@@ -3,8 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
@@ -25,14 +23,14 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
-        public Ref<IDeclaration> TargetDeclaration { get; }
+        public IRef<IDeclaration> TargetDeclaration { get; }
 
         public int TargetDeclarationDepth { get; }
 
         public FabricInstance( FabricDriver driver, IDeclaration targetDeclaration )
         {
             this.Driver = driver;
-            this.TargetDeclaration = targetDeclaration.ToValueTypedRef();
+            this.TargetDeclaration = targetDeclaration.ToRef();
             this.TargetDeclarationDepth = targetDeclaration.Depth;
 
             this.ValidatorDriverFactory = ValidatorDriverFactory.GetInstance( driver.Fabric.GetType() );

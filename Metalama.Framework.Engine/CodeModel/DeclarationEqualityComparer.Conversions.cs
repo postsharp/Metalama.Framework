@@ -10,6 +10,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
+using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -17,7 +20,7 @@ internal partial class DeclarationEqualityComparer
 {
     private sealed class Conversions( DeclarationEqualityComparer parent )
     {
-        private StructuralDeclarationComparer Comparer => parent._innerComparer.StructuralDeclarationComparer;
+        private static StructuralDeclarationComparer Comparer => StructuralDeclarationComparer.Default;
 
         // Largely based on Roslyn's ClassifyConversion.
         internal bool HasConversion( IType left, IType right, ConversionKind kind )
@@ -37,7 +40,7 @@ internal partial class DeclarationEqualityComparer
                 {
                     var unwrappedRight = ((INamedType) right).TypeArguments.Single();
 
-                    if ( this.Comparer.Equals( left, unwrappedRight ) )
+                    if ( Comparer.Equals( left, unwrappedRight ) )
                     {
                         return true;
                     }
@@ -61,11 +64,11 @@ internal partial class DeclarationEqualityComparer
             return false;
         }
 
-        private static bool IsClass( IType type ) => type.TypeKind is Code.TypeKind.Class or Code.TypeKind.RecordClass;
+        private static bool IsClass( IType type ) => type.TypeKind is TypeKind.Class or TypeKind.RecordClass;
 
         private bool HasIdentityOrImplicitReferenceConversion( IType left, IType right )
         {
-            if ( this.Comparer.Equals( left, right ) )
+            if ( Comparer.Equals( left, right ) )
             {
                 return true;
             }
@@ -73,25 +76,25 @@ internal partial class DeclarationEqualityComparer
             if ( left.IsReferenceType == true )
             {
                 // From any reference type to object and dynamic.
-                if ( right.SpecialType == Code.SpecialType.Object || right is IDynamicType )
+                if ( right.SpecialType == SpecialType.Object || right is IDynamicType )
                 {
                     return true;
                 }
 
                 switch ( left.TypeKind )
                 {
-                    case Code.TypeKind.Class or Code.TypeKind.RecordClass:
-                        if ( this.IsBaseClass( left, right ) )
+                    case TypeKind.Class or TypeKind.RecordClass:
+                        if ( IsBaseClass( left, right ) )
                         {
                             return true;
                         }
 
                         return this.HasImplicitConversionToInterface( left, right );
 
-                    case Code.TypeKind.Interface:
+                    case TypeKind.Interface:
                         return this.HasImplicitConversionToInterface( left, right );
 
-                    case Code.TypeKind.Delegate:
+                    case TypeKind.Delegate:
                         // From any delegate-type to System.Delegate, System.MulticastDelegate and the interfaces it implements.
                         if ( right.GetSymbol()?.SpecialType is RoslynSpecialType.System_Delegate or RoslynSpecialType.System_MulticastDelegate
                              || this.HasImplicitConversionToInterface(
@@ -108,7 +111,7 @@ internal partial class DeclarationEqualityComparer
 
                         return false;
 
-                    case Code.TypeKind.TypeParameter:
+                    case TypeKind.TypeParameter:
                         var leftTypeParameter = (ITypeParameter) left;
 
                         foreach ( var constraint in leftTypeParameter.TypeConstraints )
@@ -121,7 +124,7 @@ internal partial class DeclarationEqualityComparer
 
                         return false;
 
-                    case Code.TypeKind.Array:
+                    case TypeKind.Array:
                         return this.HasImplicitConversionFromArray( (IArrayType) left, right );
                 }
             }
@@ -129,7 +132,7 @@ internal partial class DeclarationEqualityComparer
             return false;
         }
 
-        private bool IsBaseClass( IType left, IType right )
+        private static bool IsBaseClass( IType left, IType right )
         {
             if ( !IsClass( right ) )
             {
@@ -138,7 +141,7 @@ internal partial class DeclarationEqualityComparer
 
             for ( var current = left; current != null; current = current.GetBaseType() )
             {
-                if ( this.Comparer.Equals( current, right ) )
+                if ( Comparer.Equals( current, right ) )
                 {
                     return true;
                 }
@@ -149,7 +152,7 @@ internal partial class DeclarationEqualityComparer
 
         private bool HasImplicitConversionToInterface( IType left, IType right )
         {
-            if ( right.TypeKind != Code.TypeKind.Interface )
+            if ( right.TypeKind != TypeKind.Interface )
             {
                 return false;
             }
@@ -159,7 +162,7 @@ internal partial class DeclarationEqualityComparer
                 return this.HasAnyBaseInterfaceConversion( left, right );
             }
 
-            if ( left.TypeKind == Code.TypeKind.Interface )
+            if ( left.TypeKind == TypeKind.Interface )
             {
                 return this.HasAnyBaseInterfaceConversion( left, right ) ||
                        this.HasVarianceConversion( left.AssertCast<INamedType>(), right.AssertCast<INamedType>() );
@@ -170,7 +173,7 @@ internal partial class DeclarationEqualityComparer
 
         private bool HasAnyBaseInterfaceConversion( IType left, IType right )
         {
-            if ( right.TypeKind != Code.TypeKind.Interface )
+            if ( right.TypeKind != TypeKind.Interface )
             {
                 return false;
             }
@@ -193,12 +196,12 @@ internal partial class DeclarationEqualityComparer
 
         private bool HasVarianceConversion( INamedType left, INamedType right )
         {
-            if ( this.Comparer.Equals( left, right ) )
+            if ( Comparer.Equals( left, right ) )
             {
                 return true;
             }
 
-            if ( !this.Comparer.Equals( left.Definition, right.Definition ) )
+            if ( !Comparer.Equals( left.Definition, right.Definition ) )
             {
                 return false;
             }
@@ -213,7 +216,7 @@ internal partial class DeclarationEqualityComparer
                 var rightTypeArgument = rightTypeArguments[i];
 
                 // If they're identical then this one is automatically good, so skip it.
-                if ( this.Comparer.Equals( leftTypeArgument, rightTypeArgument ) )
+                if ( Comparer.Equals( leftTypeArgument, rightTypeArgument ) )
                 {
                     continue;
                 }
@@ -222,10 +225,10 @@ internal partial class DeclarationEqualityComparer
 
                 switch ( typeParameter.Variance )
                 {
-                    case Code.VarianceKind.None:
+                    case VarianceKind.None:
                         return false;
 
-                    case Code.VarianceKind.Out:
+                    case VarianceKind.Out:
                         if ( !this.HasIdentityOrImplicitReferenceConversion( leftTypeArgument, rightTypeArgument ) )
                         {
                             return false;
@@ -233,7 +236,7 @@ internal partial class DeclarationEqualityComparer
 
                         break;
 
-                    case Code.VarianceKind.In:
+                    case VarianceKind.In:
                         if ( !this.HasIdentityOrImplicitReferenceConversion( rightTypeArgument, leftTypeArgument ) )
                         {
                             return false;
@@ -252,7 +255,8 @@ internal partial class DeclarationEqualityComparer
         private bool HasImplicitConversionFromArray( IArrayType left, IType right )
         {
             // Covariant array conversion.
-            if ( right is IArrayType rightArray && left.Rank == rightArray.Rank && this.HasIdentityOrImplicitReferenceConversion( left.ElementType, rightArray.ElementType ) )
+            if ( right is IArrayType rightArray && left.Rank == rightArray.Rank
+                                                && this.HasIdentityOrImplicitReferenceConversion( left.ElementType, rightArray.ElementType ) )
             {
                 return true;
             }
@@ -280,7 +284,7 @@ internal partial class DeclarationEqualityComparer
         {
             if ( left is ITypeParameter leftTypeParameter && left.IsReferenceType == true )
             {
-                if ( right.SpecialType == Code.SpecialType.Object || right is IDynamicType )
+                if ( right.SpecialType == SpecialType.Object || right is IDynamicType )
                 {
                     return true;
                 }
@@ -309,7 +313,7 @@ internal partial class DeclarationEqualityComparer
                 return false;
             }
 
-            if ( this.IsBaseClass( left, right ) )
+            if ( IsBaseClass( left, right ) )
             {
                 return true;
             }
@@ -342,13 +346,13 @@ internal partial class DeclarationEqualityComparer
             }
 
             var mostSpecificTargetType = this.MostSpecificTargetType( right, conversions );
-            
+
             if ( mostSpecificTargetType == null )
             {
                 return false;
             }
 
-            return this.HasMostSpecificConversionOperator( mostSpecificSourceType, mostSpecificTargetType, conversions );
+            return HasMostSpecificConversionOperator( mostSpecificSourceType, mostSpecificTargetType, conversions );
         }
 
         private static IEnumerable<INamedType> GetTypesParticipatingInUserDefinedConversion( IType type, bool includeBaseTypes )
@@ -359,7 +363,7 @@ internal partial class DeclarationEqualityComparer
             {
                 foreach ( var constraint in typeParameter.TypeConstraints )
                 {
-                    if ( constraint.TypeKind == Code.TypeKind.Interface )
+                    if ( constraint.TypeKind == TypeKind.Interface )
                     {
                         continue;
                     }
@@ -381,7 +385,7 @@ internal partial class DeclarationEqualityComparer
             // ReSharper disable once VariableHidesOuterVariable
             IEnumerable<INamedType> GetFromClassOrStruct( IType type )
             {
-                if ( type.TypeKind is Code.TypeKind.Class or Code.TypeKind.RecordClass or Code.TypeKind.Struct or Code.TypeKind.RecordStruct )
+                if ( type.TypeKind is TypeKind.Class or TypeKind.RecordClass or TypeKind.Struct or TypeKind.RecordStruct )
                 {
                     var namedType = (INamedType) type;
 
@@ -405,7 +409,7 @@ internal partial class DeclarationEqualityComparer
             IType right,
             IEnumerable<INamedType> typeSet )
         {
-            if ( left.TypeKind == Code.TypeKind.Interface || right.TypeKind == Code.TypeKind.Interface )
+            if ( left.TypeKind == TypeKind.Interface || right.TypeKind == TypeKind.Interface )
             {
                 yield break;
             }
@@ -425,7 +429,7 @@ internal partial class DeclarationEqualityComparer
                     Invariant.Assert( op.OperatorKind == OperatorKind.ImplicitConversion );
 
                     // We might have a bad operator and be in an error recovery situation. Ignore it.
-                    if ( op.ReturnType.SpecialType == Code.SpecialType.Void || op.Parameters.Count != 1 )
+                    if ( op.ReturnType.SpecialType == SpecialType.Void || op.Parameters.Count != 1 )
                     {
                         continue;
                     }
@@ -446,7 +450,7 @@ internal partial class DeclarationEqualityComparer
                             liftingCount = 1;
                         }
 
-                        yield return new( convertsFrom, convertsTo, liftingCount );
+                        yield return new UserDefinedImplicitConversion( convertsFrom, convertsTo, liftingCount );
                     }
                     else if ( left.IsNullableValueType()
                               && IsValidNullableValueTypeArgument( convertsFrom )
@@ -468,7 +472,7 @@ internal partial class DeclarationEqualityComparer
 
                         if ( hasLiftedFromConversion && hasLiftedToConversion )
                         {
-                            yield return new( nullableFrom, nullableTo, liftingCount );
+                            yield return new UserDefinedImplicitConversion( nullableFrom, nullableTo, liftingCount );
                         }
                     }
                 }
@@ -480,7 +484,7 @@ internal partial class DeclarationEqualityComparer
         private IType? MostSpecificSourceType( IType type, ImmutableArray<UserDefinedImplicitConversion> conversions )
         {
             // If any of the operators in U convert from S then SX is S.
-            if ( conversions.Any( conv => this.Comparer.Equals( conv.From, type ) ) )
+            if ( conversions.Any( conv => Comparer.Equals( conv.From, type ) ) )
             {
                 return type;
             }
@@ -491,7 +495,7 @@ internal partial class DeclarationEqualityComparer
                 conv => conv.From,
                 ( left, right ) =>
                 {
-                    if ( this.Comparer.Equals( left, right ) )
+                    if ( Comparer.Equals( left, right ) )
                     {
                         return BetterResult.Equal;
                     }
@@ -509,7 +513,7 @@ internal partial class DeclarationEqualityComparer
         private IType? MostSpecificTargetType( IType type, ImmutableArray<UserDefinedImplicitConversion> conversions )
         {
             // If any of the operators in U convert to T then TX is T.
-            if ( conversions.Any( conv => this.Comparer.Equals( conv.To, type ) ) )
+            if ( conversions.Any( conv => Comparer.Equals( conv.To, type ) ) )
             {
                 return type;
             }
@@ -520,7 +524,7 @@ internal partial class DeclarationEqualityComparer
                 conv => conv.To,
                 ( left, right ) =>
                 {
-                    if ( this.Comparer.Equals( left, right ) )
+                    if ( Comparer.Equals( left, right ) )
                     {
                         return BetterResult.Equal;
                     }
@@ -535,13 +539,13 @@ internal partial class DeclarationEqualityComparer
                 } );
         }
 
-        private bool HasMostSpecificConversionOperator(
+        private static bool HasMostSpecificConversionOperator(
             IType mostSpecificSourceType,
             IType mostSpecificTargetType,
             ImmutableArray<UserDefinedImplicitConversion> conversions )
         {
             bool TypesAreEqual( UserDefinedImplicitConversion conv )
-                => this.Comparer.Equals( conv.From, mostSpecificSourceType ) && this.Comparer.Equals( conv.To, mostSpecificTargetType );
+                => Comparer.Equals( conv.From, mostSpecificSourceType ) && Comparer.Equals( conv.To, mostSpecificTargetType );
 
             var hasUnlifted = HasUnique( conversions, conv => TypesAreEqual( conv ) && conv.LiftingCount == 0 );
 
@@ -579,7 +583,10 @@ internal partial class DeclarationEqualityComparer
             return false;
         }
 
-        private static TResult? UniqueBest<TItem, TResult>( ImmutableArray<TItem> items, Func<TItem, TResult> extract, Func<TResult, TResult, BetterResult> better )
+        private static TResult? UniqueBest<TItem, TResult>(
+            ImmutableArray<TItem> items,
+            Func<TItem, TResult> extract,
+            Func<TResult, TResult, BetterResult> better )
             where TResult : class
         {
             if ( items.IsEmpty )

@@ -7,7 +7,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -25,7 +24,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
     private readonly INamedType? _explicitlyImplementedInterfaceType;
 
-    protected new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+    protected new IRef<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     protected string MemberName { get; }
 

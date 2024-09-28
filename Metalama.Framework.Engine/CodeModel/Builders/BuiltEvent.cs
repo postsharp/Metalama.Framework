@@ -14,7 +14,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 {
     public EventBuilder EventBuilder { get; }
 
-    public BuiltEvent( CompilationModel compilation, EventBuilder builder ) : base( compilation )
+    public BuiltEvent( EventBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.EventBuilder = builder;
     }
@@ -28,7 +28,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     protected override MemberBuilder MemberBuilder => this.EventBuilder;
 
     [Memo]
-    public INamedType Type => this.Compilation.Factory.GetDeclaration( this.EventBuilder.Type );
+    public INamedType Type => this.MapType( this.EventBuilder.Type );
 
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
@@ -41,18 +41,26 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     public IMethod? RaiseMethod => null;
 
     [Memo]
-    public IEvent? OverriddenEvent => this.Compilation.Factory.GetDeclaration( this.EventBuilder.OverriddenEvent );
+    public IEvent? OverriddenEvent => this.MapDeclaration( this.EventBuilder.OverriddenEvent );
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-        => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 
-    IEvent IEvent.Definition => this;
+    [Memo]
+    public IEvent Definition => this.Compilation.Factory.GetEvent( this.EventBuilder ).AssertNotNull();
+
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-    IRef<IEvent> IEvent.ToRef() => this.EventBuilder.BoxedRef;
+    [Memo]
+    private IRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
+
+    public IRef<IEvent> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public IEventInvoker With( InvokerOptions options ) => this.EventBuilder.With( options );
 

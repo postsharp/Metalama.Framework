@@ -1,8 +1,5 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0115 on `meta.Target.Field.Name`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Field' in an advice applied to method 'TargetCode.field.get' because there is no 'IField'. Consider using meta.Target.FieldOrProperty instead.`
-// Error LAMA0115 on `meta.Target.Indexer.Name`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Indexer' in an advice applied to method 'TargetCode.field.get' because there is no 'IIndexer'.`
-// Error LAMA0506 on `TargetCode`: `The aspect 'ParametersAspectTest' cannot introduce member 'TargetCode.field' into type 'TargetCode' because there is already a property of the same name declared in the type or in a base type.`
-// Error LAMA0115 on `field`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Property' in an advice applied to method 'TargetCode.get_field' because there is no 'IProperty'. Consider using meta.Target.FieldOrProperty instead.`
+// Error LAMA0115 on `meta.Target.Indexer.Name`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Indexer' in an advice applied to method 'TargetCode.field.get()' because there is no 'IIndexer'.`
 // Error LAMA0115 on `get`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Field' in an advice applied to method 'TargetCode.property.get' because there is no 'IField'. Consider using meta.Target.FieldOrProperty instead.`
 // Error LAMA0115 on `get`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Indexer' in an advice applied to method 'TargetCode.property.get' because there is no 'IIndexer'.`
 // Error LAMA0115 on `=> 42`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Field' in an advice applied to method 'TargetCode.this[int].get' because there is no 'IField'. Consider using meta.Target.FieldOrPropertyOrIndexer instead.`

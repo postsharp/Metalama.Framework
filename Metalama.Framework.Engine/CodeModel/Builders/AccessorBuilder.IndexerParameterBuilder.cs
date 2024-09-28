@@ -107,8 +107,5 @@ internal partial class AccessorBuilder
         {
             throw new NotImplementedException();
         }
-
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => $"{this._accessor.ToDisplayString( format, context )}@{this.Name}";
     }
 }

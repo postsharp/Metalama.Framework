@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Collections
 {
     public sealed partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
-        internal readonly struct Group : IGrouping<TKey, TValue>
+        internal class Group : IGrouping<TKey, TValue>
         {
             public ImmutableArray<TValue> Items { get; }
 

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltMethodBase : BuiltMember, IMethodBaseImpl
 {
-    protected BuiltMethodBase( CompilationModel compilation ) : base( compilation ) { }
+    protected BuiltMethodBase( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
     protected abstract MethodBaseBuilder MethodBaseBuilder { get; }
 
@@ -17,7 +17,7 @@ internal abstract class BuiltMethodBase : BuiltMember, IMethodBaseImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this.MethodBaseBuilder.ToValueTypedRef<IHasParameters>() ) );
+            this.Compilation.GetParameterCollection( this.MethodBaseBuilder.ToRef() ) );
 
     public abstract System.Reflection.MethodBase ToMethodBase();
 

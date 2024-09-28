@@ -30,6 +30,6 @@ internal sealed class RandomizingSingleThreadedTaskRunner : SingleThreadedTaskRu
     {
         var random = new Random( this._seed );
 
-        return items.ToDictionary( a => a, _ => random.NextDouble() ).OrderBy( p => p.Value ).Select( p => p.Key );
+        return items.Select( x => (Value: x, Order: random.NextDouble()) ).OrderBy( p => p.Order ).Select( p => p.Value );
     }
 }

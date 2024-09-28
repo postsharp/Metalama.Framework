@@ -6,11 +6,11 @@ internal class TargetClass
   {
     get
     {
-      return (global::System.IFormatProvider? )this._serviceProvider.GetService(typeof(global::System.IFormatProvider));
+      return (IFormatProvider? )_serviceProvider.GetService(typeof(IFormatProvider));
     }
     init
     {
-      throw new global::System.NotSupportedException();
+      throw new NotSupportedException();
     }
   }
   public string? Format(object? o)

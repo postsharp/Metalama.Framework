@@ -97,13 +97,6 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
         this._refKind = refKind;
     }
 
-    // TODO: How to implement this?
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
-
-    public override SerializableDeclarationId ToSerializableId()
-        => throw new NotSupportedException(
-            "Getting a serializable identifier is not supported for a parameter that may still be in the process of being added to its method." );
-
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
     protected override SyntaxKind AttributeTargetSyntaxKind => this.IsReturnParameter ? SyntaxKind.ReturnKeyword : SyntaxKind.None;

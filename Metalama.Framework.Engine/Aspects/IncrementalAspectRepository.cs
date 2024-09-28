@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -15,17 +15,19 @@ namespace Metalama.Framework.Engine.Aspects;
 
 internal sealed class IncrementalAspectRepository : AspectRepository
 {
-    private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance> _aspects;
+    private readonly ImmutableDictionaryOfArray<IRef<IDeclaration>, IAspectInstance> _aspects;
     private readonly CompilationModel _compilation;
 
-    private IncrementalAspectRepository( ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance> aspects, CompilationModel compilation )
+    private IncrementalAspectRepository( ImmutableDictionaryOfArray<IRef<IDeclaration>, IAspectInstance> aspects, CompilationModel compilation )
     {
+        Invariant.Assert( aspects.KeyComparer is IRefEqualityComparer );
+
         this._aspects = aspects;
         this._compilation = compilation;
     }
 
     public IncrementalAspectRepository( CompilationModel compilation ) : this(
-        ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance>.Empty,
+        ImmutableDictionaryOfArray<IRef<IDeclaration>, IAspectInstance>.Empty.WithKeyComparer( RefEqualityComparer<IDeclaration>.Default ),
         compilation ) { }
 
     private void VerifyDeclaration( IDeclaration declaration )
@@ -79,13 +81,13 @@ internal sealed class IncrementalAspectRepository : AspectRepository
     {
         this.VerifyDeclaration( declaration );
 
-        return this._aspects[declaration.ToValueTypedRef()].Any( a => aspectType.IsAssignableFrom( a.AspectClass.Type ) );
+        return this._aspects[declaration.ToRef()].Any( a => aspectType.IsAssignableFrom( a.AspectClass.Type ) );
     }
 
     public override IEnumerable<IAspectInstance> GetAspectInstances( IDeclaration declaration )
     {
         this.VerifyDeclaration( declaration );
 
-        return this._aspects[declaration.ToValueTypedRef()];
+        return this._aspects[declaration.ToRef()];
     }
 }

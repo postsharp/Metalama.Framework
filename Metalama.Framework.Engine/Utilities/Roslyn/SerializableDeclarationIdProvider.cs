@@ -20,9 +20,9 @@ public static class SerializableDeclarationIdProvider
 
     private static readonly char[] _separators = new[] { ';', '=' };
 
-    public static SerializableDeclarationId GetSerializableId( this ISymbol symbol ) => symbol.GetSerializableId( DeclarationRefTargetKind.Default );
+    public static SerializableDeclarationId GetSerializableId( this ISymbol symbol ) => symbol.GetSerializableId( RefTargetKind.Default );
 
-    internal static SerializableDeclarationId GetSerializableId( this ISymbol symbol, DeclarationRefTargetKind targetKind )
+    internal static SerializableDeclarationId GetSerializableId( this ISymbol symbol, RefTargetKind targetKind )
     {
         if ( !TryGetSerializableId( symbol, targetKind, out var id ) )
         {
@@ -33,9 +33,9 @@ public static class SerializableDeclarationIdProvider
     }
 
     public static bool TryGetSerializableId( this ISymbol? symbol, out SerializableDeclarationId id )
-        => TryGetSerializableId( symbol, DeclarationRefTargetKind.Default, out id );
+        => TryGetSerializableId( symbol, RefTargetKind.Default, out id );
 
-    private static bool TryGetSerializableId( this ISymbol? symbol, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
+    private static bool TryGetSerializableId( this ISymbol? symbol, RefTargetKind targetKind, out SerializableDeclarationId id )
     {
         switch ( symbol )
         {
@@ -105,7 +105,7 @@ public static class SerializableDeclarationIdProvider
                         {
                             var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
 
-                            if ( targetKind == DeclarationRefTargetKind.Default )
+                            if ( targetKind == RefTargetKind.Default )
                             {
                                 id = new SerializableDeclarationId( documentationId );
                             }
@@ -125,10 +125,9 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration )
-        => declaration.GetSerializableId( DeclarationRefTargetKind.Default );
+    internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration ) => declaration.GetSerializableId( RefTargetKind.Default );
 
-    internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration, DeclarationRefTargetKind targetKind )
+    internal static SerializableDeclarationId GetSerializableId( this IDeclaration declaration, RefTargetKind targetKind )
     {
         if ( !TryGetSerializableId( declaration, targetKind, out var id ) )
         {
@@ -139,9 +138,9 @@ public static class SerializableDeclarationIdProvider
     }
 
     public static bool TryGetSerializableId( this IDeclaration? declaration, out SerializableDeclarationId id )
-        => TryGetSerializableId( declaration, DeclarationRefTargetKind.Default, out id );
+        => TryGetSerializableId( declaration, RefTargetKind.Default, out id );
 
-    private static bool TryGetSerializableId( this IDeclaration? declaration, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
+    private static bool TryGetSerializableId( this IDeclaration? declaration, RefTargetKind targetKind, out SerializableDeclarationId id )
     {
         switch ( declaration )
         {
@@ -152,10 +151,10 @@ public static class SerializableDeclarationIdProvider
                 return false;
 
             case IParameter { IsReturnParameter: true } parameter:
-                return TryGetSerializableId( parameter.DeclaringMember, DeclarationRefTargetKind.Return, out id );
+                return TryGetSerializableId( parameter.DeclaringMember, RefTargetKind.Return, out id );
 
             case IParameter { ContainingDeclaration.ContainingDeclaration: IField } parameter:
-                return TryGetSerializableId( parameter.ContainingDeclaration, DeclarationRefTargetKind.Parameter, out id );
+                return TryGetSerializableId( parameter.ContainingDeclaration, RefTargetKind.Parameter, out id );
 
             case IParameter parameter:
                 {
@@ -189,7 +188,7 @@ public static class SerializableDeclarationIdProvider
                     out id );
 
             case IMethod { ContainingDeclaration: IEvent, MethodKind: MetalamaMethodKind.EventRaise } eventRaisePseudoAccessor:
-                return TryGetSerializableId( eventRaisePseudoAccessor.DeclaringMember, DeclarationRefTargetKind.EventRaise, out id );
+                return TryGetSerializableId( eventRaisePseudoAccessor.DeclaringMember, RefTargetKind.EventRaise, out id );
 
             default:
                 string documentationId;
@@ -205,7 +204,7 @@ public static class SerializableDeclarationIdProvider
                         exception );
                 }
 
-                if ( targetKind == DeclarationRefTargetKind.Default )
+                if ( targetKind == RefTargetKind.Default )
                 {
                     id = new SerializableDeclarationId( documentationId );
                 }
@@ -245,7 +244,6 @@ public static class SerializableDeclarationIdProvider
         return isReturnParameter ? null : symbol;
     }
 
-    /// <remarks>This overload is only used for aspect targets, so it doesn't need to handle the other target kinds.</remarks>
     public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, CompilationContext compilationContext, out bool isReturnParameter )
     {
         var compilation = compilationContext.Compilation;
@@ -266,7 +264,7 @@ public static class SerializableDeclarationIdProvider
 
             var parent = DocumentationCommentId.GetFirstSymbolForDeclarationId( parentId, compilation );
 
-            if ( kind == nameof(DeclarationRefTargetKind.Return) )
+            if ( kind == nameof(RefTargetKind.Return) )
             {
                 isReturnParameter = true;
 
@@ -306,7 +304,7 @@ public static class SerializableDeclarationIdProvider
             {
                 return compilation.Assembly.GlobalNamespace;
             }
-            else if ( id.Id.StartsWith( SerializableTypeIdResolverForSymbol.Prefix, StringComparison.Ordinal ) )
+            else if ( id.Id.StartsWith( SerializableTypeId.Prefix, StringComparison.Ordinal ) )
             {
                 if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( id.Id ), out var typeSymbol ) )
                 {
@@ -322,7 +320,7 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
-    internal static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
+    internal static ICompilationElement? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
     {
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 
@@ -343,15 +341,15 @@ public static class SerializableDeclarationIdProvider
                 (null, _) => null,
                 (IHasParameters method, "Parameter") => method.Parameters[ordinal],
                 (IGeneric generic, "TypeParameter") => generic.TypeParameters[ordinal],
-                (IMethod method, nameof(DeclarationRefTargetKind.Return)) => method.ReturnParameter,
-                (IField field, nameof(DeclarationRefTargetKind.PropertyGet)) => field.GetMethod,
-                (IField field, nameof(DeclarationRefTargetKind.PropertySet)) => field.SetMethod,
-                (IField field, nameof(DeclarationRefTargetKind.PropertySetParameter)) => field.SetMethod?.Parameters[0],
-                (IField field, nameof(DeclarationRefTargetKind.PropertyGetReturnParameter)) => field.GetMethod?.ReturnParameter,
-                (IField field, nameof(DeclarationRefTargetKind.PropertySetReturnParameter)) => field.SetMethod?.ReturnParameter,
-                (IEvent @event, nameof(DeclarationRefTargetKind.EventRaise)) => @event.RaiseMethod,
-                (IEvent @event, nameof(DeclarationRefTargetKind.EventRaiseParameter)) => @event.RaiseMethod?.Parameters[0],
-                (IEvent @event, nameof(DeclarationRefTargetKind.EventRaiseReturnParameter)) => @event.RaiseMethod?.ReturnParameter,
+                (IMethod method, nameof(RefTargetKind.Return)) => method.ReturnParameter,
+                (IField field, nameof(RefTargetKind.PropertyGet)) => field.GetMethod,
+                (IField field, nameof(RefTargetKind.PropertySet)) => field.SetMethod,
+                (IField field, nameof(RefTargetKind.PropertySetParameter)) => field.SetMethod?.Parameters[0],
+                (IField field, nameof(RefTargetKind.PropertyGetReturnParameter)) => field.GetMethod?.ReturnParameter,
+                (IField field, nameof(RefTargetKind.PropertySetReturnParameter)) => field.SetMethod?.ReturnParameter,
+                (IEvent @event, nameof(RefTargetKind.EventRaise)) => @event.RaiseMethod,
+                (IEvent @event, nameof(RefTargetKind.EventRaiseParameter)) => @event.RaiseMethod?.Parameters[0],
+                (IEvent @event, nameof(RefTargetKind.EventRaiseReturnParameter)) => @event.RaiseMethod?.ReturnParameter,
                 _ => null
             };
         }
@@ -363,6 +361,17 @@ public static class SerializableDeclarationIdProvider
             }
 
             return compilation.Factory.GetAssembly( assemblyIdentity );
+        }
+        else if ( id.Id.StartsWith( SerializableTypeId.Prefix, StringComparison.Ordinal ) )
+        {
+            if ( !compilation.CompilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( id.Id ), out var typeSymbol ) )
+            {
+                return null;
+            }
+            else
+            {
+                return compilation.Factory.GetIType( typeSymbol );
+            }
         }
         else
         {

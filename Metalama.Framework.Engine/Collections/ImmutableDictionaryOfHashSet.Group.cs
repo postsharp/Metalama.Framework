@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Collections
 {
     public sealed partial class ImmutableDictionaryOfHashSet<TKey, TValue>
     {
-        internal readonly struct Group : IGrouping<TKey, TValue>
+        private class Group : IGrouping<TKey, TValue>
         {
             public ImmutableHashSet<TValue> Items { get; }
 

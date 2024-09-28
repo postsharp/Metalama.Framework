@@ -32,7 +32,7 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
         switch ( targetDeclaration )
         {
             case IField field:
-                var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
+                var promotedField = PromotedField.Create( serviceProvider, field, ObjectReader.Empty, this );
                 addTransformation( promotedField.ToTransformation() );
                 OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
 

@@ -5,8 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -16,7 +14,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 
     public TemplateClassInstance TemplateInstance { get; }
 
-    public Ref<IDeclaration> TargetDeclaration { get; }
+    public IRef<IDeclaration> TargetDeclaration { get; }
 
     /// <summary>
     /// Gets the compilation from which the advice was instantiated.
@@ -37,7 +35,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 #endif
         this.AspectInstance = parameters.AspectInstance;
         this.TemplateInstance = parameters.TemplateInstance;
-        this.TargetDeclaration = parameters.TargetDeclaration.AssertNotNull().ToValueTypedRef();
+        this.TargetDeclaration = parameters.TargetDeclaration.AssertNotNull().ToRef();
         this.SourceCompilation = parameters.SourceCompilation;
         this.AspectLayerId = new AspectLayerId( this.AspectInstance.AspectClass, parameters.LayerName );
     }

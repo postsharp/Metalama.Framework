@@ -2,22 +2,21 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class TypeParameterList : DeclarationCollection<ITypeParameter, Ref<ITypeParameter>>, IGenericParameterList
+    internal sealed class TypeParameterList : DeclarationCollection<ITypeParameter>, IGenericParameterList
     {
         public static TypeParameterList Empty { get; } = new();
 
         private TypeParameterList() { }
 
-        public TypeParameterList( INamedType declaringType, IReadOnlyList<Ref<ITypeParameter>> sourceItems ) : base(
+        public TypeParameterList( INamedType declaringType, IReadOnlyList<IRef<ITypeParameter>> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
 
-        public TypeParameterList( IMethod declaringType, IReadOnlyList<Ref<ITypeParameter>> sourceItems ) : base(
+        public TypeParameterList( IMethod declaringType, IReadOnlyList<IRef<ITypeParameter>> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
 

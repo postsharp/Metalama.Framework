@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
 using System.Collections;
@@ -11,17 +10,18 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal abstract class DeclarationCollection<TDeclaration, TRef> : IReadOnlyCollection<TDeclaration>
-        where TDeclaration : class, IDeclaration
-        where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
+    internal abstract class DeclarationCollection<T> : IReadOnlyCollection<T>
+        where T : class, IDeclaration
     {
+        private readonly IGenericContext _genericContext;
+
         internal IDeclaration? ContainingDeclaration { get; }
 
-        protected IReadOnlyList<TRef> Source { get; }
+        protected IReadOnlyList<IRef<T>> Source { get; }
 
         internal CompilationModel Compilation => (CompilationModel) this.ContainingDeclaration.AssertNotNull().Compilation;
 
-        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<TRef> source )
+        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<IRef<T>> source )
         {
 #if DEBUG
             if ( containingDeclaration is NamedTypeImpl )
@@ -30,22 +30,23 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             }
 #endif
 
+            this._genericContext = containingDeclaration.GenericContext;
             this.Source = source;
-
             this.ContainingDeclaration = containingDeclaration;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration, TRef}"/> class representing an empty list.
+        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration}"/> class representing an empty list.
         /// </summary>
         protected DeclarationCollection()
         {
-            this.Source = ImmutableArray<TRef>.Empty;
+            this.Source = ImmutableArray<IRef<T>>.Empty;
+            this._genericContext = GenericContext.Empty;
         }
 
-        public IEnumerator<TDeclaration> GetEnumerator()
+        public IEnumerator<T> GetEnumerator()
         {
-            if ( this.Source is UpdatableDeclarationCollection<TDeclaration, TRef> updatableCollection )
+            if ( this.Source is DeclarationUpdatableCollection<T> updatableCollection )
             {
                 // We don't use the list enumeration pattern because this may lead to infinite recursions
                 // if the loop body adds items during the enumeration.
@@ -70,9 +71,14 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         // We allow resolving references to missing declarations because the collection may be a child collection of a missing declaration,
         // for instance the parameters of a method that has been introduced into the current compilation but is not included in the current compilation.
-        protected TDeclaration GetItem( in TRef reference ) => reference.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
+        protected T GetItem( in IRef<T> reference )
+        {
+            var declaration = reference.GetTarget( this.Compilation, genericContext: this._genericContext );
 
-        protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
+            return declaration;
+        }
+
+        protected IEnumerable<T> GetItems( IEnumerable<IRef<T>> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
 
         public override string ToString()
         {

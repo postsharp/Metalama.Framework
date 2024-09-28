@@ -7,13 +7,11 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -36,9 +34,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
         }
     }
 
-    // A builder is never accessed directly from user code and never represents a generic type instance,
-    // so we don't need an implementation of GenericArguments.
-    public IReadOnlyList<IType> TypeArguments => throw new NotSupportedException();
+    public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
     public IMethod? OverriddenMethod { get; set; }
 
@@ -107,7 +103,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
             _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {this.DeclarationKind}." )
         };
 
-    public override IRef<IMethodBase> ToMethodBaseRef() => this.BoxedRef;
+    public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
@@ -171,25 +167,23 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-    {
-        var parameterTypes = this.Parameters.AsEnumerable<IParameter>().Select( p => p.Type );
-
-        return DisplayStringFormatter.Format( format, context, $"{this.DeclaringType}.{this.Name}({parameterTypes})" );
-    }
-
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceMethodTransformation( this.ParentAdvice, this );
+    }
 
     [Memo]
-    public BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+    public IRef<IMethod> Ref => this.RefFactory.FromBuilder<IMethod>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+    public new IRef<IMethod> ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

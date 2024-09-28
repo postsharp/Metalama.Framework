@@ -64,7 +64,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             if ( this.OverriddenDeclaration.ReturnType.Equals( SpecialType.Void ) )
             {
                 returnType = context.SyntaxGenerator.Type(
-                    this.OverriddenDeclaration.GetCompilationModel().CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
+                    this.OverriddenDeclaration.GetCompilationContext().ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
             }
         }
 

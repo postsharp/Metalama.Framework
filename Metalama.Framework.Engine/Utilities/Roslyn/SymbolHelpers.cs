@@ -5,6 +5,8 @@ using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
@@ -76,6 +78,29 @@ internal static class SymbolHelpers
         {
             throw new AssertionFailedException( $"The symbol '{symbol}' does not belong to the expected compilation." );
         }
+    }
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [return: NotNullIfNotNull( nameof(symbol) )]
+    internal static T? AssertBelongsToCompilationContext<T>( this T? symbol, CompilationContext compilationContext )
+        where T : class, ISymbol
+    {
+#if DEBUG
+
+        if ( symbol == null )
+        {
+            return null;
+        }
+
+        if ( symbol.BelongsToCompilation( compilationContext ) == false )
+        {
+            throw new AssertionFailedException( $"The symbol '{symbol}' does not belong to the expected compilation." );
+        }
+
+        return symbol;
+#else
+        return symbol;
+#endif
     }
 
     [Conditional( "DEBUG" )]

@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -74,9 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public bool IsReturnParameter => this.Index < 0;
 
-        internal override Ref<IDeclaration> ToValueTypedRef() => Ref.PseudoParameter( this );
-
-        private protected override IRef<IDeclaration> ToDeclarationRef() => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -111,11 +108,19 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 
+        internal override GenericContext GenericContext => (GenericContext) this.ContainingDeclaration.GenericContext;
+
         [Memo]
-        private BoxedRef<IParameter> BoxedRef => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+        private IRef<IParameter> Ref => this.RefFactory.PseudoParameter( this );
 
-        IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
+        IRef<IParameter> IParameter.ToRef() => this.Ref;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.BoxedRef;
+        IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
+
+        internal override ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null )
+            => newCompilation.Factory.Translate( this.DeclaringMember, genericContext ).AssertNotNull().Parameters[this.Index];
     }
 }

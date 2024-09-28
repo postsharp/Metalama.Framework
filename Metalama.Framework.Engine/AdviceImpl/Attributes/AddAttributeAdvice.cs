@@ -84,9 +84,10 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
             {
                 addTransformation(
                     new ConstructorBuilder( this, constructor.DeclaringType )
-                    {
-                        ReplacedImplicit = constructor.ToValueTypedRef(), Accessibility = Accessibility.Public
-                    }.ToTransformation() );
+                        {
+                            ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
+                        }
+                        .ToTransformation() );
             }
 
             var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );

@@ -593,4 +593,6 @@ public static partial class LinqExtensions
 
         return maxItem;
     }
+
+    internal static bool Contains<T>( this T[] array, T item ) => Array.IndexOf( array, item ) >= 0;
 }

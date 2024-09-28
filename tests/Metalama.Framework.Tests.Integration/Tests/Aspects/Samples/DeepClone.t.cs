@@ -1,20 +1,20 @@
 [DeepClone]
-internal partial class AutomaticallyCloneable : global::System.ICloneable
+internal partial class AutomaticallyCloneable : ICloneable
 {
   public int A;
   public ManuallyCloneable? B;
   public AutomaticallyCloneable? C;
   public NotCloneable? D;
-  public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable Clone()
+  public virtual AutomaticallyCloneable Clone()
   {
-    var clone = (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable)this.MemberwiseClone();
-    clone.B = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.ManuallyCloneable? )this.B?.Clone());
-    clone.C = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable? )this.C?.Clone());
-    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.AutomaticallyCloneable)clone;
+    var clone = (AutomaticallyCloneable)this.MemberwiseClone();
+    clone.B = (ManuallyCloneable? )B?.Clone();
+    clone.C = (C?.Clone());
+    return clone;
   }
-  global::System.Object global::System.ICloneable.Clone()
+  object ICloneable.Clone()
   {
-    return (global::System.Object)this.Clone();
+    return Clone();
   }
 }
 internal class ManuallyCloneable : ICloneable
@@ -35,10 +35,10 @@ internal class NotCloneable
 internal partial class Derived : AutomaticallyCloneable
 {
   public ManuallyCloneable? G { get; private set; }
-  public override global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.Derived Clone()
+  public override Derived Clone()
   {
-    var clone = (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.Derived)base.Clone();
-    clone.G = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.ManuallyCloneable? )this.G?.Clone());
-    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone.Derived)clone;
+    var clone = (Derived)base.Clone();
+    clone.G = (ManuallyCloneable? )G?.Clone();
+    return clone;
   }
 }

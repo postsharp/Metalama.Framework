@@ -21,7 +21,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 namespace Metalama.Framework.Engine.CodeModel.Pseudo;
 
 internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
-    where T : IHasAccessorsImpl
+    where T : class, IHasAccessorsImpl
 {
     protected T DeclaringMember { get; }
 
@@ -92,19 +92,17 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
     [Memo]
-    private BoxedRef<IMethod> BoxedRef => new( this.ToValueTypedRef() );
+    private IRef<IMethod> Ref => this.GetCompilationContext().RefFactory.PseudoAccessor( this );
 
-    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+    public IRef<IMethod> ToRef() => this.Ref;
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.BoxedRef;
+    IRef<IMember> IMember.ToRef() => this.Ref;
 
-    IRef<IMember> IMember.ToRef() => this.BoxedRef;
+    IRef<IMethodBase> IMethodBase.ToRef() => this.Ref;
 
-    IRef<IMethodBase> IMethodBase.ToRef() => this.BoxedRef;
-
-    IRef<IDeclaration> IDeclaration.ToRef() => this.BoxedRef;
+    IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
 
     public SerializableDeclarationId ToSerializableId() => this.DeclaringMember.GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
 
@@ -162,13 +160,17 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public ISymbol? Symbol => null;
 
-    public Ref<IDeclaration> ToValueTypedRef() => Ref.PseudoAccessor( this );
-
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
     bool IDeclarationImpl.CanBeInherited => false;
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => throw new NotSupportedException();
+
+    public ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => newCompilation.Factory.Translate( this.DeclaringMember, genericContext ).AssertNotNull().GetAccessor( this.MethodKind );
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
 
@@ -180,7 +182,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public TExtension GetMetric<TExtension>()
         where TExtension : IMetric
-        => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+        => this.Compilation.MetricManager.GetMetric<TExtension>( this );
 
     public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 
@@ -191,4 +193,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
     public ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
+
+    public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
 }

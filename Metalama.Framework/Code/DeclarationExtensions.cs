@@ -124,7 +124,7 @@ namespace Metalama.Framework.Code
         /// Gets a representation of the current declaration in a different version of the compilation.
         /// </summary>
         [return: NotNullIfNotNull( nameof(compilationElement) )]
-        public static T? ForCompilation<T>( this T? compilationElement, ICompilation compilation, ReferenceResolutionOptions options = default )
+        public static T? ForCompilation<T>( this T? compilationElement, ICompilation compilation )
             where T : class, ICompilationElement
         {
             if ( compilationElement == null )
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Code
             else
             {
                 return
-                    ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
+                    ((ICompilationInternal) compilation).Factory.Translate( compilationElement )
                     ?? throw new InvalidOperationException(
                         $"The declaration '{compilationElement}' does not exist in the requested compilation. "
                         + $"Use TryForCompilation to avoid this exception." );
@@ -147,8 +147,7 @@ namespace Metalama.Framework.Code
         public static bool TryForCompilation<T>(
             this T? compilationElement,
             ICompilation compilation,
-            [NotNullWhen( true )] out T? translated,
-            ReferenceResolutionOptions options = default )
+            [NotNullWhen( true )] out T? translated )
             where T : class, ICompilationElement
         {
             if ( compilationElement == null )
@@ -159,7 +158,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                translated = ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+                translated = ((ICompilationInternal) compilation).Factory.Translate( compilationElement );
 
                 return translated != null;
             }

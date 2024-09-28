@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Collections
             {
                 if ( this._modifiedValuesBuilder.Count == 0 )
                 {
-                    return this._initialValues ?? Empty;
+                    return this._initialValues ?? Create( this._modifiedValuesBuilder.Comparer );
                 }
                 else
                 {
@@ -112,7 +112,8 @@ namespace Metalama.Framework.Engine.Collections
 
                     foreach ( var modifiedGroup in this._modifiedValuesBuilder )
                     {
-                        dictionaryBuilder[modifiedGroup.Key] = new Group( modifiedGroup.Key, modifiedGroup.Value.ToImmutable() );
+                        var group = new Group( modifiedGroup.Key, modifiedGroup.Value.ToImmutable() );
+                        dictionaryBuilder[modifiedGroup.Key] = group;
                     }
 
                     return new ImmutableDictionaryOfArray<TKey, TValue>( dictionaryBuilder.ToImmutable() );

@@ -15,11 +15,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 
 internal class AttributeSerializationData
 {
-    public Ref<IDeclaration> ContainingDeclaration { get; }
+    public IRef<IDeclaration> ContainingDeclaration { get; }
 
-    public Ref<INamedType> Type { get; }
+    public IRef<INamedType> Type { get; }
 
-    public Ref<IConstructor> Constructor { get; }
+    public IRef<IConstructor> Constructor { get; }
 
     public ImmutableArray<TypedConstantRef> ConstructorArguments { get; }
 
@@ -27,9 +27,10 @@ internal class AttributeSerializationData
 
     public AttributeSerializationData( ISymbol symbol, AttributeData attributeData, CompilationContext compilationContext )
     {
-        this.ContainingDeclaration = Ref.FromSymbol<IDeclaration>( symbol, compilationContext );
-        this.Type = Ref.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull(), compilationContext );
-        this.Constructor = Ref.FromSymbol<IConstructor>( attributeData.AttributeConstructor.AssertSymbolNotNull(), compilationContext );
+        this.ContainingDeclaration = compilationContext.RefFactory.FromDeclarationSymbol( symbol );
+        compilationContext.RefFactory.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull() );
+        this.Constructor = compilationContext.RefFactory.FromSymbol<IConstructor>( attributeData.AttributeConstructor.AssertSymbolNotNull() );
+        this.Type = compilationContext.RefFactory.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull() );
         this.ConstructorArguments = attributeData.ConstructorArguments.SelectAsImmutableArray( c => c.ToOurTypedConstantRef( compilationContext ) );
 
         this.NamedArguments =
@@ -39,18 +40,18 @@ internal class AttributeSerializationData
 
     public AttributeSerializationData( AttributeBuilder builder )
     {
-        this.ContainingDeclaration = builder.ContainingDeclaration.ToValueTypedRef();
-        this.Constructor = builder.Constructor.ToValueTypedRef();
-        this.Type = builder.Type.ToValueTypedRef();
+        this.ContainingDeclaration = builder.ContainingDeclaration.ToRef();
+        this.Constructor = builder.Constructor.ToRef();
+        this.Type = builder.Type.ToRef();
         this.ConstructorArguments = builder.ConstructorArguments.SelectAsImmutableArray( a => a.ToRef() );
         this.NamedArguments = builder.NamedArguments.SelectAsImmutableArray( x => new KeyValuePair<string, TypedConstantRef>( x.Key, x.Value.ToRef() ) );
     }
 
     public AttributeSerializationData( IArgumentsReader reader )
     {
-        this.ContainingDeclaration = reader.GetValue<Ref<IDeclaration>>( nameof(this.ContainingDeclaration) );
-        this.Type = reader.GetValue<Ref<INamedType>>( nameof(this.Type) );
-        this.Constructor = reader.GetValue<Ref<IConstructor>>( nameof(this.Constructor) );
+        this.ContainingDeclaration = reader.GetValue<IRefImpl<IDeclaration>>( nameof(this.ContainingDeclaration) ).AssertNotNull();
+        this.Type = reader.GetValue<IRefImpl<INamedType>>( nameof(this.Type) ).AssertNotNull();
+        this.Constructor = reader.GetValue<IRefImpl<IConstructor>>( nameof(this.Constructor) ).AssertNotNull();
         this.ConstructorArguments = reader.GetValue<ImmutableArray<TypedConstantRef>>( nameof(this.ConstructorArguments) );
 
         if ( this.ConstructorArguments.IsDefault )

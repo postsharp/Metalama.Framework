@@ -25,9 +25,13 @@ namespace Metalama.Framework.Engine.Collections
             this.ValueComparer = valueComparer;
         }
 
-        internal ImmutableDictionaryOfHashSet( IEnumerable<KeyValuePair<TKey, ImmutableHashSet<TValue>>> items )
+        internal ImmutableDictionaryOfHashSet( IEnumerable<KeyValuePair<TKey, ImmutableHashSet<TValue>>> items, IEqualityComparer<TKey> keyComparer )
         {
-            this._dictionary = items.ToImmutableDictionary( i => i.Key, i => new Group( i.Key, i.Value ) );
+            this._dictionary = items.ToImmutableDictionary(
+                i => i.Key,
+                i => new Group( i.Key, i.Value ),
+                keyComparer );
+
             this.ValueComparer = EqualityComparer<TValue>.Default;
         }
 

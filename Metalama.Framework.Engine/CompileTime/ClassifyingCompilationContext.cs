@@ -16,7 +16,7 @@ internal sealed class ClassifyingCompilationContext
     public ClassifyingCompilationContext( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
         this.CompilationContext = compilationContext;
-        this.SymbolClassifier = SymbolClassifier.GetSymbolClassifier( serviceProvider, compilationContext.Compilation );
+        this.SymbolClassifier = SymbolClassifier.GetSymbolClassifier( serviceProvider, compilationContext );
     }
 
     public CompilationContext CompilationContext { get; }

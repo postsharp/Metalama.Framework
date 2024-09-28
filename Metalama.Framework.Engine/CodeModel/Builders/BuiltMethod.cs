@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 {
     private readonly MethodBuilder _methodBuilder;
 
-    public BuiltMethod( CompilationModel compilation, MethodBuilder builder ) : base( compilation )
+    public BuiltMethod( MethodBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._methodBuilder = builder;
     }
@@ -41,7 +40,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 
     public MethodInfo ToMethodInfo() => this._methodBuilder.ToMethodInfo();
 
@@ -49,19 +48,24 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
-    public IRef<IMethod> ToRef() => this._methodBuilder.BoxedRef;
+    [Memo]
+    private IRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
+
+    public IRef<IMethod> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation );
+    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation, this.GenericContext );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.GetIType( this._methodBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.MapType( this._methodBuilder.ReturnParameter.Type );
 
     [Memo]
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this._methodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter> ).ToReadOnlyList() );
+            this._methodBuilder.TypeParameters.AsBuilderList.Select( x => this.RefFactory.FromBuilder<ITypeParameter>( x ) ).ToReadOnlyList() );
 
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
@@ -72,9 +76,12 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
     [Memo]
-    public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this._methodBuilder.OverriddenMethod );
+    public IMethod? OverriddenMethod => this.MapDeclaration( this._methodBuilder.OverriddenMethod );
 
-    IMethod IMethod.Definition => this;
+    [Memo]
+    public IMethod Definition => this.Compilation.Factory.GetMethod( this._methodBuilder ).AssertNotNull();
+
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     bool IMethod.IsPartial => false;
 

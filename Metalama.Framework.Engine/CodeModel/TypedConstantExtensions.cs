@@ -1,14 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using static Microsoft.CodeAnalysis.TypedConstantKind;
 using RoslynTypedConstant = Microsoft.CodeAnalysis.TypedConstant;
-using RoslynTypedConstantKind = Microsoft.CodeAnalysis.TypedConstantKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel;
@@ -21,9 +20,11 @@ internal static class TypedConstantExtensions
 
         var value = constant.Kind switch
         {
-            RoslynTypedConstantKind.Primitive or RoslynTypedConstantKind.Enum => constant.Value,
-            RoslynTypedConstantKind.Type => constant.Value == null ? null : compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
-            RoslynTypedConstantKind.Array => constant.Values.IsDefault ? null : constant.Values.Select( x => ToOurTypedConstant( x, compilation ) ).ToImmutableArray(),
+            Primitive or TypedConstantKind.Enum => constant.Value,
+            TypedConstantKind.Type => constant.Value == null ? null : compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
+            TypedConstantKind.Array => constant.Values.IsDefault
+                ? null
+                : constant.Values.Select( x => ToOurTypedConstant( x, compilation ) ).ToImmutableArray(),
             _ => throw new ArgumentException( nameof(constant) )
         };
 
@@ -32,14 +33,14 @@ internal static class TypedConstantExtensions
 
     public static TypedConstantRef ToOurTypedConstantRef( this RoslynTypedConstant constant, CompilationContext compilationContext )
     {
-        var type = Ref.FromSymbol<IType>( constant.Type.AssertSymbolNotNull(), compilationContext );
+        var type = constant.Type.AssertSymbolNotNull().ToRef( compilationContext );
 
         return constant.Kind switch
         {
-            RoslynTypedConstantKind.Enum or TypedConstantKind.Enum => new TypedConstantRef( constant.Value, type ),
-            RoslynTypedConstantKind.Primitive => new TypedConstantRef( constant.Value, default ),
-            RoslynTypedConstantKind.Type => new TypedConstantRef(
-                Ref.FromSymbol<IType>( (ITypeSymbol) constant.Value.AssertNotNull(), compilationContext ),
+            TypedConstantKind.Enum => new TypedConstantRef( constant.Value, type ),
+            Primitive => new TypedConstantRef( constant.Value, default ),
+            TypedConstantKind.Type => new TypedConstantRef(
+                ((ITypeSymbol) constant.Value.AssertNotNull()).ToRef( compilationContext ),
                 type ),
             TypedConstantKind.Array => new TypedConstantRef(
                 constant.Values.Select( x => ToOurTypedConstantRef( x, compilationContext ) ).ToImmutableArray(),
@@ -56,15 +57,15 @@ internal static class TypedConstantExtensions
         }
         else if ( constant.Value == null )
         {
-            return new TypedConstantRef( null, constant.Type.ToValueTypedRef() );
+            return new TypedConstantRef( null, constant.Type.ToRef() );
         }
         else if ( constant.IsArray )
         {
-            return new TypedConstantRef( constant.Values.SelectAsImmutableArray( x => x.ToRef() ), constant.Type.ToValueTypedRef() );
+            return new TypedConstantRef( constant.Values.SelectAsImmutableArray( x => x.ToRef() ), constant.Type.ToRef() );
         }
         else
         {
-            return new TypedConstantRef( constant.Value, constant.Type.ToValueTypedRef() );
+            return new TypedConstantRef( constant.Value, constant.Type.ToRef() );
         }
     }
 }

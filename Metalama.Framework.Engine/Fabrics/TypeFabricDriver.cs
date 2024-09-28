@@ -71,9 +71,9 @@ internal sealed class TypeFabricDriver : FabricDriver
 
         var executionContext = new UserCodeExecutionContext(
             aspectBuilder.ServiceProvider,
-            aspectBuilder.DiagnosticAdder,
             UserCodeDescription.Create( "calling the AmendType method for the fabric {0}", this.Fabric.GetType() ),
-            compilationModel: compilation );
+            compilation,
+            diagnostics: aspectBuilder.DiagnosticAdder );
 
         return this.FabricManager.UserCodeInvoker.TryInvoke(
             () =>

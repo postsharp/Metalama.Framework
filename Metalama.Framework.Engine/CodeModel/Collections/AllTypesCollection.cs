@@ -15,7 +15,7 @@ internal sealed class AllTypesCollection : AllMemberOrNamedTypesCollection<IName
 
     public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
     {
-        return this.Where( p => this.Comparer.Equals( p.Definition, typeDefinition ) );
+        return this.Where( p => p.Is( typeDefinition, ConversionKind.TypeDefinition ) );
     }
 
     protected override INamedTypeCollection GetMembers( INamedType namedType ) => namedType.Types;

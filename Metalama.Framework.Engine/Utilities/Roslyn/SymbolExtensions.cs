@@ -156,6 +156,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             if ( symbol.DeclaringSyntaxReferences.IsEmpty )
             {
+                if ( symbol is IMethodSymbol { MethodKind: MethodKind.Constructor, IsImplicitlyDeclared: true } && kind == SyntaxKind.UnsafeKeyword )
+                {
+                    return false;
+                }
+
                 throw new ArgumentOutOfRangeException();
             }
 

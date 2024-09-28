@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
     /// <summary>
     /// Contract of the entry point of the API between the Metalama VSX and the Metalama analyzer, which can
     /// be both of different versions. This contract is strongly versioned. The reference to this API is stored
-    /// on the <see cref="AppDomain"/> using <see cref="AppDomain.GetData"/> and <see cref="AppDomain.SetData"/>.
+    /// on the <see cref="AppDomain"/> using <see cref="AppDomain.GetData"/> and <see cref="AppDomain.SetData(string,object)"/>.
     /// </summary>
     [ComImport]
     [Guid( "A0C85506-DB96-4C14-86E8-5F199731534B" )]

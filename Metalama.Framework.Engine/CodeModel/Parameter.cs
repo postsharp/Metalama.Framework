@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -71,7 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public TypedConstant? DefaultValue
             => this._parameterSymbol.HasExplicitDefaultValue
-                ? TypedConstant.Create( this._parameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.GetIType( this.Type ) )
+                ? TypedConstant.Create( this._parameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.Translate( this.Type ) )
                 : null;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
@@ -94,7 +93,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     true ) );
 
         [Memo]
-        private IRef<IParameter> Ref => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+        private IRef<IParameter> Ref => this.RefFactory.FromSymbolBasedDeclaration<IParameter>( this );
 
         private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

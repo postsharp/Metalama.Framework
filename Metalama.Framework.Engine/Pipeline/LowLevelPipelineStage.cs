@@ -75,8 +75,9 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
         var executionContext = new UserCodeExecutionContext(
             projectServiceProvider,
-            diagnostics,
-            UserCodeDescription.Create( "calling the TransformAsync method for the weaver {0}", this._aspectWeaver.GetType() ) );
+            UserCodeDescription.Create( "calling the TransformAsync method for the weaver {0}", this._aspectWeaver.GetType() ),
+            compilationModel,
+            diagnostics: diagnostics );
 
         var userCodeInvoker = projectServiceProvider.GetRequiredService<UserCodeInvoker>();
         var success = await userCodeInvoker.TryInvokeAsync( () => this._aspectWeaver.TransformAsync( context ), executionContext );

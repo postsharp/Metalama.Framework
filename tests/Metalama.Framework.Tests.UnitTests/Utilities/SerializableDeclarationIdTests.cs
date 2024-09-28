@@ -120,7 +120,7 @@ class C<T>
     private static void Roundtrip( ICompilation compilation, ISymbol symbol, bool requireSameInstance = true )
     {
         var symbolDeclarationId = symbol.GetSerializableId();
-        var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetCompilationModel().CompilationContext );
+        var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetCompilationContext() );
 
         if ( symbol is INamespaceSymbol nss )
         {
@@ -136,7 +136,8 @@ class C<T>
         }
 
         // Also test a Ref roundtrip.
-        var symbolRoundtripFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
+        var symbolRoundtripFromRef = compilation.GetCompilationContext()
+            .RefFactory.FromAnySymbol( symbol )
             .GetSymbol( compilation.GetRoslynCompilation() );
 
         if ( requireSameInstance )
