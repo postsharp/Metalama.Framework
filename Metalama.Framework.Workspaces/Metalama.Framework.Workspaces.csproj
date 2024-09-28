@@ -55,8 +55,7 @@
     
     <Target Name="IncludeBuildHost" BeforeTargets="_GetPackageFiles">
         <!-- We include the build hosts (included by Microsoft.CodeAnalysis.Workspaces.MSBuild) so that users don't have 
-         to reference the Microsoft.CodeAnalysis.Workspaces.MSBuild, which has transitive dependencies on Microsoft.Build.
-         We need build host files, but no dependencies on Microsoft.Build. -->
+         to reference the Microsoft.CodeAnalysis.Workspaces.MSBuild and possibly mess up versions. -->
         <ItemGroup>
             <Content Remove="$(PkgMicrosoft_CodeAnalysis_Workspaces_MSBuild)/contentFiles/**" />
             <Content Include="$(PkgMicrosoft_CodeAnalysis_Workspaces_MSBuild)/contentFiles/**" Pack="true" PackagePath="contentFiles"  PackageCopyToOutput="true" />
