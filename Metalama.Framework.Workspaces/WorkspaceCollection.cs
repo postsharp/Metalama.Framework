@@ -51,10 +51,7 @@ namespace Metalama.Framework.Workspaces
 
         internal GlobalServiceProvider ServiceProvider { get; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether project loading errors should be ignored. By default,
-        /// project loading errors cause an exception to be thrown.
-        /// </summary>
+        [Obsolete( "Errors are now always ignored." )]
         public bool IgnoreLoadErrors { get; set; }
 
         /// <summary>
