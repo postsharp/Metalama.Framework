@@ -229,6 +229,10 @@ dotnet_naming_style.begins_with_underscore.required_suffix =
 dotnet_naming_style.begins_with_underscore.word_separator =
 dotnet_naming_style.begins_with_underscore.capitalization = camel_case
 
+# IDE0042: Variable can be deconstructed
+dotnet_diagnostic.IDE0042.severity = suggestion
+
+
 # IDE0021: Use expression body for constructors
 dotnet_diagnostic.IDE0021.severity = suggestion
 

@@ -11,12 +11,8 @@ internal sealed class BoxedRefSerializer<T> : ReferenceTypeSerializer<BoxedRef<T
 {
     public override BoxedRef<T> CreateInstance( IArgumentsReader constructorArguments )
     {
-        var id = constructorArguments.GetValue<string>( "id" );
-
-        if ( id == null )
-        {
-            throw new AssertionFailedException();
-        }
+        var id = constructorArguments.GetValue<string>( "id" )
+                 ?? throw new AssertionFailedException();
 
         return new BoxedRef<T>( Ref.FromDeclarationId<IDeclaration>( new SerializableDeclarationId( id ) ) );
     }

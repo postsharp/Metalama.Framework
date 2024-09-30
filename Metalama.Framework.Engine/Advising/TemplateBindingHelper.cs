@@ -388,14 +388,11 @@ internal static class TemplateBindingHelper
                         continue;
                     }
 
-                    var methodParameter = targetMethod.TypeParameters.SingleOrDefault( p => p.Name == templateParameter.Name );
-
-                    if ( methodParameter == null )
-                    {
-                        throw new InvalidTemplateSignatureException(
-                            MetalamaStringFormatter.Format(
-                                $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a generic parameter '{templateParameter.Name}'." ) );
-                    }
+                    var methodParameter = targetMethod.TypeParameters.SingleOrDefault( p => p.Name == templateParameter.Name )
+                                          ??
+                                          throw new InvalidTemplateSignatureException(
+                                              MetalamaStringFormatter.Format(
+                                                  $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a generic parameter '{templateParameter.Name}'." ) );
 
                     if ( !templateParameter.IsCompatibleWith( methodParameter ) )
                     {

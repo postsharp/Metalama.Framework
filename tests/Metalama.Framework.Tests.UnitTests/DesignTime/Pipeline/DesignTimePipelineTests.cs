@@ -2088,7 +2088,7 @@ Target.cs:
     }
 
     [Fact]
-    public async Task IntroducedSyntaxTreeConflictAndChange()
+    public void IntroducedSyntaxTreeConflictAndChange()
     {
         // Tests a situation when designtime pipeline generated a syntax tree with undeterministic name.
         // Removing a type caused names to change in such a way that invalidated syntax trees were not correctly cleaned from AspectPipelineResult,
