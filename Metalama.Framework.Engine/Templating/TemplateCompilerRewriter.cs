@@ -2504,7 +2504,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // Keep the annotations if this type is in a typeof expression. Creating the runtime expression afterwards requires the annotation.
                 if ( node.Parent.IsKind( SyntaxKind.TypeOfExpression ) )
                 {
-                    transformedNode = node.CopyAnnotationsTo( transformedNode );
+                    transformedNode = node.CopyAnnotationsTo( transformedNode )!;
                 }
 
                 return true;

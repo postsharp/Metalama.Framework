@@ -767,7 +767,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         }
         else if ( typeImpl is BuiltNamedType builtNamedType )
         {
-            return this.GetNamedType( builtNamedType.TypeBuilder, ReferenceResolutionOptions.Default );
+            return this.GetNamedType( builtNamedType.TypeBuilder, ReferenceResolutionOptions.Default ).AssertNotNull();
         }
         else
         {

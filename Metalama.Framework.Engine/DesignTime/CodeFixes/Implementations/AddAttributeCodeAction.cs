@@ -30,12 +30,9 @@ internal sealed class AddAttributeCodeAction : ICodeAction
 
         var compilation = context.Compilation.Compilation;
 
-        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation );
-
-        if ( targetSymbol == null )
-        {
-            throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
-        }
+        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation )
+                           ??
+                           throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
 
         var originalNode = this.TargetDeclaration.GetPrimaryDeclarationSyntax();
 
