@@ -1,5 +1,5 @@
 [TheAspect]
-class C
+internal class C
 {
   public class Builder
   {
@@ -9,7 +9,7 @@ class C
     }
   }
 }
-class D : C
+internal class D : C
 {
   public new class Builder
   {
