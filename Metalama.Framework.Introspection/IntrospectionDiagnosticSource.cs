@@ -16,5 +16,8 @@ public enum IntrospectionDiagnosticSource
     CSharp,
 
     // Reported by the user using an API
-    User
+    User,
+
+    // Reported by MSBuild.
+    MSBuild
 }

@@ -18,12 +18,7 @@ namespace Metalama.Framework.Project
         public static T GetRequiredService<T>( this IServiceProvider<IGlobalService> serviceProvider )
             where T : class, IGlobalService
         {
-            var service = (T?) serviceProvider.GetService( typeof(T) );
-
-            if ( service == null )
-            {
-                throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
-            }
+            var service = (T?) serviceProvider.GetService( typeof(T) ) ?? throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
 
             return service;
         }
@@ -31,12 +26,7 @@ namespace Metalama.Framework.Project
         public static T GetRequiredService<T>( this IServiceProvider<IProjectService> serviceProvider )
             where T : class, IProjectService
         {
-            var service = (T?) serviceProvider.GetService( typeof(T) );
-
-            if ( service == null )
-            {
-                throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
-            }
+            var service = (T?) serviceProvider.GetService( typeof(T) ) ?? throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
 
             return service;
         }
