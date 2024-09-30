@@ -11,16 +11,9 @@
         <!-- disable warning NU5100: The assembly 'contentFiles\any\any\**\*.dll' is not inside the 'lib' folder and hence it won't be added as a reference when the package is installed into a
             project. Move it into the 'lib' folder if it needs to be referenced. -->
         <NoWarn>NU5100</NoWarn>
-
+        
         <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddPackageContent</TargetsForTfmSpecificContentInPackage>
-
     </PropertyGroup>
-
-    <ItemGroup>
-        <None Update="buildTransitive/*" Pack="true" PackagePath=""/>
-        <None Update="build/*" Pack="true" PackagePath=""/>
-    </ItemGroup>
-
 
     <ItemGroup>
         <ProjectReference Include="../Metalama.Framework.Engine/Metalama.Framework.Engine.csproj" />
@@ -45,9 +38,6 @@
         
         <!-- The following references handle [Memo] -->
         <ProjectReference Include="../source-dependencies/Metalama.Framework.Private/src/Metalama.SourceTransformer/Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists('../source-dependencies/Metalama.Framework.Private')" />
-
-
-        
     </ItemGroup>
 
     <!-- === Packaging === -->
