@@ -18,10 +18,13 @@ using Microsoft.CodeAnalysis.MSBuild;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ILogger = Metalama.Backstage.Diagnostics.ILogger;
 
 namespace Metalama.Framework.Workspaces
 {
@@ -294,6 +297,7 @@ namespace Metalama.Framework.Workspaces
             }
 
             using var msbuildProjectCollection = new ProjectCollection( allProperties );
+            msbuildProjectCollection.RegisterLogger( new MSBuildLogger( _logger ) );
 
             // Start all tasks in parallel because even that may be expensive.
             var loadProjectTasks = roslynWorkspace.CurrentSolution.Projects.AsParallel().Select( GetOurProjectAsync ).ToArray();
@@ -303,10 +307,11 @@ namespace Metalama.Framework.Workspaces
             var projectSet = new ProjectSet( ourProjects, name ?? $"{ourProjects.Length} projects" );
 
             // Throw an exception upon failure because otherwise it's too difficult to diagnose.
-            var errors = roslynWorkspace.Diagnostics.Where( d => d.Kind == WorkspaceDiagnosticKind.Failure ).ToReadOnlyList();
+            var diagnostics = roslynWorkspace.Diagnostics.ToReadOnlyList();
 
-            if ( errors.Any() )
+            if ( diagnostics.Any() )
             {
+                // Log,
                 foreach ( var diagnostic in roslynWorkspace.Diagnostics )
                 {
                     (diagnostic.Kind == WorkspaceDiagnosticKind.Failure ? _logger.Error : _logger.Warning)?.Log( diagnostic.Message );
@@ -316,20 +321,13 @@ namespace Metalama.Framework.Workspaces
                 {
                     _logger.Trace?.Log( $"Loaded assembly: '{assembly}' from '{assembly.Location}'." );
                 }
-
-                if ( !collection.IgnoreLoadErrors )
-                {
-                    throw new WorkspaceLoadException(
-                        "Cannot load the projects." + Environment.NewLine + string.Join( Environment.NewLine, errors ),
-                        errors.SelectAsImmutableArray( e => e.Message ) );
-                }
             }
 
             return new LoadProjectSetResult( projectSet, roslynWorkspace.Diagnostics );
 
             async Task<Project> GetOurProjectAsync( Microsoft.CodeAnalysis.Project roslynProject )
             {
-                // Get an evaluated MSBuild project (the Roslyn workspace presumably does but it the result is not made available). 
+                // Get an evaluated MSBuild project (the Roslyn workspace presumably does but the result is not made available). 
                 var targetFramework = WorkspaceProjectOptions.GetTargetFrameworkFromRoslynProject( roslynProject );
 
                 Dictionary<string, string>? projectProperties = null;

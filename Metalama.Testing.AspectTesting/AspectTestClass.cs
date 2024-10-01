@@ -76,12 +76,9 @@ public abstract class AspectTestClass
             .GetMethods( BindingFlags.Instance | BindingFlags.Public )
             .Single( m => m.Name == callerMemberName );
 
-        var testFilesAttribute = callerMethod.GetCustomAttribute<CurrentDirectoryAttribute>();
-
-        if ( testFilesAttribute == null )
-        {
-            throw new InvalidOperationException( "The calling method does not have a [TestFiles] attribute." );
-        }
+        var testFilesAttribute = callerMethod.GetCustomAttribute<CurrentDirectoryAttribute>()
+                                 ??
+                                 throw new InvalidOperationException( "The calling method does not have a [TestFiles] attribute." );
 
         return testFilesAttribute.Directory;
     }
