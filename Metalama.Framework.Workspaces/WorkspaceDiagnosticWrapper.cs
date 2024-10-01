@@ -37,7 +37,7 @@ internal sealed class WorkspaceDiagnosticWrapper : IIntrospectionDiagnostic
             _ => throw new ArgumentOutOfRangeException()
         };
 
-    public IntrospectionDiagnosticSource Source { get; set; }
+    public IntrospectionDiagnosticSource Source => IntrospectionDiagnosticSource.MSBuild;
 
     object? IIntrospectionDiagnostic.Details => null;
 }

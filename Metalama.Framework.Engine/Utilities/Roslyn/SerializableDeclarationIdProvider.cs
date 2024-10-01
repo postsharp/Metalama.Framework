@@ -227,12 +227,9 @@ public static class SerializableDeclarationIdProvider
     {
         // Note that the symbol resolution can fail for methods when the method signature contains a type from a missing assembly.
 
-        var symbol = id.ResolveToSymbolOrNull( compilationContext );
-
-        if ( symbol == null )
-        {
-            throw new AssertionFailedException( $"Cannot get a symbol for '{id}'." );
-        }
+        var symbol = id.ResolveToSymbolOrNull( compilationContext )
+                     ??
+                     throw new AssertionFailedException( $"Cannot get a symbol for '{id}'." );
 
         return symbol;
     }
