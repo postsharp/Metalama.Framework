@@ -32,13 +32,10 @@ internal sealed class IncrementalAspectRepository : AspectRepository
 
     private void VerifyDeclaration( IDeclaration declaration )
     {
-        var type = declaration.GetTopmostNamedType()?.GetSymbol();
-
-        if ( type == null )
-        {
-            throw new InvalidOperationException(
-                MetalamaStringFormatter.Format( $"This method cannot be used for declarations of kind '{declaration.DeclarationKind}'." ) );
-        }
+        var type = declaration.GetTopmostNamedType()?.GetSymbol()
+                   ??
+                   throw new InvalidOperationException(
+                       MetalamaStringFormatter.Format( $"This method cannot be used for declarations of kind '{declaration.DeclarationKind}'." ) );
 
         if ( type.IsGenericType )
         {

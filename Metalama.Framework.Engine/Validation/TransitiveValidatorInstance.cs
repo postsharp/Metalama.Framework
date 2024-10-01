@@ -82,12 +82,8 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 
         if ( this.MethodName != null )
         {
-            var method = type.GetMethod( this.MethodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
-
-            if ( method == null )
-            {
-                throw new InvalidOperationException( $"Cannot find a method named '{this.MethodName}' in '{type}'." );
-            }
+            var method = type.GetMethod( this.MethodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
+                         ?? throw new InvalidOperationException( $"Cannot find a method named '{this.MethodName}' in '{type}'." );
 
             return ValidatorDriverFactory.GetInstance( type )
                 .GetReferenceValidatorDriver( method );

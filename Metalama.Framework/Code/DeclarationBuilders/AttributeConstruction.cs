@@ -164,14 +164,10 @@ namespace Metalama.Framework.Code.DeclarationBuilders
             {
                 // TODO: inherited members
                 var name = argument.Key;
-                var fieldOrProperty = constructor.DeclaringType.FieldsAndProperties.OfName( name ).SingleOrDefault();
 
-                if ( fieldOrProperty == null )
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(namedArguments),
-                        $"The type '{constructor.DeclaringType.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage )}' does not contain a field or property named '{name}'." );
-                }
+                var fieldOrProperty = constructor.DeclaringType.FieldsAndProperties.OfName( name ).SingleOrDefault() ?? throw new ArgumentOutOfRangeException(
+                    nameof(namedArguments),
+                    $"The type '{constructor.DeclaringType.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage )}' does not contain a field or property named '{name}'." );
 
                 typedNamedArguments.Add(
                     new KeyValuePair<string, TypedConstant>( argument.Key, TypedConstant.UnwrapOrCreate( argument.Value, fieldOrProperty.Type ) ) );

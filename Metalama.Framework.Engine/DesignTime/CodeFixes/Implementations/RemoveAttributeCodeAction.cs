@@ -26,21 +26,15 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
-        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( context.CompilationContext );
+        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( context.CompilationContext )
+                                  ??
+                                  throw new InvalidOperationException(
+                                      $"Cannot remove attributes of type '{this.AttributeType}' because the type does not exist in the source compilation." );
 
-        if ( attributeTypeSymbol == null )
-        {
-            throw new InvalidOperationException(
-                $"Cannot remove attributes of type '{this.AttributeType}' because the type does not exist in the source compilation." );
-        }
-
-        var targetSymbol = this.TargetDeclaration.GetSymbol( context.CompilationContext );
-
-        if ( targetSymbol == null )
-        {
-            throw new InvalidOperationException(
-                $"Cannot remove attributes from '{this.TargetDeclaration}' because it does not exist in the source compilation." );
-        }
+        var targetSymbol = this.TargetDeclaration.GetSymbol( context.CompilationContext )
+                           ??
+                           throw new InvalidOperationException(
+                               $"Cannot remove attributes from '{this.TargetDeclaration}' because it does not exist in the source compilation." );
 
         // We need to process all syntaxes that define this symbol.
         foreach ( var syntaxReferenceGroup in targetSymbol.DeclaringSyntaxReferences.GroupBy( r => r.SyntaxTree ) )
