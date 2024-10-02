@@ -21,8 +21,10 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 {
     internal sealed class TestExecutor : LongLivedMarshalByRefObject, ITestFrameworkExecutor
     {
-        private readonly TestFactory _factory;
         private static readonly object _launchingDebuggerLock = new();
+        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim( Environment.ProcessorCount * 4 );
+
+        private readonly TestFactory _factory;
         private readonly GlobalServiceProvider _serviceProvider;
         private readonly ITaskRunner _taskRunner;
         private readonly ITestAssemblyMetadataReader _metadataReader;
@@ -84,8 +86,6 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
             var tasks = new ConcurrentDictionary<Task, Task>();
 
-            // Increasing the concurrency seems detrimental to performance and to responsiveness of the test runner in case of cancellation.
-            var semaphore = new SemaphoreSlim( Environment.ProcessorCount * 2 );
             var eventLock = new object();
 
             var assemblyMetrics = new Metrics( eventLock );
@@ -204,10 +204,10 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                                     logger ) );
 
                             // Throttle execution thanks to the semaphore.
-                            semaphore.Wait();
+                            _semaphore.Wait();
 
                             // When the task is over, release the semaphore.
-                            _ = task.ContinueWith( _ => semaphore.Release(), TaskScheduler.Current );
+                            _ = task.ContinueWith( _ => _semaphore.Release(), TaskScheduler.Current );
 
                             tasks.TryAdd( task, task );
                         }
