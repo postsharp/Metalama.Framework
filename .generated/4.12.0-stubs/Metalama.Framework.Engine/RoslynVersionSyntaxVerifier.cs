@@ -9,15 +9,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Metalama.Framework.Engine.CompileTime;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.CompileTime;
+namespace Metalama.Framework.Engine.Templating;
 
-internal enum RoslynApiVersion 
+internal partial class RoslynVersionSyntaxVerifier
 {
-	V4_0_1 = 0,
-	V4_4_0 = 1,
-	V4_8_0 = 2,
-	V4_12_0 = 3,
-	Current = V4_4_0,
-	Lowest = V4_0_1,
-	Highest = V4_12_0
 }

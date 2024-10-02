@@ -10,7 +10,7 @@
     <PostSharpPackageVersion>2024.1.4</PostSharpPackageVersion>
     <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. -->
     <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
-    <RoslynApiMaxVersion>4.8.0</RoslynApiMaxVersion>
+    <RoslynApiMaxVersion>4.12.0-1.final</RoslynApiMaxVersion>
     <!-- RoslynVersion is the version of Roslyn from which Metalama is forked.  It is imported from the Metalama.Compiler repo.-->
     <!--<RoslynVersion>IMPORTED!</RoslynVersion>-->
     <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
@@ -53,7 +53,7 @@
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageVersion Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-    <PackageVersion Include="System.Text.Json" Version="7.0.4"/>
+    <PackageVersion Include="System.Text.Json" Version="8.0.4"/>
     <PackageVersion Include="xunit.assert" Version="$(xUnitApiVersion)" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.extensibility.core" Version="$(xUnitApiVersion)" />

@@ -22,7 +22,9 @@ public static class SupportedCSharpVersions
     /// Gets the default C# version.
     /// </summary>
     public static LanguageVersion Default
-#if ROSLYN_4_8_0_OR_GREATER
+#if ROSLYN_4_12_0_OR_GREATER
+        => LanguageVersion.CSharp13;
+#elif ROSLYN_4_8_0_OR_GREATER
         => LanguageVersion.CSharp12;
 #elif ROSLYN_4_4_0_OR_GREATER
         => LanguageVersion.CSharp11;
@@ -35,6 +37,9 @@ public static class SupportedCSharpVersions
     /// Gets all supported language versions.
     /// </summary>
     public static ImmutableHashSet<LanguageVersion> All { get; } = ImmutableHashSet.Create(
+#if ROSLYN_4_12_0_OR_GREATER
+        LanguageVersion.CSharp13,
+#endif
 #if ROSLYN_4_8_0_OR_GREATER
         LanguageVersion.CSharp12,
 #endif
@@ -56,6 +61,7 @@ public static class SupportedCSharpVersions
             RoslynApiVersion.V4_0_1 => (LanguageVersion) 1000,
             RoslynApiVersion.V4_4_0 => (LanguageVersion) 1100,
             RoslynApiVersion.V4_8_0 => (LanguageVersion) 1200,
+            RoslynApiVersion.V4_12_0 => (LanguageVersion) 1300,
             _ => throw new AssertionFailedException( $"Unexpected Roslyn API version {apiVersion}." )
         };
 
@@ -65,6 +71,7 @@ public static class SupportedCSharpVersions
             RoslynApiVersion.V4_0_1 => "4.0.1",
             RoslynApiVersion.V4_4_0 => "4.4.0",
             RoslynApiVersion.V4_8_0 => "4.8.0",
+            RoslynApiVersion.V4_12_0 => "4.12.0-1.final",
             _ => throw new AssertionFailedException( $"Unexpected Roslyn version {roslynVersion}." )
         };
 }

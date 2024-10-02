@@ -17,7 +17,7 @@ internal enum RoslynApiVersion
 	V4_4_0 = 1,
 	V4_8_0 = 2,
 	V4_12_0 = 3,
-	Current = V4_4_0,
+	Current = V4_12_0,
 	Lowest = V4_0_1,
 	Highest = V4_12_0
 }

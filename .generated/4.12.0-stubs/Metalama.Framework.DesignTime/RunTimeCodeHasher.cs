@@ -8,16 +8,12 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Metalama.Framework.Engine.CompileTime;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using K4os.Hash.xxHash;
 
-namespace Metalama.Framework.Engine.CompileTime;
-
-internal enum RoslynApiVersion 
+namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
-	V4_0_1 = 0,
-	V4_4_0 = 1,
-	V4_8_0 = 2,
-	V4_12_0 = 3,
-	Current = V4_4_0,
-	Lowest = V4_0_1,
-	Highest = V4_12_0
+	public class RunTimeCodeHasher : BaseCodeHasher
+	{
+		public RunTimeCodeHasher(XXH64 hasher) : base(hasher) {}
+	}
 }

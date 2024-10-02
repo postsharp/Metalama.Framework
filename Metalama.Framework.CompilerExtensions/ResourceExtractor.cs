@@ -537,7 +537,11 @@ public static class ResourceExtractor
             }
         }
 
-        if ( version >= new Version( 4, 8 ) )
+        if ( version >= new Version( 4, 12 ) )
+        {
+            return "4.12.0";
+        }
+        else if ( version >= new Version( 4, 8 ) )
         {
             return "4.8.0";
         }
