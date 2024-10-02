@@ -31,6 +31,12 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
         switch ( targetDeclaration )
         {
+            // Properties must be evaluated prior to IField because PromotedField implements both interfaces but must be considered a property.
+            case IProperty property:
+                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+
+                return CreateSuccessResult( property );
+            
             case IField field:
                 var promotedField = PromotedField.Create( serviceProvider, field, ObjectReader.Empty, this );
                 addTransformation( promotedField.ToTransformation() );
@@ -40,11 +46,6 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
                     new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
                 return CreateSuccessResult( promotedField );
-
-            case IProperty property:
-                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
-
-                return CreateSuccessResult( property );
 
             case IIndexer indexer:
                 addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
