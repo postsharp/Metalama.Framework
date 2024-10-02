@@ -25,13 +25,13 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         {
             get
             {
-                var parameter = this.SingleOrDefault( p => p.Name == name )
+                var parameter = this.Source.SingleOrDefault( p => p.Name == name )
                                 ??
                                 throw new ArgumentOutOfRangeException(
                                     nameof(name),
                                     $"The method '{this.ContainingDeclaration}' does not contain a parameter named '{name}'" );
 
-                return parameter;
+                return this.GetItem( parameter );
             }
         }
 

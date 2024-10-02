@@ -11,16 +11,16 @@ internal partial class GenericContext
 {
     private sealed class TypeSymbolMapper : TypeSymbolRewriter
     {
-        private readonly GenericContext _genericContext;
+        public GenericContext GenericContext { get; }
 
         public TypeSymbolMapper( GenericContext genericContext ) : base( genericContext.CompilationContext.AssertNotNull().Compilation )
         {
-            this._genericContext = genericContext;
+            this.GenericContext = genericContext;
         }
 
         internal override ITypeSymbol Visit( ITypeParameterSymbol typeSymbolParameter )
         {
-            return this._genericContext.Map( typeSymbolParameter );
+            return this.GenericContext.Map( typeSymbolParameter );
         }
     }
 
