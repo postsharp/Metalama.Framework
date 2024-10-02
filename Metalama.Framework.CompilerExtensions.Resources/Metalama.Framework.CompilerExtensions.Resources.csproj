@@ -13,8 +13,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Metalama.Framework.DesignTime.4.0.1/Metalama.Framework.DesignTime.4.0.1.csproj" />
-        <ProjectReference Include="../Metalama.Framework.DesignTime.VisualStudio.4.0.1/Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj"  />
         <ProjectReference Include="../Metalama.Framework.DesignTime.4.4.0/Metalama.Framework.DesignTime.4.4.0.csproj" />
         <ProjectReference Include="../Metalama.Framework.DesignTime.VisualStudio.4.4.0/Metalama.Framework.DesignTime.VisualStudio.4.4.0.csproj"  />
         <ProjectReference Include="../Metalama.Framework.DesignTime.4.8.0/Metalama.Framework.DesignTime.4.8.0.csproj" />

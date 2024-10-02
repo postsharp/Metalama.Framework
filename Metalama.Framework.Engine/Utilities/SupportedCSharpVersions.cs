@@ -26,10 +26,8 @@ public static class SupportedCSharpVersions
         => LanguageVersion.CSharp13;
 #elif ROSLYN_4_8_0_OR_GREATER
         => LanguageVersion.CSharp12;
-#elif ROSLYN_4_4_0_OR_GREATER
-        => LanguageVersion.CSharp11;
 #else
-        => LanguageVersion.CSharp10;
+        => LanguageVersion.CSharp11;
 #endif
 
 #pragma warning disable SA1114 // Parameter list should follow declaration
@@ -43,9 +41,7 @@ public static class SupportedCSharpVersions
 #if ROSLYN_4_8_0_OR_GREATER
         LanguageVersion.CSharp12,
 #endif
-#if ROSLYN_4_4_0_OR_GREATER
         LanguageVersion.CSharp11,
-#endif
         LanguageVersion.CSharp10 );
 
     internal static string[] FormatSupportedVersions() => All.SelectAsArray( x => x.ToDisplayString() );

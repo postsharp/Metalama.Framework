@@ -1,8 +1,4 @@
-﻿#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
-#endif
-
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;

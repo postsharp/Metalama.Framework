@@ -545,13 +545,9 @@ public static class ResourceExtractor
         {
             return "4.8.0";
         }
-        else if ( version >= new Version( 4, 4 ) )
-        {
-            return "4.4.0";
-        }
         else
         {
-            return "4.0.1";
+            return "4.4.0";
         }
     }
 }

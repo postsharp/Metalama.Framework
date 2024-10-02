@@ -39,7 +39,6 @@ class C
             Assert.Equal( new[] { attributeType }, types );
         }
 
-#if ROSLYN_4_4_0_OR_GREATER
         [Fact]
         public void Generic()
         {
@@ -100,7 +99,6 @@ class C
 
             Assert.Equal( new[] { usedType }, types );
         }
-#endif
 
         [Fact]
         public void GenericInterface()

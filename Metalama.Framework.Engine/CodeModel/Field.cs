@@ -39,11 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         public RefKind RefKind
-#if ROSLYN_4_4_0_OR_GREATER
             => this._symbol.RefKind.ToOurRefKind();
-#else
-            => RefKind.None;
-#endif
 
         [Memo]
         public IMethod GetMethod => new PseudoGetter( this );
@@ -79,11 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public bool IsRequired
-#if ROSLYN_4_4_0_OR_GREATER
             => this._symbol.IsRequired;
-#else
-            => false;
-#endif
 
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
