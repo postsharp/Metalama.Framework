@@ -377,7 +377,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        const string code = @"";
+        const string code = "";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.CreateMutableClone();
@@ -683,7 +683,7 @@ class C
     {
         using var testContext = this.CreateTestContext();
 
-        const string code = @"";
+        const string code = "";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
         Assert.Empty( immutableCompilation.GlobalNamespace.Namespaces );
@@ -704,5 +704,35 @@ class C
 
         // Assert that there is still no type in original compilation.
         Assert.Null( immutableCompilation.GlobalNamespace.Namespaces.OfName( "N" ) );
+    }
+
+    [Fact]
+    public void AddMethodToGenericType_ParameterTypesMappedInDerivedType()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C<T>;
+class D : C<int>;
+";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var c = compilation.Types.OfName( "C" ).Single();
+
+        // Add a method.
+        var methodBuilder = new MethodBuilder( null!, c, "M" );
+        methodBuilder.ReturnType = c.TypeParameters[0];
+        methodBuilder.AddParameter( "p", c.TypeParameters[0] );
+
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
+
+        // Get the method in the derived type.
+        var methodInDerivedType = compilation.Types.OfName( "D" ).Single().AllMethods.OfName( "M" ).Single();
+
+        // Assert that the type is as expected.
+        Assert.Equal( SpecialType.Int32, methodInDerivedType.ReturnType.SpecialType );
+        Assert.Equal( SpecialType.Int32, methodInDerivedType.Parameters[0].Type.SpecialType );
     }
 }

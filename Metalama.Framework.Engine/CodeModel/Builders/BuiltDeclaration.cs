@@ -64,10 +64,18 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     public sealed override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
 
     [Memo]
-    public override IAttributeCollection Attributes
-        => new AttributeCollection(
-            this,
-            this.Compilation.GetAttributeCollection( this.ToDeclarationRef() ) );
+    public override IAttributeCollection Attributes => this.GetAttributes();
+
+    private IAttributeCollection GetAttributes()
+    {
+        // In the Attributes collection, the backlink IAttribute.ContainingDeclaration will point to the member definition but this should be ok.
+            
+        var definition = this.GetDefinition();
+            
+        return new AttributeCollection(
+            definition,
+            this.Compilation.GetAttributeCollection( definition.ToRef() ) );
+    }
 
     public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
