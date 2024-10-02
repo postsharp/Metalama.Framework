@@ -13,32 +13,45 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal partial class GenericContext : IEquatable<GenericContext?>, IGenericContext
 {
-    public static GenericContext Empty { get; } = new( null, null );
+    public static GenericContext Empty { get; } = new();
 
     public INamedTypeSymbol? NamedTypeSymbol { get; }
+    
+    public IMethodSymbol? MethodSymbol { get; }
 
     public CompilationContext? CompilationContext { get; }
 
-    public bool IsEmptyOrIdentity => this.NamedTypeSymbol is null || this.NamedTypeSymbol.IsDefinitionSafe();
+    public bool IsEmptyOrIdentity => this.NamedTypeSymbol is null;
 
-    private GenericContext( INamedTypeSymbol? namedTypeSymbol, CompilationContext? compilationContext )
+    // Creates the Empty instance.
+    private GenericContext() { }
+    
+    private GenericContext( INamedTypeSymbol namedTypeSymbol, IMethodSymbol? methodSymbol, CompilationContext? compilationContext )
     {
+        // Assert that we only create a non-empty GenericContext only when we have a non-canonical mapping.
+        Invariant.Assert( !namedTypeSymbol.IsDefinitionSafe() || methodSymbol != null );
+        Invariant.Assert( methodSymbol == null || !methodSymbol.IsDefinitionSafe() );
+        
         this.NamedTypeSymbol = namedTypeSymbol;
+        this.MethodSymbol = methodSymbol;
         this.CompilationContext = compilationContext;
     }
 
     public static GenericContext Get( ISymbol? symbol, CompilationContext compilationContext )
     {
-        var closestType = symbol?.GetClosestContainingType();
-
-        if ( closestType is null )
+        var closestMember = symbol?.GetClosestContainingMember();
+        
+        if ( closestMember == null )
         {
             return Empty;
         }
-        else
+
+        return closestMember.Kind switch
         {
-            return Get( closestType, compilationContext );
-        }
+            SymbolKind.Method => Get( (IMethodSymbol) closestMember, compilationContext ),
+            SymbolKind.NamedType => Get( (INamedTypeSymbol) closestMember, compilationContext ),
+            _ => Get( closestMember.ContainingType, compilationContext )
+        };
     }
 
     public static GenericContext Get( INamedTypeSymbol? symbol, CompilationContext compilationContext )
@@ -48,7 +61,19 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
             return Empty;
         }
 
-        return new GenericContext( symbol, compilationContext );
+        return new GenericContext( symbol, null, compilationContext );
+    }
+    
+    public static GenericContext Get( IMethodSymbol? symbol, CompilationContext compilationContext )
+    {
+        if ( symbol == null || symbol.IsDefinitionSafe() )
+        {
+            return Empty;
+        }
+
+        var genericMethodSymbol = symbol.TypeArguments.IsEmpty ? null : symbol;
+        
+        return new GenericContext( symbol.ContainingType, genericMethodSymbol, compilationContext );
     }
 
     [Memo]
@@ -67,25 +92,39 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
             return typeParameter;
         }
 
-        if ( typeParameter.TypeParameterKind != TypeParameterKind.Type )
+        if ( typeParameter.TypeParameterKind == TypeParameterKind.Type )
         {
-            throw new NotImplementedException( "Method type parameters are not supported." );
-        }
+            // Find which type of the stack of nested types we have to consider.
+            var requestedTypeDefinition = typeParameter.DeclaringType!.OriginalDefinition;
 
-        // Find which type of the stack of nested types we have to consider.
-        var requestedTypeDefinition = typeParameter.DeclaringType!.OriginalDefinition;
-
-        for ( var type = this.NamedTypeSymbol; type != null; type = type.ContainingType )
-        {
-            if ( type.OriginalDefinition == requestedTypeDefinition )
+            for ( var type = this.NamedTypeSymbol; type != null; type = type.ContainingType )
             {
-                return type.TypeArguments[typeParameter.Ordinal];
+                if ( type.OriginalDefinition == requestedTypeDefinition )
+                {
+                    return type.TypeArguments[typeParameter.Ordinal];
+                }
+            }
+
+            // The type parameter cannot be matched. This can happen when we are trying to match a nested type A<T1>.B<T2> in the context of A<string>,
+            // i.e. the top-level type is bound and the nested type is unbound.
+            return typeParameter;
+        }
+        else if ( typeParameter.TypeParameterKind == TypeParameterKind.Method )
+        {
+            if ( this.MethodSymbol == null )
+            {
+                // Cannot map it.
+                return typeParameter;
+            }
+            else
+            {
+                return this.MethodSymbol.TypeArguments[typeParameter.Ordinal];
             }
         }
-
-        // The type parameter cannot be matched. This can happen when we are trying to match a nested type A<T1>.B<T2> in the context of A<string>,
-        // i.e. the top-level type is bound and the nested type is unbound.
-        return typeParameter;
+        else
+        {
+            throw new AssertionFailedException();
+        }
     }
 
     public IType Map( ITypeParameter typeParameter )
@@ -134,7 +173,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
     }
 
     [return: NotNullIfNotNull( nameof(symbol) )]
-    public ISymbol? Map( ISymbol? symbol, CompilationContext compilationContext )
+    public ISymbol? Map( ISymbol? symbol )
     {
         if ( this.IsEmptyOrIdentity )
         {
@@ -167,7 +206,12 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
     }
 
     public override string ToString()
-        => this.NamedTypeSymbol == null
-            ? $"GenericContext (Empty)"
-            : $"GenericContext Type={{{this.NamedTypeSymbol.ToDisplayString()}}}, IsIdentity={this.IsEmptyOrIdentity}";
+    {
+        return (this.NamedTypeSymbol, this.MethodSymbol) switch
+        {
+            (null, null) => "GenericContext (Empty)",
+            (_, not null) => $"GenericContext Method={{{this.MethodSymbol.ToDisplayString()}}}",
+            _ => $"GenericContext Type={{{this.NamedTypeSymbol.ToDisplayString()}}}"
+        };
+    }
 }

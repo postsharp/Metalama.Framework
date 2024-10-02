@@ -243,7 +243,7 @@ public partial class DeclarationFactory
 
         symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
-        var mappedSymbol = genericContext.AsGenericContext().Map( symbol, this.CompilationContext );
+        var mappedSymbol = genericContext.AsGenericContext().Map( symbol );
 
         switch ( mappedSymbol.Kind )
         {

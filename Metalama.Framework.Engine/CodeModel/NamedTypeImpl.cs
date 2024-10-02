@@ -512,37 +512,66 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
-        // TODO: Type introductions.
-        var symbolInterfaceMemberImplementationSymbol =
-            this.NamedTypeSymbol.FindImplementationForInterfaceMember(
-                interfaceMember.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation ) );
-
-        var symbolInterfaceMemberImplementation =
-            symbolInterfaceMemberImplementationSymbol != null
-                ? (IMember) this.Compilation.Factory.GetDeclaration( symbolInterfaceMemberImplementationSymbol )
-                : null;
-
-        // Introduced implementation can be implementing the interface member in a subtype.
-        INamedType? currentType = this;
-
-        while ( currentType != null )
+        // Fastest track: check if we are the required interface itself.
+        if ( interfaceMember.DeclaringType.Equals( this ) )
         {
+            implementationMember = interfaceMember;
+
+            return true;
+        }
+
+        // Try to find using symbols.
+        var symbolInterfaceMemberSymbol = interfaceMember.GetSymbol();
+
+        if ( symbolInterfaceMemberSymbol != null )
+        {
+            var symbolInterfaceMemberImplementationSymbol =
+                this.NamedTypeSymbol.FindImplementationForInterfaceMember( symbolInterfaceMemberSymbol );
+
+            if ( symbolInterfaceMemberImplementationSymbol != null )
+            {
+                implementationMember = (IMember) this.Compilation.Factory.GetDeclaration( symbolInterfaceMemberImplementationSymbol );
+
+                return true;
+            }
+        }
+
+        // Find the member in introduced interfaces, including in subtypes.
+        var currentTypeDefinition = this.Definition;
+        var currentTypeSymbol = this.NamedTypeSymbol;
+        var declarationComparer = this.Compilation.Comparers.Default;
+
+        while ( true )
+        {
+            var currentGenericContext = GenericContext.Get( currentTypeSymbol, this.GetCompilationContext() );
+
             var introducedInterface =
                 this.Compilation
-                    .GetInterfaceImplementationCollection( currentType.ToRef(), false )
+                    .GetInterfaceImplementationCollection( currentTypeDefinition.ToRef(), false )
                     .Introductions
-                    .SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
+                    .SingleOrDefault( i => declarationComparer.Equals( currentGenericContext.Map( i.InterfaceType ), interfaceMember.DeclaringType ) );
 
             if ( introducedInterface != null )
             {
-                // TODO: Generics.
-                if ( !introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
+                // TODO: Use the generic map to match (compare) the member in the following call to MemberMap.TryGetValue or FindMemberOfSignature.
+
+                if ( introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
                 {
-                    var candidate = FindMemberOfSignature( currentType, interfaceMember );
+                    // We found it as an explicit member.
+                    implementationMember = interfaceMemberImplementation.ForCompilation( this.Compilation );
+
+                    return true;
+                }
+                else
+                {
+                    // Match in all members.
+                    var candidate = FindMemberOfSignature( currentTypeDefinition, interfaceMember );
 
                     if ( candidate?.Accessibility == Accessibility.Public )
                     {
-                        interfaceMemberImplementation = candidate;
+                        implementationMember = candidate.ForCompilation( this.Compilation );
+
+                        return true;
                     }
                     else
                     {
@@ -551,42 +580,31 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                         return false;
                     }
                 }
-
-                // Which is later in inheritance?
-                if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
-                {
-                    implementationMember = interfaceMemberImplementation.ForCompilation( this.Compilation );
-
-                    return true;
-                }
-                else
-                {
-                    implementationMember = symbolInterfaceMemberImplementation.ForCompilation( this.Compilation );
-
-                    return true;
-                }
             }
 
-            currentType = currentType.BaseType?.Definition;
+            if ( currentTypeSymbol.BaseType == null )
+            {
+                break;
+            }
+            else
+            {
+                currentTypeSymbol = currentTypeSymbol.BaseType;
+                currentTypeDefinition = currentTypeDefinition.BaseType.AssertNotNull().Definition;
+            }
         }
 
-        if ( symbolInterfaceMemberImplementation != null )
-        {
-            implementationMember = symbolInterfaceMemberImplementation.ForCompilation( this.Compilation );
+        implementationMember = null;
 
-            return true;
-        }
-        else
-        {
-            implementationMember = null;
-
-            return false;
-        }
+        return false;
     }
 
     public INamedTypeSymbol NamedTypeSymbol { get; }
 
-    INamedType INamedType.Definition => throw new NotSupportedException();
+    [Memo]
+    public INamedType Definition
+        => this.NamedTypeSymbol.Equals( this.NamedTypeSymbol.OriginalDefinition )
+            ? this
+            : this.Compilation.Factory.GetNamedType( this.NamedTypeSymbol.OriginalDefinition );
 
     INamedType INamedType.TypeDefinition => throw new NotSupportedException();
 

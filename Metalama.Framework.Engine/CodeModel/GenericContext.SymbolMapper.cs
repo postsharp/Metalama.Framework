@@ -16,14 +16,34 @@ internal partial class GenericContext
         {
             this._typeSymbolMapper = parent.TypeSymbolMapperInstance;
         }
-        
+
         private T MapMember<T>( T symbol )
             where T : ISymbol
         {
             var containingType = this._typeSymbolMapper.Visit( symbol.ContainingType );
             var members = containingType.GetMembers( symbol.Name );
 
-            return (T) members.Single( s => symbol.OriginalDefinition.Equals( s.OriginalDefinition ) );
+            var memberInTypeInstance = members.Single( s => symbol.OriginalDefinition.Equals( s.OriginalDefinition ) );
+
+            if ( memberInTypeInstance.Kind == SymbolKind.Method )
+            {
+                var contextMethodSymbol = this._typeSymbolMapper.GenericContext.MethodSymbol;
+
+                if ( contextMethodSymbol != null )
+                {
+                    // We also need to create a method instance.
+                    if ( memberInTypeInstance.Equals( contextMethodSymbol ) )
+                    {
+                        return (T) contextMethodSymbol;
+                    }
+                    else
+                    {
+                        return (T) ((IMethodSymbol) memberInTypeInstance).Construct( contextMethodSymbol.TypeArguments.ToArray() );
+                    }
+                }
+            }
+
+            return (T) memberInTypeInstance;
         }
 
         public override ISymbol? DefaultVisit( ISymbol symbol ) => throw new NotSupportedException();

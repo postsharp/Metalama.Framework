@@ -1884,6 +1884,59 @@ public partial class C
         }
         */
 
+        [Fact]
+        public void ParametersInGenericMethodsAreMappedInGenericMethodInstances()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = """
+                                class C
+                                {
+                                    T M<T>(T p) => p;
+                                }
+                                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            using ( testContext.WithExecutionContext( compilation ) )
+            {
+                var genericMethodDefinition = compilation.Types.Single().Methods.Single();
+
+                var genericMethodInstance = genericMethodDefinition.WithTypeArguments( typeof(int) );
+
+                Assert.Equal( SpecialType.Int32, genericMethodInstance.ReturnType.SpecialType );
+                Assert.Equal( SpecialType.Int32, genericMethodInstance.Parameters[0].Type.SpecialType );
+            }
+        }
+
+        [Fact]
+        public void TryFindImplementationForInterfaceMember()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = """
+                                using System.Collections.Generic;
+                                class C
+                                {
+                                    IReadOnlyCollection<int> f1;
+                                    List<int> f2;
+                                }
+                                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            
+            var interfaceType = (INamedType) compilation.Types.Single().Fields.OfName( "f1" ).Single().Type;
+            var interfaceMethod = interfaceType.Properties.OfName( "Count" ).Single().GetMethod;
+
+            Assert.True( interfaceType.TryFindImplementationForInterfaceMember( interfaceMethod, out var roundtrip ) );
+            Assert.Same( interfaceMethod, roundtrip );
+            
+            var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
+            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out var memberImplementation ) );
+            
+
+        }
+
         private sealed class TestClassificationService : ISymbolClassificationService
         {
             public ExecutionScope GetExecutionScope( ISymbol symbol )

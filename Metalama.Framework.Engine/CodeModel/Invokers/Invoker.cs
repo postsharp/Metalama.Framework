@@ -166,4 +166,6 @@ internal abstract class Invoker<T>
                 (this.Member, GetTargetType()!, this.Options & InvokerOptions.OrderMask) );
         }
     }
+
+    public override string ToString() => $"{this.GetType().Name} Member={{{this.Member}}}, Options={{{this.Options}}}";
 }
