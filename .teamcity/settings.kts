@@ -5,6 +5,7 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.sshAgent
 import jetbrains.buildServer.configs.kotlin.buildFeatures.Swabra
 import jetbrains.buildServer.configs.kotlin.buildFeatures.swabra
+import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.buildSteps.powerShell
 import jetbrains.buildServer.configs.kotlin.failureConditions.*
 import jetbrains.buildServer.configs.kotlin.triggers.*
@@ -91,6 +92,7 @@ object DebugBuild : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
+        perfmon {}
     }
 
     triggers {
