@@ -166,9 +166,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var expectedHighlightedSource = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );
 
             var htmlPath = actualHtmlPath;
-            var htmlContent = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
+            var actualHighlightedSource = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
 
-            this.RunDiffToolIfDifferent( expectedHighlightedSource, expectedHtmlPath, htmlContent, htmlPath );
+            var hasDifference = this.RunDiffToolIfDifferent( expectedHighlightedSource, expectedHtmlPath, actualHighlightedSource, htmlPath );
+
+            if ( hasDifference )
+            {
+                Assert.Equal( expectedHighlightedSource, actualHighlightedSource );
+            }
         }
     }
 }

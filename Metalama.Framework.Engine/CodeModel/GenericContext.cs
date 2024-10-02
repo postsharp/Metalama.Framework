@@ -19,7 +19,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
 
     public CompilationContext? CompilationContext { get; }
 
-    public bool IsEmptyOrIdentity => this.NamedTypeSymbol is null or { IsDefinition: true };
+    public bool IsEmptyOrIdentity => this.NamedTypeSymbol is null || this.NamedTypeSymbol.IsDefinitionSafe();
 
     private GenericContext( INamedTypeSymbol? namedTypeSymbol, CompilationContext? compilationContext )
     {
@@ -43,7 +43,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
 
     public static GenericContext Get( INamedTypeSymbol? symbol, CompilationContext compilationContext )
     {
-        if ( symbol == null || symbol.IsDefinition )
+        if ( symbol == null || symbol.IsDefinitionSafe() )
         {
             return Empty;
         }

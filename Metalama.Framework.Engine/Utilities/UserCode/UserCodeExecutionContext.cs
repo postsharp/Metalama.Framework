@@ -316,7 +316,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
                     this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
                     syntaxTree );
             }
-            else if ( this._sourceTrees is { } sourceTrees )
+            else if ( this._sourceTrees is { IsDefaultOrEmpty: false } sourceTrees )
             {
                 foreach ( var sourceTree in sourceTrees )
                 {
