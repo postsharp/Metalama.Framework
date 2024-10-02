@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -22,32 +23,34 @@ public sealed partial class DerivedTypeIndex
     private readonly CompilationContext _compilationContext;
 
     // Maps a base type to direct derived types.
-    private readonly ImmutableDictionaryOfArray<Ref<INamedType>, Ref<INamedType>> _relationships;
-    private readonly ImmutableHashSet<Ref<INamedType>> _processedTypes;
+    private readonly ImmutableDictionaryOfArray<IRef<INamedType>, IRef<INamedType>> _relationships;
+    private readonly ImmutableHashSet<IRef<INamedType>> _processedTypes;
 
     private DerivedTypeIndex(
         CompilationContext compilationContext,
-        ImmutableDictionaryOfArray<Ref<INamedType>, Ref<INamedType>> relationships,
-        ImmutableHashSet<Ref<INamedType>> processedTypes )
+        ImmutableDictionaryOfArray<IRef<INamedType>, IRef<INamedType>> relationships,
+        ImmutableHashSet<IRef<INamedType>> processedTypes )
     {
+        Invariant.Assert( ReferenceEquals( relationships.KeyComparer, RefEqualityComparer<INamedType>.Default ) );
+
         this._relationships = relationships;
         this._processedTypes = processedTypes;
         this._compilationContext = compilationContext;
     }
 
-    private bool IsContainedInCurrentCompilation( Ref<INamedType> type )
+    private bool IsContainedInCurrentCompilation( IRef<INamedType> type )
     {
-        switch ( type.Target )
+        switch ( type )
         {
-            case INamedTypeSymbol symbol:
+            case ISymbolRef { Symbol: INamedTypeSymbol symbol }:
                 return this.IsCurrentCompilation( symbol.ContainingAssembly );
 
-            case INamedTypeBuilder:
+            case IBuilderRef { Builder: INamedTypeBuilder }:
                 // Builders are always "in" the current Roslyn compilation.
                 return true;
 
             default:
-                throw new InvalidOperationException( $"Unexpected type {type.Target}." );
+                throw new InvalidOperationException( $"Unexpected type {type}." );
         }
     }
 
@@ -65,26 +68,26 @@ public sealed partial class DerivedTypeIndex
         };
 
     internal IEnumerable<INamedType> GetDerivedTypes( INamedType baseType )
-        => this.GetDerivedTypesCore( baseType.ToValueTypedRef() )
+        => this.GetDerivedTypesCore( baseType.ToRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-    private IEnumerable<Ref<INamedType>> GetDerivedTypesCore( in Ref<INamedType> baseType )
+    private IEnumerable<IRef<INamedType>> GetDerivedTypesCore( IRef<INamedType> baseType )
         => this._relationships[baseType]
             .SelectManyRecursiveDistinct( t => this._relationships[t], this._processedTypes.KeyComparer );
 
     private IEnumerable<INamedType> GetAllDerivedTypes( INamedType baseType )
-        => this.GetAllDerivedTypesCore( baseType.ToValueTypedRef() )
+        => this.GetAllDerivedTypesCore( baseType.ToRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-    private IEnumerable<Ref<INamedType>> GetAllDerivedTypesCore( in Ref<INamedType> baseType )
+    private IEnumerable<IRef<INamedType>> GetAllDerivedTypesCore( IRef<INamedType> baseType )
         => this.GetDerivedTypesCore( baseType )
             .Where( this.IsContainedInCurrentCompilation );
 
     private IEnumerable<INamedType> GetDirectlyDerivedTypes( INamedType baseType )
-        => this.GetDirectlyDerivedTypesCore( baseType.ToValueTypedRef() )
+        => this.GetDirectlyDerivedTypesCore( baseType.ToRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-    private IEnumerable<Ref<INamedType>> GetDirectlyDerivedTypesCore( Ref<INamedType> baseType )
+    private IEnumerable<IRef<INamedType>> GetDirectlyDerivedTypesCore( IRef<INamedType> baseType )
     {
         foreach ( var namedType in this._relationships[baseType] )
         {
@@ -96,17 +99,17 @@ public sealed partial class DerivedTypeIndex
     }
 
     private IEnumerable<INamedType> GetFirstLevelDerivedTypes( INamedType baseType )
-        => this.GetFirstLevelDerivedTypesCore( baseType.ToValueTypedRef() )
+        => this.GetFirstLevelDerivedTypesCore( baseType.ToRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
-    private IEnumerable<Ref<INamedType>> GetFirstLevelDerivedTypesCore( in Ref<INamedType> baseType )
+    private IEnumerable<IRef<INamedType>> GetFirstLevelDerivedTypesCore( IRef<INamedType> baseType )
     {
-        var set = new HashSet<Ref<INamedType>>( RefEqualityComparer<INamedType>.Default );
+        var set = new HashSet<IRef<INamedType>>( RefEqualityComparer<INamedType>.Default );
         GetDerivedTypesRecursive( baseType );
 
         return set;
 
-        void GetDerivedTypesRecursive( in Ref<INamedType> parentType )
+        void GetDerivedTypesRecursive( IRef<INamedType> parentType )
         {
             foreach ( var type in this._relationships[parentType] )
             {
@@ -135,7 +138,7 @@ public sealed partial class DerivedTypeIndex
             if ( !introducedInterface.DeclaringAssembly.GetSymbol().Equals( this._compilationContext.Compilation.Assembly ) )
             {
                 // The type may not have been analyzed yet.
-                builder.AnalyzeType( introducedInterface.ToValueTypedRef() );
+                builder.AnalyzeType( introducedInterface.ToRef() );
             }
 
             builder.AddDerivedType( introducedInterface, transformation.TargetType );
@@ -172,18 +175,21 @@ public sealed partial class DerivedTypeIndex
     {
         foreach ( var baseType in this._relationships.Keys )
         {
-            if ( baseType.Target is INamedTypeSymbol { OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty: false } baseTypeSymbol )
+            if ( baseType is ISymbolRef
+                {
+                    Symbol: INamedTypeSymbol { OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty: false } baseTypeSymbol
+                } )
             {
                 this.PopulateDependenciesCore( collector, baseTypeSymbol, baseType );
             }
         }
     }
 
-    private void PopulateDependenciesCore( IDependencyCollector collector, INamedTypeSymbol rootType, Ref<INamedType> baseType )
+    private void PopulateDependenciesCore( IDependencyCollector collector, INamedTypeSymbol rootType, IRef<INamedType> baseType )
     {
         foreach ( var derivedType in this._relationships[baseType] )
         {
-            if ( derivedType.Target is INamedTypeSymbol derivedTypeSymbol )
+            if ( derivedType is ISymbolRef { Symbol: INamedTypeSymbol derivedTypeSymbol } )
             {
                 collector.AddDependency( rootType, derivedTypeSymbol );
                 this.PopulateDependenciesCore( collector, rootType, derivedType );
@@ -197,7 +203,7 @@ public sealed partial class DerivedTypeIndex
 
         foreach ( var type in types )
         {
-            if ( !this._processedTypes.Contains( type.ToValueTypedRef<INamedType>( this._compilationContext ) ) )
+            if ( !this._processedTypes.Contains( type.ToRef( this._compilationContext ) ) )
             {
                 builder ??= new Builder( this );
                 builder.AnalyzeType( type );
@@ -220,10 +226,10 @@ public sealed partial class DerivedTypeIndex
 
         foreach ( var type in types )
         {
-            if ( !this._processedTypes.Contains( type.ToValueTypedRef() ) )
+            if ( !this._processedTypes.Contains( type.ToRef() ) )
             {
                 builder ??= new Builder( this );
-                builder.AnalyzeType( type.ToValueTypedRef() );
+                builder.AnalyzeType( type.ToRef() );
             }
         }
 

@@ -20,9 +20,6 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
     where TType : class
     where TTypeOrNamespace : class
 {
-    internal const string LegacyPrefix = "typeof";
-    internal const string Prefix = "Y:"; // T: is used for named types.
-
     private readonly ConcurrentDictionary<SerializableTypeId, ResolverResult> _cache = new();
 
     // ReSharper disable once MemberCanBeInternal
@@ -40,8 +37,10 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
             return result.Type;
         }
     }
-    
+
     // ReSharper disable once MemberCanBeInternal
+
+    protected abstract IReadOnlyDictionary<string, TType?> GetGenericContext( SerializableDeclarationId declarationId );
 
     public bool TryResolveId( SerializableTypeId typeId, [NotNullWhen( true )] out TType? type ) => this.TryResolveId( typeId, null, out type );
 
@@ -82,38 +81,73 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
         {
             var idString = id.Id;
 
-            var nullOblivious = idString[^1] != '!';
-
-            if ( !nullOblivious )
-            {
-                idString = idString[..^1];
-            }
-
-            var resolver = new Resolver( this, genericArguments, nullOblivious );
-
             TypeSyntax type;
+            bool nullOblivious;
 
-            if ( idString.StartsWith( LegacyPrefix, StringComparison.Ordinal ) )
+            if ( idString.StartsWith( SerializableTypeId.LegacyPrefix, StringComparison.Ordinal ) )
             {
                 // Backward compatibility.
+
+                // Extract the nullability character.
+                nullOblivious = idString[^1] != '!';
+
+                if ( !nullOblivious )
+                {
+                    idString = idString[..^1];
+                }
+
+                // Parse
                 var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( idString );
                 type = expression.Type;
             }
-            else if ( idString.StartsWith( Prefix, StringComparison.Ordinal ) )
-            {
-                var method = (MethodDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( idString.Substring( Prefix.Length ) + " M();" );
-
-                if ( method == null || method.GetDiagnostics().HasError() )
-                {
-                    return ResolverResult.Error( $"The string '{idString}' could not be parsed as a type." );
-                }
-
-                type = method.ReturnType;
-            }
             else
             {
-                return ResolverResult.Error( $"The string '{idString}' has an invalid prefix." );
+                if ( idString.StartsWith( SerializableTypeId.Prefix, StringComparison.Ordinal ) )
+                {
+                    // TODO: optimize strings.
+
+                    // Extract the generic context, if any.
+                    var indexOfPipe = idString.IndexOfOrdinal( '|' );
+
+                    string idWithoutContext;
+
+                    if ( indexOfPipe > 0 )
+                    {
+                        idWithoutContext = idString[..indexOfPipe];
+                        var contextId = idString[(indexOfPipe + 1)..];
+                        genericArguments = this.GetGenericContext( new SerializableDeclarationId( contextId ) );
+                    }
+                    else
+                    {
+                        idWithoutContext = idString;
+                    }
+
+                    // Extract the nullability character.
+                    nullOblivious = idWithoutContext[^1] != '!';
+
+                    if ( !nullOblivious )
+                    {
+                        idWithoutContext = idWithoutContext[..^1];
+                    }
+
+                    // Parse.
+                    var method = (MethodDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration(
+                        idWithoutContext.Substring( SerializableTypeId.Prefix.Length ) + " M();" );
+
+                    if ( method == null || method.GetDiagnostics().HasError() )
+                    {
+                        return ResolverResult.Error( $"The string '{idString}' could not be parsed as a type." );
+                    }
+
+                    type = method.ReturnType;
+                }
+                else
+                {
+                    return ResolverResult.Error( $"The string '{idString}' has an invalid prefix." );
+                }
             }
+
+            var resolver = new Resolver( this, genericArguments, nullOblivious );
 
             return resolver.Visit( type );
         }
@@ -178,7 +212,10 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
         private readonly bool _isNullOblivious;
         private TType? _currentGenericType;
 
-        public Resolver( SerializableTypeIdResolver<TType, TTypeOrNamespace> parent, IReadOnlyDictionary<string, TType?>? genericArguments, bool isNullOblivious )
+        public Resolver(
+            SerializableTypeIdResolver<TType, TTypeOrNamespace> parent,
+            IReadOnlyDictionary<string, TType?>? genericArguments,
+            bool isNullOblivious )
         {
             this._parent = parent;
             this._genericArguments = genericArguments;
@@ -382,7 +419,7 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
                 SyntaxKind.StringKeyword => SpecialType.System_String,
                 SyntaxKind.CharKeyword => SpecialType.System_Char,
                 SyntaxKind.ObjectKeyword => SpecialType.System_Object,
-                _ => throw new AssertionFailedException( $"Unexpected syntax kind: {kind}" ),
+                _ => throw new AssertionFailedException( $"Unexpected syntax kind: {kind}" )
             };
 
         public override ResolverResult VisitPredefinedType( PredefinedTypeSyntax node )

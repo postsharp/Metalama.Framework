@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 {
-    protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
+    protected BuiltMember( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
     protected abstract MemberBuilder MemberBuilder { get; }
 
@@ -26,7 +26,7 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
     public bool HasImplementation => this.MemberBuilder.HasImplementation;
 
     [Memo]
-    public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.OverriddenMember );
+    public IMember? OverriddenMember => this.MapDeclaration( this.MemberBuilder.OverriddenMember );
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
     {

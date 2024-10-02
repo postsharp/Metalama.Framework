@@ -7,7 +7,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -20,7 +19,17 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 {
     public ParameterBuilderList Parameters { get; } = new();
 
-    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
+    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.Ref;
+
+    public override void Freeze()
+    {
+        base.Freeze();
+
+        foreach ( var p in this.Parameters )
+        {
+            p.Freeze();
+        }
+    }
 
     public override Writeability Writeability
     {
@@ -77,9 +86,14 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public override IMember? OverriddenMember => this.OverriddenIndexer;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceIndexerTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceIndexerTransformation( this.ParentAdvice, this );
+    }
 
     public IndexerBuilder(
         Advice advice,
@@ -117,13 +131,13 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
     public void SetExplicitInterfaceImplementation( IIndexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = [interfaceIndexer];
 
     [Memo]
-    public BoxedRef<IIndexer> BoxedRef => new BoxedRef<IIndexer>( this.ToValueTypedRef() );
+    public IRef<IIndexer> Ref => this.RefFactory.FromBuilder<IIndexer>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.Ref;
 
-    IRef<IIndexer> IIndexer.ToRef() => this.BoxedRef;
+    public new IRef<IIndexer> ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

@@ -111,12 +111,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             if ( this._referencedProjects.TryGetValue( baseType.ContainingAssembly.Identity, out var referencedProject ) )
             {
                 var baseTypeReflectionType = referencedProject.GetType( baseType.GetFullName().AssertNotNull() );
-                var translatedBaseType = (INamedTypeSymbol?) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType );
 
-                if ( translatedBaseType == null )
-                {
-                    throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
-                }
+                var translatedBaseType = (INamedTypeSymbol?) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType )
+                                         ??
+                                         throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
 
                 // The base type is outside of current assembly, check that it has the deserializing constructor.
                 // We need visibility for a type we are currently building in compile-time compilation. Testing for public or protected is a good approximation.

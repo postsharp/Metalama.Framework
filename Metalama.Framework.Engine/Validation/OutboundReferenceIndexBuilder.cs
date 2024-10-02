@@ -53,7 +53,7 @@ internal sealed class OutboundReferenceIndexBuilder : ReferenceIndexBuilder
 
     public void IndexDeclaration( IDeclaration declaration, CancellationToken cancellationToken )
     {
-        var semanticModelProvider = declaration.GetCompilationModel().CompilationContext.SemanticModelProvider;
+        var semanticModelProvider = declaration.GetCompilationContext().SemanticModelProvider;
 
         var sources = declaration.Sources;
 

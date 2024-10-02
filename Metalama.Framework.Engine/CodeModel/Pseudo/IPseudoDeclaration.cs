@@ -2,4 +2,4 @@
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo;
 
-internal interface IPseudoDeclaration;
+internal interface IPseudoDeclaration : ICustomTranslatableDeclaration;

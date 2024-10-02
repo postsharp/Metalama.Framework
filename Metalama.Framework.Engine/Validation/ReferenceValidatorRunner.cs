@@ -92,7 +92,12 @@ public sealed class ReferenceValidatorRunner
         CancellationToken cancellationToken )
     {
         // Analyze the references.
-        var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: initialCompilation );
+        var userCodeExecutionContext = new UserCodeExecutionContext(
+            this._serviceProvider,
+            default,
+            initialCompilation,
+            diagnostics: diagnosticAdder );
+
         await this._concurrentTaskRunner.RunConcurrentlyAsync( referenceIndex.ReferencedSymbols, AnalyzeReferencedSymbolsAsync, cancellationToken );
 
         Task AnalyzeReferencedSymbolsAsync( ReferencedSymbolInfo symbolInfo )

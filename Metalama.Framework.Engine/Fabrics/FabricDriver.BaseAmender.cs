@@ -28,7 +28,7 @@ internal abstract partial class FabricDriver
         // The Target property is protected (and not exposed to the API) because
         private readonly FabricInstance _fabricInstance;
 
-        private Ref<T> TargetDeclaration { get; }
+        private IRef<T> TargetDeclaration { get; }
 
         private readonly FabricManager _fabricManager;
         private readonly IProject _project;
@@ -37,7 +37,7 @@ internal abstract partial class FabricDriver
             IProject project,
             FabricManager fabricManager,
             FabricInstance fabricInstance,
-            Ref<T> targetDeclaration ) : base(
+            IRef<T> targetDeclaration ) : base(
             fabricManager.ServiceProvider,
             targetDeclaration,
             CompilationModelVersion.Final,
@@ -45,7 +45,7 @@ internal abstract partial class FabricDriver
         {
             this._project = project;
             this._fabricInstance = fabricInstance;
-            this.TargetDeclaration = targetDeclaration;
+            this.TargetDeclaration = targetDeclaration.ToDurable(); // TODO PERF: ToDurable is useful only at design time.
             this._fabricManager = fabricManager;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }

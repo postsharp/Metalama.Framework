@@ -9,11 +9,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class AttributeCollection : DeclarationCollection<IAttribute, AttributeRef>, IAttributeCollection
+    internal sealed class AttributeCollection : DeclarationCollection<IAttribute>, IAttributeCollection
     {
         public static AttributeCollection Empty { get; } = new();
 
-        public AttributeCollection( IDeclaration declaration, IReadOnlyList<AttributeRef> sourceItems )
+        public AttributeCollection( IDeclaration declaration, IReadOnlyList<IRef<IAttribute>> sourceItems )
             : base( declaration, sourceItems ) { }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.OfAttributeType( type, conversionKind );
 
         private IEnumerable<IAttribute> OfAttributeType( IType type, ConversionKind conversionKind = ConversionKind.Default )
-            => this.GetItems( this.Source.Where( a => a.AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) ) );
+            => this.GetItems( this.Source.Where( a => ((AttributeRef) a).AttributeType.IsConvertibleTo( type.ToRef(), conversionKind ) ) );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
 
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.OfAttributeType( type, conversionKind );
 
         public IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate )
-            => this.GetItems( this.Source.Where( a => predicate( a.AttributeType.GetTarget( this.Compilation ) ) ) );
+            => this.GetItems( this.Source.Where( a => predicate( ((AttributeRef) a).AttributeType.GetTarget( this.Compilation ) ) ) );
 
         public IEnumerable<T> GetConstructedAttributesOfType<T>()
             where T : System.Attribute
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         bool IAttributeCollection.Any( IType type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
 
         private bool Any( IType type, ConversionKind conversionKind = ConversionKind.Default )
-            => this.Source.Any( a => a.AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) );
+            => this.Source.Any( a => ((AttributeRef) a).AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) );
 
         bool IAttributeCollection.Any( Type type ) => this.Any( type );
 

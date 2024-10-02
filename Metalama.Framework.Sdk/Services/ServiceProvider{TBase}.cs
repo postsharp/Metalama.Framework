@@ -69,7 +69,7 @@ public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<T
             {
                 if ( builder.ContainsKey( interfaceType ) || this.NextProvider?.GetService( interfaceType ) != null )
                 {
-                    throw new InvalidOperationException( $"The service provider already contains the service '{interfaceType.Name}'." );
+                    throw new InvalidOperationException( $"The service provider already contains the service '{interfaceType}'." );
                 }
             }
         }

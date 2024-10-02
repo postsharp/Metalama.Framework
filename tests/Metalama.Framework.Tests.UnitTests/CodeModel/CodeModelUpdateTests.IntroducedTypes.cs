@@ -10,6 +10,47 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 public sealed partial class CodeModelUpdateTests
 {
     [Fact]
+    public void AddTypeToCompilation_VisibleInCompilationTypesCollection()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var compilation = testContext.CreateCompilationModel( "class Outer;" ).CreateMutableClone();
+
+        var type = new NamedTypeBuilder( null!, compilation.GlobalNamespace, "C" );
+        compilation.AddTransformation( type.ToTransformation() );
+
+        Assert.Single( compilation.GlobalNamespace.Types.OfName( "C" ) );
+        Assert.Single( compilation.Types.OfName( "C" ) );
+
+        var nestedType = new NamedTypeBuilder( null!, compilation.Types.OfName( "Outer" ).Single(), "Inner" );
+        compilation.AddTransformation( nestedType.ToTransformation() );
+
+        Assert.Single( compilation.GlobalNamespace.Types.OfName( "Outer" ).Single().Types );
+        Assert.Single( compilation.AllTypes.OfName( "Inner" ) );
+    }
+
+    [Fact]
+    public void AddTypeToIntroducedNamespace_IsVisibleInThatNamespace()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var compilation = testContext.CreateCompilationModel( "" ).CreateMutableClone();
+
+        var nsBuilder = new NamespaceBuilder( null!, compilation.GlobalNamespace, "NS" );
+        compilation.AddTransformation( nsBuilder.ToTransformation() );
+
+        var typeBuilder = new NamedTypeBuilder( null!, nsBuilder, "C" );
+        compilation.AddTransformation( typeBuilder.ToTransformation() );
+
+        var ns = compilation.GlobalNamespace.GetDescendant( "NS" );
+
+        Assert.NotNull( ns );
+
+        Assert.Single( ns.Types.OfName( "C" ) );          
+        Assert.Single( compilation.Types.OfName( "C" ) ); 
+    }
+
+    [Fact]
     public void AddMethodToEmptyIntroducedType_InitializeBefore_Complete()
     {
         using var testContext = this.CreateTestContext();

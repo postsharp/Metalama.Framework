@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -111,9 +110,9 @@ namespace Metalama.Framework.Engine.Fabrics
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider.Underlying,
-                diagnosticAdder,
                 UserCodeDescription.Create( "calling the AmendProject method for the fabric {0}", projectFabric.GetType() ),
-                compilationModel: compilation );
+                compilation,
+                diagnostics: diagnosticAdder );
 
             if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => projectFabric.AmendProject( amender ), executionContext ) )
             {
@@ -137,7 +136,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 project,
                 fabricManager,
                 fabricInstance,
-                Ref.Compilation( compilation ),
+                compilation.RefFactory.Compilation( compilation ),
                 null ) { }
         }
     }

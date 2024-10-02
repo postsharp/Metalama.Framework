@@ -17,7 +17,7 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
 
     public override ExpressionSyntax Serialize( CompileTimeFieldInfo obj, SyntaxSerializationContext serializationContext )
     {
-        var field = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
+        var field = (IField) obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
 
         return SerializeField( field, serializationContext );
     }

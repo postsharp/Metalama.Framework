@@ -6,25 +6,25 @@ internal class VisibilityViewModel
   {
     _value = value;
   }
-  public global::System.Boolean IsCollapsed
+  public bool IsCollapsed
   {
     get
     {
-      return (global::System.Boolean)(this._value == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel.Visibility.Collapsed);
+      return _value == Visibility.Collapsed;
     }
   }
-  public global::System.Boolean IsHidden
+  public bool IsHidden
   {
     get
     {
-      return (global::System.Boolean)(this._value == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel.Visibility.Hidden);
+      return _value == Visibility.Hidden;
     }
   }
-  public global::System.Boolean IsVisible
+  public bool IsVisible
   {
     get
     {
-      return (global::System.Boolean)(this._value == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel.Visibility.Visible);
+      return _value == Visibility.Visible;
     }
   }
 }

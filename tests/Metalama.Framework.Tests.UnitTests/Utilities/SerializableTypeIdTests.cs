@@ -80,7 +80,6 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     }
 
     [Theory]
-    [InlineData( "X:x" )]
     [InlineData( "Y:x" )]
     [InlineData( "Y:+" )]
     [InlineData( "Y:List<x>" )]

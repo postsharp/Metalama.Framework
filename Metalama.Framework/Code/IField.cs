@@ -27,5 +27,11 @@ namespace Metalama.Framework.Code
         new IField Definition { get; }
 
         new IRef<IField> ToRef();
+
+        /// <summary>
+        /// Gets the property that this field has been overridden into. The opposite side of this relationship is the <see cref="IProperty.OriginalField"/>
+        /// of the <see cref="IProperty"/> interface.
+        /// </summary>
+        IProperty? OverridingProperty { get; }
     }
 }

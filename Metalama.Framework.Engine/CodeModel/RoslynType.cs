@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -13,10 +14,20 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal abstract class RoslynType<T> : ITypeImpl
+    internal abstract class RoslynType<T> : ITypeImpl, ISymbolBasedCompilationElement
         where T : ITypeSymbol
     {
         public CompilationModel Compilation { get; }
+
+        DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.Type;
+
+        public ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null )
+            => newCompilation.Factory.GetCompilationElement( this.Symbol, RefTargetKind.Default, genericContext, interfaceType );
+
+        ISymbol ISymbolBasedCompilationElement.Symbol => this.Symbol;
 
         protected T Symbol { get; }
 
@@ -30,15 +41,15 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         [Memo]
-        private IRef<IType> BoxedRef => new BoxedRef<IType>( Ref.FromSymbol<ICompilationElement>( this.Symbol, this.Compilation.CompilationContext ) );
+        private IRef<IType> Ref => this.Symbol.ToRef( this.GetCompilationContext() );
 
-        IRef<IType> IType.ToRef() => this.BoxedRef;
+        IRef<IType> IType.ToRef() => this.Ref;
 
         public abstract TypeKind TypeKind { get; }
 
         public SpecialType SpecialType => this.Symbol.SpecialType.ToOurSpecialType();
 
-        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this.Symbol );
+        public Type ToType() => this.Compilation.Factory.GetReflectionType( this.Symbol );
 
         public bool? IsReferenceType => this.Symbol.IsReferenceType;
 
@@ -57,10 +68,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
 
-        public abstract ITypeImpl Accept( TypeRewriter visitor );
+        public abstract IType Accept( TypeRewriter visitor );
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
-
-        public Ref<ICompilationElement> ToValueTypedRef() => this.Symbol.ToValueTypedRef<ICompilationElement>( this.Compilation.CompilationContext );
     }
 }

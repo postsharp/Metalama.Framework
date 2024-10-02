@@ -3,11 +3,13 @@ using System.Linq;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.IntroducedDerivedType;
 
+[assembly: AspectOrder( AspectOrderDirection.CompileTime, typeof(IntroduceClassAspect), typeof(IntroduceMethodInheritableAspect))]
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.IntroducedDerivedType
 {
     [Inheritable]
-    internal class Aspect : TypeAspect
+    internal class IntroduceMethodInheritableAspect : TypeAspect
     {
         [Introduce( WhenExists = OverrideStrategy.Override, IsVirtual = true )]
         public int Foo()
@@ -18,7 +20,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Introduced
         }
     }
 
-    internal class Introduction : TypeAspect
+    internal class IntroduceClassAspect : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
@@ -29,10 +31,10 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Introduced
     }
 
     // <target>
-    [Introduction]
+    [IntroduceClassAspect]
     public class Targets
     {
-        [Aspect]
+        [IntroduceMethodInheritableAspect]
         public class BaseType { }
 
         public class ManualDerived : BaseType { }

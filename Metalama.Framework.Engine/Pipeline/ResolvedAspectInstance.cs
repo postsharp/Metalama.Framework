@@ -23,5 +23,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.TargetDeclaration = targetDeclaration;
             this.Eligibility = eligibility;
         }
+
+        public override string ToString() => this.AspectInstance.ToString();
     }
 }

@@ -21,9 +21,14 @@ internal sealed partial class SymbolTranslator
         this._targetCompilationContext = targetCompilationContextContext;
     }
 
-    public T? Translate<T>( T symbol, bool allowMultiple = false )
+    public T? Translate<T>( T symbol, bool allowMultiple = false, CompilationContext? symbolCompilationContext = null )
         where T : ISymbol
     {
+        if ( symbolCompilationContext == this._targetCompilationContext )
+        {
+            return symbol;
+        }
+        
         var containingAssembly = symbol.ContainingAssembly;
 
         if ( containingAssembly != null && this._targetCompilationContext.Assemblies.TryGetValue( containingAssembly.Identity, out var assembly )

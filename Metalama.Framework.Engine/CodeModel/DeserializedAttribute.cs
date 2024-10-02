@@ -32,9 +32,13 @@ internal class DeserializedAttribute : IAttributeImpl
 
     internal CompilationModel Compilation { get; }
 
-    ICompilation ICompilationElement.Compilation => this.Compilation;
+    public ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => throw new NotImplementedException();
 
-    Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => throw new NotSupportedException();
+    ICompilation ICompilationElement.Compilation => this.Compilation;
 
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -44,15 +48,13 @@ internal class DeserializedAttribute : IAttributeImpl
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => [];
 
-    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => throw new NotSupportedException();
-
     bool IEquatable<IDeclaration>.Equals( IDeclaration? other ) => throw new NotImplementedException();
 
     [Memo]
     public IDeclaration ContainingDeclaration => this._serializationData.ContainingDeclaration.GetTarget( this.Compilation );
 
     [Memo]
-    private AttributeRef AttributeRef => new( this._serializationData );
+    private AttributeRef AttributeRef => new DeserializedAttributeRef( this._serializationData, this.GetCompilationContext() );
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.AttributeRef;
 
@@ -66,7 +68,7 @@ internal class DeserializedAttribute : IAttributeImpl
 
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
-    DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Attribute;
+    DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.Attribute;
 
     bool IDeclaration.IsImplicitlyDeclared => false;
 
@@ -75,6 +77,8 @@ internal class DeserializedAttribute : IAttributeImpl
     bool IDeclaration.BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
     ImmutableArray<SourceReference> IDeclaration.Sources => ImmutableArray<SourceReference>.Empty;
+
+    public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
 
     [Memo]
     public INamedType Type => this._serializationData.Type.GetTarget( this.Compilation );

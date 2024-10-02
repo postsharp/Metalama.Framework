@@ -6,15 +6,15 @@ internal class C
   {
     get
     {
-      return this._address;
+      return _address;
     }
     set
     {
-      var oldValue = this._address;
-      this._address = value;
-      if (oldValue != this._address)
+      var oldValue = _address;
+      _address = value;
+      if (oldValue != _address)
       {
-        this.AddressChangeCount = this.AddressChangeCount + 1;
+        AddressChangeCount = AddressChangeCount + 1;
       }
     }
   }
@@ -23,28 +23,28 @@ internal class C
   {
     get
     {
-      return this._items;
+      return _items;
     }
     set
     {
-      var oldValue = this._items;
-      this._items = value;
-      if (oldValue != this._items)
+      var oldValue = _items;
+      _items = value;
+      if (oldValue != _items)
       {
-        this.ItemsChangeCount = this.ItemsChangeCount + 1;
+        ItemsChangeCount = ItemsChangeCount + 1;
       }
     }
   }
-  public global::System.Int32 AddressChangeCount { get; set; }
-  public global::System.Int32 ItemsChangeCount { get; set; }
-  public global::System.Int32 TotalChanges
+  public int AddressChangeCount { get; set; }
+  public int ItemsChangeCount { get; set; }
+  public int TotalChanges
   {
     get
     {
       var sum = 0;
-      sum += this.AddressChangeCount;
-      sum += this.ItemsChangeCount;
-      return (global::System.Int32)sum;
+      sum += AddressChangeCount;
+      sum += ItemsChangeCount;
+      return sum;
     }
   }
 }

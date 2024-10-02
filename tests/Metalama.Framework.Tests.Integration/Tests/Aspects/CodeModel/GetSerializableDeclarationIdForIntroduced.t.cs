@@ -80,7 +80,7 @@ internal class C
       "M:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.op_LogicalNot(Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C)~System.Boolean",
       "M:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.op_Addition(Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C,Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C)~System.Int32",
       "M:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.op_Explicit(Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C)~System.Boolean",
-      "System.NotSupportedException: Getting a serializable identifier is not supported for a parameter that may still be in the process of being added to its method."
+      "M:Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced.C.#ctor(System.Int32);Parameter=0"
     };
   }
   private static global::System.String[] GetBuiltIds()

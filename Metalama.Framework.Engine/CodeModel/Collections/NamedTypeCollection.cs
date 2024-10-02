@@ -2,34 +2,49 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
+    internal sealed partial class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
-        public NamedTypeCollection( INamedType declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
-            base( declaringType, sourceItems ) { }
+        public NamedTypeCollection( INamespaceOrNamedType declaringType, IReadOnlyList<IRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
+            base( declaringType, IncludeNestedTypes( declaringType.Compilation, sourceItems, includeNestedTypes ) ) { }
 
-        public NamedTypeCollection( ICompilation declaringCompilation, UpdatableMemberCollection<INamedType> sourceItems ) :
-            base( declaringCompilation, sourceItems ) { }
-
-        public NamedTypeCollection( INamespace declaringNamespace, UpdatableMemberCollection<INamedType> sourceItems ) :
-            base( declaringNamespace, sourceItems ) { }
+        public NamedTypeCollection( ICompilation declaringCompilation, IReadOnlyList<IRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
+            base( declaringCompilation, IncludeNestedTypes( declaringCompilation, sourceItems, includeNestedTypes ) ) { }
 
         public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
         {
-            var typedSource = (INamedTypeCollectionImpl) this.Source;
+            var typeDefinitionRef = typeDefinition.ToRef();
 
             // Enumerate the source without causing a resolution of the reference.
-            foreach ( var sourceItem in typedSource.OfTypeDefinition( typeDefinition ) )
+            foreach ( var reference in this.Source )
             {
-                // Resolve the reference and store the declaration.
-                var member = this.GetItem( sourceItem.ToRef() );
+                if ( reference.IsConvertibleTo( typeDefinitionRef, ConversionKind.TypeDefinition ) )
+                {
+                    // Resolve the reference and store the declaration.
+                    var member = this.GetItem( reference );
 
-                // Return the result.
-                yield return member;
+                    // Return the result.
+                    yield return member;
+                }
+            }
+        }
+
+        private static IReadOnlyList<IRef<INamedType>> IncludeNestedTypes(
+            ICompilation compilation,
+            IReadOnlyList<IRef<INamedType>> sourceItems,
+            bool includeNestedTypes )
+        {
+            if ( !includeNestedTypes )
+            {
+                return sourceItems;
+            }
+            else
+            {
+                return new FlattenedList( compilation.GetCompilationModel(), sourceItems );
             }
         }
     }

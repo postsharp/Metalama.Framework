@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using System;
 
@@ -29,17 +28,19 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 
     protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome = AdviceOutcome.Default, TIntroduced? member = null )
     {
-        var memberRef = member != null ? member.ToValueTypedRef().As<TIntroduced>() : ((TIntroduced) (IDeclaration) this.Builder).ToValueTypedRef();
+        var reference = member != null
+            ? member.ToRef()
+            : this.Builder.ToRef();
 
-        return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, memberRef, null );
+        return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, reference, null );
     }
 
     protected IntroductionAdviceResult<TIntroduced> CreateIgnoredResult( IMemberOrNamedType existingMember )
         => new(
             this.AdviceKind,
             AdviceOutcome.Ignore,
-            existingMember is TIntroduced typedMember ? typedMember.ToValueTypedRef() : null,
-            existingMember.ToValueTypedRef() );
+            existingMember is TIntroduced typedMember ? typedMember.ToRef() : null,
+            existingMember.ToRef() );
 
     public override string ToString() => $"Introduce {this.Builder}";
 }

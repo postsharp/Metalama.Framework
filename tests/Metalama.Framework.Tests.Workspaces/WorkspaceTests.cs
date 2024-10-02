@@ -20,8 +20,6 @@ namespace Metalama.Framework.Tests.Workspaces
 {
     public sealed class WorkspaceTests : UnitTestClass
     {
-        private const bool _ignoreLoadErrors = false;
-
         private static readonly ImmutableDictionary<string, string> _buildProperties = ImmutableDictionary<string, string>.Empty
             .Add( "DOTNET_ROOT_X64", "" )
             .Add( "MSBUILD_EXE_PATH", "" )
@@ -48,7 +46,7 @@ namespace Metalama.Framework.Tests.Workspaces
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( [projectPath], _buildProperties );
 
@@ -81,7 +79,7 @@ namespace Metalama.Framework.Tests.Workspaces
 
             await File.WriteAllTextAsync( codePath, "class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -100,7 +98,7 @@ namespace Metalama.Framework.Tests.Workspaces
                 testContext,
                 "using Metalama.Framework.Aspects;  [CompileTime] class MyClass /* Intentional syntax error in compile-time code .*/ " );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( [projectPath], _buildProperties );
 
@@ -180,7 +178,7 @@ class MyAspect : TypeAspect
 [MyAspect]
 class MyClass {}" );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -214,7 +212,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -248,7 +246,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -285,7 +283,7 @@ class MyClass {}" );
                 testContext,
                 code );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = true };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
@@ -334,7 +332,7 @@ class MyClass {}" );
                 "Project2",
                 [projectPath1] );
 
-            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider ) { IgnoreLoadErrors = _ignoreLoadErrors };
+            var workspaceCollection = new WorkspaceCollection( testContext.ServiceProvider );
 
             using var workspace = await workspaceCollection.LoadAsync( projectPath1, projectPath2 );
 

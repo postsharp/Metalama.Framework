@@ -33,12 +33,8 @@ internal sealed class ChangeVisibilityCodeAction : ICodeAction
 
         var compilation = context.Compilation.Compilation;
 
-        var targetSymbol = this.TargetMember.ToRef().GetSymbol( compilation );
-
-        if ( targetSymbol == null )
-        {
-            throw new ArgumentOutOfRangeException( nameof(this.TargetMember), "The declaration is not declared in source." );
-        }
+        var targetSymbol = this.TargetMember.ToRef().GetSymbol( compilation ) ??
+                           throw new ArgumentOutOfRangeException( nameof(this.TargetMember), "The declaration is not declared in source." );
 
         foreach ( var referenceGroup in targetSymbol.DeclaringSyntaxReferences.GroupBy( r => r.SyntaxTree ) )
         {

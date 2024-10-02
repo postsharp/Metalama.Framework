@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, string Parameter, IDeclaration TargetDeclaration, IParameter ExistingParameter)>
+        internal static readonly DiagnosticDefinition<(string AspectType, string Parameter, IDeclaration TargetDeclaration, string ExistingParameterName)>
             CannotIntroduceParameterAlreadyExists = new(
                 "LAMA0530",
                 "Cannot parameter when a parameter with the same name already exists.",

@@ -34,6 +34,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
             => new SerializationTestContext( contextOptions, services );
 
+        [MustDisposeResource]
         protected new SerializationTestContext CreateTestContext() => (SerializationTestContext) base.CreateTestContext();
 
         [MustDisposeResource]

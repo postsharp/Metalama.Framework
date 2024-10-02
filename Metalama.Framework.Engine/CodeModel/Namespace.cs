@@ -90,7 +90,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamedTypeCollection TypesCore
         => new NamedTypeCollection(
             this.Compilation,
-            this.Compilation.GetNamedTypeCollection( this._symbol.ToValueTypedRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this._symbol.ToRef( this.Compilation.CompilationContext ) ) );
 
     // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
 
@@ -111,18 +111,34 @@ internal sealed class Namespace : Declaration, INamespace
     private INamespaceCollection NamespacesCore
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._symbol.ToValueTypedRef<INamespace>( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamespaceCollection( this._symbol.ToRef( this.Compilation.CompilationContext ) ) );
 
     public INamespace? GetDescendant( string ns )
     {
+        // Fast track: try with a symbol.
         var s = this._symbol.GetDescendant( ns );
 
-        if ( s == null )
+        if ( s != null )
         {
-            return null;
+            return this.Compilation.Factory.GetNamespace( s );
         }
+        else
+        {
+            // Slow track: take builders into account.
+            var namespaceCursor = this.Ref;
 
-        return this.Compilation.Factory.GetNamespace( s );
+            foreach ( var part in ns.Split( '.' ) )
+            {
+                namespaceCursor = this.Compilation.GetNamespaceCollection( namespaceCursor ).OfName( part ).FirstOrDefault();
+
+                if ( namespaceCursor == null )
+                {
+                    return null;
+                }
+            }
+
+            return namespaceCursor?.GetTarget( this.Compilation );
+        }
     }
 
     public bool IsPartial => !this.IsExternal && this.Compilation.IsPartial;
@@ -136,7 +152,7 @@ internal sealed class Namespace : Declaration, INamespace
     public override SyntaxTree? PrimarySyntaxTree => null;
 
     [Memo]
-    private IRef<INamespace> Ref => new BoxedRef<INamespace>( this.ToValueTypedRef() );
+    private IRef<INamespace> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamespace>( this );
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 

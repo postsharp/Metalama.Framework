@@ -10,7 +10,7 @@ public class TargetClass : IBaseInterface, global::Metalama.Framework.Tests.Inte
   {
     global::System.Console.WriteLine("InterfaceType: IInterface, Action: Implement");
     global::System.Console.WriteLine("InterfaceType: IBaseInterface, Action: Ignore");
-    global::System.Console.WriteLine("Member: IInterface.Method(), Action: Introduce, Target: TargetClass.Method");
+    global::System.Console.WriteLine("Member: IInterface.Method(), Action: Introduce, Target: TargetClass.Method()");
     global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Property, Action: Introduce, Target: TargetClass.Property");
     global::System.Console.WriteLine("Member: IInterface.Event, Action: Introduce, Target: TargetClass.Event");
     global::System.Console.WriteLine("Member: IBaseInterface.BaseMethod(), Action: UseExisting, Target: TargetClass.BaseMethod()");

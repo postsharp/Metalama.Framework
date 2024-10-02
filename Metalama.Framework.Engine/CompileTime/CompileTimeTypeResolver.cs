@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -15,29 +14,32 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <summary>
 /// Provides the <see cref="GetCompileTimeType"/> method, which maps a Roslyn <see cref="ITypeSymbol"/> to a reflection <see cref="Type"/>.
 /// </summary>
-internal abstract class CompileTimeTypeResolver
+internal abstract class CompileTimeTypeResolver : ICompilationService
 {
-    private readonly CompileTimeTypeFactory _compileTimeTypeFactory;
+    private readonly CompilationContext _compilationContext;
+
+    protected CompileTimeTypeResolver( CompilationContext compilationContext )
+    {
+        this._compilationContext = compilationContext;
+    }
 
     protected WeakCache<ITypeSymbol, Type?> Cache { get; } = new();
-
-    protected CompileTimeTypeResolver( in ProjectServiceProvider serviceProvider )
-    {
-        this._compileTimeTypeFactory = serviceProvider.GetRequiredService<CompileTimeTypeFactory>();
-    }
 
     /// <summary>
     /// Maps a Roslyn <see cref="!:ITypeSymbol" /> to a reflection <see cref="!:Type" />. 
     /// </summary>
     protected abstract Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default );
 
-    public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default )
+    public Type? GetCompileTimeType(
+        ITypeSymbol typeSymbol,
+        bool fallbackToMock,
+        CancellationToken cancellationToken = default )
     {
-        var type = this.Cache.GetOrAdd( typeSymbol, t => this.GetCompileTimeTypeCore( t, cancellationToken ) );
+        var type = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => this.GetCompileTimeTypeCore( t, cancellationToken ), cancellationToken );
 
         if ( type == null && fallbackToMock )
         {
-            return this._compileTimeTypeFactory.Get( typeSymbol );
+            return this._compilationContext.CompileTimeTypeFactory.Get( typeSymbol );
         }
         else
         {

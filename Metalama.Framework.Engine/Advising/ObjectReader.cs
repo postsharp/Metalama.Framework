@@ -16,8 +16,7 @@ namespace Metalama.Framework.Engine.Advising
         private readonly ObjectReaderFactory _objectReaderFactory;
         private ObjectReaderTypeAdapter? _typeAdapter;
 
-        private ObjectReaderTypeAdapter TypeAdapter 
-            => this._typeAdapter ??= this._objectReaderFactory.GetTypeAdapter( this.Source.GetType() );
+        private ObjectReaderTypeAdapter TypeAdapter => this._typeAdapter ??= this._objectReaderFactory.GetTypeAdapter( this.Source.GetType() );
 
         public static readonly IObjectReader Empty = new ObjectReaderDictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 

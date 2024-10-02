@@ -2,8 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using System;
 using System.Reflection;
@@ -12,11 +10,11 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 {
     internal sealed class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionObject<IEvent>
     {
-        public ISdkRef<IEvent> Target { get; }
+        public IRef<IEvent> Target { get; }
 
         public CompileTimeEventInfo( IEvent @event )
         {
-            this.Target = @event.ToValueTypedRef();
+            this.Target = @event.ToRef();
         }
 
         public static EventInfo Create( IEvent @event )

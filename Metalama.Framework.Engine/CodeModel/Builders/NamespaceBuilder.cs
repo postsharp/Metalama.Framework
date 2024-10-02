@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -22,7 +21,7 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public INamespace? ContainingNamespace { get; }
 
-    public IRef<INamespaceOrNamedType> ToRef() => this.BoxedRef;
+    public new IRef<INamespaceOrNamedType> ToRef() => this.Ref;
 
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
@@ -40,7 +39,12 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public override bool CanBeInherited => false;
 
-    public IntroduceNamespaceTransformation ToTransformation() => new( this.ParentAdvice, this );
+    public IntroduceNamespaceTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceNamespaceTransformation( this.ParentAdvice, this );
+    }
 
     public NamespaceBuilder( Advice advice, INamespace containingNamespace, string name ) : base( advice, name )
     {
@@ -55,12 +59,10 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         return null;
     }
 
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
-
     [Memo]
-    public BoxedRef<INamespace> BoxedRef => new BoxedRef<INamespace>( this.ToValueTypedRef() );
+    public IRef<INamespace> Ref => this.RefFactory.FromBuilder<INamespace>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<INamespace> INamespace.ToRef() => this.BoxedRef;
+    IRef<INamespace> INamespace.ToRef() => this.Ref;
 }

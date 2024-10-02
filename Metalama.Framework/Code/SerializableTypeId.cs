@@ -13,11 +13,21 @@ namespace Metalama.Framework.Code;
 [CompileTime]
 public readonly struct SerializableTypeId : IEquatable<SerializableTypeId>
 {
+    internal const string LegacyPrefix = "typeof";
+    internal const string Prefix = "Y:"; // T: is used for named types.
+
+    internal static bool IsTypeId( string id ) => id.StartsWith( Prefix, StringComparison.Ordinal ) || id.StartsWith( LegacyPrefix, StringComparison.Ordinal );
+
     public string Id { get; }
 
     // Intentionally public because this is used in the Workspace project where we need to pass the id as a string.
     public SerializableTypeId( string id )
     {
+        if ( !IsTypeId( id ) )
+        {
+            throw new ArgumentException( $"Invalid type id: '{id}'." );
+        }
+
         this.Id = id;
     }
 

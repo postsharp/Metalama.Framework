@@ -15,10 +15,10 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
   {
     global::System.Console.WriteLine("InterfaceType: IInterface, Action: Implement");
     global::System.Console.WriteLine("InterfaceType: IBaseInterface, Action: Implement");
-    global::System.Console.WriteLine("Member: IInterface.Method(), Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Method");
+    global::System.Console.WriteLine("Member: IInterface.Method(), Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Method()");
     global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Property, Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Property");
     global::System.Console.WriteLine("Member: IInterface.Event, Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Event");
-    global::System.Console.WriteLine("Member: IBaseInterface.BaseMethod(), Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IBaseInterface.BaseMethod");
+    global::System.Console.WriteLine("Member: IBaseInterface.BaseMethod(), Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IBaseInterface.BaseMethod()");
     global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IBaseInterface.BaseProperty, Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IBaseInterface.BaseProperty");
     global::System.Console.WriteLine("Member: IBaseInterface.BaseEvent, Action: Introduce, Target: TargetClass.Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IBaseInterface.BaseEvent");
   }

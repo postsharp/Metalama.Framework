@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
@@ -23,6 +24,22 @@ public sealed class SerializableTypeIdResolverForIType : SerializableTypeIdResol
         }
 #endif
         this._compilation = compilation;
+    }
+
+    protected override IReadOnlyDictionary<string, IType?> GetGenericContext( SerializableDeclarationId declarationId )
+    {
+        var declaration = (IGeneric) declarationId.ResolveToDeclaration( this._compilation ).AssertNotNull();
+        var genericParameters = new Dictionary<string, IType?>();
+
+        for ( var d = declaration; d != null; d = d.ContainingDeclaration as IGeneric )
+        {
+            foreach ( var typeParameter in d.TypeParameters )
+            {
+                genericParameters[typeParameter.Name] = typeParameter;
+            }
+        }
+
+        return genericParameters;
     }
 
     protected override IType CreateArrayType( IType elementType, int rank ) => elementType.MakeArrayType( rank );

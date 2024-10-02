@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public static class SerializableTypeIdGenerator
 {
-    public static SerializableTypeId GetSerializableTypeId( this ITypeSymbol symbol )
+    public static SerializableTypeId GetSerializableTypeId( this ITypeSymbol symbol, bool includeGenericContext = false )
     {
         var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.Type( symbol ).ToString();
 
@@ -17,14 +17,26 @@ public static class SerializableTypeIdGenerator
             id += '!';
         }
 
-        id = SerializableTypeIdResolverForSymbol.Prefix + id;
+        id = SerializableTypeId.Prefix + id;
+
+        if ( includeGenericContext )
+        {
+            var genericContext = TypeParameterSymbolDetector.GetTypeContext( symbol );
+
+            if ( genericContext != null )
+            {
+                // If there is a reference to a type parameter, we must append its context.
+                var contextId = genericContext.GetSerializableId().Id;
+                id += "|" + contextId;
+            }
+        }
 
         return new SerializableTypeId( id );
     }
 
     // ReSharper disable once MemberCanBeInternal
 
-    public static SerializableTypeId GetSerializableTypeId( this IType type, bool bypassSymbols = false )
+    public static SerializableTypeId GetSerializableTypeId( this IType type, bool includeGenericContext = false, bool bypassSymbols = false )
     {
         var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.Type( type, bypassSymbols ).ToString();
 
@@ -33,7 +45,19 @@ public static class SerializableTypeIdGenerator
             id += '!';
         }
 
-        id = SerializableTypeIdResolverForIType.Prefix + id;
+        id = SerializableTypeId.Prefix + id;
+
+        if ( includeGenericContext )
+        {
+            var genericContext = TypeParameterDetector.GetTypeContext( type );
+
+            if ( genericContext != null )
+            {
+                // If there is a reference to a type parameter, we must append its context.
+                var contextId = genericContext.GetSerializableId().Id;
+                id += "|" + contextId;
+            }
+        }
 
         return new SerializableTypeId( id );
     }

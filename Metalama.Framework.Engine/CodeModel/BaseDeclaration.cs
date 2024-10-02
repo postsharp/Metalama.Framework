@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -22,22 +23,27 @@ namespace Metalama.Framework.Engine.CodeModel
         [PublicAPI]
         public abstract CompilationModel Compilation { get; }
 
+        ICompilationElement? ICompilationElementImpl.Translate(
+            CompilationModel newCompilation,
+            IGenericContext? genericContext,
+            Type? interfaceType )
+            => this.Translate( newCompilation, genericContext );
+
+        internal abstract ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null );
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToDeclarationRef();
 
         /// <summary>
-        /// Returns a <see cref="BoxedRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
+        /// Returns an <see cref="IRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
         /// but <see cref="IMethod"/>, <see cref="INamedType"/>, ... 
         /// </summary>
         /// <returns></returns>
         private protected abstract IRef<IDeclaration> ToDeclarationRef();
-
-        internal abstract Ref<IDeclaration> ToValueTypedRef();
-
-        Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
-
-        Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => this.ToValueTypedRef().As<IDeclaration>();
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
@@ -66,6 +72,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract ImmutableArray<SourceReference> Sources { get; }
 
+        IGenericContext IDeclaration.GenericContext => this.GenericContext;
+
+        internal abstract GenericContext GenericContext { get; }
+
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 
         protected virtual ISymbol? GetSymbol() => null;
@@ -93,5 +103,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override int GetHashCode() => this.GetHashCodeCore();
 
         protected abstract int GetHashCodeCore();
+
+        [Memo]
+        private protected RefFactory RefFactory => this.GetCompilationContext().RefFactory;
     }
 }

@@ -1589,7 +1589,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                     declaration,
                     this._compilation,
                     LayerName: null ),
-                new AnnotationInstance( annotation, export, declaration.ToValueTypedRef<IDeclaration>() ) );
+                new AnnotationInstance( annotation, export, declaration.ToRef() ) );
 
             advice.Execute( this._state );
         }

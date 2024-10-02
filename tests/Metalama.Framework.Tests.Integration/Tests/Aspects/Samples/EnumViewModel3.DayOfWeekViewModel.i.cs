@@ -1,59 +1,60 @@
+using System;
 namespace Doc.EnumViewModel
 {
   class DayOfWeekViewModel
   {
-    private readonly global::System.DayOfWeek _value;
-    public DayOfWeekViewModel(global::System.DayOfWeek underlying)
+    private readonly DayOfWeek _value;
+    public DayOfWeekViewModel(DayOfWeek underlying)
     {
-      this._value = underlying;
+      _value = underlying;
     }
-    public global::System.Boolean IsFriday
+    public bool IsFriday
     {
       get
       {
-        return (global::System.Boolean)(this._value == global::System.DayOfWeek.Friday);
+        return _value == DayOfWeek.Friday;
       }
     }
-    public global::System.Boolean IsMonday
+    public bool IsMonday
     {
       get
       {
-        return (global::System.Boolean)(this._value == global::System.DayOfWeek.Monday);
+        return _value == DayOfWeek.Monday;
       }
     }
-    public global::System.Boolean IsSaturday
+    public bool IsSaturday
     {
       get
       {
-        return (global::System.Boolean)(this._value == global::System.DayOfWeek.Saturday);
+        return _value == DayOfWeek.Saturday;
       }
     }
-    public global::System.Boolean IsSunday
+    public bool IsSunday
     {
       get
       {
-        return (global::System.Boolean)(this._value == global::System.DayOfWeek.Sunday);
+        return _value == DayOfWeek.Sunday;
       }
     }
-    public global::System.Boolean IsThursday
+    public bool IsThursday
     {
       get
       {
-        return (global::System.Boolean)(this._value == global::System.DayOfWeek.Thursday);
+        return _value == DayOfWeek.Thursday;
       }
     }
-    public global::System.Boolean IsTuesday
+    public bool IsTuesday
     {
       get
       {
-        return (global::System.Boolean)(this._value == global::System.DayOfWeek.Tuesday);
+        return _value == DayOfWeek.Tuesday;
       }
     }
-    public global::System.Boolean IsWednesday
+    public bool IsWednesday
     {
       get
       {
-        return (global::System.Boolean)(this._value == global::System.DayOfWeek.Wednesday);
+        return _value == DayOfWeek.Wednesday;
       }
     }
   }

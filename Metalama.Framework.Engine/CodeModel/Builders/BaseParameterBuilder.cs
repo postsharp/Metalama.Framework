@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -50,9 +49,9 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
                 true ) );
 
     [Memo]
-    public BoxedRef<IParameter> BoxedRef => new BoxedRef<IParameter>( this.ToValueTypedRef() );
+    public IRef<IParameter> Ref => this.RefFactory.FromBuilder<IParameter>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IParameter> IParameter.ToRef() => this.BoxedRef;
+    public new IRef<IParameter> ToRef() => this.Ref;
 }

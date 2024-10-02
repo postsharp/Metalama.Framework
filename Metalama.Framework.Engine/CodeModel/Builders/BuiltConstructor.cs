@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,7 +14,9 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 {
     private readonly ConstructorBuilder _constructorBuilder;
 
-    public BuiltConstructor( CompilationModel compilation, ConstructorBuilder constructorBuilder ) : base( compilation )
+    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation, IGenericContext genericContext ) : base(
+        compilation,
+        genericContext )
     {
         this._constructorBuilder = constructorBuilder;
     }
@@ -29,7 +33,15 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
-    IRef<IConstructor> IConstructor.ToRef() => this._constructorBuilder.BoxedRef;
+    [Memo]
+    private IRef<IConstructor> Ref
+        => (IRef<IConstructor>?) ((ICompilationBoundRefImpl?) this._constructorBuilder.ReplacedImplicitConstructor?.ToRef())?.WithGenericContext(
+               this.GenericContext )
+           ?? this.RefFactory.FromBuilt<IConstructor>( this );
+
+    public IRef<IConstructor> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 
@@ -37,7 +49,10 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 
     public ConstructorInfo ToConstructorInfo() => this._constructorBuilder.ToConstructorInfo();
 
-    IConstructor IConstructor.Definition => this;
+    [Memo]
+    public IConstructor Definition => this.Compilation.Factory.GetConstructor( this._constructorBuilder ).AssertNotNull();
+
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     public IConstructor? GetBaseConstructor()
         =>

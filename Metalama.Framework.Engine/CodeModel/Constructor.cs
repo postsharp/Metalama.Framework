@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -28,17 +27,17 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private BoxedRef<IConstructor> BoxedRef => new BoxedRef<IConstructor>( this.ToValueTypedRef() );
+        private IRef<IConstructor> Ref => this.RefFactory.FromSymbolBasedDeclaration<IConstructor>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-        IRef<IConstructor> IConstructor.ToRef() => this.BoxedRef;
+        IRef<IConstructor> IConstructor.ToRef() => this.Ref;
 
-        protected override IRef<IMethodBase> GetMethodBaseRef() => this.BoxedRef;
+        protected override IRef<IMethodBase> GetMethodBaseRef() => this.Ref;
 
-        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+        protected override IRef<IMember> ToMemberRef() => this.Ref;
 
-        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 
         [Memo]
         public ConstructorInitializerKind InitializerKind
@@ -91,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var semanticModel = this.GetCompilationModel().RoslynCompilation.GetCachedSemanticModel( declaration!.SyntaxTree );
+                var semanticModel = this.Compilation.RoslynCompilation.GetCachedSemanticModel( declaration!.SyntaxTree );
                 var symbol = (IMethodSymbol?) semanticModel.GetSymbolInfo( initializer ).Symbol;
 
                 if ( symbol == null )
@@ -100,7 +99,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
                 else
                 {
-                    return this.GetCompilationModel().Factory.GetConstructor( symbol );
+                    return this.Compilation.Factory.GetConstructor( symbol );
                 }
             }
         }

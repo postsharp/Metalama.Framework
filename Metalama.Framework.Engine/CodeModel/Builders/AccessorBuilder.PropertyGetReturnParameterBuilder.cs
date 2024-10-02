@@ -38,8 +38,5 @@ internal partial class AccessorBuilder
             get => throw new NotSupportedException( "Cannot get the name of a return parameter." );
             set => throw new NotSupportedException( "Cannot set the name of a return parameter." );
         }
-
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.Accessor.ToDisplayString( format, context ) + "@<return>";
     }
 }

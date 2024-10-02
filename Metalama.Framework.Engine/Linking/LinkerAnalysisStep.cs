@@ -74,7 +74,6 @@ namespace Metalama.Framework.Engine.Linking
                 new AspectReferenceResolver(
                     input.InjectionRegistry,
                     input.OrderedAspectLayers,
-                    input.InputCompilationModel,
                     input.IntermediateCompilation.CompilationContext );
 
             var symbolReferenceFinder = new SymbolReferenceFinder(

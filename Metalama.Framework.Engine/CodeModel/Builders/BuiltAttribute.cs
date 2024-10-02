@@ -14,26 +14,32 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 {
     private readonly AttributeBuilder _attributeBuilder;
 
-    public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation )
+    public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._attributeBuilder = builder;
     }
 
     IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
-    IRef<IAttribute> IAttribute.ToRef() => this._attributeBuilder.ToAttributeRef();
+    [Memo]
+    private IRef<IAttribute> Ref => this._attributeBuilder.ToAttributeRef(); // TODO generic
+
+    public IRef<IAttribute> ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public override DeclarationBuilder Builder => this._attributeBuilder;
 
     [Memo]
-    public INamedType Type => this.Compilation.Factory.GetDeclaration( this._attributeBuilder.Constructor.DeclaringType );
+    public INamedType Type => this.MapType( this._attributeBuilder.Type );
 
     [Memo]
-    public IConstructor Constructor => this.Compilation.Factory.GetConstructor( this._attributeBuilder.Constructor );
+    public IConstructor Constructor
+        => this.Compilation.Factory.Translate( this._attributeBuilder.Constructor, genericContext: this.GenericContext ).AssertNotNull();
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments
-        => this._attributeBuilder.ConstructorArguments.Select( a => a.ForCompilation( this.GetCompilationModel() ) )
+        => this._attributeBuilder.ConstructorArguments.Select( a => a.ForCompilation( this.Compilation ) )
             .ToImmutableArray();
 
     [Memo]
@@ -42,7 +48,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
             this._attributeBuilder.NamedArguments.SelectAsArray(
                 a => new KeyValuePair<string, TypedConstant>(
                     a.Key,
-                    a.Value.ForCompilation( this.GetCompilationModel() ) ) ) );
+                    a.Value.ForCompilation( this.Compilation ) ) ) );
 
     int IAspectPredecessor.PredecessorDegree => 0;
 

@@ -23,9 +23,9 @@ internal sealed class CapturedUserExpression : UserExpression
         => this._expression switch
            {
                TypedExpressionSyntaxImpl { ExpressionType: { } expressionType } =>
-                   this._compilation.GetCompilationModel().Factory.GetIType( expressionType ),
+                   this._compilation.GetCompilationModel().Factory.Translate( expressionType ),
                TypedExpressionSyntax { ExpressionType: { } expressionType }
-                   => this._compilation.GetCompilationModel().Factory.GetIType( expressionType ),
+                   => this._compilation.GetCompilationModel().Factory.Translate( expressionType ),
                IExpression expression => expression.Type,
                ExpressionSyntax expressionSyntax => TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                    expressionSyntax,

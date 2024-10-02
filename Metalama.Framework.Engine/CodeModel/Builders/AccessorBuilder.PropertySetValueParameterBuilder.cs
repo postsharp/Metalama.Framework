@@ -36,8 +36,5 @@ internal partial class AccessorBuilder
             get => "value";
             set => throw new NotSupportedException( "Cannot set the name of a value parameter." );
         }
-
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.Accessor.ToDisplayString( format, context ) + "@value";
     }
 }

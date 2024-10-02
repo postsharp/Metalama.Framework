@@ -59,7 +59,7 @@ namespace Metalama.Framework.Code
         /// a generic type instance, this returns the generic definition. Otherwise, it returns the current instance.
         /// </summary>
         IMemberOrNamedType Definition { get; }
-
+        
         new IRef<IMemberOrNamedType> ToRef();
     }
 }

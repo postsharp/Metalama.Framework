@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -18,50 +18,50 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class TypeParameter : Declaration, ITypeParameter, ITypeImpl
     {
-        private readonly ITypeParameterSymbol _typeSymbol;
+        public ITypeParameterSymbol TypeParameterSymbol { get; }
 
-        ITypeSymbol ISdkType.TypeSymbol => this._typeSymbol;
+        ITypeSymbol ISdkType.TypeSymbol => this.TypeParameterSymbol;
 
         internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
-            this._typeSymbol = typeSymbol;
+            this.TypeParameterSymbol = typeSymbol;
         }
 
         public TypeKind TypeKind => TypeKind.TypeParameter;
 
         public SpecialType SpecialType => SpecialType.None;
 
-        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this._typeSymbol );
+        public Type ToType() => this.Compilation.Factory.GetReflectionType( this.TypeParameterSymbol );
 
         public bool? IsReferenceType => this.IsReferenceTypeImpl();
 
         public bool? IsNullable => this.IsNullableImpl();
 
-        public string Name => this._typeSymbol.Name;
+        public string Name => this.TypeParameterSymbol.Name;
 
-        public int Index => this._typeSymbol.Ordinal;
+        public int Index => this.TypeParameterSymbol.Ordinal;
 
         [Memo]
         public IReadOnlyList<IType> TypeConstraints
-            => this._typeSymbol.ConstraintTypes.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
+            => this.TypeParameterSymbol.ConstraintTypes.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
         public TypeKindConstraint TypeKindConstraint
         {
             get
             {
-                if ( this._typeSymbol.HasUnmanagedTypeConstraint )
+                if ( this.TypeParameterSymbol.HasUnmanagedTypeConstraint )
                 {
                     return TypeKindConstraint.Unmanaged;
                 }
-                else if ( this._typeSymbol.HasValueTypeConstraint )
+                else if ( this.TypeParameterSymbol.HasValueTypeConstraint )
                 {
                     return TypeKindConstraint.Struct;
                 }
-                else if ( this._typeSymbol.HasReferenceTypeConstraint )
+                else if ( this.TypeParameterSymbol.HasReferenceTypeConstraint )
                 {
                     return TypeKindConstraint.Class;
                 }
-                else if ( this._typeSymbol.HasNotNullConstraint )
+                else if ( this.TypeParameterSymbol.HasNotNullConstraint )
                 {
                     return TypeKindConstraint.NotNull;
                 }
@@ -73,29 +73,29 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         public VarianceKind Variance
-            => this._typeSymbol.Variance switch
+            => this.TypeParameterSymbol.Variance switch
             {
                 Microsoft.CodeAnalysis.VarianceKind.In => VarianceKind.In,
                 Microsoft.CodeAnalysis.VarianceKind.Out => VarianceKind.Out,
                 _ => VarianceKind.None
             };
 
-        public bool? IsConstraintNullable => this._typeSymbol.ReferenceTypeConstraintNullableAnnotation.ToIsAnnotated();
+        public bool? IsConstraintNullable => this.TypeParameterSymbol.ReferenceTypeConstraintNullableAnnotation.ToIsAnnotated();
 
-        public bool HasDefaultConstructorConstraint => this._typeSymbol.HasConstructorConstraint;
+        public bool HasDefaultConstructorConstraint => this.TypeParameterSymbol.HasConstructorConstraint;
 
         [Memo]
-        public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this._typeSymbol.ContainingSymbol );
+        public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.TypeParameterSymbol.ContainingSymbol );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
-        public override ISymbol Symbol => this._typeSymbol;
+        public override ISymbol Symbol => this.TypeParameterSymbol;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
-        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.TypeParameter;
+        DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.TypeParameter;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -110,17 +110,17 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
 
-        public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 
         [Memo]
-        private BoxedRef<ITypeParameter> BoxedRef => new( this.ToValueTypedRef() );
+        private IRef<ITypeParameter> Ref => this.RefFactory.FromSymbol<ITypeParameter>( this.TypeParameterSymbol );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-        IRef<ITypeParameter> ITypeParameter.ToRef() => this.BoxedRef;
+        IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 
-        IRef<IType> IType.ToRef() => this.BoxedRef;
+        IRef<IType> IType.ToRef() => this.Ref;
     }
 }

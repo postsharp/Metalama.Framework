@@ -12,7 +12,9 @@ internal sealed class SymbolValidator : SymbolVisitor<bool>
 
     private SymbolValidator() { }
 
-    public override bool DefaultVisit( ISymbol symbol ) => throw new NotImplementedException();
+    public override bool DefaultVisit( ISymbol symbol ) => throw new NotImplementedException( $"Not implemented: {symbol.Kind}." );
+
+    public override bool VisitNamespace( INamespaceSymbol symbol ) => true;
 
     public override bool VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType );
 
@@ -33,9 +35,7 @@ internal sealed class SymbolValidator : SymbolVisitor<bool>
            && symbol.Parameters.All( p => this.Visit( p.Type ) )
            && symbol.TypeParameters.All( this.Visit );
 
-    public override bool VisitNamedType( INamedTypeSymbol symbol )
-        => symbol.Kind != SymbolKind.ErrorType && this.Visit( symbol.BaseType )
-                                               && symbol.Interfaces.All( this.Visit );
+    public override bool VisitNamedType( INamedTypeSymbol symbol ) => symbol.Kind != SymbolKind.ErrorType;
 
     public override bool VisitParameter( IParameterSymbol symbol ) => this.Visit( symbol.Type );
 
@@ -49,7 +49,7 @@ internal sealed class SymbolValidator : SymbolVisitor<bool>
 
     public override bool VisitRangeVariable( IRangeVariableSymbol symbol ) => true;
 
-    public override bool VisitTypeParameter( ITypeParameterSymbol symbol ) => symbol.ConstraintTypes.All( this.Visit );
+    public override bool VisitTypeParameter( ITypeParameterSymbol symbol ) => true;
 
     public override bool Visit( ISymbol? symbol ) => symbol == null || base.Visit( symbol );
 }
