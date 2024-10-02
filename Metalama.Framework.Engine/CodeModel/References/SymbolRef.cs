@@ -17,7 +17,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
 
     public override CompilationContext CompilationContext { get; }
 
-    public override bool IsDefinition => this.Symbol.IsDefinition;
+    public override bool IsDefinition => this.Symbol.IsDefinitionSafe();
 
     [Memo]
     public override IRef Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
