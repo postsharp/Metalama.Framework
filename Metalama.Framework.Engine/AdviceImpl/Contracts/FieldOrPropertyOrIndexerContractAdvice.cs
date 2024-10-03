@@ -31,21 +31,18 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
         switch ( targetDeclaration )
         {
-            // Properties must be evaluated prior to IField because PromotedField implements both interfaces but must be considered a property.
             case IProperty property:
-                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                return AddContractToProperty( property );
 
-                return CreateSuccessResult( property );
-            
+            case IField { OverridingProperty: { } overridingProperty }:
+                return AddContractToProperty( overridingProperty );
+
             case IField field:
                 var promotedField = PromotedField.Create( serviceProvider, field, ObjectReader.Empty, this );
                 addTransformation( promotedField.ToTransformation() );
                 OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
 
-                addTransformation(
-                    new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
-
-                return CreateSuccessResult( promotedField );
+                return AddContractToProperty( promotedField );
 
             case IIndexer indexer:
                 addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
@@ -54,6 +51,13 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
             default:
                 throw new AssertionFailedException();
+        }
+
+        AddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContractToProperty( IProperty property )
+        {
+            addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+
+            return CreateSuccessResult( property );
         }
     }
 }
