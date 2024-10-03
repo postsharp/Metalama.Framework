@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Builders.Built;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Diagnostics;
