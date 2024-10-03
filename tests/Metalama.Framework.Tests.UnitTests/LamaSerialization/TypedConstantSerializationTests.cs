@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization;

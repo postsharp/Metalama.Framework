@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Comparers;
 using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;

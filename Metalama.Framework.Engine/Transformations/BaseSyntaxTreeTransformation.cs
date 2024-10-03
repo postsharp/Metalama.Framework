@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Transformations;

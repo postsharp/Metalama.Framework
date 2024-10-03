@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Immutable;

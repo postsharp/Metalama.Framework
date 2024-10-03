@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;

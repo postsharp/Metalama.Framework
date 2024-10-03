@@ -9,7 +9,7 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
+using MethodBase = Metalama.Framework.Engine.CodeModel.Source.MethodBase;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
