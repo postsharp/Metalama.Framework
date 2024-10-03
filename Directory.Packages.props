@@ -58,5 +58,6 @@
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.extensibility.core" Version="$(xUnitApiVersion)" />
     <PackageVersion Include="xunit.extensibility.execution" Version="$(xUnitApiVersion)" />
+    <PackageVersion Include="xunit.runner.console" Version="2.9.2" />
   </ItemGroup>
 </Project>

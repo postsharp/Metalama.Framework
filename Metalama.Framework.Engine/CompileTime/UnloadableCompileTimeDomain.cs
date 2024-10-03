@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public UnloadableCompileTimeDomain( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
-            CollectibleExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
+            // CollectibleExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
             this._assemblyLoadContext = new AssemblyLoadContext( "Metalama_" + Guid.NewGuid(), isCollectible: true );
 
             this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();

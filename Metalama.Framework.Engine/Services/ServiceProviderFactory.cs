@@ -72,7 +72,8 @@ public static class ServiceProviderFactory
             .WithServiceConditional( _ => new ReferenceAssemblyLocatorProvider() )
             .WithServiceConditional( _ => new FrameworkCompileTimeProjectFactory() )
             .WithServiceConditional( _ => new AttributeClassificationService() )
-            .WithServiceConditional<IProjectOptionsFactory>( _ => new MSBuildProjectOptionsFactory() );
+            .WithServiceConditional<IProjectOptionsFactory>( _ => new MSBuildProjectOptionsFactory() )
+            .WithServiceConditional<ILockingService>( _ => new GlobalLockingService() );
 
         return serviceProvider;
     }

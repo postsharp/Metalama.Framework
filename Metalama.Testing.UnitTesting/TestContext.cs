@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -118,7 +119,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         try
         {
-
             this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
             var platformInfo = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IPlatformInfo>();
@@ -137,6 +137,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
             var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
             typedAdditionalServices.GlobalServices.Add( sp => sp.WithServiceConditional<IGlobalOptions>( _ => new TestGlobalOptions() ) );
+            typedAdditionalServices.GlobalServices.Add( sp => sp.WithServiceConditional<ILockingService>( _ => new TestLockingService() ) );
 
             typedAdditionalServices.GlobalServices.Add(
                 sp => sp.WithService<IProjectOptionsFactory>( _ => new TestProjectOptionsFactory( this.ProjectOptions ) ) );

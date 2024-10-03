@@ -18,6 +18,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -36,6 +37,7 @@ internal sealed class ReferenceAssemblyLocator
     private const string _compilerInterfaceAssemblyName = "Metalama.Compiler.Interface";
     private const string _defaultCompileTimeTargetFrameworks = "netstandard2.0;net6.0;net48";
     private static readonly ImmutableArray<string> _defaultNugetSources = GetDefaultNuGetSources().ToImmutableArray();
+    private static readonly ConcurrentDictionary<string, ReferenceAssembliesManifest> _cache = new( StringComparer.Ordinal );
 
     private static IEnumerable<string> GetDefaultNuGetSources()
     {
@@ -297,6 +299,15 @@ internal sealed class ReferenceAssemblyLocator
         string additionalPackageReferences,
         string? additionalNugetSources,
         string? hooksDirectory )
+        => _cache.GetOrAdd(
+            this._cacheDirectory,
+            _ => this.GetReferenceAssembliesManifestCore( targetFrameworks, additionalPackageReferences, additionalNugetSources, hooksDirectory ) );
+
+    private ReferenceAssembliesManifest GetReferenceAssembliesManifestCore(
+        string targetFrameworks,
+        string additionalPackageReferences,
+        string? additionalNugetSources,
+        string? hooksDirectory )
     {
         using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
         {
@@ -352,12 +363,12 @@ internal sealed class ReferenceAssemblyLocator
                 {
                     hooksDirectory = $"$(MSBuildThisFileDirectory){hooksDirectory}";
                 }
-                
+
                 initialTargets = " InitialTargets=\"_WarnOfImports\"";
 
                 hooksPropsImport = $@"
   <Import Project=""{hooksDirectory}/Metalama.AssemblyLocator.Build.props"" Condition=""Exists('{hooksDirectory}/Metalama.AssemblyLocator.Build.props')"" />";
-                
+
                 hooksTargetsImport = $@"
   <Import Project=""{{hooksDirectory}}/Metalama.AssemblyLocator.Build.targets"" Condition=""Exists('{{hooksDirectory}}/Metalama.AssemblyLocator.Build.targets')"" />";
 

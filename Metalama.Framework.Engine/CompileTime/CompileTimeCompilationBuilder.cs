@@ -59,6 +59,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     private readonly ILogger _logger;
     private readonly OutputPathHelper _outputPathHelper;
     private readonly ITaskRunner _taskRunner;
+    private readonly ILockingService _lockingService;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
 
@@ -110,6 +111,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._tempFileManager = serviceProvider.Underlying.GetRequiredBackstageService<ITempFileManager>();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
         this._taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
+        this._lockingService = serviceProvider.Global.GetRequiredService<ILockingService>();
     }
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
@@ -353,8 +355,8 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         var preprocessorSymbols =
             preprocessorServiceProvider != null
-            ? preprocessorServiceProvider.PreprocessorSymbols.Concat( "NETSTANDARD_2_0" )
-            : ["NETSTANDARD_2_0"];
+                ? preprocessorServiceProvider.PreprocessorSymbols.Concat( "NETSTANDARD_2_0" )
+                : ["NETSTANDARD_2_0"];
 
         var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols, languageVersion: SupportedCSharpVersions.Default );
 
@@ -1305,5 +1307,5 @@ internal sealed partial class CompileTimeCompilationBuilder
             $"Please delete \"{Path.GetDirectoryName( outputPaths.Directory )}\" directory before retrying the build. " +
             $"If this occurs on a build server, please verify that the cache is correctly cleaned up between builds." );
 
-    private IDisposable WithLock( string compileTimeAssemblyName ) => MutexHelper.WithGlobalLock( compileTimeAssemblyName, this._logger );
+    private IDisposable WithLock( string compileTimeAssemblyName ) => this._lockingService.WithLock( compileTimeAssemblyName, this._logger );
 }
