@@ -1,7 +1,7 @@
-[Introduction]
+[IntroduceClassAspect]
 public class Targets
 {
-  [Aspect]
+  [IntroduceMethodInheritableAspect]
   public class BaseType
   {
     public virtual global::System.Int32 Foo()

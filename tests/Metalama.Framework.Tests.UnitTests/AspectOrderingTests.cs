@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var dependencies = new IAspectOrderingSource[]
             {
-                new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( serviceProvider, compilation.RoslynCompilation )
+                new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( serviceProvider, compilation.CompilationContext )
             };
 
             if ( AspectLayerSorter.TrySort(
@@ -347,9 +347,9 @@ class Aspect3 : TypeAspect { }
             var random = new Random( 45 );
 
             var stringBuilder = new StringBuilder( """
-                using Metalama.Framework.Aspects;
+                                                   using Metalama.Framework.Aspects;
 
-                """ );
+                                                   """ );
 
             const int n = 17;
 

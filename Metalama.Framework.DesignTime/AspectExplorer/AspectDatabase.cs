@@ -225,7 +225,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                     {
                         new AspectDatabaseAspectTransformation(
                             GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
-                            $"Provide the '{aspectInstance.AspectClass}' aspect." )
+                            $"Add the '{aspectInstance.AspectClass}' aspect to '{aspectInstance.TargetDeclaration}'." )
                     } ) );
 #pragma warning restore IDE0300
 

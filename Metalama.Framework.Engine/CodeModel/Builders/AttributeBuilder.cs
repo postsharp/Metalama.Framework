@@ -42,10 +42,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
-
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => this.AttributeConstruction.ToString() ?? "";
-
+    
     public INamedType Type => this.Constructor.DeclaringType;
 
     public IConstructor Constructor => this.AttributeConstruction.Constructor;
@@ -64,7 +61,12 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     public override SyntaxTree PrimarySyntaxTree
         => this.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
-    public ITransformation ToTransformation() => new IntroduceAttributeTransformation( this.ParentAdvice, this );
+    public ITransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceAttributeTransformation( this.ParentAdvice, this );
+    }
 
     int IAspectPredecessor.PredecessorDegree => 0;
 
@@ -74,9 +76,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
 
-    public override Ref<IDeclaration> ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+    public AttributeRef ToAttributeRef() => this._attributeRef ??= new BuilderAttributeRef( this );
 
-    public AttributeRef ToAttributeRef() => this._attributeRef ??= new AttributeRef( this );
-
-    public override IRef<IDeclaration> ToIRef() => this.ToAttributeRef();
+    public override IRef<IDeclaration> ToDeclarationRef() => this.ToAttributeRef();
 }

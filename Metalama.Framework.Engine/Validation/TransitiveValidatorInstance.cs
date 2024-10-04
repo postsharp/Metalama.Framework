@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Validation;
@@ -18,7 +17,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         var implementation = instance.Implementation;
         var properties = instance.Properties;
 
-        this.ValidatedDeclaration = instance.ValidatedDeclaration.ToValueTypedRef();
+        this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
         this.ReferenceKinds = properties.ReferenceKinds;
         this.IncludeDerivedTypes = properties.IncludeDerivedTypes;
         this.MethodName = instance.Driver.MethodName;
@@ -29,7 +28,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     }
 
     public TransitiveValidatorInstance(
-        Ref<IDeclaration> validatedDeclaration,
+        IRef<IDeclaration> validatedDeclaration,
         ReferenceKinds referenceKinds,
         bool includeDerivedTypes,
         object obj,
@@ -58,7 +57,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         this.DiagnosticSourceDescription = null!;
     }
 
-    public Ref<IDeclaration> ValidatedDeclaration { get; private set; }
+    public IRef<IDeclaration>? ValidatedDeclaration { get; private set; }
 
     public ReferenceKinds ReferenceKinds { get; private set; }
 
@@ -83,12 +82,8 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 
         if ( this.MethodName != null )
         {
-            var method = type.GetMethod( this.MethodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
-
-            if ( method == null )
-            {
-                throw new InvalidOperationException( $"Cannot find a method named '{this.MethodName}' in '{type}'." );
-            }
+            var method = type.GetMethod( this.MethodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
+                         ?? throw new InvalidOperationException( $"Cannot find a method named '{this.MethodName}' in '{type}'." );
 
             return ValidatorDriverFactory.GetInstance( type )
                 .GetReferenceValidatorDriver( method );
@@ -117,7 +112,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
         {
             var instance = (TransitiveValidatorInstance) obj;
-            instance.ValidatedDeclaration = initializationArguments.GetValue<Ref<IDeclaration>>( nameof(instance.ValidatedDeclaration) )!;
+            instance.ValidatedDeclaration = initializationArguments.GetValue<IRefImpl<IDeclaration>>( nameof(instance.ValidatedDeclaration) )!;
             instance.ReferenceKinds = initializationArguments.GetValue<ReferenceKinds>( nameof(instance.ReferenceKinds) );
             instance.Object = initializationArguments.GetValue<object>( nameof(instance.Object) )!;
             instance.State = initializationArguments.GetValue<IAspectState>( nameof(instance.State) );

@@ -14,6 +14,8 @@ internal sealed class EmptyNamespaceCollection : INamespaceCollection
 
     public INamespace? OfName( string name ) => null;
 
+    IEnumerable<INamespace> INamedDeclarationCollection<INamespace>.OfName( string name ) => [];
+
     public IEnumerator<INamespace> GetEnumerator() => ((IEnumerable<INamespace>) Array.Empty<INamespace>()).GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();

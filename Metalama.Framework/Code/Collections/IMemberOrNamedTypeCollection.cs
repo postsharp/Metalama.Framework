@@ -14,8 +14,15 @@ namespace Metalama.Framework.Code.Collections;
 /// </remarks>
 [InternalImplement]
 [CompileTime]
-public interface IMemberOrNamedTypeCollection<out T> : IReadOnlyCollection<T>
-    where T : IMemberOrNamedType
+public interface IMemberOrNamedTypeCollection<out T> : INamedDeclarationCollection<T>
+    where T : IMemberOrNamedType { }
+
+/// <summary>
+/// A collection of named elements.
+/// </summary>
+/// <typeparam name="T"></typeparam>
+public interface INamedDeclarationCollection<out T> : IReadOnlyCollection<T>
+    where T : INamedDeclaration
 {
     /// <summary>
     /// Gets the set of members of a given name. Note that for named types, the short name will be matched,

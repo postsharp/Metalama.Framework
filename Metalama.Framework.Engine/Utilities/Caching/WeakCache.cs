@@ -58,6 +58,34 @@ public sealed class WeakCache<TKey, TValue> : ICache<TKey, TValue>
         }
     }
 
+    public TValue GetOrAdd<TPayload>( TKey key, Func<TKey, TPayload, TValue> func, TPayload payload )
+    {
+        if ( this.TryGetValue( key, out var value ) )
+        {
+            return value;
+        }
+
+        lock ( key )
+        {
+            while ( true )
+            {
+                // We won the race.
+                // Create the new item.
+                value = func( key, payload );
+
+                // The func may have added the same item to the cache.
+                if ( this.TryGetValue( key, out var recursiveValue ) )
+                {
+                    return recursiveValue;
+                }
+
+                this._cache.Add( key, new StrongBox<TValue>( value ) );
+
+                return value;
+            }
+        }
+    }
+
     public bool TryAdd( TKey key, TValue value )
     {
         if ( this.TryGetValue( key, out _ ) )

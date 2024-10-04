@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -102,7 +101,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+        protected override IRef<IMember> ToMemberRef() => this.Ref;
 
         public override bool IsAsync => false;
 
@@ -113,12 +112,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMember? OverriddenMember => this.OverriddenEvent;
 
         [Memo]
-        private BoxedRef<IEvent> BoxedRef => new BoxedRef<IEvent>( this.ToValueTypedRef() );
+        private IRef<IEvent> Ref => this.RefFactory.FromSymbolBasedDeclaration<IEvent>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-        IRef<IEvent> IEvent.ToRef() => this.BoxedRef;
+        IRef<IEvent> IEvent.ToRef() => this.Ref;
 
-        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
     }
 }

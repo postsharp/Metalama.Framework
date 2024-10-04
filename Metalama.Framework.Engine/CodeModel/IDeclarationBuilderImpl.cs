@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IDeclarationBuilderImpl : IDeclarationBuilder
+    internal interface IDeclarationBuilderImpl : IDeclarationBuilder, IDeclarationImpl
     {
         Advice ParentAdvice { get; }
     }

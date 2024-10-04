@@ -29,7 +29,7 @@ public readonly struct ProjectServiceProvider
 
     public T GetRequiredService<T>()
         where T : class, IProjectService
-        => this.Underlying.GetService<T>() ?? throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
+        => this.Underlying.GetService<T>() ?? throw new InvalidOperationException( $"Cannot get the service {typeof(T)}." );
 
     public T? GetService<T>()
         where T : class, IProjectService

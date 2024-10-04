@@ -289,7 +289,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             var predecessors = requirement.Select( x => new AspectPredecessor( AspectPredecessorKind.RequiredAspect, x.Predecessor ) );
 
             var stronglyTypedAspectClass = (AspectClass) aspectClass;
-            var aspect = stronglyTypedAspectClass.CreateDefaultInstance();
+            var aspect = stronglyTypedAspectClass.CreateDefaultInstance( compilation.CompilationContext );
 
             var aspectInstance = new AspectInstance( aspect, requirementTarget, stronglyTypedAspectClass, predecessors.ToImmutableArray() );
             var eligibility = aspectInstance.ComputeEligibility( requirementTarget );

@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
@@ -38,5 +37,5 @@ internal abstract class ContractAdvice<T> : Advice<AddContractAdviceResult<T>>
     public override AdviceKind AdviceKind => AdviceKind.AddContract;
 
     // TODO: the conversion on the next line will not work with fields.
-    protected static AddContractAdviceResult<T> CreateSuccessResult( T member ) => new( member.ToValueTypedRef() );
+    protected static AddContractAdviceResult<T> CreateSuccessResult( T member ) => new( member.ToRef().As<T>() );
 }

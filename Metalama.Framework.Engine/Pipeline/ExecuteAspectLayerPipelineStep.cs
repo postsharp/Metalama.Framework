@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -49,18 +50,15 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
         int stepIndex,
         CancellationToken cancellationToken )
     {
-        IEnumerable<IGrouping<INamedType?, (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>> instancesByType;
+        // ReSharper disable once InconsistentlySynchronizedField
+        var aggregateInstances = this._aspectInstances
+            .GroupBy( a => a.TargetDeclaration, RefEqualityComparer<IDeclaration>.Default )
+            .Select( AggregateAspectInstance.GetInstance )
+            .WhereNotNull()
+            .Select( a => (TargetDeclaration: a.TargetDeclaration.GetTarget( compilation ), AspectInstance: a) );
 
-        lock ( this._aspectInstances )
-        {
-            var aggregateInstances = this._aspectInstances
-                .GroupBy( a => a.TargetDeclaration )
-                .Select( AggregateAspectInstance.GetInstance )
-                .WhereNotNull()
-                .Select( a => (TargetDeclaration: a.TargetDeclaration.GetTarget( compilation ), AspectInstance: a) );
-
-            instancesByType = aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
-        }
+        var instancesByType = 
+            aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
 
         // This collection will contain the observable transformations that need to be replayed on the compilation.
         var observableTransformations = new ConcurrentQueue<ITransformation>();
@@ -152,11 +150,11 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                         // ReSharper disable once AccessToModifiedClosure
                         transformations = transformations.Where(
                                 t => t.Observability != TransformationObservability.None ||
-                                     t is not ISyntaxTreeTransformation syntaxTreeTransformation || 
+                                     t is not ISyntaxTreeTransformation syntaxTreeTransformation ||
                                      partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) )
                             .ToImmutableArray();
                     }
-                    
+
                     this.Parent.AddTransformations( transformations );
 
                     foreach ( var transformation in transformations )
@@ -231,6 +229,11 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                 if ( positionComparison != 0 )
                 {
                     return positionComparison;
+                }
+
+                if ( x.TargetDeclaration.Equals( y.TargetDeclaration ) )
+                {
+                    return 0;
                 }
 
                 // Implicitly declared record methods have the same span, compare them by signature.

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Code
     internal interface IGenericInternal : IDeclarationInternal, IGeneric
     {
         /// <summary>
-        /// Constructs a generic instance of the current generic type definition.
+        /// Constructs a generic instance of the current generic type or method, but does not map the declaring type.
         /// </summary>
         /// <param name="typeArguments"></param>
         /// <returns></returns>

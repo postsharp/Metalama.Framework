@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
@@ -14,23 +15,32 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Services;
+
+#pragma warning disable CA1822
 
 public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
     private readonly ConcurrentDictionary<SyntaxGenerationContextCacheKey, SyntaxGenerationContext> _syntaxGenerationContextCache = new();
+    private static int _nextId;
 
     internal CompilationContext( Compilation compilation )
     {
         this.Compilation = compilation;
     }
 
+    public int Id { get; } = Interlocked.Increment( ref _nextId );
+
     [Memo]
     internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver );
 
     [Memo]
     internal CompilationComparers Comparers => new( this.Compilation );
+
+    [Memo]
+    internal RefFactory RefFactory => new( this );
 
     public Compilation Compilation { get; }
 
@@ -52,7 +62,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
 
     [Memo]
-    public SerializableTypeIdResolverForSymbol SerializableTypeIdResolver => new( this.Compilation );
+    public SerializableTypeIdResolverForSymbol SerializableTypeIdResolver => new( this );
 
     [Memo]
     internal SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
@@ -69,28 +79,31 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         => this.Compilation.SourceModule.ReferencedAssemblySymbols.Concat( this.Compilation.Assembly ).ToImmutableDictionary( x => x.Identity, x => x );
 
     [Memo]
-    internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<INamedType>?> NamedTypeRefComparer => RefEqualityComparer<INamedType>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<INamespace>> NamespaceRefComparer => new MemberRefEqualityComparer<INamespace>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<INamespace>?> NamespaceRefComparer => RefEqualityComparer<INamespace>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IConstructor>> ConstructorRefComparer => new MemberRefEqualityComparer<IConstructor>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IConstructor>?> ConstructorRefComparer => RefEqualityComparer<IConstructor>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IEvent>> EventRefComparer => new MemberRefEqualityComparer<IEvent>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IEvent>?> EventRefComparer => RefEqualityComparer<IEvent>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IField>> FieldRefComparer => new MemberRefEqualityComparer<IField>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IField>?> FieldRefComparer => RefEqualityComparer<IField>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IProperty>> PropertyRefComparer => new MemberRefEqualityComparer<IProperty>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IFieldOrProperty>?> FieldOrPropertyRefComparer => RefEqualityComparer<IFieldOrProperty>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IIndexer>> IndexerRefComparer => new MemberRefEqualityComparer<IIndexer>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IProperty>?> PropertyRefComparer => RefEqualityComparer<IProperty>.Default;
 
     [Memo]
-    internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
+    internal IEqualityComparer<IRef<IIndexer>?> IndexerRefComparer => RefEqualityComparer<IIndexer>.Default;
+
+    [Memo]
+    internal IEqualityComparer<IRef<IMethod>?> MethodRefComparer => RefEqualityComparer<IMethod>.Default;
 
     [Memo]
     internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.Comparers.Default );
@@ -109,6 +122,9 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
+
+    [Memo]
+    internal SymbolRefStrategy SymbolRefStrategy => new( this );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );
@@ -163,4 +179,6 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal SymbolTranslator SymbolTranslator => new( this );
+
+    public override string ToString() => $"{this.GetType().Name} #{this.Id}, Assembly={this.Compilation.AssemblyName}";
 }

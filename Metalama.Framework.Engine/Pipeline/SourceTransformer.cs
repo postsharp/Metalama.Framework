@@ -99,7 +99,7 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
             // Try.Metalama ships its own project options factory using the async-local service provider.
             var projectOptionsFactory = globalServices.GetRequiredService<IProjectOptionsFactory>();
             var projectOptions = projectOptionsFactory.GetProjectOptions( context.AnalyzerConfigOptionsProvider, context.Options );
-            
+
             var projectServiceProvider = globalServices
                 .WithProjectScopedServices( projectOptions, context.Compilation )
                 .WithService<IProjectLicenseConsumer>(
@@ -210,6 +210,8 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
     {
         var userCodeInvoker = projectServiceProvider.GetRequiredService<UserCodeInvoker>();
 
+        var compilationContext = context.Compilation.GetCompilationContext();
+
         foreach ( var suppression in diagnosticSuppressions )
         {
             var declarationId = suppression.Declaration.GetSerializableId();
@@ -220,7 +222,8 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
             {
                 executionContext = new UserCodeExecutionContext(
                     projectServiceProvider,
-                    UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Suppression.Definition, suppression.Declaration ) );
+                    UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Suppression.Definition, suppression.Declaration ),
+                    compilationContext );
             }
 
             context.RegisterDiagnosticFilter(

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Reflection;
 
@@ -8,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberOrNamedTypeImpl
 {
-    protected BuiltMemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
+    protected BuiltMemberOrNamedType( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
     protected abstract MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder { get; }
 
@@ -24,14 +25,16 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
 
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
-    public INamedType? DeclaringType
-        => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
+    [Memo]
+    public INamedType? DeclaringType => this.MapType( this.MemberOrNamedTypeBuilder.DeclaringType );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
-    IMemberOrNamedType IMemberOrNamedType.Definition => this;
+    IMemberOrNamedType IMemberOrNamedType.Definition => this.GetDefinition();
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.MemberOrNamedTypeBuilder.ToMemberOrNamedTypeRef();
+    protected abstract IMemberOrNamedType GetDefinition();
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => (IRef<IMemberOrNamedType>) this.ToDeclarationRef();
 }

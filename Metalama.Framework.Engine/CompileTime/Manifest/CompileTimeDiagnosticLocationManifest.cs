@@ -30,7 +30,7 @@ internal sealed class CompileTimeDiagnosticLocationManifest
         }
 
         // Paths of compile-time source files are always changing, so the cache uses an index as a persistent identifier for a file when possible.
-        var path = location.SourceTree.AssertNotNull().FilePath;
+        var path = location.GetLineSpan().Path.AssertNotNull();
 
         if ( sourceFilePathIndexes.TryGetValue( path, out var index ) )
         {

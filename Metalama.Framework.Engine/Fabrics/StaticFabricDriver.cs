@@ -36,8 +36,9 @@ namespace Metalama.Framework.Engine.Fabrics
             private readonly List<IValidatorSource> _validatorSources = new();
             private readonly List<IHierarchicalOptionsSource> _optionsSources = new();
 
-            protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration, string? ns ) :
-                base( project, fabricManager, fabricInstance, targetDeclaration )
+            // TODO PERF: ToDurable is useful only at design time.
+            protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, IRef<T> targetDeclaration, string? ns ) :
+                base( project, fabricManager, fabricInstance, targetDeclaration.ToDurable() )
             {
                 this.Namespace = ns;
             }

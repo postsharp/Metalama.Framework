@@ -12,7 +12,7 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 {
     private readonly NamespaceBuilder _namespaceBuilder;
 
-    public BuiltNamespace( CompilationModel compilation, NamespaceBuilder builder ) : base( compilation )
+    public BuiltNamespace( NamespaceBuilder builder, CompilationModel compilation ) : base( compilation, GenericContext.Empty )
     {
         this._namespaceBuilder = builder;
     }
@@ -27,21 +27,25 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 
     public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
 
-    IRef<INamespace> INamespace.ToRef() => this._namespaceBuilder.BoxedRef;
+    private IRef<INamespace> Ref => this._namespaceBuilder.Ref;
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this._namespaceBuilder.BoxedRef;
+    IRef<INamespace> INamespace.ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this._namespaceBuilder.ToValueTypedRef().As<INamespaceOrNamedType>() ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this._namespaceBuilder.ToRef() ) );
 
     public INamespaceCollection Namespaces
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._namespaceBuilder.ToValueTypedRef().As<INamespace>() ) );
+            this.Compilation.GetNamespaceCollection( this._namespaceBuilder.ToRef().As<INamespace>() ) );
 
     public bool IsPartial
     {

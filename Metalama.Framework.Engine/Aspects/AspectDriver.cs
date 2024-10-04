@@ -165,7 +165,7 @@ internal sealed class AspectDriver : IAspectDriver
             var serviceProvider = pipelineConfiguration.ServiceProvider;
 
             // Map the target declaration to the correct revision of the compilation model.
-            targetDeclaration = initialCompilationRevision.Factory.GetDeclaration( targetDeclaration );
+            targetDeclaration = initialCompilationRevision.Factory.Translate( targetDeclaration ).AssertNotNull();
 
             if ( aspectInstance.Aspect is not IAspect<T> aspectOfT )
             {
@@ -194,12 +194,13 @@ internal sealed class AspectDriver : IAspectDriver
 
             var buildAspectExecutionContext = new UserCodeExecutionContext(
                 serviceProvider,
-                diagnosticSink,
                 UserCodeDescription.Create( "executing BuildAspect for {0}", aspectInstance ),
+                initialCompilationRevision.CompilationContext,
                 new AspectLayerId( this._aspectClass ),
                 initialCompilationRevision,
                 targetDeclaration,
-                predecessorTrees,
+                sourceTrees: predecessorTrees,
+                diagnostics: diagnosticSink,
                 throwOnUnsupportedDependencies: true );
 
             var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

@@ -62,9 +62,9 @@ namespace Metalama.Framework.Engine.Fabrics
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
-                diagnosticAdder,
                 UserCodeDescription.Create( "calling the AmendNamespace method for the fabric {0}", this.Fabric.GetType() ),
-                compilationModel: compilation );
+                compilation,
+                diagnostics: diagnosticAdder );
 
             if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => ((NamespaceFabric) this.Fabric).AmendNamespace( amender ), executionContext ) )
             {

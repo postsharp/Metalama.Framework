@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -17,9 +18,9 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IType PointedAtType => this.Compilation.Factory.GetIType( this.Symbol.PointedAtType );
 
-        public override ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-        internal ITypeImpl WithPointedAtType( ITypeImpl pointedAtType )
+        internal ITypeImpl WithPointedAtType( IType pointedAtType )
         {
             if ( pointedAtType == this.PointedAtType )
             {
@@ -28,11 +29,11 @@ namespace Metalama.Framework.Engine.CodeModel
             else
             {
                 var symbol =
-                    this.GetCompilationModel()
+                    this.Compilation
                         .RoslynCompilation.CreatePointerTypeSymbol(
                             pointedAtType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
-                return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
+                return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
             }
         }
     }

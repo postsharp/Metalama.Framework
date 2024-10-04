@@ -20,7 +20,7 @@ internal abstract class AllMemberOrNamedTypesCollection<TItem, TCollection> : IM
         this.DeclaringType = declaringType;
     }
 
-    protected CompilationContext CompilationContext => ((IDeclarationImpl) this.DeclaringType).Compilation.CompilationContext;
+    protected CompilationContext CompilationContext => this.DeclaringType.GetCompilationContext();
 
     protected INamedType DeclaringType { get; }
 

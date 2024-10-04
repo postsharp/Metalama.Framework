@@ -33,10 +33,16 @@ internal sealed class Attribute : IAttributeImpl
 
     public CompilationModel Compilation { get; }
 
+    public ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => throw new NotImplementedException();
+
     public AttributeData AttributeData { get; }
 
     [Memo]
-    private IRef<IAttribute> Ref => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToValueTypedRef(), this.Compilation.CompilationContext );
+    private IRef<IAttribute> Ref => new SymbolAttributeRef( this.AttributeData, this.ContainingDeclaration.ToRef(), this.Compilation.CompilationContext );
 
     IRef<IAttribute> IAttribute.ToRef() => this.Ref;
 
@@ -65,19 +71,19 @@ internal sealed class Attribute : IAttributeImpl
         => ((IDeclarationImpl) this).DeclaringSyntaxReferences.SelectAsImmutableArray(
             sr => new SourceReference( sr.GetSyntax(), SourceReferenceImpl.Instance ) );
 
+    public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
+
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
     [Memo]
     public INamedType Type
         => this.Compilation.Factory.GetNamedType(
-            this.AttributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ),
-            true );
+            this.AttributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ) );
 
     [Memo]
     public IConstructor Constructor
         => this.Compilation.Factory.GetConstructor(
-            this.AttributeData.AttributeConstructor.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ),
-            true );
+            this.AttributeData.AttributeConstructor.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ) );
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments
@@ -122,10 +128,6 @@ internal sealed class Attribute : IAttributeImpl
     SyntaxTree? IDeclarationImpl.PrimarySyntaxTree => this.AttributeData.ApplicationSyntaxReference?.SyntaxTree;
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => Enumerable.Empty<IDeclaration>();
-
-    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
-
-    Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
     public bool Equals( IDeclaration? other ) => other is Attribute attribute && this.AttributeData == attribute.AttributeData;
 

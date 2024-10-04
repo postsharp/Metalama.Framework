@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -60,7 +60,6 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        // Calling OnUsingDeclaration creates an infinite recursion.
         public override ISymbol Symbol => this.Implementation.Symbol;
 
         public override MemberInfo ToMemberInfo()
@@ -236,13 +235,13 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private BoxedRef<INamedType> BoxedRef => new( this.ToValueTypedRef() );
+        private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamedType>( this );
 
-        IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+        IRef<INamedType> INamedType.ToRef() => this.Ref;
 
-        IRef<IType> IType.ToRef() => this.BoxedRef;
+        IRef<IType> IType.ToRef() => this.Ref;
 
-        IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+        IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
         INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -488,7 +487,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamedType UnderlyingType => this.Implementation.UnderlyingType;
 
-        public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public IReadOnlyList<IMember> GetOverridingMembers( IMember member )
         {
@@ -532,7 +531,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var symbol = ((INamedTypeSymbol) this.TypeSymbol.OriginalDefinition).Construct( typeArgumentSymbols );
 
-            return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
+            return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
         }
 
         public override IDeclaration ContainingDeclaration => this.Implementation.ContainingDeclaration;
@@ -543,7 +542,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this.OnUsingDeclaration();
 
-                return this.Implementation.TypeSymbol;
+                return this.Implementation.NamedTypeSymbol;
             }
         }
 

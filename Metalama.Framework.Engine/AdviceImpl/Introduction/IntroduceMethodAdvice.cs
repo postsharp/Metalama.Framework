@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -21,8 +20,6 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMethod, MethodBuilder>
 {
     private readonly PartiallyBoundTemplateMethod _template;
-
-    private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public IntroduceMethodAdvice(
         AdviceConstructorParameters<INamedType> parameters,

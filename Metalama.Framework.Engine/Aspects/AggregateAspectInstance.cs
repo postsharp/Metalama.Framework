@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -50,7 +49,7 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.TargetDeclaration;
 
-    public Ref<IDeclaration> TargetDeclaration => this._primaryInstance.TargetDeclaration;
+    public IRef<IDeclaration> TargetDeclaration => this._primaryInstance.TargetDeclaration;
 
     public IAspectClassImpl AspectClass => this._primaryInstance.AspectClass;
 

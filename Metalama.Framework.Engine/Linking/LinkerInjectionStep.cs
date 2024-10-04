@@ -255,7 +255,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
 
         // Replace wildcard AssemblyVersionAttribute with actual version.
-        var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToValueTypedRef() );
+        var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
         var assemblyVersionAttributeType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
         var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionAttributeType ).FirstOrDefault();
 
@@ -420,63 +420,60 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     {
         var compilation = input.CompilationModel;
 
-        if ( transformation is not IReplaceMemberTransformation replaceMemberTransformation )
+        if ( transformation is not IReplaceMemberTransformation replaceMemberTransformation || replaceMemberTransformation.ReplacedMember == null )
         {
             return;
         }
 
+        // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
+        // TODO: the target may have been removed from the
+        var replacedDeclaration = (IDeclaration) replaceMemberTransformation.ReplacedMember;
+
+        replacedDeclaration = GetReplacedDeclarationRecursive( replacedDeclaration );
+
+        static IDeclaration GetReplacedDeclarationRecursive( IDeclaration d )
         {
-            if ( replaceMemberTransformation.ReplacedMember.IsDefault )
+            return d switch
             {
-                return;
-            }
-
-            // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
-            // TODO: the target may have been removed from the
-            var replacedDeclaration = (IDeclaration) replaceMemberTransformation.ReplacedMember.GetTarget(
-                compilation,
-                ReferenceResolutionOptions.DoNotFollowRedirections );
-
-            replacedDeclaration = replacedDeclaration switch
-            {
-                BuiltDeclaration declaration => declaration.Builder,
-                _ => replacedDeclaration
+                BuiltDeclaration declaration => GetReplacedDeclarationRecursive( declaration.Builder ),
+                PromotedField promotedField => promotedField.OriginalSourceFieldOrFieldBuilder,
+                _ => d
             };
+        }
 
-            switch ( replacedDeclaration )
-            {
-                case Field replacedField:
-                    var fieldSyntaxReference =
-                        replacedField.Symbol.GetPrimarySyntaxReference()
-                        ?? throw new AssertionFailedException( $"The field '{replacedField.Symbol}' does not have syntax." );
+        switch ( replacedDeclaration )
+        {
+            case Field sourceField:
+                var fieldSyntaxReference =
+                    sourceField.Symbol.GetPrimarySyntaxReference()
+                    ?? throw new AssertionFailedException( $"The field '{sourceField}' does not have syntax." );
 
-                    var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
-                    transformationCollection.AddRemovedSyntax( removedFieldSyntax );
+                var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
+                transformationCollection.AddRemovedSyntax( removedFieldSyntax );
 
-                    break;
+                break;
 
-                case Constructor replacedConstructor:
-                    Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
+            case Constructor replacedConstructor:
+                Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
 
-                    break;
+                break;
 
-                // This needs to point to an interface
-                case IDeclarationBuilder replacedBuilder:
-                    if ( !transformationCollection.TryGetIntroduceDeclarationTransformation( replacedBuilder, out var introduceDeclarationTransformation ) )
-                    {
-                        throw new AssertionFailedException( $"Builder {replacedBuilder} is missing registered transformation." );
-                    }
+            // This needs to point to an interface
+            case IDeclarationBuilder replacedBuilder:
+                if ( !transformationCollection.TryGetIntroduceDeclarationTransformation( replacedBuilder, out var introduceDeclarationTransformation ) )
+                {
+                    throw new AssertionFailedException( $"Builder {replacedBuilder} is missing registered transformation." );
+                }
 
-                    lock ( replacedIntroduceDeclarationTransformations )
-                    {
-                        replacedIntroduceDeclarationTransformations.Add( introduceDeclarationTransformation );
-                    }
+                lock ( replacedIntroduceDeclarationTransformations )
+                {
+                    replacedIntroduceDeclarationTransformations.Add( introduceDeclarationTransformation );
+                }
 
-                    break;
+                break;
 
-                default:
-                    throw new AssertionFailedException( $"Unexpected replace declaration: '{replacedDeclaration}'." );
-            }
+            default:
+                throw new AssertionFailedException( $"Unexpected replace declaration: '{replacedDeclaration}'." );
         }
     }
 

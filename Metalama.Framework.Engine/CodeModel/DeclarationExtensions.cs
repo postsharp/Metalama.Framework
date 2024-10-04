@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -32,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public static class DeclarationExtensions
 {
-    public static DeclarationKind GetDeclarationKind( this ISymbol symbol )
+    public static DeclarationKind GetDeclarationKind( this ISymbol symbol, CompilationContext compilationContext )
         => symbol switch
         {
             INamespaceSymbol => DeclarationKind.Namespace,
@@ -44,13 +43,15 @@ public static class DeclarationExtensions
                     MethodKind.Destructor => DeclarationKind.Finalizer,
                     _ => DeclarationKind.Method
                 },
-            IPropertySymbol => DeclarationKind.Property,
+            IPropertySymbol { Parameters.Length: 0 } => DeclarationKind.Property,
+            IPropertySymbol { Parameters.Length: > 0 } => DeclarationKind.Indexer,
             IFieldSymbol => DeclarationKind.Field,
             ITypeParameterSymbol => DeclarationKind.TypeParameter,
-            IAssemblySymbol => DeclarationKind.Compilation,
+            IAssemblySymbol assemblySymbol when assemblySymbol.Equals( compilationContext.Compilation.Assembly ) => DeclarationKind.Compilation,
+            IAssemblySymbol => DeclarationKind.AssemblyReference,
             IParameterSymbol => DeclarationKind.Parameter,
             IEventSymbol => DeclarationKind.Event,
-            ITypeSymbol => DeclarationKind.None,
+            ITypeSymbol => DeclarationKind.Type,
             IModuleSymbol => DeclarationKind.Compilation,
             _ => throw new ArgumentException( $"Unexpected symbol: {symbol.GetType().Name}.", nameof(symbol) )
         };
@@ -62,7 +63,7 @@ public static class DeclarationExtensions
         => declaration.SelectManyRecursive(
             child => child switch
             {
-                ICompilation compilation => new[] { compilation.GlobalNamespace },
+                ICompilation compilation => [compilation.GlobalNamespace],
                 INamespace ns => EnumerableExtensions.Concat<IDeclaration>( ns.Namespaces, ns.Types ),
                 INamedType namedType => EnumerableExtensions.Concat<IDeclaration>(
                         namedType.Types,
@@ -84,25 +85,10 @@ public static class DeclarationExtensions
                 _ => Enumerable.Empty<IDeclaration>()
             } );
 
-    internal static Ref<ICompilationElement> ToValueTypedRef( this ISymbol symbol, CompilationContext compilationContext )
-        => Ref.FromSymbol( symbol, compilationContext );
-
-    internal static Ref<TCompilationElement> ToValueTypedRef<TCompilationElement>( this ISymbol symbol, CompilationContext compilationContext )
-        where TCompilationElement : class, ICompilationElement
-        => Ref.FromSymbol( symbol, compilationContext ).As<TCompilationElement>();
-
-    internal static Ref<TCompilationElement> ToValueTypedRef<TCompilationElement>( this TCompilationElement compilationElement )
-        where TCompilationElement : class, ICompilationElement
-        => ((ICompilationElementImpl) compilationElement).ToValueTypedRef().As<TCompilationElement>();
-
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
         => declaration.GetSymbol() is { } symbol
             ? compilationContext.SymbolTranslator.Translate( symbol, declaration.GetCompilationModel().RoslynCompilation )
             : null;
-
-    internal static MemberRef<T> ToMemberRef<T>( this T member )
-        where T : class, INamedDeclaration
-        => new( member.ToValueTypedRef<IDeclaration>() );
 
     internal static Location? GetDiagnosticLocation( this IDeclaration declaration )
         => declaration switch
@@ -355,8 +341,7 @@ public static class DeclarationExtensions
         {
             { IsAbstract: true } => false,
             { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
-                syntaxReferences.All(
-                    sr => sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
+                syntaxReferences.All( sr => sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
             _ => symbol.IsCompilerGenerated()
         };
 
@@ -577,12 +562,11 @@ public static class DeclarationExtensions
 
     internal static T Translate<T>(
         this T declaration,
-        ICompilation newCompilation,
-        ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+        ICompilation newCompilation )
         where T : class, IDeclaration
         => declaration.Compilation == newCompilation
             ? declaration
-            : ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
+            : ((CompilationModel) newCompilation).Factory.Translate( declaration ).AssertNotNull();
 
     /// <summary>
     /// Version of <see cref="IDeclaration.ContainingDeclaration"/> that behaves like <see cref="ISymbol.ContainingSymbol"/>,

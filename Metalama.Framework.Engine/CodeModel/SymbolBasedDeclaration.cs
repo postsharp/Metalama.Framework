@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -13,9 +14,11 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public abstract class SymbolBasedDeclaration : BaseDeclaration
+    public abstract class SymbolBasedDeclaration : BaseDeclaration, ISymbolBasedCompilationElement
     {
         public abstract ISymbol Symbol { get; }
+
+        internal sealed override GenericContext GenericContext => GenericContext.Get( this.Symbol, this.GetCompilationContext() );
 
         [Memo]
         public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
@@ -105,5 +108,25 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public override ImmutableArray<SourceReference> Sources
             => this.Symbol.DeclaringSyntaxReferences.SelectAsImmutableArray( r => new SourceReference( r.GetSyntax(), SourceReferenceImpl.Instance ) );
+
+        internal override ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null )
+        {
+            using ( StackOverflowHelper.Detect() )
+            {
+                var translatedSymbol = newCompilation.CompilationContext.SymbolTranslator.Translate(
+                    this.Symbol,
+                    symbolCompilationContext: this.Compilation.CompilationContext );
+
+                if ( translatedSymbol == null )
+                {
+                    return null;
+                }
+
+                return newCompilation.Factory.GetCompilationElement( translatedSymbol, genericContext: genericContext );
+            }
+        }
     }
 }

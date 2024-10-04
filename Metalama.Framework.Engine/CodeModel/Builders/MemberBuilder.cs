@@ -29,9 +29,6 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
     protected MemberBuilder( INamedType declaringType, string name, Advice advice ) : base( advice, declaringType, name ) { }
 
     public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
-
-    public override string ToString() => this.DeclaringType + "." + this.Name;
-
     public abstract bool IsExplicitInterfaceImplementation { get; }
 
     public bool IsVirtual
@@ -73,11 +70,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
     public bool HasImplementation => true;
 
-    public bool IsDesignTime => !this.IsOverride && !this.IsNew;
-
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
-
+    public virtual bool IsDesignTimeObservable => !this.IsOverride && !this.IsNew;
+    
     public abstract IMember? OverriddenMember { get; }
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;

@@ -45,8 +45,8 @@ public sealed class DiagnosticDefinitionDiscoveryService : IGlobalService
         {
             var executionContext = new UserCodeExecutionContext(
                 this._serviceProvider,
-                NullDiagnosticAdder.Instance,
-                UserCodeDescription.Create( "getting the DiagnosticDefinition defined by field {0}", f ) );
+                UserCodeDescription.Create( "getting the DiagnosticDefinition defined by field {0}", f ),
+                diagnostics: NullDiagnosticAdder.Instance );
 
             if ( !this._userCodeInvoker.TryInvoke( () => f.GetValue( null ), executionContext, out var value ) )
             {
@@ -60,8 +60,8 @@ public sealed class DiagnosticDefinitionDiscoveryService : IGlobalService
         {
             var executionContext = new UserCodeExecutionContext(
                 this._serviceProvider,
-                NullDiagnosticAdder.Instance,
-                UserCodeDescription.Create( "getting the DiagnosticDefinition defined by property {0}", p ) );
+                UserCodeDescription.Create( "getting the DiagnosticDefinition defined by property {0}", p ),
+                diagnostics: NullDiagnosticAdder.Instance );
 
             if ( !this._userCodeInvoker.TryInvoke( () => p.GetValue( null ), executionContext, out var value ) )
             {

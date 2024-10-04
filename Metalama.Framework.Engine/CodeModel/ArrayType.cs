@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel
             Invariant.Implies( typeSymbol.Rank == 1, typeSymbol.IsSZArray );
         }
 
-        internal ITypeImpl WithElementType( ITypeImpl elementType )
+        internal ITypeImpl WithElementType( IType elementType )
         {
             if ( elementType == this.ElementType )
             {
@@ -29,12 +30,12 @@ namespace Metalama.Framework.Engine.CodeModel
             else
             {
                 var symbol =
-                    this.GetCompilationModel()
+                    this.Compilation
                         .RoslynCompilation.CreateArrayTypeSymbol(
                             elementType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ),
                             this.Rank );
 
-                return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
+                return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
             }
         }
 
@@ -45,6 +46,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Rank => this.Symbol.Rank;
 
-        public override ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
+        public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

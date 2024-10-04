@@ -3,19 +3,18 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class ParameterList : DeclarationCollection<IParameter, Ref<IParameter>>, IParameterList
+    internal sealed class ParameterList : DeclarationCollection<IParameter>, IParameterList
     {
-        public ParameterList( IMethodBase declaringMethod, IReadOnlyList<Ref<IParameter>> sourceItems )
+        public ParameterList( IMethodBase declaringMethod, IReadOnlyList<IRef<IParameter>> sourceItems )
             : base( declaringMethod, sourceItems ) { }
 
-        public ParameterList( IIndexer declaringIndexer, IReadOnlyList<Ref<IParameter>> sourceItems )
+        public ParameterList( IIndexer declaringIndexer, IReadOnlyList<IRef<IParameter>> sourceItems )
             : base( declaringIndexer, sourceItems ) { }
 
         private ParameterList() { }
@@ -26,16 +25,13 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         {
             get
             {
-                var parameter = this.SingleOrDefault( p => p.Name == name );
+                var parameter = this.Source.SingleOrDefault( p => p.Name == name )
+                                ??
+                                throw new ArgumentOutOfRangeException(
+                                    nameof(name),
+                                    $"The method '{this.ContainingDeclaration}' does not contain a parameter named '{name}'" );
 
-                if ( parameter == null )
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(name),
-                        $"The method '{this.ContainingDeclaration}' does not contain a parameter named '{name}'" );
-                }
-
-                return parameter;
+                return this.GetItem( parameter );
             }
         }
 

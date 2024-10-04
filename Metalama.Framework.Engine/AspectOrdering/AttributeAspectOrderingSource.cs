@@ -17,10 +17,10 @@ internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
     private readonly Compilation _compilation;
     private readonly IAttributeDeserializer _attributeDeserializer;
 
-    public AttributeAspectOrderingSource( in ProjectServiceProvider serviceProvider, Compilation compilation )
+    public AttributeAspectOrderingSource( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
-        this._compilation = compilation;
-        this._attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
+        this._compilation = compilationContext.Compilation;
+        this._attributeDeserializer = serviceProvider.GetRequiredService<SystemAttributeDeserializer.Provider>().Get( compilationContext );
     }
 
     public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )

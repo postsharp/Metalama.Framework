@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -12,17 +13,19 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public sealed class SerializableTypeIdResolverForSymbol : SerializableTypeIdResolver<ITypeSymbol, INamespaceOrTypeSymbol>
 {
-    private readonly Compilation _compilation;
+    private readonly CompilationContext _compilationContext;
 
-    internal SerializableTypeIdResolverForSymbol( Compilation compilation )
+    private Compilation Compilation => this._compilationContext.Compilation;
+
+    internal SerializableTypeIdResolverForSymbol( CompilationContext compilation )
     {
 #if DEBUG
-        if ( compilation.AssemblyName == "empty" )
+        if ( compilation.Compilation.AssemblyName == "empty" )
         {
             throw new AssertionFailedException( "Expected a non-empty assembly." );
         }
 #endif
-        this._compilation = compilation;
+        this._compilationContext = compilation;
     }
 
     // ReSharper disable once MemberCanBeInternal
@@ -33,15 +36,43 @@ public sealed class SerializableTypeIdResolverForSymbol : SerializableTypeIdReso
         return this.ResolveId( typeId, genericArgumentSymbols! );
     }
 
-    protected override ITypeSymbol CreateArrayType( ITypeSymbol elementType, int rank )
-        => this._compilation.CreateArrayTypeSymbol( elementType, rank );
+    protected override IReadOnlyDictionary<string, ITypeSymbol?> GetGenericContext( SerializableDeclarationId declarationId )
+    {
+        var declaration = declarationId.ResolveToSymbol( this._compilationContext );
 
-    protected override ITypeSymbol CreatePointerType( ITypeSymbol pointedAtType )
-        => this._compilation.CreatePointerTypeSymbol( pointedAtType );
+        var dictionary = new Dictionary<string, ITypeSymbol?>();
+
+        for ( var d = declaration; d != null; d = d.ContainingSymbol )
+        {
+            var typeParameters
+                = d switch
+                {
+                    IMethodSymbol methodSymbol => methodSymbol.TypeArguments,
+                    INamedTypeSymbol namedTypeSymbol => namedTypeSymbol.TypeArguments,
+                    _ => default
+                };
+
+            if ( typeParameters.IsDefault )
+            {
+                break;
+            }
+
+            foreach ( var typeParameter in typeParameters )
+            {
+                dictionary[typeParameter.Name] = typeParameter;
+            }
+        }
+
+        return dictionary;
+    }
+
+    protected override ITypeSymbol CreateArrayType( ITypeSymbol elementType, int rank ) => this.Compilation.CreateArrayTypeSymbol( elementType, rank );
+
+    protected override ITypeSymbol CreatePointerType( ITypeSymbol pointedAtType ) => this.Compilation.CreatePointerTypeSymbol( pointedAtType );
 
     protected override ITypeSymbol CreateNullableType( ITypeSymbol elementType )
         => elementType.IsValueType
-            ? this._compilation.GetSpecialType( SpecialType.System_Nullable_T ).Construct( elementType )
+            ? this.Compilation.GetSpecialType( SpecialType.System_Nullable_T ).Construct( elementType )
             : elementType.WithNullableAnnotation( NullableAnnotation.Annotated );
 
     protected override ITypeSymbol CreateNonNullableReferenceType( ITypeSymbol referenceType )
@@ -50,14 +81,13 @@ public sealed class SerializableTypeIdResolverForSymbol : SerializableTypeIdReso
     protected override ITypeSymbol ConstructGenericType( ITypeSymbol genericType, ITypeSymbol[] typeArguments )
         => genericType.AssertCast<INamedTypeSymbol>().Construct( typeArguments );
 
-    protected override ITypeSymbol CreateTupleType( ImmutableArray<ITypeSymbol> elementTypes )
-        => this._compilation.CreateTupleTypeSymbol( elementTypes );
+    protected override ITypeSymbol CreateTupleType( ImmutableArray<ITypeSymbol> elementTypes ) => this.Compilation.CreateTupleTypeSymbol( elementTypes );
 
-    protected override ITypeSymbol DynamicType => this._compilation.DynamicType;
+    protected override ITypeSymbol DynamicType => this.Compilation.DynamicType;
 
     protected override INamespaceOrTypeSymbol? LookupName( string name, int arity, INamespaceOrTypeSymbol? ns )
     {
-        ns ??= this._compilation.GlobalNamespace;
+        ns ??= this.Compilation.GlobalNamespace;
 
         var candidates = ns.GetMembers( name );
 
@@ -74,7 +104,7 @@ public sealed class SerializableTypeIdResolverForSymbol : SerializableTypeIdReso
         return null;
     }
 
-    protected override ITypeSymbol GetSpecialType( SpecialType specialType ) => this._compilation.GetSpecialType( specialType );
+    protected override ITypeSymbol GetSpecialType( SpecialType specialType ) => this.Compilation.GetSpecialType( specialType );
 
     protected override bool HasTypeParameterOfName( ITypeSymbol type, string name )
         => type.AssertCast<INamedTypeSymbol>().TypeParameters.Any( t => t.Name == name );

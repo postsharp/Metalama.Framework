@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Reflection;
@@ -20,7 +21,7 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
 
     protected PropertyOrIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( compilation )
     {
-        this.PropertySymbol = symbol;
+        this.PropertySymbol = symbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
     }
 
     public override ISymbol Symbol => this.PropertySymbol;

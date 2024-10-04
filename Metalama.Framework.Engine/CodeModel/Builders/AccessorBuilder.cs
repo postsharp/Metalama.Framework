@@ -6,7 +6,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -107,9 +106,9 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     IMethod IMethod.Definition => this;
 
-    IRef<IMember> IMember.ToRef() => this.BoxedRef;
+    IRef<IMember> IMember.ToRef() => this.Ref;
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.BoxedRef;
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
 
     IMember IMember.Definition => this;
 
@@ -286,23 +285,20 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
-    IRef<IMethodBase> IMethodBase.ToRef() => this.BoxedRef;
+    IRef<IMethodBase> IMethodBase.ToRef() => this.Ref;
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
-
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => this.ContainingMember.ToDisplayString( this.MethodKind, format, context );
-
+    
     public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
     [Memo]
-    public BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+    public IRef<IMethod> Ref => this.RefFactory.FromBuilder<IMethod>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+    public new IRef<IMethod> ToRef() => this.Ref;
 }
