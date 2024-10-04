@@ -6,7 +6,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -98,7 +98,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public INamespace ContainingNamespace { get; }
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.BoxedRef;
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -228,9 +228,12 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
+    public IntroduceNamedTypeTransformation ToTransformation()
+    {
+        this.Freeze();
 
-    public IntroduceNamedTypeTransformation ToTransformation() => new( this.ParentAdvice, this );
+        return new IntroduceNamedTypeTransformation( this.ParentAdvice, this );
+    }
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
         => throw new NotSupportedException( "This method is not supported on the builder." );
@@ -238,7 +241,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
+    IType ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
@@ -253,13 +256,13 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
         };
 
     [Memo]
-    public BoxedRef<INamedType> BoxedRef => new( this.ToValueTypedRef() );
+    public IRef<INamedType> Ref => this.RefFactory.FromBuilder<INamedType>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<INamedType> INamedType.ToRef() => this.BoxedRef;
+    public new IRef<INamedType> ToRef() => this.Ref;
 
-    IRef<IType> IType.ToRef() => this.BoxedRef;
+    IRef<IType> IType.ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

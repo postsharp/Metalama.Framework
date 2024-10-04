@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.DeclarationBuilders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,6 +82,9 @@ namespace Metalama.Framework.Code
         public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<Type> typeArguments )
             => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
 
+        public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<IType> typeArguments )
+            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
+
         /// <summary>
         /// Constructs a generic instance of an <see cref="IMethod"/>, with type arguments given as reflection <see cref="Type"/>.
         /// </summary>
@@ -104,6 +108,9 @@ namespace Metalama.Framework.Code
 
         public static IMethod WithTypeArguments( this IMethod method, Type[] typeTypeArguments, Type[] methodTypeArguments )
             => method.ForTypeInstance( method.DeclaringType.WithTypeArguments( typeTypeArguments ) ).WithTypeArguments( methodTypeArguments );
+
+        public static IMemberOrNamedType ForTypeInstance( this IMemberOrNamedType declaration, INamedType typeInstance )
+            => ForTypeInstanceImpl( declaration, typeInstance );
 
         /// <summary>
         /// Returns a representation of the current nested <see cref="INamedType"/>, but for a different generic instance
@@ -155,7 +162,7 @@ namespace Metalama.Framework.Code
         {
             if ( declaration.DeclaringType == null )
             {
-                throw new InvalidOperationException( $"The type '{declaration.ToDisplayString()}' is not a nested type." );
+                throw new InvalidOperationException( $"The type '{declaration.ToDisplayString()}' is not a type member or nested type." );
             }
 
             var thisOriginalDeclaration = declaration.Definition;
@@ -167,13 +174,20 @@ namespace Metalama.Framework.Code
                     $"The type must be identical to or constructed from '{thisOriginalDeclaration.DeclaringType!.ToDisplayString()}'." );
             }
 
+            if ( declaration is IDeclarationBuilder )
+            {
+                throw new ArgumentOutOfRangeException( nameof(declaration), "The declaration must not be an IDeclarationBuilder." );
+            }
+
             if ( !declaration.DeclaringType.IsSelfOrDeclaringTypeGeneric() )
             {
                 return declaration;
             }
-
+            
             IEnumerable<IMemberOrNamedType> candidates;
-
+            
+            // TODO PERF: Implement the switch based on DeclarationKind. 
+            
             switch ( declaration )
             {
                 case INamedType namedType:

@@ -128,13 +128,16 @@ namespace Metalama.Framework.DesignTime
                     context.ReportedDiagnostics.Where( d => d.Location.SourceTree != null )
                         .GroupBy( d => d.Location.SourceTree! );
 
+                var compilationContext = compilation.GetCompilationContext();
+
                 foreach ( var diagnosticGroup in diagnosticsBySyntaxTree )
                 {
                     var syntaxTree = diagnosticGroup.Key;
 
                     var suppressions = pipelineResult.Value.GetSuppressionsOnSyntaxTree( syntaxTree.FilePath );
 
-                    var designTimeSuppressions = suppressions.Where( s => supportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) )
+                    var designTimeSuppressions = suppressions
+                        .Where( s => supportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) )
                         .ToReadOnlyList();
 
                     if ( designTimeSuppressions.Count == 0 )
@@ -166,13 +169,15 @@ namespace Metalama.Framework.DesignTime
                             }
 
                             foreach ( var suppression in suppressionsBySymbol[symbolId]
-                                         .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                                         .Where(
+                                             s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                             {
                                 if ( suppression.Filter is { } filter )
                                 {
                                     var executionContext = new UserCodeExecutionContext(
                                         pipeline.ServiceProvider,
-                                        UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ) );
+                                        UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ),
+                                        compilationContext );
 
                                     var filterPassed = this._userCodeInvoker.Invoke(
                                         () => filter( SuppressionFactories.CreateDiagnostic( diagnostic ) ),

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Validation;
@@ -23,7 +22,7 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
     public IDiagnosticAdder Diagnostics { get; }
 
     private volatile ConcurrentQueue<AspectInstance>? _aspectInstances;
-    private volatile ConcurrentQueue<Ref<IDeclaration>>? _exclusions;
+    private volatile ConcurrentQueue<IRef<IDeclaration>>? _exclusions;
     private volatile ConcurrentQueue<AspectRequirement>? _requirements;
     private volatile ConcurrentQueue<ValidatorInstance>? _validators;
     private volatile ConcurrentQueue<HierarchicalOptionsInstance>? _hierarchicalOptions;
@@ -35,8 +34,8 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
 
     public IReadOnlyCollection<AspectInstance> AspectInstances => this._aspectInstances ?? (IReadOnlyCollection<AspectInstance>) Array.Empty<AspectInstance>();
 
-    public IReadOnlyCollection<Ref<IDeclaration>> AspectExclusions
-        => this._exclusions ?? (IReadOnlyCollection<Ref<IDeclaration>>) Array.Empty<Ref<IDeclaration>>();
+    public IReadOnlyCollection<IRef<IDeclaration>> AspectExclusions
+        => this._exclusions ?? (IReadOnlyCollection<IRef<IDeclaration>>) Array.Empty<IRef<IDeclaration>>();
 
     public IReadOnlyCollection<AspectRequirement> AspectRequirements
         => this._requirements ?? (IReadOnlyCollection<AspectRequirement>) Array.Empty<AspectRequirement>();
@@ -59,13 +58,13 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
         aspectInstances.Enqueue( aspectInstance );
     }
 
-    public void AddExclusion( in Ref<IDeclaration> exclusion )
+    public void AddExclusion( IRef<IDeclaration> exclusion )
     {
         var exclusions = this._exclusions;
 
         if ( exclusions == null )
         {
-            Interlocked.CompareExchange( ref this._exclusions, new ConcurrentQueue<Ref<IDeclaration>>(), null );
+            Interlocked.CompareExchange( ref this._exclusions, new ConcurrentQueue<IRef<IDeclaration>>(), null );
             exclusions = this._exclusions;
         }
 

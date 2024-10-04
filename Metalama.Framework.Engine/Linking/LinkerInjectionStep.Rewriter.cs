@@ -49,6 +49,8 @@ internal sealed partial class LinkerInjectionStep
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
         }
 
+        private RefFactory RefFactory => this._compilation.CompilationContext.RefFactory;
+
         private CompilationContext CompilationContext => this._parent._compilationContext;
 
         private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
@@ -92,7 +94,7 @@ internal sealed partial class LinkerInjectionStep
             SyntaxGenerationContext? syntaxGenerationContext = null;
 
             this.RewriteAttributeLists(
-                Ref.FromSymbol<IDeclaration>( symbol, this._compilation.CompilationContext ),
+                this.RefFactory.FromDeclarationSymbol( symbol ),
                 SyntaxKind.None,
                 originalDeclaringNode,
                 attributeLists,
@@ -105,7 +107,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 case IMethodSymbol method:
                     this.RewriteAttributeLists(
-                        Ref.ReturnParameter( method, this._compilation.CompilationContext ),
+                        this.RefFactory.ReturnParameter( method ),
                         SyntaxKind.ReturnKeyword,
                         originalDeclaringNode,
                         attributeLists,
@@ -128,7 +130,7 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private void RewriteAttributeLists(
-            Ref<IDeclaration> target,
+            IRef<IDeclaration> target,
             SyntaxKind targetKind,
             SyntaxNode originalDeclaringNode,
             SyntaxList<AttributeListSyntax> inputAttributeLists,
@@ -169,7 +171,7 @@ internal sealed partial class LinkerInjectionStep
 
                 foreach ( var attribute in list.Attributes )
                 {
-                    if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
+                    if ( !finalModelAttributes.Any( a => ((AttributeRef) a).IsSyntax( attribute ) ) )
                     {
                         modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives )!;
                     }
@@ -218,17 +220,19 @@ internal sealed partial class LinkerInjectionStep
             // Add new attributes.
             foreach ( var attribute in finalModelAttributes )
             {
-                if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
+#pragma warning disable CS0618 // Type or member is obsolete
+                if ( attribute is BuilderAttributeRef builderAttributeRef && isPrimaryNode( builderAttributeRef.AttributeBuilder, originalDeclaringNode ) )
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
-                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder )
+                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( builderAttributeRef.AttributeBuilder )
                         .AssertNotNull();
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
                         .WithOptionalTrailingLineFeed( syntaxGenerationContext )
                         .WithAdditionalAnnotations(
-                            attributeBuilder.ParentAdvice?.AspectInstance.AspectClass.GeneratedCodeAnnotation
+                            builderAttributeRef.AttributeBuilder.ParentAdvice?.AspectInstance.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     if ( targetKind != SyntaxKind.None )
@@ -1369,7 +1373,7 @@ internal sealed partial class LinkerInjectionStep
             List<SyntaxTrivia> outputTrivias = new();
 
             this.RewriteAttributeLists(
-                this._compilation.ToValueTypedRef<IDeclaration>(),
+                this._compilation.ToRef(),
                 SyntaxKind.AssemblyKeyword,
                 node,
                 node.AttributeLists,

@@ -104,7 +104,7 @@ public abstract class CodeFixRunner
         else if ( !codeFix.IsLicensed && !isComputingPreview )
         {
             this._licenseVerifier?.DetectToastNotifications();
-            
+
             return CodeActionResult.Error(
                 LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic( null, (codeFixTitle, codeFix.Creator) ) );
         }
@@ -123,9 +123,9 @@ public abstract class CodeFixRunner
 
             var userCodeExecutionContext = new UserCodeExecutionContext(
                 codeActionContext.ServiceProvider,
-                diagnostics,
                 UserCodeDescription.Create( "executing {0}", codeFix ),
-                compilationModel: pipelineResult.Value.Compilation );
+                pipelineResult.Value.Compilation,
+                diagnostics: diagnostics );
 
             await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
 

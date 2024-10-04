@@ -62,7 +62,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             return this.CreateFailedResult(
                 AdviceDiagnosticDescriptors.CannotIntroduceParameterAlreadyExists.CreateRoslynDiagnostic(
                     constructor.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this._parameterName, constructor, existingParameter),
+                    (this.AspectInstance.AspectClass.ShortName, this._parameterName, constructor, existingParameter.Name),
                     this ) );
         }
 
@@ -81,7 +81,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         {
             var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType )
             {
-                ReplacedImplicit = constructor.ToValueTypedRef(), Accessibility = Accessibility.Public
+                ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
 
             initializedConstructor = constructorBuilder;
@@ -97,16 +97,18 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             RefKind.None,
             this ) { DefaultValue = this._defaultValue };
 
-        var parameter = parameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
+        var parameter = parameterBuilder.ForCompilation<IParameter>( compilation );
 
         this._buildAction?.Invoke( parameterBuilder );
+
+        parameterBuilder.Freeze();
 
         addTransformation( new IntroduceParameterTransformation( this, parameterBuilder ) );
 
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
 
-        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToValueTypedRef<IParameter>() );
+        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToRef() );
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
@@ -156,7 +158,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 {
                     var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType )
                     {
-                        ReplacedImplicit = chainedConstructor.ToValueTypedRef(), Accessibility = Accessibility.Public
+                        ReplacedImplicitConstructor = chainedConstructor, Accessibility = Accessibility.Public
                     };
 
                     addTransformation( derivedConstructorBuilder.ToTransformation() );
@@ -192,10 +194,11 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                             this ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
+                        recursiveParameterBuilder.Freeze();
 
                         addTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder ) );
 
-                        var recursiveParameter = recursiveParameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
+                        var recursiveParameter = recursiveParameterBuilder.ForCompilation<IParameter>( compilation );
 
                         // Process all constructors calling this constructor.
                         PullConstructorParameterRecursive( chainedConstructor, recursiveParameter );

@@ -53,7 +53,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public IMethodBase MethodBase
             => (IMethodBase?) this._method ?? (IMethodBase?) this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IField Field => this._fieldOrPropertyOrIndexer as IField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+        public IField Field
+            => this._fieldOrPropertyOrIndexer switch
+            {
+                IField field => field,
+                IProperty { OriginalField: { } field } => field,
+                _ => throw this.CreateInvalidOperationException( nameof(this.Field) )
+            };
 
         public IFieldOrProperty FieldOrProperty
             => this._fieldOrPropertyOrIndexer as IFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
@@ -67,7 +73,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IProperty Property => this._fieldOrPropertyOrIndexer as IProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IProperty Property
+            => this._fieldOrPropertyOrIndexer switch
+            {
+                IProperty property => property,
+                IField { OverridingProperty: { } property } => property,
+                _ => throw this.CreateInvalidOperationException( nameof(this.Property) )
+            };
 
         public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 

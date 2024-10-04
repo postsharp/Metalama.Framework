@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -37,7 +38,7 @@ public sealed partial class InheritableAspectInstance
 
         public int GetHashCode( InheritableAspectInstance obj )
         {
-            return obj.TargetDeclaration.GetHashCode();
+            return obj.TargetDeclaration.GetHashCode( RefComparison.Default );
         }
     }
 }

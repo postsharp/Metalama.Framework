@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -32,14 +34,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         protected MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
-            this.MethodSymbol = symbol;
+            this.MethodSymbol = symbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
         }
 
         [Memo]
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.GetCompilationModel().GetParameterCollection( this.ToValueTypedRef<IHasParameters>() ) );
+                this.Compilation.GetParameterCollection( this.ToRef().GetDefinition() ) );
 
         public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch
@@ -67,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract System.Reflection.MethodBase ToMethodBase();
 
-        IRef<IMethodBase> IMethodBase.ToRef() => this.GetMethodBaseRef();
+        public IRef<IMethodBase> ToRef() => this.GetMethodBaseRef();
 
         protected abstract IRef<IMethodBase> GetMethodBaseRef();
 

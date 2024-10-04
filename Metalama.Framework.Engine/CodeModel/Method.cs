@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -45,7 +44,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
+            this.MethodSymbol.TypeParameters.Select( x => this.RefFactory.FromSymbol<ITypeParameter>( x ) )
                 .ToReadOnlyList() );
 
     [Memo]
@@ -93,7 +92,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
 
-    protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    protected override IRef<IMember> ToMemberRef() => this.Ref;
 
     [Memo]
     public override bool IsAsync
@@ -161,13 +160,13 @@ internal sealed class Method : MethodBase, IMethodImpl
     }
 
     [Memo]
-    private BoxedRef<IMethod> BoxedRef => new BoxedRef<IMethod>( this.ToValueTypedRef() );
+    private IRef<IMethod> Ref => this.RefFactory.FromSymbolBasedDeclaration<IMethod>( this );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IMethod> IMethod.ToRef() => this.BoxedRef;
+    public new IRef<IMethod> ToRef() => this.Ref;
 
-    protected override IRef<IMethodBase> GetMethodBaseRef() => this.BoxedRef;
+    protected override IRef<IMethodBase> GetMethodBaseRef() => this.Ref;
 
-    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

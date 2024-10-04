@@ -160,7 +160,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
             {
                 context.CancellationToken.ThrowIfCancellationRequested();
 
-                var validationTarget = validator.ValidatedDeclaration.GetTargetOrNull( context.Compilation );
+                var validationTarget = validator.ValidatedDeclaration?.GetTargetOrNull( context.Compilation );
 
                 if ( validationTarget?.GetSymbol() == null )
                 {

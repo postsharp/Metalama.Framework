@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Validation;
 using System;
 using System.Threading.Tasks;
@@ -12,7 +11,7 @@ internal sealed class ChildAspectReceiver<TDeclaration, TTag> : AspectReceiver<T
     where TDeclaration : class, IDeclaration
 {
     internal ChildAspectReceiver(
-        ISdkRef<IDeclaration> containingDeclaration,
+        IRef<IDeclaration> containingDeclaration,
         IAspectReceiverParent parent,
         CompilationModelVersion compilationModelVersion,
         Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )

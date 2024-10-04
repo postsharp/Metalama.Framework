@@ -185,8 +185,9 @@ public abstract class AspectPipeline : IDisposable
 
                     var executionContext = new UserCodeExecutionContext(
                         projectServiceProviderWithoutPlugins,
-                        diagnosticAdder,
-                        UserCodeDescription.Create( "instantiating the plug-in {0}", type ) );
+                        UserCodeDescription.Create( "instantiating the plug-in {0}", type ),
+                        compilation.GetCompilationContext(),
+                        diagnostics: diagnosticAdder );
 
                     if ( !invoker.TryInvoke( () => Activator.CreateInstance( type ), executionContext, out var instance ) )
                     {
@@ -249,7 +250,7 @@ public abstract class AspectPipeline : IDisposable
         // Get aspect parts and sort them.
         var aspectOrderSources = new IAspectOrderingSource[]
         {
-            new AttributeAspectOrderingSource( projectServiceProviderWithProject, compilation ),
+            new AttributeAspectOrderingSource( projectServiceProviderWithProject, compilationModel.CompilationContext ),
             new AspectLayerOrderingSource( aspectClasses ),
             new FrameworkAspectOrderingSource( aspectClasses )
         };

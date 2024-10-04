@@ -16,7 +16,7 @@ public sealed class RefTests : UnitTestClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( "/* nothing */" );
 
-        var compilationRef = compilation.ToValueTypedRef();
+        var compilationRef = compilation.ToRef();
         var resolved = compilationRef.GetTarget( compilation );
 
         Assert.Same( compilation, resolved );

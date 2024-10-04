@@ -350,7 +350,8 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         {
             SyntaxTreePipelineResult.Builder? builder;
 
-            if ( diagnostic.Location.SourceTree?.FilePath is { } filePath )
+            // GetLineSpan() works even for "external" locations (i.e. not tree-based), which we use for exceptions.
+            if ( diagnostic.Location.GetLineSpan().Path is { } filePath )
             {
                 if ( !resultBuilders.TryGetValue( filePath, out builder ) )
                 {
@@ -481,7 +482,8 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     validator.Driver,
                     validator.Implementation,
                     validator.DiagnosticSourceDescription,
-                    validator.Granularity );
+                    validator.Granularity,
+                    compilation.CompilationContext );
 
                 if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                 {
@@ -597,7 +599,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 continue;
             }
 
-            var syntaxTree = annotationsOnDeclaration.Key.GetPrimarySyntaxTree( compilation.CompilationContext );
+            var syntaxTree = annotationsOnDeclaration.Key.GetPrimarySyntaxTree( compilationContext );
 
             SyntaxTreePipelineResult.Builder builder;
 

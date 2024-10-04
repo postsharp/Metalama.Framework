@@ -31,12 +31,9 @@ internal sealed class ApplyAspectCodeAction<TTarget> : ICodeAction
     {
         var compilation = context.Compilation;
 
-        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation.Compilation );
-
-        if ( targetSymbol == null )
-        {
-            throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
-        }
+        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation.Compilation )
+                           ??
+                           throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
 
         var aspectClass = (AspectClass) context.PipelineConfiguration.BoundAspectClasses.Single<IBoundAspectClass>( c => c.Type == this.Aspect.GetType() );
 

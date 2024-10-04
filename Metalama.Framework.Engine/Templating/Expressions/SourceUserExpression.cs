@@ -54,7 +54,7 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
 
             case MemberAccessExpressionSyntax:
             case IdentifierNameSyntax:
-                var semanticModel = this.Type.GetCompilationModel().CompilationContext.SemanticModelProvider.GetSemanticModel( this.Expression.SyntaxTree );
+                var semanticModel = this.Type.GetCompilationContext().SemanticModelProvider.GetSemanticModel( this.Expression.SyntaxTree );
                 var member = semanticModel.GetSymbolInfo( expression ).Symbol;
 
                 if ( member is IFieldSymbol field && field.ContainingType.TypeKind == TypeKind.Enum )

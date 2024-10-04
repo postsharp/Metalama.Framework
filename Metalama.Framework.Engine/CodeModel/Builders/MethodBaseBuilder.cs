@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using System;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -52,18 +51,11 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
 
     public abstract System.Reflection.MethodBase ToMethodBase();
 
-    IRef<IMethodBase> IMethodBase.ToRef() => this.ToMethodBaseRef();
+    public new IRef<IMethodBase> ToRef() => this.ToMethodBaseRef();
 
     protected MethodBaseBuilder(
         Advice advice,
         INamedType targetType,
         string name )
         : base( targetType, name, advice ) { }
-
-    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-    {
-        var parameterTypes = this.Parameters.AsEnumerable<IParameter>().Select( p => p.Type );
-
-        return DisplayStringFormatter.Format( format, context, $"{this.DeclaringType}.{this.Name}({parameterTypes})" );
-    }
 }

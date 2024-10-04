@@ -22,12 +22,17 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
 {
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
+    private readonly CompilationContext _compilationContext;
     private readonly UserCodeInvoker _userCodeInvoker;
 
-    protected AttributeDeserializer( in ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
+    protected AttributeDeserializer(
+        in ProjectServiceProvider serviceProvider,
+        CompileTimeTypeResolver compileTimeTypeResolver,
+        CompilationContext compilationContext )
     {
         this._serviceProvider = serviceProvider;
         this._compileTimeTypeResolver = compileTimeTypeResolver;
+        this._compilationContext = compilationContext;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
@@ -165,8 +170,9 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
 
         var executionContext = new UserCodeExecutionContext(
             this._serviceProvider,
-            diagnosticAdder,
-            UserCodeDescription.Create( "calling the {0} constructor while instantiating a custom attribute", constructor ) );
+            UserCodeDescription.Create( "calling the {0} constructor while instantiating a custom attribute", constructor ),
+            this._compilationContext,
+            diagnostics: diagnosticAdder );
 
         if ( !this._userCodeInvoker.TryInvoke( () => (Attribute) constructor.Invoke( arguments ), executionContext, out var localAttributeInstance ) )
         {

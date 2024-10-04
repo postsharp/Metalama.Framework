@@ -134,7 +134,9 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
                 ((AspectClass) aspectClass).CreateAspectInstance(
                     targetDeclaration,
                     (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),
-                    new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToValueTypedRef() ) ) ) );
+                    new AspectPredecessor(
+                        AspectPredecessorKind.Interactive,
+                        new LiveTemplatePredecessor( targetDeclaration.ToRef() ) ) ) );
 
             return Task.CompletedTask;
         }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities;
@@ -10,11 +11,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
+internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 {
     public PropertyBuilder PropertyBuilder { get; }
 
-    public BuiltProperty( CompilationModel compilation, PropertyBuilder builder ) : base( compilation )
+    public BuiltProperty( PropertyBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.PropertyBuilder = builder;
     }
@@ -32,18 +33,26 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 
     [Memo]
-    public IProperty? OverriddenProperty => this.Compilation.Factory.GetDeclaration( this.PropertyBuilder.OverriddenProperty );
+    public IProperty? OverriddenProperty => this.MapDeclaration( this.PropertyBuilder.OverriddenProperty );
 
-    IProperty IProperty.Definition => this;
+    [Memo]
+    public IProperty Definition => this.Compilation.Factory.GetProperty( this.PropertyBuilder ).AssertNotNull();
 
-    IRef<IProperty> IProperty.ToRef() => this.PropertyBuilder.BoxedRef;
+    protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.PropertyBuilder.BoxedRef;
+    [Memo]
+    private IRef<IProperty> Ref => this.RefFactory.FromBuilt<IProperty>( this );
+
+    IRef<IProperty> IProperty.ToRef() => this.Ref;
+
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
+
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
-        => this.PropertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+        => this.PropertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.Translate( i ) );
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
@@ -61,4 +70,26 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
         => this.PropertyBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+    [Memo]
+    public IField? OriginalField => this.GetOriginalField();
+
+    private IField? GetOriginalField()
+    {
+        using ( StackOverflowHelper.Detect() )
+        {
+            // Intentionally not using MapDeclaration to avoid the strong typing.
+
+            var originalField = (IFieldBuilder?) this.PropertyBuilder.OriginalField;
+
+            if ( originalField != null )
+            {
+                return this.Compilation.Factory.GetField( originalField, this.GenericContext );
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
 }

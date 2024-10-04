@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Options;
 using Metalama.Framework.Serialization;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

@@ -16,12 +16,19 @@ namespace Metalama.Framework.Engine.CodeModel;
 internal sealed class CompilationHelpers : ICompilationHelpers
 {
     private readonly ProjectServiceProvider _serviceProvider;
-    private UserCodeAttributeDeserializer? _attributeDeserializer;
+    private readonly CompilationContext _compilationContext;
+    private AttributeDeserializer? _attributeDeserializer;
 
-    public CompilationHelpers( in ProjectServiceProvider serviceProvider )
+    public CompilationHelpers( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
         this._serviceProvider = serviceProvider;
+        this._compilationContext = compilationContext;
     }
+
+    // The service is not always available in tests, so we get it lazily.
+    private AttributeDeserializer GetAttributeDeserializer()
+        => this._attributeDeserializer ??=
+            this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer.Provider>().Get( this._compilationContext );
 
     public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
 
@@ -141,21 +148,16 @@ internal sealed class CompilationHelpers : ICompilationHelpers
         ScopedDiagnosticSink diagnosticSink,
         [NotNullWhen( true )] out System.Attribute? constructedAttribute )
     {
-        // The service is not always available in tests, so we get it lazily.
-        this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
-
-        return this._attributeDeserializer.TryCreateAttribute(
-            attribute,
-            (IDiagnosticAdder?) diagnosticSink.Sink ?? NullDiagnosticAdder.Instance,
-            out constructedAttribute );
+        return this.GetAttributeDeserializer()
+            .TryCreateAttribute(
+                attribute,
+                (IDiagnosticAdder?) diagnosticSink.Sink ?? NullDiagnosticAdder.Instance,
+                out constructedAttribute );
     }
 
     public System.Attribute ConstructAttribute( IAttribute attribute )
     {
-        // The service is not always available in tests, so we get it lazily.
-        this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
-
-        if ( this._attributeDeserializer.TryCreateAttribute( attribute, ThrowingDiagnosticAdder.Instance, out var constructedAttribute ) )
+        if ( this.GetAttributeDeserializer().TryCreateAttribute( attribute, ThrowingDiagnosticAdder.Instance, out var constructedAttribute ) )
         {
             return constructedAttribute;
         }

@@ -220,52 +220,50 @@ internal sealed class LinkerInjectionRegistry
 
         ISymbol? GetOverrideTargetSymbol( IDeclaration overrideTarget )
         {
-            if ( overrideTarget is Declaration originalDeclaration )
+            switch ( overrideTarget )
             {
-                if ( this._introducedParametersByTargetDeclaration.TryGetValue( overrideTarget, out var introducedParameters ) )
-                {
-                    // Constructors with introduced parameters cannot be found through normal translation.
-                    // TODO: This is a hack, constructors with introduced parameters should be identifiable through code model.
-                    Invariant.Assert( overrideTarget is IConstructor );
-
-                    var originalConstructor = (IMethodSymbol) overrideTarget.GetSymbol().AssertNotNull();
-
-                    var translatedConstructor =
-                        TranslateConstructor( originalConstructor, introducedParameters )
-                        ?? throw new AssertionFailedException(
-                            $"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters." );
-
-                    return translatedConstructor;
-                }
-                else
-                {
-                    var symbol =
-                        this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
-                                originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
-                                true )
-                            .AssertNotNull();
-
-                    if ( auxiliarySourceMemberMap.TryGetValue( symbol, out var auxiliarySourceMemberSymbol ) )
+                case Declaration when this._introducedParametersByTargetDeclaration.TryGetValue( overrideTarget, out var introducedParameters ):
                     {
-                        return auxiliarySourceMemberSymbol;
+                        // Constructors with introduced parameters cannot be found through normal translation.
+                        // TODO: This is a hack, constructors with introduced parameters should be identifiable through code model.
+                        Invariant.Assert( overrideTarget is IConstructor );
+
+                        var originalConstructor = (IMethodSymbol) overrideTarget.GetSymbol().AssertNotNull();
+
+                        var translatedConstructor =
+                            TranslateConstructor( originalConstructor, introducedParameters )
+                            ?? throw new AssertionFailedException(
+                                $"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters." );
+
+                        return translatedConstructor;
                     }
-                    else
+
+                case Declaration originalDeclaration:
                     {
-                        return symbol;
+                        var symbol =
+                            this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
+                                    originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
+                                    true )
+                                .AssertNotNull();
+
+                        if ( auxiliarySourceMemberMap.TryGetValue( symbol, out var auxiliarySourceMemberSymbol ) )
+                        {
+                            return auxiliarySourceMemberSymbol;
+                        }
+                        else
+                        {
+                            return symbol;
+                        }
                     }
-                }
-            }
-            else if ( overrideTarget is IDeclarationBuilder builder )
-            {
-                return GetFromBuilder( builder );
-            }
-            else if ( overrideTarget is BuiltMember builtMember )
-            {
-                return GetFromBuilder( builtMember.Builder );
-            }
-            else
-            {
-                throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );
+
+                case IDeclarationBuilder builder:
+                    return GetFromBuilder( builder );
+
+                case BuiltMember builtMember:
+                    return GetFromBuilder( builtMember.Builder );
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );
             }
 
             ISymbol? GetFromBuilder( IDeclarationBuilder builder )

@@ -36,7 +36,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     private readonly INamedType? _targetType;
     private readonly ImmutableArray<SyntaxTree>? _sourceTrees;
     private readonly ISyntaxBuilderImpl? _syntaxBuilder;
-    private readonly CompilationContext? _compilationServices;
+    private readonly CompilationContext? _compilationContext;
     private bool _collectDependencyDisabled;
 
     internal static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
@@ -45,18 +45,21 @@ public class UserCodeExecutionContext : IExecutionContextInternal
 
     internal static Type ResolveCompileTimeTypeOf( string typeId, IReadOnlyDictionary<string, IType>? substitutions = null )
     {
-        if ( Current._compilationServices == null )
+        if ( Current._compilationContext == null )
         {
             throw new InvalidOperationException( "Cannot use typeof for run-time types in the current execution context." );
         }
 
-        return Current._compilationServices.CompileTimeTypeFactory
+        return Current._compilationContext.CompileTimeTypeFactory
             .Get( new SerializableTypeId( typeId ), substitutions );
     }
 
     internal static Type ResolveCompileTimeTypeOf( string typeId, string? ns, string name, string fullName, string toString )
-        => Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+    {
+        return Current._compilationContext.AssertNotNull()
+            .CompileTimeTypeFactory
             .Get( new SerializableTypeId( typeId ), new CompileTimeTypeMetadata( ns, name, fullName, toString ) );
+    }
 
     IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 
@@ -104,13 +107,37 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             new UserCodeExecutionContext(
                 serviceProvider,
                 UserCodeDescription.Create( description ?? "executing a test method" ),
+                compilation.CompilationContext,
                 compilationModel: compilation ) );
 
     internal static DisposeAction WithContext( in ProjectServiceProvider serviceProvider, CompilationModel compilation, UserCodeDescription description )
-        => WithContext( new UserCodeExecutionContext( serviceProvider, description, compilationModel: compilation ) );
+        => WithContext( new UserCodeExecutionContext( serviceProvider, description, compilation.CompilationContext, compilationModel: compilation ) );
 
-    public UserCodeExecutionContext( ProjectServiceProvider serviceProvider, UserCodeDescription description )
-        : this( serviceProvider, description, null ) { }
+    internal UserCodeExecutionContext(
+        ProjectServiceProvider serviceProvider,
+        UserCodeDescription description,
+        CompilationModel compilationModel,
+        AspectLayerId? aspectAspectLayerId = null,
+        IDeclaration? targetDeclaration = null,
+        ISyntaxBuilderImpl? syntaxBuilder = null,
+        MetaApi? metaApi = null,
+        IDiagnosticAdder? diagnostics = null,
+        ImmutableArray<SyntaxTree> sourceTrees = default ) : this(
+        serviceProvider,
+        description,
+        compilationModel.CompilationContext,
+        aspectAspectLayerId,
+        compilationModel,
+        targetDeclaration,
+        syntaxBuilder,
+        metaApi,
+        diagnostics,
+        sourceTrees ) { }
+
+    public UserCodeExecutionContext(
+        ProjectServiceProvider serviceProvider,
+        UserCodeDescription description,
+        CompilationContext? compilationContext ) : this( serviceProvider, description, compilationContext, null ) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
@@ -119,64 +146,37 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     internal UserCodeExecutionContext(
         ProjectServiceProvider serviceProvider,
         UserCodeDescription description,
+        CompilationContext? compilationContext = null,
         AspectLayerId? aspectAspectLayerId = null,
         CompilationModel? compilationModel = null,
         IDeclaration? targetDeclaration = null,
-        ISyntaxBuilderImpl? syntaxBuilder = null,
-        MetaApi? metaApi = null )
-    {
-        this.Description = description;
-        this.ServiceProvider = serviceProvider;
-        this.AspectLayerId = aspectAspectLayerId;
-        this.Compilation = compilationModel;
-        this._compilationServices = compilationModel?.CompilationContext;
-        this.TargetDeclaration = targetDeclaration;
-        this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
-        this._targetType = targetDeclaration?.GetTopmostNamedType();
-        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider, targetDeclaration );
-        this.MetaApi = metaApi;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
-    /// to invoke user code using <see cref="UserCodeInvoker.TryInvoke{T}"/>.
-    /// </summary>
-    internal UserCodeExecutionContext(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnostics,
-        UserCodeDescription description,
-        AspectLayerId? aspectAspectLayerId = null,
-        CompilationModel? compilationModel = null,
-        IDeclaration? targetDeclaration = null,
-        ImmutableArray<SyntaxTree>? sourceTrees = null,
-        bool throwOnUnsupportedDependencies = false,
         ISyntaxBuilderImpl? syntaxBuilder = null,
         MetaApi? metaApi = null,
-        CompilationContext? compilationServices = null )
+        IDiagnosticAdder? diagnostics = null,
+        ImmutableArray<SyntaxTree> sourceTrees = default,
+        bool throwOnUnsupportedDependencies = false )
     {
+        this.Description = description;
         this.ServiceProvider = serviceProvider;
         this.AspectLayerId = aspectAspectLayerId;
         this.Compilation = compilationModel;
-        this._diagnosticAdder = diagnostics;
-        this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
-        this.Description = description;
+        this._compilationContext = compilationContext;
         this.TargetDeclaration = targetDeclaration;
-        this._sourceTrees = sourceTrees;
-
         this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
         this._targetType = targetDeclaration?.GetTopmostNamedType();
-
-        this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
-
         this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider, targetDeclaration );
         this.MetaApi = metaApi;
+        this._diagnosticAdder = diagnostics;
+        this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
+        this._sourceTrees = sourceTrees;
     }
 
-    internal UserCodeExecutionContext( UserCodeExecutionContext prototype )
+    private protected UserCodeExecutionContext( UserCodeExecutionContext prototype )
     {
         this.ServiceProvider = prototype.ServiceProvider;
         this.AspectLayerId = prototype.AspectLayerId;
         this.Compilation = prototype.Compilation;
+        this._compilationContext = prototype._compilationContext;
         this._diagnosticAdder = prototype._diagnosticAdder;
         this._throwOnUnsupportedDependencies = prototype._throwOnUnsupportedDependencies;
         this.Description = prototype.Description;
@@ -184,9 +184,22 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this._sourceTrees = prototype._sourceTrees;
         this._dependencyCollector = prototype._dependencyCollector;
         this._targetType = prototype._targetType;
-        this._compilationServices = prototype._compilationServices;
+        this._compilationContext = prototype._compilationContext;
         this._syntaxBuilder = prototype._syntaxBuilder;
         this.MetaApi = prototype.MetaApi;
+    }
+
+    private UserCodeExecutionContext( UserCodeExecutionContext prototype, UserCodeDescription description ) : this( prototype )
+    {
+        this.Description = description;
+    }
+
+    private UserCodeExecutionContext( UserCodeExecutionContext prototype, CompilationModel compilation, IDiagnosticAdder diagnostics ) : this( prototype )
+    {
+        this.Compilation = compilation;
+        this._compilationContext = compilation.CompilationContext;
+        this._diagnosticAdder = diagnostics;
+        this._syntaxBuilder = GetSyntaxBuilder( compilation, null, this.ServiceProvider, null );
     }
 
     private static ISyntaxBuilderImpl? GetSyntaxBuilder(
@@ -194,12 +207,29 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         ISyntaxBuilderImpl? syntaxBuilderImpl,
         ProjectServiceProvider serviceProvider,
         IDeclaration? targetDeclaration )
-        => syntaxBuilderImpl ?? (compilationModel == null
-            ? null
-            : new SyntaxBuilderImpl(
-                compilationModel,
-                serviceProvider.GetRequiredService<SyntaxGenerationOptions>(),
-                targetDeclaration?.GetClosestNamedType() ));
+    {
+        if ( syntaxBuilderImpl != null )
+        {
+            return syntaxBuilderImpl;
+        }
+
+        if ( compilationModel == null )
+        {
+            return null;
+        }
+        
+        var syntaxGenerationOptions = serviceProvider.GetService<SyntaxGenerationOptions>();
+
+        if ( syntaxGenerationOptions == null )
+        {
+            return null;
+        }
+
+        return new SyntaxBuilderImpl(
+            compilationModel,
+            syntaxGenerationOptions,
+            targetDeclaration?.GetClosestNamedType() );
+    }
 
     internal IDiagnosticAdder Diagnostics
         => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
@@ -232,18 +262,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     ICompilation IExecutionContext.Compilation
         => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
 
-    internal UserCodeExecutionContext WithDescription( UserCodeDescription invokedMember )
-        => new(
-            this.ServiceProvider,
-            this.Diagnostics,
-            invokedMember,
-            this.AspectLayerId,
-            this.Compilation,
-            this.TargetDeclaration,
-            this._sourceTrees,
-            this._throwOnUnsupportedDependencies,
-            this._syntaxBuilder,
-            this.MetaApi );
+    internal UserCodeExecutionContext WithDescription( UserCodeDescription description ) => new( this, description );
 
     internal UserCodeExecutionContext WithCompilationAndDiagnosticAdder( CompilationModel compilation, IDiagnosticAdder diagnostics )
     {
@@ -252,17 +271,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             return this;
         }
 
-        return new UserCodeExecutionContext(
-            this.ServiceProvider,
-            diagnostics,
-            this.Description,
-            this.AspectLayerId,
-            compilation,
-            this.TargetDeclaration,
-            this._sourceTrees,
-            this._throwOnUnsupportedDependencies,
-            GetSyntaxBuilder( compilation, null, this.ServiceProvider, null ),
-            this.MetaApi );
+        return new UserCodeExecutionContext( this, compilation, diagnostics );
     }
 
     internal void AddDependencyFrom( IDeclaration declaration )
@@ -307,7 +316,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
                     this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
                     syntaxTree );
             }
-            else if ( this._sourceTrees is { } sourceTrees )
+            else if ( this._sourceTrees is { IsDefaultOrEmpty: false } sourceTrees )
             {
                 foreach ( var sourceTree in sourceTrees )
                 {

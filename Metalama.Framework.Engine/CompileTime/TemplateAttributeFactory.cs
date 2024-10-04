@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 {
-    private readonly IAttributeDeserializer _attributeDeserializer;
+    private readonly UserCodeAttributeDeserializer.Provider _attributeDeserializerProvider;
 
     private readonly ConcurrentDictionary<SerializableDeclarationId, IAdviceAttribute?> _cacheById = new();
 
@@ -28,7 +28,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
     public TemplateAttributeFactory( in ProjectServiceProvider serviceProvider )
     {
-        this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
+        this._attributeDeserializerProvider = serviceProvider.GetRequiredService<UserCodeAttributeDeserializer.Provider>();
     }
 
     public bool TryGetTemplateAttribute(
@@ -82,7 +82,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
             member,
             m =>
             {
-                _ = this.TryGetTemplateAttributeBySymbol( m, diagnosticAdder, out var attribute );
+                _ = this.TryGetTemplateAttributeBySymbol( m, compilationContext, diagnosticAdder, out var attribute );
 
                 return attribute;
             } );
@@ -96,6 +96,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
     private bool TryGetTemplateAttributeBySymbol(
         ISymbol member,
+        CompilationContext compilationContext,
         IDiagnosticAdder diagnosticAdder,
         out IAdviceAttribute? adviceAttribute )
     {
@@ -119,18 +120,20 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
                 if ( overriddenMember != null )
                 {
-                    return this.TryGetTemplateAttributeBySymbol( overriddenMember, diagnosticAdder, out adviceAttribute );
+                    return this.TryGetTemplateAttributeBySymbol( overriddenMember, compilationContext, diagnosticAdder, out adviceAttribute );
                 }
             }
             else if ( member is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
             {
-                return this.TryGetTemplateAttributeBySymbol( associatedSymbol, diagnosticAdder, out adviceAttribute );
+                return this.TryGetTemplateAttributeBySymbol( associatedSymbol, compilationContext, diagnosticAdder, out adviceAttribute );
             }
 
             throw new AssertionFailedException( $"Cannot find the TemplateAttribute for '{member}'." );
         }
 
-        if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attribute ) )
+        var attributeDeserializer = this._attributeDeserializerProvider.Get( compilationContext );
+
+        if ( !attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attribute ) )
         {
             adviceAttribute = null;
 

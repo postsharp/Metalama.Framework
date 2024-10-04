@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -58,7 +57,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 ? this
                 : this.Compilation.Factory.GetProperty( this.PropertySymbol.OriginalDefinition );
 
-        IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.BoxedRef;
+        IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
+
+        IField? IProperty.OriginalField => null;
 
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
@@ -102,18 +103,18 @@ namespace Metalama.Framework.Engine.CodeModel
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
         [Memo]
-        private BoxedRef<IProperty> BoxedRef => new BoxedRef<IProperty>( this.ToValueTypedRef() );
+        private IRef<IProperty> Ref => this.RefFactory.FromSymbolBasedDeclaration<IProperty>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.BoxedRef;
+        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-        IRef<IProperty> IProperty.ToRef() => this.BoxedRef;
+        IRef<IProperty> IProperty.ToRef() => this.Ref;
 
-        protected override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.BoxedRef;
+        protected override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.Ref;
 
-        protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.BoxedRef;
+        protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.Ref;
 
-        protected override IRef<IMember> ToMemberRef() => this.BoxedRef;
+        protected override IRef<IMember> ToMemberRef() => this.Ref;
 
-        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+        protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
     }
 }

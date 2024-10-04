@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Licensing.Consumption.Sources;
-using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
@@ -48,7 +47,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
     private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<AspectPipelineResultAndState>> _compilationResultCache = new();
-    private readonly IFileSystemWatcher? _fileSystemWatcher;
+    private readonly RecursiveFileSystemWatcher? _fileSystemWatcher;
     private readonly ConcurrentQueue<Func<AsyncExecutionContext, ValueTask>> _jobQueue = new();
     private readonly IDesignTimeAspectPipelineObserver? _observer;
     private readonly SemaphoreSlim _sync = new( 1, 1 );
@@ -127,16 +126,14 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this.Logger.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
 
         // Initialize FileSystemWatcher.
-        var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
+        var watchedFilter = Path.GetFileName( this.ProjectOptions.BuildTouchFile );
         var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
 
         if ( watchedDirectory != null )
         {
-            var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
-            this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
-            this._fileSystemWatcher.IncludeSubdirectories = false;
+            this._fileSystemWatcher = new RecursiveFileSystemWatcher( watchedDirectory, watchedFilter );
 
-            this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
+            this._fileSystemWatcher.Changed += this.OnTouchFileChanged;
             this._fileSystemWatcher.EnableRaisingEvents = true;
         }
     }
@@ -275,11 +272,11 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 
 #pragma warning disable VSTHRD100
-    private async void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
+    private async void OnTouchFileChanged( object sender, FileSystemEventArgs e )
     {
         try
         {
-            if ( e.FullPath != this.ProjectOptions.BuildTouchFile || this.Status != DesignTimeAspectPipelineStatus.Paused )
+            if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
             {
                 return;
             }
@@ -887,10 +884,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             return null;
         }
 
-        if ( !symbol.TryGetSerializableId( out var symbolId ) )
-        {
-            return null;
-        }
+        var symbolId = symbol.GetSerializableId();
 
         if ( !this._currentState.PipelineResult.SyntaxTreeResults.TryGetValue( filePath, out var result ) )
         {

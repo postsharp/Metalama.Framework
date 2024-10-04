@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,11 +15,13 @@ namespace Metalama.Framework.Engine.Formatting
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
             private readonly SemanticModel _semanticModel;
+            private readonly CompilationContext _compilationContext;
 
             public AddTitlesVisitor( ClassifiedTextSpanCollection textSpans, SemanticModel semanticModel )
             {
                 this._textSpans = textSpans;
                 this._semanticModel = semanticModel;
+                this._compilationContext = semanticModel.Compilation.GetCompilationContext();
             }
 
             private void ProcessNode<T>( T node, TextSpan span )
@@ -35,7 +38,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                 if ( symbol != null )
                 {
-                    var doc = XmlDocumentationReader.Instance.GetFormattedDocumentation( symbol, this._semanticModel.Compilation );
+                    var doc = XmlDocumentationReader.Instance.GetFormattedDocumentation( symbol, this._compilationContext );
 
                     if ( doc != null )
                     {

@@ -150,9 +150,9 @@ internal sealed partial class LinkerAnalysisStep
                             true,
                             true );
 
-                    var wasAdded = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
+                    _ = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
 
-                    Invariant.Assert( wasAdded );
+                    // In case of duplicate declarations (which can happen at design time), the aspect may not be added here.
                 }
             }
 

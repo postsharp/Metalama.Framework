@@ -8,10 +8,23 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.SerializationE
     [CompileTime]
     internal class Aspect
     {
+        [Introduce]
+        void Method(object arg) { }
+
+        [Introduce]
+        event Action<object> Event = delegate { };
+
+        [Introduce]
+        Action<object> Property { get; } = delegate { };
+
         [TestTemplate]
         private dynamic? Template()
         {
-            Console.WriteLine( meta.RunTime( meta.Target.Method ) );
+            Method(meta.RunTime(meta.Target.Method));
+
+            Event(meta.RunTime(meta.Target.Method));
+
+            Property(meta.RunTime(meta.Target.Method));
 
             return default;
         }

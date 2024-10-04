@@ -57,6 +57,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         internal T Translate<T>( T declaration )
             where T : class, IDeclaration
-            => declaration.ForCompilation( this.SourceCompilation, ReferenceResolutionOptions.CanBeMissing );
+            => declaration.ForCompilation( this.SourceCompilation );
     }
 }

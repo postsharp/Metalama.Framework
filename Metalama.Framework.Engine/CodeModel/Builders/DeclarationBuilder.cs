@@ -5,7 +5,9 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
@@ -27,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
 /// 
 /// </summary>
-internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
+internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBasedDeclaration
 {
     private readonly AttributeBuilderCollection _attributes = new();
 
@@ -38,7 +40,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     protected T Translate<T>( T compilationElement )
         where T : class, ICompilationElement
-        => compilationElement.ForCompilation( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
+        => compilationElement.ForCompilation( this.Compilation );
 
     protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
@@ -60,7 +62,15 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     ImmutableArray<SourceReference> IDeclaration.Sources => ImmutableArray<SourceReference>.Empty;
 
+    IGenericContext IDeclaration.GenericContext => GenericContext.Empty;
+
     ICompilation ICompilationElement.Compilation => this.Compilation;
+
+    public virtual ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => newCompilation.Factory.GetDeclaration( this, genericContext, interfaceType );
 
     public CompilationModel Compilation
         => (CompilationModel?) this.ContainingDeclaration?.Compilation
@@ -76,7 +86,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         }
     }
 
-    public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
+    public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => DisplayStringFormatter.Format( this );
 
     public void AddAttribute( AttributeConstruction attribute )
     {
@@ -101,15 +111,19 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public virtual void Freeze() => this.IsFrozen = true;
 
-    public virtual Ref<IDeclaration> ToValueTypedRef() => Ref.FromBuilder( this );
+    public abstract IRef<IDeclaration> ToDeclarationRef();
 
-    public abstract IRef<IDeclaration> ToIRef();
+    public SerializableDeclarationId ToSerializableId()
+    {
+        if ( !this.IsFrozen )
+        {
+            throw new InvalidOperationException( $"Cannot get the SerializableId of {this.DeclarationKind.ToDisplayString()} '{this}' until it is frozen." );
+        }
 
-    public virtual SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
+        return this.GetSerializableId();
+    }
 
-    IRef<IDeclaration> IDeclaration.ToRef() => this.ToValueTypedRef();
-
-    Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
+    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 
@@ -122,7 +136,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
-    public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
+    public sealed override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
 
     public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
 
@@ -131,7 +145,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     public TExtension GetMetric<TExtension>()
         where TExtension : IMetric
-        => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+        => this.Compilation.MetricManager.GetMetric<TExtension>( this );
 
     protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
 
@@ -140,7 +154,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         declaration ??= this;
 
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-            declaration.ToValueTypedRef(),
+            declaration.ToRef(),
             context.Compilation,
             this.AttributeTargetSyntaxKind );
 
@@ -148,7 +162,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         {
             attributes = attributes.AddRange(
                 context.SyntaxGenerator.AttributesForDeclaration(
-                    method.ReturnParameter.ToValueTypedRef<IDeclaration>(),
+                    method.ReturnParameter.ToRef(),
                     context.Compilation,
                     SyntaxKind.ReturnKeyword ) );
 
@@ -156,7 +170,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
             {
                 attributes = attributes.AddRange(
                     context.SyntaxGenerator.AttributesForDeclaration(
-                        method.Parameters[0].ToValueTypedRef<IDeclaration>(),
+                        method.Parameters[0].ToRef(),
                         context.Compilation,
                         SyntaxKind.ParamKeyword ) );
             }
@@ -170,7 +184,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
     }
 
     // TODO: This is temporary overload (see the callsite for reason).
-    public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, Ref<IDeclaration> declarationRef )
+    public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, IRef<IDeclaration> declarationRef )
     {
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
             declarationRef,
@@ -181,4 +195,9 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
     }
 
     public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
+
+    [Memo]
+    protected RefFactory RefFactory => this.GetCompilationContext().RefFactory;
+
+    IDeclarationBuilder IBuilderBasedDeclaration.Builder => this;
 }

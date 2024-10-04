@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -92,7 +91,7 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
 
     public abstract IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef();
 
-    public sealed override void Freeze()
+    public override void Freeze()
     {
         base.Freeze();
 
@@ -102,5 +101,5 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => throw new NotImplementedException();
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => this.ToPropertyOrIndexerRef();
 }

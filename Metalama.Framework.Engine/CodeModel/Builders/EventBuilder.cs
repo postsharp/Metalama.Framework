@@ -7,7 +7,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -128,9 +127,14 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation()
+    {
+        this.Freeze();
+
+        return new IntroduceEventTransformation( this.ParentAdvice, this );
+    }
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
@@ -157,11 +161,11 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     }
 
     [Memo]
-    public BoxedRef<IEvent> BoxedRef => new BoxedRef<IEvent>( this.ToValueTypedRef() );
+    public IRef<IEvent> Ref => this.RefFactory.FromBuilder<IEvent>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IEvent> IEvent.ToRef() => this.BoxedRef;
+    public new IRef<IEvent> ToRef() => this.Ref;
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

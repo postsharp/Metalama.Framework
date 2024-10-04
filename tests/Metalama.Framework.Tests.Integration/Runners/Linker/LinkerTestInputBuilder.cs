@@ -6,7 +6,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -270,8 +269,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         if ( replacedMemberSymbol != null )
                         {
                             // This is replaced source element.
-                            A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMember>( replacedMemberSymbol, inputCompilation.GetCompilationContext() ) );
+                            var replacedMember = (IMember) initialCompilationModel.Factory.GetDeclaration( replacedMemberSymbol );
+
+                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( replacedMember );
                         }
                         else
                         {
@@ -293,8 +293,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             A.CallTo( () => ((ICompilationElement) replacedTransformation).Compilation ).Returns( initialCompilationModel );
                             A.CallTo( () => ((ICompilationElementImpl) replacedTransformation).Compilation ).Returns( initialCompilationModel );
 
-                            A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMember>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
+                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( (IMember) replacedTransformation );
                         }
                     }
 
@@ -460,8 +459,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         {
             A.CallTo( () => observableTransformation.TargetDeclaration ).Returns( containingDeclaration );
 
-            A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToValueTypedRef() )
-                .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
+            A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
+                .Returns( ((IDeclarationBuilder) observableTransformation).ToRef() );
 
             A.CallTo( () => ((IInjectMemberTransformation) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );

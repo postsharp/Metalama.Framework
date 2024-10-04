@@ -31,20 +31,18 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
         switch ( targetDeclaration )
         {
+            case IProperty property:
+                return AddContractToProperty( property );
+
+            case IField { OverridingProperty: { } overridingProperty }:
+                return AddContractToProperty( overridingProperty );
+
             case IField field:
-                var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
+                var promotedField = PromotedField.Create( serviceProvider, field, ObjectReader.Empty, this );
                 addTransformation( promotedField.ToTransformation() );
                 OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
 
-                addTransformation(
-                    new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
-
-                return CreateSuccessResult( promotedField );
-
-            case IProperty property:
-                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
-
-                return CreateSuccessResult( property );
+                return AddContractToProperty( promotedField );
 
             case IIndexer indexer:
                 addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
@@ -53,6 +51,13 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
             default:
                 throw new AssertionFailedException();
+        }
+
+        AddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContractToProperty( IProperty property )
+        {
+            addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+
+            return CreateSuccessResult( property );
         }
     }
 }

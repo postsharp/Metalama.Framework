@@ -2,8 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using System;
 using System.Reflection;
@@ -12,11 +10,11 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 {
     internal sealed class CompileTimeParameterInfo : ParameterInfo, ICompileTimeReflectionObject<IParameter>
     {
-        public ISdkRef<IParameter> Target { get; }
+        public IRef<IParameter> Target { get; }
 
         private CompileTimeParameterInfo( IParameter parameter )
         {
-            this.Target = parameter.ToValueTypedRef();
+            this.Target = parameter.ToRef();
         }
 
         public static ParameterInfo Create( IParameter parameter ) => new CompileTimeParameterInfo( parameter );

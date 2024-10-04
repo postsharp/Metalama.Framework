@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating;
 internal static class TypeAnnotationMapper
 {
     public const string ExpressionTypeSymbolAnnotationKind = "Metalama.ExpressionType";
-    
+
     // ReSharper disable once MemberCanBePrivate.Global
     public const string ExpressionITypeAnnotationKind = "Metalama.ExpressionIType";
 
@@ -114,7 +114,7 @@ internal static class TypeAnnotationMapper
         {
             return node;
         }
-            
+
         var syntaxAnnotation = GetOrCreateAnnotation( ExpressionTypeSymbolAnnotationKind, type );
 
         Invariant.Assert( SymbolEqualityComparer.IncludeNullability.Equals( GetSymbolFromAnnotation( syntaxAnnotation ), type ) );
@@ -203,7 +203,7 @@ internal static class TypeAnnotationMapper
             return false;
         }
 
-        type = compilationModel.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ).AssertNotNull( $"The type '{type}' could not be translated." );
+        type = compilationModel.Factory.Translate( type ).AssertNotNull( $"The type '{type}' could not be translated." );
 
         return true;
     }

@@ -140,8 +140,9 @@ internal sealed class FabricManager
 
         var executionContext = new UserCodeExecutionContext(
             this.ServiceProvider,
-            diagnostics,
-            UserCodeDescription.Create( "instantiating the fabric ", fabricType ) );
+            UserCodeDescription.Create( "instantiating the fabric ", fabricType ),
+            compilation,
+            diagnostics: diagnostics );
 
         if ( !this.UserCodeInvoker.TryInvoke( () => Activator.CreateInstance( fabricType ), executionContext, out var fabric ) )
         {

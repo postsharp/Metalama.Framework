@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -16,16 +15,20 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
-    private Ref<IConstructor> _replacedImplicit;
+    private IConstructor? _replacedImplicitConstructor;
     private ConstructorInitializerKind _initializerKind;
 
-    public Ref<IConstructor> ReplacedImplicit
+    public IConstructor? ReplacedImplicitConstructor
     {
-        get => this._replacedImplicit;
+        get => this._replacedImplicitConstructor;
         set
         {
+            // We intentionally don't store a reference to the replaced constructor, but the constructor itself,
+            // because references are always resolved to the _replacement_.
+
+            Invariant.Assert( value is null or Constructor or ConstructorBuilder );
             this.CheckNotFrozen();
-            this._replacedImplicit = value;
+            this._replacedImplicitConstructor = value;
         }
     }
 
@@ -47,14 +50,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         this.InitializerArguments = new List<(IExpression Expression, string? ParameterName)>();
     }
 
-    public override Ref<IDeclaration> ToValueTypedRef()
-
-        // Replacement of implicit constructor should use the implicit constructor as Ref.
-        => !this.ReplacedImplicit.IsDefault
-            ? this.ReplacedImplicit.As<IDeclaration>()
-            : base.ToValueTypedRef();
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.BoxedRef;
+    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 
     public void AddInitializerArgument( IExpression expression, string? parameterName )
     {
@@ -67,14 +63,18 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public override IMember? OverriddenMember => null;
 
-    public override IRef<IMember> ToMemberRef() => this.BoxedRef;
+    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public override bool IsExplicitInterfaceImplementation => false;
 
     public IInjectMemberTransformation ToTransformation()
-        => this.IsStatic
+    {
+        this.Freeze();
+
+        return this.IsStatic
             ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this )
             : new IntroduceConstructorTransformation( this.ParentAdvice, this );
+    }
 
     // This is implemented by BuiltConstructor and there is no point in supporting it here.
     public IConstructor GetBaseConstructor() => throw new NotSupportedException();
@@ -91,7 +91,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     IConstructor IConstructor.Definition => this;
 
-    public override IRef<IMethodBase> ToMethodBaseRef() => this.BoxedRef;
+    public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
@@ -111,9 +111,15 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
     [Memo]
-    public BoxedRef<IConstructor> BoxedRef => new BoxedRef<IConstructor>( this.ToValueTypedRef() );
+    private IRef<IConstructor> Ref => this._replacedImplicitConstructor?.ToRef() ?? this.RefFactory.FromBuilder<IConstructor>( this );
 
-    public override IRef<IDeclaration> ToIRef() => this.BoxedRef;
+    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IRef<IConstructor> IConstructor.ToRef() => this.BoxedRef;
+    public new IRef<IConstructor> ToRef() => this.Ref;
+
+    public override ICompilationElement? Translate(
+        CompilationModel newCompilation,
+        IGenericContext? genericContext = null,
+        Type? interfaceType = null )
+        => this.ReplacedImplicitConstructor?.Translate( newCompilation ) ?? base.Translate( newCompilation, genericContext );
 }

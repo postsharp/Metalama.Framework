@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -31,7 +30,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     private readonly IObjectReader _tags;
     private readonly IAdviceFactoryImpl _adviceFactory;
 
-    private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+    private new IRef<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public ImplementInterfaceAdvice(
         AdviceConstructorParameters<INamedType> parameters,
@@ -689,6 +688,11 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         templateProperty.Declaration.SetMethod.AssertNotNull(),
                                         (DeclarationBuilder) propertyBuilder.SetMethod.AssertNotNull() );
                                 }
+
+                                if ( isAutoProperty )
+                                {
+                                    propertyBuilder.InitializerTemplate = templateProperty.GetInitializerTemplate();
+                                }
                             }
 
                             AddTransformationNoDuplicates( propertyBuilder.ToTransformation() );
@@ -710,8 +714,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 }
                                 else
                                 {
-                                    propertyBuilder.InitializerTemplate = templateProperty.GetInitializerTemplate();
-
                                     OverrideHelper.AddTransformationsForStructField(
                                         targetType.ForCompilation( compilation ),
                                         this,

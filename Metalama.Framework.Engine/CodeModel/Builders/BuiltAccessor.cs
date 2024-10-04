@@ -18,7 +18,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     private readonly BuiltMember _builtMember;
     private readonly AccessorBuilder _accessorBuilder;
 
-    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation )
+    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builtMember.GenericContext )
     {
         this._builtMember = builtMember;
         this._accessorBuilder = builder;
@@ -61,21 +61,31 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.GetCompilationModel().GetParameterCollection( this._accessorBuilder.ToValueTypedRef<IHasParameters>() ) );
+            this.Compilation.GetParameterCollection( this.Ref ) );
 
     public MethodKind MethodKind => this._accessorBuilder.MethodKind;
 
     public OperatorKind OperatorKind => this._accessorBuilder.OperatorKind;
 
-    IMethod IMethod.Definition => this;
+    [Memo]
+    public IMethod Definition => this.Compilation.Factory.GetAccessor( this._accessorBuilder );
 
-    IRef<IMember> IMember.ToRef() => this._accessorBuilder.BoxedRef;
+    [Memo]
+    private IRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this._accessorBuilder.BoxedRef;
+    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    IMemberOrNamedType IMemberOrNamedType.Definition => this;
+    IRef<IMember> IMember.ToRef() => this.Ref;
 
-    IMember IMember.Definition => this;
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
+
+    public IRef<IMethod> ToRef() => this.Ref;
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this.Ref;
+
+    IMemberOrNamedType IMemberOrNamedType.Definition => this.Definition;
+
+    IMember IMember.Definition => this.Definition;
 
     bool IMethod.IsExtern => false;
 
@@ -92,15 +102,15 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public object? Invoke( IEnumerable<IExpression> args ) => this._accessorBuilder.Invoke( args );
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation );
+    public IParameter ReturnParameter
+        => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.GetIType( this._accessorBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
 
     public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
-    [Memo]
-    public IReadOnlyList<IType> TypeArguments => this._accessorBuilder.TypeArguments.SelectAsImmutableArray( t => this.Compilation.Factory.GetIType( t ) );
+    IReadOnlyList<IType> IGeneric.TypeArguments => [];
 
     public bool IsGeneric => this._accessorBuilder.IsGeneric;
 
@@ -120,16 +130,12 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
 
-    IRef<IMethod> IMethod.ToRef() => this._accessorBuilder.BoxedRef;
-
-    IRef<IMethodBase> IMethodBase.ToRef() => this._accessorBuilder.BoxedRef;
-
     public MemberInfo ToMemberInfo() => this._accessorBuilder.ToMemberInfo();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
     [Memo]
-    public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this._accessorBuilder.OverriddenMember );
+    public IMember? OverriddenMember => this.Compilation.Factory.Translate( this._accessorBuilder.OverriddenMember, genericContext: this.GenericContext );
 
     public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
 

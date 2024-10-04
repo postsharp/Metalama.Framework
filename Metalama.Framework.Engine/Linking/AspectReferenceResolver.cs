@@ -75,14 +75,12 @@ internal sealed class AspectReferenceResolver
     private readonly LinkerInjectionRegistry _injectionRegistry;
     private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
     private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
-    private readonly CompilationModel _finalCompilationModel;
     private readonly SafeSymbolComparer _comparer;
     private readonly ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>> _overrideIndicesCache;
 
     public AspectReferenceResolver(
         LinkerInjectionRegistry injectionRegistry,
         IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
-        CompilationModel finalCompilationModel,
         CompilationContext intermediateCompilationContext )
     {
         this._injectionRegistry = injectionRegistry;
@@ -94,7 +92,6 @@ internal sealed class AspectReferenceResolver
 
         this._orderedLayers = indexedLayers.SelectAsImmutableArray( x => x.AspectLayerId );
         this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
-        this._finalCompilationModel = finalCompilationModel;
         this._comparer = intermediateCompilationContext.SymbolComparer;
         this._overrideIndicesCache = new ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>>( intermediateCompilationContext.SymbolComparer );
     }
@@ -196,8 +193,8 @@ internal sealed class AspectReferenceResolver
             // Resolved to the initial version of the symbol (before any aspects).
 
             if ( targetIntroductionInjectedMember == null
-                 || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { IsDefault: false } replacedMember }
-                     && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null) )
+                 || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                     && replacedMember.GetSymbol() != null) )
             {
                 // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
                 var declaredInCurrentType = this._comparer.Equals( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType );
@@ -222,7 +219,7 @@ internal sealed class AspectReferenceResolver
             // Resolved to a version before the symbol was introduced.
             // The only valid case are introduced promoted fields.
             if ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                 && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() == null )
+                 && replacedMember.GetSymbol() == null )
             {
                 // This is the same as targeting the property.
                 return CreateResolved( resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
@@ -414,12 +411,8 @@ internal sealed class AspectReferenceResolver
             return null;
         }
 
-        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { IsDefault: false } replacedMemberRef } )
+        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
         {
-            var replacedMember = replacedMemberRef.GetTarget(
-                this._finalCompilationModel,
-                ReferenceResolutionOptions.DoNotFollowRedirections );
-
             IDeclaration canonicalReplacedMember = replacedMember switch
             {
                 BuiltDeclaration builtDeclaration => builtDeclaration.Builder,
@@ -598,7 +591,7 @@ internal sealed class AspectReferenceResolver
                             ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax memberAccess }]
                         } invocationExpression:
                             var symbolInfo = semanticModel.GetSymbolInfo( memberAccess );
-                            
+
                             rootNode = invocationExpression;
 
                             // This should match AspectReferenceWalker's VisitCore method as it does the same symbol resolution.
@@ -612,7 +605,7 @@ internal sealed class AspectReferenceResolver
                                     { CandidateSymbols: [{ } symbol] } => symbol,
 
                                     // We should not get here because this reference would be skipped by AspectReferenceWalker.
-                                    _ => throw new AssertionFailedException( $"Invalid symbol info: {symbolInfo}" ),
+                                    _ => throw new AssertionFailedException( $"Invalid symbol info: {symbolInfo}" )
                                 };
 
                             targetSymbolSource = memberAccess;

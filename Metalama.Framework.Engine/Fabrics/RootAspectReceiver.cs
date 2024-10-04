@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Validation;
 
 namespace Metalama.Framework.Engine.Fabrics;
@@ -10,7 +9,7 @@ internal sealed class RootAspectReceiver<T> : AspectReceiver<T, int>
     where T : class, IDeclaration
 {
     internal RootAspectReceiver(
-        ISdkRef<IDeclaration> containingDeclaration,
+        IRef<IDeclaration> containingDeclaration,
         IAspectReceiverParent parent,
         CompilationModelVersion compilationModelVersion ) : base(
         parent.ServiceProvider,
