@@ -105,8 +105,6 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
             _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {this.DeclarationKind}." )
         };
 
-    public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
-
     public override MethodBase ToMethodBase() => this.ToMethodInfo();
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
@@ -116,9 +114,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
     public OperatorKind OperatorKind { get; }
 
     IMethod IMethod.Definition => this;
-
-    bool IMethod.IsPartial => false;
-
+    
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
@@ -171,8 +167,6 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
-    public override IRef<IMember> ToMemberRef() => this.Ref;
-
     public IInjectMemberTransformation ToTransformation()
     {
         this.Freeze();
@@ -180,12 +174,5 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
         return new IntroduceMethodTransformation( this.ParentAdvice, this );
     }
 
-    [Memo]
-    public IRef<IMethod> Ref => this.RefFactory.FromBuilder<IMethod>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public new IRef<IMethod> ToRef() => this.Ref;
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
+    IRef<IMethod> IMethod.ToRef() => throw new NotSupportedException();
 }

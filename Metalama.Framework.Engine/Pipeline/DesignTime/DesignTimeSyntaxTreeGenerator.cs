@@ -367,7 +367,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Additionally, add all introduced constructors to the list.
             foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
             {
-                var constructorBuilder = (introducedConstructor.ToRef() as IBuilderRef)?.Builder as ConstructorBuilder;
+                var constructorBuilder = (introducedConstructor.ToRef() as IBuilderRef)?.BuilderData as ConstructorBuilder;
 
                 if ( constructorBuilder is null || constructorBuilder.ReplacedImplicitConstructor != null )
                 {

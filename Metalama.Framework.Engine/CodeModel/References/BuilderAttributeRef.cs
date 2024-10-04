@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Builders.Built;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,12 +16,11 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// </summary>
 internal sealed class BuilderAttributeRef : AttributeRef
 {
-    public AttributeBuilder AttributeBuilder { get; }
+    public AttributeBuilderData AttributeBuilder { get; }
 
-    public BuilderAttributeRef( AttributeBuilder builder ) : base(
-        builder.ContainingDeclaration.ToRef(),
-        builder.Constructor.DeclaringType.ToRef(),
-        builder.GetCompilationContext() )
+    public BuilderAttributeRef( AttributeBuilderData builder ) : base(
+        builder.ContainingDeclaration,
+        builder.Type )
     {
         this.AttributeBuilder = builder;
     }

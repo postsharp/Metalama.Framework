@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
@@ -14,31 +15,31 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltEvent : BuiltMember, IEventImpl
 {
-    public EventBuilder EventBuilder { get; }
+    public EventBuilderData EventBuilder { get; }
 
-    public BuiltEvent( EventBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltEvent( EventBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.EventBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this.EventBuilder;
+    public override DeclarationBuilderData BuilderData => this.EventBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.EventBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.EventBuilder;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.EventBuilder;
 
-    protected override MemberBuilder MemberBuilder => this.EventBuilder;
+    protected override MemberBuilderData MemberBuilder => this.EventBuilder;
 
     [Memo]
-    public INamedType Type => this.MapType( this.EventBuilder.Type );
+    public INamedType Type => this.MapDeclaration( this.EventBuilder.Type );
 
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
     [Memo]
-    public IMethod AddMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.AddMethod );
+    public IMethod AddMethod => new BuiltAccessor( this, this.EventBuilder.AddMethod );
 
     [Memo]
-    public IMethod RemoveMethod => new BuiltAccessor( this, (AccessorBuilder) this.EventBuilder.RemoveMethod );
+    public IMethod RemoveMethod => new BuiltAccessor( this, this.EventBuilder.RemoveMethod );
 
     public IMethod? RaiseMethod => null;
 

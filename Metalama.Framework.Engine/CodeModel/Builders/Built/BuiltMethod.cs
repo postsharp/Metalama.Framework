@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -13,25 +14,30 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
-internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
+internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 {
-    private readonly MethodBuilder _methodBuilder;
+    private readonly MethodBuilderData _methodBuilder;
 
-    public BuiltMethod( MethodBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltMethod( MethodBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._methodBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this._methodBuilder;
+    public override DeclarationBuilderData BuilderData => this._methodBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._methodBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._methodBuilder;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._methodBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._methodBuilder;
 
-    protected override MemberBuilder MemberBuilder => this._methodBuilder;
-
-    protected override MethodBaseBuilder MethodBaseBuilder => this._methodBuilder;
-
+    protected override MemberBuilderData MemberBuilder => this._methodBuilder;
+    
+    
+    [Memo]
+    public IParameterList Parameters
+        => new ParameterList(
+            this,
+            this.Compilation.GetParameterCollection( this._methodBuilder.ToRef() ) );
+    
     public MethodKind MethodKind => this._methodBuilder.MethodKind;
 
     public OperatorKind OperatorKind => this._methodBuilder.OperatorKind;
@@ -66,11 +72,11 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     public ITypeParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this._methodBuilder.TypeParameters.AsBuilderList.Select( x => this.RefFactory.FromBuilder<ITypeParameter>( x ) ).ToReadOnlyList() );
+            this._methodBuilder.TypeParameters.AsBuilderList.Select( x => this.RefFactory.FromBuilderData<ITypeParameter>( x ) ).ToReadOnlyList() );
 
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
-    public bool IsGeneric => this._methodBuilder.IsGeneric;
+    public bool IsGeneric => !this._methodBuilder.TypeParameters.IsDefault;
 
     public bool IsCanonicalGenericInstance => throw new NotImplementedException();
 

@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -17,9 +18,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltField : BuiltMember, IFieldImpl
 {
-    public IFieldBuilder FieldBuilder { get; }
+    public FieldBuilderData FieldBuilder { get; }
 
-    public BuiltField( IFieldBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltField( FieldBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         Invariant.Assert( builder is Builders.FieldBuilder or PromotedField );
 
@@ -29,13 +30,13 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     // DeclarationKind is always a field even if the underlying builder may be a PromotedField i.e. a property.
     public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-    public override DeclarationBuilder Builder => (DeclarationBuilder) this.FieldBuilder;
+    public override DeclarationBuilderData BuilderData =>  this.FieldBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => (NamedDeclarationBuilder) this.FieldBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.FieldBuilder;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => (MemberOrNamedTypeBuilder) this.FieldBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder =>  this.FieldBuilder;
 
-    protected override MemberBuilder MemberBuilder => (MemberBuilder) this.FieldBuilder;
+    protected override MemberBuilderData MemberBuilder => this.FieldBuilder;
 
     public Writeability Writeability => this.FieldBuilder.Writeability;
 
@@ -46,10 +47,10 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     public RefKind RefKind => this.FieldBuilder.RefKind;
 
     [Memo]
-    public IMethod GetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod! );
+    public IMethod GetMethod => new BuiltAccessor( this, this.FieldBuilder.GetMethod! );
 
     [Memo]
-    public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod! );
+    public IMethod SetMethod => new BuiltAccessor( this, this.FieldBuilder.SetMethod! );
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 

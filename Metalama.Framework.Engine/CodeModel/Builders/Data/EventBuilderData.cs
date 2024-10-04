@@ -1,8 +1,9 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
-
+using System.Linq;
 namespace Metalama.Framework.Engine.CodeModel.Builders.Data;
 
 internal class EventBuilderData : MemberBuilderData
@@ -24,7 +25,9 @@ internal class EventBuilderData : MemberBuilderData
 
     public MethodBuilderData RemoveMethod { get; }
 
-    public IEvent? OverriddenEvent { get; set; }
+    public IRef<IEvent>? OverriddenEvent { get; }
+    
+    public IReadOnlyList<IRef<IEvent>> ExplicitInterfaceImplementations { get; }
 
     public EventBuilderData( EventBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
@@ -36,9 +39,15 @@ internal class EventBuilderData : MemberBuilderData
         this.RefKind = builder.RefKind;
         this.AddMethod = new MethodBuilderData( builder.AddMethod, me );
         this.RemoveMethod = new MethodBuilderData( builder.RemoveMethod, me );
+        this.OverriddenEvent = builder.OverriddenEvent?.ToRef();
+        this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
     }
 
     public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Event;
+
+    public override IRef<IMember>? OverriddenMember => this.OverriddenEvent;
+    
+    public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
 }

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -12,9 +13,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 {
-    private readonly AttributeBuilder _attributeBuilder;
+    private readonly AttributeBuilderData _attributeBuilder;
 
-    public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltAttribute( AttributeBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._attributeBuilder = builder;
     }
@@ -22,20 +23,20 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
     [Memo]
-    private IRef<IAttribute> Ref => this._attributeBuilder.ToAttributeRef(); // TODO generic
+    private IRef<IAttribute> Ref => this._attributeBuilder.ToAttributeRef();
 
     public IRef<IAttribute> ToRef() => this.Ref;
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    public override DeclarationBuilder Builder => this._attributeBuilder;
+    public override DeclarationBuilderData BuilderData => this._attributeBuilder;
 
     [Memo]
-    public INamedType Type => this.MapType( this._attributeBuilder.Type );
+    public INamedType Type => this.Constructor.DeclaringType;
 
     [Memo]
     public IConstructor Constructor
-        => this.Compilation.Factory.Translate( this._attributeBuilder.Constructor, genericContext: this.GenericContext ).AssertNotNull();
+        => this.MapDeclaration( this._attributeBuilder.Constructor ).AssertNotNull();
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments
@@ -52,9 +53,11 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 
     int IAspectPredecessor.PredecessorDegree => 0;
 
-    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this._attributeBuilder.ContainingDeclaration.ToRef();
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this._attributeBuilder.ContainingDeclaration;
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
+
+    public override bool CanBeInherited => false;
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
 }

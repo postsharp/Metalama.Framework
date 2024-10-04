@@ -4,9 +4,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -19,15 +21,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 {
     private readonly BuiltMember _builtMember;
-    private readonly AccessorBuilder _accessorBuilder;
+    private readonly MethodBuilderData _accessorBuilder;
 
-    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builtMember.GenericContext )
+    public BuiltAccessor( BuiltMember builtMember, MethodBuilderData builder ) : base( builtMember.Compilation, builtMember.GenericContext )
     {
         this._builtMember = builtMember;
         this._accessorBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this._accessorBuilder;
+    public override DeclarationBuilderData BuilderData => this._accessorBuilder;
 
     public Accessibility Accessibility => this._accessorBuilder.Accessibility;
 
@@ -106,7 +108,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     [Memo]
     public IParameter ReturnParameter
-        => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext );
+        => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext );
 
     [Memo]
     public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
@@ -115,30 +117,32 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     IReadOnlyList<IType> IGeneric.TypeArguments => [];
 
-    public bool IsGeneric => this._accessorBuilder.IsGeneric;
+    public bool IsGeneric => false;
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this._accessorBuilder.ConstructGenericInstance( typeArguments );
 
-    public IMethod? OverriddenMethod => this._accessorBuilder.OverriddenMethod;
+    [Memo]
+    public IMethod? OverriddenMethod => this.MapDeclaration(this._accessorBuilder.OverriddenMethod);
 
     public INamedType DeclaringType => this._builtMember.DeclaringType;
 
-    public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this._accessorBuilder.ExplicitInterfaceImplementations;
+    [Memo]
+    public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.MapDeclarationList( this._accessorBuilder.ExplicitInterfaceImplementations );
 
-    public MethodInfo ToMethodInfo() => this._accessorBuilder.ToMethodInfo();
+    public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
     IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this._builtMember;
 
-    public MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
+    public MethodBase ToMethodBase() => throw new NotImplementedException();
 
-    public MemberInfo ToMemberInfo() => this._accessorBuilder.ToMemberInfo();
+    public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
     [Memo]
-    public IMember? OverriddenMember => this.Compilation.Factory.Translate( this._accessorBuilder.OverriddenMember, genericContext: this.GenericContext );
+    public IMember? OverriddenMember => this.MapDeclaration( this._accessorBuilder.OverriddenMember );
 
     public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
 

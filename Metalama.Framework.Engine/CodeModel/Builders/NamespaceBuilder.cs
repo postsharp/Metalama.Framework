@@ -22,8 +22,7 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public INamespace? ContainingNamespace { get; }
 
-    public new IRef<INamespaceOrNamedType> ToRef() => this.Ref;
-
+    
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     [Memo]
@@ -32,7 +31,7 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     [Memo]
     public INamespaceCollection Namespaces => new EmptyNamespaceCollection();
 
-    public bool IsPartial => throw new NotImplementedException();
+    public bool IsPartial => false;
 
     public override IDeclaration? ContainingDeclaration => this.ContainingNamespace;
 
@@ -60,10 +59,9 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         return null;
     }
 
-    [Memo]
-    public IRef<INamespace> Ref => this.RefFactory.FromBuilder<INamespace>( this );
 
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    IRef<INamespace> INamespace.ToRef() => throw new NotSupportedException();
 
-    IRef<INamespace> INamespace.ToRef() => this.Ref;
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => throw new NotSupportedException();
+
 }

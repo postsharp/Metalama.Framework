@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
 /// 
 /// </summary>
-internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBasedDeclaration
+internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 {
     public AttributeBuilderCollection Attributes { get; } = new();
 
@@ -70,11 +70,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    public virtual ICompilationElement? Translate(
-        CompilationModel newCompilation,
-        IGenericContext? genericContext = null,
-        Type? interfaceType = null )
-        => newCompilation.Factory.GetDeclaration( this, genericContext, interfaceType );
+    ICompilationElement? ICompilationElementImpl.Translate( CompilationModel newCompilation, IGenericContext? genericContext = null, Type? interfaceType = null ) => throw new NotSupportedException();
 
     public CompilationModel Compilation
         => (CompilationModel?) this.ContainingDeclaration?.Compilation
@@ -114,9 +110,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
     }
 
     public virtual void Freeze() => this.IsFrozen = true;
-
-    public abstract IRef<IDeclaration> ToDeclarationRef();
-
+    
     public SerializableDeclarationId ToSerializableId()
     {
         if ( !this.IsFrozen )
@@ -127,7 +121,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
         return this.GetSerializableId();
     }
 
-    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
+    public IRef<IDeclaration> ToRef() => throw new NotSupportedException();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 
@@ -199,9 +193,5 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
     }
 
     public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
-
-    [Memo]
-    protected RefFactory RefFactory => this.GetCompilationContext().RefFactory;
-
-    IDeclarationBuilder IBuilderBasedDeclaration.Builder => this;
+    
 }

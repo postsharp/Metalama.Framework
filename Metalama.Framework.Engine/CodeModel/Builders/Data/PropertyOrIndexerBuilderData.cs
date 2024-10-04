@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Data;
 
-internal abstract class PropertyOrIndexerBuilderData : MemberOrNamedTypeBuilderData
+internal abstract class PropertyOrIndexerBuilderData : MemberBuilderData
 {
     protected PropertyOrIndexerBuilderData( PropertyOrIndexerBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
@@ -36,5 +36,5 @@ internal abstract class PropertyOrIndexerBuilderData : MemberOrNamedTypeBuilderD
 
     public MethodBuilderData? SetMethod { get; }
 
-    public Writeability Writeability { get;  }
+    public Writeability Writeability { get; }
 }

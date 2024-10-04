@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
     }
 
-    internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
+    internal interface IRefImpl<out T> : IRef<T>, IRefImpl
         where T : class, ICompilationElement
     {
         new IRefImpl<TOut> As<TOut>()

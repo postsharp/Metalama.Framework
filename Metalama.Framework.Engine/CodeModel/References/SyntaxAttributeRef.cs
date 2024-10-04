@@ -24,10 +24,10 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         CompilationContext compilationContext,
         RefTargetKind targetKind = RefTargetKind.Default ) : base(
         new SyntaxRef<IDeclaration>( declaration, targetKind, compilationContext ),
-        attributeType,
-        compilationContext )
+        attributeType )
     {
         this._attributeSyntax = attributeSyntax;
+        this.CompilationContext = compilationContext;
     }
 
     public SyntaxAttributeRef(
@@ -36,11 +36,13 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         ISymbol symbol,
         CompilationContext compilationContext ) : base(
         symbol.ToRef( compilationContext ),
-        attributeType,
-        compilationContext )
+        attributeType )
     {
         this._attributeSyntax = attributeSyntax;
+        this.CompilationContext = compilationContext;
     }
+
+    public CompilationContext CompilationContext { get; }
 
     private ResolvedAttributeRef? _resolvedRef;
 

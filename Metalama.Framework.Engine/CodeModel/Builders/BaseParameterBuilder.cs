@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -33,6 +34,8 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public abstract bool IsReturnParameter { get; }
 
+    IRef<IParameter> IParameter.ToRef() => throw new NotSupportedException();
+
     public sealed override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
     protected BaseParameterBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
@@ -49,10 +52,5 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
                 ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                 true ) );
 
-    [Memo]
-    public IRef<IParameter> Ref => this.RefFactory.FromBuilder<IParameter>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public new IRef<IParameter> ToRef() => this.Ref;
+    
 }

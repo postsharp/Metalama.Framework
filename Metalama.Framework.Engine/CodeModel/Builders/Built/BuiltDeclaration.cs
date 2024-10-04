@@ -3,14 +3,17 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
@@ -27,42 +30,46 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         this.GenericContext = genericContext.AsGenericContext();
     }
 
-    IDeclarationBuilder IBuilderBasedDeclaration.Builder => this.Builder;
+    DeclarationBuilderData IBuilderBasedDeclaration.Builder => this.BuilderData;
 
     public override CompilationModel Compilation { get; }
 
-    public abstract DeclarationBuilder Builder { get; }
+    public abstract DeclarationBuilderData BuilderData { get; }
 
     internal override GenericContext GenericContext { get; }
 
     public sealed override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => DisplayStringFormatter.Format( this );
 
-    [Memo]
-    public override IAssembly DeclaringAssembly => this.Compilation.Factory.Translate( this.Builder.DeclaringAssembly ).AssertNotNull();
+    public override IAssembly DeclaringAssembly => this.Compilation;
 
-    public override IDeclarationOrigin Origin => this.Builder.Origin;
+    public override IDeclarationOrigin Origin => this.BuilderData.ParentAdvice;
 
     [return: NotNullIfNotNull( nameof(type) )]
-    protected T? MapType<T>( T? type )
-        where T : class, IType
+    protected IType? MapType( IRef<IType>? type )
     {
         if ( type == null )
         {
             return null;
         }
 
-        return (T) this.GenericContext.Map( this.Compilation.Factory.Translate( type ) ).AssertNotNull();
+        return type.GetTarget( this.Compilation, this.GenericContext );
     }
 
-    protected T? MapDeclaration<T>( T? declaration )
+    [return: NotNullIfNotNull(nameof(declaration))]
+    protected T? MapDeclaration<T>( IRef<T>? declaration )
         where T : class, ICompilationElement
-        => this.Compilation.Factory.Translate( declaration, genericContext: this.GenericContext );
+        => declaration?.GetTarget(this.Compilation, this.GenericContext);
 
+    protected IReadOnlyList<T> MapDeclarationList<T>( IReadOnlyList<IRef<T>> refs )
+        where T : class, ICompilationElement
+        => refs.Count == 0 ? [] : refs.SelectAsReadOnlyList( this.MapDeclaration );
+    
+            
     [Memo]
-    public override IDeclaration? ContainingDeclaration => this.MapDeclaration( this.Builder.ContainingDeclaration );
+    public override IDeclaration? ContainingDeclaration => this.MapDeclaration( this.BuilderData.ContainingDeclaration );
 
-    public sealed override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
+    public sealed override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
 
     [Memo]
     public override IAttributeCollection Attributes => this.GetAttributes();
@@ -78,15 +85,15 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
             this.Compilation.GetAttributeCollection( definition.ToRef() ) );
     }
 
-    public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
+    public override DeclarationKind DeclarationKind => this.BuilderData.DeclarationKind;
 
-    public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
-
-    public override bool CanBeInherited => this.Builder.CanBeInherited;
-
+    public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
+    
     public sealed override string ToString() => this.ToDisplayString();
 
-    public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
+    public override Location? DiagnosticLocation => this.ContainingDeclaration?.GetDiagnosticLocation();
+
+    
 
     public override bool IsImplicitlyDeclared => false;
 
@@ -94,8 +101,8 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     {
         switch ( other )
         {
-            case BuiltDeclaration builtDeclaration when this.Builder.Equals( builtDeclaration.Builder ):
-            case DeclarationBuilder declarationBuilder when this.Builder.Equals( declarationBuilder ):
+            case BuiltDeclaration builtDeclaration when this.BuilderData.Equals( builtDeclaration.BuilderData ):
+            case DeclarationBuilder declarationBuilder when this.BuilderData.Equals( declarationBuilder ):
                 return true;
 
             default:
@@ -103,7 +110,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         }
     }
 
-    protected override int GetHashCodeCore() => this.Builder.GetHashCode();
+    protected override int GetHashCodeCore() => this.BuilderData.GetHashCode();
 
     public override bool BelongsToCurrentProject => true;
 
@@ -113,5 +120,5 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
-        => this.Builder.Translate( newCompilation, genericContext );
+        => this.BuilderData.Translate( newCompilation, genericContext );
 }

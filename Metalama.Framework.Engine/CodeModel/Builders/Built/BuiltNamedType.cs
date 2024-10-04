@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
@@ -20,24 +21,25 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
-    public NamedTypeBuilder TypeBuilder { get; }
+    public NamedTypeBuilderData TypeBuilder { get; }
 
-    public BuiltNamedType( NamedTypeBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltNamedType( NamedTypeBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.TypeBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this.TypeBuilder;
+    public override DeclarationBuilderData BuilderData => this.TypeBuilder;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.TypeBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.TypeBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.TypeBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.TypeBuilder;
 
     public bool IsPartial => this.TypeBuilder.IsPartial;
 
     public bool HasDefaultConstructor => this.TypeBuilder.HasDefaultConstructor;
 
-    public INamedType? BaseType => this.MapType( this.TypeBuilder.BaseType );
+    [Memo]
+    public INamedType? BaseType => this.MapDeclaration( this.TypeBuilder.BaseType );
 
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(
@@ -51,7 +53,8 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     INamespace INamedType.Namespace => this.ContainingNamespace;
 
-    public INamespace ContainingNamespace => this.TypeBuilder.ContainingNamespace;
+    [Memo]
+    public INamespace ContainingNamespace => this.MapDeclaration( this.TypeBuilder.ContainingNamespace );
 
     [Memo]
     private IRef<INamedType> Ref => this.RefFactory.FromBuilt<INamedType>( this );

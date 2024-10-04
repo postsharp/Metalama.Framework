@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using System;
 using System.Collections.Generic;
 
@@ -9,16 +10,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 {
-    private readonly TypeParameterBuilder _typeParameterBuilder;
+    private readonly TypeParameterBuilderData _typeParameterBuilder;
 
-    public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base(
+    public BuiltTypeParameter( TypeParameterBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base(
         compilation,
         genericContext )
     {
         this._typeParameterBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this._typeParameterBuilder;
+    public override DeclarationBuilderData BuilderData => this._typeParameterBuilder;
 
     public TypeKind TypeKind => TypeKind.TypeParameter;
 
@@ -33,7 +34,7 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
     bool IType.Equals( SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
-        => otherType is BuiltTypeParameter otherBuildTypeParameter && otherBuildTypeParameter.Builder == this.Builder;
+        => otherType is BuiltTypeParameter otherBuildTypeParameter && otherBuildTypeParameter.BuilderData == this.BuilderData;
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 

@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
@@ -13,22 +14,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 {
-    private readonly IndexerBuilder _indexerBuilder;
+    private readonly IndexerBuilderData _indexerBuilder;
 
-    public BuiltIndexer( IndexerBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltIndexer( IndexerBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._indexerBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this._indexerBuilder;
+    public override DeclarationBuilderData BuilderData => this._indexerBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._indexerBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._indexerBuilder;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._indexerBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._indexerBuilder;
 
-    protected override MemberBuilder MemberBuilder => this._indexerBuilder;
+    protected override MemberBuilderData MemberBuilder => this._indexerBuilder;
 
-    protected override PropertyOrIndexerBuilder PropertyOrIndexerBuilder => this._indexerBuilder;
+    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilder => this._indexerBuilder;
 
     [Memo]
     public IParameterList Parameters

@@ -28,8 +28,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
-    protected override IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef() => this.Ref;
-
     public override Writeability Writeability
     {
         get
@@ -61,8 +59,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     IProperty IProperty.Definition => this;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
-
+    
     public virtual IField? OriginalField => null;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
@@ -72,8 +69,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     public override IMember? OverriddenMember => this.OverriddenProperty;
-
-    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public virtual IInjectMemberTransformation ToTransformation()
     {
@@ -164,14 +159,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
             out initializerExpression,
             out initializerMethod );
 
-    [Memo]
-    public CompilationBoundRef<IProperty> Ref => this.RefFactory.FromBuilder<IProperty>( this );
+    IRef<IProperty> IProperty.ToRef() => throw new NotSupportedException();
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => throw new NotSupportedException();
 
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public override IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef() => this.Ref;
-
-    public new IRef<IProperty> ToRef() => this.Ref;
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

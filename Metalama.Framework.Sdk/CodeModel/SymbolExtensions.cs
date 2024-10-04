@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;
 
         public static ISymbol? GetSymbol( this IRef declaration, Compilation compilation, bool ignoreAssemblyKey = false )
-            => ((ISdkRef<ICompilationElement>) declaration).GetSymbol( compilation, ignoreAssemblyKey );
+            => ((ISdkRef) declaration).GetSymbol( compilation, ignoreAssemblyKey );
 
         private static T? GetSymbol<T>( this IDeclaration declaration )
             where T : ISymbol

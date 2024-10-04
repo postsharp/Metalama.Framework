@@ -22,14 +22,16 @@ internal sealed class SymbolAttributeRef : AttributeRef
             containingDeclaration,
             compilationContext.RefFactory.FromSymbol<INamedType>(
                 attributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes )
-                    .TranslateIfNecessary( compilationContext ) ),
-            compilationContext )
+                    .TranslateIfNecessary( compilationContext ) ) )
     {
         // Note that Roslyn can return an AttributeData that does not belong to the same compilation
         // as the parent symbol, probably because of some bug or optimisation.
 
         this._attributeData = attributeData;
+        this.CompilationContext = compilationContext;
     }
+
+    public CompilationContext CompilationContext { get; }
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {

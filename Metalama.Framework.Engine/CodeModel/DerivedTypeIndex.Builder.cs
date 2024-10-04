@@ -45,7 +45,7 @@ public partial class DerivedTypeIndex
 
                     break;
 
-                case IBuilderRef { Builder: INamedTypeBuilder builder }:
+                case IBuilderRef { BuilderData: INamedTypeBuilder builder }:
                     this.AnalyzeType( builder );
 
                     break;

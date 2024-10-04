@@ -183,13 +183,13 @@ internal sealed partial class LinkerInjectionStep
 
                     // Order replaced declarations within the same layer.
                     if ( x.Transformation is IReplaceMemberTransformation { ReplacedMember: IBuilderRef builderRefX }
-                         && builderRefX.Builder == y.DeclarationBuilder )
+                         && builderRefX.BuilderData == y.DeclarationBuilder )
                     {
                         return 1;
                     }
 
                     if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: not null and IBuilderRef builderRefY }
-                         && builderRefY.Builder == x.DeclarationBuilder )
+                         && builderRefY.BuilderData == x.DeclarationBuilder )
                     {
                         return -1;
                     }

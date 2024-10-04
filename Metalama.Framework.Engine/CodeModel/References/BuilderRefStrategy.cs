@@ -18,7 +18,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
     {
         var builderRef = (IBuilderRef) declaration;
 
-        foreach ( var attribute in builderRef.Builder.Attributes )
+        foreach ( var attribute in builderRef.BuilderData.Attributes )
         {
             add( (AttributeRef) attribute.ToRef() );
         }
@@ -26,7 +26,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
 
     public void EnumerateAllImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
     {
-        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).Builder;
+        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).BuilderData;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {
@@ -38,7 +38,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
     {
         // BUG: EnumerateAllImplementedInterfaces and EnumerateImplementedInterfaces should not have the same implementation.
 
-        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).Builder;
+        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).BuilderData;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {
@@ -68,7 +68,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
         DeclarationKind kind,
         CompilationModel compilation )
     {
-        var parentDeclaration = ((IBuilderRef) parent).Builder;
+        var parentDeclaration = ((IBuilderRef) parent).BuilderData;
 
         var collection = GetCollection( parentDeclaration, kind );
 
@@ -77,7 +77,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
 
     public IEnumerable<IRef> GetMembers( IRef parent, DeclarationKind kind, CompilationModel compilation )
     {
-        var parentDeclaration = ((IBuilderRef) parent).Builder;
+        var parentDeclaration = ((IBuilderRef) parent).BuilderData;
 
         var collection = GetCollection( parentDeclaration, kind );
 

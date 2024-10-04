@@ -23,7 +23,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, INamedTypeImpl
+internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, INamedTypeImpl, IMemberOrNamedTypeBuilderImpl
 {
     private bool _isPartial;
     private INamedType? _baseType;
@@ -101,8 +101,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public INamespace ContainingNamespace { get; }
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
-
+    
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     INamespace INamedType.ContainingNamespace => this.ContainingNamespace;
@@ -258,14 +257,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
 
-    [Memo]
-    public IRef<INamedType> Ref => this.RefFactory.FromBuilder<INamedType>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public new IRef<INamedType> ToRef() => this.Ref;
-
-    IRef<IType> IType.ToRef() => this.Ref;
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
+    IRef<INamedType> INamedType.ToRef() => throw new NotSupportedException();
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => throw new NotSupportedException();
+    IRef<IType> IType.ToRef() => throw new NotSupportedException();
 }

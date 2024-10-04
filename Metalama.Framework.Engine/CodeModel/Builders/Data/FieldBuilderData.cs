@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Data;
 
@@ -29,4 +30,8 @@ internal class FieldBuilderData : MemberBuilderData
     public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Field;
+
+    public override IRef<IMember>? OverriddenMember => null;
+
+    public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => [];
 }

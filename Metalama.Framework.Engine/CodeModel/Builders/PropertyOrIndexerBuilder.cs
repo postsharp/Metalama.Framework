@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -26,9 +27,7 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
 
     public AccessorBuilder? SetMethod { get; }
 
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.ToFieldOrPropertyOrIndexerRef();
-
-    protected abstract IRef<IFieldOrPropertyOrIndexer> ToFieldOrPropertyOrIndexerRef();
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => throw new NotSupportedException();
 
     public abstract Writeability Writeability { get; set; }
 
@@ -96,17 +95,16 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
         }
     }
 
-    public abstract IRef<IPropertyOrIndexer> ToPropertyOrIndexerRef();
-
+    
     public override void Freeze()
     {
         base.Freeze();
 
-        ((DeclarationBuilder?) this.GetMethod)?.Freeze();
-        ((DeclarationBuilder?) this.SetMethod)?.Freeze();
+        this.GetMethod?.Freeze();
+        this.SetMethod?.Freeze();
     }
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => this.ToPropertyOrIndexerRef();
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => throw new NotSupportedException();
 }

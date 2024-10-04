@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Builders.Built;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public CompilationBoundRef<T> FromBuilder<T>( IDeclarationBuilder builder, GenericContext? genericContext = null )
+        public CompilationBoundRef<T> FromBuilderData<T>( DeclarationBuilderData builder, GenericContext? genericContext = null )
             where T : class, IDeclaration
         {
             if ( typeof(T) == typeof(IField) && builder is PromotedField promotedField )
@@ -44,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public CompilationBoundRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
             where T : class, IDeclaration
-            => this.FromBuilder<T>( builtDeclaration.Builder, builtDeclaration.GenericContext );
+            => this.FromBuilderData<T>( builtDeclaration.BuilderData, builtDeclaration.GenericContext );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.

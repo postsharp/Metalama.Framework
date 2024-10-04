@@ -102,7 +102,7 @@ internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMem
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.ToMemberOrNamedTypeRef();
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => throw new NotSupportedException();
 
-    public abstract IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef();
+    bool IMemberOrNamedType.IsPartial => false;
 }

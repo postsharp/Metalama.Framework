@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
@@ -39,11 +40,11 @@ internal class AttributeSerializationData
                 x => new KeyValuePair<string, TypedConstantRef>( x.Key, x.Value.ToOurTypedConstantRef( compilationContext ) ) );
     }
 
-    public AttributeSerializationData( AttributeBuilder builder )
+    public AttributeSerializationData( AttributeBuilderData builder )
     {
-        this.ContainingDeclaration = builder.ContainingDeclaration.ToRef();
-        this.Constructor = builder.Constructor.ToRef();
-        this.Type = builder.Type.ToRef();
+        this.ContainingDeclaration = builder.ContainingDeclaration;
+        this.Constructor = builder.Constructor;
+        this.Type = builder.Type;
         this.ConstructorArguments = builder.ConstructorArguments.SelectAsImmutableArray( a => a.ToRef() );
         this.NamedArguments = builder.NamedArguments.SelectAsImmutableArray( x => new KeyValuePair<string, TypedConstantRef>( x.Key, x.Value.ToRef() ) );
     }

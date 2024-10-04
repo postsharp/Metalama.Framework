@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders.Collections;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Data;
@@ -25,4 +26,8 @@ internal class ConstructorBuilderData : MemberBuilderData
     }
 
     public ImmutableArray<ParameterBuilderData> Parameters { get; }
+
+    public override IRef<IMember>? OverriddenMember => null;
+
+    public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => [];
 }

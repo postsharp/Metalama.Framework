@@ -438,7 +438,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             return d switch
             {
-                BuiltDeclaration declaration => GetReplacedDeclarationRecursive( declaration.Builder ),
+                BuiltDeclaration declaration => GetReplacedDeclarationRecursive( declaration.BuilderData ),
                 PromotedField promotedField => promotedField.OriginalSourceFieldOrFieldBuilder,
                 _ => d
             };
@@ -676,7 +676,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                         default:
                             var propertyOrIndexerBuilder = propertyOrIndexer as PropertyOrIndexerBuilder
                                                            ?? (PropertyOrIndexerBuilder) ((BuiltPropertyOrIndexer) insertStatementTransformation.TargetMember)
-                                                           .Builder;
+                                                           .BuilderData;
 
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                                 this._syntaxGenerationOptions,
@@ -732,7 +732,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
                         default:
                             var methodBaseBuilder = methodBase as MethodBaseBuilder
-                                                    ?? (MethodBaseBuilder) ((BuiltMethodBase) insertStatementTransformation.TargetMember).Builder;
+                                                    ?? (MethodBaseBuilder) ((BuiltMethodBase) insertStatementTransformation.TargetMember).BuilderData;
 
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                                 this._syntaxGenerationOptions,
@@ -855,7 +855,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         else
         {
             var parentDeclarationBuilder = (memberLevelTransformation.TargetMember as DeclarationBuilder
-                                            ?? (memberLevelTransformation.TargetMember as BuiltDeclaration)?.Builder)
+                                            ?? (memberLevelTransformation.TargetMember as BuiltDeclaration)?.BuilderData)
                 .AssertNotNull();
 
             memberLevelTransformations = transformationCollection.GetOrAddMemberLevelTransformations( parentDeclarationBuilder );

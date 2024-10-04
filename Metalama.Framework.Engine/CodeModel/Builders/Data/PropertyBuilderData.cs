@@ -4,7 +4,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Data;
 
@@ -21,6 +23,8 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
     public IObjectReader InitializerTags { get; }
 
     public IRef<IProperty>? OverriddenProperty { get; }
+    
+    public IReadOnlyList<IRef<IProperty>> ExplicitInterfaceImplementations { get; }
 
     public PropertyBuilderData( PropertyBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
@@ -29,6 +33,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         this.IsAutoPropertyOrField = builder.IsAutoPropertyOrField;
         this.OverriddenProperty = builder.OverriddenProperty?.ToRef();
         this.InitializerTemplate = builder.InitializerTemplate;
+        this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
 
         // TODO: Potential CompilationModel leak
         this.InitializerTags = builder.InitializerTags;
@@ -37,4 +42,9 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
     public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
+
+    public override IRef<IMember>? OverriddenMember => this.OverriddenProperty;
+    
+    public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
+    
 }

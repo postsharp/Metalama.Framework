@@ -419,7 +419,7 @@ internal sealed class AspectReferenceResolver
         {
             IDeclaration canonicalReplacedMember = replacedMember switch
             {
-                BuiltDeclaration builtDeclaration => builtDeclaration.Builder,
+                BuiltDeclaration builtDeclaration => builtDeclaration.BuilderData,
                 _ => replacedMember
             };
 

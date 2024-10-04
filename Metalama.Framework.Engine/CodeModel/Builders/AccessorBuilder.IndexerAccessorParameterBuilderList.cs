@@ -40,18 +40,6 @@ internal partial class AccessorBuilder
                 _ => this[this.Indexer.Parameters[name].Index]
             };
 
-        public ImmutableArray<ParameterBuilderData> ToImmutable( IRef<IDeclaration> containingDeclaration )
-        {
-            if ( this.Count == 0 )
-            {
-                return ImmutableArray<ParameterBuilderData>.Empty;
-            }
-            else
-            {
-                return this._parameters.SelectAsImmutableArray( p => new ParameterBuilderData( p, containingDeclaration ) );
-            }
-        }
-
         public object ToValueArray() => new ValueArrayExpression( this );
 
         public IParameterBuilder this[ int index ]

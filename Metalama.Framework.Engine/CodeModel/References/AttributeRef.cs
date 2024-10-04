@@ -15,19 +15,16 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// </summary>
     internal abstract class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
-        protected AttributeRef( IRef<IDeclaration> containingDeclaration, IRef<INamedType> attributeType, CompilationContext compilationContext )
+        protected AttributeRef( IRef<IDeclaration> containingDeclaration, IRef<INamedType> attributeType )
         {
             this.ContainingDeclaration = containingDeclaration;
             this.AttributeType = attributeType;
-            this.CompilationContext = compilationContext;
         }
 
         public IRef<IDeclaration> ContainingDeclaration { get; }
 
         public IRef<INamedType> AttributeType { get; }
-
-        public CompilationContext CompilationContext { get; }
-
+        
         public ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
             => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
 

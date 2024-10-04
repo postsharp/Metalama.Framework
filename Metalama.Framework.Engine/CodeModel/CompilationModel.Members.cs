@@ -387,7 +387,7 @@ public sealed partial class CompilationModel
             {
                 var newBuilder = introduceDeclarationTransformation.DeclarationBuilder;
 
-                Invariant.Assert( !(replacedMember is IBuilderRef replacedBuilderRef && newBuilder.Equals( replacedBuilderRef.Builder )) );
+                Invariant.Assert( !(replacedMember is IBuilderRef replacedBuilderRef && newBuilder.Equals( replacedBuilderRef.BuilderData )) );
 
                 this._redirections = this._redirections.Add( replacedMember.ToRef(), newBuilder );
             }

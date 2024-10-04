@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using System;
 using System.Collections.Generic;
@@ -10,20 +11,20 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 {
-    private readonly NamespaceBuilder _namespaceBuilder;
+    private readonly NamespaceBuilderData _namespaceBuilder;
 
-    public BuiltNamespace( NamespaceBuilder builder, CompilationModel compilation ) : base( compilation, GenericContext.Empty )
+    public BuiltNamespace( NamespaceBuilderData builder, CompilationModel compilation ) : base( compilation, GenericContext.Empty )
     {
         this._namespaceBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this._namespaceBuilder;
+    public override DeclarationBuilderData BuilderData => this._namespaceBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._namespaceBuilder;
+    protected override NamespaceBuilderData NamedDeclarationBuilder => this._namespaceBuilder;
 
     public string FullName => this._namespaceBuilder.FullName;
 
-    public bool IsGlobalNamespace => this._namespaceBuilder.IsGlobalNamespace;
+    public bool IsGlobalNamespace => false;
 
     public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
 

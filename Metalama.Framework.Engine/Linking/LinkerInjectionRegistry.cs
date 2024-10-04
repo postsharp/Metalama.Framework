@@ -263,7 +263,7 @@ internal sealed class LinkerInjectionRegistry
                     return GetFromBuilder( builder );
 
                 case BuiltMember builtMember:
-                    return GetFromBuilder( builtMember.Builder );
+                    return GetFromBuilder( builtMember.BuilderData );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );

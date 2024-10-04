@@ -7,7 +7,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Data;
 
 internal class ParameterBuilderData : DeclarationBuilderData
 {
-    public ParameterBuilderData( BaseParameterBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration ) { }
+    public string Name { get;  }
+
+    public IRef<IType> Type { get;  }
+
+    public RefKind RefKind { get;  }
+
+    public int Index { get; }
+
+    public TypedConstant? DefaultValue { get; }
+
+    public bool IsParams { get; }
+
+    public ParameterBuilderData( BaseParameterBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    {
+        this.Name = builder.Name;
+        this.Type = builder.Type.ToRef();
+        this.RefKind = builder.RefKind;
+        this.Index = builder.Index;
+        this.DefaultValue = builder.DefaultValue;
+        this.IsParams = builder.IsParams;
+    }
 
     public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
 

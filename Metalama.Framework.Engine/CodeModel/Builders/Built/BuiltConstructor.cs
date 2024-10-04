@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
+using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
@@ -11,28 +14,35 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
-internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
+internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 {
-    private readonly ConstructorBuilder _constructorBuilder;
+    private readonly ConstructorBuilderData _constructorBuilder;
 
-    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation, IGenericContext genericContext ) : base(
+    public BuiltConstructor( ConstructorBuilderData constructorBuilder, CompilationModel compilation, IGenericContext genericContext ) : base(
         compilation,
         genericContext )
     {
         this._constructorBuilder = constructorBuilder;
     }
 
-    public override DeclarationBuilder Builder => this._constructorBuilder;
+    public override DeclarationBuilderData BuilderData => this._constructorBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._constructorBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._constructorBuilder;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._constructorBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._constructorBuilder;
 
-    protected override MemberBuilder MemberBuilder => this._constructorBuilder;
+    protected override MemberBuilderData MemberBuilder => this._constructorBuilder;
+    
+    
+    [Memo]
+    public IParameterList Parameters
+        => new ParameterList(
+            this,
+            this.Compilation.GetParameterCollection( this._constructorBuilder.ToRef() ) );
 
-    protected override MethodBaseBuilder MethodBaseBuilder => this._constructorBuilder;
-
-    public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
+    
+    
+    public MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     [Memo]
     private IRef<IConstructor> Ref

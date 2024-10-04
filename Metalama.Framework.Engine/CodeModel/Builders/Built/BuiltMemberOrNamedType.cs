@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Reflection;
@@ -12,7 +13,7 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
 {
     protected BuiltMemberOrNamedType( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
-    protected abstract MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder { get; }
+    protected abstract MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder { get; }
 
     public Accessibility Accessibility => this.MemberOrNamedTypeBuilder.Accessibility;
 
@@ -26,8 +27,11 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
 
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
+    public bool IsPartial => this.MemberOrNamedTypeBuilder.IsPartial;
+    
+
     [Memo]
-    public INamedType? DeclaringType => this.MapType( this.MemberOrNamedTypeBuilder.DeclaringType );
+    public INamedType? DeclaringType => this.MapDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
@@ -38,4 +42,6 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
     protected abstract IMemberOrNamedType GetDefinition();
 
     IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => (IRef<IMemberOrNamedType>) this.ToDeclarationRef();
+
+
 }

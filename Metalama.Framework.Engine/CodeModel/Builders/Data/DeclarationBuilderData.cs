@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Data;
@@ -27,4 +28,9 @@ internal abstract class DeclarationBuilderData
     public Advice ParentAdvice { get; }
 
     public ImmutableArray<AttributeBuilderData> Attributes { get; }
+
+    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
+
+    public SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
+
 }

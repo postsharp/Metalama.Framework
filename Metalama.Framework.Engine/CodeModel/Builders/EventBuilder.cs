@@ -117,6 +117,8 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
+    IRef<IEvent> IEvent.ToRef() => throw new NotSupportedException();
+
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
     public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
@@ -132,8 +134,6 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
-
-    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public IInjectMemberTransformation ToTransformation()
     {
@@ -162,16 +162,9 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
         base.Freeze();
 
-        ((DeclarationBuilder?) this.AddMethod)?.Freeze();
-        ((DeclarationBuilder?) this.RemoveMethod)?.Freeze();
+        this.AddMethod?.Freeze();
+        this.RemoveMethod?.Freeze();
     }
 
-    [Memo]
-    public IRef<IEvent> Ref => this.RefFactory.FromBuilder<IEvent>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public new IRef<IEvent> ToRef() => this.Ref;
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
+    
 }

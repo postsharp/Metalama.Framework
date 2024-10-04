@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System.Collections.Generic;
@@ -14,22 +15,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 {
-    public PropertyBuilder PropertyBuilder { get; }
+    public PropertyBuilderData PropertyBuilder { get; }
 
-    public BuiltProperty( PropertyBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltProperty( PropertyBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this.PropertyBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this.PropertyBuilder;
+    public override DeclarationBuilderData BuilderData => this.PropertyBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.PropertyBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.PropertyBuilder;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
-    protected override MemberBuilder MemberBuilder => this.PropertyBuilder;
+    protected override MemberBuilderData MemberBuilder => this.PropertyBuilder;
 
-    protected override PropertyOrIndexerBuilder PropertyOrIndexerBuilder => this.PropertyBuilder;
+    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilder => this.PropertyBuilder;
 
     public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 

@@ -38,7 +38,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     public override IDeclaration ContainingDeclaration { get; }
 
-    IRef<IAttribute> IAttribute.ToRef() => this.ToAttributeRef();
+    IRef<IAttribute> IAttribute.ToRef() => throw new NotSupportedException();
 
     IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
@@ -78,8 +78,5 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
-
-    public AttributeRef ToAttributeRef() => this._attributeRef ??= new BuilderAttributeRef( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.ToAttributeRef();
+    
 }

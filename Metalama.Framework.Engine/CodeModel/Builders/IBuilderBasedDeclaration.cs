@@ -2,10 +2,11 @@
 
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal interface IBuilderBasedDeclaration : IDeclarationImpl
 {
-    IDeclarationBuilder Builder { get; }
+    DeclarationBuilderData Builder { get; }
 }

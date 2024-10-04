@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,14 +14,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
 
 internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 {
-    private readonly BaseParameterBuilder _parameterBuilder;
+    private readonly ParameterBuilderData _parameterBuilder;
 
-    public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltParameter( ParameterBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
         this._parameterBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this._parameterBuilder;
+    public override DeclarationBuilderData BuilderData => this._parameterBuilder;
 
     public RefKind RefKind => this._parameterBuilder.RefKind;
 
@@ -36,12 +38,12 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     [Memo]
     public IHasParameters DeclaringMember
-        => this.MapDeclaration( this._parameterBuilder.DeclaringMember )
+        => this.MapDeclaration( this._parameterBuilder.ContainingDeclaration.As<IHasParameters>() )
             .AssertNotNull();
 
-    public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
+    public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
-    public bool IsReturnParameter => this._parameterBuilder.IsReturnParameter;
+    public bool IsReturnParameter => this.Index >= 0;
 
     [Memo]
     private IRef<IParameter> Ref => this.RefFactory.FromBuilt<IParameter>( this );
@@ -56,6 +58,8 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => this._parameterBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
+
+    public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
         => ((IMemberImpl) this.DeclaringMember).GetDerivedDeclarations( options )

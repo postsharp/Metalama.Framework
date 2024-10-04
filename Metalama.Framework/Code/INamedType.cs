@@ -11,11 +11,6 @@ namespace Metalama.Framework.Code
     /// </summary>
     public interface INamedType : IType, IGeneric, INamespaceOrNamedType, IEquatable<INamedType>
     {
-        /// <summary>
-        /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
-        /// </summary>
-        bool IsPartial { get; }
-
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
 

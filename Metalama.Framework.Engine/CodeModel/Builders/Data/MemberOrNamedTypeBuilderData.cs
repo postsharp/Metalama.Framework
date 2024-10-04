@@ -16,6 +16,7 @@ internal abstract class MemberOrNamedTypeBuilderData : NamedDeclarationBuilderDa
         this.HasNewKeyword = builder.HasNewKeyword.AssertNotNull();
         this.IsAbstract = builder.IsAbstract;
         this.IsStatic = builder.IsStatic;
+        this.IsPartial = builder.IsPartial;
     }
 
     public Accessibility Accessibility { get; }
@@ -29,4 +30,11 @@ internal abstract class MemberOrNamedTypeBuilderData : NamedDeclarationBuilderDa
     public bool IsAbstract { get; }
 
     public bool IsStatic { get; }
+    
+    public bool IsPartial { get; }
+
+    
+    public IRef<INamedType>? DeclaringType => this.ContainingDeclaration as IRef<INamedType>;
+    
+    
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
@@ -13,9 +14,9 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 {
     protected BuiltMember( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
-    protected abstract MemberBuilder MemberBuilder { get; }
+    protected abstract MemberBuilderData MemberBuilder { get; }
 
-    public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
+    public abstract bool IsExplicitInterfaceImplementation { get; }
 
     public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
@@ -25,7 +26,7 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 
     public bool IsOverride => this.MemberBuilder.IsOverride;
 
-    public bool HasImplementation => this.MemberBuilder.HasImplementation;
+    public bool HasImplementation => !this.IsAbstract; // TODO - partials?
 
     [Memo]
     public IMember? OverriddenMember => this.MapDeclaration( this.MemberBuilder.OverriddenMember );
@@ -44,5 +45,7 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 
     IMember IMember.Definition => this;
 
-    IRef<IMember> IMember.ToRef() => this.MemberBuilder.ToMemberRef();
+    public abstract IRef<IMember> ToMemberRef();
+
+    IRef<IMember> IMember.ToRef() => this.ToMemberRef();
 }

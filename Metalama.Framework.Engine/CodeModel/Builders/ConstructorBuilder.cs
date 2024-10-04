@@ -54,8 +54,6 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         this.InitializerArguments = new List<(IExpression Expression, string? ParameterName)>();
     }
 
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
-
     public void AddInitializerArgument( IExpression expression, string? parameterName )
     {
         this.CheckNotFrozen();
@@ -66,8 +64,6 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     bool IConstructor.IsPrimary => false;
 
     public override IMember? OverriddenMember => null;
-
-    public override IRef<IMember> ToMemberRef() => this.Ref;
 
     public override bool IsExplicitInterfaceImplementation => false;
 
@@ -101,9 +97,9 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         set => throw new NotSupportedException();
     }
 
-    public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
-
     public override MethodBase ToMethodBase() => this.ToConstructorInfo();
+
+    IRef<IConstructor> IConstructor.ToRef() => throw new NotSupportedException();
 
     public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
@@ -120,12 +116,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    [Memo]
-    private IRef<IConstructor> Ref => this._replacedImplicitConstructor?.ToRef() ?? this.RefFactory.FromBuilder<IConstructor>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public new IRef<IConstructor> ToRef() => this.Ref;
+   
 
     public override ICompilationElement? Translate(
         CompilationModel newCompilation,

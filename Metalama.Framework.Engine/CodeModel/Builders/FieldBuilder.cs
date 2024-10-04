@@ -58,22 +58,13 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public override IMember? OverriddenMember => null;
 
+    
+
     public IProperty? OverridingProperty => null;
 
-    public new IRef<IField> ToRef() => this.Ref;
-
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
-
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Ref;
-
-    public override IRef<IMember> ToMemberRef() => this.Ref;
-
-    [Memo]
-    public IRef<IField> Ref => this.RefFactory.FromBuilder<IField>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => throw new NotSupportedException();
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => throw new NotSupportedException();
+    IRef<IField> IField.ToRef() => throw new NotImplementedException();
 
     public IInjectMemberTransformation ToTransformation()
     {

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
 {
     protected BuiltPropertyOrIndexer( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
-    protected abstract PropertyOrIndexerBuilder PropertyOrIndexerBuilder { get; }
+    protected abstract PropertyOrIndexerBuilderData PropertyOrIndexerBuilder { get; }
 
     public RefKind RefKind => this.PropertyOrIndexerBuilder.RefKind;
 
@@ -27,13 +28,13 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
     [Memo]
     public IMethod? GetMethod
         => this.PropertyOrIndexerBuilder.GetMethod != null
-            ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.GetMethod )
+            ? new BuiltAccessor( this, this.PropertyOrIndexerBuilder.GetMethod )
             : null;
 
     [Memo]
     public IMethod? SetMethod
         => this.PropertyOrIndexerBuilder.SetMethod != null
-            ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.SetMethod )
+            ? new BuiltAccessor( this, this.PropertyOrIndexerBuilder.SetMethod )
             : null;
 
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => (IRef<IFieldOrPropertyOrIndexer>) this.ToDeclarationRef();
@@ -44,5 +45,17 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-    public IEnumerable<IMethod> Accessors => this.PropertyOrIndexerBuilder.Accessors.Select( this.MapDeclaration ).WhereNotNull();
+    public IEnumerable<IMethod> Accessors
+    {
+        get
+        {
+            return (this.GetMethod, this.SetMethod) switch
+            {
+                (null, { } setMethod) => [setMethod],
+                ({ } getMethod, null) => [getMethod],
+                ({ } getMethod, { } setMethod) => [getMethod, setMethod],
+                _ => []
+            };
+        }
+    }
 }

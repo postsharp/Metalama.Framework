@@ -15,8 +15,7 @@ internal sealed class DeserializedAttributeRef : AttributeRef
 
     public DeserializedAttributeRef( AttributeSerializationData serializationData, CompilationContext compilationContext ) : base(
         serializationData.ContainingDeclaration,
-        serializationData.Type,
-        compilationContext )
+        serializationData.Type )
     {
         this._serializationData = serializationData;
     }

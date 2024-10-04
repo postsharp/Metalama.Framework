@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -139,8 +140,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
-        private ImmutableDictionary<IRef, IDeclarationBuilder> _redirections =
-            ImmutableDictionary.Create<IRef, IDeclarationBuilder>( RefEqualityComparer.Default );
+        private ImmutableDictionary<IRef, DeclarationBuilderData> _redirections =
+            ImmutableDictionary.Create<IRef, DeclarationBuilderData>( RefEqualityComparer.Default );
 
         private ImmutableDictionary<IRef<IDeclaration>, int> _depthsCache =
             ImmutableDictionary.Create<IRef<IDeclaration>, int>( RefEqualityComparer<IDeclaration>.Default );
@@ -559,7 +560,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return reference is IRef<IDeclaration> declarationRef && this._redirections.ContainsKey( declarationRef );
         }
 
-        internal bool TryGetRedirectedDeclaration( IRef reference, [NotNullWhen( true )] out IDeclarationBuilder? redirected )
+        internal bool TryGetRedirectedDeclaration( IRef reference, [NotNullWhen( true )] out DeclarationBuilderData? redirected )
         {
             return this._redirections.TryGetValue( reference, out redirected );
         }

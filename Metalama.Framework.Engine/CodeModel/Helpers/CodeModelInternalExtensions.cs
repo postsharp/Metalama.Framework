@@ -63,7 +63,7 @@ internal static class CodeModelInternalExtensions
             switch ( declaration )
             {
                 case BuiltDeclaration builtDeclaration:
-                    return builtDeclaration.Builder.ToInsertPosition();
+                    return builtDeclaration.BuilderData.ToInsertPosition();
 
                 // TODO: This is a hack (since splitting transformations and builders).
                 // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.

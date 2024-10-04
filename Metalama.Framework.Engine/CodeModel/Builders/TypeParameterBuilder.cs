@@ -76,12 +76,6 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
 
-    [Memo]
-    public IRef<ITypeParameter> Ref => this.RefFactory.FromBuilder<ITypeParameter>( this );
-
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
-    public new IRef<ITypeParameter> ToRef() => this.Ref;
-
-    IRef<IType> IType.ToRef() => this.Ref;
+    IRef<ITypeParameter> ITypeParameter.ToRef() => throw new NotSupportedException();
+    IRef<IType> IType.ToRef() => throw new NotSupportedException();
 }
