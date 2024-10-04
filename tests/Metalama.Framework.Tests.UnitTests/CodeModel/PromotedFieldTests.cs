@@ -59,6 +59,7 @@ class C
         Assert.Same( fieldAfter, fieldAfter.SetMethod.ContainingDeclaration );
         Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.GetMethod.ContainingDeclaration );
         Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.SetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.SetMethod.ReturnParameter.ContainingDeclaration.ContainingDeclaration );
 
         // Declaration on references.
         Assert.Same( fieldAfter, field.ToRef().GetTarget( compilation ) );

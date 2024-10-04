@@ -11,10 +11,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 {
+    private readonly IHasParameters? _parent;
     private readonly BaseParameterBuilder _parameterBuilder;
 
-    public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation, IGenericContext genericContext, IHasParameters? parent ) : base( compilation, genericContext )
     {
+        // When BuiltParameter represents the return parameter of the pseudo getter of a promoted field, there is an ambiguity whether
+        // the parent is the getter of the field or of the property. We resolve this ambiguity by explicitly passing the parent when we know it upfront.
+        
+        this._parent = parent;
         this._parameterBuilder = builder;
     }
 
@@ -35,8 +40,10 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     [Memo]
     public IHasParameters DeclaringMember
-        => this.MapDeclaration( this._parameterBuilder.DeclaringMember )
+        => this._parent ?? this.MapDeclaration( this._parameterBuilder.DeclaringMember )
             .AssertNotNull();
+
+    public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
     public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
 

@@ -103,7 +103,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     [Memo]
     public IParameter ReturnParameter
-        => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext );
+        => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );
 
     [Memo]
     public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
@@ -127,6 +127,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public MethodInfo ToMethodInfo() => this._accessorBuilder.ToMethodInfo();
 
     IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this._builtMember;
+
+    public override IDeclaration? ContainingDeclaration => this._builtMember;
 
     public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
 
