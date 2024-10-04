@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
+using MethodBase = System.Reflection.MethodBase;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Built;
@@ -110,7 +111,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     [Memo]
     public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
 
-    public IGenericParameterList TypeParameters => TypeParameterList.Empty;
+    public ITypeParameterList TypeParameters => TypeParameterList.Empty;
 
     IReadOnlyList<IType> IGeneric.TypeArguments => [];
 
@@ -130,7 +131,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this._builtMember;
 
-    public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
+    public MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
 
     public MemberInfo ToMemberInfo() => this._accessorBuilder.ToMemberInfo();
 

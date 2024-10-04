@@ -3,9 +3,13 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders.Collections;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -35,6 +39,18 @@ internal partial class AccessorBuilder
                 (MethodKind.PropertySet, "value") => this[this.Count - 1],
                 _ => this[this.Indexer.Parameters[name].Index]
             };
+
+        public ImmutableArray<ParameterBuilderData> ToImmutable( IRef<IDeclaration> containingDeclaration )
+        {
+            if ( this.Count == 0 )
+            {
+                return ImmutableArray<ParameterBuilderData>.Empty;
+            }
+            else
+            {
+                return this._parameters.SelectAsImmutableArray( p => new ParameterBuilderData( p, containingDeclaration ) );
+            }
+        }
 
         public object ToValueArray() => new ValueArrayExpression( this );
 

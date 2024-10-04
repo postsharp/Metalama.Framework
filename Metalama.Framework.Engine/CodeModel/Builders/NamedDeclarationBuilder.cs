@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal abstract class NamedDeclarationBuilder : DeclarationBuilder, INamedDeclaration
+internal abstract class NamedDeclarationBuilder : DeclarationBuilder, INamedDeclarationBuilderImpl
 {
     private string _name;
 

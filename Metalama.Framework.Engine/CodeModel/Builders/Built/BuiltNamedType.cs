@@ -158,7 +158,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public bool? IsNullable => this.TypeBuilder.IsNullable;
 
-    public IGenericParameterList TypeParameters => this.TypeBuilder.TypeParameters;
+    public ITypeParameterList TypeParameters => this.TypeBuilder.TypeParameters;
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters.SelectAsImmutableArray( this.MapType );

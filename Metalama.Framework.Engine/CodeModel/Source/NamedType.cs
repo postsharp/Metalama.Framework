@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public bool Equals( IType? otherType, TypeComparison typeComparison ) => this.Implementation.Equals( otherType, typeComparison );
 
-        public IGenericParameterList TypeParameters
+        public ITypeParameterList TypeParameters
         {
             get
             {

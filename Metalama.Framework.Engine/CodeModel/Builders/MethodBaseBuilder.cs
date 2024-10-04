@@ -7,12 +7,15 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Builders.Collections;
 using System;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, IMethodBaseImpl
 {
     public ParameterBuilderList Parameters { get; } = new();
+
+    public abstract BaseParameterBuilder? ReturnParameter { get; set; }
 
     public override void Freeze()
     {
@@ -51,7 +54,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
 
     public abstract IRef<IMethodBase> ToMethodBaseRef();
 
-    public abstract System.Reflection.MethodBase ToMethodBase();
+    public abstract MethodBase ToMethodBase();
 
     public new IRef<IMethodBase> ToRef() => this.ToMethodBaseRef();
 

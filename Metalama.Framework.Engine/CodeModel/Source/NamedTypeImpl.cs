@@ -296,7 +296,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     }
 
     [Memo]
-    public IGenericParameterList TypeParameters
+    public ITypeParameterList TypeParameters
         => new TypeParameterList(
             this._facade.Definition,
             this.NamedTypeSymbol.TypeParameters.Select( x => this.RefFactory.FromSymbol<ITypeParameter>( x ) )

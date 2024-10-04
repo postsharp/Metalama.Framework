@@ -28,7 +28,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     private bool _isPartial;
     private INamedType? _baseType;
 
-    public GenericParameterBuilderList TypeParameters { get; } = new();
+    public TypeParameterBuilderList TypeParameters { get; } = new();
 
     public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
         advice,
@@ -185,7 +185,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public bool? IsNullable => false;
 
-    IGenericParameterList IGeneric.TypeParameters => this.TypeParameters;
+    ITypeParameterList IGeneric.TypeParameters => this.TypeParameters;
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments => Array.Empty<IType>();

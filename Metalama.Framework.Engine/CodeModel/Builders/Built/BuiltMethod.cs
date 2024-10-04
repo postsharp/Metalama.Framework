@@ -47,7 +47,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 
     IHasAccessors? IMethod.DeclaringMember => null;
 
-    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
+    public override MethodBase ToMethodBase() => this.ToMethodInfo();
 
     [Memo]
     private IRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
@@ -63,7 +63,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
     public IType ReturnType => this.MapType( this._methodBuilder.ReturnParameter.Type );
 
     [Memo]
-    public IGenericParameterList TypeParameters
+    public ITypeParameterList TypeParameters
         => new TypeParameterList(
             this,
             this._methodBuilder.TypeParameters.AsBuilderList.Select( x => this.RefFactory.FromBuilder<ITypeParameter>( x ) ).ToReadOnlyList() );

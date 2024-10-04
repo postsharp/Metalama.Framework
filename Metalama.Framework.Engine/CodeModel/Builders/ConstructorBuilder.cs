@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using MethodBase = System.Reflection.MethodBase;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -94,9 +95,15 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     IConstructor IConstructor.Definition => this;
 
+    public override BaseParameterBuilder? ReturnParameter
+    {
+        get => null;
+        set => throw new NotSupportedException();
+    }
+
     public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
 
-    public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
+    public override MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 

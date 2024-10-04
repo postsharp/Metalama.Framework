@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -44,7 +45,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
-    
+
     public INamedType Type => this.Constructor.DeclaringType;
 
     public IConstructor Constructor => this.AttributeConstruction.Constructor;

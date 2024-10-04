@@ -10,5 +10,5 @@ namespace Metalama.Framework.Code.Collections
     /// <remarks>
     ///  <para>The order of items in this list is undetermined and may change between versions.</para>
     /// </remarks>
-    public interface IGenericParameterList : IReadOnlyList<ITypeParameter>;
+    public interface ITypeParameterList : IReadOnlyList<ITypeParameter>;
 }

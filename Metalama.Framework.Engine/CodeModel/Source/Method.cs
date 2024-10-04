@@ -43,7 +43,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
 
     [Memo]
-    public IGenericParameterList TypeParameters
+    public ITypeParameterList TypeParameters
         => new TypeParameterList(
             this,
             this.MethodSymbol.TypeParameters.Select( x => this.RefFactory.FromSymbol<ITypeParameter>( x ) )

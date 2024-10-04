@@ -21,7 +21,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodImpl
+internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuilderImpl
 {
     public MemberBuilder ContainingMember { get; }
 
@@ -29,6 +29,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     private bool _isIteratorMethod;
 
     public bool? IsIteratorMethod => this._isIteratorMethod;
+
+    IParameterBuilderList IHasParametersBuilder.Parameters => this.Parameters;
 
     internal void SetIsIteratorMethod( bool value ) => this._isIteratorMethod = value;
 
@@ -40,8 +42,12 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
         this.IsImplicitlyDeclared = isImplicit;
     }
 
+    TypeParameterBuilderList IMethodBuilderImpl.TypeParameters => TypeParameterBuilderList.Empty;
+
+    IParameterBuilder IMethodBuilder.ReturnParameter => this.ReturnParameter;
+
     [Memo]
-    public IParameterBuilder ReturnParameter
+    public BaseParameterBuilder ReturnParameter
         => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
         {
             (PropertyBuilder or IndexerBuilder, MethodKind.PropertyGet) => new PropertyGetReturnParameterBuilder( this ),
@@ -59,7 +65,7 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     }
 
     [Memo]
-    public IGenericParameterList TypeParameters => TypeParameterList.Empty;
+    public ITypeParameterList TypeParameters => TypeParameterList.Empty;
 
     public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
@@ -285,14 +291,14 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this.ContainingMember;
 
-    public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
+    public MethodBase ToMethodBase() => throw new NotImplementedException();
 
     IRef<IMethodBase> IMethodBase.ToRef() => this.Ref;
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
-    
+
     public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;

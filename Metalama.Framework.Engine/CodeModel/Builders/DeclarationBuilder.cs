@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Builders.Collections;
 using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -34,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// </summary>
 internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBasedDeclaration
 {
-    private readonly AttributeBuilderCollection _attributes = new();
+    public AttributeBuilderCollection Attributes { get; } = new();
 
     protected DeclarationBuilder( Advice parentAdvice )
     {
@@ -53,7 +54,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
 
     public abstract IDeclaration? ContainingDeclaration { get; }
 
-    IAttributeCollection IDeclaration.Attributes => this._attributes;
+    IAttributeCollection IDeclaration.Attributes => this.Attributes;
 
     public abstract DeclarationKind DeclarationKind { get; }
 
@@ -95,21 +96,21 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IBuilderBa
     {
         this.CheckNotFrozen();
 
-        this._attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
+        this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
     }
 
     public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
     {
         this.CheckNotFrozen();
 
-        this._attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
+        this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
     }
 
     public void RemoveAttributes( INamedType type )
     {
         this.CheckNotFrozen();
 
-        this._attributes.RemoveAll( a => a.Type.Is( type ) );
+        this.Attributes.RemoveAll( a => a.Type.Is( type ) );
     }
 
     public virtual void Freeze() => this.IsFrozen = true;

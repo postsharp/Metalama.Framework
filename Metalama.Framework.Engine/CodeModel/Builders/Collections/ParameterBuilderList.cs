@@ -3,13 +3,15 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders.Collections;
 
-internal sealed class ParameterBuilderList : List<BaseParameterBuilder>, IParameterBuilderList, IParameterList
+internal sealed class ParameterBuilderList : List<BaseParameterBuilder>, IParameterList, IParameterBuilderList
 {
     public ParameterBuilderList() { }
 

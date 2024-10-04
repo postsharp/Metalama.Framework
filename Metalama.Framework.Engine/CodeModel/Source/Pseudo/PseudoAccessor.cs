@@ -44,7 +44,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
             : ((IFieldOrProperty) this.DeclaringMember).Type;
 
     [Memo]
-    public IGenericParameterList TypeParameters => TypeParameterList.Empty;
+    public ITypeParameterList TypeParameters => TypeParameterList.Empty;
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;

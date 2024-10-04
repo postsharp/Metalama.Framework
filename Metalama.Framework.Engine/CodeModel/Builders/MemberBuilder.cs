@@ -21,7 +21,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
+internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilderImpl
 {
     private bool _isVirtual;
     private bool _isAsync;

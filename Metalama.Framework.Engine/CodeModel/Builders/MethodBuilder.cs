@@ -18,12 +18,12 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethodImpl
+internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 {
     private bool _isReadOnly;
     private bool _isIteratorMethod;
 
-    public GenericParameterBuilderList TypeParameters { get; } = new();
+    public TypeParameterBuilderList TypeParameters { get; } = new();
 
     public bool IsReadOnly
     {
@@ -81,7 +81,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     IType IMethod.ReturnType => this.ReturnParameter.Type;
 
-    public ParameterBuilder ReturnParameter { get; }
+    public override BaseParameterBuilder ReturnParameter { get; set; }
 
     IParameter IMethod.ReturnParameter => this.ReturnParameter;
 
@@ -89,7 +89,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     IParameterBuilderList IHasParametersBuilder.Parameters => this.Parameters;
 
-    IGenericParameterList IGeneric.TypeParameters => this.TypeParameters;
+    ITypeParameterList IGeneric.TypeParameters => this.TypeParameters;
 
     public bool IsGeneric => this.TypeParameters.Count > 0;
 
@@ -107,7 +107,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     public override IRef<IMethodBase> ToMethodBaseRef() => this.Ref;
 
-    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
+    public override MethodBase ToMethodBase() => this.ToMethodInfo();
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 

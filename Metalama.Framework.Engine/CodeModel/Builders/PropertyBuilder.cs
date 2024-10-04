@@ -55,7 +55,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     bool? IFieldOrProperty.IsAutoPropertyOrField => this.IsAutoPropertyOrField;
 
-    protected IObjectReader InitializerTags { get; }
+    public IObjectReader InitializerTags { get; }
 
     public IProperty? OverriddenProperty { get; set; }
 

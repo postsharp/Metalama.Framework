@@ -2,10 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Builders.Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel.Builders;
+namespace Metalama.Framework.Engine.CodeModel.Builders.Collections;
 
 internal sealed class AttributeBuilderCollection : List<AttributeBuilder>, IAttributeCollection
 {
@@ -22,7 +25,7 @@ internal sealed class AttributeBuilderCollection : List<AttributeBuilder>, IAttr
     public IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate ) => throw new NotImplementedException();
 
     public IEnumerable<T> GetConstructedAttributesOfType<T>()
-        where T : System.Attribute
+        where T : Attribute
         => throw new NotImplementedException();
 
     public bool Any( IType type ) => throw new NotImplementedException();
@@ -32,4 +35,16 @@ internal sealed class AttributeBuilderCollection : List<AttributeBuilder>, IAttr
     public bool Any( Type type ) => throw new NotImplementedException();
 
     public bool Any( Type type, ConversionKind conversionKind ) => throw new NotImplementedException();
+
+    public ImmutableArray<AttributeBuilderData> ToImmutable( IRef<IDeclaration> containingDeclaration )
+    {
+        if ( this.Count == 0 )
+        {
+            return ImmutableArray<AttributeBuilderData>.Empty;
+        }
+        else
+        {
+            return this.SelectAsImmutableArray( a => new AttributeBuilderData( a, containingDeclaration ) );
+        }
+    }
 }

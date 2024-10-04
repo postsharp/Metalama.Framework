@@ -63,10 +63,13 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
     [Memo]
-    public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this.IsEventField );
+    public AccessorBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this.IsEventField );
 
     [Memo]
-    public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this.IsEventField );
+    public AccessorBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this.IsEventField );
+
+    IMethodBuilder IEventBuilder.AddMethod => this.AddMethod;
+    IMethodBuilder IEventBuilder.RemoveMethod => this.RemoveMethod;
 
     public IMethodBuilder? RaiseMethod => null;
 

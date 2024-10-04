@@ -15,15 +15,13 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterBuilder, ISdkType
+internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParameterBuilder, ISdkType
 {
     private readonly List<IType> _typeConstraints = new();
 
-    public string Name { get; set; }
-
     public int Index { get; }
 
-    IReadOnlyList<IType> ITypeParameter.TypeConstraints => this._typeConstraints;
+    public IReadOnlyList<IType> TypeConstraints => this._typeConstraints;
 
     public IReadOnlyList<IType> ReadOnlyTypeConstraints => this._typeConstraints;
 
@@ -57,20 +55,18 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
-    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
+    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice, name )
     {
         this.ContainingDeclaration = containingMethod;
         this.Index = index;
-        this.Name = name;
     }
 
-    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.ParentAdvice )
+    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.ParentAdvice, name )
     {
         this.ContainingDeclaration = containingType;
         this.Index = index;
-        this.Name = name;
     }
-    
+
     bool IType.Equals( SpecialType specialType ) => false;
 
     bool IEquatable<IType>.Equals( IType? other ) => this.Equals( other, TypeComparison.Default );

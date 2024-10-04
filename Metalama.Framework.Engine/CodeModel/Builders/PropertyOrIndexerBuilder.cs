@@ -22,9 +22,9 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
 
     public RefKind RefKind { get; set; }
 
-    public IMethodBuilder? GetMethod { get; }
+    public AccessorBuilder? GetMethod { get; }
 
-    public IMethodBuilder? SetMethod { get; }
+    public AccessorBuilder? SetMethod { get; }
 
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.ToFieldOrPropertyOrIndexerRef();
 
@@ -45,7 +45,11 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
 
     IMethod? IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;
 
+    IMethodBuilder? IPropertyOrIndexerBuilder.GetMethod => this.GetMethod;
+
     IMethod? IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
+
+    IMethodBuilder? IPropertyOrIndexerBuilder.SetMethod => this.SetMethod;
 
     protected PropertyOrIndexerBuilder(
         Advice advice,
