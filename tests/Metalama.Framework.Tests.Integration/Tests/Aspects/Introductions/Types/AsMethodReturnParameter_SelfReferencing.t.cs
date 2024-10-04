@@ -1,1 +1,11 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+[IntroductionAttribute]
+public class TargetType
+{
+  class IntroducedNestedType
+  {
+    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.AsMethodReturnParameter_SelfReferencing.TargetType.IntroducedNestedType Method()
+    {
+      return default;
+    }
+  }
+}
