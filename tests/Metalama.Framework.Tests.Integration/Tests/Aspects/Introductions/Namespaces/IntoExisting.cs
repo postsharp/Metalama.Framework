@@ -1,6 +1,4 @@
-﻿
-
-using System;
+﻿using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -17,6 +15,8 @@ public class IntroductionAttribute : TypeAspect
         builder.IntroduceField( "Field", @class.Declaration );
     }
 }
+
+#pragma warning disable CS8618
 
 // <target>
 [IntroductionAttribute]

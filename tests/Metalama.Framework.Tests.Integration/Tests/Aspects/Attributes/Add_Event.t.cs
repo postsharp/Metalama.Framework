@@ -1,6 +1,3 @@
-// Warning CS8618 on `Event1`: `Non-nullable event 'Event1' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
-// Warning CS8618 on `Event2`: `Non-nullable event 'Event2' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
-// Warning CS8618 on `Event3`: `Non-nullable event 'Event3' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
 internal class C
 {
   [MyAspect]

@@ -914,14 +914,14 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     i => i
                         .Named( $"Advice({aspectLayer.AspectName})" )
                         .WithArgumentsForConstructor(
-                        [
+                        new object[] {
                             new Advice.AdviceConstructorParameters(
                                 fakeAspectInstance,
                                 fakeAspectInstance.TemplateInstances.Values.Single(),
                                 A.Fake<IDeclarationImpl>( p => p.Named( $"Advice({aspectLayer.AspectName}).P1" ) ),
                                 A.Fake<ICompilation>( p => p.Named( $"Advice({aspectLayer.AspectName}).P2" ) ),
                                 aspectLayer.LayerName )
-                        ] ) );
+                        } ) );
             }
         }
     }

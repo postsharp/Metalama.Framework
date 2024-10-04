@@ -4,8 +4,6 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.OverriddenProperty_Half;
 
-#pragma warning disable CS8618
-
 internal class NotNullAttribute : ContractAspect
 {
     public ContractDirection Direction { get; set; }
@@ -20,6 +18,8 @@ internal class NotNullAttribute : ContractAspect
         }
     }
 }
+
+#pragma warning disable CS8618
 
 internal class B
 {

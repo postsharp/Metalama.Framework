@@ -1,4 +1,4 @@
-// Warning CS8618 on `EventField`: `Non-nullable event 'EventField' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
+// Warning CS8618 on `EventField`: `Non-nullable event 'EventField' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the event as nullable.`
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeImplicitMembers
 {
   partial class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeImplicitMembers.IInterface

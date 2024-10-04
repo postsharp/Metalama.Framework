@@ -42,7 +42,7 @@ public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
 
     public IEnumerable<IHierarchicalOptions> GetOptions(in OptionsProviderContext context)
     {
-        return [new MyOptions { MyOption1 = MyOption1, MyOption2 = MyOption2 }];
+        return new[] { new MyOptions { MyOption1 = MyOption1, MyOption2 = MyOption2 } };
     }
 }
 

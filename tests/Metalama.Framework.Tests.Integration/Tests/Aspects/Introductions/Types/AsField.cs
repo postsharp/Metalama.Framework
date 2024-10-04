@@ -36,6 +36,8 @@ public class IntroductionAttribute : TypeAspect
     public object? FieldTemplate;
 }
 
+#pragma warning disable CS8618
+
 // <target>
 [IntroductionAttribute]
 public class TargetType

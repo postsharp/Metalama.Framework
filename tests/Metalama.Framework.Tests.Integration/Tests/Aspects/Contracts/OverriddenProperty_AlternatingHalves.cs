@@ -4,8 +4,6 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.OverriddenProperty_AlternatingHalves;
 
-#pragma warning disable CS8618
-
 internal class NotNullAttribute : ContractAspect
 {
     public override void Validate( dynamic? value )
@@ -16,6 +14,8 @@ internal class NotNullAttribute : ContractAspect
         }
     }
 }
+
+#pragma warning disable CS8618
 
 // <target>
 internal class B

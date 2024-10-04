@@ -28,7 +28,7 @@ public class Marker : Attribute
     public string? Value { get; set; }
 }
 
-public class DerivedMarker : Marker;
+public class DerivedMarker : Marker { }
 
 public class TheAspect : OverrideMethodAspect
 {
