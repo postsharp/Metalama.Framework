@@ -3,8 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.Builders.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Formatting;

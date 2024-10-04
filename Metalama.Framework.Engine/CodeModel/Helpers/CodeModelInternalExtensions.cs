@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.Builders.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;

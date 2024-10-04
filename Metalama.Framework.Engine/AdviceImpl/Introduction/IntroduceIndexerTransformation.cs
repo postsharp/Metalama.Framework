@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.Builders.Helpers;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;

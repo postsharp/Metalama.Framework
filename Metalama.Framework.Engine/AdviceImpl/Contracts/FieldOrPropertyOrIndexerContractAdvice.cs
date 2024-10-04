@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;

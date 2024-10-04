@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using System.Linq;
 using Xunit;
 

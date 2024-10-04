@@ -3,7 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
