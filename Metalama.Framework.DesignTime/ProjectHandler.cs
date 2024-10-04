@@ -38,7 +38,7 @@ public abstract class ProjectHandler : IDisposable
         this.ProjectOptions = projectOptions;
         this.ProjectKey = projectKey;
         this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
-        this.PendingTasks = new TaskBag( this.Logger );
+        this.PendingTasks = new TaskBag( this.Logger, serviceProvider );
         this._taskRunner = this.ServiceProvider.GetRequiredService<ITaskRunner>();
     }
 

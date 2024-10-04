@@ -41,6 +41,7 @@ namespace Metalama.Framework.DesignTime
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
         private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         static TheDiagnosticSuppressor()
         {
@@ -53,6 +54,8 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticSuppressor( GlobalServiceProvider serviceProvider )
         {
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
+
             try
             {
                 this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
@@ -63,7 +66,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
 
                 throw;
             }
@@ -208,7 +211,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
             }
         }
 

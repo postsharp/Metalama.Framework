@@ -2,6 +2,9 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.Utilities;
@@ -13,11 +16,13 @@ public sealed class TaskBag
 {
     private readonly ConcurrentDictionary<int, (Task Task, Func<Task> Func)> _pendingTasks = new();
     private readonly ILogger _logger;
+    private readonly DesignTimeExceptionHandler _exceptionHandler;
     private int _nextId;
 
-    public TaskBag( ILogger logger )
+    public TaskBag( ILogger logger, ServiceProvider<IGlobalService> exceptionHandler )
     {
         this._logger = logger;
+        this._exceptionHandler = exceptionHandler.GetRequiredService<DesignTimeExceptionHandler>();
     }
 
     public void Run( Func<Task> asyncAction, CancellationToken cancellationToken = default )
@@ -35,7 +40,7 @@ public sealed class TaskBag
                 }
                 catch ( Exception e )
                 {
-                    DesignTimeExceptionHandler.ReportException( e, this._logger );
+                    this._exceptionHandler.ReportException(e, this._logger);
                 }
                 finally
                 {

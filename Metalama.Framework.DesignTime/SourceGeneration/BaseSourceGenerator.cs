@@ -36,6 +36,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         private readonly ConcurrentDictionary<ProjectKey, ProjectHandler?> _projectHandlers = new();
         private readonly TouchIdComparer _touchIdComparer;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         protected BaseSourceGenerator( ServiceProvider<IGlobalService> serviceProvider )
         {
@@ -43,6 +44,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
             this._touchIdComparer = new TouchIdComparer( this._logger );
             this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
         }
 
         protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey );
@@ -84,7 +86,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
 
                 // We rethrow the exception because it is important that the user knows that there was a problem,
                 // given that the compilation may be broken.
