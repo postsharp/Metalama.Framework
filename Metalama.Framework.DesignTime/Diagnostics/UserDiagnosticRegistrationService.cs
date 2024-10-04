@@ -20,9 +20,11 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         // Multiple instances are needed for testing.
         private readonly UserDiagnosticsConfiguration _registrationFile;
         private readonly IConfigurationManager _configurationManager;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         public UserDiagnosticRegistrationService( GlobalServiceProvider serviceProvider )
         {
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
             this._configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
             this._registrationFile = this._configurationManager.Get<UserDiagnosticsConfiguration>();
         }
@@ -67,7 +69,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             {
                 // We swallow exceptions because we don't want to fail the pipeline in case of error here.
                 this._configurationManager.Logger.Error?.Log( $"Cannot register user diagnostics and registrations: {e.Message}." );
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
             }
         }
 

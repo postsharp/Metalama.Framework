@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
 #pragma warning disable VSTHRD200
 
-public sealed class DiagnosticAnalyzerTests : UnitTestClass
+public sealed class DiagnosticAnalyzerTests : FrameworkBaseTestClass
 {
     private async Task<List<Diagnostic>> RunAnalyzer( string code, string? dependencyCode = null )
     {
