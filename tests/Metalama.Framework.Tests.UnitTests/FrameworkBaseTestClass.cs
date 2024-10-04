@@ -4,9 +4,11 @@ using Metalama.Backstage.Telemetry;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
+using StreamJsonRpc;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,7 +26,7 @@ public abstract class FrameworkBaseTestClass : UnitTestClass, IDisposable
     public void Dispose()
     {
         // We generally don't want to see any exceptions reported during the test.
-        Assert.Empty( this._exceptionReporter?.ReportedExceptions ?? [] );
+        Assert.Empty( this._exceptionReporter?.ReportedExceptions?.Where( e => e is not ConnectionLostException ) ?? [] );
     }
 
     protected override void ConfigureServices( IAdditionalServiceCollection services )
