@@ -413,7 +413,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
                 case MethodKind.PropertyGet:
                     {
-                        var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
+                        var propertyOrIndexer = (IFieldOrPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.SelectGetterTemplate( propertyOrIndexer, templateSelector.AsGetterTemplateSelector(), true )
                             ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
@@ -421,9 +421,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
                         switch ( propertyOrIndexer )
                         {
-                            case IProperty property:
+                            case IFieldOrProperty fieldOrProperty:
                                 return new OverrideFieldOrPropertyAdvice(
-                                        this.GetAdviceConstructorParameters<IFieldOrProperty>( property ),
+                                        this.GetAdviceConstructorParameters( fieldOrProperty ),
                                         getTemplate: template,
                                         setTemplate: null,
                                         this.GetTagsReader( tags ) )
@@ -446,7 +446,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
                 case MethodKind.PropertySet:
                     {
-                        var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
+                        var propertyOrIndexer = (IFieldOrPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )
                             ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
@@ -454,9 +454,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
                         switch ( propertyOrIndexer )
                         {
-                            case IProperty property:
+                            case IFieldOrProperty property:
                                 return new OverrideFieldOrPropertyAdvice(
-                                        this.GetAdviceConstructorParameters<IFieldOrProperty>( property ),
+                                        this.GetAdviceConstructorParameters( property ),
                                         getTemplate: null,
                                         setTemplate: template,
                                         this.GetTagsReader( tags ) )

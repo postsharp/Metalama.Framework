@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -504,11 +503,11 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             return this.Implementation.IsImplementationOfInterfaceMember( typeMember, interfaceMember );
         }
 
-        internal ITypeImpl WithTypeArguments( ImmutableArray<IType> types )
+        internal ITypeImpl WithTypeArguments( IReadOnlyList<IType> types )
         {
             var hasDifference = false;
 
-            for ( var i = 0; i < types.Length; i++ )
+            for ( var i = 0; i < types.Count; i++ )
             {
                 if ( types[i] != this.TypeArguments[i] )
                 {
@@ -523,14 +522,15 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 return this;
             }
 
-            var typeArgumentSymbols = new ITypeSymbol[types.Length];
+            var typeArgumentSymbols = new ITypeSymbol[types.Count];
 
-            for ( var i = 0; i < types.Length; i++ )
+            for ( var index = 0; index < types.Count; index++ )
             {
-                typeArgumentSymbols[i] = types[i].GetSymbol().AssertSymbolNotNull();
+                var t = types[index];
+                typeArgumentSymbols[index] = t.GetSymbol().AssertSymbolNotNull();
             }
 
-            var symbol = ((INamedTypeSymbol) this.TypeSymbol.OriginalDefinition).Construct( typeArgumentSymbols );
+            var symbol = ((INamedTypeSymbol) this.TypeSymbol).ConstructedFrom.Construct( typeArgumentSymbols );
 
             return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
         }

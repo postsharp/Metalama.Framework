@@ -18,7 +18,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
     public static GenericContext Empty { get; } = new();
 
     public INamedTypeSymbol? NamedTypeSymbol { get; }
-    
+
     public IMethodSymbol? MethodSymbol { get; }
 
     public CompilationContext? CompilationContext { get; }
@@ -27,13 +27,13 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
 
     // Creates the Empty instance.
     private GenericContext() { }
-    
+
     private GenericContext( INamedTypeSymbol namedTypeSymbol, IMethodSymbol? methodSymbol, CompilationContext? compilationContext )
     {
         // Assert that we only create a non-empty GenericContext only when we have a non-canonical mapping.
         Invariant.Assert( !namedTypeSymbol.IsDefinitionSafe() || methodSymbol != null );
         Invariant.Assert( methodSymbol == null || !methodSymbol.IsDefinitionSafe() );
-        
+
         this.NamedTypeSymbol = namedTypeSymbol;
         this.MethodSymbol = methodSymbol;
         this.CompilationContext = compilationContext;
@@ -42,7 +42,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
     public static GenericContext Get( ISymbol? symbol, CompilationContext compilationContext )
     {
         var closestMember = symbol?.GetClosestContainingMember();
-        
+
         if ( closestMember == null )
         {
             return Empty;
@@ -65,7 +65,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
 
         return new GenericContext( symbol, null, compilationContext );
     }
-    
+
     public static GenericContext Get( IMethodSymbol? symbol, CompilationContext compilationContext )
     {
         if ( symbol == null || symbol.IsDefinitionSafe() )
@@ -74,7 +74,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
         }
 
         var genericMethodSymbol = symbol.TypeArguments.IsEmpty ? null : symbol;
-        
+
         return new GenericContext( symbol.ContainingType, genericMethodSymbol, compilationContext );
     }
 
@@ -170,7 +170,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
         {
             null => null,
             ITypeParameterSymbol typeParameter => this.Map( typeParameter ),
-            _ => TypeSymbolVisitor.Instance.Visit( type ) ? this.TypeSymbolMapperInstance.Visit( type ) : null
+            _ => TypeSymbolVisitor.Instance.Visit( type ) ? this.TypeSymbolMapperInstance.Visit( type ) : type
         };
     }
 

@@ -1,15 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.CodeFixes;
-using Metalama.Framework.DesignTime.Diagnostics;
-using Metalama.Framework.DesignTime.Rider;
-using Metalama.Framework.Engine.Pipeline.DesignTime;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Testing.UnitTesting;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -18,53 +10,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.CodeActions;
 
 #pragma warning disable VSTHRD200, CA1307
 
-public sealed class CodeFixTests : UnitTestClass
+public sealed class CodeFixTests : CodeFixTestClassBase
 {
-    protected override void ConfigureServices( IAdditionalServiceCollection services )
-    {
-        base.ConfigureServices( services );
-        services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
-        services.AddGlobalService<IUserDiagnosticRegistrationService>( new TestUserDiagnosticRegistrationService( shouldWrapUnsupportedDiagnostics: true ) );
-    }
-
-    private static async Task<(ImmutableArray<Diagnostic> diagnostics, GlobalServiceProvider serviceProvider)> ExecutePipeline(
-        TestContext testContext, TestWorkspaceProvider workspace, TestDesignTimeAspectPipelineFactory pipelineFactory )
-    {
-        var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
-
-        serviceProvider = serviceProvider.WithServices(
-            new CodeActionExecutionService( serviceProvider ),
-            new CodeRefactoringDiscoveryService( serviceProvider ) );
-
-        var project = workspace.GetProject( "target" );
-        var pipeline = pipelineFactory.GetOrCreatePipeline( project )!;
-        var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
-        Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
-
-        return (diagnostics, serviceProvider);
-    }
-
-    private static async Task<(TestCodeFixContext codeFixContext, TestCodeRefactoringContext riderRefactoringContext)> QueryCodeFixes(
-        TestWorkspaceProvider workspace, GlobalServiceProvider serviceProvider, ImmutableArray<Diagnostic> diagnostics, string targetTokenText )
-    {
-        var document = workspace.GetDocument( "target", "code.cs" );
-        var syntaxRoot = await document.GetSyntaxRootAsync();
-        var span = syntaxRoot.DescendantTokens().Single( t => t.Text == targetTokenText ).Span;
-
-        var codeFixProvider = new RiderCodeFixProvider( serviceProvider );
-        var codeFixContext = new TestCodeFixContext( document, diagnostics, span );
-
-        await codeFixProvider.RegisterCodeFixesAsync( codeFixContext );
-
-        var codeRefactoringProvider = new RiderCodeRefactoringProvider( serviceProvider );
-        var codeRefactoringContext = new TestCodeRefactoringContext( document, span );
-
-        await codeRefactoringProvider.ComputeRefactoringsAsync( codeRefactoringContext );
-
-        return (codeFixContext, codeRefactoringContext);
-    }
-
     [Fact]
     public async Task RiderHiddenDiagnosticCodeFixTest()
     {
@@ -117,7 +64,7 @@ public sealed class CodeFixTests : UnitTestClass
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
+        var (diagnostics, serviceProvider) = await ExecutePipelineAsync( testContext, workspace, factory );
 
         Assert.Equal( 3, diagnostics.Length );
         Assert.Single( diagnostics, d => d.Id == "MY001" );
@@ -125,7 +72,7 @@ public sealed class CodeFixTests : UnitTestClass
         Assert.Single( diagnostics, d => d.Id == "LAMA0043" );
 
         // Query code fixes and refactorings.
-        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, "Method" );
+        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixesAsync( workspace, serviceProvider, diagnostics, "Method" );
 
         Assert.Single( codeFixContext.RegisteredCodeFixes );
         Assert.Single( codeFixContext.RegisteredCodeFixes, fix => fix.CodeAction.Title.Contains( "[Info]" ) );
@@ -211,14 +158,14 @@ public sealed class CodeFixTests : UnitTestClass
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
+        var (diagnostics, serviceProvider) = await ExecutePipelineAsync( testContext, workspace, factory );
 
         Assert.Equal( 2, diagnostics.Length );
         Assert.Single( diagnostics, d => d.Id == "RA01" );
         Assert.Single( diagnostics, d => d.Id == "LAMA0043" );
 
         // Query code fixes.
-        var (codeFixContext, _) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, "TestClass" );
+        var (codeFixContext, _) = await QueryCodeFixesAsync( workspace, serviceProvider, diagnostics, "TestClass" );
 
         var codeFix = Assert.Single( codeFixContext.RegisteredCodeFixes );
         Assert.Contains( "[Required]", codeFix.CodeAction.Title );
@@ -282,13 +229,13 @@ public sealed class CodeFixTests : UnitTestClass
         // Execute the pipeline to get diagnostics.
         using var factory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        var (diagnostics, serviceProvider) = await ExecutePipeline( testContext, workspace, factory );
+        var (diagnostics, serviceProvider) = await ExecutePipelineAsync( testContext, workspace, factory );
 
         Assert.Single( diagnostics );
         Assert.Single( diagnostics, d => d.Id == "TEST01" );
 
         // Query code fixes.
-        var (codeFixContext, _) = await QueryCodeFixes( workspace, serviceProvider, diagnostics, "Name" );
+        var (codeFixContext, _) = await QueryCodeFixesAsync( workspace, serviceProvider, diagnostics, "Name" );
 
         var codeFix = Assert.Single( codeFixContext.RegisteredCodeFixes );
         Assert.Contains( "[A]", codeFix.CodeAction.Title );

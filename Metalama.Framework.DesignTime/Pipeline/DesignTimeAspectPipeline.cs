@@ -57,6 +57,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly ITaskRunner _taskRunner;
     private readonly ProjectVersionProvider _projectVersionProvider;
     private readonly IUserDiagnosticRegistrationService? _userDiagnosticsRegistrationService;
+    private readonly DesignTimeExceptionHandler _exceptionHandler;
 
     private bool _mustProcessQueue;
 
@@ -98,6 +99,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this._projectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
         this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
         this._eventHub = this.ServiceProvider.Global.GetService<AnalysisProcessEventHub>();
+        this._exceptionHandler = this.ServiceProvider.Global.GetRequiredService<DesignTimeExceptionHandler>();
 
         if ( this._eventHub != null )
         {
@@ -294,7 +296,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
         catch ( Exception exception )
         {
-            DesignTimeExceptionHandler.ReportException( exception );
+            this._exceptionHandler.ReportException( exception );
         }
     }
 #pragma warning restore VSTHRD100

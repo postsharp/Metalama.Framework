@@ -56,6 +56,11 @@ class C
         Assert.Same( fieldAfter, fieldAfter.OverridingProperty.OriginalField );
         Assert.Equal( DeclarationKind.Field, fieldAfter.DeclarationKind );
         Assert.Equal( DeclarationKind.Property, fieldAfter.OverridingProperty.DeclarationKind );
+        Assert.Same( fieldAfter, fieldAfter.GetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter, fieldAfter.SetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.GetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.SetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.SetMethod.ReturnParameter.ContainingDeclaration.ContainingDeclaration );
 
         // Declaration on references.
         Assert.Same( fieldAfter, field.ToRef().GetTarget( compilation ) );
@@ -104,6 +109,10 @@ class C<T>
             Assert.Same( genericFieldAfter, genericFieldAfter.OverridingProperty.OriginalField );
             Assert.Equal( DeclarationKind.Field, genericFieldAfter.DeclarationKind );
             Assert.Equal( DeclarationKind.Property, genericFieldAfter.OverridingProperty.DeclarationKind );
+            Assert.Same( genericFieldAfter, genericFieldAfter.GetMethod.ContainingDeclaration );
+            Assert.Same( genericFieldAfter, genericFieldAfter.SetMethod.ContainingDeclaration );
+            Assert.Same( genericFieldAfter.OverridingProperty, genericFieldAfter.OverridingProperty.GetMethod.ContainingDeclaration );
+            Assert.Same( genericFieldAfter.OverridingProperty, genericFieldAfter.OverridingProperty.SetMethod.ContainingDeclaration );
 
             // Declaration on references.
             Assert.Same( genericFieldAfter, genericField.ToRef().GetTarget( compilation ) );
@@ -164,6 +173,10 @@ class C
         Assert.Same( fieldAfter, fieldAfter.OverridingProperty.OriginalField );
         Assert.Equal( DeclarationKind.Field, fieldAfter.DeclarationKind );
         Assert.Equal( DeclarationKind.Property, fieldAfter.OverridingProperty.DeclarationKind );
+        Assert.Same( fieldAfter, fieldAfter.GetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter, fieldAfter.SetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.GetMethod.ContainingDeclaration );
+        Assert.Same( fieldAfter.OverridingProperty, fieldAfter.OverridingProperty.SetMethod.ContainingDeclaration );
 
         // Declaration on references.
         Assert.Same( fieldAfter, field.ToRef().GetTarget( compilation2 ) );

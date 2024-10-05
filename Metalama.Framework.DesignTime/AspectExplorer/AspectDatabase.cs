@@ -31,6 +31,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly WorkspaceProvider _workspaceProvider;
     private readonly AnalysisProcessEventHub _eventHub;
+    private readonly DesignTimeExceptionHandler _exceptionHandler;
 
     private readonly WeakCache<Compilation, ImmutableArray<IIntrospectionAspectInstance>> _aspectInstanceCache = new();
 
@@ -40,6 +41,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._workspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
+        this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
     }
 
     private async Task<(DesignTimeAspectPipeline Pipeline, Compilation Compilation)?> GetPipelineAndCompilationAsync(
@@ -141,7 +143,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             }
             catch ( Exception ex )
             {
-                DesignTimeExceptionHandler.ReportException( ex );
+                this._exceptionHandler.ReportException( ex );
 
                 aspectInstances = ImmutableArray<IIntrospectionAspectInstance>.Empty;
             }

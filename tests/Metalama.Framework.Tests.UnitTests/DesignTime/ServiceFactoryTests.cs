@@ -3,13 +3,14 @@
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.VisualStudio.Services;
+using Metalama.Testing.UnitTesting;
 using System;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public sealed class ServiceFactoryTests : DesignTimeTestBase
+public sealed class ServiceFactoryTests : UnitTestClass
 {
     public ServiceFactoryTests( ITestOutputHelper logger ) : base( logger ) { }
 

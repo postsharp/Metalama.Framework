@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class DistributedDesignTimeTestBase : UnitTestClass
+public class DistributedDesignTimeTestBase : FrameworkBaseTestClass
 {
     protected DistributedDesignTimeTestBase( ITestOutputHelper? logger = null ) : base( logger ) { }
 

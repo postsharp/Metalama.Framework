@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Source;
 using System;
-using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Visitors
 {
@@ -63,38 +63,54 @@ namespace Metalama.Framework.Engine.CodeModel.Visitors
 
         internal virtual IType Visit( INamedType namedType )
         {
-            if ( namedType.TypeArguments.Count == 0 )
+            if ( !namedType.IsGeneric )
             {
                 return namedType;
             }
+
+            var hasChange = false;
+            INamedType typeDefinition;
+
+            if ( namedType.DeclaringType != null )
+            {
+                var mappedDeclaringType = (INamedType) this.Visit( namedType.DeclaringType );
+                hasChange |= mappedDeclaringType != namedType.DeclaringType;
+                typeDefinition = mappedDeclaringType.Types.OfName( namedType.Name ).Single( t => t.TypeParameters.Count == namedType.TypeParameters.Count );
+
+                if ( namedType.TypeArguments.Count == 0 )
+                {
+                    return typeDefinition;
+                }
+            }
             else
             {
-                var typeArguments = ImmutableArray.CreateBuilder<IType>( namedType.TypeArguments.Count );
+                typeDefinition = namedType;
+            }
 
-                var hasChange = false;
+            var typeArguments = new IType[namedType.TypeArguments.Count];
 
-                foreach ( var t in namedType.TypeArguments )
+            for ( var index = 0; index < namedType.TypeArguments.Count; index++ )
+            {
+                var t = namedType.TypeArguments[index];
+                var argumentType = this.Visit( t );
+                hasChange |= argumentType != t;
+                typeArguments[index] = argumentType;
+            }
+
+            if ( hasChange )
+            {
+                if ( typeDefinition is NamedType sourceNamedType )
                 {
-                    var argumentType = this.Visit( t );
-                    hasChange |= argumentType != t;
-                    typeArguments.Add( argumentType );
-                }
-
-                if ( hasChange )
-                {
-                    if ( namedType is NamedType sourceNamedType )
-                    {
-                        return sourceNamedType.WithTypeArguments( typeArguments.MoveToImmutable() );
-                    }
-                    else
-                    {
-                        throw new NotImplementedException();
-                    }
+                    return sourceNamedType.WithTypeArguments( typeArguments );
                 }
                 else
                 {
-                    return namedType;
+                    throw new NotImplementedException();
                 }
+            }
+            else
+            {
+                return namedType;
             }
         }
 
