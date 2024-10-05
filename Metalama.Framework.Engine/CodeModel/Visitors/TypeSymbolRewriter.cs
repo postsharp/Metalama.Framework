@@ -72,35 +72,38 @@ internal abstract class TypeSymbolRewriter
     {
         INamedTypeSymbol typeDefinition;
 
+        if ( !namedTypeSymbol.IsGenericType )
+        {
+            // Fast track.
+            return namedTypeSymbol;
+        }
+
         if ( namedTypeSymbol.ContainingType != null )
         {
             var mappedDeclaringType = this.Visit( namedTypeSymbol.ContainingType );
             typeDefinition = mappedDeclaringType.GetTypeMembers( namedTypeSymbol.Name, namedTypeSymbol.Arity ).Single();
+
+            if ( namedTypeSymbol.TypeParameters.Length == 0 )
+            {
+                // The nested type itself is not generic.
+                return typeDefinition;
+            }
         }
         else
         {
             typeDefinition = namedTypeSymbol;
         }
 
-        if ( !typeDefinition.IsGenericType || !ReferenceEquals( typeDefinition, typeDefinition.ConstructedFrom ) )
-        {
-            // The type is already constructed.
-            return typeDefinition;
-        }
-        else
-        {
-            // We must construct the type.
-            var typeArguments = new ITypeSymbol[namedTypeSymbol.TypeArguments.Length];
+        var typeArguments = new ITypeSymbol[namedTypeSymbol.TypeArguments.Length];
 
-            for ( var index = 0; index < namedTypeSymbol.TypeArguments.Length; index++ )
-            {
-                var t = namedTypeSymbol.TypeArguments[index];
-                var argumentTypeSymbol = this.Visit( t );
-                typeArguments[index] = argumentTypeSymbol;
-            }
-
-            return typeDefinition.Construct( typeArguments );
+        for ( var index = 0; index < namedTypeSymbol.TypeArguments.Length; index++ )
+        {
+            var t = namedTypeSymbol.TypeArguments[index];
+            var argumentTypeSymbol = this.Visit( t );
+            typeArguments[index] = argumentTypeSymbol;
         }
+
+        return typeDefinition.ConstructedFrom.Construct( typeArguments );
     }
 
     internal virtual ITypeSymbol Visit( ITypeParameterSymbol typeSymbolParameter ) => typeSymbolParameter;

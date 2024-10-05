@@ -40,7 +40,9 @@ internal partial class GenericContext
 
         protected override bool VisitDynamicType( IDynamicType dynamicType ) => false;
 
-        protected override bool VisitNamedType( INamedType namedType ) => namedType.TypeArguments.Any( this.Visit );
+        protected override bool VisitNamedType( INamedType namedType )
+            => namedType.TypeArguments.Any( this.Visit ) ||
+               (namedType.DeclaringType != null && this.Visit( namedType.DeclaringType ));
 
         protected override bool VisitPointerType( IPointerType pointerType ) => this.Visit( pointerType.PointedAtType );
 
