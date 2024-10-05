@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using System;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Visitors
