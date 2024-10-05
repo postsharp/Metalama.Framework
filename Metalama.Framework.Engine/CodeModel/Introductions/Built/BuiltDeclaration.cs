@@ -22,15 +22,13 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
 /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
 /// </summary>
-internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclaration
+internal abstract class BuiltDeclaration : BaseDeclaration
 {
     protected BuiltDeclaration( CompilationModel compilation, IGenericContext genericContext )
     {
         this.Compilation = compilation;
         this.GenericContext = genericContext.AsGenericContext();
     }
-
-    DeclarationBuilderData IBuilderBasedDeclaration.Builder => this.BuilderData;
 
     public override CompilationModel Compilation { get; }
 
@@ -56,16 +54,15 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         return type.GetTarget( this.Compilation, this.GenericContext );
     }
 
-    [return: NotNullIfNotNull(nameof(declaration))]
+    [return: NotNullIfNotNull( nameof(declaration) )]
     protected T? MapDeclaration<T>( IRef<T>? declaration )
         where T : class, ICompilationElement
-        => declaration?.GetTarget(this.Compilation, this.GenericContext);
+        => declaration?.GetTarget( this.Compilation, this.GenericContext );
 
     protected IReadOnlyList<T> MapDeclarationList<T>( IReadOnlyList<IRef<T>> refs )
         where T : class, ICompilationElement
         => refs.Count == 0 ? [] : refs.SelectAsReadOnlyList( this.MapDeclaration );
-    
-            
+
     [Memo]
     public override IDeclaration? ContainingDeclaration => this.MapDeclaration( this.BuilderData.ContainingDeclaration );
 
@@ -77,9 +74,9 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     private IAttributeCollection GetAttributes()
     {
         // In the Attributes collection, the backlink IAttribute.ContainingDeclaration will point to the member definition but this should be ok.
-            
+
         var definition = this.GetDefinition();
-            
+
         return new AttributeCollection(
             definition,
             this.Compilation.GetAttributeCollection( definition.ToRef() ) );
@@ -88,12 +85,10 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
     public override DeclarationKind DeclarationKind => this.BuilderData.DeclarationKind;
 
     public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
-    
+
     public sealed override string ToString() => this.ToDisplayString();
 
     public override Location? DiagnosticLocation => this.ContainingDeclaration?.GetDiagnosticLocation();
-
-    
 
     public override bool IsImplicitlyDeclared => false;
 
@@ -120,5 +115,25 @@ internal abstract class BuiltDeclaration : BaseDeclaration, IBuilderBasedDeclara
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
-        => this.BuilderData.Translate( newCompilation, genericContext );
+    {
+        GenericContext combinedGenericContext;
+
+        if ( genericContext is { IsEmptyOrIdentity: false } )
+        {
+            if ( this.GenericContext.IsEmptyOrIdentity )
+            {
+                combinedGenericContext = (GenericContext) genericContext;
+            }
+            else
+            {
+                throw new AssertionFailedException( "Don't know how to combine generic contexts." );
+            }
+        }
+        else
+        {
+            combinedGenericContext = this.GenericContext;
+        }
+
+        return this.BuilderData.ToRef().GetTarget( newCompilation, combinedGenericContext );
+    }
 }

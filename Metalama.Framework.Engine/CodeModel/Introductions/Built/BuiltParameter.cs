@@ -4,7 +4,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,10 +57,16 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     bool IExpression.IsAssignable => true;
 
-    public ref object? Value => ref this._parameterBuilder.Value;
+    public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-        => this._parameterBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
+        => new(
+            new TypedExpressionSyntaxImpl(
+                SyntaxFactory.IdentifierName( this.Name ),
+                this.Type,
+                ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
+                true ) );
+
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 

@@ -43,7 +43,7 @@ internal sealed class SymbolAttributeRef : AttributeRef
             return false;
         }
 
-        attribute = new Attribute( this._attributeData, compilation, this.ContainingDeclaration.GetTarget( compilation ) );
+        attribute = new Attribute( this._attributeData, compilation, (IDeclaration) this.ContainingDeclaration.GetTarget( compilation ) );
 
         return true;
     }

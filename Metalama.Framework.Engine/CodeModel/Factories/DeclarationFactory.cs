@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
@@ -40,7 +41,7 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
     internal DeclarationFactory( CompilationModel compilation )
     {
         this._compilationModel = compilation;
-        this._builderCache = new Cache<IDeclarationBuilder, IDeclaration>( ReferenceEqualityComparer<IDeclarationBuilder>.Instance );
+        this._builderCache = new Cache<DeclarationBuilderData, IDeclaration>( ReferenceEqualityComparer<DeclarationBuilderData>.Instance );
         this._symbolCache = new Cache<ISymbol, IDeclaration>( compilation.CompilationContext.SymbolComparer );
         this._typeCache = new Cache<ITypeSymbol, IType>( compilation.CompilationContext.SymbolComparerIncludingNullability );
 

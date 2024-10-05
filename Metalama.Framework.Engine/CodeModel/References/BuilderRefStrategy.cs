@@ -10,13 +10,13 @@ using System.Linq;
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 /// <summary>
-/// Implementation of <see cref="IRefStrategy"/> for <see cref="BuilderRef{T}"/>.
+/// Implementation of <see cref="IRefStrategy"/> for <see cref="BuiltDeclarationRef{T}"/>.
 /// </summary>
 internal sealed class BuilderRefStrategy : IRefStrategy
 {
     public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add )
     {
-        var builderRef = (IBuilderRef) declaration;
+        var builderRef = (IBuiltDeclarationRef) declaration;
 
         foreach ( var attribute in builderRef.BuilderData.Attributes )
         {
@@ -26,7 +26,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
 
     public void EnumerateAllImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
     {
-        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).BuilderData;
+        var resolvedNameType = (INamedType) ((IBuiltDeclarationRef) namedType).BuilderData;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {
@@ -38,7 +38,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
     {
         // BUG: EnumerateAllImplementedInterfaces and EnumerateImplementedInterfaces should not have the same implementation.
 
-        var resolvedNameType = (INamedType) ((IBuilderRef) namedType).BuilderData;
+        var resolvedNameType = (INamedType) ((IBuiltDeclarationRef) namedType).BuilderData;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {
@@ -68,7 +68,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
         DeclarationKind kind,
         CompilationModel compilation )
     {
-        var parentDeclaration = ((IBuilderRef) parent).BuilderData;
+        var parentDeclaration = compilation.Factory.GetDeclaration( ((IBuiltDeclarationRef) parent).BuilderData );
 
         var collection = GetCollection( parentDeclaration, kind );
 
@@ -77,7 +77,7 @@ internal sealed class BuilderRefStrategy : IRefStrategy
 
     public IEnumerable<IRef> GetMembers( IRef parent, DeclarationKind kind, CompilationModel compilation )
     {
-        var parentDeclaration = ((IBuilderRef) parent).BuilderData;
+        var parentDeclaration = compilation.Factory.GetDeclaration( ((IBuiltDeclarationRef) parent).BuilderData );
 
         var collection = GetCollection( parentDeclaration, kind );
 

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;

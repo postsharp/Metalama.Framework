@@ -30,7 +30,7 @@ internal static class OverrideHelper
 
             case IField field:
                 {
-                    var propertyBuilder = PromotedField.Create( serviceProvider, field, tags, advice );
+                    var propertyBuilder = PromotedFieldBuilder.Create( serviceProvider, field, tags, advice );
                     addTransformation( propertyBuilder.ToTransformation() );
                     addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
 

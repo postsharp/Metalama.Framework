@@ -13,7 +13,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 {
     private readonly IField _replacedField;
 
-    public PromoteFieldTransformation( Advice advice, IField replacedField, PromotedField propertyBuilder ) : base( advice, propertyBuilder )
+    public PromoteFieldTransformation( Advice advice, IField replacedField, PromotedFieldBuilder propertyBuilder ) : base( advice, propertyBuilder )
     {
         this._replacedField = replacedField;
     }

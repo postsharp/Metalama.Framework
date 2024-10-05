@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -28,6 +29,8 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 
     public bool HasImplementation => !this.IsAbstract; // TODO - partials?
 
+    public sealed override bool CanBeInherited => (this.IsAbstract || this.IsVirtual || this.IsOverride ) && !this.IsSealed;
+
     [Memo]
     public IMember? OverriddenMember => this.MapDeclaration( this.MemberBuilder.OverriddenMember );
 
@@ -45,7 +48,5 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 
     IMember IMember.Definition => this;
 
-    public abstract IRef<IMember> ToMemberRef();
-
-    IRef<IMember> IMember.ToRef() => this.ToMemberRef();
+    IRef<IMember> IMember.ToRef() => throw new NotSupportedException();
 }

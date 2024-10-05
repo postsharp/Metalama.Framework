@@ -1,6 +1,8 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,6 +12,8 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class EventBuilderData : MemberBuilderData
 {
+    private readonly IRef<IEvent> _ref;
+    
     public ImmutableArray<IAttributeData> FieldAttributes { get; }
 
     public IRef<INamedType> Type { get; }
@@ -18,10 +22,7 @@ internal class EventBuilderData : MemberBuilderData
 
     public bool IsEventField { get; }
 
-    public RefKind RefKind
-    {
-        get;
-    }
+    public RefKind RefKind { get; }
 
     public MethodBuilderData AddMethod { get; }
 
@@ -33,19 +34,20 @@ internal class EventBuilderData : MemberBuilderData
 
     public EventBuilderData( EventBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        var me = this.ToDeclarationRef();
+        this._ref = new DeclarationBuilderDataRef<IEvent>( this);
 
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.Type = builder.Type.ToRef();
         this.InitializerTags = builder.InitializerTags;
         this.RefKind = builder.RefKind;
-        this.AddMethod = new MethodBuilderData( builder.AddMethod, me );
-        this.RemoveMethod = new MethodBuilderData( builder.RemoveMethod, me );
+        this.AddMethod = new MethodBuilderData( builder.AddMethod, this._ref );
+        this.RemoveMethod = new MethodBuilderData( builder.RemoveMethod, this._ref );
         this.OverriddenEvent = builder.OverriddenEvent?.ToRef();
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
+        this.IsEventField = builder.IsEventField;
     }
 
-    public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
+    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

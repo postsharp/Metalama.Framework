@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -37,7 +38,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool IsPartial => this._accessorBuilder.IsPartial;
 
-    public bool HasImplementation => this._accessorBuilder.HasImplementation;
+    public bool HasImplementation => !this._builtMember.IsAbstract;
 
     public bool IsAbstract => this._accessorBuilder.IsAbstract;
 
@@ -94,17 +95,17 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     bool IMethod.IsExtern => false;
 
-    public IMethodInvoker With( InvokerOptions options ) => this._accessorBuilder.With( options );
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
 
-    public IMethodInvoker With( object? target, InvokerOptions options ) => this._accessorBuilder.With( target, options );
+    public IMethodInvoker With( object? target, InvokerOptions options ) => new MethodInvoker( this, options, target );
 
-    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => this._accessorBuilder.With( target, options );
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
 
-    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this._accessorBuilder.CreateInvokeExpression( args );
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new MethodInvoker( this ).CreateInvokeExpression( args );
 
-    public object? Invoke( params object?[] args ) => this._accessorBuilder.Invoke( args );
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
-    public object? Invoke( IEnumerable<IExpression> args ) => this._accessorBuilder.Invoke( args );
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
     [Memo]
     public IParameter ReturnParameter
@@ -121,7 +122,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this._accessorBuilder.ConstructGenericInstance( typeArguments );
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) 
+        => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
     [Memo]
     public IMethod? OverriddenMethod => this.MapDeclaration(this._accessorBuilder.OverriddenMethod);
@@ -145,6 +147,8 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public IMember? OverriddenMember => this.MapDeclaration( this._accessorBuilder.OverriddenMember );
 
     public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
+
+    public override bool CanBeInherited => this._builtMember.CanBeInherited;
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
     {

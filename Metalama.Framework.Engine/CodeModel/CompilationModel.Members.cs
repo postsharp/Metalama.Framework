@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
@@ -31,7 +32,7 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<IRef<IHasParameters>, ParameterUpdatableCollection> _parameters;
     private ImmutableDictionary<IRef<IDeclaration>, AttributeUpdatableCollection> _attributes;
     private ImmutableDictionary<IRef<INamedType>, IConstructorBuilder> _staticConstructors;
-    private ImmutableDictionary<IRef<INamedType>, IMethodBuilder> _finalizers;
+    private ImmutableDictionary<IRef<INamedType>, MethodBuilderData> _finalizers;
     private ImmutableDictionary<IRef<INamespaceOrNamedType>, TypeUpdatableCollection> _namedTypesByParent;
     private ImmutableDictionary<IRef<INamespace>, NamespaceUpdatableCollection> _namespaces;
     private TypeUpdatableCollection? _topLevelNamedTypes;
@@ -40,19 +41,19 @@ public sealed partial class CompilationModel
 
     private bool IsMutable { get; }
 
-    internal bool Contains( FieldBuilder fieldBuilder )
-        => (this._fields.TryGetValue( fieldBuilder.DeclaringType.ToRef(), out var fields )
+    internal bool Contains( FieldBuilderData fieldBuilder )
+        => (this._fields.TryGetValue( fieldBuilder.DeclaringType, out var fields )
             && fields.Contains( fieldBuilder.ToRef() ))
            || this.IsRedirected( fieldBuilder.ToRef() );
 
-    internal bool Contains( MethodBuilder methodBuilder )
+    internal bool Contains( MethodBuilderData methodBuilder )
         => methodBuilder switch
         {
             { MethodKind: MethodKind.Finalizer } =>
-                this._finalizers.TryGetValue( methodBuilder.DeclaringType.ToRef(), out var finalizer )
+                this._finalizers.TryGetValue( methodBuilder.DeclaringType, out var finalizer )
                 && finalizer == methodBuilder,
             _ =>
-                this._methods.TryGetValue( methodBuilder.DeclaringType.ToRef(), out var methods )
+                this._methods.TryGetValue( methodBuilder.DeclaringType, out var methods )
                 && methods.Contains( methodBuilder.ToRef() )
         };
 
@@ -62,24 +63,24 @@ public sealed partial class CompilationModel
            || (this._staticConstructors.TryGetValue( constructorBuilder.DeclaringType.ToRef(), out var staticConstructors )
                && staticConstructors == constructorBuilder);
 
-    internal bool Contains( EventBuilder eventBuilder )
-        => this._events.TryGetValue( eventBuilder.DeclaringType.ToRef(), out var events )
+    internal bool Contains( EventBuilderData eventBuilder )
+        => this._events.TryGetValue( eventBuilder.DeclaringType, out var events )
            && events.Contains( eventBuilder.ToRef() );
 
-    internal bool Contains( PropertyBuilder propertyBuilder )
-        => this._properties.TryGetValue( propertyBuilder.DeclaringType.ToRef(), out var properties )
+    internal bool Contains( PropertyBuilderData propertyBuilder )
+        => this._properties.TryGetValue( propertyBuilder.DeclaringType, out var properties )
            && properties.Contains( propertyBuilder.ToRef() );
 
-    internal bool Contains( IndexerBuilder indexerBuilder )
-        => this._indexers.TryGetValue( indexerBuilder.DeclaringType.ToRef(), out var indexers )
+    internal bool Contains( IndexerBuilderData indexerBuilder )
+        => this._indexers.TryGetValue( indexerBuilder.DeclaringType, out var indexers )
            && indexers.Contains( indexerBuilder.ToRef() );
 
-    internal bool Contains( BaseParameterBuilder parameterBuilder )
+    internal bool Contains( ParameterBuilderData parameterBuilder )
         => parameterBuilder.ContainingDeclaration switch
         {
-            DeclarationBuilder declarationBuilder => this.Contains( declarationBuilder ),
+            IDeclarationBuilderDataRef declarationBuilder => this.Contains( declarationBuilder.BuilderData ),
             null => false,
-            _ => this._parameters.TryGetValue( parameterBuilder.ContainingDeclaration.ToRef().As<IHasParameters>(), out var parameters )
+            _ => this._parameters.TryGetValue( parameterBuilder.ContainingDeclaration.As<IHasParameters>(), out var parameters )
                  && parameters.Contains( parameterBuilder.ToRef() )
         };
 
@@ -104,38 +105,19 @@ public sealed partial class CompilationModel
                && namespaces.Contains( namespaceBuilder.ToRef() );
     }
 
-    private bool Contains( DeclarationBuilder builder )
+    private bool Contains( DeclarationBuilderData builder )
         => builder switch
         {
-            FieldBuilder fieldBuilder => this.Contains( fieldBuilder ),
-            MethodBuilder methodBuilder => this.Contains( methodBuilder ),
-            ConstructorBuilder constructorBuilder => this.Contains( constructorBuilder ),
-            EventBuilder eventBuilder => this.Contains( eventBuilder ),
-            PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
-            IndexerBuilder indexerBuilder => this.Contains( indexerBuilder ),
-            BaseParameterBuilder parameterBuilder => this.Contains( parameterBuilder ),
+            FieldBuilderData fieldBuilder => this.Contains( fieldBuilder ),
+            MethodBuilderData methodBuilder => this.Contains( methodBuilder ),
+            ConstructorBuilderData constructorBuilder => this.Contains( constructorBuilder ),
+            EventBuilderData eventBuilder => this.Contains( eventBuilder ),
+            PropertyBuilderData propertyBuilder => this.Contains( propertyBuilder ),
+            IndexerBuilderData indexerBuilder => this.Contains( indexerBuilder ),
+            ParameterBuilderData parameterBuilder => this.Contains( parameterBuilder ),
             _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
         };
-
-    // TODO: Check why the next method is never used.
-    // Resharper disable UnusedMember.Global
-
-    internal bool Contains( ParameterBuilder parameterBuilder )
-    {
-        if ( parameterBuilder.IsReturnParameter )
-        {
-            return this.Contains( (DeclarationBuilder) parameterBuilder.DeclaringMember );
-        }
-        else if ( parameterBuilder.DeclaringMember is DeclarationBuilder declarationBuilder )
-        {
-            return this.Contains( declarationBuilder ) && ((IHasParameters) declarationBuilder).Parameters.Contains( parameterBuilder );
-        }
-
-        // This can also be a parameter appended to an existing declaration.
-        return this._parameters.TryGetValue( parameterBuilder.DeclaringMember.ToRef().As<IHasParameters>(), out var events )
-               && events.Contains( parameterBuilder.ToRef() );
-    }
-
+    
     private TCollection GetMemberCollection<TOwner, TDeclaration, TCollection>(
         ref ImmutableDictionary<IRef<TOwner>, TCollection> dictionary,
         bool requestMutableCollection,
@@ -281,7 +263,7 @@ public sealed partial class CompilationModel
         return value;
     }
 
-    internal IMethodBuilder? GetFinalizer( INamedTypeSymbol declaringType )
+    internal MethodBuilderData? GetFinalizer( INamedTypeSymbol declaringType )
     {
         this._finalizers.TryGetValue( declaringType.ToRef( this.CompilationContext ), out var value );
 
@@ -387,7 +369,7 @@ public sealed partial class CompilationModel
             {
                 var newBuilder = introduceDeclarationTransformation.DeclarationBuilder;
 
-                Invariant.Assert( !(replacedMember is IBuilderRef replacedBuilderRef && newBuilder.Equals( replacedBuilderRef.BuilderData )) );
+                Invariant.Assert( !(replacedMember is IBuiltDeclarationRef replacedBuilderRef && newBuilder.Equals( replacedBuilderRef.BuilderData )) );
 
                 this._redirections = this._redirections.Add( replacedMember.ToRef(), newBuilder );
             }

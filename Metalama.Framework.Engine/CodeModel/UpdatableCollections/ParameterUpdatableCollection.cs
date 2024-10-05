@@ -39,7 +39,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuilderRef { BuilderData: IMethodBaseBuilder builder }:
+            case IBuiltDeclarationRef { BuilderData: IMethodBaseBuilder builder }:
                 foreach ( var p in builder.Parameters )
                 {
                     action( this.RefFactory.FromBuilderData<IParameter>( p ) );
@@ -47,7 +47,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuilderRef { BuilderData: IIndexerBuilder indexerBuilder }:
+            case IBuiltDeclarationRef { BuilderData: IIndexerBuilder indexerBuilder }:
                 foreach ( var p in indexerBuilder.Parameters )
                 {
                     action( this.RefFactory.FromBuilderData<IParameter>( p ) );

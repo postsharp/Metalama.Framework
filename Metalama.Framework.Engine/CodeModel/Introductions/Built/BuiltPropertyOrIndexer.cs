@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Reflection;
@@ -37,7 +38,7 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
 
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => (IRef<IFieldOrPropertyOrIndexer>) this.ToDeclarationRef();
 
-    public PropertyInfo ToPropertyInfo() => this.PropertyOrIndexerBuilder.ToPropertyInfo();
+    public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
     IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => (IRef<IPropertyOrIndexer>) this.ToDeclarationRef();
 

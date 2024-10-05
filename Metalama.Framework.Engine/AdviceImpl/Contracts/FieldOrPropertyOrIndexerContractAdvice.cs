@@ -38,7 +38,7 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
                 return AddContractToProperty( overridingProperty );
 
             case IField field:
-                var promotedField = PromotedField.Create( serviceProvider, field, ObjectReader.Empty, this );
+                var promotedField = PromotedFieldBuilder.Create( serviceProvider, field, ObjectReader.Empty, this );
                 addTransformation( promotedField.ToTransformation() );
                 OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
 

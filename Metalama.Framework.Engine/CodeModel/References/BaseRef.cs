@@ -28,6 +28,8 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     public virtual RefTargetKind TargetKind => RefTargetKind.Default;
 
+    public abstract IRef? ContainingDeclaration { get; }
+
     public abstract string? Name { get; }
 
     public abstract SerializableDeclarationId ToSerializableId();

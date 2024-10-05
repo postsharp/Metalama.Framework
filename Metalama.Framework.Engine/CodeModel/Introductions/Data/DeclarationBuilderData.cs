@@ -12,6 +12,8 @@ internal abstract class DeclarationBuilderData
 {
     protected DeclarationBuilderData( IDeclarationBuilderImpl builder, IRef<IDeclaration> containingDeclaration )
     {
+        Invariant.Assert( builder.IsFrozen );
+        
         this.ParentAdvice = builder.ParentAdvice;
         this.ContainingDeclaration = containingDeclaration;
 
@@ -19,7 +21,9 @@ internal abstract class DeclarationBuilderData
         this.Attributes = builder.Attributes.ToImmutable( this.ToDeclarationRef() );
     }
 
-    public abstract IRef<IDeclaration> ToDeclarationRef();
+    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
+    
+    protected abstract IRef<IDeclaration> ToDeclarationRef();
 
     public abstract DeclarationKind DeclarationKind { get; }
 
@@ -28,8 +32,7 @@ internal abstract class DeclarationBuilderData
     public Advice ParentAdvice { get; }
 
     public ImmutableArray<AttributeBuilderData> Attributes { get; }
-
-    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
+    
 
     public SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
 

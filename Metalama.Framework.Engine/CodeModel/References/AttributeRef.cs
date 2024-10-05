@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.AttributeType = attributeType;
         }
 
-        public IRef<IDeclaration> ContainingDeclaration { get; }
+        public IRef ContainingDeclaration { get; }
 
         public IRef<INamedType> AttributeType { get; }
         

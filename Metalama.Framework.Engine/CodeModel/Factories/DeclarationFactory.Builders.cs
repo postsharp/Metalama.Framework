@@ -167,10 +167,10 @@ public partial class DeclarationFactory
             MethodBuilderData { ContainingDeclaration.DeclarationKind: DeclarationKind.NamedType } methodBuilder => this.GetMethod( methodBuilder, genericContext ),
             MethodBuilderData { ContainingDeclaration.DeclarationKind: DeclarationKind.Property or DeclarationKind.Event or DeclarationKind.Field } accessorBuilder =>this.GetAccessor( accessorBuilder, genericContext ),
             FieldBuilderData fieldBuilder when interfaceType == null || interfaceType != typeof(IProperty) => this.GetField( fieldBuilder, genericContext ),
-            FieldBuilderData fieldBuilder when interfaceType == typeof(IProperty) => this.GetProperty( (PropertyBuilder) fieldBuilder, genericContext ),
+            FieldBuilderData fieldBuilder when interfaceType == typeof(IProperty) => fieldBuilder.OverridingProperty.AssertNotNull().GetTarget(this._compilationModel,genericContext),
             PropertyBuilderData propertyBuilder when interfaceType == null || interfaceType != typeof(IField) =>
                 this.GetProperty( propertyBuilder, genericContext ),
-            PropertyBuilderData propertyBuilder when interfaceType == typeof(IField) => this.GetField( (IFieldBuilder) propertyBuilder, genericContext ),
+            PropertyBuilderData propertyBuilder when interfaceType == typeof(IField) => propertyBuilder.GetOriginalField( this._compilationModel, (GenericContext?) genericContext ?? GenericContext.Empty),
             IndexerBuilderData indexerBuilder => this.GetIndexer( indexerBuilder, genericContext ),
             EventBuilderData eventBuilder => this.GetEvent( eventBuilder, genericContext ),
             ParameterBuilderData parameterBuilder => this.GetParameter( parameterBuilder, genericContext ),
@@ -182,7 +182,7 @@ public partial class DeclarationFactory
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global
-            ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
+            ISdkRef reference => (IDeclaration) reference.GetTarget( this._compilationModel ).AssertNotNull(),
             _ => throw new AssertionFailedException( $"Cannot get a declaration for a {builder.GetType()}" )
         };
     }

@@ -4,6 +4,4 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel.Abstractions;
 
-internal interface INamespaceOrNamedTypeImpl : INamespaceOrNamedType, IDeclarationImpl
-{
-}
+internal interface INamespaceOrNamedTypeImpl : INamespaceOrNamedType, IDeclarationImpl;

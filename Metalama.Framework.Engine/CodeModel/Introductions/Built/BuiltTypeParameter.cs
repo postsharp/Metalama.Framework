@@ -2,7 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -42,7 +44,8 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public int Index => this._typeParameterBuilder.Index;
 
-    public IReadOnlyList<IType> TypeConstraints => this._typeParameterBuilder.ReadOnlyTypeConstraints;
+    [Memo]
+    public IReadOnlyList<IType> TypeConstraints => this.MapDeclarationList( this._typeParameterBuilder.TypeConstraints );
 
     public TypeKindConstraint TypeKindConstraint => this._typeParameterBuilder.TypeKindConstraint;
 
@@ -63,6 +66,8 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
     public override int GetHashCode() => this._typeParameterBuilder.GetHashCode();
+
+    public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration.AssertNotNull(  )).CanBeInherited; 
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 }

@@ -25,6 +25,8 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
 
     public override RefTargetKind TargetKind { get; }
 
+    public override IRef? ContainingDeclaration => this.CompilationContext.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
+
     public override string Name => this.Symbol.Name;
 
     public override SerializableDeclarationId ToSerializableId() => this.Symbol.GetSerializableId();

@@ -1,6 +1,8 @@
 ﻿using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -10,26 +12,42 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class IndexerBuilderData : PropertyOrIndexerBuilderData
 {
+    private readonly IRef<IIndexer> _ref;
+    
     public ImmutableArray<ParameterBuilderData> Parameters { get; }
     public IRef<IIndexer>? OverriddenIndexer { get; }
-    public IReadOnlyList<IRef<IIndexer>> ExplicitInterfaceImplementation { get; }
+    public IReadOnlyList<IRef<IIndexer>> ExplicitInterfaceImplementations { get; }
 
 
     public IndexerBuilderData( IndexerBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        var me = this.ToDeclarationRef();
-        this.Parameters = builder.Parameters.ToImmutable(me);
+        this._ref = new DeclarationBuilderDataRef<IIndexer>( this);
+        this.Parameters = builder.Parameters.ToImmutable(this._ref );
         this.OverriddenIndexer = builder.OverriddenIndexer?.ToRef();
-        this.ExplicitInterfaceImplementation = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
+        this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
+        
+        if ( builder.GetMethod != null )
+        {
+            this.GetMethod = new MethodBuilderData( builder.GetMethod, this._ref );
+        }
+
+        if ( builder.SetMethod != null )
+        {
+            this.SetMethod = new MethodBuilderData( builder.SetMethod, this._ref );
+        }
 
     }
 
-    public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
+    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
     public override IRef<IMember>? OverriddenMember => throw new NotImplementedException();
 
 
-    public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementation;
+    public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
+
+    public override MethodBuilderData? GetMethod { get; }
+
+    public override MethodBuilderData? SetMethod { get; }
 }

@@ -173,7 +173,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             return ((IGenericInternal) this.Implementation).ConstructGenericInstance( typeArguments );
         }
 
-        public bool IsPartial
+        public override bool IsPartial
         {
             get
             {

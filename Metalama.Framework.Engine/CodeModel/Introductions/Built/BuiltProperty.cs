@@ -6,9 +6,12 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
@@ -28,6 +31,8 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
     protected override MemberBuilderData MemberBuilder => this.PropertyBuilder;
+
+    public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilder => this.PropertyBuilder;
 
@@ -53,24 +58,26 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
-        => this.PropertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.Translate( i ) );
+        => this.MapDeclarationList(this.PropertyBuilder.ExplicitInterfaceImplementations );
 
-    public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
+    public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
     public bool IsRequired => this.PropertyBuilder.IsRequired;
 
     public IExpression? InitializerExpression => this.PropertyBuilder.InitializerExpression;
 
-    public IFieldOrPropertyInvoker With( InvokerOptions options ) => this.PropertyBuilder.With( options );
+    public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
-    public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => this.PropertyBuilder.With( target, options );
+    public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default ) => new FieldOrPropertyInvoker( this, options, target );
 
-    public ref object? Value => ref this.PropertyBuilder.Value;
-
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-        => this.PropertyBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
+    public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        => new FieldOrPropertyInvoker( this )
+            .ToTypedExpressionSyntax( syntaxGenerationContext );
+    
 
     [Memo]
     public IField? OriginalField => this.GetOriginalField();
@@ -81,16 +88,7 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
         {
             // Intentionally not using MapDeclaration to avoid the strong typing.
 
-            var originalField = (IFieldBuilder?) this.PropertyBuilder.OriginalField;
-
-            if ( originalField != null )
-            {
-                return this.Compilation.Factory.GetField( originalField, this.GenericContext );
-            }
-            else
-            {
-                return null;
-            }
+            return this.PropertyBuilder.GetOriginalField( this.Compilation, this.GenericContext );
         }
     }
 }

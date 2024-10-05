@@ -64,6 +64,8 @@ namespace Metalama.Framework.Code
         /// Gets the <see cref="DeclarationKind"/> of the reference declaration, if available.
         /// </summary>
         DeclarationKind DeclarationKind { get; }
+        
+        IRef? ContainingDeclaration { get; }
 
         /// <summary>
         /// Gets the name of the referenced declaration, if available. 

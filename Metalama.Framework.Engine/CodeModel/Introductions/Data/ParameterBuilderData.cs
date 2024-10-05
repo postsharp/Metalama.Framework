@@ -2,12 +2,15 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class ParameterBuilderData : DeclarationBuilderData
 {
+    private readonly IRef<IParameter> _ref;
+    
     public string Name { get;  }
 
     public IRef<IType> Type { get;  }
@@ -22,6 +25,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     public ParameterBuilderData( BaseParameterBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
+        this._ref = new DeclarationBuilderDataRef<IParameter>( this);
         this.Name = builder.Name;
         this.Type = builder.Type.ToRef();
         this.RefKind = builder.RefKind;
@@ -30,7 +34,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
         this.IsParams = builder.IsParams;
     }
 
-    public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
+    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 }

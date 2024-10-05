@@ -48,11 +48,14 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
         }
     }
 
-    [Memo]
-    public IMethod GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+    IMethod IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;
+    IMethod IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
 
     [Memo]
-    public IMethod SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
+    public AccessorBuilder GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+
+    [Memo]
+    public AccessorBuilder SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
 
     public override bool IsExplicitInterfaceImplementation => false;
 

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
-    internal interface ISdkRef
+    internal interface ISdkRef : IRef
     {
         // This is a temporary method to extract the symbol from the reference, when there is any.
         // In the final implementation, this method should not be necessary.

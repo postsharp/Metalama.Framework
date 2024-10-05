@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
@@ -29,25 +28,21 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 /// Represents a property that has been created from a field. It implements both the <see cref="IField"/> and <see cref="IProperty"/>
 /// interfaces.
 /// </summary>
-internal sealed class PromotedField : PropertyBuilder, IFieldImpl, IFieldBuilder
+internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IFieldBuilder
 {
     /// <summary>
     /// Gets the original <see cref="Field"/> or <see cref="FieldBuilder"/>.
     /// </summary>
     public IFieldImpl OriginalSourceFieldOrFieldBuilder { get; }
 
-    public static PromotedField Create( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice )
+    public static PromotedFieldBuilder Create( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice )
         => new(
             serviceProvider,
-            field switch
-            {
-                BuiltField builtField => builtField.FieldBuilder,
-                _ => field
-            },
+            field,
             initializerTags,
             advice );
 
-    private PromotedField( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
+    private PromotedFieldBuilder( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
         advice,
         field.DeclaringType,
         field.Name,
@@ -156,7 +151,7 @@ internal sealed class PromotedField : PropertyBuilder, IFieldImpl, IFieldBuilder
         => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalSourceFieldOrFieldBuilder, this );
 
     public override bool Equals( IDeclaration? other )
-        => ReferenceEquals( this, other ) || (other is PromotedField otherPromotedField
+        => ReferenceEquals( this, other ) || (other is PromotedFieldBuilder otherPromotedField
                                               && otherPromotedField.OriginalSourceFieldOrFieldBuilder.Equals( this.OriginalSourceFieldOrFieldBuilder ));
 
     public override bool IsDesignTimeObservable => false;

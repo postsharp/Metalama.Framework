@@ -26,8 +26,8 @@ internal class AttributeBuilderData : DeclarationBuilderData
         
         // TODO: TypedConstant can still leak a CompilationModel through its typeof(.) value.
     }
-    
-    public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
+
+    protected override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 

@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -33,9 +34,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.TypeBuilder;
 
-    public bool IsPartial => this.TypeBuilder.IsPartial;
-
-    public bool HasDefaultConstructor => this.TypeBuilder.HasDefaultConstructor;
+    public bool HasDefaultConstructor => true; // TODO
 
     [Memo]
     public INamedType? BaseType => this.MapDeclaration( this.TypeBuilder.BaseType );
@@ -53,7 +52,19 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     INamespace INamedType.Namespace => this.ContainingNamespace;
 
     [Memo]
-    public INamespace ContainingNamespace => this.MapDeclaration( this.TypeBuilder.ContainingNamespace );
+    public INamespace ContainingNamespace => this.GetContainingNamespace();
+
+    private INamespace GetContainingNamespace()
+    {
+        var containingDeclaration = this.ContainingDeclaration;
+
+        return containingDeclaration switch
+        {
+            INamespace ns => ns,
+            INamedType type => type.ContainingNamespace,
+            _ => throw new AssertionFailedException()
+        };
+    }
 
     [Memo]
     private IRef<INamedType> Ref => this.RefFactory.FromBuilt<INamedType>( this );
@@ -68,7 +79,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
-    public string FullName => this.TypeBuilder.FullName;
+    [Memo]
+    public string FullName => ((INamespaceOrNamedTypeImpl) this.ContainingDeclaration.AssertNotNull(  )).FullName + "." + this.Name;
+    
 
     [Memo]
     public INamedTypeCollection Types
@@ -128,20 +141,16 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public IMethodCollection AllMethods => new AllMethodsCollection( this );
 
-    public IConstructor? PrimaryConstructor => this.TypeBuilder.PrimaryConstructor;
+    IConstructor? INamedType.PrimaryConstructor => null;
 
     public IConstructorCollection Constructors
         => new ConstructorCollection(
             this,
             this.Compilation.GetConstructorCollection( this.Ref.GetDefinition() ) );
 
-    public IConstructor? StaticConstructor => this.TypeBuilder.StaticConstructor;
+    IConstructor? INamedType.StaticConstructor => null;
 
-    public IMethod? Finalizer => this.TypeBuilder.Finalizer;
-
-    public bool IsReadOnly => this.TypeBuilder.IsReadOnly;
-
-    public bool IsRef => this.TypeBuilder.IsRef;
+    IMethod? INamedType.Finalizer => null;
 
     public INamedType TypeDefinition => this.Definition;
 
@@ -154,22 +163,27 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public TypeKind TypeKind => this.TypeBuilder.TypeKind;
 
-    public SpecialType SpecialType => this.TypeBuilder.SpecialType;
+    public SpecialType SpecialType => SpecialType.None;
 
-    public bool? IsReferenceType => this.TypeBuilder.IsReferenceType;
+    public bool? IsReferenceType => this.TypeBuilder.TypeKind is TypeKind.Class or TypeKind.RecordClass;
 
-    public bool? IsNullable => this.TypeBuilder.IsNullable;
+    public bool IsReadOnly => this.TypeBuilder.IsReadOnly;
 
-    public ITypeParameterList TypeParameters => this.TypeBuilder.TypeParameters;
+    public bool IsRef => this.TypeBuilder.IsRef;
+
+    public bool? IsNullable => false; // TODO: We don't have a mechanism to create nullable introduced types
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments => this.TypeParameters.SelectAsImmutableArray( this.MapType );
+    public ITypeParameterList TypeParameters => new TypeParameterList( this, this.TypeBuilder.TypeParameters.SelectAsReadOnlyList( t => t.ToRef() ) );
 
-    public bool IsGeneric => this.TypeBuilder.IsGeneric;
+    [Memo]
+    public IReadOnlyList<IType> TypeArguments => this.TypeBuilder.TypeParameters.SelectAsImmutableArray( t => this.MapType( t.ToRef() ) );
 
-    public bool IsCanonicalGenericInstance => this.TypeBuilder.IsCanonicalGenericInstance;
+    public bool IsGeneric => this.TypeBuilder.TypeParameters.Length > 0;
 
-    public ExecutionScope ExecutionScope => this.TypeBuilder.ExecutionScope;
+    public bool IsCanonicalGenericInstance => this.GenericContext.IsEmptyOrIdentity;
+
+    public ExecutionScope ExecutionScope => ExecutionScope.RunTime;
 
     public ITypeSymbol? TypeSymbol => null;
 
@@ -184,8 +198,10 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public bool Equals( INamedType? other ) => this.Compilation.Comparers.Default.Equals( this, other );
 
+    public override bool CanBeInherited => !this.IsSealed;
+
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = DerivedTypesOptions.Default )
-        => Array.Empty<IDeclaration>();
+        => Array.Empty<IDeclaration>(); // TODO
 
     public bool IsSubclassOf( INamedType type ) => type.SpecialType == SpecialType.Object;
 

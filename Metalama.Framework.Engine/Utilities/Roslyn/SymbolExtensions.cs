@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => false
             };
 
-        internal static bool HasModifier( this ISymbol symbol, SyntaxKind kind )
+        internal static bool? HasModifier( this ISymbol symbol, SyntaxKind kind )
         {
             if ( symbol.DeclaringSyntaxReferences.IsEmpty )
             {
@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     return false;
                 }
 
-                throw new ArgumentOutOfRangeException();
+                return null;
             }
 
             return symbol.DeclaringSyntaxReferences.Any(

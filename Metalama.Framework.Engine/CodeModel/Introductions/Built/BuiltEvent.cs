@@ -4,7 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +31,8 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.EventBuilder;
 
     protected override MemberBuilderData MemberBuilder => this.EventBuilder;
+
+    public override bool IsExplicitInterfaceImplementation => throw new System.NotImplementedException();
 
     [Memo]
     public INamedType Type => this.MapDeclaration( this.EventBuilder.Type );
@@ -56,7 +60,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
-    public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
+    public EventInfo ToEventInfo() => CompileTimeEventInfo.Create(  this );
 
     [Memo]
     private IRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
@@ -64,16 +68,17 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     public IRef<IEvent> ToRef() => this.Ref;
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    
 
-    public IEventInvoker With( InvokerOptions options ) => this.EventBuilder.With( options );
+    public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
-    public IEventInvoker With( object? target, InvokerOptions options = default ) => this.EventBuilder.With( target, options );
+    public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );
 
-    public object Add( object? handler ) => this.EventBuilder.Add( handler );
+    public object Add( object? handler ) => new EventInvoker( this ).Add( handler );
 
-    public object Remove( object? handler ) => this.EventBuilder.Remove( handler );
+    public object Remove( object? handler ) => new EventInvoker( this ).Remove( handler );
 
-    public object Raise( params object?[] args ) => this.EventBuilder.Raise( args );
+    public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

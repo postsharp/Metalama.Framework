@@ -45,7 +45,7 @@ public sealed partial class DerivedTypeIndex
             case ISymbolRef { Symbol: INamedTypeSymbol symbol }:
                 return this.IsCurrentCompilation( symbol.ContainingAssembly );
 
-            case IBuilderRef { BuilderData: INamedTypeBuilder }:
+            case IBuiltDeclarationRef { BuilderData: INamedTypeBuilder }:
                 // Builders are always "in" the current Roslyn compilation.
                 return true;
 

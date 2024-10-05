@@ -133,7 +133,7 @@ internal static class DeclarationModifiersHelper
             AddToken( SyntaxKind.ConstKeyword );
         }
 
-        if ( (categories & ModifierCategories.Unsafe) != 0 && member.GetSymbol() is { } symbol && symbol.HasModifier( SyntaxKind.UnsafeKeyword ) )
+        if ( (categories & ModifierCategories.Unsafe) != 0 && member.GetSymbol() is { } symbol && symbol.HasModifier( SyntaxKind.UnsafeKeyword ) == true )
         {
             AddToken( SyntaxKind.UnsafeKeyword );
         }

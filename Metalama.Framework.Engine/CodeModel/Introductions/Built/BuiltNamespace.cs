@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -11,24 +13,27 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 {
-    private readonly NamespaceBuilderData _namespaceBuilder;
+    private readonly NamespaceBuilderData _namedDeclarationBuilder;
 
     public BuiltNamespace( NamespaceBuilderData builder, CompilationModel compilation ) : base( compilation, GenericContext.Empty )
     {
-        this._namespaceBuilder = builder;
+        this._namedDeclarationBuilder = builder;
     }
 
-    public override DeclarationBuilderData BuilderData => this._namespaceBuilder;
+    public override DeclarationBuilderData BuilderData => this.NamedDeclarationBuilder;
 
-    protected override NamespaceBuilderData NamedDeclarationBuilder => this._namespaceBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._namedDeclarationBuilder;
 
-    public string FullName => this._namespaceBuilder.FullName;
+    [Memo]
+    public string FullName => this.ContainingNamespace.IsGlobalNamespace ? this.Name : this.ContainingNamespace.FullName + "." + this.Name;
 
     public bool IsGlobalNamespace => false;
 
-    public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
+    [Memo]
+    public INamespace ContainingNamespace => this.MapDeclaration( this.NamedDeclarationBuilder.ContainingDeclaration.As<INamespace>() );
 
-    private IRef<INamespace> Ref => this._namespaceBuilder.Ref;
+    [Memo]
+    private IRef<INamespace> Ref => this.RefFactory.FromBuilt<INamespace>( this );
 
     IRef<INamespace> INamespace.ToRef() => this.Ref;
 
@@ -41,12 +46,12 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollectionByParent( this._namespaceBuilder.ToRef() ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this._namedDeclarationBuilder.ToRef() ) );
 
     public INamespaceCollection Namespaces
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._namespaceBuilder.ToRef().As<INamespace>() ) );
+            this.Compilation.GetNamespaceCollection( this.NamedDeclarationBuilder.ToRef().As<INamespace>() ) );
 
     public bool IsPartial
     {
@@ -66,6 +71,8 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
     }
 
     public INamespace GetDescendant( string ns ) => throw new NotImplementedException();
+
+    public override bool CanBeInherited => false;
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = DerivedTypesOptions.Default )
         => throw new NotSupportedException();

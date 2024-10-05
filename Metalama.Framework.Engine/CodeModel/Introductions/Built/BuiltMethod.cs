@@ -6,6 +6,8 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -30,8 +32,9 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._methodBuilder;
 
     protected override MemberBuilderData MemberBuilder => this._methodBuilder;
-    
-    
+
+    public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0 ;
+
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
@@ -49,14 +52,17 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
         => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 
-    public MethodInfo ToMethodInfo() => this._methodBuilder.ToMethodInfo();
+    public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
     IHasAccessors? IMethod.DeclaringMember => null;
-
-    public override MethodBase ToMethodBase() => this.ToMethodInfo();
+    
 
     [Memo]
     private IRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
+
+    public MethodBase ToMethodBase() => throw new NotImplementedException();
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this.ToRef();
 
     public IRef<IMethod> ToRef() => this.Ref;
 
@@ -72,7 +78,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public ITypeParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this._methodBuilder.TypeParameters.AsBuilderList.Select( x => this.RefFactory.FromBuilderData<ITypeParameter>( x ) ).ToReadOnlyList() );
+            this._methodBuilder.TypeParameters.Select( x => this.RefFactory.FromBuilderData<ITypeParameter>( x ) ).ToReadOnlyList() );
 
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
@@ -89,22 +95,20 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public IMethod Definition => this.Compilation.Factory.GetMethod( this._methodBuilder ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
-
-    bool IMethod.IsPartial => false;
-
+    
     bool IMethod.IsExtern => false;
 
-    public IMethodInvoker With( InvokerOptions options ) => this._methodBuilder.With( options );
+    public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
 
-    public IMethodInvoker With( object? target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
+    public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
 
-    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
 
-    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this._methodBuilder.CreateInvokeExpression( args );
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new MethodInvoker( this ).CreateInvokeExpression( args );
 
-    public object? Invoke( params object?[] args ) => this._methodBuilder.Invoke( args );
+    public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
-    public object? Invoke( IEnumerable<IExpression> args ) => this._methodBuilder.Invoke( args );
+    public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
     public bool? IsIteratorMethod => this._methodBuilder.IsIteratorMethod;
 }

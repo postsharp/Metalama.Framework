@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,8 +33,9 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
     protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._constructorBuilder;
 
     protected override MemberBuilderData MemberBuilder => this._constructorBuilder;
-    
-    
+
+    public override bool IsExplicitInterfaceImplementation => throw new System.NotImplementedException();
+
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
@@ -44,21 +46,23 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
     
     public MethodBase ToMethodBase() => this.ToConstructorInfo();
 
+    IRef<IMethodBase> IMethodBase.ToRef() => this.ToRef();
+
     [Memo]
     private IRef<IConstructor> Ref
-        => (IRef<IConstructor>?) ((ICompilationBoundRefImpl?) this._constructorBuilder.ReplacedImplicitConstructor?.ToRef())?.WithGenericContext(
+        => (IRef<IConstructor>?) ((ICompilationBoundRefImpl?) this._constructorBuilder.ReplacedImplicitConstructor)?.WithGenericContext(
                this.GenericContext )
            ?? this.RefFactory.FromBuilt<IConstructor>( this );
 
     public IRef<IConstructor> ToRef() => this.Ref;
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-
+    
     public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 
     bool IConstructor.IsPrimary => false;
 
-    public ConstructorInfo ToConstructorInfo() => this._constructorBuilder.ToConstructorInfo();
+    public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
     [Memo]
     public IConstructor Definition => this.Compilation.Factory.GetConstructor( this._constructorBuilder ).AssertNotNull();

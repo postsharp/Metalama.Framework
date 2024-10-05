@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -12,6 +13,8 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class MethodBuilderData : MemberBuilderData
 {
+    private readonly IRef<IMethod> _ref;
+    
     public IReadOnlyList<IRef<IMethod>> ExplicitInterfaceImplementations { get; }
 
     public bool IsReadOnly { get; }
@@ -38,25 +41,23 @@ internal class MethodBuilderData : MemberBuilderData
         builder,
         containingDeclaration )
     {
-        var me = this.ToDeclarationRef();
+        this._ref = new DeclarationBuilderDataRef<IMethod>( this);
 
         this.IsReadOnly = builder.IsReadOnly;
         this.IsIteratorMethod = builder.IsIteratorMethod.AssertNotNull();
-        this.TypeParameters = builder.TypeParameters.ToImmutable( me );
-        this.Parameters = builder.Parameters.ToImmutable( me );
-        this.ReturnParameter = new ParameterBuilderData( builder.ReturnParameter, me );
+        this.TypeParameters = builder.TypeParameters.ToImmutable( this._ref );
+        this.Parameters = builder.Parameters.ToImmutable( this._ref );
+        this.ReturnParameter = new ParameterBuilderData( builder.ReturnParameter, this._ref );
         this.OverriddenMethod = builder.OverriddenMethod?.ToRef();
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
         this.MethodKind = builder.MethodKind;
         this.OperatorKind = builder.OperatorKind;
     }
-
+    
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
 
-    [Memo]
-    public IRef<IMethod> Ref => this.RefFactory.FromBuilderData<IMethod>( this );
+    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    public new IRef<IMethod> ToRef() => this._ref;
 
-    public new IRef<IMethod> ToRef() => this.Ref;
 }

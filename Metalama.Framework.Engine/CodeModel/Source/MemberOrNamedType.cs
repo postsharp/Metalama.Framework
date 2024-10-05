@@ -182,6 +182,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.ToMemberOrNamedTypeRef();
 
+        public virtual bool IsPartial => this.Symbol.HasModifier( SyntaxKind.PartialKeyword )??false;
+
         protected abstract IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef();
     }
 }

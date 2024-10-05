@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -11,9 +13,18 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class ConstructorBuilderData : MemberBuilderData
 {
-    public ConstructorBuilderData( ConstructorBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration ) { }
+    private readonly IRef<IConstructor> _ref;
+    
+    public IRef<IConstructor>? ReplacedImplicitConstructor { get; }
+    public ImmutableArray<ParameterBuilderData> Parameters { get; }
+    
+    public ConstructorInitializerKind InitializerKind { get; }
+    
+    public ImmutableArray<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
-    public override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
+    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    
+    public new IRef<IConstructor> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
@@ -21,14 +32,19 @@ internal class ConstructorBuilderData : MemberBuilderData
         builder,
         containingDeclaration )
     {
-        var me = this.ToDeclarationRef();
+        this._ref = new DeclarationBuilderDataRef<IConstructor>( this);
 
-        this.Parameters = builder.Parameters.ToImmutable( me );
+        this.Parameters = builder.Parameters.ToImmutable( this._ref );
+        this.ReplacedImplicitConstructor = builder.ReplacedImplicitConstructor?.ToRef();
+        this.InitializerKind = builder.InitializerKind;
+        this.InitializerArguments = builder.InitializerArguments.ToImmutableArray();
     }
 
-    public ImmutableArray<ParameterBuilderData> Parameters { get; }
+    
 
     public override IRef<IMember>? OverriddenMember => null;
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => [];
+
+    
 }

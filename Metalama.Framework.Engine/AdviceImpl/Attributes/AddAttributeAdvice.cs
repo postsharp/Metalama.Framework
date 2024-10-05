@@ -94,7 +94,7 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
             var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );
             addTransformation( attributeBuilder.ToTransformation() );
 
-            return new AddAttributeAdviceResult( outcome, attributeBuilder.ToAttributeRef() );
+            return new AddAttributeAdviceResult( outcome, attributeBuilder.ToRef() );
         }
     }
 }

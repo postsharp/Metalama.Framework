@@ -5,7 +5,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
@@ -116,10 +115,11 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
    
-
+/*
     public override ICompilationElement? Translate(
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
         => this.ReplacedImplicitConstructor?.Translate( newCompilation ) ?? base.Translate( newCompilation, genericContext );
+        */
 }

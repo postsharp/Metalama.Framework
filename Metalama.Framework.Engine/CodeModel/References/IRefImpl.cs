@@ -11,10 +11,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// <summary>
     /// A weakly typed base for <see cref="ISdkRef{T}"/>.
     /// </summary>
-    internal interface IRefImpl : IRef
+    internal interface IRefImpl : ISdkRef
     {
         IRef ToDurable();
-
+        
         ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
 
         SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );

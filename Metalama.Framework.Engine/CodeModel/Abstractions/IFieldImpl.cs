@@ -6,4 +6,5 @@ using Metalama.Framework.CompileTimeContracts;
 namespace Metalama.Framework.Engine.CodeModel.Abstractions
 {
     internal interface IFieldImpl : IField, IFieldOrPropertyOrIndexerImpl, IUserExpression;
+    
 }

@@ -14,7 +14,7 @@ internal class SymbolIdRef<T> : StringRef<T>
     private SymbolIdRef( string id ) : base( id ) { }
 
     public SymbolIdRef( in SymbolId id ) : base( id.Id ) { }
-
+    
     public override SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
     public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext )
