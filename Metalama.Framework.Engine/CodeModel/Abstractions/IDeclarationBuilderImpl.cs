@@ -11,5 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Abstractions
         Advice ParentAdvice { get; }
 
         new AttributeBuilderCollection Attributes { get; }
+        
+        bool IsDesignTimeObservable { get; }
     }
 }

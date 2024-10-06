@@ -16,28 +16,28 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTransformation, IIntroduceDeclarationTransformation,
                                                                 IInjectMemberTransformation
-    where T : DeclarationBuilder
+    where T : NamedDeclarationBuilderData
 {
-    public T IntroducedDeclaration { get; }
+    public T BuilderData { get; }
 
-    protected IntroduceDeclarationTransformation( Advice advice, T introducedDeclaration ) : base( advice )
+    protected IntroduceDeclarationTransformation( Advice advice, T introducedDeclaration ) : base( advice, introducedDeclaration.PrimarySyntaxTree )
     {
-        this.IntroducedDeclaration = introducedDeclaration.AssertNotNull();
+        this.BuilderData = introducedDeclaration.AssertNotNull();
     }
 
     public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
-    public virtual InsertPosition InsertPosition => this.IntroducedDeclaration.ToInsertPosition();
+    public virtual InsertPosition InsertPosition => this.BuilderData.ToInsertPosition();
 
-    IDeclarationBuilder IIntroduceDeclarationTransformation.DeclarationBuilder => this.IntroducedDeclaration;
+    DeclarationBuilderData IIntroduceDeclarationTransformation.DeclarationBuilderData => this.BuilderData;
 
-    public override IDeclaration TargetDeclaration => this.IntroducedDeclaration.ContainingDeclaration.AssertNotNull();
+    public override IRef<IDeclaration> TargetDeclaration => this.BuilderData.ContainingDeclaration.AssertNotNull();
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceMember;
 
-    public override FormattableString ToDisplayString()
-        => $"Introduce {this.IntroducedDeclaration.DeclarationKind} '{this.IntroducedDeclaration.ToDisplayString()}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation )
+        => $"Introduce {this.BuilderData.DeclarationKind.ToDisplayString()} '{this.BuilderData.Name}' into '{this.BuilderData.ContainingDeclaration.GetTarget(compilation).ToDisplayString()}'.";
 
     public override string ToString()
-        => $"{{{this.GetType().Name} Builder={{{this.IntroducedDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}}}";
+        => $"{{{this.GetType().Name} Builder={{{this.BuilderData}}}";
 }

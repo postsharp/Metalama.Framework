@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -21,8 +22,6 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 {
-    private AttributeRef? _attributeRef;
-
     internal IAttributeData AttributeConstruction { get; }
 
     public AttributeBuilder( Advice advice, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base( advice )
@@ -37,11 +36,12 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     public override IDeclaration ContainingDeclaration { get; }
 
-    IRef<IAttribute> IAttribute.ToRef() => throw new NotSupportedException();
-
+    
     IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
+
+    public override bool IsDesignTimeObservable => false;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
@@ -65,9 +65,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     public ITransformation ToTransformation()
     {
-        this.Freeze();
-
-        return new IntroduceAttributeTransformation( this.ParentAdvice, this );
+        return new IntroduceAttributeTransformation( this.ParentAdvice, this.Immutable );
     }
 
     int IAspectPredecessor.PredecessorDegree => 0;
@@ -77,5 +75,11 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
+    
+    [Memo]
+    public AttributeBuilderData Immutable => new AttributeBuilderData( this, this.ContainingDeclaration.ToRef() );
+    
+    public IRef<IAttribute> ToRef() => this.Immutable.ToRef();
+
     
 }

@@ -41,8 +41,8 @@ public sealed class ProjectModel : IProject
         IEnumerable<AssemblyIdentity>? references = null,
         IEnumerable<string>? preprocessorSymbolNames = null )
     {
-        references ??= Enumerable.Empty<AssemblyIdentity>();
-        preprocessorSymbolNames ??= Enumerable.Empty<string>();
+        references ??= [];
+        preprocessorSymbolNames ??= [];
 
         this.ClassificationService = serviceProvider.GetService<ISymbolClassificationService>();
         this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();

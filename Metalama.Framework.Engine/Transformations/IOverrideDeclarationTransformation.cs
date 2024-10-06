@@ -6,5 +6,5 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal interface IOverrideDeclarationTransformation : ITransformation
 {
-    IDeclaration OverriddenDeclaration { get; }
+    IRef<IDeclaration> OverriddenDeclaration { get; }
 }

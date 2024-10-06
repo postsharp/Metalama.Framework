@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
                         Identifier( symbol.Name ),
                         AccessorList(
                             Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.OpenBraceToken, generationContext.ElasticEndOfLineTriviaList ),
-                            List( new[] { transformedAdd, transformedRemove } ),
+                            List( [transformedAdd, transformedRemove] ),
                             Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, generationContext.ElasticEndOfLineTriviaList ) ),
                         default );
             }
@@ -162,11 +162,10 @@ namespace Metalama.Framework.Engine.Linking
             var accessorList =
                 AccessorList(
                     List(
-                        new[]
-                        {
-                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, context.SyntaxGenerator.FormattedBlock() ),
+                    [
+                        AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, context.SyntaxGenerator.FormattedBlock() ),
                             AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, context.SyntaxGenerator.FormattedBlock() )
-                        } ) );
+                    ] ) );
 
             return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ), context );
         }

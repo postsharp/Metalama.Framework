@@ -29,7 +29,7 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
 
     public override bool CanBeInherited => false;
 
-    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
+    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => [];
 
     public INamespace GlobalNamespace => this.Compilation.Factory.GetNamespace( this._assemblySymbol.GlobalNamespace );
 

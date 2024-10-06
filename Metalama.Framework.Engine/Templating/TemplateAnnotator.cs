@@ -1253,7 +1253,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                  arg => arg.Expression.GetScopeFromAnnotation()?.GetExpressionExecutionScope() == CompileTimeOnly ) )
         {
             updatedInvocation = updatedInvocation.ReplaceTokens(
-                new[] { updatedInvocation.ArgumentList.OpenParenToken, updatedInvocation.ArgumentList.CloseParenToken },
+                [updatedInvocation.ArgumentList.OpenParenToken, updatedInvocation.ArgumentList.CloseParenToken],
                 ( token, _ ) => token.AddColoringAnnotation( TextSpanClassification.CompileTime ) );
 
             // Note: if there is ever a non-compile-time TemplateKeyword that has multiple arguments, ArgumentList commas might need coloring too.
@@ -1486,7 +1486,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             transformedDesignation = this.Visit( node.Designation );
         }
 
-        var scope = this.GetExpressionScope( new SyntaxNode[] { transformedType, transformedDesignation }, node );
+        var scope = this.GetExpressionScope( [transformedType, transformedDesignation], node );
 
         return node.Update( transformedType, transformedDesignation ).AddScopeAnnotation( scope );
     }
@@ -1996,7 +1996,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
 
             var expressionScope = this.GetNodeScope( annotatedExpression );
-            castScope = this.GetExpressionScope( new SyntaxNode[] { annotatedExpression, annotatedType }, new[] { expressionScope, typeScope }, node );
+            castScope = this.GetExpressionScope( [annotatedExpression, annotatedType], [expressionScope, typeScope], node );
         }
         else
         {
@@ -2031,7 +2031,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 }
                 else
                 {
-                    castScope = this.GetExpressionScope( new SyntaxNode[] { annotatedExpression, annotatedType }, new[] { expressionScope, typeScope }, node );
+                    castScope = this.GetExpressionScope( [annotatedExpression, annotatedType], [expressionScope, typeScope], node );
                 }
             }
         }
@@ -2073,7 +2073,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         var combinedScope = this.GetNodeScope( annotatedType ) == RunTimeOrCompileTime
             ? this.GetNodeScope( annotatedExpression ).GetExpressionValueScope()
-            : this.GetExpressionScope( new[] { annotatedExpression }, transformedCastNode );
+            : this.GetExpressionScope( [annotatedExpression], transformedCastNode );
 
         return transformedCastNode.AddScopeAnnotation( combinedScope );
     }
@@ -2113,7 +2113,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             // Use the default rule.
             annotatedRight = this.Visit( node.Right );
             var rightScope = this.GetNodeScope( annotatedRight );
-            combinedScope = this.GetExpressionScope( new SyntaxNode[] { annotatedLeft, annotatedRight }, new[] { leftScope, rightScope }, node );
+            combinedScope = this.GetExpressionScope( [annotatedLeft, annotatedRight], [leftScope, rightScope], node );
         }
 
         return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
@@ -2625,7 +2625,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         SyntaxNode? transformedWhen,
         SyntaxNode? transformedExpression,
         SyntaxNode originalNode )
-        => this.GetExpressionScope( new[] { transformedPattern, transformedWhen, transformedExpression }, originalNode );
+        => this.GetExpressionScope( [transformedPattern, transformedWhen, transformedExpression], originalNode );
 
     public override SyntaxNode VisitCasePatternSwitchLabel( CasePatternSwitchLabelSyntax node )
     {
@@ -2923,8 +2923,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 CompileTimeOnly => CompileTimeOnly,
                 RunTimeOnly => RunTimeOnly,
                 _ => this.GetExpressionScope(
-                    new SyntaxNode?[] { node.ArgumentList, transformedInitializer },
-                    new[] { argumentsScope, initializerScope },
+                    [node.ArgumentList, transformedInitializer],
+                    [argumentsScope, initializerScope],
                     node )
             };
 
@@ -2964,8 +2964,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             var scope = expressionScope == RunTimeOrCompileTime
                 ? this.GetExpressionScope(
-                    new SyntaxNode[] { node.Expression, node.Initializer },
-                    new[] { expressionScope, this.GetNodeScope( transformedInitializer ) },
+                    [node.Expression, node.Initializer],
+                    [expressionScope, this.GetNodeScope( transformedInitializer )],
                     node )
                 : expressionScope;
 

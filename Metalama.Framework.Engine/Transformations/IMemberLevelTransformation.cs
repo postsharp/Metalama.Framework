@@ -9,5 +9,5 @@ internal interface IMemberLevelTransformation : ISyntaxTreeTransformation
     /// <summary>
     /// Gets a target method base of this code transformation.
     /// </summary>
-    IMember TargetMember { get; }
+    IRef<IMember> TargetMember { get; }
 }

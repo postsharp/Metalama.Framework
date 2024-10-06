@@ -136,7 +136,7 @@ internal sealed class LinkerInjectionRegistry
 
             if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
             {
-                builderToInjectedMemberMap.TryAdd( introduceTransformation.DeclarationBuilder, injectedMember );
+                builderToInjectedMemberMap.TryAdd( introduceTransformation.DeclarationBuilderData, injectedMember );
             }
 
             if ( injectedMember is { Transformation: null, Semantic: InjectedMemberSemantic.AuxiliaryBody } )
@@ -570,6 +570,6 @@ internal sealed class LinkerInjectionRegistry
 
         var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
-        return injectedMember?.Transformation?.ParentAdvice.AspectInstance.AspectClass;
+        return injectedMember?.Transformation?.AspectInstance.AspectClass;
     }
 }

@@ -67,7 +67,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IParameter, ParameterBuilderData>(
             parameterBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<ParameterBuilderData> args ) => new BuiltParameter( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<ParameterBuilderData> args ) => new BuiltParameter( args.Builder, args.Compilation, args.GenericContext, (IHasParameters) args.Builder.ContainingDeclaration.GetTarget(args.Compilation) ) );
 
     internal ITypeParameter GetTypeParameter(
         TypeParameterBuilderData typeParameterBuilder,

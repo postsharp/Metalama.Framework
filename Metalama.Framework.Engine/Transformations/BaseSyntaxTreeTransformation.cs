@@ -9,7 +9,11 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal abstract class BaseSyntaxTreeTransformation : BaseTransformation, ISyntaxTreeTransformation
 {
-    protected BaseSyntaxTreeTransformation( Advice advice ) : base( advice ) { }
+    protected BaseSyntaxTreeTransformation( Advice advice, SyntaxTree? transformedSyntaxTree = null ) : base( advice )
+    {
+        this.TransformedSyntaxTree = transformedSyntaxTree ?? advice.TargetDeclaration.GetPrimarySyntaxTree()
+            ?? advice.SourceCompilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
+    }
 
-    public virtual SyntaxTree TransformedSyntaxTree => this.TargetDeclaration.GetPrimarySyntaxTree().AssertNotNull();
+    public SyntaxTree TransformedSyntaxTree { get; }
 }

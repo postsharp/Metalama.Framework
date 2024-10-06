@@ -36,5 +36,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
+    public new IRef<IParameter> ToRef() => this._ref;
+
     public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 }

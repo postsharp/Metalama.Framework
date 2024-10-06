@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,12 +14,12 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractMethodTransformation : ContractBaseTransformation
 {
-    private new IMethod TargetMember => (IMethod) base.TargetMember;
+    private new IRef<IMethod> TargetMember => (IRef<IMethod>) base.TargetMember;
 
     public ContractMethodTransformation(
         Advice advice,
-        IMethod targetMethod,
-        IParameter contractTarget,
+        IRef<IMethod> targetMethod,
+        IRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
@@ -26,7 +27,7 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget )
+        switch ( this.ContractTarget.GetTarget(context.Compilation) )
         {
             case IParameter { IsReturnParameter: true } returnValueParam:
                 {
@@ -40,7 +41,7 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
                     }
                     else
                     {
-                        return new[] { new InsertedStatement( contractBlock, returnValueParam, this, InsertedStatementKind.OutputContract ) };
+                        return [new InsertedStatement( contractBlock, returnValueParam, this, InsertedStatementKind.OutputContract )];
                     }
                 }
 
@@ -99,5 +100,5 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
         }
     }
 
-    public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetMember}'";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add default contract to method '{this.TargetMember}'";
 }

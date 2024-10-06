@@ -67,7 +67,7 @@ internal sealed class Namespace : Declaration, INamespace
 
     public override bool CanBeInherited => false;
 
-    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
+    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => [];
 
     [Memo]
     public INamespace? ContainingNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );

@@ -6,14 +6,54 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System.Linq;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class TemplateMember<T>
+internal sealed class TemplateMember<T> : TemplateMember
     where T : class, IMemberOrNamedType
 {
-    public T Declaration { get; }
+    public TemplateMember(
+        T implementation,
+        TemplateClassMember templateClassMember,
+        IAdviceAttribute adviceAttribute,
+        TemplateKind selectedKind = TemplateKind.Default ) : this(
+        implementation,
+        templateClassMember,
+        adviceAttribute,
+        selectedKind,
+        selectedKind ) { }
+
+    public TemplateMember(
+        T implementation,
+        TemplateClassMember templateClassMember,
+        IAdviceAttribute adviceAttribute,
+        TemplateKind selectedKind,
+        TemplateKind interpretedKind ) : base(
+        implementation,
+        templateClassMember,
+        adviceAttribute,
+        selectedKind,
+        interpretedKind )
+    {
+        
+    }
+
+    public TemplateMember( TemplateMember prototype ) : base( prototype )
+    {
+        
+    }
+    
+}
+
+internal abstract class TemplateMember
+{
+    public ISymbol Declaration { get; }
 
     public TemplateClassMember TemplateClassMember { get; }
 
@@ -45,49 +85,69 @@ internal sealed class TemplateMember<T>
     /// </summary>
     public TemplateKind EffectiveKind
     {
-        get
-        {
-            if ( this.SelectedKind == TemplateKind.Default )
-            {
-                if ( this.Declaration is IMethod method && method.GetAsyncInfo() is { IsAsync: true } )
-                {
-                    if ( this.IsIteratorMethod )
-                    {
-                        switch ( method.GetIteratorInfo().EnumerableKind )
-                        {
-                            case EnumerableKind.IAsyncEnumerable:
-                                return TemplateKind.IAsyncEnumerable;
-
-                            case EnumerableKind.IAsyncEnumerator:
-                                return TemplateKind.IAsyncEnumerator;
-                        }
-                    }
-                    else
-                    {
-                        return TemplateKind.Async;
-                    }
-                }
-                else if ( this.IsIteratorMethod )
-                {
-                    var iteratorMethod = this.Declaration as IMethod ?? (this.Declaration as IProperty)?.GetMethod;
-
-                    switch ( iteratorMethod?.GetIteratorInfo().EnumerableKind )
-                    {
-                        case EnumerableKind.IEnumerable:
-                            return TemplateKind.IEnumerable;
-
-                        case EnumerableKind.IEnumerator:
-                            return TemplateKind.IEnumerator;
-                    }
-                }
-            }
-
-            return this.SelectedKind;
-        }
+        get;
     }
 
-    public TemplateMember(
-        T implementation,
+    private TemplateKind GetEffectiveKind( IMemberOrNamedType declaration )
+    {
+        if ( this.SelectedKind == TemplateKind.Default )
+        {
+            if ( declaration is IMethod method && method.GetAsyncInfo() is { IsAsync: true } )
+            {
+                if ( this.IsIteratorMethod )
+                {
+                    switch ( method.GetIteratorInfo().EnumerableKind )
+                    {
+                        case EnumerableKind.IAsyncEnumerable:
+                            return TemplateKind.IAsyncEnumerable;
+
+                        case EnumerableKind.IAsyncEnumerator:
+                            return TemplateKind.IAsyncEnumerator;
+                    }
+                }
+                else
+                {
+                    return TemplateKind.Async;
+                }
+            }
+            else if ( this.IsIteratorMethod )
+            {
+                var iteratorMethod = declaration as IMethod ?? (declaration as IProperty)?.GetMethod;
+
+                switch ( iteratorMethod?.GetIteratorInfo().EnumerableKind )
+                {
+                    case EnumerableKind.IEnumerable:
+                        return TemplateKind.IEnumerable;
+
+                    case EnumerableKind.IEnumerator:
+                        return TemplateKind.IEnumerator;
+                }
+            }
+        }
+
+        return this.SelectedKind;
+    }
+
+    [Memo]
+    public TemplateDriver Driver => this.TemplateClassMember.TemplateClass.GetTemplateDriver( this.Declaration );
+
+    protected TemplateMember( TemplateMember prototype )
+    {
+        this.Declaration = prototype.Declaration;
+        this.Accessibility = prototype.Accessibility;
+        this.InterpretedKind = prototype.InterpretedKind;
+        this.Accessibility = prototype.Accessibility;
+        this.AdviceAttribute = prototype.AdviceAttribute;
+        this.IsIteratorMethod = prototype.IsIteratorMethod;
+        this.EffectiveKind = prototype.EffectiveKind;
+        this.SelectedKind = prototype.SelectedKind;
+        this.GetAccessorAccessibility = prototype.GetAccessorAccessibility;
+        this.SetAccessorAccessibility = prototype.SetAccessorAccessibility;
+        this.TemplateClassMember = prototype.TemplateClassMember;
+    }
+
+    protected TemplateMember(
+        IMemberOrNamedType implementation,
         TemplateClassMember templateClassMember,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind = TemplateKind.Default ) : this(
@@ -97,14 +157,13 @@ internal sealed class TemplateMember<T>
         selectedKind,
         selectedKind ) { }
 
-    public TemplateMember(
-        T implementation,
+    protected TemplateMember(
+        IMemberOrNamedType implementation,
         TemplateClassMember templateClassMember,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind,
         TemplateKind interpretedKind )
     {
-        this.Declaration = implementation;
         this.TemplateClassMember = templateClassMember;
         this.AdviceAttribute = adviceAttribute.AssertNotNull();
 
@@ -117,6 +176,7 @@ internal sealed class TemplateMember<T>
 
         this.SelectedKind = selectedKind;
         this.InterpretedKind = interpretedKind != TemplateKind.None ? interpretedKind : selectedKind;
+        this.EffectiveKind = this.GetEffectiveKind( implementation );
 
         // Get the template characteristics that may disappear or be changed during template compilation.
         var compiledTemplateAttribute = GetCompiledTemplateAttribute( implementation );
@@ -193,22 +253,11 @@ internal sealed class TemplateMember<T>
         return attribute;
     }
 
-    public TemplateMember<IMemberOrNamedType> Cast()
-        => TemplateMemberFactory.Create<IMemberOrNamedType>(
-            this.Declaration,
-            this.TemplateClassMember,
-            this.AdviceAttribute.AssertNotNull(),
-            this.SelectedKind,
-            this.InterpretedKind );
+    public TemplateMember<IMemberOrNamedType> Cast() => this as TemplateMember<IMemberOrNamedType> ?? new TemplateMember<IMemberOrNamedType>( this );
 
     public TemplateMember<TOther> Cast<TOther>()
         where TOther : class, IMemberOrNamedType
-        => TemplateMemberFactory.Create(
-            (TOther) (IMemberOrNamedType) this.Declaration,
-            this.TemplateClassMember,
-            this.AdviceAttribute.AssertNotNull(),
-            this.SelectedKind,
-            this.InterpretedKind );
+        => this as TemplateMember<TOther> ?? new TemplateMember<TOther>( this );
 
     public override string ToString() => $"{this.Declaration.Name}:{this.SelectedKind}";
 }

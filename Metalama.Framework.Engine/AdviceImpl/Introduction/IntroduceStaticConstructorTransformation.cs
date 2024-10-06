@@ -2,8 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,46 +15,43 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal sealed class IntroduceStaticConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation
+internal sealed class IntroduceStaticConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilderData>, IReplaceMemberTransformation
 {
-    public IntroduceStaticConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
+    public IntroduceStaticConstructorTransformation( Advice advice, ConstructorBuilderData introducedDeclaration ) : base( advice, introducedDeclaration )
     {
         Invariant.Assert( introducedDeclaration.IsStatic );
-
-        var targetType = introducedDeclaration.DeclaringType;
-        this.ReplacedMember = targetType.StaticConstructor;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var constructorBuilder = this.IntroducedDeclaration;
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget(context.Compilation);
 
         var syntax =
             ConstructorDeclaration(
-                constructorBuilder.GetAttributeLists( context ),
+                AdviceSyntaxGenerator.GetAttributeLists( constructorBuilder, context ),
                 TokenList( Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( Space ) ) ),
                 Identifier( constructorBuilder.DeclaringType.Name ),
                 ParameterList(),
                 null,
-                context.SyntaxGenerator.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
+                context.SyntaxGenerator.FormattedBlock().WithGeneratedCodeAnnotation( this.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
                 null );
 
-        return new[]
-        {
+        return
+        [
             new InjectedMember(
                 this,
                 syntax,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Introduction,
-                constructorBuilder )
-        };
+                this.BuilderData.ToRef() )
+        ];
     }
 
-    public IMember? ReplacedMember { get; }
+    public IRef<IMember>? ReplacedMember => this.BuilderData.ReplacedImplicitConstructor;
 
-    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.IntroducedDeclaration.ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
-    public override FormattableString ToDisplayString() => $"Introduce a static constructor into '{this.TargetDeclaration}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce a static constructor into '{this.TargetDeclaration}'.";
 }

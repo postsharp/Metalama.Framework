@@ -630,7 +630,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     if ( member is null or ITypeSymbol )
                     {
-                        return Enumerable.Empty<(ISymbol, INamedTypeSymbol)>();
+                        return [];
                     }
 
                     var selfAttributes = member.GetAttributes()

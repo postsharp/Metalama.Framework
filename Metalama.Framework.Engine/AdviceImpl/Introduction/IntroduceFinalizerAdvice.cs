@@ -5,14 +5,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -36,21 +31,24 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
             explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
-
-        this.Builder = new MethodBuilder( this, parameters.TargetDeclaration, "Finalize", DeclarationKind.Finalizer );
     }
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
+    protected override MethodBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
+        return new MethodBuilder( this, this.TargetDeclaration, "Finalize", DeclarationKind.Finalizer );
+    }
+
+    protected override void InitializeBuilderCore(
+        MethodBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context )
+    {
+        var targetDeclaration = this.TargetDeclaration;
 
         switch ( this.OverrideStrategy )
         {
             case OverrideStrategy.New:
-                diagnosticAdder.Report(
+                context.Diagnostics.Report(
                     AdviceDiagnosticDescriptors.CannotUseNewOverrideStrategyWithFinalizers.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
                         (this.AspectInstance.AspectClass.ShortName, targetDeclaration, this.OverrideStrategy),
@@ -61,18 +59,15 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
 
         // TODO: The base implementation may take more than needed from the template. Most would be ignored by the transformation, but
         //       the user may see it in the code model.
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+        base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;
 
-    protected override IntroductionAdviceResult<IMethod> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroductionAdviceResult<IMethod> ImplementCore( MethodBuilder builder, in AdviceImplementationContext context )
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
         var existingFinalizer = targetDeclaration.Finalizer;
 
@@ -80,7 +75,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
         if ( existingFinalizer == null )
         {
             // Check that there is no other member named the same, which is possible, but very unlikely.
-            var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
+            var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
             if ( existingOtherMember != null )
             {
@@ -88,19 +83,19 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind),
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration, existingOtherMember.DeclarationKind),
                             this ) );
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideFinalizerTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
-            this.Builder.IsOverride = false;
-            this.Builder.HasNewKeyword = this.Builder.IsNew = false;
+            var overriddenMethod = new OverrideFinalizerTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
+            builder.IsOverride = false;
+            builder.HasNewKeyword = builder.IsNew = false;
 
-            addTransformation( this.Builder.ToTransformation() );
-            addTransformation( overriddenMethod );
+            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( overriddenMethod );
 
-            return this.CreateSuccessResult();
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {
@@ -112,7 +107,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                         this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                  existingFinalizer.DeclaringType),
                                 this ) );
 
@@ -121,34 +116,36 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                     return this.CreateIgnoredResult( existingFinalizer );
 
                 case OverrideStrategy.Override:
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingFinalizer.DeclaringType ) )
                     {
                         var overriddenMethod = new OverrideFinalizerTransformation(
                             this,
-                            existingFinalizer,
+                            existingFinalizer.ToRef(),
                             this._template.ForIntroduction( existingFinalizer ),
                             this.Tags );
 
-                        addTransformation( overriddenMethod );
+                        context.AddTransformation( overriddenMethod );
 
                         return this.CreateSuccessResult( AdviceOutcome.Override, existingFinalizer );
                     }
                     else
                     {
-                        this.Builder.IsOverride = true;
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = false;
-                        this.Builder.OverriddenMethod = existingFinalizer;
+                        builder.IsOverride = true;
+                        builder.HasNewKeyword = builder.IsNew = false;
+                        builder.OverriddenMethod = existingFinalizer;
+                        
+                        builder.Freeze();
 
                         var overriddenMethod = new OverrideFinalizerTransformation(
                             this,
-                            this.Builder,
-                            this._template.ForIntroduction( this.Builder ),
+                            builder.ToRef(),
+                            this._template.ForIntroduction( builder ),
                             this.Tags );
 
-                        addTransformation( this.Builder.ToTransformation() );
-                        addTransformation( overriddenMethod );
+                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( overriddenMethod );
 
-                        return this.CreateSuccessResult( AdviceOutcome.Override, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.Override, builder );
                     }
 
                 default:

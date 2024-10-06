@@ -85,7 +85,7 @@ public static class DeclarationExtensions
                 IIndexer indexer => indexer.Parameters.Concat<IDeclaration>( indexer.Accessors ),
                 IConstructor constructor => constructor.Parameters,
                 IHasAccessors member => member.Accessors,
-                _ => Enumerable.Empty<IDeclaration>()
+                _ => []
             } );
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
@@ -134,7 +134,7 @@ public static class DeclarationExtensions
 
         if ( args == null || args.Length == 0 )
         {
-            return Array.Empty<ArgumentSyntax>();
+            return [];
         }
 
         var arguments = new List<ArgumentSyntax>( args.Length );

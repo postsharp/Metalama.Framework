@@ -125,7 +125,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
     }
 
 #pragma warning disable CA1822
-    public bool Is( IRef<IType> left, IType right, ConversionKind kind ) => left.GetCollectionStrategy().IsConvertibleTo( left, right.ToRef(), kind );
+    public bool Is( IRef<IType> left, IType right, ConversionKind kind ) => left.GetStrategy().IsConvertibleTo( left, right.ToRef(), kind );
 #pragma warning restore CA1822
 
     public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );

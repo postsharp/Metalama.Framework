@@ -12,17 +12,15 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
-using System.Collections.Generic;
 using Attribute = Metalama.Framework.Engine.CodeModel.Source.Attribute;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, IProperty, PropertyBuilder>
 {
+    private readonly IType? _explicitType;
     private readonly PartiallyBoundTemplateMethod? _getTemplate;
     private readonly PartiallyBoundTemplateMethod? _setTemplate;
     private readonly bool _isProgrammaticAutoProperty;
@@ -41,22 +39,26 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, explicitName, propertyTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
     {
+        this._explicitType = explicitType;
         this._getTemplate = getTemplate;
         this._setTemplate = setTemplate;
         this._isProgrammaticAutoProperty = propertyTemplate == null && getTemplate == null && setTemplate == null;
+    }
 
-        var templatePropertyDeclaration = propertyTemplate?.Declaration;
+    protected override PropertyBuilder CreateBuilder( in AdviceImplementationContext context )
+    {
+        var templatePropertyDeclaration = this.Template?.Declaration;
         var name = this.MemberName;
 
         var hasGet = this._isProgrammaticAutoProperty
-                     || (templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate != null);
+                     || (templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : this._getTemplate != null);
 
         var hasSet = this._isProgrammaticAutoProperty
-                     || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate != null);
+                     || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : this._setTemplate != null);
 
-        this.Builder = new PropertyBuilder(
+        var builder = new PropertyBuilder(
             this,
-            parameters.TargetDeclaration,
+            this.TargetDeclaration,
             name,
             hasGet,
             hasSet,
@@ -66,22 +68,26 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             templatePropertyDeclaration is { Writeability: Writeability.ConstructorOnly, IsAutoPropertyOrField: true },
             this.Tags );
 
-        if ( explicitType != null )
+        if ( this._explicitType != null )
         {
-            this.Builder.Type = explicitType;
+            builder.Type = this._explicitType;
         }
 
-        this.Builder.InitializerTemplate = propertyTemplate?.GetInitializerTemplate();
+        builder.InitializerTemplate = this.Template?.GetInitializerTemplate();
+
+        return builder;
     }
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
+    protected override void InitializeBuilderCore(
+        PropertyBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context )
     {
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+        base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        this.Builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
+        var serviceProvider = context.ServiceProvider;
+
+        builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
 
         if ( !this._isProgrammaticAutoProperty )
         {
@@ -89,7 +95,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             {
                 var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
 
-                this.Builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
+                builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
             }
             else if ( this._setTemplate != null )
             {
@@ -101,23 +107,23 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                 {
                     // There may be an invalid template without runtime parameters, in which case type cannot be determined.
 
-                    this.Builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[runtimeParameters[0].SourceIndex].Type );
+                    builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[runtimeParameters[0].SourceIndex].Type );
                 }
             }
             else if ( this.Template != null )
             {
                 // Case for event fields.
-                this.Builder.Type = this.Template.Declaration.Type;
+                builder.Type = this.Template.Declaration.Type;
             }
 
-            this.Builder.Accessibility =
+            builder.Accessibility =
                 this.Template?.Accessibility ?? (this._getTemplate != null
                     ? this._getTemplate.TemplateMember.Accessibility
                     : this._setTemplate?.TemplateMember.Accessibility).AssertNotNull();
 
-            if ( this.Builder.GetMethod != null )
+            if ( builder.GetMethod != null )
             {
-                ((AccessorBuilder) this.Builder.GetMethod).SetIsIteratorMethod(
+                ((AccessorBuilder) builder.GetMethod).SetIsIteratorMethod(
                     this.Template?.IsIteratorMethod ?? this._getTemplate?.TemplateMember.IsIteratorMethod ?? false );
             }
 
@@ -125,12 +131,12 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             {
                 if ( this.Template.Declaration.AssertNotNull().GetMethod != null )
                 {
-                    this.Builder.GetMethod.AssertNotNull().Accessibility = this.Template.GetAccessorAccessibility;
+                    builder.GetMethod.AssertNotNull().Accessibility = this.Template.GetAccessorAccessibility;
                 }
 
                 if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
                 {
-                    this.Builder.SetMethod.AssertNotNull().Accessibility = this.Template.SetAccessorAccessibility;
+                    builder.SetMethod.AssertNotNull().Accessibility = this.Template.SetAccessorAccessibility;
                 }
 
                 if ( this.Template.Declaration.GetSymbol().AssertSymbolNotNull().GetBackingField() is { } backingField )
@@ -141,34 +147,34 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     {
                         if ( classificationService.MustCopyTemplateAttribute( attribute ) )
                         {
-                            this.Builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), this.Builder ) );
+                            builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), builder ) );
                         }
                     }
                 }
             }
         }
 
-        if ( this.Builder.GetMethod != null )
+        if ( builder.GetMethod != null )
         {
             if ( this._getTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._getTemplate.TemplateMember.TemplateClassMember, this._getTemplate.Declaration, this.Builder.GetMethod );
+                AddAttributeForAccessorTemplate( this._getTemplate.TemplateMember.TemplateClassMember, this._getTemplate.Declaration, builder.GetMethod );
             }
             else if ( this.Template?.Declaration.GetMethod != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.GetMethod, this.Builder.GetMethod );
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.GetMethod, builder.GetMethod );
             }
         }
 
-        if ( this.Builder.SetMethod != null )
+        if ( builder.SetMethod != null )
         {
             if ( this._setTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._setTemplate.TemplateMember.TemplateClassMember, this._setTemplate.Declaration, this.Builder.SetMethod );
+                AddAttributeForAccessorTemplate( this._setTemplate.TemplateMember.TemplateClassMember, this._setTemplate.Declaration, builder.SetMethod );
             }
             else if ( this.Template?.Declaration.SetMethod != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.SetMethod, this.Builder.SetMethod );
+                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, this.Template.Declaration.SetMethod, builder.SetMethod );
             }
         }
 
@@ -193,15 +199,16 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceProperty;
 
-    protected override IntroductionAdviceResult<IProperty> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroductionAdviceResult<IProperty> ImplementCore( PropertyBuilder builder, in AdviceImplementationContext context )
     {
-        // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        builder.Freeze();
+        
+        var serviceProvider = context.ServiceProvider;
 
-        var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
+        // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
+        var targetDeclaration = this.TargetDeclaration;
+
+        var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
         var isAutoProperty = this.Template?.Declaration is { IsAutoPropertyOrField: true };
 
@@ -212,27 +219,25 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             if ( isAutoProperty )
             {
                 // Introduced auto property.
-                addTransformation( this.Builder.ToTransformation() );
+                context.AddTransformation( builder.ToTransformation() );
 
-                OverrideHelper.AddTransformationsForStructField( targetDeclaration.ForCompilation( compilation ), this, addTransformation );
-
-                return this.CreateSuccessResult();
+                OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, context.AddTransformation );
             }
             else
             {
                 // Introduce and override using the template.
                 var overriddenProperty = new OverridePropertyTransformation(
                     this,
-                    this.Builder,
-                    this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
-                    this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
+                    builder.ToRef(),
+                    this._getTemplate?.ForIntroduction( builder.GetMethod ),
+                    this._setTemplate?.ForIntroduction( builder.SetMethod ),
                     this.Tags );
 
-                addTransformation( this.Builder.ToTransformation() );
-                addTransformation( overriddenProperty );
-
-                return this.CreateSuccessResult();
+                context.AddTransformation( builder.ToTransformation() );
+                context.AddTransformation( overriddenProperty );
             }
+
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {
@@ -242,27 +247,27 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind),
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration, existingDeclaration.DeclarationKind),
                             this ) );
             }
 
-            if ( existingProperty.IsStatic != this.Builder.IsStatic )
+            if ( existingProperty.IsStatic != builder.IsStatic )
             {
                 return
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                              existingProperty.DeclaringType),
                             this ) );
             }
-            else if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingProperty.Type ) )
+            else if ( !builder.Type.Equals( existingProperty.Type ) )
             {
                 return
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                              existingProperty.DeclaringType, existingProperty.Type),
                             this ) );
             }
@@ -275,7 +280,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                  existingProperty.DeclaringType),
                                 this ) );
 
@@ -285,43 +290,45 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
                 case OverrideStrategy.New:
                     // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingProperty.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingProperty.DeclaringType ) )
                     {
                         return this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, existingProperty.DeclaringType),
+                                (this.AspectInstance.AspectClass.ShortName, builder, existingProperty.DeclaringType),
                                 this ) );
                     }
                     else
                     {
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = true;
-                        this.Builder.OverriddenProperty = existingProperty;
+                        builder.HasNewKeyword = builder.IsNew = true;
+                        builder.OverriddenProperty = existingProperty;
+                        builder.Freeze();
+                            
 
                         var overriddenProperty = new OverridePropertyTransformation(
                             this,
-                            this.Builder,
-                            this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
-                            this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
+                            builder.ToRef(),
+                            this._getTemplate?.ForIntroduction( builder.GetMethod ),
+                            this._setTemplate?.ForIntroduction( builder.SetMethod ),
                             this.Tags );
 
-                        addTransformation( this.Builder.ToTransformation() );
-                        addTransformation( overriddenProperty );
+                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( overriddenProperty );
 
-                        return this.CreateSuccessResult( AdviceOutcome.New, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.New, builder );
                     }
 
                 case OverrideStrategy.Override:
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingProperty.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingProperty.DeclaringType ) )
                     {
                         var overriddenMethod = new OverridePropertyTransformation(
                             this,
-                            existingProperty,
+                            existingProperty.ToRef(),
                             this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
                             this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
                             this.Tags );
 
-                        addTransformation( overriddenMethod );
+                        context.AddTransformation( overriddenMethod );
 
                         return this.CreateSuccessResult( AdviceOutcome.Override, existingProperty );
                     }
@@ -331,27 +338,27 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             this.CreateFailedResult(
                                 AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                      existingProperty.DeclaringType),
                                     this ) );
                     }
                     else
                     {
-                        this.Builder.IsOverride = true;
-                        this.Builder.OverriddenProperty = existingProperty;
+                        builder.IsOverride = true;
+                        builder.OverriddenProperty = existingProperty;
 
-                        addTransformation( this.Builder.ToTransformation() );
+                        context.AddTransformation( builder.ToTransformation() );
 
                         OverrideHelper.OverrideProperty(
                             serviceProvider,
                             this,
-                            this.Builder,
-                            this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
-                            this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
+                            builder,
+                            this._getTemplate?.ForIntroduction( builder.GetMethod ),
+                            this._setTemplate?.ForIntroduction( builder.SetMethod ),
                             this.Tags,
-                            addTransformation );
+                            context.AddTransformation );
 
-                        return this.CreateSuccessResult( AdviceOutcome.Override, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.Override, builder );
                     }
 
                 default:

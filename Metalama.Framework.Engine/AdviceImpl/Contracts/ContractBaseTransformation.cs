@@ -22,12 +22,12 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     /// <summary>
     /// Gets the target member of the contract into which contract statements will be inserted.
     /// </summary>
-    public IMember TargetMember { get; }
+    public IRef<IMember> TargetMember { get; }
 
     /// <summary>
     /// Gets the declaration on which the contract was applied on.
     /// </summary>
-    protected IDeclaration ContractTarget { get; }
+    protected IRef<IDeclaration> ContractTarget { get; }
 
     /// <summary>
     /// Gets the contract direction of inserted statements.
@@ -36,8 +36,8 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
 
     protected ContractBaseTransformation(
         Advice advice,
-        IMember targetMember,
-        IDeclaration contractTarget,
+        IRef<IMember> targetMember,
+        IRef<IDeclaration> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
@@ -53,7 +53,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         this._tags = tags;
     }
 
-    public override IDeclaration TargetDeclaration => this.TargetMember;
+    public override IRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public abstract IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 
@@ -67,31 +67,30 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         var boundTemplate = this._template.ForContract( annotatedValueExpression, this._templateArguments );
 
         var metaApiProperties = new MetaApiProperties(
-            this.ParentAdvice.SourceCompilation,
+            this.OriginalCompilation,
             context.DiagnosticSink,
             this._template.Cast(),
             this._tags,
-            this.ParentAdvice.AspectLayerId,
+            this.AspectLayerId,
             context.SyntaxGenerationContext,
-            this.ParentAdvice.AspectInstance,
+            this.AspectInstance,
             context.ServiceProvider,
             MetaApiStaticity.Default );
 
         var metaApi = MetaApi.ForDeclaration(
-            this.ContractTarget,
+            this.ContractTarget.GetTarget(context.Compilation),
             metaApiProperties,
             this.ContractDirection );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.TargetMember,
+            this.TargetMember.GetTarget(context.Compilation),
             boundTemplate,
             null,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this._template.Declaration );
+        var templateDriver = this._template.Driver;
 
         return templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out contractBlock );
     }

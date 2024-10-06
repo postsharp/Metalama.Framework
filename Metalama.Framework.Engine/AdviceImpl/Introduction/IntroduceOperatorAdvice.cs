@@ -6,19 +6,19 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, IMethod, MethodBuilder>
 {
+    private readonly OperatorKind _operatorKind;
+    private readonly IType _leftOperandType;
+    private readonly IType? _rightOperandType;
+    private readonly IType _resultType;
     private readonly PartiallyBoundTemplateMethod _template;
 
     public IntroduceOperatorAdvice(
@@ -42,45 +42,60 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
             tags,
             explicitlyImplementedInterfaceType )
     {
+        this._operatorKind = operatorKind;
+        this._leftOperandType = leftOperandType;
+        this._rightOperandType = rightOperandType;
+        this._resultType = resultType;
         this._template = template;
+    }
 
-        this.Builder = new MethodBuilder( this, parameters.TargetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
+    protected override MethodBuilder CreateBuilder( in AdviceImplementationContext context )
+    {
+        var builder = new MethodBuilder(
+            this,
+            this.TargetDeclaration,
+            this._operatorKind.ToOperatorMethodName(),
+            DeclarationKind.Operator,
+            this._operatorKind );
 
-        this.Builder.IsStatic = true;
+        builder.IsStatic = true;
 
-        var runtimeParameters = template.TemplateMember.TemplateClassMember.RunTimeParameters;
+        var runtimeParameters = this.Template.TemplateClassMember.RunTimeParameters;
 
         // Add predefined parameters of correct types.
         var firstParameterName = !runtimeParameters.IsEmpty ? runtimeParameters[0].Name : "a";
-        this.Builder.AddParameter( firstParameterName, leftOperandType );
+        builder.AddParameter( firstParameterName, this._leftOperandType );
 
-        if ( rightOperandType != null )
+        if ( this._rightOperandType != null )
         {
             var secondParameterName = !runtimeParameters.IsEmpty ? runtimeParameters[1].Name : "a";
-            this.Builder.AddParameter( secondParameterName, rightOperandType );
+            builder.AddParameter( secondParameterName, this._rightOperandType );
         }
 
-        this.Builder.ReturnType = resultType;
+        builder.ReturnType = this._resultType;
+
+        return builder;
     }
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
+    protected override void InitializeBuilderCore(
+        MethodBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context )
     {
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+        base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
+        var serviceProvider = context.ServiceProvider;
         var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
 
-        CopyTemplateAttributes( this.Template.AssertNotNull().Declaration.ReturnParameter, this.Builder.ReturnParameter, serviceProvider );
+        CopyTemplateAttributes( this.Template.AssertNotNull().Declaration.ReturnParameter, builder.ReturnParameter, serviceProvider );
 
-        if ( runtimeParameters.Length == this.Builder.Parameters.Count )
+        if ( runtimeParameters.Length == builder.Parameters.Count )
         {
             for ( var i = 0; i < runtimeParameters.Length; i++ )
             {
                 var runtimeParameter = runtimeParameters[i];
                 var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
-                var parameterBuilder = this.Builder.Parameters[i];
+                var parameterBuilder = builder.Parameters[i];
 
                 CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
             }
@@ -91,22 +106,22 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceOperator;
 
-    protected override IntroductionAdviceResult<IMethod> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroductionAdviceResult<IMethod> ImplementCore( MethodBuilder builder, in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
-        var existingOperator = targetDeclaration.FindClosestVisibleMethod( this.Builder );
+        builder.Freeze();
+        
+        var targetDeclaration = this.TargetDeclaration;
+        var existingOperator = targetDeclaration.FindClosestVisibleMethod( builder );
 
         if ( existingOperator == null )
         {
-            var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+            
+            var overriddenOperator = new OverrideOperatorTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
+            context.AddTransformation( overriddenOperator );
+            context.AddTransformation( builder.ToTransformation() );
 
-            addTransformation( this.Builder.ToTransformation() );
-            addTransformation( overriddenOperator );
 
-            return this.CreateSuccessResult();
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {
@@ -118,7 +133,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                         this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                  existingOperator.DeclaringType),
                                 this ) );
 
@@ -128,41 +143,42 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
                 case OverrideStrategy.New:
                     // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingOperator.DeclaringType ) )
                     {
                         return this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, existingOperator.DeclaringType),
+                                (this.AspectInstance.AspectClass.ShortName, builder, existingOperator.DeclaringType),
                                 this ) );
                     }
                     else
                     {
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = true;
-                        this.Builder.IsOverride = false;
+                        builder.HasNewKeyword = builder.IsNew = true;
+                        builder.IsOverride = false;
+                        builder.Freeze();
 
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this,
-                            this.Builder,
-                            this._template.ForIntroduction( this.Builder ),
+                            builder.ToRef(),
+                            this._template.ForIntroduction( builder ),
                             this.Tags );
 
-                        addTransformation( overriddenOperator );
-                        addTransformation( this.Builder.ToTransformation() );
+                        context.AddTransformation( overriddenOperator );
+                        context.AddTransformation( builder.ToTransformation() );
 
-                        return this.CreateSuccessResult( AdviceOutcome.New, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.New, builder );
                     }
 
                 case OverrideStrategy.Override:
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingOperator.DeclaringType ) )
                     {
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this,
-                            existingOperator,
+                            existingOperator.ToRef(),
                             this._template.ForIntroduction( existingOperator ),
                             this.Tags );
 
-                        addTransformation( overriddenOperator );
+                        context.AddTransformation( overriddenOperator );
 
                         return this.CreateSuccessResult( AdviceOutcome.Override, existingOperator );
                     }
@@ -172,26 +188,26 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                             this.CreateFailedResult(
                                 AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                      existingOperator.DeclaringType),
                                     this ) );
                     }
                     else
                     {
-                        this.Builder.IsOverride = true;
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = false;
-                        this.Builder.OverriddenMethod = existingOperator;
+                        builder.IsOverride = true;
+                        builder.HasNewKeyword = builder.IsNew = false;
+                        builder.OverriddenMethod = existingOperator;
 
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this,
-                            this.Builder,
-                            this._template.ForIntroduction( this.Builder ),
+                            builder.ToRef(),
+                            this._template.ForIntroduction( builder ),
                             this.Tags );
 
-                        addTransformation( this.Builder.ToTransformation() );
-                        addTransformation( overriddenOperator );
+                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( overriddenOperator );
 
-                        return this.CreateSuccessResult( AdviceOutcome.Override, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.Override, builder );
                     }
 
                 default:

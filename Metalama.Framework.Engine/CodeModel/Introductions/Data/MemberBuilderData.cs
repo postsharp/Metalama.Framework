@@ -24,4 +24,7 @@ internal abstract class MemberBuilderData : MemberOrNamedTypeBuilderData
     public abstract IRef<IMember>? OverriddenMember { get; }
     
     public abstract IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers { get; }
+    
+    public new IRef<INamedType> DeclaringType => (IRef<INamedType>) this.ContainingDeclaration;
+  
 }

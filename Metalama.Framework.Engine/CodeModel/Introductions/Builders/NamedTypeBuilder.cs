@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -28,7 +29,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     private bool _isPartial;
     private INamedType? _baseType;
 
-    public TypeParameterBuilderList TypeParameters { get; } = new();
+    public TypeParameterBuilderList TypeParameters { get; } = [];
 
     public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
         advice,
@@ -198,6 +199,8 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     [Memo]
     public IAttributeCollection Attributes => new AttributeBuilderCollection();
 
+    public override bool IsDesignTimeObservable => true;
+
     public int Depth => this.ContainingNamespace.Depth + 1;
 
     public bool BelongsToCurrentProject => true;
@@ -232,9 +235,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public IntroduceNamedTypeTransformation ToTransformation()
     {
-        this.Freeze();
-
-        return new IntroduceNamedTypeTransformation( this.ParentAdvice, this );
+        return new IntroduceNamedTypeTransformation( this.ParentAdvice, this.Immutable );
     }
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
@@ -257,7 +258,10 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
 
-    IRef<INamedType> INamedType.ToRef() => throw new NotSupportedException();
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => throw new NotSupportedException();
-    IRef<IType> IType.ToRef() => throw new NotSupportedException();
+    public IRef<INamedType> ToRef() => this.Immutable.ToRef();
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
+    IRef<IType> IType.ToRef() => this.Immutable.ToRef();
+    
+    [Memo]
+    public NamedTypeBuilderData Immutable => new NamedTypeBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

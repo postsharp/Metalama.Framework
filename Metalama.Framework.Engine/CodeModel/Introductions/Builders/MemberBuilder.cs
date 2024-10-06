@@ -16,7 +16,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
@@ -29,6 +29,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
     protected MemberBuilder( INamedType declaringType, string name, Advice advice ) : base( advice, declaringType, name ) { }
 
     public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
+
     public abstract bool IsExplicitInterfaceImplementation { get; }
 
     public bool IsVirtual
@@ -70,150 +71,10 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
     public bool HasImplementation => true;
 
-    public virtual bool IsDesignTimeObservable => !this.IsOverride && !this.IsNew;
-    
+    public override bool IsDesignTimeObservable => !this.IsOverride && !this.IsNew;
+
     public abstract IMember? OverriddenMember { get; }
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-    private bool TryExpandInitializerTemplate<T>(
-        Advice advice,
-        MemberInjectionContext context,
-        TemplateMember<T> initializerTemplate,
-        IObjectReader tags,
-        [NotNullWhen( true )] out BlockSyntax? expression )
-        where T : class, IMember
-    {
-        var metaApi = MetaApi.ForInitializer(
-            this,
-            new MetaApiProperties(
-                advice.SourceCompilation,
-                context.DiagnosticSink,
-                initializerTemplate.Cast(),
-                tags,
-                advice.AspectLayerId,
-                context.SyntaxGenerationContext,
-                advice.AspectInstance,
-                context.ServiceProvider,
-                MetaApiStaticity.Default ) );
-
-        var expansionContext = new TemplateExpansionContext(
-            context,
-            advice.TemplateInstance.TemplateProvider,
-            metaApi,
-            this,
-            default,
-            null,
-            advice.AspectLayerId );
-
-        var templateDriver = advice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration );
-
-        return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
-    }
-
-    internal bool GetInitializerExpressionOrMethod<T>(
-        Advice advice,
-        MemberInjectionContext context,
-        IType targetType,
-        IExpression? initializerExpression,
-        TemplateMember<T>? initializerTemplate,
-        IObjectReader tags,
-        out ExpressionSyntax? initializerExpressionSyntax,
-        out MethodDeclarationSyntax? initializerMethodSyntax )
-        where T : class, IMember
-    {
-        if ( context is null )
-        {
-            throw new ArgumentNullException( nameof(context) );
-        }
-
-        if ( targetType is null )
-        {
-            throw new ArgumentNullException( nameof(targetType) );
-        }
-
-        if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate != null) )
-        {
-            // At design time when generating the partial code for source generators, we do not expand templates.
-            // This may cause warnings in the constructor (because some fields will not be initialized)
-            // but we will add that later. The main point is that we should not execute the template here.
-
-            initializerMethodSyntax = null;
-            initializerExpressionSyntax = null;
-
-            return true;
-        }
-
-        if ( initializerExpression != null )
-        {
-            // TODO: Error about the expression type?
-            initializerMethodSyntax = null;
-
-            try
-            {
-                initializerExpressionSyntax =
-                    initializerExpression.ToExpressionSyntax(
-                        new SyntaxSerializationContext( context.Compilation, context.SyntaxGenerationContext, this.DeclaringType ) );
-            }
-            catch ( Exception ex )
-            {
-                context.DiagnosticSink.Report( GeneralDiagnosticDescriptors.CantGetMemberInitializer.CreateRoslynDiagnostic( null, (this, ex.Message) ) );
-
-                initializerExpressionSyntax = null;
-
-                return false;
-            }
-
-            return true;
-        }
-        else if ( initializerTemplate != null )
-        {
-            if ( !this.TryExpandInitializerTemplate( advice, context, initializerTemplate, tags, out var initializerBlock ) )
-            {
-                // Template expansion error.
-                initializerMethodSyntax = null;
-                initializerExpressionSyntax = null;
-
-                return false;
-            }
-
-            // If the initializer block contains only a single return statement, 
-            if ( initializerBlock.Statements is [ReturnStatementSyntax { Expression: not null } returnStatement] )
-            {
-                initializerMethodSyntax = null;
-                initializerExpressionSyntax = returnStatement.Expression;
-
-                return true;
-            }
-
-            var initializerName = context.InjectionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
-
-            initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
-
-            initializerMethodSyntax =
-                MethodDeclaration(
-                    List<AttributeListSyntax>(),
-                    TokenList(
-                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
-                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
-                    context.SyntaxGenerator.Type( targetType )
-                        .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
-                    null,
-                    Identifier( initializerName ),
-                    null,
-                    ParameterList(),
-                    List<TypeParameterConstraintClauseSyntax>(),
-                    initializerBlock,
-                    null );
-
-            return true;
-        }
-        else
-        {
-            initializerMethodSyntax = null;
-            initializerExpressionSyntax = null;
-
-            return true;
-        }
-    }
 }

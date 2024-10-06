@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -84,9 +85,9 @@ public abstract class TemplateClass : IDiagnosticSource
     /// </summary>
     internal abstract Type Type { get; }
 
-    internal TemplateDriver GetTemplateDriver( IMember sourceTemplate )
+    internal TemplateDriver GetTemplateDriver( IRef sourceTemplate )
     {
-        var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
+        var templateSymbol = ((ISymbolRef) sourceTemplate).Symbol;
         var id = templateSymbol.GetDocumentationCommentId()!;
 
         if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
@@ -366,7 +367,8 @@ public abstract class TemplateClass : IDiagnosticSource
                         compilationModelForTemplateReflection.CompilationContext.SymbolTranslator.Translate( x.Symbol, x.SymbolCompilation )
                             .AssertNotNull() ),
                     x.TemplateClassMember,
-                    x.Attribute ) );
+                    x.Attribute
+                    ) );
     }
 
     private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, Compilation SymbolCompilation, DeclarativeAdviceAttribute Attribute)>

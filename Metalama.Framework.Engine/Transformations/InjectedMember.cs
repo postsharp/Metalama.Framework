@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,7 +29,7 @@ internal sealed class InjectedMember
     /// </summary>
     public ISyntaxTreeTransformation? Transformation { get; }
 
-    public IDeclarationBuilder? DeclarationBuilder => (this.Transformation as IIntroduceDeclarationTransformation)?.DeclarationBuilder;
+    public DeclarationBuilderData? BuilderData => (this.Transformation as IIntroduceDeclarationTransformation)?.DeclarationBuilderData;
 
     /// <summary>
     /// Gets the syntax of the introduced member.
@@ -50,19 +51,19 @@ internal sealed class InjectedMember
     /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
     /// are not suppressed from the introduced member.
     /// </summary>
-    public INamedDeclaration Declaration { get; }
+    public IRef Declaration { get; }
 
     public SyntaxTree TargetSyntaxTree
         => this.Transformation != null
             ? this.Transformation.TransformedSyntaxTree
-            : this.Declaration.GetPrimarySyntaxTree().AssertNotNull();
+            : this.Declaration.PrimarySyntaxTree.AssertNotNull();
 
     public InjectedMember(
         IInjectMemberTransformation injectMemberTransformation,
         MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        NamedDeclarationBuilder declaration ) : this(
+        IRef declaration ) : this(
         injectMemberTransformation,
         declaration.DeclarationKind,
         syntax,
@@ -75,7 +76,7 @@ internal sealed class InjectedMember
         MemberDeclarationSyntax syntax,
         AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
-        INamedDeclaration declaration ) : this(
+        IRef declaration ) : this(
         overrideMemberTransformation,
         overrideMemberTransformation.OverriddenDeclaration.DeclarationKind,
         syntax,
@@ -89,7 +90,7 @@ internal sealed class InjectedMember
         MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        INamedDeclaration declaration )
+        IRef declaration )
     {
         this.Transformation = transformation;
         this.Syntax = syntax;

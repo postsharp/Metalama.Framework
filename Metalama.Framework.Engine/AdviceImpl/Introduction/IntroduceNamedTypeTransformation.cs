@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -17,23 +17,23 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTransformation<NamedTypeBuilder>
+internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTransformation<NamedTypeBuilderData>
 {
-    public IntroduceNamedTypeTransformation( Advice advice, NamedTypeBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceNamedTypeTransformation( Advice advice, NamedTypeBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var typeBuilder = this.IntroducedDeclaration;
+        var typeBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
 
         BaseListSyntax? baseList;
 
-        if ( this.IntroducedDeclaration.BaseType != null && this.IntroducedDeclaration.BaseType.SpecialType != SpecialType.Object )
+        if ( typeBuilder.BaseType != null && typeBuilder.BaseType.SpecialType != SpecialType.Object )
         {
             baseList = BaseList(
                 SingletonSeparatedList<BaseTypeSyntax>(
-                    SimpleBaseType( context.SyntaxGenerator.Type( this.IntroducedDeclaration.BaseType.ToNonNullableType() ) ) ) );
+                    SimpleBaseType( context.SyntaxGenerator.Type( typeBuilder.BaseType.ToNonNullableType() ) ) ) );
         }
         else
         {
@@ -42,14 +42,14 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
 
         var type =
             ClassDeclaration(
-                    typeBuilder.GetAttributeLists( context ),
+                    AdviceSyntaxGenerator.GetAttributeLists( typeBuilder, context ),
                     typeBuilder.GetSyntaxModifierList(),
                     Identifier( typeBuilder.Name ),
-                    this.IntroducedDeclaration.TypeParameters.Count == 0
+                    typeBuilder.TypeParameters.Count == 0
                         ? null
                         : TypeParameterList(
                             SeparatedList(
-                                ((IEnumerable<TypeParameterBuilder>) this.IntroducedDeclaration.TypeParameters).Select(
+                                ((IEnumerable<TypeParameterBuilder>) typeBuilder.TypeParameters).Select(
                                     tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
                     baseList,
                     List<TypeParameterConstraintClauseSyntax>(),
@@ -60,10 +60,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
         {
             case INamedType:
             case INamespace { IsGlobalNamespace: true }:
-                return new[]
-                {
-                    new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration )
-                };
+                return [new InjectedMember( this, type, this.AspectLayerId, InjectedMemberSemantic.Introduction, this.BuilderData.ToRef() )];
 
             case INamespace:
                 var namespaceDeclaration =
@@ -77,20 +74,19 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                         Token( TriviaList( context.SyntaxGenerationContext.ElasticEndOfLineTrivia ), SyntaxKind.CloseBraceToken, TriviaList() ),
                         default );
 
-                return new[]
-                {
+                return
+                [
                     new InjectedMember(
                         this,
                         namespaceDeclaration,
-                        this.ParentAdvice.AspectLayerId,
+                        this.AspectLayerId,
                         InjectedMemberSemantic.Introduction,
-                        this.IntroducedDeclaration )
-                };
+                        this.BuilderData.ToRef() )
+                ];
 
             default:
                 throw new AssertionFailedException( $"Unsupported containing declaration type '{typeBuilder.ContainingDeclaration.GetType()}'." );
         }
     }
-
-    public override SyntaxTree TransformedSyntaxTree => this.IntroducedDeclaration.PrimarySyntaxTree;
+    
 }

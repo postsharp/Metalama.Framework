@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating;
@@ -16,17 +17,17 @@ namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
 internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTreeTransformation, IInsertStatementTransformation
 {
-    private readonly IConstructor _targetConstructor;
+    private readonly IRef<IConstructor> _targetConstructor;
     private readonly BoundTemplateMethod _boundTemplate;
 
-    private IMemberOrNamedType ContextDeclaration { get; }
+    private IRef<IMemberOrNamedType> ContextDeclaration { get; }
 
-    public IMember TargetMember => this._targetConstructor;
+    public IRef<IMember> TargetMember => this._targetConstructor;
 
     public TemplateBasedInitializationTransformation(
         Advice advice,
-        IMemberOrNamedType initializedDeclaration,
-        IConstructor targetConstructor,
+        IRef<IMemberOrNamedType> initializedDeclaration,
+        IRef<IConstructor> targetConstructor,
         BoundTemplateMethod boundTemplate,
         IObjectReader tags ) : base( advice )
     {
@@ -38,29 +39,33 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
+        var targetConstructor = this._targetConstructor.GetTarget(context.Compilation);
+        var contextDeclaration = this.ContextDeclaration.GetTarget( context.Compilation );
+
         var metaApi = MetaApi.ForConstructor(
-            this._targetConstructor,
+            targetConstructor,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.OriginalCompilation,
                 context.DiagnosticSink,
                 this._boundTemplate.TemplateMember.Cast(),
                 this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
-                this._targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
+                targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
+
+        
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.ContextDeclaration,
+            contextDeclaration,
             this._boundTemplate,
             null,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this._boundTemplate.TemplateMember.Declaration );
+        var templateDriver = this._boundTemplate.TemplateMember.Driver;
 
         if ( !templateDriver.TryExpandDeclaration( expansionContext, this._boundTemplate.TemplateArguments, out var expandedBody ) )
         {
@@ -68,27 +73,27 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
             return Array.Empty<InsertedStatement>();
         }
 
-        return new[]
-        {
+        return
+        [
             new InsertedStatement(
                 expandedBody
                     .AssertNotNull()
                     .WithGeneratedCodeAnnotation(
                         metaApi.AspectInstance?.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                this.ContextDeclaration,
+                contextDeclaration,
                 this,
                 InsertedStatementKind.Initializer )
-        };
+        ];
     }
 
     private IObjectReader Tags { get; }
 
-    public override IDeclaration TargetDeclaration => this.TargetMember;
+    public override IRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
 
-    public override FormattableString ToDisplayString() => $"Add a statement to '{this._targetConstructor}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add a statement to '{this._targetConstructor}'.";
 }

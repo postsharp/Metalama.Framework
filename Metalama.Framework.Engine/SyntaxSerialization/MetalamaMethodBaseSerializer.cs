@@ -87,15 +87,14 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         IdentifierName( nameof(ReflectionHelper.GetConstructor) ) ),
                     ArgumentList(
                         SeparatedList(
-                            new[]
-                            {
-                                Argument( typeCreation ),
+                        [
+                            Argument( typeCreation ),
                                 Argument( allBindingFlags ),
                                 Argument(
                                     LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
                                         Literal( ReflectionSignatureBuilder.GetConstructorSignature( constructor ) ) ) )
-                            } ) ) );
+                        ] ) ) );
             }
             else
             {
@@ -106,13 +105,12 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         IdentifierName( "GetConstructor" ) ),
                     ArgumentList(
                         SeparatedList(
-                            new[]
-                            {
-                                Argument( allBindingFlags ),
+                        [
+                            Argument( allBindingFlags ),
                                 Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
                                 Argument( parameterTypeArray ),
                                 Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
-                            } ) ) );
+                        ] ) ) );
             }
         }
         else
@@ -126,9 +124,8 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         IdentifierName( nameof(ReflectionHelper.GetMethod) ) ),
                     ArgumentList(
                         SeparatedList(
-                            new[]
-                            {
-                                Argument( typeCreation ),
+                        [
+                            Argument( typeCreation ),
                                 Argument(
                                     LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
@@ -138,7 +135,7 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                                     LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
                                         Literal( ReflectionSignatureBuilder.GetMethodSignature( (IMethod) method ) ) ) )
-                            } ) ) );
+                        ] ) ) );
             }
             else
             {
@@ -149,14 +146,13 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         IdentifierName( "GetMethod" ) ),
                     ArgumentList(
                         SeparatedList(
-                            new[]
-                            {
-                                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( method.Name ) ) ),
+                        [
+                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( method.Name ) ) ),
                                 Argument( allBindingFlags ),
                                 Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
                                 Argument( parameterTypeArray ),
                                 Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
-                            } ) ) );
+                        ] ) ) );
             }
         }
 

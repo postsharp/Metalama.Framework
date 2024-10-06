@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,19 +14,19 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 {
-    private new IIndexer TargetMember => (IIndexer) base.TargetMember;
+    private new IRef<IIndexer> TargetMember => (IRef<IIndexer>) base.TargetMember;
 
     public ContractIndexerTransformation(
         Advice advice,
-        IIndexer targetIndexer,
-        IParameter? indexerParameter,
+        IRef<IIndexer> targetIndexer,
+        IRef<IParameter>? indexerParameter,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
         IObjectReader tags ) : base(
         advice,
         targetIndexer,
-        (IDeclaration?) indexerParameter ?? targetIndexer,
+        (IRef<IDeclaration>?) indexerParameter ?? targetIndexer,
         contractDirection,
         template,
         templateArguments,
@@ -33,11 +34,16 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget )
+        switch ( this.ContractTarget.GetTarget(context.Compilation) )
         {
             case IIndexer:
                 {
-                    Invariant.Assert( ReferenceEquals( this.ContractTarget, this.TargetMember ) );
+                    Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ));
+                    
+                    var targetMember = this.TargetMember.GetTarget(context.Compilation);
+                 
+                    
+                    
                     Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
                     bool? inputResult, outputResult;
@@ -45,9 +51,9 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 
                     if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
                     {
-                        Invariant.Assert( this.TargetMember.SetMethod is not null );
+                        Invariant.Assert( targetMember.SetMethod is not null );
 
-                        inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), this.TargetMember.Type, out inputContractBlock );
+                        inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), targetMember.Type, out inputContractBlock );
                     }
                     else
                     {
@@ -57,14 +63,14 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 
                     if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
                     {
-                        Invariant.Assert( this.TargetMember.GetMethod is not null );
+                        Invariant.Assert( targetMember.GetMethod is not null );
 
                         var returnVariableName = context.GetReturnValueVariableName();
 
                         outputResult = this.TryExecuteTemplate(
                             context,
                             IdentifierName( returnVariableName ),
-                            this.TargetMember.Type,
+                            targetMember.Type,
                             out outputContractBlock );
                     }
                     else
@@ -85,7 +91,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                         statements.Add(
                             new InsertedStatement(
                                 inputContractBlock,
-                                this.TargetMember.SetMethod.AssertNotNull().Parameters[^1],
+                                targetMember.SetMethod.AssertNotNull().Parameters[^1],
                                 this,
                                 InsertedStatementKind.InputContract ) );
                     }
@@ -95,7 +101,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                         statements.Add(
                             new InsertedStatement(
                                 outputContractBlock,
-                                this.TargetMember.GetMethod.AssertNotNull().ReturnParameter,
+                                targetMember.GetMethod.AssertNotNull().ReturnParameter,
                                 this,
                                 InsertedStatementKind.OutputContract ) );
                     }
@@ -158,6 +164,6 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         }
     }
 
-    public override FormattableString ToDisplayString()
-        => $"Add default contract to indexer '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+    public override FormattableString ToDisplayString( CompilationModel compilation )
+        => $"Add default contract to indexer '{this.TargetDeclaration.GetTarget(compilation).ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

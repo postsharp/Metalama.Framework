@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,12 +14,12 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractConstructorTransformation : ContractBaseTransformation
 {
-    private new IConstructor TargetMember => (IConstructor) base.TargetMember;
+    private new IRef<IConstructor> TargetMember => (IRef<IConstructor>) base.TargetMember;
 
     public ContractConstructorTransformation(
         Advice advice,
-        IConstructor targetConstructor,
-        IParameter contractTarget,
+        IRef<IConstructor> targetConstructor,
+        IRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
@@ -26,7 +27,7 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget )
+        switch ( this.ContractTarget.GetTarget(context.Compilation) )
         {
             case IParameter param:
                 {
@@ -83,5 +84,5 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
         }
     }
 
-    public override FormattableString ToDisplayString() => $"Add default contract to constructor '{this.TargetMember}'";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add default contract to constructor '{this.TargetMember}'";
 }

@@ -64,9 +64,8 @@ namespace Metalama.Framework.Engine.Linking
             var accessorList =
                 AccessorList(
                     List(
-                        new[]
-                        {
-                            AccessorDeclaration(
+                    [
+                        AccessorDeclaration(
                                 SyntaxKind.GetAccessorDeclaration,
                                 List<AttributeListSyntax>(),
                                 TokenList(),
@@ -77,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                             AccessorDeclaration(
                                 setAccessorKind,
                                 context.SyntaxGenerator.FormattedBlock() )
-                        } ) );
+                    ] ) );
 
             return
                 PropertyDeclaration(

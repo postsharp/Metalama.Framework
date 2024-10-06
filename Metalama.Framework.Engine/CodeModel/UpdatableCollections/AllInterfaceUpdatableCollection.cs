@@ -23,13 +23,13 @@ internal sealed class AllInterfaceUpdatableCollection : DeclarationUpdatableColl
     public void Add( IntroduceInterfaceTransformation introduction )
     {
         this.EnsureComplete();
-        this.AddItem( introduction.InterfaceType.ToRef() );
+        this.AddItem( introduction.InterfaceType );
 
         this.Introductions = this.Introductions.Add( introduction );
     }
 
     protected override void PopulateAllItems( Action<IRef<INamedType>> action )
     {
-        this._declaringType.GetCollectionStrategy().EnumerateAllImplementedInterfaces( this._declaringType, this.Compilation, action );
+        this._declaringType.GetStrategy().EnumerateAllImplementedInterfaces( this._declaringType, this.Compilation, action );
     }
 }

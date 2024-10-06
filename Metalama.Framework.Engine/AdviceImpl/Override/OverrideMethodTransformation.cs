@@ -19,7 +19,7 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
 {
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideMethodTransformation( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
+    public OverrideMethodTransformation( Advice advice, IRef<IMethod> targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
         : base( advice, targetMethod, tags )
     {
         this.BoundTemplate = boundTemplate;
@@ -32,34 +32,35 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
             return this.CreateProceedExpression( context, kind );
         }
 
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+
         var metaApi = MetaApi.ForMethod(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.OriginalCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.Cast(),
                 this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             this.BoundTemplate,
             ProceedExpressionProvider,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
+        var templateDriver = this.BoundTemplate.TemplateMember.Driver;
 
         if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
         return this.GetInjectedMembersImpl( context, newMethodBody, this.BoundTemplate.TemplateMember.MustInterpretAsAsyncTemplate() );

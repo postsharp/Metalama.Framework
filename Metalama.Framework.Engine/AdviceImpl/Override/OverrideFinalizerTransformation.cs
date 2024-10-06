@@ -25,9 +25,9 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
 {
     private BoundTemplateMethod BoundTemplate { get; }
 
-    private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+    private new IRef<IMethod> OverriddenDeclaration => (IRef<IMethod>) base.OverriddenDeclaration;
 
-    public OverrideFinalizerTransformation( Advice advice, IMethod targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
+    public OverrideFinalizerTransformation( Advice advice, IRef<IMethod> targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
         : base( advice, targetFinalizer, tags )
     {
         this.BoundTemplate = boundTemplate;
@@ -37,37 +37,38 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
     {
         var proceedExpression = this.CreateProceedExpression( context );
 
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+
         var metaApi = MetaApi.ForMethod(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.OriginalCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.Cast(),
                 this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             this.BoundTemplate,
             _ => proceedExpression,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
+        var templateDriver = this.BoundTemplate.TemplateMember.Driver;
 
         if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
-        var modifiers = this.OverriddenDeclaration
+        var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
@@ -79,22 +80,22 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
                 null,
                 Identifier(
                     context.InjectionNameProvider.GetOverrideName(
-                        this.OverriddenDeclaration.DeclaringType,
-                        this.ParentAdvice.AspectLayerId,
-                        this.OverriddenDeclaration ) ),
+                        overriddenDeclaration.DeclaringType,
+                        this.AspectLayerId,
+                        overriddenDeclaration ) ),
                 null,
                 ParameterList(),
                 List<TypeParameterConstraintClauseSyntax>(),
                 newMethodBody,
                 null );
 
-        return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
+        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToRef() )];
     }
 
     private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )
         => new(
-            context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
-            this.OverriddenDeclaration.GetCompilationModel().Cache.SystemVoidType );
+            context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.AspectLayerId ),
+            context.Compilation.Cache.SystemVoidType );
 
     public override TransformationObservability Observability => TransformationObservability.None;
 }

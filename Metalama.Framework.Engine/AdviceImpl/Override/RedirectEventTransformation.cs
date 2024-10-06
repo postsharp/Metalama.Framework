@@ -22,9 +22,9 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
 {
     private readonly IEvent _targetEvent;
 
-    private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
+    private new IRef<IEvent> OverriddenDeclaration => (IRef<IEvent>) base.OverriddenDeclaration;
 
-    public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent )
+    public RedirectEventTransformation( Advice advice, IRef<IEvent> overriddenDeclaration, IEvent targetEvent )
         : base( advice, overriddenDeclaration, ObjectReader.Empty )
     {
         this._targetEvent = targetEvent;
@@ -32,44 +32,45 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        return new[]
-        {
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+
+        return
+        [
             new InjectedMember(
                 this,
                 EventDeclaration(
                     List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
+                    overriddenDeclaration.GetSyntaxModifierList(),
+                    context.SyntaxGenerator.EventType( overriddenDeclaration ),
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(
-                            this.OverriddenDeclaration.DeclaringType,
-                            this.ParentAdvice.AspectLayerId,
-                            this.OverriddenDeclaration ) ),
+                            overriddenDeclaration.DeclaringType,
+                            this.AspectLayerId,
+                            overriddenDeclaration ) ),
                     AccessorList( List( GetAccessors() ) ) ),
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
-        };
+                overriddenDeclaration.ToRef() )
+        ];
 
-        IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
+        IEnumerable<AccessorDeclarationSyntax> GetAccessors()
         {
             return new[]
                 {
                     AccessorDeclaration(
                         SyntaxKind.AddAccessorDeclaration,
                         List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.AddMethod.GetSyntaxModifierList(),
+                        overriddenDeclaration.AddMethod.GetSyntaxModifierList(),
                         CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
                         null ),
                     AccessorDeclaration(
                         SyntaxKind.RemoveAccessorDeclaration,
                         List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
+                        overriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
                         CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
                         null )
-                }.WhereNotNull()
-                .ToArray();
+                }.WhereNotNull();
         }
 
         BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
@@ -89,7 +90,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
                 this._targetEvent.IsStatic
                     ? IdentifierName( this._targetEvent.Name )
                     : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetEvent.Name ) )
-                        .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+                        .WithAspectReferenceAnnotation( this.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

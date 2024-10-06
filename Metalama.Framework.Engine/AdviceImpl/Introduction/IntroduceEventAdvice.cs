@@ -12,11 +12,8 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
-using System.Collections.Generic;
 using Attribute = Metalama.Framework.Engine.CodeModel.Source.Attribute;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
@@ -41,23 +38,26 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
     {
         this._addTemplate = addTemplate;
         this._removeTemplate = removeTemplate;
-
-        this.Builder = new EventBuilder(
-            this,
-            parameters.TargetDeclaration,
-            this.MemberName,
-            eventTemplate?.Declaration != null && eventTemplate.Declaration.IsEventField() == true,
-            tags );
-
-        this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
     }
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
+    protected override EventBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+        return new EventBuilder(
+            this,
+            this.TargetDeclaration,
+            this.MemberName,
+            this.Template?.Declaration != null && this.Template.Declaration.IsEventField() == true,
+            this.Tags ) { InitializerTemplate = this.Template.GetInitializerTemplate() };
+    }
+
+    protected override void InitializeBuilderCore(
+        EventBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context )
+    {
+        base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
+
+        var serviceProvider = context.ServiceProvider;
 
         if ( this._addTemplate != null || this._removeTemplate != null )
         {
@@ -77,27 +77,27 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                     throw new AssertionFailedException( $"'{rewrittenType}' is not allowed type of an event." );
                 }
 
-                this.Builder.Type = rewrittenNamedType;
+                builder.Type = rewrittenNamedType;
             }
         }
         else if ( this.Template != null )
         {
             // Case for event fields.
-            this.Builder.Type = this.Template.Declaration.Type;
+            builder.Type = this.Template.Declaration.Type;
         }
 
         if ( this.Template != null )
         {
             if ( this.Template.Declaration.GetSymbol().AssertSymbolNotNull().GetBackingField() is { } backingField )
             {
-                var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
+                var classificationService = context.ServiceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
                 // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
                 foreach ( var attribute in backingField.GetAttributes() )
                 {
                     if ( classificationService.MustCopyTemplateAttribute( attribute ) )
                     {
-                        this.Builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), this.Builder ) );
+                        builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), builder ) );
                     }
                 }
             }
@@ -105,7 +105,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
         if ( this._addTemplate != null )
         {
-            AddAttributeForAccessorTemplate( this._addTemplate.TemplateMember.TemplateClassMember, this._addTemplate.Declaration, this.Builder.AddMethod );
+            AddAttributeForAccessorTemplate( this._addTemplate.TemplateMember.TemplateClassMember, this._addTemplate.Declaration, builder.AddMethod );
         }
         else if ( this.Template != null )
         {
@@ -113,7 +113,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,
                 this.Template.AssertNotNull().Declaration.AddMethod,
-                this.Builder.AddMethod );
+                builder.AddMethod );
         }
 
         if ( this._removeTemplate != null )
@@ -121,7 +121,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             AddAttributeForAccessorTemplate(
                 this._removeTemplate.TemplateMember.TemplateClassMember,
                 this._removeTemplate.Declaration,
-                this.Builder.RemoveMethod );
+                builder.RemoveMethod );
         }
         else if ( this.Template != null )
         {
@@ -129,7 +129,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,
                 this.Template.AssertNotNull().Declaration.RemoveMethod,
-                this.Builder.RemoveMethod );
+                builder.RemoveMethod );
         }
 
         void AddAttributeForAccessorTemplate( TemplateClassMember templateClassMember, IMethod accessorTemplate, IMethodBuilder accessorBuilder )
@@ -151,15 +151,14 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceEvent;
 
-    protected override IntroductionAdviceResult<IEvent> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroductionAdviceResult<IEvent> ImplementCore( EventBuilder builder, in AdviceImplementationContext context )
     {
+        builder.Freeze();
+        
         // this.Tags: Override transformations.
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
-        var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
+        var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
         var hasNoOverrideSemantics = this.Template?.Declaration != null && this.Template.Declaration.IsEventField() == true;
 
         if ( existingDeclaration == null )
@@ -167,22 +166,22 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             // TODO: validate event type.
 
             // There is no existing declaration, we will introduce and override the introduced.
-            addTransformation( this.Builder.ToTransformation() );
+            context.AddTransformation( builder.ToTransformation() );
 
-            OverrideHelper.AddTransformationsForStructField( targetDeclaration.ForCompilation( compilation ), this, addTransformation );
+            OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, context.AddTransformation );
 
             if ( !hasNoOverrideSemantics )
             {
-                addTransformation(
+                context.AddTransformation(
                     new OverrideEventTransformation(
                         this,
-                        this.Builder,
-                        this._addTemplate?.ForIntroduction( this.Builder.AddMethod ),
-                        this._removeTemplate?.ForIntroduction( this.Builder.RemoveMethod ),
+                        builder.ToRef(),
+                        this._addTemplate?.ForIntroduction( builder.AddMethod ),
+                        this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
                         this.Tags ) );
             }
 
-            return this.CreateSuccessResult();
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {
@@ -191,24 +190,24 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                 return this.CreateFailedResult(
                     AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind),
+                        (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration, existingDeclaration.DeclarationKind),
                         this ) );
             }
-            else if ( existingEvent.IsStatic != this.Builder.IsStatic )
+            else if ( existingEvent.IsStatic != builder.IsStatic )
             {
                 return this.CreateFailedResult(
                     AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                        (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                          existingEvent.DeclaringType),
                         this ) );
             }
-            else if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingEvent.Type ) )
+            else if ( !builder.Type.Equals( existingEvent.Type ) )
             {
                 return this.CreateFailedResult(
                     AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                        (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                          existingEvent.DeclaringType, existingEvent.Type),
                         this ) );
             }
@@ -220,7 +219,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                     return this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                              existingEvent.DeclaringType),
                             this ) );
 
@@ -230,43 +229,43 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
                 case OverrideStrategy.New:
                     // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingEvent.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingEvent.DeclaringType ) )
                     {
                         return this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, existingEvent.DeclaringType),
+                                (this.AspectInstance.AspectClass.ShortName, builder, existingEvent.DeclaringType),
                                 this ) );
                     }
                     else
                     {
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = true;
-                        this.Builder.OverriddenEvent = existingEvent;
+                        builder.HasNewKeyword = builder.IsNew = true;
+                        builder.OverriddenEvent = existingEvent;
 
                         if ( hasNoOverrideSemantics )
                         {
-                            addTransformation( this.Builder.ToTransformation() );
+                            context.AddTransformation( builder.ToTransformation() );
 
-                            return this.CreateSuccessResult( AdviceOutcome.New, this.Builder );
+                            return this.CreateSuccessResult( AdviceOutcome.New, builder );
                         }
                         else
                         {
                             var overriddenMethod = new OverrideEventTransformation(
                                 this,
-                                this.Builder,
-                                this._addTemplate?.ForIntroduction( this.Builder.AddMethod ),
-                                this._removeTemplate?.ForIntroduction( this.Builder.RemoveMethod ),
+                                builder.ToRef(),
+                                this._addTemplate?.ForIntroduction( builder.AddMethod ),
+                                this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
                                 this.Tags );
 
-                            addTransformation( this.Builder.ToTransformation() );
-                            addTransformation( overriddenMethod );
+                            context.AddTransformation( builder.ToTransformation() );
+                            context.AddTransformation( overriddenMethod );
 
-                            return this.CreateSuccessResult( AdviceOutcome.New, this.Builder );
+                            return this.CreateSuccessResult( AdviceOutcome.New, builder );
                         }
                     }
 
                 case OverrideStrategy.Override:
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingEvent.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingEvent.DeclaringType ) )
                     {
                         if ( hasNoOverrideSemantics )
                         {
@@ -276,12 +275,12 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         {
                             var overriddenMethod = new OverrideEventTransformation(
                                 this,
-                                existingEvent,
+                                existingEvent.ToRef(),
                                 this._addTemplate?.ForIntroduction( existingEvent.AddMethod ),
                                 this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ),
                                 this.Tags );
 
-                            addTransformation( overriddenMethod );
+                            context.AddTransformation( overriddenMethod );
 
                             return this.CreateSuccessResult( AdviceOutcome.Override, existingEvent );
                         }
@@ -292,34 +291,34 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                             this.CreateFailedResult(
                                 AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                      existingEvent.DeclaringType),
                                     this ) );
                     }
                     else
                     {
-                        this.Builder.IsOverride = true;
-                        this.Builder.OverriddenEvent = existingEvent;
+                        builder.IsOverride = true;
+                        builder.OverriddenEvent = existingEvent;
 
                         if ( hasNoOverrideSemantics )
                         {
-                            addTransformation( this.Builder.ToTransformation() );
+                            context.AddTransformation( builder.ToTransformation() );
 
-                            return this.CreateSuccessResult( AdviceOutcome.Override, this.Builder );
+                            return this.CreateSuccessResult( AdviceOutcome.Override, builder );
                         }
                         else
                         {
                             var overriddenEvent = new OverrideEventTransformation(
                                 this,
-                                this.Builder,
-                                this._addTemplate?.ForIntroduction( this.Builder.AddMethod ),
-                                this._removeTemplate?.ForIntroduction( this.Builder.RemoveMethod ),
+                                builder.ToRef(),
+                                this._addTemplate?.ForIntroduction( builder.AddMethod ),
+                                this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
                                 this.Tags );
 
-                            addTransformation( this.Builder.ToTransformation() );
-                            addTransformation( overriddenEvent );
+                            context.AddTransformation( builder.ToTransformation() );
+                            context.AddTransformation( overriddenEvent );
 
-                            return this.CreateSuccessResult( AdviceOutcome.Override, this.Builder );
+                            return this.CreateSuccessResult( AdviceOutcome.Override, builder );
                         }
                     }
 

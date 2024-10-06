@@ -3,6 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.Services;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,11 +29,11 @@ internal sealed class BuilderRefStrategy : IRefStrategy
 
     public void EnumerateAllImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
     {
-        var resolvedNameType = (INamedType) ((IBuiltDeclarationRef) namedType).BuilderData;
+        var resolvedNameType = (NamedTypeBuilderData) ((IBuiltDeclarationRef) namedType).BuilderData;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {
-            add( i.ToRef() );
+            add( i );
         }
     }
 
@@ -38,11 +41,11 @@ internal sealed class BuilderRefStrategy : IRefStrategy
     {
         // BUG: EnumerateAllImplementedInterfaces and EnumerateImplementedInterfaces should not have the same implementation.
 
-        var resolvedNameType = (INamedType) ((IBuiltDeclarationRef) namedType).BuilderData;
+        var resolvedNameType = (NamedTypeBuilderData) ((IBuiltDeclarationRef) namedType).BuilderData;
 
         foreach ( var i in resolvedNameType.ImplementedInterfaces )
         {
-            add( i.ToRef() );
+            add( i );
         }
     }
 
@@ -86,6 +89,10 @@ internal sealed class BuilderRefStrategy : IRefStrategy
 
     public bool IsConvertibleTo( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
         => throw new NotImplementedException();
+
+    public IAssemblySymbol GetAssemblySymbol( IRef reference, CompilationContext compilationContext ) => compilationContext.Compilation.Assembly;
+
+    public bool IsStatic( IRef<IMember> reference ) => ((MemberBuilderData) ((IBuiltDeclarationRef) reference).BuilderData).IsStatic;
 
     public static IRefStrategy Instance { get; } = new BuilderRefStrategy();
 }

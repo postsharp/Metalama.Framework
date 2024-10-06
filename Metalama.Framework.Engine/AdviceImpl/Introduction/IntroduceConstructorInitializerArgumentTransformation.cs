@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
@@ -16,15 +17,15 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 /// </summary>
 internal sealed class IntroduceConstructorInitializerArgumentTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
-    private IConstructor Constructor { get; }
+    private IRef<IConstructor> Constructor { get; }
 
-    IMember IMemberLevelTransformation.TargetMember => this.Constructor;
+    IRef<IMember> IMemberLevelTransformation.TargetMember => this.Constructor;
 
     public int ParameterIndex { get; }
 
     private ExpressionSyntax Value { get; }
 
-    public IntroduceConstructorInitializerArgumentTransformation( Advice advice, IConstructor constructor, int parameterIndex, ExpressionSyntax value ) : base(
+    public IntroduceConstructorInitializerArgumentTransformation( Advice advice, IRef<IConstructor> constructor, int parameterIndex, ExpressionSyntax value ) : base(
         advice )
     {
         this.Constructor = constructor;
@@ -33,13 +34,13 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
     }
 
     public ArgumentSyntax ToSyntax()
-        => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation );
+        => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.AspectInstance.AspectClass.GeneratedCodeAnnotation );
 
-    public override IDeclaration TargetDeclaration => this.Constructor;
+    public override IRef<IDeclaration> TargetDeclaration => this.Constructor;
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertConstructorInitializerArgument;
 
-    public override FormattableString ToDisplayString() => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
 }

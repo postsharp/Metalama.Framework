@@ -156,14 +156,13 @@ namespace Metalama.Framework.Engine.Templating
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                new[]
-                                {
-                                    SyntaxFactory.Argument( leadingTrivia ),
+                            [
+                                SyntaxFactory.Argument( leadingTrivia ),
                                     SyntaxFactory.Argument( syntaxKind ),
                                     SyntaxFactory.Argument( text ),
                                     SyntaxFactory.Argument( valueText ),
                                     SyntaxFactory.Argument( trailingTrivia )
-                                } ) ) );
+                            ] ) ) );
 
                 return result;
             }
@@ -189,14 +188,13 @@ namespace Metalama.Framework.Engine.Templating
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                new[]
-                                {
-                                    SyntaxFactory.Argument( leading ),
+                            [
+                                SyntaxFactory.Argument( leading ),
                                     SyntaxFactory.Argument( kind ),
                                     SyntaxFactory.Argument( text ),
                                     SyntaxFactory.Argument( valueText ),
                                     SyntaxFactory.Argument( trailing )
-                                } ) ) );
+                            ] ) ) );
 
                 return result;
             }

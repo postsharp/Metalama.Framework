@@ -213,7 +213,7 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
                 }
 
                 if ( !this._userCodeInvoker.TryInvoke(
-                        () => setter.Invoke( localAttributeInstance, new[] { translatedValue } ),
+                        () => setter.Invoke( localAttributeInstance, [translatedValue] ),
                         executionContext.WithDescription(
                             UserCodeDescription.Create( "setting the {0} property while instantiating a custom attribute", property ) ) ) )
                 {

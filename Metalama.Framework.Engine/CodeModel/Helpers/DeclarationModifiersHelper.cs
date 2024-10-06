@@ -17,6 +17,7 @@ internal static class DeclarationModifiersHelper
 {
     public static SyntaxTokenList GetSyntaxModifierList( this IDeclaration declaration, ModifierCategories categories = ModifierCategories.All )
     {
+        // TODO Perf: switch by DeclarationKind.
         switch ( declaration )
         {
             case IMethodImpl accessor when accessor.IsAccessor():

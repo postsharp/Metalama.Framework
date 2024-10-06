@@ -439,7 +439,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var transformedNode = this.TransformCompileTimeType( node, symbol, scope );
 
-                    return new[] { transformedNode };
+                    return [transformedNode];
                 }
             }
 

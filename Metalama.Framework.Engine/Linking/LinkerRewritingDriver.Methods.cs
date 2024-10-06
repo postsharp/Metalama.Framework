@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: { } } )
                 {
                     // This is a partial method declaration that is not to be transformed.
-                    return new[] { methodDeclaration };
+                    return [methodDeclaration];
                 }
 
                 var members = new List<MemberDeclarationSyntax>();
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
+                    return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync )];
                 }
                 else
                 {
@@ -87,19 +87,19 @@ namespace Metalama.Framework.Engine.Linking
             {
                 Invariant.Assert( symbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } );
 
-                return new[]
-                {
+                return
+                [
                     this.GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
                     this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext )
-                };
+                ];
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync )];
             }
             else
             {
-                return new[] { methodDeclaration };
+                return [methodDeclaration];
             }
 
             MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )

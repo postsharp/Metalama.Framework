@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
         {
             if ( type.IsGenericParameter )
             {
-                return this.GetNamedTypeSymbol( type.DeclaringType.AssertNotNull(), Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition];
+                return this.GetNamedTypeSymbol( type.DeclaringType.AssertNotNull(), [] ).TypeParameters[type.GenericParameterPosition];
             }
 
             if ( type is CompileTimeType compileTimeType )

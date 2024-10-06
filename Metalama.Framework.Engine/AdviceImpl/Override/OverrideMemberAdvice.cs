@@ -11,7 +11,7 @@ internal abstract class OverrideMemberAdvice<TInput, TOutput> : Advice<OverrideM
     where TInput : class, IMember
     where TOutput : class, IMember
 {
-    protected new IRef<TInput> TargetDeclaration => base.TargetDeclaration.As<TInput>();
+    protected new TInput TargetDeclaration => (TInput) base.TargetDeclaration;
 
     protected IObjectReader Tags { get; }
 

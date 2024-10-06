@@ -564,7 +564,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 new DesignTimeTransformation(
                     transformation.TargetDeclaration.ToSerializableId(),
                     transformation.AspectClass.FullName,
-                    MetalamaStringFormatter.Format( transformation.ToDisplayString() ) ) );
+                    MetalamaStringFormatter.Format( transformation.ToDisplayString( TODO ) ) ) );
         }
 
         // Split options by syntax tree.

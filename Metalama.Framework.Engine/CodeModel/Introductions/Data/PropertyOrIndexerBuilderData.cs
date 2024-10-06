@@ -2,6 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
@@ -29,4 +32,19 @@ internal abstract class PropertyOrIndexerBuilderData : MemberBuilderData
     public abstract MethodBuilderData? SetMethod { get; }
 
     public Writeability Writeability { get; }
+
+    public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations()
+    {
+        var owned = base.GetOwnedDeclarations();
+
+        return (this.GetMethod, this.SetMethod) switch
+        {
+            (null, null) => owned,
+            (null, { } setMethod) => owned.Concat( setMethod ),
+            ({ } getMethod, null) => owned.Concat( getMethod ),
+            ({ } getMethod, { } setMethod) => owned.Concat( [getMethod, setMethod] )
+        };
+    }
+    
+    
 }

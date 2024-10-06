@@ -14,7 +14,9 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 public static class RefExtensions
 {
-    internal static IRefStrategy GetCollectionStrategy( this IRef reference ) => ((ICompilationBoundRefImpl) reference).Strategy;
+    internal static IRefStrategy GetStrategy( this IRef reference ) => ((ICompilationBoundRefImpl) reference).Strategy;
+
+    internal static bool HasSymbol( this IRef reference ) => reference is ISymbolRef;
 
     internal static IDurableRef<T> ToDurable<T>( this IRef<T> reference )
         where T : class, ICompilationElement
@@ -23,7 +25,7 @@ public static class RefExtensions
     internal static IRef ToDurable( this IRef reference ) => ((IRefImpl) reference).ToDurable();
 
     internal static bool IsConvertibleTo( this IRef<IType> type, IRef<IType> otherType, ConversionKind conversionKind = ConversionKind.Default )
-        => type.GetCollectionStrategy().IsConvertibleTo( type, otherType, conversionKind );
+        => type.GetStrategy().IsConvertibleTo( type, otherType, conversionKind );
 
     // ReSharper disable once SuspiciousTypeConversion.Global
     public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference, CompilationContext compilationContext )

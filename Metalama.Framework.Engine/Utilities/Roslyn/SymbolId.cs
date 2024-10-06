@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             var symbolKeyExtensionsType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyExtensions" ).AssertNotNull();
 
             // Get SymbolKey(string) constructor.
-            var symbolKeyConstructor = symbolKeyType.GetConstructor( new[] { typeof(string) } ).AssertNotNull();
+            var symbolKeyConstructor = symbolKeyType.GetConstructor( [typeof(string)] ).AssertNotNull();
 
             var idParameter = Expression.Parameter( typeof(string), "id" );
             var newSymbolKey = Expression.ConvertChecked( Expression.New( symbolKeyConstructor, idParameter ), typeof(object) );

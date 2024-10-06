@@ -72,7 +72,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
         var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
-        HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
+        HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = [];
 
         ConcurrentDictionary<IMember, InsertStatementTransformationContextImpl>
             pendingInsertStatementContexts = new( input.CompilationModel.Comparers.Default );
@@ -405,7 +405,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
             transformationCollection.AddIntroduceTransformation(
-                introduceDeclarationTransformation.DeclarationBuilder,
+                introduceDeclarationTransformation.DeclarationBuilderData,
                 introduceDeclarationTransformation );
 
             if ( !existingSyntaxTrees.Contains( transformation.TransformedSyntaxTree ) )
@@ -504,63 +504,71 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         switch ( transformation )
         {
             case IInjectMemberTransformation injectMemberTransformation:
-                // Transformed syntax tree must match insert position.
-                Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxTree );
-
-                // Create the SyntaxGenerationContext for the insertion point.
-                var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
-                    this._syntaxGenerationOptions,
-                    injectMemberTransformation.InsertPosition );
-
-                // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
-                //       For introduction, this should be a compilation that INCLUDES the builder.
-                //       But, if we pass the mutable compilation, it will get changed before the template is expanded.
-                //       The expanded template should not see declarations added after it runs.
-
-                // Call GetInjectedMembers.
-                var injectionContext = new MemberInjectionContext(
-                    this._serviceProvider,
-                    diagnostics,
-                    nameProvider,
-                    aspectReferenceSyntaxProvider,
-                    lexicalScopeFactory,
-                    syntaxGenerationContext,
-                    input.CompilationModel );
-
-                var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
-
-                transformationCollection.AddInjectedMembers( injectMemberTransformation, injectedMembers );
-
-                break;
-
-            case IInjectInterfaceTransformation injectInterfaceTransformation:
-                var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( this._syntaxGenerationOptions );
-                var introducedInterface = new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterfaceSyntax );
-
-                switch ( injectInterfaceTransformation.TargetDeclaration )
                 {
-                    case NamedType sourceType:
-                        transformationCollection.AddInjectedInterface(
-                            (BaseTypeDeclarationSyntax) sourceType.GetPrimaryDeclarationSyntax().AssertNotNull(),
-                            introducedInterface );
+                    // Transformed syntax tree must match insert position.
+                    Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxTree );
 
-                        break;
+                    // Create the SyntaxGenerationContext for the insertion point.
+                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                        this._syntaxGenerationOptions,
+                        injectMemberTransformation.InsertPosition );
 
-                    case BuiltNamedType builtType:
-                        transformationCollection.AddInjectedInterface( builtType.TypeBuilder, introducedInterface );
+                    // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
+                    //       For introduction, this should be a compilation that INCLUDES the builder.
+                    //       But, if we pass the mutable compilation, it will get changed before the template is expanded.
+                    //       The expanded template should not see declarations added after it runs.
 
-                        break;
+                    // Call GetInjectedMembers.
+                    var injectionContext = new MemberInjectionContext(
+                        this._serviceProvider,
+                        diagnostics,
+                        nameProvider,
+                        aspectReferenceSyntaxProvider,
+                        lexicalScopeFactory,
+                        syntaxGenerationContext,
+                        input.CompilationModel );
 
-                    case NamedTypeBuilder typeBuilder:
-                        transformationCollection.AddInjectedInterface( typeBuilder, introducedInterface );
+                    var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
 
-                        break;
+                    transformationCollection.AddInjectedMembers( injectMemberTransformation, injectedMembers );
 
-                    default:
-                        throw new AssertionFailedException( $"Unsupported: {injectInterfaceTransformation.TargetDeclaration}" );
+                    break;
                 }
 
-                break;
+            case IInjectInterfaceTransformation injectInterfaceTransformation:
+                {
+                    // Create the SyntaxGenerationContext for the insertion point.
+                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                        this._syntaxGenerationOptions );
+
+                    var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( syntaxGenerationContext );
+                    var introducedInterface = new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterfaceSyntax );
+
+                    switch ( injectInterfaceTransformation.TargetDeclaration )
+                    {
+                        case NamedType sourceType:
+                            transformationCollection.AddInjectedInterface(
+                                (BaseTypeDeclarationSyntax) sourceType.GetPrimaryDeclarationSyntax().AssertNotNull(),
+                                introducedInterface );
+
+                            break;
+
+                        case BuiltNamedType builtType:
+                            transformationCollection.AddInjectedInterface( builtType.TypeBuilder, introducedInterface );
+
+                            break;
+
+                        case NamedTypeBuilder typeBuilder:
+                            transformationCollection.AddInjectedInterface( typeBuilder, introducedInterface );
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException( $"Unsupported: {injectInterfaceTransformation.TargetDeclaration}" );
+                    }
+
+                    break;
+                }
         }
     }
 
@@ -929,7 +937,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // return returnValue;
 
             var advice = originTransformation.ParentAdvice;
-            var compilationModel = (CompilationModel) originTransformation.ParentAdvice.SourceCompilation;
+            var compilationModel = (CompilationModel) originTransformation.SourceCompilation;
 
             var rootMember =
                 member switch

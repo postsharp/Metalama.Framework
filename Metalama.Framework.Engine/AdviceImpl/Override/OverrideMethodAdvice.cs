@@ -23,30 +23,28 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideMethod;
 
-    protected override OverrideMemberAdviceResult<IMethod> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IMethod> Implement( in AdviceImplementationContext context ) 
     {
         // TODO: order should be self if the target is introduced on the same layer.
-        var targetMethod = this.TargetDeclaration.GetTarget( compilation );
+        var targetMethod = this.TargetDeclaration;
 
         switch ( targetMethod.MethodKind )
         {
             case MethodKind.Finalizer:
-                addTransformation(
-                    new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             case MethodKind.Operator:
-                addTransformation(
-                    new OverrideOperatorTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideOperatorTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             default:
-                addTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideMethodTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
                 break;
         }

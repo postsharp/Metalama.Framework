@@ -29,14 +29,11 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
-    protected override OverrideMemberAdviceResult<IIndexer> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IIndexer> Implement( in AdviceImplementationContext context ) 
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
-        addTransformation( new OverrideIndexerTransformation( this, targetDeclaration, this._getTemplate, this._setTemplate, this.Tags ) );
+        context.AddTransformation( new OverrideIndexerTransformation( this, targetDeclaration.ToRef(), this._getTemplate, this._setTemplate, this.Tags ) );
 
         return this.CreateSuccessResult( targetDeclaration );
     }

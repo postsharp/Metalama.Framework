@@ -115,7 +115,7 @@ internal static class TransformationHelper
                 return compilationContext.GetSyntaxGenerationContext( options, primaryDeclaration );
 
             case BuiltDeclaration builtDeclaration:
-                return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.BuilderData );
+                return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.BuilderData.ToInsertPosition() );
 
             case IDeclarationBuilder builder:
                 var insertPosition = builder.ToInsertPosition();

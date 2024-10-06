@@ -27,20 +27,20 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
     public IntrospectionTransformationKind TransformationKind => this._transformation.TransformationKind;
 
     [Memo]
-    public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.Translate( this._compilation );
+    public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.GetTarget( this._compilation );
 
     [Memo]
-    public FormattableString Description => FormattableStringHelper.MapString( this._transformation.ToDisplayString(), this._compilation );
+    public FormattableString Description => FormattableStringHelper.MapString( this._transformation.ToDisplayString( this._compilation.GetCompilationModel() ), this._compilation );
 
     [Memo]
     public IDeclaration? IntroducedDeclaration
         => this._transformation switch
         {
-            IIntroduceDeclarationTransformation introduceDeclarationTransformation => introduceDeclarationTransformation.DeclarationBuilder
-                .Translate<IDeclaration>( this._compilation ),
-            IIntroduceInterfaceTransformation introduceInterfaceTransformation => introduceInterfaceTransformation.TargetType.Translate<IDeclaration>(
+            IIntroduceDeclarationTransformation introduceDeclarationTransformation => introduceDeclarationTransformation.DeclarationBuilderData.ToRef()
+                .GetTarget( this._compilation ),
+            IIntroduceInterfaceTransformation introduceInterfaceTransformation => introduceInterfaceTransformation.TargetType.GetTarget(
                 this._compilation ),
-            IntroduceParameterTransformation introduceParameterTransformation => introduceParameterTransformation.Parameter.Translate<IDeclaration>(
+            IntroduceParameterTransformation introduceParameterTransformation => introduceParameterTransformation.Parameter.ToRef().GetTarget(
                 this._compilation ),
             _ => null
         };

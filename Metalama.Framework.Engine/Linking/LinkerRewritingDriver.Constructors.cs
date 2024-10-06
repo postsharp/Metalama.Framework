@@ -54,9 +54,8 @@ internal sealed partial class LinkerRewritingDriver
                         Identifier( TriviaList( ElasticSpace ), primaryConstructorProperty.Name, default ),
                         AccessorList(
                             List(
-                                new[]
-                                {
-                                    AccessorDeclaration(
+                            [
+                                AccessorDeclaration(
                                         SyntaxKind.GetAccessorDeclaration,
                                         List<AttributeListSyntax>(),
                                         TokenList(),
@@ -72,7 +71,7 @@ internal sealed partial class LinkerRewritingDriver
                                         null,
                                         null,
                                         Token( SyntaxKind.SemicolonToken ) )
-                                } ) ),
+                            ] ) ),
                         null,
                         null,
                         default ) );
@@ -187,7 +186,7 @@ internal sealed partial class LinkerRewritingDriver
 
             if ( isAuxiliaryForPrimaryConstructor )
             {
-                List<StatementSyntax> primaryConstructorFieldAssignments = new();
+                List<StatementSyntax> primaryConstructorFieldAssignments = [];
 
                 foreach ( var primaryConstructorField in this.LateTransformationRegistry.GetPrimaryConstructorFields( symbol.ContainingType ) )
                 {

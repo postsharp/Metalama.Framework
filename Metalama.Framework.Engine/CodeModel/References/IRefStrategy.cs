@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using Metalama.Framework.Engine.Services;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
@@ -25,4 +27,8 @@ internal interface IRefStrategy
     IEnumerable<IRef> GetMembers( IRef parent, DeclarationKind kind, CompilationModel compilation );
 
     bool IsConvertibleTo( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default );
+
+    IAssemblySymbol GetAssemblySymbol( IRef reference, CompilationContext compilationContext );
+
+    bool IsStatic( IRef<IMember> reference );
 }

@@ -150,7 +150,7 @@ internal sealed partial class LinkerAnalysisStep
                             true,
                             true );
 
-                    _ = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
+                    _ = aspectReferences.TryAdd( containingSemantic, [resolvedReference] );
 
                     // In case of duplicate declarations (which can happen at design time), the aspect may not be added here.
                 }

@@ -94,17 +94,17 @@ internal sealed partial class LinkerLinkingStep
                 var symbols =
                     member switch
                     {
-                        ConstructorDeclarationSyntax ctorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( ctorDecl ) },
-                        OperatorDeclarationSyntax operatorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( operatorDecl ) },
-                        ConversionOperatorDeclarationSyntax destructorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( destructorDecl ) },
-                        DestructorDeclarationSyntax destructorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( destructorDecl ) },
-                        MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
-                        BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
+                        ConstructorDeclarationSyntax ctorDecl => [semanticModel.GetDeclaredSymbol( ctorDecl )],
+                        OperatorDeclarationSyntax operatorDecl => [semanticModel.GetDeclaredSymbol( operatorDecl )],
+                        ConversionOperatorDeclarationSyntax destructorDecl => [semanticModel.GetDeclaredSymbol( destructorDecl )],
+                        DestructorDeclarationSyntax destructorDecl => [semanticModel.GetDeclaredSymbol( destructorDecl )],
+                        MethodDeclarationSyntax methodDecl => [semanticModel.GetDeclaredSymbol( methodDecl )],
+                        BasePropertyDeclarationSyntax basePropertyDecl => [semanticModel.GetDeclaredSymbol( basePropertyDecl )],
                         FieldDeclarationSyntax fieldDecl =>
                             fieldDecl.Declaration.Variables.SelectAsArray( v => semanticModel.GetDeclaredSymbol( v ) ),
                         EventFieldDeclarationSyntax eventFieldDecl =>
                             eventFieldDecl.Declaration.Variables.SelectAsArray( v => semanticModel.GetDeclaredSymbol( v ) ),
-                        _ => Array.Empty<ISymbol>()
+                        _ => []
                     };
 
                 if ( symbols.Length == 0 || symbols is [null] )

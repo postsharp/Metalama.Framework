@@ -138,7 +138,7 @@ internal sealed class LinkerInjectionHelperProvider
                         GenericName(
                             Identifier( baseTypeName ),
                             TypeArgumentList(
-                                SeparatedList( new[] { aspectTypeSyntax, GetOrdinalTypeArgument( aspectType.ShortName, description, ordinal ) } ) ) ) );
+                                SeparatedList( [aspectTypeSyntax, GetOrdinalTypeArgument( aspectType.ShortName, description, ordinal )] ) ) ) );
         }
     }
 

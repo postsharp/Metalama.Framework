@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -47,14 +48,13 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceParameter;
 
-    protected override IntroduceConstructorParameterAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroduceConstructorParameterAdviceResult Implement( in AdviceImplementationContext context )
     {
+        var contextCopy = context;
+        var serviceProvider = context.ServiceProvider;
         var syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
 
-        var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
+        var constructor = (IConstructor) this.TargetDeclaration;
         var initializedConstructor = constructor;
 
         var existingParameter = constructor.Parameters.FirstOrDefault( p => p.Name == this._parameterName );
@@ -85,9 +85,10 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             {
                 ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
-
+            constructorBuilder.Freeze();
+            
             initializedConstructor = constructorBuilder;
-            addTransformation( constructorBuilder.ToTransformation() );
+            context.AddTransformation( constructorBuilder.ToTransformation() );
         }
 
         // Create the parameter.
@@ -99,18 +100,19 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             RefKind.None,
             this ) { DefaultValue = this._defaultValue };
 
-        var parameter = parameterBuilder.ForCompilation<IParameter>( compilation );
+        var parameter = parameterBuilder;
 
         this._buildAction?.Invoke( parameterBuilder );
 
         parameterBuilder.Freeze();
+        var parameterBuilderData = parameterBuilder.Immutable;
 
-        addTransformation( new IntroduceParameterTransformation( this, parameterBuilder ) );
+        context.AddTransformation( new IntroduceParameterTransformation( this, parameterBuilderData ) );
 
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
 
-        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToRef() );
+        return new IntroduceConstructorParameterAdviceResult( parameterBuilderData.ToRef() );
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
@@ -118,7 +120,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             var sameTypeConstructors =
                 baseConstructor.DeclaringType.Constructors.Where( c => c.InitializerKind == ConstructorInitializerKind.This );
 
-            var derivedConstructors = compilation
+            var derivedConstructors = contextCopy.Compilation
                 .GetDerivedTypes( baseConstructor.DeclaringType, DerivedTypesOptions.DirectOnly )
                 .SelectMany( t => t.Constructors )
                 .Where( c => c.InitializerKind != ConstructorInitializerKind.This && !c.IsRecordCopyConstructor() );
@@ -130,7 +132,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             // Process all of these constructors.
             foreach ( var chainedConstructor in chainedConstructors )
             {
-                var chainedSyntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext(
+                var chainedSyntaxGenerationContext = contextCopy.Compilation.CompilationContext.GetSyntaxGenerationContext(
                     syntaxGenerationOptions,
                     constructor.GetPrimaryDeclarationSyntax()
                     ?? constructor.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
@@ -141,7 +143,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 {
                     using ( UserCodeExecutionContext.WithContext(
                                serviceProvider,
-                               compilation,
+                               contextCopy.Compilation,
                                UserCodeDescription.Create( "evaluating the pull action for {0}", this ) ) )
                     {
                         // Ask the IPullStrategy what to do.
@@ -163,7 +165,8 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                         ReplacedImplicitConstructor = chainedConstructor, Accessibility = Accessibility.Public
                     };
 
-                    addTransformation( derivedConstructorBuilder.ToTransformation() );
+                    derivedConstructorBuilder.Freeze();
+                    contextCopy.AddTransformation( derivedConstructorBuilder.ToTransformation() );
                     initializedChainedConstructor = derivedConstructorBuilder;
                 }
 
@@ -179,7 +182,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                     case PullActionKind.UseExpression:
                         parameterValue =
                             pullParameterAction.Expression.AssertNotNull()
-                                .ToExpressionSyntax( new SyntaxSerializationContext( compilation, chainedSyntaxGenerationContext, constructor.DeclaringType ) );
+                                .ToExpressionSyntax( new SyntaxSerializationContext( contextCopy.Compilation, chainedSyntaxGenerationContext, constructor.DeclaringType ) );
 
                         break;
 
@@ -197,10 +200,10 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
                         recursiveParameterBuilder.Freeze();
+                        
+                        contextCopy.AddTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder.Immutable ) );
 
-                        addTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder ) );
-
-                        var recursiveParameter = recursiveParameterBuilder.ForCompilation<IParameter>( compilation );
+                        var recursiveParameter = recursiveParameterBuilder;
 
                         // Process all constructors calling this constructor.
                         PullConstructorParameterRecursive( chainedConstructor, recursiveParameter );
@@ -212,10 +215,10 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 }
 
                 // Append an argument to the call to the current constructor. 
-                addTransformation(
+                contextCopy.AddTransformation(
                     new IntroduceConstructorInitializerArgumentTransformation(
                         this,
-                        initializedChainedConstructor,
+                        initializedChainedConstructor.ToRef(),
                         baseParameter.Index,
                         parameterValue ) );
             }

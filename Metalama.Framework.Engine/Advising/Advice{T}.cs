@@ -13,74 +13,26 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal abstract class Advice<T> : Advice
-    where T : AdviceResult, new()
+internal abstract class Advice<TResult> : Advice
+    where TResult : AdviceResult, new()
 {
-    /// <summary>
-    /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.
-    /// </summary>
-    /// <param name="serviceProvider">Service provider.</param>
-    /// <param name="compilation">Input compilation.</param>
-    /// <param name="addTransformation"></param>
-    /// <returns>Advice result containing transformations and diagnostics.</returns>
-    protected abstract T Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation );
+    protected Advice( AdviceConstructorParameters parameters ) : base( parameters ) { }
 
-    /// <summary>
-    /// Initializes the advice. Executed before any advices are executed.
-    /// </summary>
-    /// <remarks>
-    /// The advice should only report diagnostics that do not take into account the target declaration(s).
-    /// </remarks>
-    protected virtual void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
-
-    /// <summary>
-    /// Validates the advice. Executed only if initialization passed, before implementing the advice.
-    /// </summary>    
-    protected virtual void Validate( CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) { }
-
-    public T Execute( IAdviceExecutionContext context )
+    public TResult Execute( IAdviceExecutionContext context )
     {
         List<ITransformation> transformations = new();
 
         // Initialize the advice. It should report errors for any situation that does not depend on the target declaration.
         // These errors are reported as exceptions.
         var initializationDiagnostics = new DiagnosticBag();
-        this.Initialize( context.ServiceProvider, initializationDiagnostics );
-
-        // Validate the advice against the current compilation.
-        if ( !initializationDiagnostics.HasError )
-        {
-            this.Validate( context.CurrentCompilation, initializationDiagnostics );
-        }
-
-        if ( initializationDiagnostics.HasError() )
-        {
-            throw new DiagnosticException(
-                "Errors have occured while creating advice.",
-                initializationDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
-        }
+        var implementationContext = new AdviceImplementationContext( initializationDiagnostics, context, transformations );
+        var adviceResult = this.Implement( implementationContext );
+        implementationContext.ThrowIfAnyError();
 
         context.Diagnostics.Report( initializationDiagnostics );
 
-        // Implement the advice. This should report errors for any situation that does depend on the target declaration.
-        // These errors are reported as diagnostics.
-        var adviceResult = this.Implement(
-            context.ServiceProvider,
-            context.CurrentCompilation,
-            t =>
-            {
-                context.SetOrders( t );
-                transformations.Add( t );
-            } );
-
-        // Set the compilation in whichi references must be resolved.
+        // Set the compilation in which references must be resolved.
         adviceResult.Compilation = context.CurrentCompilation;
-
-        // Report diagnostics.
-        context.Diagnostics.Report( adviceResult.Diagnostics );
 
         context.IntrospectionListener?.AddAdviceResult( this.AspectInstance, this, adviceResult, context.CurrentCompilation );
 
@@ -109,11 +61,68 @@ internal abstract class Advice<T> : Advice
         return adviceResult;
     }
 
-    protected Advice( AdviceConstructorParameters parameters ) : base( parameters ) { }
+    /// <summary>
+    /// Initializes and validates the advice. Executed before any advices are executed.
+    /// </summary>
+    /// <remarks>
+    /// The advice should only report diagnostics that do not take into account the target declaration(s).
+    /// </remarks>
+    protected abstract TResult Implement( in AdviceImplementationContext context );
 
-    protected T CreateFailedResult( Diagnostic diagnostic )
+    protected TResult CreateFailedResult( Diagnostic diagnostic )
         => new() { Diagnostics = ImmutableArray.Create( diagnostic ), Outcome = AdviceOutcome.Error, AdviceKind = this.AdviceKind };
 
-    protected T CreateFailedResult( ImmutableArray<Diagnostic> diagnostics )
+    protected TResult CreateFailedResult( ImmutableArray<Diagnostic> diagnostics )
         => new() { Diagnostics = diagnostics, Outcome = AdviceOutcome.Error, AdviceKind = this.AdviceKind };
+
+    internal readonly struct AdviceImplementationContext
+    {
+        private readonly List<ITransformation> _transformations;
+
+        public AdviceImplementationContext( DiagnosticBag diagnostics, IAdviceExecutionContext adviceExecutionContext, List<ITransformation> transformations )
+        {
+            this._transformations = transformations;
+            this.Diagnostics = diagnostics;
+            this.AdviceExecutionContext = adviceExecutionContext;
+        }
+
+        public void ThrowIfAnyError()
+        {
+            if ( this.Diagnostics.HasError() )
+            {
+                throw new DiagnosticException(
+                    "Errors have occured while creating advice.",
+                    this.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
+            }
+        }
+
+        public CompilationModel Compilation => this.AdviceExecutionContext.CurrentCompilation;
+
+        public IAdviceExecutionContext AdviceExecutionContext { get; }
+
+        public ProjectServiceProvider ServiceProvider => this.AdviceExecutionContext.ServiceProvider;
+
+        public DiagnosticBag Diagnostics { get; }
+
+        public void AddTransformation( ITransformation transformation )
+        {
+            this.AdviceExecutionContext.SetOrders( transformation );
+            this._transformations.Add( transformation );
+        }
+    }
+
+    internal readonly struct ImplementationContext
+    {
+        private readonly Action<ITransformation> _addTransformation;
+
+        public ImplementationContext( Action<ITransformation> addTransformation )
+        {
+            this._addTransformation = addTransformation;
+        }
+
+        public void AddTransformation( ITransformation transformation )
+        {
+            this._addTransformation( transformation );
+        }
+    }
 }

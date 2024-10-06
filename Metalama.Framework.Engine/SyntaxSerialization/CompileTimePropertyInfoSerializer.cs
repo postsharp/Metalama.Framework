@@ -43,14 +43,13 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
                         IdentifierName( "GetProperty" ) ),
                     ArgumentList(
                         SeparatedList(
-                            new[]
-                            {
-                                Argument(
+                        [
+                            Argument(
                                     LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
                                         Literal( propertyOrIndexer.Name ) ) ),
                                 Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) )
-                            } ) ) );
+                        ] ) ) );
 
                 break;
 
@@ -78,9 +77,8 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
                             IdentifierName( "GetProperty" ) ),
                         ArgumentList(
                             SeparatedList(
-                                new[]
-                                {
-                                    Argument(
+                            [
+                                Argument(
                                         LiteralExpression(
                                             SyntaxKind.StringLiteralExpression,
                                             Literal(
@@ -101,7 +99,7 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
                                                     SyntaxKind.ArrayInitializerExpression,
                                                     SeparatedList( parameterTypes ) ) ) ),
                                     Argument( SyntaxFactoryEx.Null )
-                                } ) ) ); // modifiers
+                            ] ) ) ); // modifiers
 
                     break;
                 }

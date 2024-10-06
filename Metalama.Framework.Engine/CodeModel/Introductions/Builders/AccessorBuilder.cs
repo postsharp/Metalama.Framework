@@ -98,11 +98,11 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
             (IIndexer, MethodKind.PropertySet) => new IndexerAccessorParameterBuilderList( this ),
             (IProperty, MethodKind.PropertyGet) => new ParameterBuilderList(),
             (IProperty, MethodKind.PropertySet) =>
-                new ParameterBuilderList( new[] { new PropertySetValueParameterBuilder( this, 0 ) } ),
+                new ParameterBuilderList( [new PropertySetValueParameterBuilder( this, 0 )] ),
             (FieldBuilder _, MethodKind.PropertyGet) => new ParameterBuilderList(),
-            (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameterBuilder( this, 0 ) } ),
+            (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( [new PropertySetValueParameterBuilder( this, 0 )] ),
             (IEvent _, _) =>
-                new ParameterBuilderList( new[] { new EventValueParameterBuilder( this ) } ),
+                new ParameterBuilderList( [new EventValueParameterBuilder( this )] ),
             _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
         };
 
@@ -242,6 +242,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public bool IsAsync => false;
 
     public INamedType DeclaringType => this.ContainingMember.DeclaringType;
+
+    public override bool IsDesignTimeObservable => this.ContainingMember.IsDesignTimeObservable;
 
     public override IDeclaration ContainingDeclaration => this.ContainingMember;
 

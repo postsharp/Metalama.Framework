@@ -23,7 +23,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
     [Memo]
-    private IRef<IAttribute> Ref => this._attributeBuilder.ToAttributeRef();
+    private IRef<IAttribute> Ref => this._attributeBuilder.ToRef();
 
     public IRef<IAttribute> ToRef() => this.Ref;
 
@@ -59,5 +59,5 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 
     public override bool CanBeInherited => false;
 
-    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
+    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => [];
 }

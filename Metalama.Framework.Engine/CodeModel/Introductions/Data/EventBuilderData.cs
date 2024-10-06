@@ -1,5 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
@@ -31,6 +32,10 @@ internal class EventBuilderData : MemberBuilderData
     public IRef<IEvent>? OverriddenEvent { get; }
     
     public IReadOnlyList<IRef<IEvent>> ExplicitInterfaceImplementations { get; }
+    
+    public IExpression? InitializerExpression { get; }
+
+    public TemplateMember<IEvent>? InitializerTemplate { get; }
 
     public EventBuilderData( EventBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
@@ -45,13 +50,20 @@ internal class EventBuilderData : MemberBuilderData
         this.OverriddenEvent = builder.OverriddenEvent?.ToRef();
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
         this.IsEventField = builder.IsEventField;
+        this.InitializerExpression = builder.InitializerExpression;
+        this.InitializerTemplate = builder.InitializerTemplate;
     }
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+
+    public IRef<IEvent> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
     public override IRef<IMember>? OverriddenMember => this.OverriddenEvent;
     
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
+
+    public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations() => base.GetOwnedDeclarations().Concat( [this.AddMethod, this.RemoveMethod] );
+    
 }

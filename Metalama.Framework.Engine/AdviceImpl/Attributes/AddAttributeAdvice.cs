@@ -29,12 +29,10 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceAttribute;
 
-    protected override AddAttributeAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddAttributeAdviceResult Implement( in AdviceImplementationContext context ) 
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
+        var contextCopy = context;
 
         if ( this._overrideStrategy != OverrideStrategy.New )
         {
@@ -61,8 +59,8 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
                             this,
-                            targetDeclaration,
-                            this._attribute.Type );
+                            targetDeclaration.ToRef(),
+                            this._attribute.Type.ToRef() );
 
                         return AddTransformations( AdviceOutcome.Override, removeTransformation );
 
@@ -78,12 +76,12 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
         {
             if ( removeTransformation != null )
             {
-                addTransformation( removeTransformation );
+                contextCopy.AddTransformation( removeTransformation );
             }
 
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicitlyDeclared: true } constructor )
             {
-                addTransformation(
+                contextCopy.AddTransformation(
                     new ConstructorBuilder( this, constructor.DeclaringType )
                         {
                             ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
@@ -92,7 +90,8 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
             }
 
             var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );
-            addTransformation( attributeBuilder.ToTransformation() );
+            attributeBuilder.Freeze();
+            contextCopy.AddTransformation( attributeBuilder.ToTransformation() );
 
             return new AddAttributeAdviceResult( outcome, attributeBuilder.ToRef() );
         }

@@ -704,16 +704,15 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                             IdentifierName( nameof(IArgumentsWriter.SetValue) ) ),
                         ArgumentList(
                             SeparatedList(
-                                new[]
-                                {
-                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
+                            [
+                                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
                                     Argument(
                                         MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
                                             objectExpression,
                                             IdentifierName( member.Name ) ) ),
                                     Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
-                                } ) ) ) ) );
+                            ] ) ) ) ) );
         }
 
         return Block( statements );
@@ -755,11 +754,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                                     TypeArgumentList( SingletonSeparatedList( this._context.SyntaxGenerator.Type( memberType ) ) ) ) ),
                             ArgumentList(
                                 SeparatedList(
-                                    new[]
-                                    {
-                                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
+                                [
+                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
                                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
-                                    } ) ) ) ) ) );
+                                ] ) ) ) ) ) );
         }
 
         foreach ( var member in defaultLocationSelector( serializedType ) )

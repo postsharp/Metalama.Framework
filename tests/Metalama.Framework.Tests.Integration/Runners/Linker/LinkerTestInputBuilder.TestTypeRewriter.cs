@@ -513,7 +513,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( 0 );
 
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
-                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder) transformation );
+                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilderData ).Returns( (IDeclarationBuilder) transformation );
 
                 A.CallTo( () => ((IDeclaration) transformation).DeclarationKind ).Returns( declarationKind );
                 A.CallTo( () => ((IDeclaration) transformation).ToRef() ).Returns( (IRef<IDeclaration>)transformation );

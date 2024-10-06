@@ -5,6 +5,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -56,6 +58,75 @@ internal static class CodeModelInternalExtensions
             _ => false
         };
 
+    public static InsertPosition ToInsertPosition( this DeclarationBuilderData declaration )
+    {
+        switch ( declaration )
+            {
+               
+                // TODO: This is a hack (since splitting transformations and builders).
+                // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
+                //case PromotedField promotedField:
+                 //   return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
+
+                case NamedTypeBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
+                    return new InsertPosition( InsertPositionRelation.Within, named );
+                
+                case NamedTypeBuilderData { DeclaringType: ISymbolRef declaringType }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within,
+                        (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
+
+                case NamedTypeBuilderData topLevelType:
+                    return new InsertPosition( topLevelType.PrimarySyntaxTree );
+
+                case MemberBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
+                    return new InsertPosition( InsertPositionRelation.Within, named );
+
+                case MemberBuilderData { DeclaringType: ISymbolRef declaringType }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within,
+                        (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
+                
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
+            }
+    }
+
+    public static InsertPosition ToInsertPosition( this IRef declaration )
+        => declaration switch
+        {
+            ISymbolRef symbolRef => symbolRef.Symbol.ToInsertPosition(),
+            IDeclarationBuilderDataRef builderDataRef => builderDataRef.BuilderData.ToInsertPosition(),
+            _ => throw new AssertionFailedException()
+        };
+
+    public static InsertPosition ToInsertPosition( this ISymbol symbol )
+    {
+        var primaryDeclaration = symbol.GetPrimaryDeclaration();
+
+        if ( primaryDeclaration != null )
+        {
+            var memberDeclaration = primaryDeclaration.FindMemberDeclaration();
+
+            if ( memberDeclaration is BaseTypeDeclarationSyntax )
+            {
+                return new InsertPosition( InsertPositionRelation.Within, memberDeclaration );
+            }
+            else
+            {
+                return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+            }
+        }
+        else
+        {
+            var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
+
+            return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
+        }
+
+    }
+    
     public static InsertPosition ToInsertPosition( this IDeclaration declaration )
     {
         using ( StackOverflowHelper.Detect() )
@@ -67,57 +138,12 @@ internal static class CodeModelInternalExtensions
 
                 // TODO: This is a hack (since splitting transformations and builders).
                 // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
-                case PromotedField promotedField:
-                    return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
-
-                case NamedTypeBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
-                    return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
-
-                case NamedTypeBuilder { DeclaringType: BuiltNamedType builtNamedType }:
-                    return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
-
-                case NamedTypeBuilder { DeclaringType: { } declaringType }:
-                    return new InsertPosition(
-                        InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
-
-                case NamedTypeBuilder topLevelType:
-                    return new InsertPosition( topLevelType.PrimarySyntaxTree );
-
-                case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
-                    return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
-
-                case IMemberBuilder { DeclaringType: BuiltNamedType builtNamedType }:
-                    return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
-
-                case IMemberBuilder { DeclaringType: { } declaringType }:
-                    return new InsertPosition(
-                        InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
-
+                //  case PromotedField promotedField:
+                //    return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
+                
+                
                 case SymbolBasedDeclaration baseDeclaration:
-                    var symbol = baseDeclaration.Symbol;
-                    var primaryDeclaration = symbol.GetPrimaryDeclaration();
-
-                    if ( primaryDeclaration != null )
-                    {
-                        var memberDeclaration = primaryDeclaration.FindMemberDeclaration();
-
-                        if ( memberDeclaration is BaseTypeDeclarationSyntax )
-                        {
-                            return new InsertPosition( InsertPositionRelation.Within, memberDeclaration );
-                        }
-                        else
-                        {
-                            return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
-                        }
-                    }
-                    else
-                    {
-                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
-
-                        return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
-                    }
+                    return baseDeclaration.Symbol.ToInsertPosition();
 
                 default:
                     throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );

@@ -21,12 +21,9 @@ internal sealed class AddAnnotationAdvice : Advice<AddAnnotationAdviceResult>
 
     public override AdviceKind AdviceKind => AdviceKind.AddAnnotation;
 
-    protected override AddAnnotationAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddAnnotationAdviceResult Implement( in AdviceImplementationContext context ) 
     {
-        addTransformation( new AddAnnotationTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._annotationInstance ) );
+        context.AddTransformation( new AddAnnotationTransformation( this, this.TargetDeclaration.ToRef(), this._annotationInstance ) );
 
         return new AddAnnotationAdviceResult();
     }

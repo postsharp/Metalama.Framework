@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -15,11 +17,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
-    public IMember TargetMember => this.Parameter.DeclaringMember;
+    public IRef<IMember> TargetMember => this.Parameter.ContainingDeclaration.As<IMember>();
 
-    public IParameter Parameter { get; }
+    public ParameterBuilderData Parameter { get; }
 
-    public IntroduceParameterTransformation( Advice advice, IParameter parameter ) : base( advice )
+    public IntroduceParameterTransformation( Advice advice, ParameterBuilderData parameter ) : base( advice )
     {
         this.Parameter = parameter;
     }
@@ -48,11 +50,11 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
         return syntax;
     }
 
-    public override IDeclaration TargetDeclaration => this.TargetMember;
+    public override IRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceParameter;
 
-    public override FormattableString ToDisplayString() => $"Introduce parameter '{this.Parameter.Name}' into '{this.Parameter.DeclaringMember}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce parameter '{this.Parameter.Name}' into '{this.Parameter.ContainingDeclaration}'.";
 }

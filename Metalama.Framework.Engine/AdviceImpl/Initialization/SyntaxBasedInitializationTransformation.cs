@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -15,17 +16,17 @@ namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
 internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTransformation, IInsertStatementTransformation
 {
-    private readonly IConstructor _targetConstructor;
+    private readonly IRef<IConstructor> _targetConstructor;
     private readonly Func<SyntaxGenerationContext, StatementSyntax> _initializationStatement;
 
-    private IMemberOrNamedType ContextDeclaration { get; }
+    private IRef<IMemberOrNamedType> ContextDeclaration { get; }
 
-    public IMember TargetMember => this._targetConstructor;
+    public IRef<IMember> TargetMember => this._targetConstructor;
 
     public SyntaxBasedInitializationTransformation(
         Advice advice,
-        IMemberOrNamedType initializedDeclaration,
-        IConstructor targetConstructor,
+        IRef<IMemberOrNamedType> initializedDeclaration,
+        IRef<IConstructor> targetConstructor,
         Func<SyntaxGenerationContext, StatementSyntax> initializationStatement ) : base( advice )
     {
         this.ContextDeclaration = initializedDeclaration;
@@ -35,23 +36,23 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTr
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        return new[]
-        {
+        return
+        [
             new InsertedStatement(
                 this._initializationStatement( context.SyntaxGenerationContext )
-                    .WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation )
+                    .WithGeneratedCodeAnnotation( this.AspectInstance.AspectClass.GeneratedCodeAnnotation )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                this.ContextDeclaration,
+                this.ContextDeclaration.GetTarget(context.Compilation),
                 this,
                 InsertedStatementKind.Initializer )
-        };
+        ];
     }
 
-    public override IDeclaration TargetDeclaration => this.TargetMember;
+    public override IRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
 
-    public override FormattableString ToDisplayString() => $"Add a statement to '{this._targetConstructor}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add a statement to '{this._targetConstructor}'.";
 }

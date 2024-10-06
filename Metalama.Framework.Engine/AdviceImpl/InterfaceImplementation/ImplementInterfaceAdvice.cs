@@ -33,7 +33,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     private readonly IObjectReader _tags;
     private readonly IAdviceFactoryImpl _adviceFactory;
 
-    private new IRef<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+    private new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
     public ImplementInterfaceAdvice(
         AdviceConstructorParameters<INamedType> parameters,
@@ -45,16 +45,17 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     {
         this._interfaceType = interfaceType;
         this._overrideStrategy = overrideStrategy;
-        this._interfaceSpecifications = new List<InterfaceSpecification>();
+        this._interfaceSpecifications = [];
         this._tags = tags;
         this._adviceFactory = adviceFactory;
     }
 
     public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
-
-    protected override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+    
+    private void Initialize( in AdviceImplementationContext context )
     {
-        base.Initialize( serviceProvider, diagnosticAdder );
+        var interfaceType = this._interfaceType;
+        var contextCopy = context;
 
         switch ( this._overrideStrategy )
         {
@@ -64,30 +65,30 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 break;
 
             default:
-                diagnosticAdder.Report(
+                context.Diagnostics.Report(
                     AdviceDiagnosticDescriptors.InterfaceUnsupportedOverrideStrategy.CreateRoslynDiagnostic(
                         this.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, InterfaceType: this._interfaceType,
-                         this.TargetDeclaration.GetTarget( this.SourceCompilation ),
+                        (this.AspectInstance.AspectClass.ShortName, InterfaceType: interfaceType,
+                         this.TargetDeclaration,
                          this._overrideStrategy),
                         this ) );
 
                 break;
         }
 
-        if ( this._interfaceType is { IsGeneric: true, IsCanonicalGenericInstance: true } )
+        if ( interfaceType is { IsGeneric: true, IsCanonicalGenericInstance: true } )
         {
-            diagnosticAdder.Report(
+            context.Diagnostics.Report(
                 AdviceDiagnosticDescriptors.CannotImplementCanonicalGenericInstanceOfGenericInterface.CreateRoslynDiagnostic(
                     this.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, InterfaceType: this._interfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation )),
+                    (this.AspectInstance.AspectClass.ShortName, InterfaceType: interfaceType, this.TargetDeclaration),
                     this ) );
 
             // No other diagnostics should be reported after this.
             return;
         }
 
-        if ( !this._interfaceType.IsFullyBound() )
+        if ( !interfaceType.IsFullyBound() )
         {
             // Temporary limitation.
             throw new NotImplementedException( "Overriding unbound generic interfaces is not yet supported." );
@@ -98,22 +99,22 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         // should be reported.
 
         var templateReflectionContext =
-            this.TemplateInstance.TemplateClass.GetTemplateReflectionContext( ((CompilationModel) this.SourceCompilation).CompilationContext );
+            this.TemplateInstance.TemplateClass.GetTemplateReflectionContext( this.SourceCompilation.CompilationContext );
 
         var templateClassType = templateReflectionContext.GetCompilationModel( this.SourceCompilation )
             .Factory.GetTypeByReflectionName( this.TemplateInstance.TemplateClass.FullName );
 
         // Prepare all interface types that need to be introduced.
         var interfacesToIntroduce =
-            new[] { (InterfaceType: this._interfaceType, IsTopLevel: true) }
-                .Concat( this._interfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
+            new[] { (InterfaceType: interfaceType, IsTopLevel: true) }
+                .Concat( interfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
                 .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
         // No explicit member specification was given, we have to detect introduced members corresponding to all interface members.
         foreach ( var pair in interfacesToIntroduce )
         {
             var introducedInterface = pair.Key;
-            List<MemberSpecification> memberSpecifications = new();
+            List<MemberSpecification> memberSpecifications = [];
 
             void TryAddMember<T>( T interfaceMember, Func<T, TemplateMember<T>?> getAspectInterfaceMember, Func<T, bool> membersMatch )
                 where T : class, IMember
@@ -126,18 +127,18 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 }
                 else if ( !membersMatch( memberTemplate.Declaration ) )
                 {
-                    diagnosticAdder.Report(
+                    contextCopy.Diagnostics.Report(
                         AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ),
-                             InterfaceType: this._interfaceType,
+                            (this.AspectInstance.AspectClass.ShortName, this.TargetDeclaration,
+                             InterfaceType: interfaceType,
                              memberTemplate.Declaration,
                              interfaceMember),
                             this ) );
                 }
                 else
                 {
-                    var memberSpecification = new MemberSpecification( interfaceMember, null, memberTemplate.Cast<IMember>(), null );
+                    var memberSpecification = new MemberSpecification( interfaceMember.ToRef(), null, memberTemplate.Cast<IMember>(), null );
 
                     var isPublic = memberTemplate.Accessibility == Accessibility.Public;
 
@@ -156,10 +157,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                     if ( !memberSpecification.IsExplicit && !isPublic )
                     {
-                        diagnosticAdder.Report(
+                        contextCopy.Diagnostics.Report(
                             AdviceDiagnosticDescriptors.ImplicitInterfaceImplementationHasToBePublic.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this._interfaceType, memberTemplate.Declaration),
+                                (this.AspectInstance.AspectClass.ShortName, interfaceType, memberTemplate.Declaration),
                                 this ) );
                     }
                     else
@@ -207,7 +208,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                         this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, templateEvent.Type ) );
             }
 
-            this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface, memberSpecifications ) );
+            this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface.ToRef(), memberSpecifications ) );
         }
 
         TemplateMember<IMethod>? GetAspectInterfaceMethod( IMethod interfaceMethod )
@@ -256,16 +257,21 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         }
     }
 
-    protected override ImplementInterfaceAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override ImplementInterfaceAdviceResult Implement( in AdviceImplementationContext context )
     {
+        var contextCopy = context;
+        var serviceProvider = context.ServiceProvider;
+        var compilation = context.Compilation;
+        
+        this.Initialize(  context );
+        context.ThrowIfAnyError();
+
+        
         // Adding interfaces may run into three problems:
         //      1) Target type already implements the interface.
         //      2) Target type already implements an ancestor of the interface.
 
-        var targetType = this.TargetDeclaration.GetTarget( compilation ).AssertNotNull();
+        var targetType = this.TargetDeclaration;
         var diagnostics = new DiagnosticBag();
         var implementedInterfaces = new List<ImplementationResult>();
         var implementedInterfaceMembers = new List<MemberImplementationResult>();
@@ -276,12 +282,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             bool skipInterfaceBaseList;
             var forceIgnore = false;
 
-            if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparers.Default.Equals( t, interfaceSpecification.InterfaceType ) ) )
+            var interfaceType = interfaceSpecification.InterfaceType.GetTarget(context.Compilation);
+
+            if ( targetType.AllImplementedInterfaces.Any( t => t.Equals( interfaceType ) ) )
             {
                 switch ( this._overrideStrategy )
                 {
                     case OverrideStrategy.Ignore:
-                        implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Ignore ) );
+                        implementedInterfaces.Add( new ImplementationResult( interfaceType, InterfaceImplementationOutcome.Ignore ) );
                         skipInterfaceBaseList = true;
 
                         // The interface is implemented, so we ignore its members, as if they had InterfaceMemberOverrideStrategy.Ignore.
@@ -293,7 +301,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                         diagnostics.Report(
                             AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
                                 targetType.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType),
+                                (this.AspectInstance.AspectClass.ShortName, InterfaceType: interfaceType, targetType),
                                 this ) );
 
                         continue;
@@ -301,7 +309,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case OverrideStrategy.Override:
                         implementedInterfaces.Add(
                             new ImplementationResult(
-                                interfaceSpecification.InterfaceType,
+                                interfaceType,
                                 InterfaceImplementationOutcome.Implement,
                                 this.TargetDeclaration,
                                 this._adviceFactory ) );
@@ -318,7 +326,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             {
                 implementedInterfaces.Add(
                     new ImplementationResult(
-                        interfaceSpecification.InterfaceType,
+                        interfaceType,
                         InterfaceImplementationOutcome.Implement,
                         this.TargetDeclaration,
                         this._adviceFactory ) );
@@ -342,10 +350,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     }
                 }
 
-                addTransformation( transformation );
+                contextCopy.AddTransformation( transformation );
             }
 
-            var interfaceMemberMap = new Dictionary<IMember, IMember>( compilation.Comparers.Default );
+            var interfaceMemberMap = new Dictionary<IMember, IMember>( context.Compilation.Comparers.Default );
 
             foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
             {
@@ -353,12 +361,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 var mergedTags = ObjectReader.Merge( this._tags, memberSpec.Tags );
                 var templateAttributeProperties = (memberSpec.Template?.AdviceAttribute as ITemplateAttribute)?.Properties;
 
-                switch ( memberSpec.InterfaceMember )
+                var interfaceMember = memberSpec.InterfaceMember.GetTarget(context.Compilation);
+
+                switch ( interfaceMember )
                 {
                     case IMethod interfaceMethod:
                         var existingMethod = targetType.AllMethods.OfName( interfaceMethod.Name ).SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
                         var templateMethod = memberSpec.Template?.Cast<IMethod>();
-                        var redirectionTargetMethod = (IMethod?) memberSpec.TargetMember;
+                        var redirectionTargetMethod = memberSpec.TargetMember?.As<IMethod>().GetTarget(context.Compilation);
 
                         if ( existingMethod != null && !memberSpec.IsExplicit )
                         {
@@ -371,7 +381,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     implementedInterfaceMembers.Add(
                                         new MemberImplementationResult(
                                             compilation,
-                                            memberSpec.InterfaceMember,
+                                            interfaceMember,
                                             InterfaceMemberImplementationOutcome.UseExisting,
                                             existingMethod ) );
 
@@ -404,14 +414,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         AddTransformationNoDuplicates(
                                             new OverrideMethodTransformation(
                                                 this,
-                                                existingMethod,
+                                                existingMethod.ToRef(),
                                                 templateMethod.AssertNotNull().ForOverride( existingMethod ),
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
                                             new MemberImplementationResult(
                                                 compilation,
-                                                memberSpec.InterfaceMember,
+                                                interfaceMember,
                                                 InterfaceMemberImplementationOutcome.Override,
                                                 existingMethod ) );
                                     }
@@ -457,6 +467,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                             var methodBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isIteratorMethod, isExplicit, isVirtual, isOverride );
 
                             CopyAttributes( interfaceMethod, methodBuilder );
+                            methodBuilder.Freeze();
 
                             AddTransformationNoDuplicates( methodBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceMethod, methodBuilder );
@@ -466,7 +477,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 AddTransformationNoDuplicates(
                                     new OverrideMethodTransformation(
                                         this,
-                                        methodBuilder,
+                                        methodBuilder.ToRef(),
                                         templateMethod.ForIntroduction( methodBuilder ),
                                         mergedTags ) );
                             }
@@ -475,14 +486,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 AddTransformationNoDuplicates(
                                     new RedirectMethodTransformation(
                                         this,
-                                        methodBuilder,
-                                        (IMethod) memberSpec.TargetMember.AssertNotNull() ) );
+                                        methodBuilder.ToRef(),
+                                        memberSpec.TargetMember.AssertNotNull().As<IMethod>() ) );
                             }
 
                             implementedInterfaceMembers.Add(
                                 new MemberImplementationResult(
                                     compilation,
-                                    memberSpec.InterfaceMember,
+                                    interfaceMember,
                                     InterfaceMemberImplementationOutcome.Introduce,
                                     methodBuilder ) );
                         }
@@ -492,7 +503,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case IProperty interfaceProperty:
                         var existingProperty = targetType.Properties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
                         var templateProperty = memberSpec.Template?.Cast<IProperty>();
-                        var redirectionTargetProperty = (IProperty?) memberSpec.TargetMember;
+                        var redirectionTargetProperty = memberSpec.TargetMember?.As<IProperty>().GetTarget(context.Compilation);
 
                         if ( existingProperty != null && !memberSpec.IsExplicit )
                         {
@@ -505,7 +516,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     implementedInterfaceMembers.Add(
                                         new MemberImplementationResult(
                                             compilation,
-                                            memberSpec.InterfaceMember,
+                                            interfaceMember,
                                             InterfaceMemberImplementationOutcome.UseExisting,
                                             existingProperty ) );
 
@@ -540,7 +551,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         AddTransformationNoDuplicates(
                                             new OverridePropertyTransformation(
                                                 this,
-                                                existingProperty,
+                                                existingProperty.ToRef(),
                                                 existingProperty.GetMethod != null ? accessorTemplates.Get?.ForOverride( existingProperty.GetMethod ) : null,
                                                 existingProperty.SetMethod != null ? accessorTemplates.Set?.ForOverride( existingProperty.SetMethod ) : null,
                                                 mergedTags ) );
@@ -548,7 +559,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         implementedInterfaceMembers.Add(
                                             new MemberImplementationResult(
                                                 compilation,
-                                                memberSpec.InterfaceMember,
+                                                interfaceMember,
                                                 InterfaceMemberImplementationOutcome.Override,
                                                 existingProperty ) );
                                     }
@@ -682,14 +693,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 {
                                     CopyAttributes(
                                         templateProperty.Declaration.GetMethod.AssertNotNull(),
-                                        (DeclarationBuilder) propertyBuilder.GetMethod.AssertNotNull() );
+                                        propertyBuilder.GetMethod.AssertNotNull() );
                                 }
 
                                 if ( hasSetter )
                                 {
                                     CopyAttributes(
                                         templateProperty.Declaration.SetMethod.AssertNotNull(),
-                                        (DeclarationBuilder) propertyBuilder.SetMethod.AssertNotNull() );
+                                        propertyBuilder.SetMethod.AssertNotNull() );
                                 }
 
                                 if ( isAutoProperty )
@@ -698,6 +709,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 }
                             }
 
+                            propertyBuilder.Freeze();
                             AddTransformationNoDuplicates( propertyBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceProperty, propertyBuilder );
 
@@ -710,7 +722,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     AddTransformationNoDuplicates(
                                         new OverridePropertyTransformation(
                                             this,
-                                            propertyBuilder,
+                                            propertyBuilder.ToRef(),
                                             propertyBuilder.GetMethod != null ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod ) : null,
                                             propertyBuilder.SetMethod != null ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod ) : null,
                                             mergedTags ) );
@@ -728,14 +740,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 AddTransformationNoDuplicates(
                                     new RedirectPropertyTransformation(
                                         this,
-                                        propertyBuilder,
-                                        redirectionTargetProperty.AssertNotNull() ) );
+                                        propertyBuilder.ToRef(),
+                                        redirectionTargetProperty.ToRef() ) );
                             }
 
                             implementedInterfaceMembers.Add(
                                 new MemberImplementationResult(
                                     compilation,
-                                    memberSpec.InterfaceMember,
+                                    interfaceMember,
                                     InterfaceMemberImplementationOutcome.Introduce,
                                     propertyBuilder ) );
                         }
@@ -761,7 +773,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     implementedInterfaceMembers.Add(
                                         new MemberImplementationResult(
                                             compilation,
-                                            memberSpec.InterfaceMember,
+                                            interfaceMember,
                                             InterfaceMemberImplementationOutcome.UseExisting,
                                             existingEvent ) );
 
@@ -796,7 +808,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         AddTransformationNoDuplicates(
                                             new OverrideEventTransformation(
                                                 this,
-                                                existingEvent,
+                                                existingEvent.ToRef(),
                                                 accessorTemplates.Add?.ForOverride( existingEvent.AddMethod ),
                                                 accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod ),
                                                 mergedTags ) );
@@ -804,7 +816,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         implementedInterfaceMembers.Add(
                                             new MemberImplementationResult(
                                                 compilation,
-                                                memberSpec.InterfaceMember,
+                                                interfaceMember,
                                                 InterfaceMemberImplementationOutcome.Override,
                                                 existingEvent ) );
                                     }
@@ -858,8 +870,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                             if ( templateEvent != null )
                             {
                                 CopyAttributes( templateEvent.Declaration, eventBuilder );
-                                CopyAttributes( templateEvent.Declaration.AssertNotNull(), (DeclarationBuilder) eventBuilder.AddMethod.AssertNotNull() );
-                                CopyAttributes( templateEvent.Declaration.AssertNotNull(), (DeclarationBuilder) eventBuilder.RemoveMethod.AssertNotNull() );
+                                CopyAttributes( templateEvent.Declaration.AssertNotNull(), eventBuilder.AddMethod.AssertNotNull() );
+                                CopyAttributes( templateEvent.Declaration.AssertNotNull(), eventBuilder.RemoveMethod.AssertNotNull() );
                             }
 
                             AddTransformationNoDuplicates( eventBuilder.ToTransformation() );
@@ -874,7 +886,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     AddTransformationNoDuplicates(
                                         new OverrideEventTransformation(
                                             this,
-                                            eventBuilder,
+                                            eventBuilder.ToRef(),
                                             accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod ),
                                             accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod ),
                                             mergedTags ) );
@@ -894,14 +906,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 AddTransformationNoDuplicates(
                                     new RedirectEventTransformation(
                                         this,
-                                        eventBuilder,
+                                        eventBuilder.ToRef(),
                                         redirectionTargetEvent.AssertNotNull() ) );
                             }
 
                             implementedInterfaceMembers.Add(
                                 new MemberImplementationResult(
                                     compilation,
-                                    memberSpec.InterfaceMember,
+                                    interfaceMember,
                                     InterfaceMemberImplementationOutcome.Introduce,
                                     eventBuilder ) );
                         }
@@ -909,7 +921,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                         break;
 
                     default:
-                        throw new AssertionFailedException( $"Unexpected kind of declaration: '{memberSpec.InterfaceMember}'." );
+                        throw new AssertionFailedException( $"Unexpected kind of declaration: '{interfaceMember}'." );
                 }
 
                 void CopyAttributes( IDeclaration interfaceMember, DeclarationBuilder builder )
@@ -929,7 +941,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             if ( !skipInterfaceBaseList )
             {
                 AddTransformationNoDuplicates(
-                    new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
+                    new IntroduceInterfaceTransformation( this, targetType.ToRef(), interfaceType.ToRef(), interfaceMemberMap ) );
             }
         }
 
@@ -1079,7 +1091,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         return propertyBuilder;
     }
 
-    private Location? GetDiagnosticLocation() => this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
+    private Location? GetDiagnosticLocation() => this.TargetDeclaration.GetDiagnosticLocation();
 
     private EventBuilder GetImplEventBuilder(
         INamedType declaringType,

@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             if ( (categories & ModifierCategories.Inheritance) != 0 )
             {
-                if ( member.HasModifier( SyntaxKind.NewKeyword ) )
+                if ( member.HasModifier( SyntaxKind.NewKeyword ) == true )
                 {
                     tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.NewKeyword ) );
                 }
@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ConstKeyword ) );
             }
 
-            if ( (categories & ModifierCategories.Unsafe) != 0 && member.HasModifier( SyntaxKind.UnsafeKeyword ) )
+            if ( (categories & ModifierCategories.Unsafe) != 0 && member.HasModifier( SyntaxKind.UnsafeKeyword ) == true )
             {
                 tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.UnsafeKeyword ) );
             }

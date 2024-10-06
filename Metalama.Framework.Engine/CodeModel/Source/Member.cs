@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         {
             if ( !this.CanBeInherited )
             {
-                return Enumerable.Empty<IDeclaration>();
+                return [];
             }
             else
             {

@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
@@ -99,6 +101,4 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
     }
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
-
-    protected override SyntaxKind AttributeTargetSyntaxKind => this.IsReturnParameter ? SyntaxKind.ReturnKeyword : SyntaxKind.None;
 }

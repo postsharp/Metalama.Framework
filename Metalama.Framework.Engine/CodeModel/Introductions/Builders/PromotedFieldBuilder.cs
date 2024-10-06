@@ -102,53 +102,9 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
         };
 
     public override SyntaxTree? PrimarySyntaxTree => this.OriginalSourceFieldOrFieldBuilder.PrimarySyntaxTree;
-
-    protected internal override bool GetPropertyInitializerExpressionOrMethod(
-        Advice advice,
-        MemberInjectionContext context,
-        out ExpressionSyntax? initializerExpression,
-        out MethodDeclarationSyntax? initializerMethod )
-    {
-        if ( this.OriginalSourceFieldOrFieldBuilder is FieldBuilder fieldBuilder )
-        {
-            return fieldBuilder.GetInitializerExpressionOrMethod(
-                fieldBuilder.ParentAdvice,
-                context,
-                this.Type,
-                fieldBuilder.InitializerExpression,
-                fieldBuilder.InitializerTemplate,
-                this.InitializerTags,
-                out initializerExpression,
-                out initializerMethod );
-        }
-        else
-        {
-            // For original code fields, copy the initializer syntax.
-            var fieldDeclaration = (VariableDeclaratorSyntax) this.OriginalSourceFieldOrFieldBuilder.GetPrimaryDeclarationSyntax().AssertNotNull();
-
-            if ( fieldDeclaration.Initializer != null )
-            {
-                initializerExpression = fieldDeclaration.Initializer.Value;
-            }
-            else if ( this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct
-                      && context.SyntaxGenerationContext.RequiresStructFieldInitialization )
-            {
-                // In structs in C# 10, we have to initialize all introduced fields.
-                initializerExpression = SyntaxFactoryEx.Default;
-            }
-            else
-            {
-                initializerExpression = null;
-            }
-
-            initializerMethod = null;
-
-            return true;
-        }
-    }
-
+    
     public override IInjectMemberTransformation ToTransformation()
-        => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalSourceFieldOrFieldBuilder, this );
+        => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalSourceFieldOrFieldBuilder, this.Immutable );
 
     public override bool Equals( IDeclaration? other )
         => ReferenceEquals( this, other ) || (other is PromotedFieldBuilder otherPromotedField

@@ -5,9 +5,11 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -49,7 +51,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public ConstructorBuilder( Advice advice, INamedType targetType )
         : base( advice, targetType, null! )
     {
-        this.InitializerArguments = new List<(IExpression Expression, string? ParameterName)>();
+        this.InitializerArguments = [];
     }
 
     public void AddInitializerArgument( IExpression expression, string? parameterName )
@@ -64,15 +66,6 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public override IMember? OverriddenMember => null;
 
     public override bool IsExplicitInterfaceImplementation => false;
-
-    public IInjectMemberTransformation ToTransformation()
-    {
-        this.Freeze();
-
-        return this.IsStatic
-            ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this )
-            : new IntroduceConstructorTransformation( this.ParentAdvice, this );
-    }
 
     // This is implemented by BuiltConstructor and there is no point in supporting it here.
     public IConstructor GetBaseConstructor() => throw new NotSupportedException();
@@ -97,7 +90,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public override MethodBase ToMethodBase() => this.ToConstructorInfo();
 
-    IRef<IConstructor> IConstructor.ToRef() => throw new NotSupportedException();
+    public IRef<IConstructor> ToRef() => this.Immutable.ToRef();
 
     public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
@@ -113,8 +106,15 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    
+    public  IInjectMemberTransformation ToTransformation()
+    {
 
-   
+        return this.IsStatic
+            ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this.Immutable )
+            : new IntroduceConstructorTransformation( this.ParentAdvice, this.Immutable);
+    }
+
 /*
     public override ICompilationElement? Translate(
         CompilationModel newCompilation,
@@ -122,4 +122,26 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         Type? interfaceType = null )
         => this.ReplacedImplicitConstructor?.Translate( newCompilation ) ?? base.Translate( newCompilation, genericContext );
         */
+
+    [Memo]
+    public ConstructorBuilderData Immutable => new ConstructorBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+
+}
+
+internal static class DeclarationBuilderExtensions
+{
+    public static T AssertFrozen<T>( this T declarationBuilder )
+        where T : DeclarationBuilder
+    {
+        #if DEBUG
+        if ( !declarationBuilder.IsFrozen )
+        {
+            throw new AssertionFailedException( $"The {declarationBuilder.GetType().Name} was expected to be frozen." );
+        }
+
+        return declarationBuilder;
+#else
+return declarationBuilder;
+#endif
+    }
 }

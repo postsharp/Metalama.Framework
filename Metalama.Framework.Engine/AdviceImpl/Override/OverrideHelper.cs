@@ -31,8 +31,10 @@ internal static class OverrideHelper
             case IField field:
                 {
                     var propertyBuilder = PromotedFieldBuilder.Create( serviceProvider, field, tags, advice );
+                    propertyBuilder.Freeze();
+                    
                     addTransformation( propertyBuilder.ToTransformation() );
-                    addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
+                    addTransformation( new OverridePropertyTransformation( advice, propertyBuilder.ToRef(), getTemplate, setTemplate, tags ) );
 
                     AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
 
@@ -41,7 +43,7 @@ internal static class OverrideHelper
 
             case IProperty property:
                 {
-                    addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
+                    addTransformation( new OverridePropertyTransformation( advice, property.ToRef(), getTemplate, setTemplate, tags ) );
 
                     if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
                     {

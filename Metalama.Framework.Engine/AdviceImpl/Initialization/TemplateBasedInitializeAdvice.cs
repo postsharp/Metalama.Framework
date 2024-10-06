@@ -29,8 +29,8 @@ internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
     {
         var initialization = new TemplateBasedInitializationTransformation(
             this,
-            targetDeclaration,
-            targetCtor,
+            targetDeclaration.ToRef(),
+            targetCtor.ToRef(),
             this._boundTemplate,
             this._tags );
 

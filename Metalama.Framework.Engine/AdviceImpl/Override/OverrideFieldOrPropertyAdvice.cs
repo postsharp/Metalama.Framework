@@ -29,23 +29,20 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
-    protected override OverrideMemberAdviceResult<IProperty> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IProperty> Implement( in AdviceImplementationContext context )
     {
         // TODO: Translate templates to this compilation.
         // TODO: order should be self if the target is introduced on the same layer.
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
         var promotedField = OverrideHelper.OverrideProperty(
-            serviceProvider,
+            context.ServiceProvider,
             this,
-            targetDeclaration.ForCompilation( compilation ).AssertNotNull(),
+            targetDeclaration,
             this._getTemplate,
             this._setTemplate,
             this.Tags,
-            addTransformation );
+            context.AddTransformation );
 
         return this.CreateSuccessResult( promotedField );
     }

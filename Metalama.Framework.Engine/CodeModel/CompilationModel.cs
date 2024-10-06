@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                return Enumerable.Empty<T>();
+                return [];
             }
         }
 
@@ -188,9 +188,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this.CompilationContext = partialCompilation.Compilation.GetCompilationContext();
 
             this._staticConstructors =
-                ImmutableDictionary<IRef<INamedType>, IConstructorBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
+                ImmutableDictionary<IRef<INamedType>, ConstructorBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
-            this._finalizers = ImmutableDictionary<IRef<INamedType>, IMethodBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
+            this._finalizers = ImmutableDictionary<IRef<INamedType>, MethodBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
             this.Annotations = annotations
                                ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty.WithKeyComparer(
@@ -275,16 +275,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 this.IsMutable = false;
 
-                // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allNewDeclarations =
                     observableTransformations
                         .OfType<IIntroduceDeclarationTransformation>()
-                        .SelectMany( t => t.DeclarationBuilder.GetContainedDeclarations() );
+                        .SelectMany( t => t.DeclarationBuilderData.GetOwnedDeclarations() );
 
-                // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allAttributes =
                     allNewDeclarations.SelectMany( c => c.Attributes )
-                        .Cast<AttributeBuilder>()
                         .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
                         .Select( a => new BuilderAttributeRef( a ) )
                         .ToReadOnlyList();
@@ -410,6 +407,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
         public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, DerivedTypesOptions options = default )
+        {
+            OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
+
+            return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType, options );
+        }
+        
+        public IEnumerable<IRef<INamedType>> GetDerivedTypes( IRef<INamedType> baseType, DerivedTypesOptions options = default )
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
@@ -576,7 +580,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => [];
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 

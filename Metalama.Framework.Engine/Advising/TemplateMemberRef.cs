@@ -34,7 +34,10 @@ internal readonly struct TemplateMemberRef
         this._interpretedKind = interpretedKind;
     }
 
-    public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, in ProjectServiceProvider serviceProvider )
+    public TemplateMember<T> GetTemplateMember<T>(
+        CompilationModel compilation,
+        in ProjectServiceProvider serviceProvider,
+        in TemplateProvider templateProvider )
         where T : class, IMemberOrNamedType
     {
         if ( this.IsNull )
@@ -77,7 +80,12 @@ internal readonly struct TemplateMemberRef
 
         if ( attribute is ITemplateAttribute templateAttribute )
         {
-            return TemplateMemberFactory.Create( typedSymbol, this._templateMember, templateAttribute, this._selectedKind, this._interpretedKind );
+            return TemplateMemberFactory.Create(
+                typedSymbol,
+                this._templateMember,
+                templateAttribute,
+                this._selectedKind,
+                this._interpretedKind );
         }
         else
         {

@@ -129,7 +129,7 @@ internal sealed class Attribute : IAttributeImpl
 
     SyntaxTree? IDeclarationImpl.PrimarySyntaxTree => this.AttributeData.ApplicationSyntaxReference?.SyntaxTree;
 
-    IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => Enumerable.Empty<IDeclaration>();
+    IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => [];
 
     public bool Equals( IDeclaration? other ) => other is Attribute attribute && this.AttributeData == attribute.AttributeData;
 

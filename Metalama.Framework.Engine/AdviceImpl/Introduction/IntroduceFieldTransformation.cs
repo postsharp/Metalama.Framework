@@ -1,9 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -13,23 +14,24 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilder>
+internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilderData>
 {
-    public IntroduceFieldTransformation( Advice advice, FieldBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceFieldTransformation( Advice advice, FieldBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-        var fieldBuilder = this.IntroducedDeclaration;
+        var fieldBuilder = this.BuilderData.ToRef().GetTarget(context.Compilation);
 
         // If template fails to expand, we will still generate the field, albeit without the initializer.
-        _ = fieldBuilder.GetInitializerExpressionOrMethod(
+        _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
+            fieldBuilder,
             this.ParentAdvice,
             context,
             fieldBuilder.Type,
             fieldBuilder.InitializerExpression,
-            fieldBuilder.InitializerTemplate,
-            fieldBuilder.InitializerTags,
+            this.BuilderData.InitializerTemplate,
+            this.BuilderData.InitializerTags,
             out var initializerExpression,
             out var initializerMethod );
 
@@ -43,7 +45,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
 
         var field =
             FieldDeclaration(
-                fieldBuilder.GetAttributeLists( context ),
+                AdviceSyntaxGenerator.GetAttributeLists( fieldBuilder, context ), 
                 fieldBuilder.GetSyntaxModifierList(),
                 VariableDeclaration(
                     syntaxGenerator.Type( fieldBuilder.Type )
@@ -58,20 +60,20 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
 
         if ( initializerMethod != null )
         {
-            return new[]
-            {
-                new InjectedMember( this, field, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, fieldBuilder ),
+            return
+            [
+                new InjectedMember( this, field, this.AspectLayerId, InjectedMemberSemantic.Introduction, this.BuilderData.ToRef() ),
                 new InjectedMember(
                     this,
                     initializerMethod,
-                    this.ParentAdvice.AspectLayerId,
+                    this.AspectLayerId,
                     InjectedMemberSemantic.InitializerMethod,
-                    fieldBuilder )
-            };
+                    this.BuilderData.ToRef() )
+            ];
         }
         else
         {
-            return new[] { new InjectedMember( this, field, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, fieldBuilder ) };
+            return [new InjectedMember( this, field, this.AspectLayerId, InjectedMemberSemantic.Introduction, this.BuilderData.ToRef() )];
         }
     }
 }

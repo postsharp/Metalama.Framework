@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Immutable;
 
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class AttributeBuilderData : DeclarationBuilderData
 {
+    private DeclarationBuilderDataRef<IAttribute> _ref;
     public IRef<INamedType> Type { get; }
     public IRef<IConstructor> Constructor { get; }
 
@@ -19,6 +21,7 @@ internal class AttributeBuilderData : DeclarationBuilderData
     
     public AttributeBuilderData( AttributeBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
+        this._ref = new DeclarationBuilderDataRef<IAttribute>( this );
         this.Constructor = builder.AttributeConstruction.Constructor.ToRef();
         this.Type = builder.AttributeConstruction.Type.ToRef();
         this.ConstructorArguments = builder.AttributeConstruction.ConstructorArguments.ToImmutableArray();
@@ -27,12 +30,10 @@ internal class AttributeBuilderData : DeclarationBuilderData
         // TODO: TypedConstant can still leak a CompilationModel through its typeof(.) value.
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => throw new NotImplementedException();
+    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
-    public IRef<IAttribute> ToAttributeRef()
-    {
-        throw new NotImplementedException();
-    }
+    public IRef<IAttribute> ToRef() => this._ref;
+
 }

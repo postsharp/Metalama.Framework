@@ -345,7 +345,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             return (new TemplateExpansionContext(
                         serviceProvider,
-                        templateProvider,
                         metaApi,
                         lexicalScope,
                         syntaxGenerationContext,

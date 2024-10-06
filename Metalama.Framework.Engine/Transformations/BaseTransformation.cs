@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Introspection;
 using System;
 
@@ -15,13 +17,23 @@ internal abstract class BaseTransformation : ITransformation
         this.ParentAdvice = advice;
     }
 
+    public AspectLayerId AspectLayerId => this.ParentAdvice.AspectLayerId;
+
+    public IAspectInstanceInternal AspectInstance => this.ParentAdvice.AspectInstance;
+
+    /// <summary>
+    /// Gets the <see cref="CompilationModel"/> on which the templates should be executed.
+    /// </summary>
+    public CompilationModel OriginalCompilation => this.ParentAdvice.SourceCompilation;
+
     /// <summary>
     /// Gets the declaration that is transformed, or the declaration into which a new declaration is being introduced. 
     /// </summary>
-    public abstract IDeclaration TargetDeclaration { get; }
+    public abstract IRef<IDeclaration> TargetDeclaration { get; }
 
-    IAspectClass ITransformationBase.AspectClass => this.ParentAdvice.AspectInstance.AspectClass;
+    IAspectClass ITransformationBase.AspectClass => this.AspectInstance.AspectClass;
 
+    [Obsolete("We want to remove this relationship.")]
     public Advice ParentAdvice { get; }
 
     public int OrderWithinPipelineStepAndTypeAndAspectInstance { get; set; }
@@ -34,5 +46,5 @@ internal abstract class BaseTransformation : ITransformation
 
     public abstract IntrospectionTransformationKind TransformationKind { get; }
 
-    public abstract FormattableString ToDisplayString();
+    public abstract FormattableString ToDisplayString( CompilationModel compilation );
 }

@@ -16,24 +16,20 @@ namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransformation, IIntroduceDeclarationTransformation
 {
-    public AttributeBuilder AttributeBuilder { get; }
+    public AttributeBuilderData AttributeBuilder { get; }
 
-    public IntroduceAttributeTransformation( Advice advice, AttributeBuilder attributeBuilder ) : base( advice )
+    public IntroduceAttributeTransformation( Advice advice, AttributeBuilderData attributeBuilder ) : base( advice )
     {
         this.AttributeBuilder = attributeBuilder;
     }
 
-    public override IDeclaration TargetDeclaration => this.AttributeBuilder.ContainingDeclaration;
+    public override IRef<IDeclaration> TargetDeclaration => this.AttributeBuilder.ContainingDeclaration;
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceAttribute;
 
-    public IDeclarationBuilder DeclarationBuilder => this.AttributeBuilder;
-
-    public override SyntaxTree TransformedSyntaxTree
-        => this.DeclarationBuilder.ContainingDeclaration.AssertNotNull().GetPrimarySyntaxTree()
-           ?? ((CompilationModel) this.DeclarationBuilder.Compilation).PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
-
-    public override FormattableString ToDisplayString() => $"Introduce attribute of type '{this.AttributeBuilder.Type}' into '{this.TargetDeclaration}'";
+    public DeclarationBuilderData DeclarationBuilderData => this.AttributeBuilder;
+    
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce attribute of type '{this.AttributeBuilder.Type}' into '{this.TargetDeclaration}'";
 }

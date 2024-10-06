@@ -31,7 +31,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
             return this.Invoke( expressionArgs );
         }
 
-        args ??= Array.Empty<object>();
+        args ??= [];
 
         var parametersCount = this.Member.Parameters.Count;
 

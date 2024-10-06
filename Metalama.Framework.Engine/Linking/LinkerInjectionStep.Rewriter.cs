@@ -197,7 +197,7 @@ internal sealed partial class LinkerInjectionStep
                             if ( wasFirstList )
                             {
                                 // Trivia preceding the first attribute list needs to before the first final attribute list.
-                                targetList = firstListLeadingTrivia ??= new List<SyntaxTrivia>();
+                                targetList = firstListLeadingTrivia ??= [];
                             }
                             else
                             {
@@ -489,16 +489,16 @@ internal sealed partial class LinkerInjectionStep
                 injectedNode = injectedNode
                     .WithOptionalLeadingTrivia( syntaxGenerationContext.TwoElasticEndOfLinesTriviaList, syntaxGenerationContext.Options )
                     .WithGeneratedCodeAnnotation(
-                        injectedMember.Transformation?.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation
+                        injectedMember.Transformation?.AspectInstance.AspectClass.GeneratedCodeAnnotation
                         ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                 switch ( injectedNode )
                 {
                     case ConstructorDeclarationSyntax constructorDeclaration:
                         {
-                            if ( injectedMember.DeclarationBuilder != null &&
+                            if ( injectedMember.BuilderData != null &&
                                  this._transformationCollection.TryGetMemberLevelTransformations(
-                                     injectedMember.DeclarationBuilder.AssertNotNull(),
+                                     injectedMember.BuilderData.AssertNotNull(),
                                      out var memberLevelTransformations ) )
                             {
                                 injectedNode = this.ApplyMemberLevelTransformations(
@@ -511,7 +511,7 @@ internal sealed partial class LinkerInjectionStep
                         }
 
                     case PropertyDeclarationSyntax propertyDeclaration:
-                        if ( injectedMember.DeclarationBuilder is IPropertyBuilder propertyBuilder
+                        if ( injectedMember.BuilderData is IPropertyBuilder propertyBuilder
                              && this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( propertyBuilder ) )
                         {
                             switch ( injectedMember )
@@ -538,7 +538,7 @@ internal sealed partial class LinkerInjectionStep
 
                     case TypeDeclarationSyntax typeDeclaration:
 
-                        var typeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
+                        var typeBuilder = (NamedTypeBuilder) injectedMember.BuilderData.AssertNotNull();
                         var injectedTypeMembers = new List<MemberDeclarationSyntax>();
 
                         this.AddInjectionsOnPosition(
@@ -555,7 +555,7 @@ internal sealed partial class LinkerInjectionStep
                     case NamespaceDeclarationSyntax namespaceDeclaration:
                         // This handles named types injected into a namespace.
 
-                        var namespaceTypeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
+                        var namespaceTypeBuilder = (NamedTypeBuilder) injectedMember.BuilderData.AssertNotNull();
                         var injectedNamedTypeMembers = new List<MemberDeclarationSyntax>();
 
                         this.AddInjectionsOnPosition(
@@ -857,7 +857,7 @@ internal sealed partial class LinkerInjectionStep
         {
             static MemberDeclarationSyntax[] Singleton( MemberDeclarationSyntax m )
             {
-                return new[] { m };
+                return [m];
             }
 
             return member switch
@@ -1056,7 +1056,7 @@ internal sealed partial class LinkerInjectionStep
                 {
                     if ( rewrittenVariables.Count > 0 )
                     {
-                        return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
+                        return [node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) )];
                     }
                     else
                     {
@@ -1065,7 +1065,7 @@ internal sealed partial class LinkerInjectionStep
                 }
                 else
                 {
-                    return new[] { node };
+                    return [node];
                 }
             }
         }
@@ -1363,15 +1363,15 @@ internal sealed partial class LinkerInjectionStep
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists, node );
                 node = this.ReplaceAttributes( node, rewrittenAttributes );
 
-                return new[] { node };
+                return [node];
             }
         }
 
         public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
         {
             SyntaxGenerationContext? syntaxGenerationContext = null;
-            List<AttributeListSyntax> outputLists = new();
-            List<SyntaxTrivia> outputTrivias = new();
+            List<AttributeListSyntax> outputLists = [];
+            List<SyntaxTrivia> outputTrivias = [];
 
             this.RewriteAttributeLists(
                 this._compilation.ToRef(),

@@ -12,7 +12,7 @@ internal interface IReplaceMemberTransformation : ITransformation
     /// <summary>
     /// Gets a member that is replaced by this transformation or <c>null</c> if the transformation does not replace any member.
     /// </summary>
-    IMember? ReplacedMember { get; }
+    IRef<IMember>? ReplacedMember { get; }
 
     // ReplacedMember must not be a reference because resolving the reference would returned the replacement, not the original member.
 }

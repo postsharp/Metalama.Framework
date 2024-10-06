@@ -20,5 +20,5 @@ internal interface IInsertStatementTransformation : ISyntaxTreeTransformation
     /// <summary>
     /// Gets the member that statements will be inserted into (may differ from <see cref="ITransformationBase.TargetDeclaration"/> e.g. for builders).
     /// </summary>
-    IMember TargetMember { get; }
+    IRef<IMember> TargetMember { get; }
 }

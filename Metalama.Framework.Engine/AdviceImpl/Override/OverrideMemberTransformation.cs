@@ -19,13 +19,13 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 {
     protected IObjectReader Tags { get; }
 
-    public IMember OverriddenDeclaration { get; }
+    public IRef<IMember> OverriddenDeclaration { get; }
 
-    IDeclaration IOverrideDeclarationTransformation.OverriddenDeclaration => this.OverriddenDeclaration;
+    IRef<IDeclaration> IOverrideDeclarationTransformation.OverriddenDeclaration => this.OverriddenDeclaration;
 
-    public override IDeclaration TargetDeclaration => this.OverriddenDeclaration;
+    public override IRef<IDeclaration> TargetDeclaration => this.OverriddenDeclaration;
 
-    protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags ) : base( advice )
+    protected OverrideMemberTransformation( Advice advice, IRef<IMember> overriddenDeclaration, IObjectReader tags ) : base( advice )
     {
         Invariant.Assert( advice != null! );
         Invariant.Assert( overriddenDeclaration != null! );
@@ -36,14 +36,14 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 
     public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
-    protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
-        => ProceedHelper.CreateMemberAccessExpression( this.OverriddenDeclaration, this.ParentAdvice.AspectLayerId, referenceTargetKind, generationContext );
+    protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, MemberInjectionContext context )
+        => ProceedHelper.CreateMemberAccessExpression( this.OverriddenDeclaration.GetTarget(context.Compilation), this.AspectLayerId, referenceTargetKind, context.SyntaxGenerationContext );
 
     public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
-    public override FormattableString ToDisplayString() => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration}'";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration}'";
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.OverrideMember;
 }

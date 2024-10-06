@@ -18,19 +18,16 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
 {
     private readonly InitializerKind _kind;
 
-    private new IRef<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
+    private new IMemberOrNamedType TargetDeclaration => (IMemberOrNamedType) base.TargetDeclaration;
 
     protected InitializeAdvice( AdviceConstructorParameters<IMemberOrNamedType> parameters, InitializerKind kind ) : base( parameters )
     {
         this._kind = kind;
     }
 
-    protected override AddInitializerAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddInitializerAdviceResult Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
         var containingType = targetDeclaration.GetClosestNamedType().AssertNotNull();
 
@@ -54,8 +51,9 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
                 var staticConstructorBuilder =
                     new ConstructorBuilder( this, containingType ) { IsStatic = true, ReplacedImplicitConstructor = staticConstructor };
 
+                staticConstructorBuilder.Freeze();
                 staticConstructor = staticConstructorBuilder;
-                addTransformation( staticConstructorBuilder.ToTransformation() );
+                context.AddTransformation( staticConstructorBuilder.ToTransformation() );
             }
         }
         else
@@ -66,11 +64,11 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
         var constructors =
             targetDeclaration switch
             {
-                IConstructor constructor => new[] { constructor },
+                IConstructor constructor => [constructor],
                 INamedType => this._kind switch
                 {
                     InitializerKind.BeforeTypeConstructor =>
-                        new[] { staticConstructor.AssertNotNull() },
+                        [staticConstructor.AssertNotNull()],
                     InitializerKind.BeforeInstanceConstructor =>
                         containingType.Constructors
                             .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
@@ -89,7 +87,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
                 var builder =
                     new ConstructorBuilder( this, ctor.DeclaringType ) { ReplacedImplicitConstructor = ctor, Accessibility = Accessibility.Public };
 
-                addTransformation( builder.ToTransformation() );
+                context.AddTransformation( builder.ToTransformation() );
                 targetCtor = builder;
             }
             else
@@ -97,7 +95,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
                 targetCtor = ctor;
             }
 
-            this.AddTransformation( targetDeclaration, targetCtor, addTransformation );
+            this.AddTransformation( targetDeclaration, targetCtor, context.AddTransformation );
         }
 
         return new AddInitializerAdviceResult { AdviceKind = this.AdviceKind };

@@ -129,14 +129,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext(
         TransformationContext transformationContext,
-        TemplateProvider templateProvider,
         MetaApi metaApi,
         IDeclaration declarationForLexicalScope,
         BoundTemplateMethod? template,
         Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : this(
         transformationContext.ServiceProvider,
-        templateProvider,
         metaApi,
         transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope ),
         transformationContext.SyntaxGenerationContext,
@@ -146,7 +144,6 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext(
         ProjectServiceProvider serviceProvider,
-        TemplateProvider templateProvider,
         MetaApi metaApi,
         TemplateLexicalScope lexicalScope,
         SyntaxGenerationContext syntaxGenerationContext,
@@ -167,7 +164,6 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         metaApi: metaApi )
     {
         this._template = template?.TemplateMember;
-        this.TemplateProvider = templateProvider;
         this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext, metaApi.Type );
         this.SyntaxGenerationContext = syntaxGenerationContext;
@@ -207,7 +203,6 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private TemplateExpansionContext( TemplateExpansionContext prototype, LocalFunctionInfo localFunctionInfo ) : base( prototype )
     {
         this._template = prototype._template;
-        this.TemplateProvider = prototype.TemplateProvider;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
@@ -219,11 +214,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
-    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template, TemplateProvider templateProvider ) : base(
-        prototype )
+    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template ) : base( prototype )
     {
         this._template = template;
-        this.TemplateProvider = templateProvider.IsNull ? prototype.TemplateProvider : templateProvider;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
@@ -235,7 +228,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
     }
 
-    public TemplateProvider TemplateProvider { get; }
+    public TemplateProvider TemplateProvider => this._template.AssertNotNull().TemplateProvider;
 
     public SyntaxSerializationService SyntaxSerializationService { get; }
 
@@ -637,8 +630,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
 
-    internal TemplateExpansionContext ForTemplate( TemplateMember<IMethod> template, TemplateProvider templateProvider )
-        => new( this, template, templateProvider );
+    internal TemplateExpansionContext ForTemplate( TemplateMember<IMethod> template, TemplateProvider templateProvider ) => new( this, template );
 
     internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
     {

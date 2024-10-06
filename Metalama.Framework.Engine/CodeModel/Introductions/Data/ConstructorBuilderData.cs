@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
@@ -37,7 +38,7 @@ internal class ConstructorBuilderData : MemberBuilderData
         this.Parameters = builder.Parameters.ToImmutable( this._ref );
         this.ReplacedImplicitConstructor = builder.ReplacedImplicitConstructor?.ToRef();
         this.InitializerKind = builder.InitializerKind;
-        this.InitializerArguments = builder.InitializerArguments.ToImmutableArray();
+        this.InitializerArguments = ImmutableArray.ToImmutableArray( builder.InitializerArguments );
     }
 
     
@@ -46,5 +47,5 @@ internal class ConstructorBuilderData : MemberBuilderData
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => [];
 
-    
+    public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations() => base.GetOwnedDeclarations().Concat( this.Parameters );
 }

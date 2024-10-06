@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class AddAnnotationTransformation : BaseTransformation
 {
-    public AddAnnotationTransformation( AddAnnotationAdvice advice, IDeclaration declaration, AnnotationInstance annotationInstance ) : base( advice )
+    public AddAnnotationTransformation( AddAnnotationAdvice advice, IRef<IDeclaration> declaration, AnnotationInstance annotationInstance ) : base( advice )
     {
         this.TargetDeclaration = declaration;
         this.AnnotationInstance = annotationInstance;
@@ -18,11 +18,11 @@ internal sealed class AddAnnotationTransformation : BaseTransformation
 
     public AnnotationInstance AnnotationInstance { get; }
 
-    public override IDeclaration TargetDeclaration { get; }
+    public override IRef<IDeclaration> TargetDeclaration { get; }
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.AddAnnotation;
 
-    public override FormattableString ToDisplayString() => $"Adding annotation '{this.AnnotationInstance}' to '{this.TargetDeclaration}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Adding annotation '{this.AnnotationInstance}' to '{this.TargetDeclaration}'.";
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 }

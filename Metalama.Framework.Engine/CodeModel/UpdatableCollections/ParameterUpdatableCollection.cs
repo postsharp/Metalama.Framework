@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
@@ -39,7 +40,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuiltDeclarationRef { BuilderData: IMethodBaseBuilder builder }:
+            case IBuiltDeclarationRef { BuilderData: MethodBuilderData builder }:
                 foreach ( var p in builder.Parameters )
                 {
                     action( this.RefFactory.FromBuilderData<IParameter>( p ) );
@@ -47,7 +48,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuiltDeclarationRef { BuilderData: IIndexerBuilder indexerBuilder }:
+            case IBuiltDeclarationRef { BuilderData: IndexerBuilderData indexerBuilder }:
                 foreach ( var p in indexerBuilder.Parameters )
                 {
                     action( this.RefFactory.FromBuilderData<IParameter>( p ) );
@@ -60,7 +61,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
         }
     }
 
-    public void Add( IParameterBuilder parameterBuilder )
+    public void Add( ParameterBuilderData parameterBuilder )
     {
         this.EnsureComplete();
 

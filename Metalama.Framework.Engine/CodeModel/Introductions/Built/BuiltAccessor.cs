@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -109,7 +110,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     [Memo]
     public IParameter ReturnParameter
-        => new BuiltParameter( (BaseParameterBuilder) this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );
+        => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );
 
     [Memo]
     public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
@@ -139,7 +140,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public override IDeclaration? ContainingDeclaration => this._builtMember;
 
-    public System.Reflection.MethodBase ToMethodBase() => this._accessorBuilder.ToMethodBase();
+    public System.Reflection.MethodBase ToMethodBase() => CompileTimeMethodInfo.Create(  this );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
@@ -156,7 +157,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     {
         if ( !this.CanBeInherited )
         {
-            return Enumerable.Empty<IDeclaration>();
+            return [];
         }
         else
         {

@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -12,14 +13,14 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 {
     public IAspectInstanceInternal AspectInstance { get; }
 
-    public TemplateClassInstance TemplateInstance { get; }
+    protected TemplateClassInstance TemplateInstance { get; }
 
-    public IRef<IDeclaration> TargetDeclaration { get; }
+    public IDeclaration TargetDeclaration { get; }
 
     /// <summary>
     /// Gets the compilation from which the advice was instantiated.
     /// </summary>
-    public ICompilation SourceCompilation { get; }
+    public CompilationModel SourceCompilation { get; }
 
     public AspectLayerId AspectLayerId { get; }
 
@@ -35,7 +36,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 #endif
         this.AspectInstance = parameters.AspectInstance;
         this.TemplateInstance = parameters.TemplateInstance;
-        this.TargetDeclaration = parameters.TargetDeclaration.AssertNotNull().ToRef();
+        this.TargetDeclaration = parameters.TargetDeclaration;
         this.SourceCompilation = parameters.SourceCompilation;
         this.AspectLayerId = new AspectLayerId( this.AspectInstance.AspectClass, parameters.LayerName );
     }
@@ -55,7 +56,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
         IAspectInstanceInternal AspectInstance,
         TemplateClassInstance TemplateInstance,
         IDeclaration TargetDeclaration,
-        ICompilation SourceCompilation,
+        CompilationModel SourceCompilation,
         string? LayerName );
 
     /// <summary>
@@ -63,16 +64,16 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
     /// </summary>
     public record struct AdviceConstructorParameters<T>(
         IAspectInstanceInternal AspectInstance,
-        TemplateClassInstance TemplateInstance,
+        TemplateClassInstance TemplateClassInstance,
         T TargetDeclaration,
-        ICompilation SourceCompilation,
+        CompilationModel SourceCompilation,
         string? LayerName )
         where T : IDeclaration
     {
         public static implicit operator AdviceConstructorParameters( AdviceConstructorParameters<T> parameters )
             => new(
                 parameters.AspectInstance,
-                parameters.TemplateInstance,
+                parameters.TemplateClassInstance,
                 parameters.TargetDeclaration,
                 parameters.SourceCompilation,
                 parameters.LayerName );

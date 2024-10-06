@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true ) };
+                    return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true )];
                 }
                 else
                 {
@@ -74,28 +74,28 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Event field indicates explicit interface implementation with event field template.
 
-                return new MemberDeclarationSyntax[]
-                {
+                return
+                [
                     this.GetEventBackingField( eventDeclaration, symbol, context ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true )
-                };
+                ];
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
             {
                 Invariant.Assert( symbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } );
 
-                return new[]
-                {
+                return
+                [
                     this.GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), context ),
                     this.GetOriginalImplEvent( eventDeclaration, symbol, context )
-                };
+                ];
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, false ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, false )];
             }
             else
             {
-                return new[] { eventDeclaration };
+                return [eventDeclaration];
             }
 
             EventDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isOverrideOrOverrideTarget )
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithAccessorList(
                         AccessorList(
                             Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
-                            List( new[] { transformedAdd, transformedRemove } ),
+                            List( [transformedAdd, transformedRemove] ),
                             Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) ) );
             }
 

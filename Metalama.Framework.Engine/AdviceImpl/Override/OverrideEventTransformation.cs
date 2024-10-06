@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal sealed class OverrideEventTransformation : OverrideMemberTransformation
 {
-    private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
+    private new IRef<IEvent> OverriddenDeclaration => (IRef<IEvent>) base.OverriddenDeclaration;
 
     private BoundTemplateMethod? AddTemplate { get; }
 
@@ -32,7 +32,7 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
 
     public OverrideEventTransformation(
         Advice advice,
-        IEvent overriddenDeclaration,
+        IRef<IEvent> overriddenDeclaration,
         BoundTemplateMethod? addTemplate,
         BoundTemplateMethod? removeTemplate,
         IObjectReader tags )
@@ -44,10 +44,12 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+
         var eventName = context.InjectionNameProvider.GetOverrideName(
-            this.OverriddenDeclaration.DeclaringType,
-            this.ParentAdvice.AspectLayerId,
-            this.OverriddenDeclaration );
+            overriddenDeclaration.DeclaringType,
+            this.AspectLayerId,
+            overriddenDeclaration );
 
         var templateExpansionError = false;
         BlockSyntax? addAccessorBody = null;
@@ -57,13 +59,13 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
             templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                 context,
                 this.AddTemplate,
-                this.OverriddenDeclaration.AddMethod,
-                context.SyntaxGenerationContext,
+                overriddenDeclaration.AddMethod,
+                overriddenDeclaration,
                 out addAccessorBody );
         }
         else
         {
-            addAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.AddAccessorDeclaration, context.SyntaxGenerationContext );
+            addAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.AddAccessorDeclaration, context );
         }
 
         BlockSyntax? removeAccessorBody = null;
@@ -73,22 +75,22 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
             templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                 context,
                 this.RemoveTemplate,
-                this.OverriddenDeclaration.RemoveMethod,
-                context.SyntaxGenerationContext,
+                overriddenDeclaration.RemoveMethod,
+                overriddenDeclaration,
                 out removeAccessorBody );
         }
         else
         {
-            removeAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.RemoveAccessorDeclaration, context.SyntaxGenerationContext );
+            removeAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.RemoveAccessorDeclaration, context );
         }
 
         if ( templateExpansionError )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
-        var modifiers = this.OverriddenDeclaration
+        var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
@@ -101,28 +103,27 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
                     List<AttributeListSyntax>(),
                     modifiers,
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                    context.SyntaxGenerator.EventType( this.OverriddenDeclaration )
+                    context.SyntaxGenerator.EventType( overriddenDeclaration )
                         .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null!,
                     Identifier( eventName ),
                     AccessorList(
                         List(
-                            new[]
-                            {
-                                AccessorDeclaration(
+                        [
+                            AccessorDeclaration(
                                     SyntaxKind.AddAccessorDeclaration,
                                     List<AttributeListSyntax>(),
-                                    this.OverriddenDeclaration.AddMethod.AssertNotNull().GetSyntaxModifierList(),
+                                    overriddenDeclaration.AddMethod.AssertNotNull().GetSyntaxModifierList(),
                                     addAccessorBody.AssertNotNull() ),
                                 AccessorDeclaration(
                                     SyntaxKind.RemoveAccessorDeclaration,
                                     List<AttributeListSyntax>(),
-                                    this.OverriddenDeclaration.RemoveMethod.AssertNotNull().GetSyntaxModifierList(),
+                                    overriddenDeclaration.RemoveMethod.AssertNotNull().GetSyntaxModifierList(),
                                     removeAccessorBody.AssertNotNull() )
-                            } ) ) ),
-                this.ParentAdvice.AspectLayerId,
+                        ] ) ) ),
+                this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
+                overriddenDeclaration.ToRef() )
         };
 
         return overrides;
@@ -132,42 +133,41 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
         MemberInjectionContext context,
         BoundTemplateMethod accessorTemplate,
         IMethod accessor,
-        SyntaxGenerationContext generationContext,
+        IEvent overriddenDeclaration,
         [NotNullWhen( true )] out BlockSyntax? body )
     {
         var proceedExpression = new SyntaxUserExpression(
             accessor.MethodKind switch
             {
-                MethodKind.EventAdd => this.CreateAddExpression( generationContext ),
-                MethodKind.EventRemove => this.CreateRemoveExpression( generationContext ),
+                MethodKind.EventAdd => this.CreateAddExpression( context ),
+                MethodKind.EventRemove => this.CreateRemoveExpression( context ),
                 _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
             },
-            this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType );
+            context.Compilation.Cache.SystemVoidType );
 
         var metaApi = MetaApi.ForEvent(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             accessor,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.OriginalCompilation,
                 context.DiagnosticSink,
                 accessorTemplate.TemplateMember.Cast(),
                 this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
             accessor,
             accessorTemplate,
             _ => proceedExpression,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
+        var templateDriver = accessorTemplate.TemplateMember.Driver;
 
         return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
     }
@@ -175,30 +175,30 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
     /// </summary>
-    private BlockSyntax CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
+    private BlockSyntax CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, MemberInjectionContext context )
     {
         switch ( accessorDeclarationKind )
         {
             case SyntaxKind.AddAccessorDeclaration:
-                return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
+                return context.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateAddExpression( context ) ) );
 
             case SyntaxKind.RemoveAccessorDeclaration:
-                return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
+                return context.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( context ) ) );
 
             default:
                 throw new AssertionFailedException( $"Unexpected syntax kind: {accessorDeclarationKind}." );
         }
     }
 
-    private ExpressionSyntax CreateAddExpression( SyntaxGenerationContext generationContext )
+    private ExpressionSyntax CreateAddExpression( MemberInjectionContext context )
         => AssignmentExpression(
             SyntaxKind.AddAssignmentExpression,
-            this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor, generationContext ),
+            this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventAddAccessor, context ),
             IdentifierName( "value" ) );
 
-    private ExpressionSyntax CreateRemoveExpression( SyntaxGenerationContext generationContext )
+    private ExpressionSyntax CreateRemoveExpression( MemberInjectionContext context )
         => AssignmentExpression(
             SyntaxKind.SubtractAssignmentExpression,
-            this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor, generationContext ),
+            this.CreateMemberAccessExpression( AspectReferenceTargetKind.EventRemoveAccessor, context ),
             IdentifierName( "value" ) );
 }

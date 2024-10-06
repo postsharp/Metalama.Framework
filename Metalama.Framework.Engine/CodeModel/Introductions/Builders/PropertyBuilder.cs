@@ -8,9 +8,11 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -70,9 +72,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public virtual IInjectMemberTransformation ToTransformation()
     {
-        this.Freeze();
-
-        return new IntroducePropertyTransformation( this.ParentAdvice, this );
+        return new IntroducePropertyTransformation( this.ParentAdvice, this.Immutable );
     }
 
     public IExpression? InitializerExpression
@@ -131,7 +131,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
         this.IsAutoPropertyOrField = isAutoProperty;
         this.InitializerTags = initializerTags;
         this.HasInitOnlySetter = hasInitOnlySetter;
-        this._fieldAttributes = new List<IAttributeData>();
+        this._fieldAttributes = [];
     }
 
     public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
@@ -140,24 +140,13 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public bool IsRequired { get; set; }
 
-    public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
+    public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = [interfaceProperty];
 
-    protected internal virtual bool GetPropertyInitializerExpressionOrMethod(
-        Advice advice,
-        MemberInjectionContext context,
-        out ExpressionSyntax? initializerExpression,
-        out MethodDeclarationSyntax? initializerMethod )
-        => this.GetInitializerExpressionOrMethod(
-            advice,
-            context,
-            this.Type,
-            this.InitializerExpression,
-            this.InitializerTemplate,
-            this.InitializerTags,
-            out initializerExpression,
-            out initializerMethod );
+    public IRef<IProperty> ToRef() => this.Immutable.ToRef();
 
-    IRef<IProperty> IProperty.ToRef() => throw new NotSupportedException();
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => throw new NotSupportedException();
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
+    
+    [Memo]
+    public PropertyBuilderData Immutable => new PropertyBuilderData( this.AssertFrozen(), this.DeclaringType.ToRef() );   
 
 }

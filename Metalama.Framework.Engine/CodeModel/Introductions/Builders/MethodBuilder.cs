@@ -8,9 +8,11 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -22,7 +24,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
     private bool _isReadOnly;
     private bool _isIteratorMethod;
 
-    public TypeParameterBuilderList TypeParameters { get; } = new();
+    public TypeParameterBuilderList TypeParameters { get; } = [];
 
     public bool IsReadOnly
     {
@@ -160,7 +162,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
                 this.ParentAdvice );
     }
 
-    public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
+    public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = [interfaceMethod];
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
@@ -168,10 +170,11 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     public IInjectMemberTransformation ToTransformation()
     {
-        this.Freeze();
-
-        return new IntroduceMethodTransformation( this.ParentAdvice, this );
+        return new IntroduceMethodTransformation( this.ParentAdvice, this.Immutable );
     }
 
-    IRef<IMethod> IMethod.ToRef() => throw new NotSupportedException();
+    public IRef<IMethod> ToRef() => this.Immutable.ToRef();
+    
+    [Memo]
+    public MethodBuilderData Immutable => new MethodBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

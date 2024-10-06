@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -39,8 +40,8 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
         private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
-        private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
-        private readonly ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
+        private readonly ConcurrentDictionary<DeclarationBuilderData, MemberLevelTransformations> _introductionMemberLevelTransformations;
+        private readonly ConcurrentDictionary<DeclarationBuilderData, IIntroduceDeclarationTransformation> _builderToTransformationMap;
 
         private readonly ConcurrentDictionary<IMethodBase, List<InsertedStatement>> _insertedStatementsByTargetMethodBase;
 
@@ -75,11 +76,11 @@ internal sealed partial class LinkerInjectionStep
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
             this._injectedInterfacesByTargetTypeDeclaration = new ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>>();
             this._injectedInterfacesByTargetTypeBuilder = new ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>>();
-            this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
-            this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
-            this._autoPropertyWithSynthesizedSetterBuilders = new HashSet<IPropertyBuilder>();
+            this._removedVariableDeclaratorSyntax = [];
+            this._autoPropertyWithSynthesizedSetterSyntax = [];
+            this._autoPropertyWithSynthesizedSetterBuilders = [];
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>>();
-            this._nodesWithModifiedAttributes = new HashSet<SyntaxNode>();
+            this._nodesWithModifiedAttributes = [];
             this._symbolMemberLevelTransformations = new ConcurrentDictionary<SyntaxNode, MemberLevelTransformations>();
             this._introductionMemberLevelTransformations = new ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations>();
             this._builderToTransformationMap = new ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>();
@@ -93,8 +94,8 @@ internal sealed partial class LinkerInjectionStep
                 new ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>>( finalCompilationModel.Comparers.Default );
 
             this._lateTypeLevelTransformations = new ConcurrentDictionary<INamedType, LateTypeLevelTransformations>( finalCompilationModel.Comparers.Default );
-            this._transformationsCausingAuxiliaryOverrides = new HashSet<ITransformation>();
-            this._introducedSyntaxTrees = new HashSet<SyntaxTree>();
+            this._transformationsCausingAuxiliaryOverrides = [];
+            this._introducedSyntaxTrees = [];
         }
 
         public void AddInjectedMember( InjectedMember injectedMember )
@@ -115,7 +116,7 @@ internal sealed partial class LinkerInjectionStep
 
             this._injectedMembers.Enqueue( injectedMember );
 
-            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => new List<InjectedMember>() );
+            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => [] );
 
             lock ( nodes )
             {
@@ -136,7 +137,7 @@ internal sealed partial class LinkerInjectionStep
             var interfaceList =
                 this._injectedInterfacesByTargetTypeDeclaration.GetOrAdd(
                     targetType,
-                    _ => new List<LinkerInjectedInterface>() );
+                    _ => [] );
 
             lock ( interfaceList )
             {
@@ -149,7 +150,7 @@ internal sealed partial class LinkerInjectionStep
             var interfaceList =
                 this._injectedInterfacesByTargetTypeBuilder.GetOrAdd(
                     targetTypeBuilder,
-                    _ => new List<LinkerInjectedInterface>() );
+                    _ => [] );
 
             lock ( interfaceList )
             {
@@ -180,7 +181,7 @@ internal sealed partial class LinkerInjectionStep
         // ReSharper disable once UnusedMember.Local
         public void AddDeclarationWithAdditionalFlags( PropertyDeclarationSyntax declaration, AspectLinkerDeclarationFlags flags )
         {
-            var list = this._additionalDeclarationFlags.GetOrAdd( declaration, _ => new List<AspectLinkerDeclarationFlags>() );
+            var list = this._additionalDeclarationFlags.GetOrAdd( declaration, _ => [] );
 
             lock ( list )
             {
@@ -192,7 +193,7 @@ internal sealed partial class LinkerInjectionStep
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
-            var statementList = this._insertedStatementsByTargetMethodBase.GetOrAdd( targetMethod, _ => new List<InsertedStatement>() );
+            var statementList = this._insertedStatementsByTargetMethodBase.GetOrAdd( targetMethod, _ => [] );
 
             lock ( statementList )
             {

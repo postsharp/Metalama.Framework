@@ -26,9 +26,9 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
 {
     private BoundTemplateMethod BoundTemplate { get; }
 
-    private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+    private new IRef<IMethod> OverriddenDeclaration => (IRef<IMethod>) base.OverriddenDeclaration;
 
-    public OverrideOperatorTransformation( Advice advice, IMethod targetOperator, BoundTemplateMethod boundTemplate, IObjectReader tags )
+    public OverrideOperatorTransformation( Advice advice, IRef<IMethod> targetOperator, BoundTemplateMethod boundTemplate, IObjectReader tags )
         : base( advice, targetOperator, tags )
     {
         this.BoundTemplate = boundTemplate;
@@ -36,42 +36,44 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var proceedExpression = this.CreateProceedExpression( context );
+        
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
+
 
         var metaApi = MetaApi.ForMethod(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.OriginalCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.Cast(),
                 this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.AlwaysStatic ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             this.BoundTemplate,
             _ => proceedExpression,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
+        var templateDriver = this.BoundTemplate.TemplateMember.Driver;
 
         if ( !templateDriver.TryExpandDeclaration(
                 expansionContext,
-                this.BoundTemplate.GetTemplateArgumentsForMethod( this.OverriddenDeclaration ),
+                this.BoundTemplate.GetTemplateArgumentsForMethod( overriddenDeclaration ),
                 out var newMethodBody ) )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
-        var modifiers = this.OverriddenDeclaration
+        var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
@@ -79,30 +81,30 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
             MethodDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( modifiers ),
-                context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
+                context.SyntaxGenerator.ReturnType( overriddenDeclaration )
                     .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 null,
                 Identifier(
                     context.InjectionNameProvider.GetOverrideName(
-                        this.OverriddenDeclaration.DeclaringType,
-                        this.ParentAdvice.AspectLayerId,
-                        this.OverriddenDeclaration ) ),
+                        overriddenDeclaration.DeclaringType,
+                        this.AspectLayerId,
+                        overriddenDeclaration ) ),
                 null,
-                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, removeDefaultValues: true ),
+                context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.Compilation, removeDefaultValues: true ),
                 List<TypeParameterConstraintClauseSyntax>(),
                 newMethodBody,
                 null );
 
-        return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
+        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToRef() )];
     }
 
-    private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )
+    private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context, IMethod overriddenDeclaration )
     {
         return new SyntaxUserExpression(
             context.AspectReferenceSyntaxProvider.GetOperatorReference(
-                this.ParentAdvice.AspectLayerId,
-                this.OverriddenDeclaration,
+                this.AspectLayerId,
+                overriddenDeclaration,
                 context.SyntaxGenerator ),
-            this.OverriddenDeclaration.ReturnType );
+            overriddenDeclaration.ReturnType );
     }
 }

@@ -23,7 +23,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
 
     public OverridePropertyTransformation(
         Advice advice,
-        IProperty overriddenDeclaration,
+        IRef<IProperty> overriddenDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
         IObjectReader tags )
@@ -44,14 +44,17 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        if ( this.OverriddenDeclaration.GetMethod != null )
+        var overriddenDeclaration = this.OverriddenDeclaration.As<IProperty>().GetTarget(context.Compilation);
+
+        if ( overriddenDeclaration.GetMethod != null )
         {
             if ( getTemplate != null )
             {
                 templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                     context,
                     getTemplate,
-                    this.OverriddenDeclaration.GetMethod,
+                    overriddenDeclaration.GetMethod,
+                    overriddenDeclaration,
                     out getAccessorBody );
             }
             else
@@ -66,14 +69,15 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
 
         BlockSyntax? setAccessorBody = null;
 
-        if ( this.OverriddenDeclaration.SetMethod != null )
+        if ( overriddenDeclaration.SetMethod != null )
         {
             if ( setTemplate != null )
             {
                 templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                     context,
                     setTemplate,
-                    this.OverriddenDeclaration.SetMethod,
+                    overriddenDeclaration.SetMethod,
+                    overriddenDeclaration,
                     out setAccessorBody );
             }
             else
@@ -89,7 +93,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         if ( templateExpansionError )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
         return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
@@ -99,6 +103,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         MemberInjectionContext context,
         BoundTemplateMethod accessorTemplate,
         IMethod accessor,
+        IProperty overriddenDeclaration,
         [NotNullWhen( true )] out BlockSyntax? body )
     {
         SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind )
@@ -107,29 +112,28 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         }
 
         var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             accessor,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.OriginalCompilation,
                 context.DiagnosticSink,
                 accessorTemplate.TemplateMember.Cast(),
                 this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
             accessor,
             accessorTemplate,
             ProceedExpressionProvider,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
+        var templateDriver = accessorTemplate.TemplateMember.Driver;
 
         return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
     }

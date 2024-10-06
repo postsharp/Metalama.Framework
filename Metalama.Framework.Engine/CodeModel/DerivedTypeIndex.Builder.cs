@@ -139,6 +139,7 @@ public partial class DerivedTypeIndex
                 baseType.ToRef( this._compilationContext ),
                 derivedType.ToRef( this._compilationContext ) );
 
+        public void AddDerivedType( IRef<INamedType> baseType, IRef<INamedType> derivedType ) => this._relationships.Add( baseType, derivedType );
         public void AddDerivedType( INamedType baseType, INamedType derivedType ) => this._relationships.Add( baseType.ToRef(), derivedType.ToRef() );
 
         public DerivedTypeIndex ToImmutable()

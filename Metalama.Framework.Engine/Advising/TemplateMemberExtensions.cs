@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
+using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -11,5 +13,5 @@ internal static class TemplateMemberExtensions
     /// Returns <c>null</c> if the input <see cref="BoundTemplateMethod"/> does not represent a method with an implementation.
     /// </summary>
     public static BoundTemplateMethod? ExplicitlyImplementedOrNull( this BoundTemplateMethod? templateMethod )
-        => templateMethod?.TemplateMember.Declaration.GetSymbol()?.IsAutoAccessor() == true ? null : templateMethod;
+        => templateMethod == null ? null : ((IMethodSymbol) ((ISymbolRef) templateMethod.TemplateMember.Declaration).Symbol).IsAutoAccessor() ? null : templateMethod;
 }

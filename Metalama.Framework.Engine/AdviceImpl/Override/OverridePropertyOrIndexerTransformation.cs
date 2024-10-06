@@ -11,11 +11,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverridePropertyOrIndexerTransformation : OverrideMemberTransformation
 {
-    protected new IPropertyOrIndexer OverriddenDeclaration => (IPropertyOrIndexer) base.OverriddenDeclaration;
+    protected new IRef<IPropertyOrIndexer> OverriddenDeclaration => (IRef<IPropertyOrIndexer>) base.OverriddenDeclaration;
 
     protected OverridePropertyOrIndexerTransformation(
         Advice advice,
-        IPropertyOrIndexer overriddenDeclaration,
+        IRef<IPropertyOrIndexer> overriddenDeclaration,
         IObjectReader tags )
         : base( advice, overriddenDeclaration, tags ) { }
 

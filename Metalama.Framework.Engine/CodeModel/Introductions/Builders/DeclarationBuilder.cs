@@ -33,7 +33,9 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 /// </summary>
 internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 {
-    public AttributeBuilderCollection Attributes { get; } = new();
+    public AttributeBuilderCollection Attributes { get; } = [];
+
+    public abstract bool IsDesignTimeObservable { get; }
 
     protected DeclarationBuilder( Advice parentAdvice )
     {
@@ -143,52 +145,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
         where TExtension : IMetric
         => this.Compilation.MetricManager.GetMetric<TExtension>( this );
 
-    protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
-
-    public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, IDeclaration? declaration = null )
-    {
-        declaration ??= this;
-
-        var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-            declaration.ToRef(),
-            context.Compilation,
-            this.AttributeTargetSyntaxKind );
-
-        if ( declaration is IMethod method )
-        {
-            attributes = attributes.AddRange(
-                context.SyntaxGenerator.AttributesForDeclaration(
-                    method.ReturnParameter.ToRef(),
-                    context.Compilation,
-                    SyntaxKind.ReturnKeyword ) );
-
-            if ( method.MethodKind is MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.PropertySet )
-            {
-                attributes = attributes.AddRange(
-                    context.SyntaxGenerator.AttributesForDeclaration(
-                        method.Parameters[0].ToRef(),
-                        context.Compilation,
-                        SyntaxKind.ParamKeyword ) );
-            }
-        }
-        else if ( declaration is IProperty { IsAutoPropertyOrField: true } )
-        {
-            // TODO: field-level attributes
-        }
-
-        return attributes;
-    }
-
-    // TODO: This is temporary overload (see the callsite for reason).
-    public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, IRef<IDeclaration> declarationRef )
-    {
-        var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-            declarationRef,
-            context.Compilation,
-            this.AttributeTargetSyntaxKind );
-
-        return attributes;
-    }
+    
 
     public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     

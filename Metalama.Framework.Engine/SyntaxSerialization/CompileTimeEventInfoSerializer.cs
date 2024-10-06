@@ -31,11 +31,10 @@ internal sealed class CompileTimeEventInfoSerializer : ObjectSerializer<CompileT
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetEvent" ) ),
                 ArgumentList(
                     SeparatedList(
-                        new[]
-                        {
-                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ),
+                    [
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ),
                             Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) )
-                        } ) ) )
+                    ] ) ) )
             .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
 
         // In the new .NET, the API is marked for nullability, so we have to suppress the warning.

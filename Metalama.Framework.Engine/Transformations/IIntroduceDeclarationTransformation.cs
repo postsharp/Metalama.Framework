@@ -11,5 +11,5 @@ namespace Metalama.Framework.Engine.Transformations;
 /// </summary>
 internal interface IIntroduceDeclarationTransformation : ITransformation
 {
-    IDeclarationBuilder DeclarationBuilder { get; }
+    DeclarationBuilderData DeclarationBuilderData { get; }
 }

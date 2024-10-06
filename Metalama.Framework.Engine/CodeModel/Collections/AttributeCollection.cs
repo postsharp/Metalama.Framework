@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             if ( this.ContainingDeclaration == null )
             {
                 // The collection is empty.
-                return Enumerable.Empty<IAttribute>();
+                return [];
             }
 
             return this.OfAttributeType(

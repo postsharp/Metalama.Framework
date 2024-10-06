@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Introspection;
 using System;
 
@@ -11,9 +12,9 @@ public interface ITransformationBase
 {
     IAspectClass AspectClass { get; }
 
-    IDeclaration TargetDeclaration { get; }
+    IRef<IDeclaration> TargetDeclaration { get; }
 
     IntrospectionTransformationKind TransformationKind { get; }
 
-    FormattableString ToDisplayString();
+    FormattableString ToDisplayString( CompilationModel compilation);
 }

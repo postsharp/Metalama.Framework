@@ -7,5 +7,5 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal interface IInjectInterfaceTransformation : ISyntaxTreeTransformation
 {
-    BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options );
+    BaseTypeSyntax GetSyntax( SyntaxGenerationContext context );
 }

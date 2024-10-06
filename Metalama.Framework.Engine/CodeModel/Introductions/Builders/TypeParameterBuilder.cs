@@ -5,6 +5,8 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParameterBuilder, ISdkType
 {
-    private readonly List<IType> _typeConstraints = new();
+    private readonly List<IType> _typeConstraints = [];
 
     public int Index { get; }
 
@@ -48,6 +50,8 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
+    public override bool IsDesignTimeObservable => true;
+
     public override IDeclaration ContainingDeclaration { get; }
 
     public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
@@ -75,6 +79,10 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
 
-    IRef<ITypeParameter> ITypeParameter.ToRef() => throw new NotSupportedException();
-    IRef<IType> IType.ToRef() => throw new NotSupportedException();
+    IRef<ITypeParameter> ITypeParameter.ToRef() => this.Immutable.ToRef();
+
+    IRef<IType> IType.ToRef() => this.Immutable.ToRef();
+    
+    [Memo]
+    public TypeParameterBuilderData Immutable => new TypeParameterBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );   
 }

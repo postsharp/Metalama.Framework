@@ -8,6 +8,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
@@ -149,22 +150,22 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
             static ( data, compilation ) => new DeserializedAttribute( data, compilation ),
             this._compilationModel );
 
-    public void Invalidate( IDeclaration declaration )
+    public void Invalidate( IRef<IDeclaration> declaration )
     {
         switch ( declaration )
         {
-            case SymbolBasedDeclaration symbolBasedDeclaration:
-                this._symbolCache.Remove( symbolBasedDeclaration.Symbol.AssertSymbolNotNull() );
+            case ISymbolRef symbolRef:
+                this._symbolCache.Remove( symbolRef.Symbol );
 
                 break;
 
-            case IDeclarationBuilder declarationBuilder:
-                this._builderCache.Remove( declarationBuilder );
+            case IDeclarationBuilderDataRef builderDataRef:
+                this._builderCache.Remove( builderDataRef.BuilderData );
 
                 break;
 
-            case BuiltDeclaration builtDeclaration:
-                this._builderCache.Remove( builtDeclaration.BuilderData );
+            case IBuiltDeclarationRef builtDeclarationRef:
+                this._builderCache.Remove( builtDeclarationRef.BuilderData );
 
                 break;
 

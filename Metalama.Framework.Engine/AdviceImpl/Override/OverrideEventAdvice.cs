@@ -31,16 +31,13 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideEvent;
 
-    protected override OverrideMemberAdviceResult<IEvent> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IEvent> Implement( in AdviceImplementationContext context ) 
     {
         // TODO: order should be self if the target is introduced on the same layer.
-        addTransformation(
+        context.AddTransformation(
             new OverrideEventTransformation(
                 this,
-                this.TargetDeclaration.GetTarget( compilation ),
+                this.TargetDeclaration.ToRef(),
                 this._addTemplate,
                 this._removeTemplate,
                 this.Tags ) );

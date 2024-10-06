@@ -553,7 +553,7 @@ internal static class TemplateBindingHelper
     {
         if ( template == null )
         {
-            return Array.Empty<object?>();
+            return [];
         }
 
         compileTimeArguments ??= ObjectReader.Empty;
@@ -571,7 +571,7 @@ internal static class TemplateBindingHelper
     {
         if ( template == null )
         {
-            return Array.Empty<object?>();
+            return [];
         }
 
         var compileTimeArguments = template.TemplateArguments ?? ObjectReader.Empty;
@@ -600,7 +600,7 @@ internal static class TemplateBindingHelper
     {
         if ( template == null )
         {
-            return Array.Empty<object?>();
+            return [];
         }
 
         compileTimeArguments ??= ObjectReader.Empty;

@@ -8,8 +8,10 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -18,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder, IIndexerImpl
 {
-    public ParameterBuilderList Parameters { get; } = new();
+    public ParameterBuilderList Parameters { get; } = [];
 
     public override void Freeze()
     {
@@ -87,9 +89,7 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public IInjectMemberTransformation ToTransformation()
     {
-        this.Freeze();
-
-        return new IntroduceIndexerTransformation( this.ParentAdvice, this );
+        return new IntroduceIndexerTransformation( this.ParentAdvice, this.Immutable );
     }
 
     public IndexerBuilder(
@@ -127,5 +127,8 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public void SetExplicitInterfaceImplementation( IIndexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = [interfaceIndexer];
 
-    IRef<IIndexer> IIndexer.ToRef() => throw new NotSupportedException();
+    public IRef<IIndexer> ToRef() => throw new NotSupportedException();
+    
+    [Memo]
+    public IndexerBuilderData Immutable => new IndexerBuilderData( this.AssertFrozen(), this.DeclaringType.ToRef() );
 }

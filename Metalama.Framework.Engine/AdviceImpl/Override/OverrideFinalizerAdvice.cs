@@ -27,13 +27,11 @@ internal class OverrideFinalizerAdvice : OverrideMemberAdvice<IMethod, IMethod>
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideFinalizer;
 
-    protected override OverrideMemberAdviceResult<IMethod> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IMethod> Implement( in AdviceImplementationContext context )
     {
         // TODO: order should be self if the target is introduced on the same layer.
-        addTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+        context.AddTransformation(
+            new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
         return this.CreateSuccessResult();
     }

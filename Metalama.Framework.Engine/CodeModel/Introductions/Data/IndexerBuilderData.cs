@@ -39,6 +39,8 @@ internal class IndexerBuilderData : PropertyOrIndexerBuilderData
     }
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    
+    public new IRef<IIndexer> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
@@ -50,4 +52,10 @@ internal class IndexerBuilderData : PropertyOrIndexerBuilderData
     public override MethodBuilderData? GetMethod { get; }
 
     public override MethodBuilderData? SetMethod { get; }
+    
+    
+    public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations()
+    {
+        return base.GetOwnedDeclarations().Concat( this.Parameters );
+    }
 }

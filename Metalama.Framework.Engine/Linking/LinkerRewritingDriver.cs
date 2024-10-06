@@ -486,13 +486,13 @@ internal sealed partial class LinkerRewritingDriver
         if ( LinkerSyntaxHelper.IsUnsupportedMemberSyntax( syntax) )
         {
             // If there is unsupported symbol, we will not rewrite the member.
-            return new[] { syntax };
+            return [syntax];
         }
 
         if ( this.AnalysisRegistry.HasAnyUnsupportedOverride( symbol ) )
         {
             // If there is unsupported code in overrides, we will not rewrite the member.
-            return new[] { syntax };
+            return [syntax];
         }
 
         if ( this.InjectionRegistry.IsOverride( symbol )

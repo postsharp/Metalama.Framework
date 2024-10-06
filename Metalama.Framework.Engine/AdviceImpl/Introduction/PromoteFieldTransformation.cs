@@ -2,25 +2,25 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class PromoteFieldTransformation : IntroducePropertyTransformation, IReplaceMemberTransformation
 {
-    private readonly IField _replacedField;
+    private readonly IRef<IField> _replacedField;
 
-    public PromoteFieldTransformation( Advice advice, IField replacedField, PromotedFieldBuilder propertyBuilder ) : base( advice, propertyBuilder )
+    public PromoteFieldTransformation( Advice advice, IField replacedField, PropertyBuilderData propertyBuilder ) : base( advice, propertyBuilder )
     {
-        this._replacedField = replacedField;
+        this._replacedField = replacedField.ToRef();
     }
 
     public override InsertPosition InsertPosition => this._replacedField.ToInsertPosition();
 
-    IMember? IReplaceMemberTransformation.ReplacedMember => this._replacedField;
+    IRef<IMember>? IReplaceMemberTransformation.ReplacedMember => this._replacedField;
 
-    public override IDeclaration TargetDeclaration => this._replacedField;
+    public override IRef<IDeclaration> TargetDeclaration => this._replacedField;
 }

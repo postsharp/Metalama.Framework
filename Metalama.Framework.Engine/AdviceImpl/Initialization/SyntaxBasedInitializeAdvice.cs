@@ -23,6 +23,6 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
     {
         // TODO: The statement can now be more complex, including invoking a template. For this we need to pass a TemplateSyntaxFactoryImpl.
         addTransformation(
-            new SyntaxBasedInitializationTransformation( this, targetDeclaration, targetCtor, _ => ((IStatementImpl) this._statement).GetSyntax( null ) ) );
+            new SyntaxBasedInitializationTransformation( this, targetDeclaration.ToRef(), targetCtor.ToRef(), _ => ((IStatementImpl) this._statement).GetSyntax( null ) ) );
     }
 }

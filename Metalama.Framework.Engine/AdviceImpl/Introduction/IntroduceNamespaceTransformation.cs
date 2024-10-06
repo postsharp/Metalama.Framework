@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
@@ -13,20 +14,20 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceNamespaceTransformation : BaseTransformation, IIntroduceDeclarationTransformation
 {
-    private readonly NamespaceBuilder _introducedDeclaration;
+    private readonly NamespaceBuilderData _introducedDeclaration;
 
-    public IntroduceNamespaceTransformation( Advice advice, NamespaceBuilder introducedDeclaration ) : base( advice )
+    public IntroduceNamespaceTransformation( Advice advice, NamespaceBuilderData introducedDeclaration ) : base( advice )
     {
         this._introducedDeclaration = introducedDeclaration.AssertNotNull();
     }
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
-    IDeclarationBuilder IIntroduceDeclarationTransformation.DeclarationBuilder => this._introducedDeclaration;
+    DeclarationBuilderData IIntroduceDeclarationTransformation.DeclarationBuilderData => this._introducedDeclaration;
 
-    public override IDeclaration TargetDeclaration => this._introducedDeclaration.ContainingDeclaration.AssertNotNull();
+    public override IRef<IDeclaration> TargetDeclaration => this._introducedDeclaration.ContainingDeclaration.AssertNotNull();
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceMember;
 
-    public override FormattableString ToDisplayString() => $"Introduce {this._introducedDeclaration.DeclarationKind} '{this._introducedDeclaration}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce {this._introducedDeclaration.DeclarationKind} '{this._introducedDeclaration}'.";
 }

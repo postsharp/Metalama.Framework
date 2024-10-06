@@ -50,7 +50,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
     private readonly TypeOfRewriter _typeOfRewriter;
     private readonly TypeSyntax _templateTypeArgumentType;
-    private readonly HashSet<string> _templateCompileTimeTypeParameterNames = new();
+    private readonly HashSet<string> _templateCompileTimeTypeParameterNames = [];
     private readonly TypeSyntax _templateSyntaxFactoryType;
     private readonly TypeSyntax _dictionaryOfITypeType;
     private readonly TypeSyntax _dictionaryOfTypeSyntaxType;
@@ -856,11 +856,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicMemberAccessExpression) ),
                     ArgumentList(
                         SeparatedList(
-                            new[]
-                            {
-                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
+                        [
+                            Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
                                 Argument( SyntaxFactoryEx.LiteralExpression( node.Name.Identifier.ValueText ) )
-                            } ) ) );
+                        ] ) ) );
             }
         }
 
@@ -876,7 +875,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             return InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConditionalAccessExpression) ),
-                ArgumentList( SeparatedList( new[] { Argument( this.Transform( node.Expression ) ), Argument( this.Transform( node.WhenNotNull ) ) } ) ) );
+                ArgumentList( SeparatedList( [Argument( this.Transform( node.Expression ) ), Argument( this.Transform( node.WhenNotNull ) )] ) ) );
         }
 
         // Expand extension methods.
@@ -1541,7 +1540,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         // Create the parameter list.
         var parameters = node.Keyword.IsKind( SyntaxKind.GetKeyword )
-            ? new[] { this.CreateTemplateSyntaxFactoryParameter() }
+            ? [this.CreateTemplateSyntaxFactoryParameter()]
             : new[]
             {
                 this.CreateTemplateSyntaxFactoryParameter(),
@@ -1617,7 +1616,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         => MethodDeclaration(
                 this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
-            .AddParameterListParameters( parameters ?? new[] { this.CreateTemplateSyntaxFactoryParameter() } )
+            .AddParameterListParameters( parameters ?? [this.CreateTemplateSyntaxFactoryParameter()] )
             .WithModifiers( this.DetermineModifiers( accessibilityModifiers ) )
             .NormalizeWhitespace()
             .WithBody( body )
@@ -1627,7 +1626,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     private SyntaxTokenList DetermineModifiers( SyntaxToken[]? accessibilityModifiers )
     {
-        var modifiers = TokenList( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } );
+        var modifiers = TokenList( accessibilityModifiers ?? [Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space )] );
 
         var templateSymbol = this._rootTemplateSymbol.AssertSymbolNotNull();
 
@@ -1840,14 +1839,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                                         .WithArgumentList(
                                                             ArgumentList(
                                                                 SeparatedList(
-                                                                    new[]
-                                                                    {
-                                                                        Argument(
+                                                                [
+                                                                    Argument(
                                                                             SyntaxFactoryEx.LiteralExpression(
                                                                                 localFunctionInfo.ReturnType.GetSerializableTypeId().Id ) ),
                                                                         Argument( map ),
                                                                         Argument( SyntaxFactoryEx.LiteralExpression( localFunctionInfo.IsAsync ) )
-                                                                    } ) ) ) ) ) ) ) )
+                                                                ] ) ) ) ) ) ) ) )
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
             }
@@ -2012,11 +2010,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddStatement) ),
                                         ArgumentList(
                                             SeparatedList(
-                                                new[]
-                                                {
-                                                    Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ),
+                                            [
+                                                Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ),
                                                     Argument( expressionSyntax )
-                                                } ) ) ) ) );
+                                            ] ) ) ) ) );
 
                         newContext.Statements.Add( add.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia ) );
 
@@ -2580,7 +2577,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         return InvocationExpression(
             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConditionalExpression) ),
-            ArgumentList( SeparatedList( new[] { Argument( transformedCondition ), Argument( transformedWhenTrue ), Argument( transformedWhenFalse ) } ) ) );
+            ArgumentList( SeparatedList( [Argument( transformedCondition ), Argument( transformedWhenTrue ), Argument( transformedWhenFalse )] ) ) );
     }
 
     protected override ExpressionSyntax TransformYieldStatement( YieldStatementSyntax node )

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -232,6 +233,10 @@ internal sealed class SymbolRefStrategy : IRefStrategy
                 throw new NotImplementedException( "This ConversionKind is not implemented." );
         }
     }
+
+    public IAssemblySymbol GetAssemblySymbol( IRef reference, CompilationContext compilationContext ) => ((ISymbolRef) reference).Symbol.ContainingAssembly.AssertBelongsToCompilationContext( compilationContext );
+
+    public bool IsStatic( IRef<IMember> reference ) => ((ISymbolRef) reference).Symbol.IsStatic;
 
     private static bool IsValidSymbol( ISymbol symbol, CompilationModel compilation )
     {

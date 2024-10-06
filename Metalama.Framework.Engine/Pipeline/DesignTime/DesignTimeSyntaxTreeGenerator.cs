@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -102,9 +103,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 {
                     if ( transformation is IIntroduceDeclarationTransformation
                          {
-                             DeclarationBuilder: INamedType namedTypeBuilder
+                             DeclarationBuilderData: INamedType namedTypeBuilder
                          } introduceDeclarationTransformation
-                         && !transformationsByBucket.ContainsKey( introduceDeclarationTransformation.DeclarationBuilder.ToRef().As<INamespaceOrNamedType>() ) )
+                         && !transformationsByBucket.ContainsKey( introduceDeclarationTransformation.DeclarationBuilderData.ToRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
                         ProcessTransformationsOnType( namedTypeBuilder.ToRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
@@ -175,7 +176,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                             if ( injectMemberTransformation is IIntroduceDeclarationTransformation
                                 {
-                                    DeclarationBuilder: ConstructorBuilder constructorBuilder
+                                    DeclarationBuilderData: ConstructorBuilderData constructorBuilder
                                 } )
                             {
                                 injectedMembers = AddIntroducedConstructorParameters(
@@ -185,7 +186,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                     syntaxGenerationContext );
                             }
 
-                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilder: NamedTypeBuilder } )
+                            if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilderData: NamedTypeBuilderData } )
                             {
                                 // TODO: This is not optimal - the injected member should be skipped instead.
                                 //       However, determining whether the type should be injected as a member depends on transformations after this
@@ -199,7 +200,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                         case IInjectInterfaceTransformation injectInterfaceTransformation:
                             baseList ??= BaseList();
-                            baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
+                            baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext ) );
 
                             break;
 
@@ -296,7 +297,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
         private static IEnumerable<MemberDeclarationSyntax> AddIntroducedConstructorParameters(
             IEnumerable<MemberDeclarationSyntax> injectedMembers,
-            ConstructorBuilder constructorBuilder,
+            ConstructorBuilderData constructorBuilder,
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext )
         {
@@ -311,7 +312,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     continue;
                 }
 
-                for ( var index = constructorBuilder.Parameters.Count; index < finalConstructor.Parameters.Count; index++ )
+                for ( var index = constructorBuilder.Parameters.Length; index < finalConstructor.Parameters.Count; index++ )
                 {
                     constructorDeclaration =
                         constructorDeclaration.AddParameterListParameters(
@@ -367,7 +368,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Additionally, add all introduced constructors to the list.
             foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
             {
-                var constructorBuilder = (introducedConstructor.ToRef() as IBuiltDeclarationRef)?.BuilderData as ConstructorBuilder;
+                var constructorBuilder = (introducedConstructor.ToRef() as IBuiltDeclarationRef)?.BuilderData as ConstructorBuilderData;
 
                 if ( constructorBuilder is null || constructorBuilder.ReplacedImplicitConstructor != null )
                 {

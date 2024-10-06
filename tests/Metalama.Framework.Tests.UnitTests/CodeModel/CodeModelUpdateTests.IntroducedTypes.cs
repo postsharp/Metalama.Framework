@@ -17,6 +17,7 @@ public sealed partial class CodeModelUpdateTests
         var compilation = testContext.CreateCompilationModel( "class Outer;" ).CreateMutableClone();
 
         var type = new NamedTypeBuilder( null!, compilation.GlobalNamespace, "C" );
+        type.Freeze();
         compilation.AddTransformation( type.ToTransformation() );
 
         Assert.Single( compilation.GlobalNamespace.Types.OfName( "C" ) );
@@ -69,6 +70,7 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
+        typeBuilder.Freeze();
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
@@ -82,6 +84,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -110,6 +113,7 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
+        typeBuilder.Freeze();
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
@@ -123,6 +127,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -151,6 +156,7 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
+        typeBuilder.Freeze();
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
@@ -161,6 +167,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -189,6 +196,7 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
+        typeBuilder.Freeze();
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
@@ -199,6 +207,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -225,12 +234,14 @@ class C
         var target = initialCompilation.Types.OfName( "Target" ).Single();
 
         var baseType = new NamedTypeBuilder( null!, target, "B" );
+        baseType.Freeze();
 
         var derivedType = new NamedTypeBuilder( null!, target, "C" ) { BaseType = baseType };
+        derivedType.Freeze();
 
         var interfaceType = initialCompilation.Types.OfName( "I" ).Single();
 
-        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType, interfaceType, [] );
+        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToRef(), interfaceType.ToRef(), [] );
 
         var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
             [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface],

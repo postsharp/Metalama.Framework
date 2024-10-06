@@ -66,6 +66,16 @@ public sealed partial class DerivedTypeIndex
             DerivedTypesOptions.IncludingExternalTypesDangerous => this.GetDerivedTypes( baseType ),
             _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
         };
+    
+    internal IEnumerable<IRef<INamedType>> GetDerivedTypesInCurrentCompilation( IRef<INamedType> baseType, DerivedTypesOptions options )
+        => options switch
+        {
+            DerivedTypesOptions.All => this.GetAllDerivedTypesCore( baseType ),
+            DerivedTypesOptions.DirectOnly => this.GetDirectlyDerivedTypesCore( baseType ),
+            DerivedTypesOptions.FirstLevelWithinCompilationOnly => this.GetFirstLevelDerivedTypesCore( baseType ),
+            DerivedTypesOptions.IncludingExternalTypesDangerous => this.GetDerivedTypesCore( baseType ),
+            _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
+        };
 
     internal IEnumerable<INamedType> GetDerivedTypes( INamedType baseType )
         => this.GetDerivedTypesCore( baseType.ToRef() )
@@ -75,6 +85,7 @@ public sealed partial class DerivedTypeIndex
         => this._relationships[baseType]
             .SelectManyRecursiveDistinct( t => this._relationships[t], this._processedTypes.KeyComparer );
 
+    
     private IEnumerable<INamedType> GetAllDerivedTypes( INamedType baseType )
         => this.GetAllDerivedTypesCore( baseType.ToRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
@@ -135,10 +146,10 @@ public sealed partial class DerivedTypeIndex
 
             var introducedInterface = transformation.InterfaceType;
 
-            if ( !introducedInterface.DeclaringAssembly.GetSymbol().Equals( this._compilationContext.Compilation.Assembly ) )
+            if ( !introducedInterface.GetStrategy().GetAssemblySymbol(introducedInterface, this._compilationContext ).Equals( this._compilationContext.Compilation.Assembly ) )
             {
                 // The type may not have been analyzed yet.
-                builder.AnalyzeType( introducedInterface.ToRef() );
+                builder.AnalyzeType( introducedInterface );
             }
 
             builder.AddDerivedType( introducedInterface, transformation.TargetType );
@@ -155,16 +166,16 @@ public sealed partial class DerivedTypeIndex
         {
             builder ??= new Builder( this );
 
-            var introducedType = transformation.IntroducedDeclaration;
+            var introducedType = transformation.BuilderData;
 
             if ( introducedType.BaseType is { } baseType )
             {
-                builder.AddDerivedType( baseType, introducedType );
+                builder.AddDerivedType( baseType, introducedType.ToRef() );
             }
 
             foreach ( var implementedInterface in introducedType.ImplementedInterfaces )
             {
-                builder.AddDerivedType( implementedInterface, introducedType );
+                builder.AddDerivedType( implementedInterface, introducedType.ToRef() );
             }
         }
 

@@ -5,8 +5,10 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
@@ -33,7 +35,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public abstract bool IsReturnParameter { get; }
 
-    IRef<IParameter> IParameter.ToRef() => throw new NotSupportedException();
+    IRef<IParameter> IParameter.ToRef() => this.Immutable.ToRef();
 
     public sealed override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
@@ -51,5 +53,8 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
                 ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                 true ) );
 
-    
+    [Memo]
+    public ParameterBuilderData Immutable => new ParameterBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+
+    public override bool IsDesignTimeObservable => true;
 }

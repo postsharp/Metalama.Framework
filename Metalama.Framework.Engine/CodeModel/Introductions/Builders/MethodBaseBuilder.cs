@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, IMethodBaseImpl
 {
-    public ParameterBuilderList Parameters { get; } = new();
+    public ParameterBuilderList Parameters { get; } = [];
 
     public abstract BaseParameterBuilder? ReturnParameter { get; set; }
 

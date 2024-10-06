@@ -21,11 +21,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// </summary>
 internal sealed class RedirectMethodTransformation : OverrideMemberTransformation
 {
-    private readonly IMethod _targetMethod;
+    private readonly IRef<IMethod> _targetMethod;
 
-    private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+    private new IRef<IMethod> OverriddenDeclaration => (IRef<IMethod>) base.OverriddenDeclaration;
 
-    public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod )
+    public RedirectMethodTransformation( Advice advice, IRef<IMethod> overriddenDeclaration, IRef<IMethod> targetMethod )
         : base( advice, overriddenDeclaration, ObjectReader.Empty )
     {
         this._targetMethod = targetMethod;
@@ -33,53 +33,55 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+
         var body =
             context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
-                this.OverriddenDeclaration.ReturnType
-                != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
+                overriddenDeclaration.ReturnType
+                != overriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
                     ? ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         GetInvocationExpression(),
                         Token( SyntaxKind.SemicolonToken ) )
                     : ExpressionStatement( GetInvocationExpression() ) );
 
-        return new[]
-        {
+        return
+        [
             new InjectedMember(
                 this,
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
+                    overriddenDeclaration.GetSyntaxModifierList(),
+                    context.SyntaxGenerator.ReturnType( overriddenDeclaration )
                         .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(
-                            this.OverriddenDeclaration.DeclaringType,
-                            this.ParentAdvice.AspectLayerId,
-                            this.OverriddenDeclaration ) ),
-                    context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
-                    context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, removeDefaultValues: true ),
-                    context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
+                            overriddenDeclaration.DeclaringType,
+                            this.AspectLayerId,
+                            overriddenDeclaration ) ),
+                    context.SyntaxGenerator.TypeParameterList( overriddenDeclaration, context.Compilation ),
+                    context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.Compilation, removeDefaultValues: true ),
+                    context.SyntaxGenerator.ConstraintClauses( overriddenDeclaration ),
                     body,
                     null ),
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
-        };
+                overriddenDeclaration.ToRef() )
+        ];
 
         ExpressionSyntax GetInvocationExpression()
         {
             return
                 InvocationExpression(
                     GetInvocationTargetExpression(),
-                    ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
+                    ArgumentList( SeparatedList( overriddenDeclaration.Parameters.SelectAsReadOnlyList( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
         }
 
         ExpressionSyntax GetInvocationTargetExpression()
         {
             var expression =
-                this.OverriddenDeclaration.IsStatic
+                overriddenDeclaration.IsStatic
                     ? (ExpressionSyntax) IdentifierName( this._targetMethod.Name )
                     : MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
@@ -87,7 +89,7 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
                         IdentifierName( this._targetMethod.Name ) );
 
             return expression
-                .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+                .WithAspectReferenceAnnotation( this.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

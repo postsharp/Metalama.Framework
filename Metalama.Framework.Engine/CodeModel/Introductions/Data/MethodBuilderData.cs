@@ -60,4 +60,6 @@ internal class MethodBuilderData : MemberBuilderData
 
     public new IRef<IMethod> ToRef() => this._ref;
 
+    public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations()
+        => base.GetOwnedDeclarations().Concat( this.Parameters ).Concat( this.ReturnParameter );
 }

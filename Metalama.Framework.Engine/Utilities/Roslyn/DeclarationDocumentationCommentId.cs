@@ -875,7 +875,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     // type arguments
                     if ( PeekNextChar( id, index ) == '{' )
                     {
-                        typeArguments = new List<IType>();
+                        typeArguments = [];
 
                         if ( !ParseTypeArguments( id, ref index, compilation, typeParameterContext, typeArguments ) )
                         {
@@ -1028,7 +1028,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     INamespace ns => ns.Types.OfName( memberName ),
                     INamedType namedType => namedType.Types.OfName( memberName ),
-                    _ => Enumerable.Empty<INamedType>()
+                    _ => []
                 };
 
                 foreach ( var type in types )
@@ -1055,7 +1055,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     INamespace ns => ns.Types.OfName( memberName )
                         .ConcatNotNull<IDeclaration>( ns.Namespaces.OfName( memberName ) ),
                     INamedType namedType => namedType.Types.OfName( memberName ),
-                    _ => Enumerable.Empty<IDeclaration>()
+                    _ => []
                 };
 
                 foreach ( var member in members )
@@ -1128,7 +1128,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     }
                     else if ( memberName == ".cctor" )
                     {
-                        members = type.StaticConstructor == null ? Enumerable.Empty<IMethodBase>() : new[] { type.StaticConstructor };
+                        members = type.StaticConstructor == null ? [] : [type.StaticConstructor];
                     }
                     else
                     {
@@ -1232,7 +1232,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         {
                             if ( parameters == null )
                             {
-                                parameters = new List<ParameterInfo>();
+                                parameters = [];
                             }
                             else
                             {
@@ -1434,7 +1434,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 return index >= id.Length ? '\0' : id[index];
             }
 
-            private static readonly char[] _nameDelimiters = { ':', '.', '(', ')', '{', '}', '[', ']', ',', '\'', '@', '*', '`', '~' };
+            private static readonly char[] _nameDelimiters = [':', '.', '(', ')', '{', '}', '[', ']', ',', '\'', '@', '*', '`', '~'];
 
             private static string ParseName( string id, ref int index )
             {

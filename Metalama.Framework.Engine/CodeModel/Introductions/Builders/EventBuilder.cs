@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -43,7 +44,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         this.InitializerTags = initializerTags;
         this.IsEventField = isEventField;
         this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
-        this._fieldAttributes = new List<IAttributeData>();
+        this._fieldAttributes = [];
     }
 
     public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
@@ -117,7 +118,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
-    IRef<IEvent> IEvent.ToRef() => throw new NotSupportedException();
+    public IRef<IEvent> ToRef() => this.Immutable.ToRef();
 
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
@@ -129,7 +130,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public object Raise( params object?[] args ) => new EventInvoker( this ).Raise( args );
 
-    public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
+    public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = [interfaceEvent];
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
@@ -137,9 +138,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public IInjectMemberTransformation ToTransformation()
     {
-        this.Freeze();
-
-        return new IntroduceEventTransformation( this.ParentAdvice, this );
+        return new IntroduceEventTransformation( this.ParentAdvice, this.Immutable );
     }
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
@@ -166,5 +165,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         this.RemoveMethod?.Freeze();
     }
 
+    [Memo]
+    public EventBuilderData Immutable => new EventBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
     
 }

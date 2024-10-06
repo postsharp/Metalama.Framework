@@ -38,7 +38,7 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
     {
         if ( !this.CanBeInherited )
         {
-            return Enumerable.Empty<IDeclaration>();
+            return [];
         }
         else
         {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -24,7 +25,7 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     /// <summary>
     /// Gets the builder into which the new node should be inserted.
     /// </summary>
-    public NamedDeclarationBuilder? DeclarationBuilder { get; }
+    public NamedDeclarationBuilderData? DeclarationBuilder { get; }
 
     /// <summary>
     /// Gets the target syntax tree of the insertion.
@@ -38,7 +39,7 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
         this._syntaxTree = node?.SyntaxTree;
     }
 
-    public InsertPosition( InsertPositionRelation relation, NamedTypeBuilder builder )
+    public InsertPosition( InsertPositionRelation relation, NamedDeclarationBuilderData builder )
     {
         this.Relation = relation;
         this.DeclarationBuilder = builder;
@@ -66,8 +67,8 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
             ? $"{this.Relation} {this.SyntaxNode.Kind()} in {this.SyntaxNode.SyntaxTree.FilePath}"
             : this.DeclarationBuilder switch
             {
-                NamedTypeBuilder namedTypeBuilder => $"{this.Relation} {namedTypeBuilder.AssertNotNull().FullName} (built type)",
-                NamespaceBuilder namespaceBuilder => $"{this.Relation} {namespaceBuilder.AssertNotNull().FullName} (built namespace)",
+                NamedTypeBuilderData namedTypeBuilder => $"{this.Relation} {namedTypeBuilder.AssertNotNull().Name} (built type)",
+                NamespaceBuilderData namespaceBuilder => $"{this.Relation} {namespaceBuilder.AssertNotNull().Name} (built namespace)",
                 _ => throw new AssertionFailedException( $"Unexpected: {this.DeclarationBuilder}" ),
             };
 }

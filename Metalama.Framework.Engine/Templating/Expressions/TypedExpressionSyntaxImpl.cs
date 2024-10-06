@@ -143,7 +143,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 default:
                     if ( array.Length == 0 )
                     {
-                        return Array.Empty<TypedExpressionSyntaxImpl>();
+                        return [];
                     }
 
                     var newArray = new TypedExpressionSyntaxImpl[array.Length];

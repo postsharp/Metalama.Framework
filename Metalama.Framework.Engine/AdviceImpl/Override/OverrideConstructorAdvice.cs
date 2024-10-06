@@ -25,12 +25,9 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideConstructor;
 
-    protected override OverrideMemberAdviceResult<IConstructor> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
-    {
-        var constructor = this.TargetDeclaration.GetTarget( compilation );
+    protected override OverrideMemberAdviceResult<IConstructor> Implement( in AdviceImplementationContext context ) 
+{
+        var constructor = this.TargetDeclaration;
 
         if ( constructor.IsImplicitInstanceConstructor() )
         {
@@ -39,12 +36,13 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
             {
                 ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
+            builder.Freeze();
 
-            addTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.ToTransformation() );
             constructor = builder;
         }
 
-        addTransformation( new OverrideConstructorTransformation( this, constructor, this._boundTemplate, this.Tags ) );
+        context.AddTransformation( new OverrideConstructorTransformation( this, constructor.ToRef(), this._boundTemplate, this.Tags ) );
 
         return this.CreateSuccessResult( constructor );
     }

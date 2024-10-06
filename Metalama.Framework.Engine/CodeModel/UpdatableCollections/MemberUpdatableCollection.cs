@@ -20,7 +20,7 @@ internal abstract class MemberUpdatableCollection<T> : DeclarationUpdatableColle
     protected abstract DeclarationKind ItemsDeclarationKind { get; }
 
     protected virtual IEnumerable<IRef<T>> GetMemberRefsOfName( string name )
-        => this.ContainingDeclaration.GetCollectionStrategy()
+        => this.ContainingDeclaration.GetStrategy()
             .GetMembersOfName(
                 this.ContainingDeclaration,
                 name,
@@ -29,7 +29,7 @@ internal abstract class MemberUpdatableCollection<T> : DeclarationUpdatableColle
             .Cast<IRef<T>>();
 
     protected virtual IEnumerable<IRef<T>> GetMemberRefs()
-        => this.ContainingDeclaration.GetCollectionStrategy()
+        => this.ContainingDeclaration.GetStrategy()
             .GetMembers( this.ContainingDeclaration, this.ItemsDeclarationKind, this.Compilation )
             .Cast<IRef<T>>();
 }

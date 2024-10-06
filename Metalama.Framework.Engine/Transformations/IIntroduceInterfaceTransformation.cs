@@ -6,7 +6,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal interface IIntroduceInterfaceTransformation : ITransformation
 {
-    INamedType InterfaceType { get; }
+    IRef<INamedType> InterfaceType { get; }
 
-    INamedType TargetType { get; }
+    IRef<INamedType> TargetType { get; }
 }

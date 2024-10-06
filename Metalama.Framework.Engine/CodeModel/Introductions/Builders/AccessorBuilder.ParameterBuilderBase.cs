@@ -43,5 +43,7 @@ internal partial class AccessorBuilder
         public override bool IsReturnParameter => this.Index < 0;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
+
+        public override bool IsDesignTimeObservable => this.Accessor.IsDesignTimeObservable;
     }
 }

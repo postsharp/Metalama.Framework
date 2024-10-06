@@ -129,7 +129,7 @@ namespace Metalama.Compiler
             }
 
             transformedCompilation =
-                transformedCompilation.WithSyntaxTreeTransformations( new[] { SyntaxTreeTransformation.AddTree( instrinsicsSyntaxTree ) } );
+                transformedCompilation.WithSyntaxTreeTransformations( [SyntaxTreeTransformation.AddTree( instrinsicsSyntaxTree )] );
         }
 
         return transformedCompilation;
@@ -392,15 +392,14 @@ namespace Metalama.Compiler
             .WithArgumentList(
                 AttributeArgumentList(
                     SeparatedList(
-                        new[]
-                        {
-                            AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
+                    [
+                        AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ),
                             AttributeArgument( SyntaxFactoryEx.LiteralExpression( isAsyncMethod ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsAsync) ) ),
                             AttributeArgument( SyntaxFactoryEx.LiteralExpression( isIteratorMethod ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsIteratorMethod) ) )
-                        } ) ) );
+                    ] ) ) );
 
         var attributeList = AttributeList( SingletonSeparatedList( attribute ) )
             .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );

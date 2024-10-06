@@ -10,9 +10,9 @@ internal sealed partial class ImplementInterfaceAdvice
 {
     private readonly struct MemberSpecification
     {
-        public IMember InterfaceMember { get; }
+        public IRef<IMember> InterfaceMember { get; }
 
-        public IMember? TargetMember { get; }
+        public IRef<IMember>? TargetMember { get; }
 
         public TemplateMember<IMember>? Template { get; }
 
@@ -27,8 +27,8 @@ internal sealed partial class ImplementInterfaceAdvice
 #pragma warning restore CS0618
 
         public MemberSpecification(
-            IMember interfaceMember,
-            IMember? targetMember,
+            IRef<IMember> interfaceMember,
+            IRef<IMember>? targetMember,
             TemplateMember<IMember>? template,
             IObjectReader? tags )
         {

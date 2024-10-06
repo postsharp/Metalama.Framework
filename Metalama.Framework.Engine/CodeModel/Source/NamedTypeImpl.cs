@@ -236,7 +236,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
         if ( builder != null )
         {
-            return this.Compilation.Factory.GetConstructor( (ConstructorBuilder) builder );
+            return this.Compilation.Factory.GetConstructor( builder );
         }
 
         var symbol = this.NamedTypeSymbol.StaticConstructors.SingleOrDefault();
@@ -255,7 +255,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
         if ( builder != null )
         {
-            return this.Compilation.Factory.GetMethod( (MethodBuilder) builder );
+            return this.Compilation.Factory.GetMethod( builder );
         }
 
         var symbol = this.NamedTypeSymbol.GetMembers()
@@ -541,8 +541,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         // Find the member in introduced interfaces, including in subtypes.
         var currentTypeDefinition = this.Definition;
         var currentTypeSymbol = this.NamedTypeSymbol;
-        var declarationComparer = this.Compilation.Comparers.Default;
-
+        
         while ( true )
         {
             var currentGenericContext = GenericContext.Get( currentTypeSymbol, this.GetCompilationContext() );
@@ -551,7 +550,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 this.Compilation
                     .GetInterfaceImplementationCollection( currentTypeDefinition.ToRef(), false )
                     .Introductions
-                    .SingleOrDefault( i => declarationComparer.Equals( currentGenericContext.Map( i.InterfaceType ), interfaceMember.DeclaringType ) );
+                    .SingleOrDefault( i =>  currentGenericContext.Map( i.InterfaceType.GetTarget(this.Compilation) ).Equals( interfaceMember.DeclaringType ) );
 
             if ( introducedInterface != null )
             {

@@ -89,12 +89,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
             var replacedCompilationModel = initialCompilationModel.WithTransformationsAndAspectInstances(
-                this._rewriter.ReplacedTransformations.ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
+                this._rewriter.ReplacedTransformations.ToOrderedList( x => layerOrderLookup[x.AspectLayerId] ),
                 null,
                 null );
 
             var inputCompilationModel = replacedCompilationModel.WithTransformationsAndAspectInstances(
-                this._rewriter.ObservableTransformations.ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
+                this._rewriter.ObservableTransformations.ToOrderedList( x => layerOrderLookup[x.AspectLayerId] ),
                 null,
                 null );
 
@@ -104,7 +104,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 this._rewriter.ReplacedTransformations.Concat(
                         this._rewriter.ObservableTransformations,
                         this._rewriter.NonObservableTransformations )
-                    .ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
+                    .ToOrderedList( x => layerOrderLookup[x.AspectLayerId] ),
                 orderedLayers,
                 null! );
 

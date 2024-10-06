@@ -22,20 +22,17 @@ internal sealed class RemoveAttributesAdvice : Advice<RemoveAttributesAdviceResu
 
     public override AdviceKind AdviceKind => AdviceKind.RemoveAttributes;
 
-    protected override RemoveAttributesAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override RemoveAttributesAdviceResult Implement( in AdviceImplementationContext context ) 
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
         if ( targetDeclaration.Attributes.OfAttributeType( this._attributeType ).Any() )
         {
-            addTransformation(
+            context.AddTransformation(
                 new RemoveAttributesTransformation(
                     this,
-                    targetDeclaration,
-                    this._attributeType ) );
+                    targetDeclaration.ToRef(),
+                    this._attributeType.ToRef() ) );
         }
 
         return new RemoveAttributesAdviceResult();

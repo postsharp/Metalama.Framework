@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using MethodBuilder = System.Reflection.Emit.MethodBuilder;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
@@ -31,7 +32,7 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<IRef<INamedType>, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
     private ImmutableDictionary<IRef<IHasParameters>, ParameterUpdatableCollection> _parameters;
     private ImmutableDictionary<IRef<IDeclaration>, AttributeUpdatableCollection> _attributes;
-    private ImmutableDictionary<IRef<INamedType>, IConstructorBuilder> _staticConstructors;
+    private ImmutableDictionary<IRef<INamedType>, ConstructorBuilderData> _staticConstructors;
     private ImmutableDictionary<IRef<INamedType>, MethodBuilderData> _finalizers;
     private ImmutableDictionary<IRef<INamespaceOrNamedType>, TypeUpdatableCollection> _namedTypesByParent;
     private ImmutableDictionary<IRef<INamespace>, NamespaceUpdatableCollection> _namespaces;
@@ -57,10 +58,10 @@ public sealed partial class CompilationModel
                 && methods.Contains( methodBuilder.ToRef() )
         };
 
-    internal bool Contains( ConstructorBuilder constructorBuilder )
-        => (this._constructors.TryGetValue( constructorBuilder.DeclaringType.ToRef(), out var constructors )
+    internal bool Contains( ConstructorBuilderData constructorBuilder )
+        => (this._constructors.TryGetValue( constructorBuilder.DeclaringType, out var constructors )
             && constructors.Contains( constructorBuilder.ToRef() ))
-           || (this._staticConstructors.TryGetValue( constructorBuilder.DeclaringType.ToRef(), out var staticConstructors )
+           || (this._staticConstructors.TryGetValue( constructorBuilder.DeclaringType, out var staticConstructors )
                && staticConstructors == constructorBuilder);
 
     internal bool Contains( EventBuilderData eventBuilder )
@@ -256,7 +257,7 @@ public sealed partial class CompilationModel
             parent,
             static ( c, t ) => new AttributeUpdatableCollection( c, t ) );
 
-    internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
+    internal ConstructorBuilderData? GetStaticConstructor( INamedTypeSymbol declaringType )
     {
         this._staticConstructors.TryGetValue( declaringType.ToRef( this.CompilationContext ), out var value );
 
@@ -296,9 +297,8 @@ public sealed partial class CompilationModel
         // IMPORTANT: Keep the builder interface in this condition for linker tests, which use fake builders.
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
-            var builder = introduceDeclarationTransformation.DeclarationBuilder;
-            builder.Freeze();
-
+            var builder = introduceDeclarationTransformation.DeclarationBuilderData;
+            
             this.AddDeclaration( builder );
         }
 
@@ -321,12 +321,12 @@ public sealed partial class CompilationModel
     private void AddAnnotation( AddAnnotationTransformation addAnnotationTransformation )
         => this.Annotations =
             this.Annotations.Add(
-                addAnnotationTransformation.TargetDeclaration.ToRef(),
+                addAnnotationTransformation.TargetDeclaration,
                 addAnnotationTransformation.AnnotationInstance );
 
     private void RemoveAttributes( RemoveAttributesTransformation removeAttributes )
     {
-        var attributes = this.GetAttributeCollection( removeAttributes.ContainingDeclaration.ToRef(), true );
+        var attributes = this.GetAttributeCollection( removeAttributes.ContainingDeclaration, true );
         attributes.Remove( removeAttributes.AttributeType );
     }
 
@@ -342,19 +342,23 @@ public sealed partial class CompilationModel
 
         switch ( replaced )
         {
-            case IConstructor { IsStatic: false } replacedConstructor:
-                var constructors = this.GetConstructorCollection( replacedConstructor.DeclaringType.ToRef(), true );
-                constructors.Remove( replacedConstructor.ToRef() );
+            case IRef<IConstructor> replacedConstructor:
+                if ( !replacedConstructor.GetStrategy().IsStatic( replacedConstructor ) )
+                {
+                    var constructors = this.GetConstructorCollection( replacedConstructor.ContainingDeclaration.AssertNotNull().As<INamedType>(), true );
+                    constructors.Remove( replacedConstructor );
+                }
+                else
+                {
+                    // Nothing to do, static constructor is replaced in the collection earlier.
+                }
 
                 break;
 
-            case IConstructor { IsStatic: true }:
-                // Nothing to do, static constructor is replaced in the collection earlier.
-                break;
 
-            case IField replacedField:
-                var fields = this.GetFieldCollection( replacedField.DeclaringType.ToRef(), true );
-                fields.Remove( replacedField.ToRef() );
+            case IRef<IField> replacedField:
+                var fields = this.GetFieldCollection( replacedField.ContainingDeclaration.AssertNotNull(  ).As<INamedType>(), true );
+                fields.Remove( replacedField );
 
                 break;
 
@@ -367,11 +371,11 @@ public sealed partial class CompilationModel
         {
             if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                var newBuilder = introduceDeclarationTransformation.DeclarationBuilder;
+                var newBuilder = introduceDeclarationTransformation.DeclarationBuilderData;
 
                 Invariant.Assert( !(replacedMember is IBuiltDeclarationRef replacedBuilderRef && newBuilder.Equals( replacedBuilderRef.BuilderData )) );
 
-                this._redirections = this._redirections.Add( replacedMember.ToRef(), newBuilder );
+                this._redirections = this._redirections.Add( replacedMember, newBuilder );
             }
             else
             {
@@ -380,12 +384,14 @@ public sealed partial class CompilationModel
         }
     }
 
-    private void AddDeclaration( IDeclaration declaration )
+    private void AddDeclaration( DeclarationBuilderData declaration )
     {
+        // TODO Perf: switch on DeclarationKind,
+        
         switch ( declaration )
         {
-            case IMethodBuilder { MethodKind: MethodKind.Finalizer } finalizer:
-                var finalizerDeclaringType = finalizer.DeclaringType.ToRef();
+            case MethodBuilderData { MethodKind: MethodKind.Finalizer } finalizer:
+                var finalizerDeclaringType = finalizer.DeclaringType;
 
                 if ( this._finalizers.ContainsKey( finalizerDeclaringType ) )
                 {
@@ -397,20 +403,20 @@ public sealed partial class CompilationModel
 
                 break;
 
-            case IMethod method:
-                var methods = this.GetMethodCollection( method.DeclaringType.ToRef(), true ).AssertCast<MethodUpdatableCollection>();
+            case MethodBuilderData method:
+                var methods = this.GetMethodCollection( method.DeclaringType, true ).AssertCast<MethodUpdatableCollection>();
                 methods.Add( method.ToRef() );
 
                 break;
 
-            case IConstructor { IsStatic: false } constructor:
-                var constructors = this.GetConstructorCollection( constructor.DeclaringType.ToRef(), true );
+            case ConstructorBuilderData { IsStatic: false } constructor:
+                var constructors = this.GetConstructorCollection( constructor.DeclaringType, true );
                 constructors.Add( constructor.ToRef() );
 
                 break;
 
-            case IConstructorBuilder { IsStatic: true } staticConstructorBuilder:
-                var staticCtorDeclaringType = staticConstructorBuilder.DeclaringType.ToRef();
+            case ConstructorBuilderData { IsStatic: true } staticConstructorBuilder:
+                var staticCtorDeclaringType = staticConstructorBuilder.DeclaringType;
 
                 if ( this._staticConstructors.ContainsKey( staticCtorDeclaringType ) )
                 {
@@ -422,45 +428,45 @@ public sealed partial class CompilationModel
 
                 break;
 
-            case IField field:
-                var fields = this.GetFieldCollection( field.DeclaringType.ToRef(), true );
+            case FieldBuilderData field:
+                var fields = this.GetFieldCollection( field.DeclaringType, true );
                 fields.Add( field.ToRef() );
 
                 break;
 
-            case IProperty property:
-                var properties = this.GetPropertyCollection( property.DeclaringType.ToRef(), true );
+            case PropertyBuilderData property:
+                var properties = this.GetPropertyCollection( property.DeclaringType, true );
                 properties.Add( property.ToRef() );
 
                 break;
 
-            case IIndexer indexer:
-                var indexers = this.GetIndexerCollection( indexer.DeclaringType.ToRef(), true );
+            case IndexerBuilderData indexer:
+                var indexers = this.GetIndexerCollection( indexer.DeclaringType, true );
                 indexers.Add( indexer.ToRef() );
 
                 break;
 
-            case IEvent @event:
-                var events = this.GetEventCollection( @event.DeclaringType.ToRef(), true );
+            case EventBuilderData @event:
+                var events = this.GetEventCollection( @event.DeclaringType, true );
                 events.Add( @event.ToRef() );
 
                 break;
 
-            case IParameterBuilder parameter:
-                var parameters = this.GetParameterCollection( parameter.DeclaringMember.ToRef().As<IHasParameters>(), true );
+            case ParameterBuilderData parameter:
+                var parameters = this.GetParameterCollection( parameter.ContainingDeclaration.As<IHasParameters>(), true );
                 parameters.Add( parameter );
 
                 break;
 
-            case AttributeBuilder attribute:
-                var attributes = this.GetAttributeCollection( attribute.ContainingDeclaration.ToRef(), true );
+            case AttributeBuilderData attribute:
+                var attributes = this.GetAttributeCollection( attribute.ContainingDeclaration, true );
                 attributes.Add( attribute );
 
                 break;
 
-            case INamedType namedType:
+            case NamedTypeBuilderData namedType:
                 var types = this.GetNamedTypeCollectionByParent(
-                    namedType.ContainingDeclaration.AssertNotNull().ToRef().As<INamespaceOrNamedType>(),
+                    namedType.ContainingDeclaration.AssertNotNull().As<INamespaceOrNamedType>(),
                     true );
 
                 types.Add( namedType.ToRef() );
@@ -473,9 +479,9 @@ public sealed partial class CompilationModel
 
                 break;
 
-            case INamespace @namespace:
+            case NamespaceBuilderData @namespace:
                 var namespaces = this.GetNamespaceCollection(
-                    @namespace.ContainingNamespace.AssertNotNull().ToRef(),
+                    @namespace.ContainingDeclaration.AssertNotNull().As<INamespace>(),
                     true );
 
                 namespaces.Add( @namespace.ToRef() );
@@ -491,15 +497,15 @@ public sealed partial class CompilationModel
     {
         var introduceInterface = (IntroduceInterfaceTransformation) transformation;
 
-        var targetType = (INamedType) introduceInterface.ContainingDeclaration;
+        var targetType = introduceInterface.TargetType;
 
-        var interfaces = this.GetInterfaceImplementationCollection( targetType.ToRef(), true );
+        var interfaces = this.GetInterfaceImplementationCollection( targetType, true );
 
         interfaces.Add( introduceInterface );
 
-        foreach ( var type in new[] { targetType }.Concat( this.GetDerivedTypes( targetType ) ) )
+        foreach ( var type in this.GetDerivedTypes( targetType ).Concat( targetType ) )
         {
-            var allInterfaces = this.GetAllInterfaceImplementationCollection( type.ToRef(), true );
+            var allInterfaces = this.GetAllInterfaceImplementationCollection( type, true );
 
             allInterfaces.Add( introduceInterface );
         }

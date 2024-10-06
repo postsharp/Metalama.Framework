@@ -8,6 +8,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -65,15 +66,15 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public IProperty? OverridingProperty => null;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => throw new NotSupportedException();
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => throw new NotSupportedException();
-    IRef<IField> IField.ToRef() => throw new NotImplementedException();
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
+
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Immutable.ToRef();
+
+    IRef<IField> IField.ToRef() => this.Immutable.ToRef();
 
     public IInjectMemberTransformation ToTransformation()
     {
-        this.Freeze();
-
-        return new IntroduceFieldTransformation( this.ParentAdvice, this );
+        return new IntroduceFieldTransformation( this.ParentAdvice, this.Immutable );
     }
 
     public Writeability Writeability
@@ -137,4 +138,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     public bool IsRequired { get; set; }
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+    
+    [Memo]
+    public FieldBuilderData Immutable => new FieldBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

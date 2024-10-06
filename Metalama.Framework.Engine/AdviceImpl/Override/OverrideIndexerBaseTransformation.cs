@@ -20,11 +20,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIndexerTransformation
 {
-    private new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
+    private new IRef<IIndexer> OverriddenDeclaration => (IRef<IIndexer>) base.OverriddenDeclaration;
 
     protected OverrideIndexerBaseTransformation(
         Advice advice,
-        IIndexer overriddenDeclaration,
+        IRef<IIndexer> overriddenDeclaration,
         IObjectReader tags )
         : base( advice, overriddenDeclaration, tags ) { }
 
@@ -33,12 +33,14 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+
         var setAccessorDeclarationKind =
-            this.OverriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
+            overriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
                 ? SyntaxKind.InitAccessorDeclaration
                 : SyntaxKind.SetAccessorDeclaration;
 
-        var modifiers = this.OverriddenDeclaration
+        var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
@@ -49,17 +51,17 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                 IndexerDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList( modifiers ),
-                    context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration )
+                    context.SyntaxGenerator.IndexerType( overriddenDeclaration )
                         .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Token( SyntaxKind.ThisKeyword ),
                     TransformationHelper.GetIndexerOverrideParameterList(
                         context.Compilation,
                         context.SyntaxGenerationContext,
-                        this.OverriddenDeclaration,
+                        overriddenDeclaration,
                         context.InjectionNameProvider.GetOverriddenByType(
-                            this.ParentAdvice.AspectInstance,
-                            this.OverriddenDeclaration,
+                            this.AspectInstance,
+                            overriddenDeclaration,
                             context.SyntaxGenerationContext ) ),
                     AccessorList(
                         List(
@@ -83,25 +85,25 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                                 .AssertNoneNull() ) ),
                     null,
                     default ),
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
+                overriddenDeclaration.ToRef() )
         };
 
         return overrides;
     }
 
-    protected SyntaxUserExpression CreateProceedDynamicExpression( MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
+    protected SyntaxUserExpression CreateProceedDynamicExpression( MemberInjectionContext context, IMethod accessor, TemplateKind templateKind, IIndexer overriddenDeclaration )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
                 this.CreateProceedGetExpression( context ),
                 templateKind,
-                this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
+                overriddenDeclaration.GetMethod.AssertNotNull() ),
             MethodKind.PropertySet => new SyntaxUserExpression(
                 this.CreateProceedSetExpression( context ),
-                this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType ),
+                overriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType ),
             _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 
@@ -109,13 +111,13 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         => TransformationHelper.CreateIndexerProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration,
-            this.ParentAdvice.AspectLayerId );
+            this.OverriddenDeclaration.GetTarget(context.Compilation),
+            this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreateIndexerProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration,
-            this.ParentAdvice.AspectLayerId );
+            this.OverriddenDeclaration.GetTarget(context.Compilation),
+            this.AspectLayerId );
 }

@@ -22,12 +22,11 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
         IObjectReader templateArguments )
         : base( parameters, template, direction, tags, templateArguments ) { }
 
-    protected override AddContractAdviceResult<IFieldOrPropertyOrIndexer> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddContractAdviceResult<IFieldOrPropertyOrIndexer> Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var serviceProvider = context.ServiceProvider;
+        var contextCopy = context;
+        var targetDeclaration = this.TargetDeclaration;
 
         switch ( targetDeclaration )
         {
@@ -39,13 +38,15 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
             case IField field:
                 var promotedField = PromotedFieldBuilder.Create( serviceProvider, field, ObjectReader.Empty, this );
-                addTransformation( promotedField.ToTransformation() );
-                OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
+                promotedField.Freeze();
+                context.AddTransformation( promotedField.ToTransformation() );
+                OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this, context.AddTransformation );
 
                 return AddContractToProperty( promotedField );
 
             case IIndexer indexer:
-                addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                context.AddTransformation(
+                    new ContractIndexerTransformation( this, indexer.ToRef(), null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
                 return CreateSuccessResult( indexer );
 
@@ -55,7 +56,7 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
         AddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContractToProperty( IProperty property )
         {
-            addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+            contextCopy.AddTransformation( new ContractPropertyTransformation( this, property.ToRef(), this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
             return CreateSuccessResult( property );
         }

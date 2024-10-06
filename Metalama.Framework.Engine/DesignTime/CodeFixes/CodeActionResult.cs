@@ -35,11 +35,11 @@ public sealed class CodeActionResult
     public static CodeActionResult Success( IEnumerable<SyntaxTree> modifiedTrees )
         => Success( modifiedTrees.Select( JsonSerializationHelper.CreateSerializableSyntaxTree ).ToImmutableArray() );
 
-    public static CodeActionResult Error( string message ) => Error( new[] { message } );
+    public static CodeActionResult Error( string message ) => Error( [message] );
 
     public static CodeActionResult Error( IEnumerable<string> messages ) => new( ImmutableArray<SerializableSyntaxTree>.Empty, messages.ToImmutableArray() );
 
-    public static CodeActionResult Error( Diagnostic diagnostic ) => Error( new[] { diagnostic } );
+    public static CodeActionResult Error( Diagnostic diagnostic ) => Error( [diagnostic] );
 
     public static CodeActionResult Error( IEnumerable<Diagnostic> diagnostic )
         => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetLocalizedMessage() ) );

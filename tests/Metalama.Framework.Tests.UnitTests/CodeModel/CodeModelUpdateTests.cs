@@ -37,6 +37,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
+        methodBuilder.Freeze();
         compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -68,6 +69,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
+        methodBuilder.Freeze();
         compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -94,6 +96,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
+        methodBuilder.Freeze();
         compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -120,6 +123,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
+        methodBuilder.Freeze();
         compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -168,6 +172,7 @@ void M(int p){}
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
+        methodBuilder.Freeze();
         compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -195,6 +200,7 @@ void M(int p){}
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
+        methodBuilder.Freeze();
         compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -221,6 +227,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        fieldBuilder.Freeze();
         compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -244,6 +251,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        fieldBuilder.Freeze();
         compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -270,6 +278,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        fieldBuilder.Freeze();
         compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -293,6 +302,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        fieldBuilder.Freeze();
         compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -362,12 +372,13 @@ class C
 
         Assert.Empty( type.Attributes );
 
-        compilation.AddTransformation(
-            new AttributeBuilder(
-                    null!,
-                    type,
-                    AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) )
-                .ToTransformation() );
+        var attributeBuilder = new AttributeBuilder(
+            null!,
+            type,
+            AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
+        attributeBuilder.Freeze();
+
+        compilation.AddTransformation( attributeBuilder.ToTransformation() );
 
         Assert.Single( type.Attributes );
     }

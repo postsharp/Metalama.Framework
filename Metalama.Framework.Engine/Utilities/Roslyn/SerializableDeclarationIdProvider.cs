@@ -18,7 +18,7 @@ public static class SerializableDeclarationIdProvider
 {
     private const string _assemblyPrefix = "Assembly:";
 
-    private static readonly char[] _separators = new[] { ';', '=' };
+    private static readonly char[] _separators = [';', '='];
 
     public static SerializableDeclarationId GetSerializableId( this ISymbol symbol ) => symbol.GetSerializableId( RefTargetKind.Default );
 

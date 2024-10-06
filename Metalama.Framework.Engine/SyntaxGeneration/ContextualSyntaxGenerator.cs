@@ -271,7 +271,7 @@ internal sealed partial class ContextualSyntaxGenerator
             switch ( genericParameter.TypeKindConstraint )
             {
                 case TypeKindConstraint.Class:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     var constraint = ClassOrStructConstraint( SyntaxKind.ClassConstraint );
 
                     if ( genericParameter.HasDefaultConstructorConstraint )
@@ -284,13 +284,13 @@ internal sealed partial class ContextualSyntaxGenerator
                     break;
 
                 case TypeKindConstraint.Struct:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( ClassOrStructConstraint( SyntaxKind.StructConstraint ) );
 
                     break;
 
                 case TypeKindConstraint.Unmanaged:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
 
                     constraints.Add(
                         TypeConstraint(
@@ -299,13 +299,13 @@ internal sealed partial class ContextualSyntaxGenerator
                     break;
 
                 case TypeKindConstraint.NotNull:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( TypeConstraint( SyntaxFactory.IdentifierName( "notnull" ) ) );
 
                     break;
 
                 case TypeKindConstraint.Default:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( DefaultConstraint() );
 
                     break;
@@ -313,20 +313,20 @@ internal sealed partial class ContextualSyntaxGenerator
 
             foreach ( var typeConstraint in genericParameter.TypeConstraints )
             {
-                constraints ??= new List<TypeParameterConstraintSyntax>();
+                constraints ??= [];
 
                 constraints.Add( TypeConstraint( this.Type( typeConstraint ) ) );
             }
 
             if ( genericParameter.HasDefaultConstructorConstraint )
             {
-                constraints ??= new List<TypeParameterConstraintSyntax>();
+                constraints ??= [];
                 constraints.Add( ConstructorConstraint() );
             }
 
             if ( constraints != null )
             {
-                clauses ??= new List<TypeParameterConstraintClauseSyntax>();
+                clauses ??= [];
 
                 clauses.Add(
                     TypeParameterConstraintClause(
@@ -455,6 +455,8 @@ internal sealed partial class ContextualSyntaxGenerator
 
         return interpolatedString.WithContents( List( contents ) );
     }
+
+    public TypeSyntax Type( IRef<IType> type ) => this.Type( (ITypeSymbol) ((ISymbolRef) type).Symbol);
 
     public TypeSyntax Type( IType type, bool bypassSymbols = false )
     {
@@ -881,7 +883,7 @@ internal sealed partial class ContextualSyntaxGenerator
     public BlockSyntax FormattedBlock() => this.MemoizedFormattedBlock;
 
     [Memo]
-    private BlockSyntax MemoizedFormattedBlock => this.FormattedBlock( Array.Empty<StatementSyntax>() );
+    private BlockSyntax MemoizedFormattedBlock => this.FormattedBlock( [] );
 
     public BlockSyntax FormattedBlock( params StatementSyntax[] statements ) => this.FormattedBlock( (IEnumerable<StatementSyntax>) statements );
 

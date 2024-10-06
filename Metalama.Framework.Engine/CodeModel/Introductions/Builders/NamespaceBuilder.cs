@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -33,6 +34,8 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public bool IsPartial => false;
 
+    public override bool IsDesignTimeObservable => true;
+
     public override IDeclaration? ContainingDeclaration => this.ContainingNamespace;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
@@ -43,7 +46,7 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     {
         this.Freeze();
 
-        return new IntroduceNamespaceTransformation( this.ParentAdvice, this );
+        return new IntroduceNamespaceTransformation( this.ParentAdvice, this.Immutable );
     }
 
     public NamespaceBuilder( Advice advice, INamespace containingNamespace, string name ) : base( advice, name )
@@ -60,8 +63,11 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     }
 
 
-    IRef<INamespace> INamespace.ToRef() => throw new NotSupportedException();
+    IRef<INamespace> INamespace.ToRef() => this.Immutable.ToRef();
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => throw new NotSupportedException();
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
+    
+    [Memo]
+    public NamespaceBuilderData Immutable => new NamespaceBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 
 }

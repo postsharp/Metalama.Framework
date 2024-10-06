@@ -12,28 +12,33 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INamespace, NamespaceBuilder>
 {
+    private readonly string _name;
+
     public override AdviceKind AdviceKind => AdviceKind.IntroduceNamespace;
 
     public IntroduceNamespaceAdvice(
         AdviceConstructorParameters<INamespace> parameters,
         string name ) : base( parameters, null )
     {
-        this.Builder = new NamespaceBuilder( this, parameters.TargetDeclaration.AssertNotNull(), name );
+        this._name = name;
     }
 
-    protected override IntroductionAdviceResult<INamespace> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override NamespaceBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.As<INamespace>().GetTarget( compilation );
-        var existingNamespace = targetDeclaration.Namespaces.OfName( this.Builder.Name );
+        return new NamespaceBuilder( this, (INamespace) this.TargetDeclaration.AssertNotNull(), this._name );
+    }
+
+    protected override IntroductionAdviceResult<INamespace> ImplementCore( NamespaceBuilder builder, in AdviceImplementationContext context ) 
+    {
+        builder.Freeze();
+        var targetDeclaration = (INamespace) this.TargetDeclaration;
+        var existingNamespace = targetDeclaration.Namespaces.OfName( builder.Name );
 
         if ( existingNamespace == null )
         {
-            addTransformation( this.Builder.ToTransformation() );
+            context.AddTransformation( builder.ToTransformation() );
 
-            return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {

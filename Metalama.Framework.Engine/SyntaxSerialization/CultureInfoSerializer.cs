@@ -15,11 +15,10 @@ internal sealed class CultureInfoSerializer : ObjectSerializer<CultureInfo>
                 serializationContext.GetTypeSyntax( typeof(CultureInfo) ),
                 ArgumentList(
                     SeparatedList(
-                        new[]
-                        {
-                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( obj.Name ) ) ),
+                    [
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( obj.Name ) ) ),
                             Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) )
-                        } ) ),
+                    ] ) ),
                 null )
             .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
 

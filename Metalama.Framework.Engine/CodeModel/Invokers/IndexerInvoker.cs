@@ -41,7 +41,7 @@ internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
 
     private ExpressionSyntax CreateIndexerAccess( object?[]? args, SyntaxSerializationContext context )
     {
-        args ??= Array.Empty<object>();
+        args ??= [];
 
         var receiverInfo = this.GetReceiverInfo( context );
         var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context );

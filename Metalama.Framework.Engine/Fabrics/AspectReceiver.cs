@@ -631,12 +631,12 @@ namespace Metalama.Framework.Engine.Fabrics
                                         break;
 
                                     case INamedType type:
-                                        types = new[] { type };
+                                        types = [type];
 
                                         break;
 
                                     case var _ when declaration.GetTopmostNamedType() is { } topmostType:
-                                        types = new[] { topmostType };
+                                        types = [topmostType];
 
                                         break;
 

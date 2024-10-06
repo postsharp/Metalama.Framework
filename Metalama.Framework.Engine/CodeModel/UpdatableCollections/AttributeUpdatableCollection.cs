@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
@@ -24,23 +25,21 @@ internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollect
 
     protected override void PopulateAllItems( Action<IRef<IAttribute>> action )
     {
-        this._parent.GetCollectionStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
+        this._parent.GetStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
     }
 
-    public void Add( AttributeBuilder attribute )
+    public void Add( AttributeBuilderData attribute )
     {
         this.EnsureComplete();
         this.AddItem( new BuilderAttributeRef( attribute ) );
     }
 
-    public void Remove( INamedType namedType )
+    public void Remove( IRef<INamedType> namedType )
     {
         this.EnsureComplete();
 
-        // TODO: Do not resolve the AttributeRef.
-        var itemsToRemove = this.Where( x => x.GetTarget( namedType.Compilation ).Constructor.DeclaringType.Is( namedType ) )
-            .ToReadOnlyList();
-
+        var itemsToRemove = this.Where( x => ((AttributeRef) x).AttributeType.IsConvertibleTo( namedType ) );
+        
         foreach ( var item in itemsToRemove )
         {
             this.RemoveItem( item );

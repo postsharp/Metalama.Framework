@@ -20,33 +20,30 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
         IObjectReader templateArguments )
         : base( parameters, template, direction, tags, templateArguments ) { }
 
-    protected override AddContractAdviceResult<IParameter> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddContractAdviceResult<IParameter> Implement( in AdviceImplementationContext context ) 
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
         switch ( targetDeclaration )
         {
             case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
-                addTransformation(
-                    new ContractIndexerTransformation( this, indexer, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                context.AddTransformation(
+                    new ContractIndexerTransformation( this, indexer.ToRef(), parameter.ToRef(), this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
                 return CreateSuccessResult( parameter );
 
             case IParameter { ContainingDeclaration: IMethod method } parameter:
-                addTransformation(
-                    new ContractMethodTransformation( this, method, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                context.AddTransformation(
+                    new ContractMethodTransformation( this, method.ToRef(), parameter.ToRef(), this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
                 return CreateSuccessResult( parameter );
 
             case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
-                addTransformation(
+                context.AddTransformation(
                     new ContractConstructorTransformation(
                         this,
-                        constructor,
-                        parameter,
+                        constructor.ToRef(),
+                        parameter.ToRef(),
                         this.Direction,
                         this.Template,
                         this.TemplateArguments,
