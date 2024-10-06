@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
@@ -21,7 +19,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-        var fieldBuilder = this.BuilderData.ToRef().GetTarget(context.Compilation);
+        var fieldBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
 
         // If template fails to expand, we will still generate the field, albeit without the initializer.
         _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
@@ -45,7 +43,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
 
         var field =
             FieldDeclaration(
-                AdviceSyntaxGenerator.GetAttributeLists( fieldBuilder, context ), 
+                AdviceSyntaxGenerator.GetAttributeLists( fieldBuilder, context ),
                 fieldBuilder.GetSyntaxModifierList(),
                 VariableDeclaration(
                     syntaxGenerator.Type( fieldBuilder.Type )

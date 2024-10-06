@@ -4,13 +4,9 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
@@ -29,7 +25,7 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceAttribute;
 
-    protected override AddAttributeAdviceResult Implement( in AdviceImplementationContext context ) 
+    protected override AddAttributeAdviceResult Implement( in AdviceImplementationContext context )
     {
         var targetDeclaration = this.TargetDeclaration;
         var contextCopy = context;

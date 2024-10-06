@@ -62,13 +62,16 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
+        var setTemplateDeclaration = this._setTemplate?.TemplateMember.DeclarationRef.GetTarget( this.SourceCompilation );
+        var getTemplateDeclaration = this._getTemplate?.TemplateMember.DeclarationRef.GetTarget( this.SourceCompilation );
+
         var serviceProvider = context.ServiceProvider;
 
         if ( this._getTemplate != null )
         {
             var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
 
-            builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
+            builder.Type = typeRewriter.Visit( getTemplateDeclaration.ReturnType );
         }
         else if ( this._setTemplate != null )
         {
@@ -80,7 +83,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
             {
                 // There may be an invalid template without runtime parameters.
 
-                builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[lastRuntimeParameter.SourceIndex].Type );
+                builder.Type = typeRewriter.Visit( setTemplateDeclaration.Parameters[lastRuntimeParameter.SourceIndex].Type );
             }
         }
 
@@ -91,17 +94,17 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
         if ( this._getTemplate != null )
         {
-            CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, builder.GetMethod.AssertNotNull(), serviceProvider );
+            CopyTemplateAttributes( getTemplateDeclaration, builder.GetMethod.AssertNotNull(), serviceProvider );
 
             CopyTemplateAttributes(
-                this._getTemplate.TemplateMember.Declaration.ReturnParameter,
+                getTemplateDeclaration.ReturnParameter,
                 builder.GetMethod!.ReturnParameter,
                 serviceProvider );
         }
 
         if ( this._setTemplate != null )
         {
-            CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration, builder.SetMethod!, serviceProvider );
+            CopyTemplateAttributes( setTemplateDeclaration, builder.SetMethod!, serviceProvider );
 
             var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
 
@@ -110,28 +113,28 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                 // There may be an invalid template without runtime parameters.
 
                 CopyTemplateAttributes(
-                    this._setTemplate.TemplateMember.Declaration.Parameters[lastRuntimeParameter.SourceIndex],
+                    setTemplateDeclaration.Parameters[lastRuntimeParameter.SourceIndex],
                     builder.SetMethod.AssertNotNull().Parameters.Last(),
                     serviceProvider );
             }
 
             CopyTemplateAttributes(
-                this._setTemplate.TemplateMember.Declaration.ReturnParameter,
+                setTemplateDeclaration.ReturnParameter,
                 builder.SetMethod.AssertNotNull().ReturnParameter,
                 serviceProvider );
         }
 
-        var (accessorTemplateForAttributeCopy, skipLastParameter) =
+        var (accessorTemplateForAttributeCopy, accessorTemplateDeclarationForAttributeCopy, skipLastParameter) =
             this._getTemplate == null
-                ? (this._setTemplate!.TemplateMember, true)
-                : (this._getTemplate.TemplateMember, false);
+                ? (this._setTemplate!.TemplateMember, setTemplateDeclaration, true)
+                : (this._getTemplate.TemplateMember, getTemplateDeclaration, false);
 
         var runtimeParameters = accessorTemplateForAttributeCopy.TemplateClassMember.RunTimeParameters;
 
         for ( var i = 0; i < runtimeParameters.Length - (skipLastParameter ? 1 : 0); i++ )
         {
             var runtimeParameter = runtimeParameters[i];
-            var templateParameter = accessorTemplateForAttributeCopy.Declaration.Parameters[runtimeParameter.SourceIndex];
+            var templateParameter = accessorTemplateDeclarationForAttributeCopy.Parameters[runtimeParameter.SourceIndex];
             var parameterBuilder = builder.Parameters[i];
 
             CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
@@ -166,7 +169,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
     protected override IntroductionAdviceResult<IIndexer> ImplementCore( IndexerBuilder builder, in AdviceImplementationContext context )
     {
         builder.Freeze();
-        
+
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
         var targetDeclaration = this.TargetDeclaration;
 

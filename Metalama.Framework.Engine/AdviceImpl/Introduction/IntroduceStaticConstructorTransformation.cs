@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
@@ -24,7 +23,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var constructorBuilder = this.BuilderData.ToRef().GetTarget(context.Compilation);
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
 
         var syntax =
             ConstructorDeclaration(

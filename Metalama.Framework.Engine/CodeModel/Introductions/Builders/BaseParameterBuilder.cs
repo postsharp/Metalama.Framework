@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
@@ -54,7 +53,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
                 true ) );
 
     [Memo]
-    public ParameterBuilderData Immutable => new ParameterBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public ParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 
     public override bool IsDesignTimeObservable => true;
 }

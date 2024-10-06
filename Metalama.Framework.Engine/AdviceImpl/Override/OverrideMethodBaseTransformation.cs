@@ -33,14 +33,13 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             context.SyntaxGenerationContext,
             this.CreateInvocationExpression( context ),
             templateKind,
-            this.OverriddenDeclaration.GetTarget(context.Compilation) );
+            this.OverriddenDeclaration.GetTarget( context.Compilation ) );
 
     protected InjectedMember[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
     {
         TypeSyntax? returnType = null;
 
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
-        
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async | ModifierCategories.Unsafe )
@@ -67,8 +66,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
 
             if ( overriddenDeclaration.ReturnType.Equals( SpecialType.Void ) )
             {
-                returnType = context.SyntaxGenerator.Type(
-                    overriddenDeclaration.GetCompilationContext().ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
+                returnType = context.SyntaxGenerator.Type( overriddenDeclaration.GetCompilationContext().ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
             }
         }
 
@@ -119,7 +117,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             MethodKind.Operator =>
                 context.AspectReferenceSyntaxProvider.GetOperatorReference(
                     this.AspectLayerId,
-                    (IMethod) this.TargetDeclaration.GetTarget(context.Compilation),
+                    (IMethod) this.TargetDeclaration.GetTarget( context.Compilation ),
                     context.SyntaxGenerator ),
             _ => throw new AssertionFailedException( $"Unsupported method kind: {overriddenDeclaration} is {overriddenDeclaration.MethodKind}." )
         };

@@ -34,12 +34,15 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     /// </summary>
     protected ContractDirection ContractDirection { get; }
 
+    public TemplateProvider TemplateProvider { get; }
+
     protected ContractBaseTransformation(
         Advice advice,
         IRef<IMember> targetMember,
         IRef<IDeclaration> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
+        TemplateProvider templateProvider,
         IObjectReader templateArguments,
         IObjectReader tags ) : base( advice )
     {
@@ -48,6 +51,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         this.TargetMember = targetMember;
         this.ContractTarget = contractTarget;
         this.ContractDirection = contractDirection;
+        this.TemplateProvider = templateProvider;
         this._template = template;
         this._templateArguments = templateArguments;
         this._tags = tags;
@@ -64,12 +68,12 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         [NotNullWhen( true )] out BlockSyntax? contractBlock )
     {
         var annotatedValueExpression = TypeAnnotationMapper.AddExpressionTypeAnnotation( valueExpression, valueType );
-        var boundTemplate = this._template.ForContract( annotatedValueExpression, this._templateArguments );
+        var boundTemplate = this._template.ForContract( annotatedValueExpression, this.TemplateProvider, this._templateArguments );
 
         var metaApiProperties = new MetaApiProperties(
             this.OriginalCompilation,
             context.DiagnosticSink,
-            this._template.Cast(),
+            this._template.AsMemberOrNamedType(),
             this._tags,
             this.AspectLayerId,
             context.SyntaxGenerationContext,
@@ -78,14 +82,14 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
             MetaApiStaticity.Default );
 
         var metaApi = MetaApi.ForDeclaration(
-            this.ContractTarget.GetTarget(context.Compilation),
+            this.ContractTarget.GetTarget( context.Compilation ),
             metaApiProperties,
             this.ContractDirection );
 
         var expansionContext = new TemplateExpansionContext(
             context,
             metaApi,
-            this.TargetMember.GetTarget(context.Compilation),
+            this.TargetMember.GetTarget( context.Compilation ),
             boundTemplate,
             null,
             this.AspectLayerId );

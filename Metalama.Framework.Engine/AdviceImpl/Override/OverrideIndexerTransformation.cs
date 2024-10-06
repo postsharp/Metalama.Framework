@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -38,7 +37,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         if ( overriddenDeclaration.GetMethod != null )
         {
@@ -98,13 +97,11 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         [NotNullWhen( true )] out BlockSyntax? body )
     {
         var overriddenDeclaration = (IIndexer) this.OverriddenDeclaration.GetTarget( context.Compilation );
-            
+
         SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind )
         {
             return this.CreateProceedDynamicExpression( context, accessor, kind, overriddenDeclaration );
         }
-
-        
 
         var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
             overriddenDeclaration,
@@ -112,7 +109,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
             new MetaApiProperties(
                 this.OriginalCompilation,
                 context.DiagnosticSink,
-                accessorTemplate.TemplateMember.Cast(),
+                accessorTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,

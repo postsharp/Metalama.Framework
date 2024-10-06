@@ -14,6 +14,13 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
 {
     internal static class AsyncHelper
     {
+        public static bool IsAsyncSafe( this IMethodSymbol method )
+            => method.MetadataToken == 0
+                ? method.IsAsync
+                : method.GetAttributes()
+                    .Any(
+                        a => a.AttributeConstructor?.ContainingType.Name is nameof(AsyncStateMachineAttribute) or nameof(AsyncIteratorStateMachineAttribute) );
+
         public static AsyncInfo GetAsyncInfoImpl( this IMethod method )
         {
             var isAwaitable = TryGetAsyncInfo( method.ReturnType, out var resultType, out var hasMethodBuilder );

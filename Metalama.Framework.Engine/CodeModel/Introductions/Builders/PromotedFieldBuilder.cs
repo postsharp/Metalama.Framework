@@ -6,21 +6,17 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
@@ -102,7 +98,7 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
         };
 
     public override SyntaxTree? PrimarySyntaxTree => this.OriginalSourceFieldOrFieldBuilder.PrimarySyntaxTree;
-    
+
     public override IInjectMemberTransformation ToTransformation()
         => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalSourceFieldOrFieldBuilder, this.Immutable );
 

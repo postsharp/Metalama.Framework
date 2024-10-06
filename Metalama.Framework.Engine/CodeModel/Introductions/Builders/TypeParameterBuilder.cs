@@ -82,7 +82,7 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
     IRef<ITypeParameter> ITypeParameter.ToRef() => this.Immutable.ToRef();
 
     IRef<IType> IType.ToRef() => this.Immutable.ToRef();
-    
+
     [Memo]
-    public TypeParameterBuilderData Immutable => new TypeParameterBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );   
+    public TypeParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

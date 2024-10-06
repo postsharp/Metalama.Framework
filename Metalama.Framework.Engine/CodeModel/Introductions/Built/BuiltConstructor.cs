@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -34,7 +35,7 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     protected override MemberBuilderData MemberBuilder => this._constructorBuilder;
 
-    public override bool IsExplicitInterfaceImplementation => throw new System.NotImplementedException();
+    public override bool IsExplicitInterfaceImplementation => throw new NotImplementedException();
 
     [Memo]
     public IParameterList Parameters
@@ -42,22 +43,19 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
             this,
             this.Compilation.GetParameterCollection( this._constructorBuilder.ToRef() ) );
 
-    
-    
     public MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     IRef<IMethodBase> IMethodBase.ToRef() => this.ToRef();
 
     [Memo]
     private IRef<IConstructor> Ref
-        => (IRef<IConstructor>?) ((ICompilationBoundRefImpl?) this._constructorBuilder.ReplacedImplicitConstructor)?.WithGenericContext(
-               this.GenericContext )
+        => (IRef<IConstructor>?) ((ICompilationBoundRefImpl?) this._constructorBuilder.ReplacedImplicitConstructor)?.WithGenericContext( this.GenericContext )
            ?? this.RefFactory.FromBuilt<IConstructor>( this );
 
     public IRef<IConstructor> ToRef() => this.Ref;
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-    
+
     public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 
     bool IConstructor.IsPrimary => false;

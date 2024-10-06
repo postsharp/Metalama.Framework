@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -36,7 +35,6 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     public override IDeclaration ContainingDeclaration { get; }
 
-    
     IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
     IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
@@ -75,11 +73,9 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
-    
-    [Memo]
-    public AttributeBuilderData Immutable => new AttributeBuilderData( this, this.ContainingDeclaration.ToRef() );
-    
-    public IRef<IAttribute> ToRef() => this.Immutable.ToRef();
 
-    
+    [Memo]
+    public AttributeBuilderData Immutable => new( this, this.ContainingDeclaration.ToRef() );
+
+    public new IRef<IAttribute> ToRef() => this.Immutable.ToRef();
 }

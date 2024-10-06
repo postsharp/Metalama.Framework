@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodBase = System.Reflection.MethodBase;
@@ -109,8 +108,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
     [Memo]
-    public IParameter ReturnParameter
-        => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );
+    public IParameter ReturnParameter => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );
 
     [Memo]
     public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
@@ -123,11 +121,11 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) 
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
         => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
     [Memo]
-    public IMethod? OverriddenMethod => this.MapDeclaration(this._accessorBuilder.OverriddenMethod);
+    public IMethod? OverriddenMethod => this.MapDeclaration( this._accessorBuilder.OverriddenMethod );
 
     public INamedType DeclaringType => this._builtMember.DeclaringType;
 
@@ -140,7 +138,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public override IDeclaration? ContainingDeclaration => this._builtMember;
 
-    public System.Reflection.MethodBase ToMethodBase() => CompileTimeMethodInfo.Create(  this );
+    public MethodBase ToMethodBase() => CompileTimeMethodInfo.Create( this );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 

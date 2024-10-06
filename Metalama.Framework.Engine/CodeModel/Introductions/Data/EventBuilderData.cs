@@ -1,10 +1,10 @@
-﻿using Metalama.Framework.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 internal class EventBuilderData : MemberBuilderData
 {
     private readonly IRef<IEvent> _ref;
-    
+
     public ImmutableArray<IAttributeData> FieldAttributes { get; }
 
     public IRef<INamedType> Type { get; }
@@ -30,16 +30,16 @@ internal class EventBuilderData : MemberBuilderData
     public MethodBuilderData RemoveMethod { get; }
 
     public IRef<IEvent>? OverriddenEvent { get; }
-    
+
     public IReadOnlyList<IRef<IEvent>> ExplicitInterfaceImplementations { get; }
-    
+
     public IExpression? InitializerExpression { get; }
 
     public TemplateMember<IEvent>? InitializerTemplate { get; }
 
     public EventBuilderData( EventBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IEvent>( this);
+        this._ref = new DeclarationBuilderDataRef<IEvent>( this );
 
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.Type = builder.Type.ToRef();
@@ -56,14 +56,13 @@ internal class EventBuilderData : MemberBuilderData
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public IRef<IEvent> ToRef() => this._ref;
+    public new IRef<IEvent> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
     public override IRef<IMember>? OverriddenMember => this.OverriddenEvent;
-    
+
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
 
     public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations() => base.GetOwnedDeclarations().Concat( [this.AddMethod, this.RemoveMethod] );
-    
 }

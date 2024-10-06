@@ -114,15 +114,15 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     IMethod IMethod.Definition => this;
 
-    
     IMember IMember.Definition => this;
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
     IRef<IMethod> IMethod.ToRef() => throw new NotSupportedException();
-    IRef<IMember> IMember.ToRef() => throw new NotSupportedException();
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => throw new NotSupportedException();
 
+    IRef<IMember> IMember.ToRef() => throw new NotSupportedException();
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => throw new NotSupportedException();
 
     public bool IsPartial => false;
 
@@ -306,6 +306,4 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
-
-  
 }

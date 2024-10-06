@@ -31,11 +31,8 @@ internal abstract class MemberOrNamedTypeBuilderData : NamedDeclarationBuilderDa
     public bool IsAbstract { get; }
 
     public bool IsStatic { get; }
-    
+
     public bool IsPartial { get; }
 
-    
     public IRef<INamedType>? DeclaringType => this.ContainingDeclaration as IRef<INamedType>;
-    
-    
 }

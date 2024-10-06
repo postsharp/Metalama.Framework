@@ -28,7 +28,6 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
     public bool IsPartial => this.MemberOrNamedTypeBuilder.IsPartial;
-    
 
     [Memo]
     public INamedType? DeclaringType => this.MapDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );
@@ -42,6 +41,4 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
     protected abstract IMemberOrNamedType GetDefinition();
 
     IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => (IRef<IMemberOrNamedType>) this.ToDeclarationRef();
-
-
 }

@@ -3,17 +3,13 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -85,8 +81,9 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             {
                 ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
+
             constructorBuilder.Freeze();
-            
+
             initializedConstructor = constructorBuilder;
             context.AddTransformation( constructorBuilder.ToTransformation() );
         }
@@ -182,7 +179,8 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                     case PullActionKind.UseExpression:
                         parameterValue =
                             pullParameterAction.Expression.AssertNotNull()
-                                .ToExpressionSyntax( new SyntaxSerializationContext( contextCopy.Compilation, chainedSyntaxGenerationContext, constructor.DeclaringType ) );
+                                .ToExpressionSyntax(
+                                    new SyntaxSerializationContext( contextCopy.Compilation, chainedSyntaxGenerationContext, constructor.DeclaringType ) );
 
                         break;
 
@@ -200,7 +198,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
                         recursiveParameterBuilder.Freeze();
-                        
+
                         contextCopy.AddTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder.Immutable ) );
 
                         var recursiveParameter = recursiveParameterBuilder;

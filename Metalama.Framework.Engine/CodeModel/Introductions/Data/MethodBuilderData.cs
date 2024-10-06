@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -14,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 internal class MethodBuilderData : MemberBuilderData
 {
     private readonly IRef<IMethod> _ref;
-    
+
     public IReadOnlyList<IRef<IMethod>> ExplicitInterfaceImplementations { get; }
 
     public bool IsReadOnly { get; }
@@ -41,7 +40,7 @@ internal class MethodBuilderData : MemberBuilderData
         builder,
         containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IMethod>( this);
+        this._ref = new DeclarationBuilderDataRef<IMethod>( this );
 
         this.IsReadOnly = builder.IsReadOnly;
         this.IsIteratorMethod = builder.IsIteratorMethod.AssertNotNull();
@@ -53,7 +52,7 @@ internal class MethodBuilderData : MemberBuilderData
         this.MethodKind = builder.MethodKind;
         this.OperatorKind = builder.OperatorKind;
     }
-    
+
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;

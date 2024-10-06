@@ -42,11 +42,13 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
     protected override EventBuilder CreateBuilder( in AdviceImplementationContext context )
     {
+        var templateDeclaration = this.Template.DeclarationRef.GetTarget( this.SourceCompilation );
+
         return new EventBuilder(
             this,
             this.TargetDeclaration,
             this.MemberName,
-            this.Template?.Declaration != null && this.Template.Declaration.IsEventField() == true,
+            this.Template?.DeclarationRef != null && templateDeclaration.IsEventField() == true,
             this.Tags ) { InitializerTemplate = this.Template.GetInitializerTemplate() };
     }
 
@@ -59,9 +61,13 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
         var serviceProvider = context.ServiceProvider;
 
+        var templateDeclaration = this.Template.DeclarationRef.GetTarget( this.SourceCompilation );
+
         if ( this._addTemplate != null || this._removeTemplate != null )
         {
             var primaryTemplate = (this._addTemplate ?? this._removeTemplate).AssertNotNull();
+            var primaryTemplateDeclaration = primaryTemplate.Declaration.GetTarget( this.SourceCompilation );
+
             var runtimeParameters = primaryTemplate.TemplateMember.TemplateClassMember.RunTimeParameters;
 
             var typeRewriter = TemplateTypeRewriter.Get( primaryTemplate );
@@ -70,7 +76,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             {
                 // There may be an invalid template without runtime parameters, in which case type cannot be determined.
 
-                var rewrittenType = typeRewriter.Visit( primaryTemplate.Declaration.Parameters[runtimeParameters[0].SourceIndex].Type );
+                var rewrittenType = typeRewriter.Visit( primaryTemplateDeclaration.Parameters[runtimeParameters[0].SourceIndex].Type );
 
                 if ( rewrittenType is not INamedType rewrittenNamedType )
                 {
@@ -83,12 +89,12 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         else if ( this.Template != null )
         {
             // Case for event fields.
-            builder.Type = this.Template.Declaration.Type;
+            builder.Type = templateDeclaration.Type;
         }
 
         if ( this.Template != null )
         {
-            if ( this.Template.Declaration.GetSymbol().AssertSymbolNotNull().GetBackingField() is { } backingField )
+            if ( templateDeclaration.GetSymbol().AssertSymbolNotNull().GetBackingField() is { } backingField )
             {
                 var classificationService = context.ServiceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
@@ -97,7 +103,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                 {
                     if ( classificationService.MustCopyTemplateAttribute( attribute ) )
                     {
-                        builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), builder ) );
+                        builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation, builder ) );
                     }
                 }
             }
@@ -105,14 +111,17 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
         if ( this._addTemplate != null )
         {
-            AddAttributeForAccessorTemplate( this._addTemplate.TemplateMember.TemplateClassMember, this._addTemplate.Declaration, builder.AddMethod );
+            AddAttributeForAccessorTemplate(
+                this._addTemplate.TemplateMember.TemplateClassMember,
+                this._addTemplate.Declaration.GetTarget( this.SourceCompilation ),
+                builder.AddMethod );
         }
         else if ( this.Template != null )
         {
             // Case for event fields.
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,
-                this.Template.AssertNotNull().Declaration.AddMethod,
+                templateDeclaration.AddMethod,
                 builder.AddMethod );
         }
 
@@ -120,7 +129,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         {
             AddAttributeForAccessorTemplate(
                 this._removeTemplate.TemplateMember.TemplateClassMember,
-                this._removeTemplate.Declaration,
+                this._removeTemplate.Declaration.GetTarget( this.SourceCompilation ),
                 builder.RemoveMethod );
         }
         else if ( this.Template != null )
@@ -128,7 +137,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             // Case for event fields.
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,
-                this.Template.AssertNotNull().Declaration.RemoveMethod,
+                templateDeclaration.RemoveMethod,
                 builder.RemoveMethod );
         }
 
@@ -154,12 +163,15 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
     protected override IntroductionAdviceResult<IEvent> ImplementCore( EventBuilder builder, in AdviceImplementationContext context )
     {
         builder.Freeze();
-        
+
+        var templateDeclaration = this.Template.DeclarationRef.GetTarget( this.SourceCompilation );
+
         // this.Tags: Override transformations.
         var targetDeclaration = this.TargetDeclaration;
 
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
-        var hasNoOverrideSemantics = this.Template?.Declaration != null && this.Template.Declaration.IsEventField() == true;
+
+        var hasNoOverrideSemantics = this.Template?.DeclarationRef != null && templateDeclaration.IsEventField() == true;
 
         if ( existingDeclaration == null )
         {

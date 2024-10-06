@@ -1,15 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
@@ -30,6 +26,7 @@ internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransform
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceAttribute;
 
     public DeclarationBuilderData DeclarationBuilderData => this.AttributeBuilder;
-    
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce attribute of type '{this.AttributeBuilder.Type}' into '{this.TargetDeclaration}'";
+
+    public override FormattableString ToDisplayString( CompilationModel compilation )
+        => $"Introduce attribute of type '{this.AttributeBuilder.Type}' into '{this.TargetDeclaration}'";
 }

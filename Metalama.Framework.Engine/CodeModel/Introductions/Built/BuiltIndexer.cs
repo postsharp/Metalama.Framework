@@ -63,7 +63,6 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 
     public object SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
 
-
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations

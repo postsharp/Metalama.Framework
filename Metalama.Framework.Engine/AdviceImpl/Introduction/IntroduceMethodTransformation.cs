@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -23,7 +22,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var methodBuilder = this.BuilderData.ToRef().GetTarget(context.Compilation);
+        var methodBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
 
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -50,7 +49,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                 Invariant.Assert( methodBuilder.Parameters.Count == 1 );
 
                 var syntax = ConversionOperatorDeclaration(
-                    AdviceSyntaxGenerator.GetAttributeLists(  methodBuilder, context ),
+                    AdviceSyntaxGenerator.GetAttributeLists( methodBuilder, context ),
                     methodBuilder.GetSyntaxModifierList(),
                     SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                     explicitInterfaceSpecifier,

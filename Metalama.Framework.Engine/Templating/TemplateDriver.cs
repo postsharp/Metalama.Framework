@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Templating
             CopyTemplateArguments( templateArguments, allArguments, 1, templateExpansionContext.SyntaxGenerationContext );
 
             if ( !this._userCodeInvoker.TryInvoke(
-                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateProvider.Object, allArguments ).AssertNotNull(),
+                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateProvider!.Value.Object, allArguments ).AssertNotNull(),
                     templateExpansionContext,
                     out var output ) )
             {

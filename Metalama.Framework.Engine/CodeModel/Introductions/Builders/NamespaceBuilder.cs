@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
@@ -23,7 +22,6 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public INamespace? ContainingNamespace { get; }
 
-    
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     [Memo]
@@ -62,12 +60,10 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         return null;
     }
 
-
     IRef<INamespace> INamespace.ToRef() => this.Immutable.ToRef();
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
-    
-    [Memo]
-    public NamespaceBuilderData Immutable => new NamespaceBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 
+    [Memo]
+    public NamespaceBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Source;
@@ -128,10 +127,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
             ISymbol symbol,
             RefTargetKind targetKind = RefTargetKind.Default )
             where T : class, ICompilationElement
-            => new SymbolRef<T>( symbol, this._compilationContext, targetKind );
+            => new( symbol, this._compilationContext, targetKind );
 
-        public SymbolRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol )
-            => new SymbolRef<IParameter>( methodSymbol, this._compilationContext, RefTargetKind.Return );
+        public SymbolRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, this._compilationContext, RefTargetKind.Return );
 
         internal SymbolRef<ICompilation> Compilation( CompilationContext compilationContext )
         {

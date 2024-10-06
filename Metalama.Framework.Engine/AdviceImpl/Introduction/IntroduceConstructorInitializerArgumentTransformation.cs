@@ -25,8 +25,11 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
 
     private ExpressionSyntax Value { get; }
 
-    public IntroduceConstructorInitializerArgumentTransformation( Advice advice, IRef<IConstructor> constructor, int parameterIndex, ExpressionSyntax value ) : base(
-        advice )
+    public IntroduceConstructorInitializerArgumentTransformation(
+        Advice advice,
+        IRef<IConstructor> constructor,
+        int parameterIndex,
+        ExpressionSyntax value ) : base( advice )
     {
         this.Constructor = constructor;
         this.ParameterIndex = parameterIndex;
@@ -42,5 +45,6 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertConstructorInitializerArgument;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation )
+        => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
 }

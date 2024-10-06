@@ -32,7 +32,7 @@ internal static class OverrideHelper
                 {
                     var propertyBuilder = PromotedFieldBuilder.Create( serviceProvider, field, tags, advice );
                     propertyBuilder.Freeze();
-                    
+
                     addTransformation( propertyBuilder.ToTransformation() );
                     addTransformation( new OverridePropertyTransformation( advice, propertyBuilder.ToRef(), getTemplate, setTemplate, tags ) );
 

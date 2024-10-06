@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -32,8 +31,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
         if ( typeBuilder.BaseType != null && typeBuilder.BaseType.SpecialType != SpecialType.Object )
         {
             baseList = BaseList(
-                SingletonSeparatedList<BaseTypeSyntax>(
-                    SimpleBaseType( context.SyntaxGenerator.Type( typeBuilder.BaseType.ToNonNullableType() ) ) ) );
+                SingletonSeparatedList<BaseTypeSyntax>( SimpleBaseType( context.SyntaxGenerator.Type( typeBuilder.BaseType.ToNonNullableType() ) ) ) );
         }
         else
         {
@@ -49,8 +47,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                         ? null
                         : TypeParameterList(
                             SeparatedList(
-                                ((IEnumerable<TypeParameterBuilder>) typeBuilder.TypeParameters).Select(
-                                    tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
+                                ((IEnumerable<TypeParameterBuilder>) typeBuilder.TypeParameters).Select( tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
                     baseList,
                     List<TypeParameterConstraintClauseSyntax>(),
                     List<MemberDeclarationSyntax>() )
@@ -88,5 +85,4 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                 throw new AssertionFailedException( $"Unsupported containing declaration type '{typeBuilder.ContainingDeclaration.GetType()}'." );
         }
     }
-    
 }

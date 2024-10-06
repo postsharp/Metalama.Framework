@@ -67,7 +67,7 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public override int GetHashCode() => this._typeParameterBuilder.GetHashCode();
 
-    public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration.AssertNotNull(  )).CanBeInherited; 
+    public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration.AssertNotNull()).CanBeInherited;
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 }

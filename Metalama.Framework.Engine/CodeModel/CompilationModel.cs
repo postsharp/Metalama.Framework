@@ -4,7 +4,6 @@ using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
@@ -12,7 +11,6 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
@@ -412,7 +410,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType, options );
         }
-        
+
         public IEnumerable<IRef<INamedType>> GetDerivedTypes( IRef<INamedType> baseType, DerivedTypesOptions options = default )
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );

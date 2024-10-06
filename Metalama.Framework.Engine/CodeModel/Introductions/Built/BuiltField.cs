@@ -4,13 +4,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -29,15 +29,15 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     // DeclarationKind is always a field even if the underlying builder may be a PromotedField i.e. a property.
     public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-    public override DeclarationBuilderData BuilderData =>  this.FieldBuilder;
+    public override DeclarationBuilderData BuilderData => this.FieldBuilder;
 
     protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.FieldBuilder;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder =>  this.FieldBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.FieldBuilder;
 
     protected override MemberBuilderData MemberBuilder => this.FieldBuilder;
 
-    public override bool IsExplicitInterfaceImplementation => throw new System.NotImplementedException();
+    public override bool IsExplicitInterfaceImplementation => throw new NotImplementedException();
 
     public Writeability Writeability => this.FieldBuilder.Writeability;
 
@@ -66,7 +66,7 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Ref;
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-    
+
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
     public bool IsRequired => this.FieldBuilder.IsRequired;

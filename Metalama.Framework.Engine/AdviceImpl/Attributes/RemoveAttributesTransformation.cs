@@ -30,5 +30,6 @@ internal sealed class RemoveAttributesTransformation : BaseSyntaxTreeTransformat
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.RemoveAttributes;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Remove attributes of type '{this.AttributeType}' from '{this.TargetDeclaration}'";
+    public override FormattableString ToDisplayString( CompilationModel compilation )
+        => $"Remove attributes of type '{this.AttributeType}' from '{this.TargetDeclaration}'";
 }

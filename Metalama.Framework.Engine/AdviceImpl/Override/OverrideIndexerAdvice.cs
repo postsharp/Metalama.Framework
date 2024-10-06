@@ -4,10 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -29,7 +25,7 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
-    protected override OverrideMemberAdviceResult<IIndexer> Implement( in AdviceImplementationContext context ) 
+    protected override OverrideMemberAdviceResult<IIndexer> Implement( in AdviceImplementationContext context )
     {
         var targetDeclaration = this.TargetDeclaration;
 

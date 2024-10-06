@@ -367,8 +367,7 @@ public abstract class TemplateClass : IDiagnosticSource
                         compilationModelForTemplateReflection.CompilationContext.SymbolTranslator.Translate( x.Symbol, x.SymbolCompilation )
                             .AssertNotNull() ),
                     x.TemplateClassMember,
-                    x.Attribute
-                    ) );
+                    x.Attribute ) );
     }
 
     private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, Compilation SymbolCompilation, DeclarativeAdviceAttribute Attribute)>

@@ -102,7 +102,6 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public INamespace ContainingNamespace { get; }
 
-    
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     INamespace INamedType.ContainingNamespace => this.ContainingNamespace;
@@ -197,7 +196,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 
     [Memo]
-    public IAttributeCollection Attributes => new AttributeBuilderCollection();
+    public new IAttributeCollection Attributes => new AttributeBuilderCollection();
 
     public override bool IsDesignTimeObservable => true;
 
@@ -258,10 +257,12 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
 
-    public IRef<INamedType> ToRef() => this.Immutable.ToRef();
+    public new IRef<INamedType> ToRef() => this.Immutable.ToRef();
+
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
+
     IRef<IType> IType.ToRef() => this.Immutable.ToRef();
-    
+
     [Memo]
-    public NamedTypeBuilderData Immutable => new NamedTypeBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public NamedTypeBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

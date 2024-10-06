@@ -153,7 +153,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         serviceProvider,
         UserCodeDescription.Create(
             "executing the template method '{0}' in the context of the aspect '{1}' applied to '{2}'",
-            template?.TemplateMember.Declaration.GetSymbol(),
+            template?.TemplateMember.DeclarationRef.GetSymbol( syntaxGenerationContext.CompilationContext.Compilation ),
             metaApi.AspectInstance?.AspectClass.FullName,
             metaApi.AspectInstance?.TargetDeclaration ),
         syntaxGenerationContext.CompilationContext,
@@ -164,6 +164,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         metaApi: metaApi )
     {
         this._template = template?.TemplateMember;
+        this.TemplateProvider = template?.TemplateProvider;
         this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext, metaApi.Type );
         this.SyntaxGenerationContext = syntaxGenerationContext;
@@ -212,6 +213,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.TemplateGenericArguments = prototype.TemplateGenericArguments;
         this._proceedExpressionProvider = prototype._proceedExpressionProvider;
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
+        this.TemplateProvider = prototype.TemplateProvider;
     }
 
     private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template ) : base( prototype )
@@ -226,9 +228,10 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.TemplateGenericArguments = prototype.TemplateGenericArguments;
         this._proceedExpressionProvider = prototype._proceedExpressionProvider;
         this._otherTemplateClassProvider = prototype._otherTemplateClassProvider;
+        this.TemplateProvider = prototype.TemplateProvider;
     }
 
-    public TemplateProvider TemplateProvider => this._template.AssertNotNull().TemplateProvider;
+    public TemplateProvider? TemplateProvider { get; }
 
     public SyntaxSerializationService SyntaxSerializationService { get; }
 
@@ -692,7 +695,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
                     (aspectClass?.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
-                     targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration),
+                     targetLanguageVersion.Value.ToDisplayString(), Declaration: templateMember.DeclarationRef.GetTarget( context.Compilation )),
                     deduplicationKey: aspectClass?.FullName ) );
         }
     }

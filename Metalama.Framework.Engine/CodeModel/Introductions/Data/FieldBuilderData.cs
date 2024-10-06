@@ -5,8 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
@@ -26,14 +24,15 @@ internal class FieldBuilderData : MemberBuilderData
     public bool IsRequired { get; }
 
     public IExpression? InitializerExpression { get; }
-    
-    public TemplateMember<IField>? InitializerTemplate { get;  }
+
+    public TemplateMember<IField>? InitializerTemplate { get; }
 
     public TypedConstant? ConstantValue { get; }
-    
+
     public MethodBuilderData GetMethod { get; }
+
     public MethodBuilderData SetMethod { get; }
-    
+
     public IRef<IProperty>? OverridingProperty { get; }
 
     public FieldBuilderData( FieldBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
@@ -45,7 +44,7 @@ internal class FieldBuilderData : MemberBuilderData
         this.RefKind = builder.RefKind;
         this.IsRequired = builder.IsRequired;
         this.InitializerExpression = builder.InitializerExpression;
-        this.InitializerTemplate  = builder.InitializerTemplate;
+        this.InitializerTemplate = builder.InitializerTemplate;
         this.ConstantValue = builder.ConstantValue;
         this.GetMethod = new MethodBuilderData( builder.GetMethod, this._ref );
         this.SetMethod = new MethodBuilderData( builder.SetMethod, this._ref );
@@ -64,6 +63,4 @@ internal class FieldBuilderData : MemberBuilderData
     public override IRef<IMember>? OverriddenMember => null;
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => [];
-
-    
 }

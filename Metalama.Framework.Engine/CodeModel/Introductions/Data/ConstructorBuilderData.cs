@@ -4,8 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -15,16 +13,17 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 internal class ConstructorBuilderData : MemberBuilderData
 {
     private readonly IRef<IConstructor> _ref;
-    
+
     public IRef<IConstructor>? ReplacedImplicitConstructor { get; }
+
     public ImmutableArray<ParameterBuilderData> Parameters { get; }
-    
+
     public ConstructorInitializerKind InitializerKind { get; }
-    
+
     public ImmutableArray<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
-    
+
     public new IRef<IConstructor> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
@@ -33,15 +32,13 @@ internal class ConstructorBuilderData : MemberBuilderData
         builder,
         containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IConstructor>( this);
+        this._ref = new DeclarationBuilderDataRef<IConstructor>( this );
 
         this.Parameters = builder.Parameters.ToImmutable( this._ref );
         this.ReplacedImplicitConstructor = builder.ReplacedImplicitConstructor?.ToRef();
         this.InitializerKind = builder.InitializerKind;
         this.InitializerArguments = ImmutableArray.ToImmutableArray( builder.InitializerArguments );
     }
-
-    
 
     public override IRef<IMember>? OverriddenMember => null;
 

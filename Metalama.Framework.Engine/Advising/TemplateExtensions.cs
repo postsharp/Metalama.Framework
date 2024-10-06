@@ -2,10 +2,10 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -15,15 +15,17 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( propertyTemplate != null )
             {
-                if ( !propertyTemplate.Declaration.IsAutoPropertyOrField.GetValueOrDefault() )
+                var templatePropertySymbol = (IPropertySymbol) propertyTemplate.DeclarationRef.Symbol;
+
+                if ( !templatePropertySymbol.IsAutoProperty().GetValueOrDefault() )
                 {
-                    TemplateMember<IMethod>? GetAccessorTemplate( IMethod? accessor )
+                    TemplateMember<IMethod>? GetAccessorTemplate( IMethodSymbol? accessor )
                     {
                         if ( accessor != null && propertyTemplate.TemplateClassMember.Accessors.TryGetValue(
-                                accessor.GetSymbol()!.MethodKind,
+                                accessor.MethodKind,
                                 out var template ) )
                         {
-                            return TemplateMemberFactory.Create( accessor, template );
+                            return TemplateMemberFactory.Create<IMethod>( accessor, template, propertyTemplate.DeclarationRef.CompilationContext );
                         }
                         else
                         {
@@ -31,8 +33,8 @@ namespace Metalama.Framework.Engine.Advising
                         }
                     }
 
-                    return (GetAccessorTemplate( propertyTemplate.Declaration.GetMethod ),
-                            GetAccessorTemplate( propertyTemplate.Declaration.SetMethod ));
+                    return (GetAccessorTemplate( templatePropertySymbol.GetMethod ),
+                            GetAccessorTemplate( templatePropertySymbol.SetMethod ));
                 }
             }
 
@@ -43,15 +45,17 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( eventTemplate != null )
             {
-                if ( !eventTemplate.Declaration.IsEventField().GetValueOrDefault() )
+                var templateEventSymbol = (IEventSymbol) eventTemplate.DeclarationRef.Symbol;
+
+                if ( !templateEventSymbol.IsEventField().GetValueOrDefault() )
                 {
-                    TemplateMember<IMethod>? GetAccessorTemplate( IMethod? accessor )
+                    TemplateMember<IMethod>? GetAccessorTemplate( IMethodSymbol? accessor )
                     {
                         if ( accessor != null && eventTemplate.TemplateClassMember.Accessors.TryGetValue(
-                                accessor.GetSymbol()!.MethodKind,
+                                accessor.MethodKind,
                                 out var template ) )
                         {
-                            return TemplateMemberFactory.Create( accessor, template );
+                            return TemplateMemberFactory.Create<IMethod>( accessor, template, eventTemplate.DeclarationRef.CompilationContext );
                         }
                         else
                         {
@@ -59,8 +63,8 @@ namespace Metalama.Framework.Engine.Advising
                         }
                     }
 
-                    return (GetAccessorTemplate( eventTemplate.Declaration.AddMethod ),
-                            GetAccessorTemplate( eventTemplate.Declaration.RemoveMethod ));
+                    return (GetAccessorTemplate( templateEventSymbol.AddMethod ),
+                            GetAccessorTemplate( templateEventSymbol.RemoveMethod ));
                 }
             }
 
@@ -85,11 +89,12 @@ namespace Metalama.Framework.Engine.Advising
             };
 
         public static bool MustInterpretAsAsyncTemplate( this TemplateMember<IMethod> template )
-            => template.Declaration is { IsAsync: true }
+            => ((IMethodSymbol) template.DeclarationRef.Symbol).IsAsyncSafe()
                || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsyncTemplate());
 
         public static bool MustInterpretAsAsyncIteratorTemplate( this TemplateMember<IMethod> template )
-            => template.InterpretedKind.IsAsyncIteratorTemplate() && (template.Declaration.IsAsync || template.SelectedKind == TemplateKind.Default);
+            => template.InterpretedKind.IsAsyncIteratorTemplate()
+               && (((IMethodSymbol) template.DeclarationRef.Symbol).IsAsyncSafe() || template.SelectedKind == TemplateKind.Default);
 
         public static TemplateMember<IField>? GetInitializerTemplate( this TemplateMember<IField>? fieldTemplate )
         {
@@ -97,14 +102,15 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( fieldTemplate != null )
             {
-                var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.DeclarationRef.Symbol );
 
                 if ( fieldTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
-                    return TemplateMemberFactory.Create(
-                        fieldTemplate.Declaration,
+                    return TemplateMemberFactory.Create<IField>(
+                        fieldTemplate.DeclarationRef.Symbol,
                         fieldTemplate.TemplateClassMember,
                         fieldTemplate.AdviceAttribute.AssertNotNull(),
+                        fieldTemplate.DeclarationRef.CompilationContext,
                         TemplateKind.InitializerExpression );
                 }
                 else
@@ -126,13 +132,14 @@ namespace Metalama.Framework.Engine.Advising
             {
                 // Initializer template is compiled into a template for event.
                 var templateName =
-                    TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
+                    TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.DeclarationRef.Symbol );
 
                 if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
-                    return TemplateMemberFactory.Create(
-                        eventFieldTemplate.Declaration,
+                    return TemplateMemberFactory.Create<IEvent>(
+                        eventFieldTemplate.DeclarationRef.Symbol,
                         eventFieldTemplate.TemplateClassMember,
+                        eventFieldTemplate.DeclarationRef.CompilationContext,
                         TemplateKind.InitializerExpression );
                 }
                 else
@@ -151,13 +158,14 @@ namespace Metalama.Framework.Engine.Advising
             if ( propertyTemplate != null )
             {
                 // Initializer template is compiled into a template for property.
-                var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.DeclarationRef.Symbol );
 
                 if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {
-                    return TemplateMemberFactory.Create(
-                        propertyTemplate.Declaration,
+                    return TemplateMemberFactory.Create<IProperty>(
+                        propertyTemplate.DeclarationRef.Symbol,
                         propertyTemplate.TemplateClassMember,
+                        propertyTemplate.DeclarationRef.CompilationContext,
                         TemplateKind.InitializerExpression );
                 }
                 else

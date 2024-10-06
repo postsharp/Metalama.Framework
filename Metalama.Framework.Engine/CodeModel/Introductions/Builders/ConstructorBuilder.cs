@@ -90,7 +90,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public override MethodBase ToMethodBase() => this.ToConstructorInfo();
 
-    public IRef<IConstructor> ToRef() => this.Immutable.ToRef();
+    public new IRef<IConstructor> ToRef() => this.Immutable.ToRef();
 
     public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
@@ -106,13 +106,12 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
-    
-    public  IInjectMemberTransformation ToTransformation()
-    {
 
+    public IInjectMemberTransformation ToTransformation()
+    {
         return this.IsStatic
             ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this.Immutable )
-            : new IntroduceConstructorTransformation( this.ParentAdvice, this.Immutable);
+            : new IntroduceConstructorTransformation( this.ParentAdvice, this.Immutable );
     }
 
 /*
@@ -124,8 +123,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         */
 
     [Memo]
-    public ConstructorBuilderData Immutable => new ConstructorBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
-
+    public ConstructorBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }
 
 internal static class DeclarationBuilderExtensions
@@ -133,7 +131,7 @@ internal static class DeclarationBuilderExtensions
     public static T AssertFrozen<T>( this T declarationBuilder )
         where T : DeclarationBuilder
     {
-        #if DEBUG
+#if DEBUG
         if ( !declarationBuilder.IsFrozen )
         {
             throw new AssertionFailedException( $"The {declarationBuilder.GetType().Name} was expected to be frozen." );

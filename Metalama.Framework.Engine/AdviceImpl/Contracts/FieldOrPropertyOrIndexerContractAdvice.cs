@@ -4,11 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
@@ -46,7 +42,15 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
             case IIndexer indexer:
                 context.AddTransformation(
-                    new ContractIndexerTransformation( this, indexer.ToRef(), null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                    new ContractIndexerTransformation(
+                        this,
+                        indexer.ToRef(),
+                        null,
+                        this.Direction,
+                        this.Template,
+                        this.TemplateArguments,
+                        this.Tags,
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( indexer );
 
@@ -56,7 +60,15 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
 
         AddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContractToProperty( IProperty property )
         {
-            contextCopy.AddTransformation( new ContractPropertyTransformation( this, property.ToRef(), this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+            contextCopy.AddTransformation(
+                new ContractPropertyTransformation(
+                    this,
+                    property.ToRef(),
+                    this.Direction,
+                    this.Template,
+                    this.TemplateArguments,
+                    this.Tags,
+                    this.TemplateProvider ) );
 
             return CreateSuccessResult( property );
         }

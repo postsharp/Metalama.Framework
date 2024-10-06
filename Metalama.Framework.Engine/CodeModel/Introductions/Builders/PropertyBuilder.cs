@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
@@ -59,7 +58,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     IProperty IProperty.Definition => this;
 
-    
     public virtual IField? OriginalField => null;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
@@ -142,11 +140,10 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = [interfaceProperty];
 
-    public IRef<IProperty> ToRef() => this.Immutable.ToRef();
+    public new IRef<IProperty> ToRef() => this.Immutable.ToRef();
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
-    
-    [Memo]
-    public PropertyBuilderData Immutable => new PropertyBuilderData( this.AssertFrozen(), this.DeclaringType.ToRef() );   
 
+    [Memo]
+    public PropertyBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToRef() );
 }

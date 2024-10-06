@@ -43,9 +43,11 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
+        var templateDeclaration = this.Template.DeclarationRef.GetTarget( this.SourceCompilation );
+
         var serviceProvider = context.ServiceProvider;
 
-        builder.IsAsync = this.Template!.Declaration.IsAsync;
+        builder.IsAsync = templateDeclaration.IsAsync;
 
         var typeRewriter = TemplateTypeRewriter.Get( this._template );
 
@@ -53,16 +55,17 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
         builder.SetIsIteratorMethod( this.Template.IsIteratorMethod );
 
         // Handle return type.
-        if ( this.Template.Declaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
+
+        if ( templateDeclaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
         {
             // Templates with dynamic return value result in object return type of the introduced member.
             builder.ReturnParameter.Type = builder.Compilation.Cache.SystemObjectType;
         }
         else
         {
-            builder.ReturnParameter.Type = typeRewriter.Visit( this.Template.Declaration.ReturnParameter.Type );
+            builder.ReturnParameter.Type = typeRewriter.Visit( templateDeclaration.ReturnParameter.Type );
 
-            if ( this.Template.Declaration.ReturnParameter.RefKind != RefKind.None )
+            if ( templateDeclaration.ReturnParameter.RefKind != RefKind.None )
             {
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format(
@@ -70,13 +73,13 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
             }
         }
 
-        CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, builder.ReturnParameter, serviceProvider );
+        CopyTemplateAttributes( templateDeclaration.ReturnParameter, builder.ReturnParameter, serviceProvider );
 
         var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
 
         foreach ( var runtimeParameter in runtimeParameters )
         {
-            var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+            var templateParameter = templateDeclaration.Parameters[runtimeParameter.SourceIndex];
 
             var parameterBuilder = builder.AddParameter(
                 templateParameter.Name,
@@ -91,7 +94,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
 
         foreach ( var runtimeTypeParameter in runtimeTypeParameters )
         {
-            var templateTypeParameter = this.Template.AssertNotNull().Declaration.TypeParameters[runtimeTypeParameter.SourceIndex];
+            var templateTypeParameter = templateDeclaration.TypeParameters[runtimeTypeParameter.SourceIndex];
             var typeParameterBuilder = builder.AddTypeParameter( templateTypeParameter.Name );
             typeParameterBuilder.Variance = templateTypeParameter.Variance;
             typeParameterBuilder.HasDefaultConstructorConstraint = templateTypeParameter.HasDefaultConstructorConstraint;

@@ -115,7 +115,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
     public OperatorKind OperatorKind { get; }
 
     IMethod IMethod.Definition => this;
-    
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
@@ -173,8 +173,8 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
         return new IntroduceMethodTransformation( this.ParentAdvice, this.Immutable );
     }
 
-    public IRef<IMethod> ToRef() => this.Immutable.ToRef();
-    
+    public new IRef<IMethod> ToRef() => this.Immutable.ToRef();
+
     [Memo]
-    public MethodBuilderData Immutable => new MethodBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public MethodBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

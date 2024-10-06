@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -32,14 +31,14 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
             return this.CreateProceedExpression( context, kind );
         }
 
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,
             new MetaApiProperties(
                 this.OriginalCompilation,
                 context.DiagnosticSink,
-                this.BoundTemplate.TemplateMember.Cast(),
+                this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,

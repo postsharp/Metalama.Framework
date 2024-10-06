@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -67,7 +65,11 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IParameter, ParameterBuilderData>(
             parameterBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<ParameterBuilderData> args ) => new BuiltParameter( args.Builder, args.Compilation, args.GenericContext, (IHasParameters) args.Builder.ContainingDeclaration.GetTarget(args.Compilation) ) );
+            static ( in CreateFromBuilderArgs<ParameterBuilderData> args ) => new BuiltParameter(
+                args.Builder,
+                args.Compilation,
+                args.GenericContext,
+                (IHasParameters) args.Builder.ContainingDeclaration.GetTarget( args.Compilation ) ) );
 
     internal ITypeParameter GetTypeParameter(
         TypeParameterBuilderData typeParameterBuilder,
@@ -75,7 +77,8 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<ITypeParameter, TypeParameterBuilderData>(
             typeParameterBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<TypeParameterBuilderData> args ) => new BuiltTypeParameter( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<TypeParameterBuilderData> args )
+                => new BuiltTypeParameter( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IMethod GetMethod(
         MethodBuilderData methodBuilder,
@@ -164,13 +167,21 @@ public partial class DeclarationFactory
         {
             // TODO PERF: switch based on DeclarationKind or use an array of delegates.
 
-            MethodBuilderData { ContainingDeclaration.DeclarationKind: DeclarationKind.NamedType } methodBuilder => this.GetMethod( methodBuilder, genericContext ),
-            MethodBuilderData { ContainingDeclaration.DeclarationKind: DeclarationKind.Property or DeclarationKind.Event or DeclarationKind.Field } accessorBuilder =>this.GetAccessor( accessorBuilder, genericContext ),
+            MethodBuilderData { ContainingDeclaration.DeclarationKind: DeclarationKind.NamedType } methodBuilder => this.GetMethod(
+                methodBuilder,
+                genericContext ),
+            MethodBuilderData
+            {
+                ContainingDeclaration.DeclarationKind: DeclarationKind.Property or DeclarationKind.Event or DeclarationKind.Field
+            } accessorBuilder => this.GetAccessor( accessorBuilder, genericContext ),
             FieldBuilderData fieldBuilder when interfaceType == null || interfaceType != typeof(IProperty) => this.GetField( fieldBuilder, genericContext ),
-            FieldBuilderData fieldBuilder when interfaceType == typeof(IProperty) => fieldBuilder.OverridingProperty.AssertNotNull().GetTarget(this._compilationModel,genericContext),
+            FieldBuilderData fieldBuilder when interfaceType == typeof(IProperty) => fieldBuilder.OverridingProperty.AssertNotNull()
+                .GetTarget( this._compilationModel, genericContext ),
             PropertyBuilderData propertyBuilder when interfaceType == null || interfaceType != typeof(IField) =>
                 this.GetProperty( propertyBuilder, genericContext ),
-            PropertyBuilderData propertyBuilder when interfaceType == typeof(IField) => propertyBuilder.GetOriginalField( this._compilationModel, (GenericContext?) genericContext ?? GenericContext.Empty),
+            PropertyBuilderData propertyBuilder when interfaceType == typeof(IField) => propertyBuilder.GetOriginalField(
+                this._compilationModel,
+                (GenericContext?) genericContext ?? GenericContext.Empty ),
             IndexerBuilderData indexerBuilder => this.GetIndexer( indexerBuilder, genericContext ),
             EventBuilderData eventBuilder => this.GetEvent( eventBuilder, genericContext ),
             ParameterBuilderData parameterBuilder => this.GetParameter( parameterBuilder, genericContext ),

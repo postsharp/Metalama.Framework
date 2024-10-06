@@ -431,7 +431,7 @@ internal sealed partial class LinkerInjectionStep
             foreach ( var injectedMember in injectedMembersAtPosition )
             {
                 // We should inject into a correct syntax tree.
-                Invariant.Assert( injectedMember.TargetSyntaxTree == originalSyntaxTree );
+                Invariant.Assert( injectedMember.GetTargetSyntaxTree( this.CompilationContext ) == originalSyntaxTree );
 
                 // Allow for tracking of the node inserted.
                 // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!

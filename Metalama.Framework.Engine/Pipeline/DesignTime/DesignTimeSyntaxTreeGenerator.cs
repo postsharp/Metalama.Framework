@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -105,7 +104,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                          {
                              DeclarationBuilderData: INamedType namedTypeBuilder
                          } introduceDeclarationTransformation
-                         && !transformationsByBucket.ContainsKey( introduceDeclarationTransformation.DeclarationBuilderData.ToRef().As<INamespaceOrNamedType>() ) )
+                         && !transformationsByBucket.ContainsKey(
+                             introduceDeclarationTransformation.DeclarationBuilderData.ToRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
                         ProcessTransformationsOnType( namedTypeBuilder.ToRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );

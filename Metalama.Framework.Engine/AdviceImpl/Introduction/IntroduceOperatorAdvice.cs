@@ -87,14 +87,16 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         var serviceProvider = context.ServiceProvider;
         var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
 
-        CopyTemplateAttributes( this.Template.AssertNotNull().Declaration.ReturnParameter, builder.ReturnParameter, serviceProvider );
+        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
+
+        CopyTemplateAttributes( templateDeclaration.ReturnParameter, builder.ReturnParameter, serviceProvider );
 
         if ( runtimeParameters.Length == builder.Parameters.Count )
         {
             for ( var i = 0; i < runtimeParameters.Length; i++ )
             {
                 var runtimeParameter = runtimeParameters[i];
-                var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+                var templateParameter = templateDeclaration.Parameters[runtimeParameter.SourceIndex];
                 var parameterBuilder = builder.Parameters[i];
 
                 CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
@@ -109,17 +111,15 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
     protected override IntroductionAdviceResult<IMethod> ImplementCore( MethodBuilder builder, in AdviceImplementationContext context )
     {
         builder.Freeze();
-        
+
         var targetDeclaration = this.TargetDeclaration;
         var existingOperator = targetDeclaration.FindClosestVisibleMethod( builder );
 
         if ( existingOperator == null )
         {
-            
             var overriddenOperator = new OverrideOperatorTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
             context.AddTransformation( overriddenOperator );
             context.AddTransformation( builder.ToTransformation() );
-
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }

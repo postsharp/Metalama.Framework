@@ -127,8 +127,8 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public void SetExplicitInterfaceImplementation( IIndexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = [interfaceIndexer];
 
-    public IRef<IIndexer> ToRef() => throw new NotSupportedException();
-    
+    public new IRef<IIndexer> ToRef() => this.Immutable.ToRef();
+
     [Memo]
-    public IndexerBuilderData Immutable => new IndexerBuilderData( this.AssertFrozen(), this.DeclaringType.ToRef() );
+    public IndexerBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToRef() );
 }

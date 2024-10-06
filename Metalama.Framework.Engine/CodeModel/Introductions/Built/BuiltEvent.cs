@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -32,7 +33,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 
     protected override MemberBuilderData MemberBuilder => this.EventBuilder;
 
-    public override bool IsExplicitInterfaceImplementation => throw new System.NotImplementedException();
+    public override bool IsExplicitInterfaceImplementation => throw new NotImplementedException();
 
     [Memo]
     public INamedType Type => this.MapDeclaration( this.EventBuilder.Type );
@@ -60,7 +61,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
-    public EventInfo ToEventInfo() => CompileTimeEventInfo.Create(  this );
+    public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
     [Memo]
     private IRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
@@ -68,7 +69,6 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     public IRef<IEvent> ToRef() => this.Ref;
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
-    
 
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 

@@ -3,23 +3,28 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
-using MethodKind = Metalama.Framework.Code.MethodKind;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class TemplateMember<T> : TemplateMember
     where T : class, IMemberOrNamedType
 {
+    protected override ISymbolRef<IMemberOrNamedType> GetDeclaration() => this.DeclarationRef;
+
+    public new ISymbolRef<T> DeclarationRef { get; }
+
     public TemplateMember(
-        T implementation,
+        ISymbolRef<T> implementation,
         TemplateClassMember templateClassMember,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind = TemplateKind.Default ) : this(
@@ -30,7 +35,7 @@ internal sealed class TemplateMember<T> : TemplateMember
         selectedKind ) { }
 
     public TemplateMember(
-        T implementation,
+        ISymbolRef<T> implementation,
         TemplateClassMember templateClassMember,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind,
@@ -41,19 +46,20 @@ internal sealed class TemplateMember<T> : TemplateMember
         selectedKind,
         interpretedKind )
     {
-        
+        this.DeclarationRef = (ISymbolRef<T>) implementation.As<T>();
     }
 
     public TemplateMember( TemplateMember prototype ) : base( prototype )
     {
-        
+        this.DeclarationRef = (ISymbolRef<T>) prototype.DeclarationRef.As<T>();
     }
-    
 }
 
 internal abstract class TemplateMember
 {
-    public ISymbol Declaration { get; }
+    protected abstract ISymbolRef<IMemberOrNamedType> GetDeclaration();
+
+    public IRef<IMemberOrNamedType> DeclarationRef => this.GetDeclaration();
 
     public TemplateClassMember TemplateClassMember { get; }
 
@@ -88,15 +94,15 @@ internal abstract class TemplateMember
         get;
     }
 
-    private TemplateKind GetEffectiveKind( IMemberOrNamedType declaration )
+    private TemplateKind GetEffectiveKind( ISymbol declaration )
     {
         if ( this.SelectedKind == TemplateKind.Default )
         {
-            if ( declaration is IMethod method && method.GetAsyncInfo() is { IsAsync: true } )
+            if ( declaration is IMethodSymbol method && method.IsAsyncSafe() )
             {
                 if ( this.IsIteratorMethod )
                 {
-                    switch ( method.GetIteratorInfo().EnumerableKind )
+                    switch ( method.GetEnumerableKind() )
                     {
                         case EnumerableKind.IAsyncEnumerable:
                             return TemplateKind.IAsyncEnumerable;
@@ -112,9 +118,9 @@ internal abstract class TemplateMember
             }
             else if ( this.IsIteratorMethod )
             {
-                var iteratorMethod = declaration as IMethod ?? (declaration as IProperty)?.GetMethod;
+                var iteratorMethod = declaration as IMethodSymbol ?? (declaration as IPropertySymbol)?.GetMethod;
 
-                switch ( iteratorMethod?.GetIteratorInfo().EnumerableKind )
+                switch ( iteratorMethod?.GetEnumerableKind() )
                 {
                     case EnumerableKind.IEnumerable:
                         return TemplateKind.IEnumerable;
@@ -129,11 +135,10 @@ internal abstract class TemplateMember
     }
 
     [Memo]
-    public TemplateDriver Driver => this.TemplateClassMember.TemplateClass.GetTemplateDriver( this.Declaration );
+    public TemplateDriver Driver => this.TemplateClassMember.TemplateClass.GetTemplateDriver( this.DeclarationRef );
 
     protected TemplateMember( TemplateMember prototype )
     {
-        this.Declaration = prototype.Declaration;
         this.Accessibility = prototype.Accessibility;
         this.InterpretedKind = prototype.InterpretedKind;
         this.Accessibility = prototype.Accessibility;
@@ -147,7 +152,7 @@ internal abstract class TemplateMember
     }
 
     protected TemplateMember(
-        IMemberOrNamedType implementation,
+        ISymbolRef<IMemberOrNamedType> implementation,
         TemplateClassMember templateClassMember,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind = TemplateKind.Default ) : this(
@@ -158,28 +163,30 @@ internal abstract class TemplateMember
         selectedKind ) { }
 
     protected TemplateMember(
-        IMemberOrNamedType implementation,
+        ISymbolRef<IMemberOrNamedType> implementation,
         TemplateClassMember templateClassMember,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind,
         TemplateKind interpretedKind )
     {
+        var symbol = implementation.Symbol;
+
         this.TemplateClassMember = templateClassMember;
         this.AdviceAttribute = adviceAttribute.AssertNotNull();
 
-        if ( implementation is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
+        if ( symbol is IMethodSymbol { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
              && templateClassMember.Parameters.Length != 1 )
         {
             throw new AssertionFailedException(
-                $"'{implementation}' is an accessor but the template '{templateClassMember.Name}' has {templateClassMember.Parameters.Length} parameters." );
+                $"'{symbol}' is an accessor but the template '{templateClassMember.Name}' has {templateClassMember.Parameters.Length} parameters." );
         }
 
         this.SelectedKind = selectedKind;
         this.InterpretedKind = interpretedKind != TemplateKind.None ? interpretedKind : selectedKind;
-        this.EffectiveKind = this.GetEffectiveKind( implementation );
+        this.EffectiveKind = this.GetEffectiveKind( symbol );
 
         // Get the template characteristics that may disappear or be changed during template compilation.
-        var compiledTemplateAttribute = GetCompiledTemplateAttribute( implementation );
+        var compiledTemplateAttribute = GetCompiledTemplateAttribute( symbol );
 
         // The one defined on the [Template] attribute has priority, then on [Accessibility],
         // then the accessibility of the template itself.
@@ -193,7 +200,7 @@ internal abstract class TemplateMember
             this.IsIteratorMethod = compiledTemplateAttribute.IsIteratorMethod;
         }
 
-        if ( implementation is IProperty property )
+        if ( symbol is IPropertySymbol property )
         {
             if ( property.GetMethod != null )
             {
@@ -209,7 +216,7 @@ internal abstract class TemplateMember
         }
     }
 
-    private static CompiledTemplateAttribute GetCompiledTemplateAttribute( IMemberOrNamedType? declaration )
+    private static CompiledTemplateAttribute GetCompiledTemplateAttribute( ISymbol? declaration )
     {
         var attribute = new CompiledTemplateAttribute() { Accessibility = Accessibility.Private };
 
@@ -219,16 +226,16 @@ internal abstract class TemplateMember
         }
 
         // Set the attribute data with data computed from the code, if available.
-        attribute.Accessibility = declaration.Accessibility;
+        attribute.Accessibility = declaration.DeclaredAccessibility.ToOurAccessibility();
 
-        if ( declaration is IMethod method )
+        if ( declaration is IMethodSymbol method )
         {
-            attribute.IsIteratorMethod = method.IsIteratorMethod() ?? false;
-            attribute.IsAsync = method.IsAsync;
+            attribute.IsIteratorMethod = method.IsIteratorMethod();
+            attribute.IsAsync = method.IsAsyncSafe();
         }
 
         // Override with values stored in the CompiledTemplateAttribute.
-        var attributeData = declaration.Attributes.OfAttributeType( typeof(CompiledTemplateAttribute) ).SingleOrDefault();
+        var attributeData = declaration.GetAttributes().SingleOrDefault( a => a.AttributeClass?.Name == nameof(CompiledTemplateAttribute) );
 
         if ( attributeData == null )
         {
@@ -237,7 +244,7 @@ internal abstract class TemplateMember
 
         if ( attributeData.TryGetNamedArgument( nameof(CompiledTemplateAttribute.Accessibility), out var accessibility ) )
         {
-            attribute.Accessibility = (Accessibility) accessibility.Value!;
+            attribute.Accessibility = ((Microsoft.CodeAnalysis.Accessibility) accessibility.Value!).ToOurAccessibility();
         }
 
         if ( attributeData.TryGetNamedArgument( nameof(CompiledTemplateAttribute.IsAsync), out var isAsync ) )
@@ -253,11 +260,12 @@ internal abstract class TemplateMember
         return attribute;
     }
 
-    public TemplateMember<IMemberOrNamedType> Cast() => this as TemplateMember<IMemberOrNamedType> ?? new TemplateMember<IMemberOrNamedType>( this );
+    public TemplateMember<IMemberOrNamedType> AsMemberOrNamedType()
+        => this as TemplateMember<IMemberOrNamedType> ?? new TemplateMember<IMemberOrNamedType>( this );
 
-    public TemplateMember<TOther> Cast<TOther>()
+    public TemplateMember<TOther> As<TOther>()
         where TOther : class, IMemberOrNamedType
         => this as TemplateMember<TOther> ?? new TemplateMember<TOther>( this );
 
-    public override string ToString() => $"{this.Declaration.Name}:{this.SelectedKind}";
+    public override string ToString() => $"{this.DeclarationRef.Name}:{this.SelectedKind}";
 }

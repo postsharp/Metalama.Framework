@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
@@ -12,12 +11,10 @@ internal abstract class PropertyOrIndexerBuilderData : MemberBuilderData
 {
     protected PropertyOrIndexerBuilderData( PropertyOrIndexerBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-
         this.Type = builder.Type.ToRef();
         this.HasInitOnlySetter = builder.HasInitOnlySetter;
         this.RefKind = builder.RefKind;
         this.Writeability = builder.Writeability;
-
     }
 
     public IRef<IType> Type { get; }
@@ -45,6 +42,4 @@ internal abstract class PropertyOrIndexerBuilderData : MemberBuilderData
             ({ } getMethod, { } setMethod) => owned.Concat( [getMethod, setMethod] )
         };
     }
-    
-    
 }

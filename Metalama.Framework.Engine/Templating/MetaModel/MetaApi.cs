@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
@@ -45,7 +44,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
 
             return TemplatingDiagnosticDescriptors.MetaMemberNotAvailable.CreateException(
-                (this._common.Template.Declaration, "meta.Target." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                (Declaration: this._common.Template.DeclarationRef.GetTarget( this.Compilation ), "meta.Target." + memberName, this.Declaration,
+                 this.Declaration.DeclarationKind,
                  description ?? "I" + memberName, alternativeSuggestion) );
         }
 
@@ -107,7 +107,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                     : $"the target {this.Declaration.DeclarationKind} is static";
 
                 return TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind, explanation) );
+                    (Declaration: this._common.Template.DeclarationRef.GetTarget( this.Compilation ), expressionName, this.Declaration,
+                     this.Declaration.DeclarationKind, explanation) );
             }
 
             return (this._common.Staticity, this._type, this.Declaration) switch

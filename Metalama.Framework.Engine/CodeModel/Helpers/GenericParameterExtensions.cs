@@ -73,5 +73,40 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
 
             return true;
         }
+
+        public static bool IsCompatibleWith( this ITypeParameterSymbol a, ITypeParameter b )
+        {
+            // Check new() constraint.
+            if ( a.HasConstructorConstraint && !b.HasDefaultConstructorConstraint )
+            {
+                return false;
+            }
+
+            // Check type kind.
+            if ( a.HasNotNullConstraint
+                 && b.TypeKindConstraint is not (TypeKindConstraint.NotNull or TypeKindConstraint.Unmanaged or TypeKindConstraint.Struct) )
+            {
+                return false;
+            }
+
+            if ( a.HasValueTypeConstraint && b.TypeKindConstraint is not (TypeKindConstraint.Struct or TypeKindConstraint.Unmanaged) )
+            {
+                return false;
+            }
+
+            if ( a.HasUnmanagedTypeConstraint && b.TypeKindConstraint is not TypeKindConstraint.Unmanaged )
+            {
+                return false;
+            }
+
+            // Check types.
+            if ( a.ConstraintTypes.Any(
+                    aConstraint => !b.TypeConstraints.Any( bConstraint => bConstraint.Is( b.GetCompilationModel().Factory.GetIType( aConstraint ) ) ) ) )
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

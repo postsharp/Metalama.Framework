@@ -6,11 +6,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Linq;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -52,13 +49,15 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
+        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
+
         var typeRewriter = TemplateTypeRewriter.Get( this._template );
 
         var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
 
         foreach ( var runtimeParameter in runtimeParameters )
         {
-            var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+            var templateParameter = templateDeclaration.Parameters[runtimeParameter.SourceIndex];
 
             var parameterBuilder = builder.AddParameter(
                 templateParameter.Name,
@@ -99,10 +98,9 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             }
 
             builder.Freeze();
-            
+
             // There is no existing declaration, we will introduce and override the introduced.
-            
-            
+
             var overriddenConstructor = new OverrideConstructorTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
             context.AddTransformation( builder.ToTransformation() );
             context.AddTransformation( overriddenConstructor );

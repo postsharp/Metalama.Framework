@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
@@ -46,5 +45,6 @@ internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransform
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.ImplementInterface;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Make the type '{this.TargetType}' implement the interface '{this.InterfaceType}'.";
+    public override FormattableString ToDisplayString( CompilationModel compilation )
+        => $"Make the type '{this.TargetType}' implement the interface '{this.InterfaceType}'.";
 }

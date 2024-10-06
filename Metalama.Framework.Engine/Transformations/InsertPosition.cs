@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -45,7 +44,7 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
         this.DeclarationBuilder = builder;
         this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
     }
-    
+
     public InsertPosition( SyntaxTree introducedSyntaxTree )
     {
         this.Relation = InsertPositionRelation.Root;
@@ -69,6 +68,6 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
             {
                 NamedTypeBuilderData namedTypeBuilder => $"{this.Relation} {namedTypeBuilder.AssertNotNull().Name} (built type)",
                 NamespaceBuilderData namespaceBuilder => $"{this.Relation} {namespaceBuilder.AssertNotNull().Name} (built namespace)",
-                _ => throw new AssertionFailedException( $"Unexpected: {this.DeclarationBuilder}" ),
+                _ => throw new AssertionFailedException( $"Unexpected: {this.DeclarationBuilder}" )
             };
 }

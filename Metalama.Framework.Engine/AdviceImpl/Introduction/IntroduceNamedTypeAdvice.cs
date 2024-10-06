@@ -4,11 +4,8 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Linq;
 
@@ -37,11 +34,11 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
     {
         return new NamedTypeBuilder( this, (INamespaceOrNamedType) this.TargetDeclaration.AssertNotNull(), this._explicitName );
     }
-    
-    protected override IntroductionAdviceResult<INamedType> ImplementCore( NamedTypeBuilder builder, in AdviceImplementationContext context ) 
+
+    protected override IntroductionAdviceResult<INamedType> ImplementCore( NamedTypeBuilder builder, in AdviceImplementationContext context )
     {
         builder.Freeze();
-        
+
         var targetDeclaration = (INamespaceOrNamedType) this.TargetDeclaration;
 
         var existingType =

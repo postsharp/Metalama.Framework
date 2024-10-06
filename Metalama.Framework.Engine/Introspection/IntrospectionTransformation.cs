@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
@@ -30,7 +29,8 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
     public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.GetTarget( this._compilation );
 
     [Memo]
-    public FormattableString Description => FormattableStringHelper.MapString( this._transformation.ToDisplayString( this._compilation.GetCompilationModel() ), this._compilation );
+    public FormattableString Description
+        => FormattableStringHelper.MapString( this._transformation.ToDisplayString( this._compilation.GetCompilationModel() ), this._compilation );
 
     [Memo]
     public IDeclaration? IntroducedDeclaration
@@ -38,10 +38,9 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
         {
             IIntroduceDeclarationTransformation introduceDeclarationTransformation => introduceDeclarationTransformation.DeclarationBuilderData.ToRef()
                 .GetTarget( this._compilation ),
-            IIntroduceInterfaceTransformation introduceInterfaceTransformation => introduceInterfaceTransformation.TargetType.GetTarget(
-                this._compilation ),
-            IntroduceParameterTransformation introduceParameterTransformation => introduceParameterTransformation.Parameter.ToRef().GetTarget(
-                this._compilation ),
+            IIntroduceInterfaceTransformation introduceInterfaceTransformation => introduceInterfaceTransformation.TargetType.GetTarget( this._compilation ),
+            IntroduceParameterTransformation introduceParameterTransformation => introduceParameterTransformation.Parameter.ToRef()
+                .GetTarget( this._compilation ),
             _ => null
         };
 

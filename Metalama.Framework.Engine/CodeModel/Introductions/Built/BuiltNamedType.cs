@@ -80,8 +80,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     [Memo]
-    public string FullName => ((INamespaceOrNamedTypeImpl) this.ContainingDeclaration.AssertNotNull(  )).FullName + "." + this.Name;
-    
+    public string FullName => ((INamespaceOrNamedTypeImpl) this.ContainingDeclaration.AssertNotNull()).FullName + "." + this.Name;
 
     [Memo]
     public INamedTypeCollection Types

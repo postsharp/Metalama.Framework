@@ -43,7 +43,7 @@ internal static partial class IteratorHelper
 
     public static bool? IsIteratorMethod( this IMethod method ) => ((IMethodImpl) method).IsIteratorMethod;
 
-    public static bool IsIteratorMethod( IMethodSymbol method )
+    public static bool IsIteratorMethod( this IMethodSymbol method )
     {
         if ( method.IsAsync
              && GetEnumerableKind( method.ReturnType ) is EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator )
@@ -66,6 +66,8 @@ internal static partial class IteratorHelper
 
         return isIterator;
     }
+
+    public static EnumerableKind GetEnumerableKind( this IMethodSymbol method ) => GetEnumerableKind( method.ReturnType );
 
     private static EnumerableKind GetEnumerableKind( IType returnType )
     {

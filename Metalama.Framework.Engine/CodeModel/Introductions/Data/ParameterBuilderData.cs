@@ -3,19 +3,18 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class ParameterBuilderData : DeclarationBuilderData
 {
     private readonly IRef<IParameter> _ref;
-    
-    public string Name { get;  }
 
-    public IRef<IType> Type { get;  }
+    public string Name { get; }
 
-    public RefKind RefKind { get;  }
+    public IRef<IType> Type { get; }
+
+    public RefKind RefKind { get; }
 
     public int Index { get; }
 
@@ -25,7 +24,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     public ParameterBuilderData( BaseParameterBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IParameter>( this);
+        this._ref = new DeclarationBuilderDataRef<IParameter>( this );
         this.Name = builder.Name;
         this.Type = builder.Type.ToRef();
         this.RefKind = builder.RefKind;

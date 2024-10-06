@@ -64,7 +64,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this.Definition;
 
-    public bool IsPartial => this.MethodSymbol.IsPartialDefinition || this.MethodSymbol.PartialDefinitionPart != null;
+    public override bool IsPartial => this.MethodSymbol.IsPartialDefinition || this.MethodSymbol.PartialDefinitionPart != null;
 
     public bool IsExtern => this.MethodSymbol.IsExtern;
 

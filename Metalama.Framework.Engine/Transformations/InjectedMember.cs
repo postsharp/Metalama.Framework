@@ -1,14 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -51,19 +49,19 @@ internal sealed class InjectedMember
     /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
     /// are not suppressed from the introduced member.
     /// </summary>
-    public IRef Declaration { get; }
+    public IRef<IDeclaration> Declaration { get; }
 
-    public SyntaxTree TargetSyntaxTree
+    public SyntaxTree GetTargetSyntaxTree( CompilationContext compilationContext )
         => this.Transformation != null
             ? this.Transformation.TransformedSyntaxTree
-            : this.Declaration.PrimarySyntaxTree.AssertNotNull();
+            : this.Declaration.GetPrimarySyntaxTree( compilationContext ).AssertNotNull();
 
     public InjectedMember(
         IInjectMemberTransformation injectMemberTransformation,
         MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        IRef declaration ) : this(
+        IRef<IDeclaration> declaration ) : this(
         injectMemberTransformation,
         declaration.DeclarationKind,
         syntax,
@@ -76,7 +74,7 @@ internal sealed class InjectedMember
         MemberDeclarationSyntax syntax,
         AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
-        IRef declaration ) : this(
+        IRef<IDeclaration> declaration ) : this(
         overrideMemberTransformation,
         overrideMemberTransformation.OverriddenDeclaration.DeclarationKind,
         syntax,
@@ -90,7 +88,7 @@ internal sealed class InjectedMember
         MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        IRef declaration )
+        IRef<IDeclaration> declaration )
     {
         this.Transformation = transformation;
         this.Syntax = syntax;

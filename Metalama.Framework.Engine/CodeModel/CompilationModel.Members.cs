@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
@@ -15,7 +14,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using MethodBuilder = System.Reflection.Emit.MethodBuilder;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
@@ -118,7 +116,7 @@ public sealed partial class CompilationModel
             ParameterBuilderData parameterBuilder => this.Contains( parameterBuilder ),
             _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
         };
-    
+
     private TCollection GetMemberCollection<TOwner, TDeclaration, TCollection>(
         ref ImmutableDictionary<IRef<TOwner>, TCollection> dictionary,
         bool requestMutableCollection,
@@ -298,7 +296,7 @@ public sealed partial class CompilationModel
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
             var builder = introduceDeclarationTransformation.DeclarationBuilderData;
-            
+
             this.AddDeclaration( builder );
         }
 
@@ -355,9 +353,8 @@ public sealed partial class CompilationModel
 
                 break;
 
-
             case IRef<IField> replacedField:
-                var fields = this.GetFieldCollection( replacedField.ContainingDeclaration.AssertNotNull(  ).As<INamedType>(), true );
+                var fields = this.GetFieldCollection( replacedField.ContainingDeclaration.AssertNotNull().As<INamedType>(), true );
                 fields.Remove( replacedField );
 
                 break;
@@ -387,7 +384,7 @@ public sealed partial class CompilationModel
     private void AddDeclaration( DeclarationBuilderData declaration )
     {
         // TODO Perf: switch on DeclarationKind,
-        
+
         switch ( declaration )
         {
             case MethodBuilderData { MethodKind: MethodKind.Finalizer } finalizer:

@@ -335,7 +335,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new MetaApiProperties(
                     compilation,
                     diagnostics,
-                    template.TemplateMember.Cast(),
+                    template.TemplateMember.AsMemberOrNamedType(),
                     serviceProvider.GetRequiredService<ObjectReaderFactory>().GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,

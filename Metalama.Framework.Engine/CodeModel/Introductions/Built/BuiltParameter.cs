@@ -19,11 +19,13 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 {
     private readonly ParameterBuilderData _parameterBuilder;
 
-    public BuiltParameter( ParameterBuilderData builder, CompilationModel compilation, IGenericContext genericContext, IHasParameters parent ) : base( compilation, genericContext )
+    public BuiltParameter( ParameterBuilderData builder, CompilationModel compilation, IGenericContext genericContext, IHasParameters parent ) : base(
+        compilation,
+        genericContext )
     {
         // When BuiltParameter represents the return parameter of the pseudo getter of a promoted field, there is an ambiguity whether
         // the parent is the getter of the field or of the property. We resolve this ambiguity by explicitly passing the parent when we know it upfront.
-        
+
         this.DeclaringMember = parent;
         this._parameterBuilder = builder;
     }
@@ -69,7 +71,6 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
                 this.Type,
                 ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                 true ) );
-
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 

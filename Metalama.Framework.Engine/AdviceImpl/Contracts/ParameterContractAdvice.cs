@@ -3,10 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
@@ -20,7 +16,7 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
         IObjectReader templateArguments )
         : base( parameters, template, direction, tags, templateArguments ) { }
 
-    protected override AddContractAdviceResult<IParameter> Implement( in AdviceImplementationContext context ) 
+    protected override AddContractAdviceResult<IParameter> Implement( in AdviceImplementationContext context )
     {
         var targetDeclaration = this.TargetDeclaration;
 
@@ -28,13 +24,29 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
         {
             case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
                 context.AddTransformation(
-                    new ContractIndexerTransformation( this, indexer.ToRef(), parameter.ToRef(), this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                    new ContractIndexerTransformation(
+                        this,
+                        indexer.ToRef(),
+                        parameter.ToRef(),
+                        this.Direction,
+                        this.Template,
+                        this.TemplateArguments,
+                        this.Tags,
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
 
             case IParameter { ContainingDeclaration: IMethod method } parameter:
                 context.AddTransformation(
-                    new ContractMethodTransformation( this, method.ToRef(), parameter.ToRef(), this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                    new ContractMethodTransformation(
+                        this,
+                        method.ToRef(),
+                        parameter.ToRef(),
+                        this.Direction,
+                        this.Template,
+                        this.TemplateArguments,
+                        this.Tags,
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
 
@@ -47,7 +59,8 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
                         this.Direction,
                         this.Template,
                         this.TemplateArguments,
-                        this.Tags ) );
+                        this.Tags,
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
 

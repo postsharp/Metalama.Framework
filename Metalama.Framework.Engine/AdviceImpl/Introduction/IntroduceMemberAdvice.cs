@@ -16,13 +16,13 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> : IntroduceDeclarationAdvice<TIntroduced,TBuilder>
+internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> : IntroduceDeclarationAdvice<TIntroduced, TBuilder>
     where TTemplate : class, IMember
     where TIntroduced : class, IMember
     where TBuilder : MemberBuilder, TIntroduced
 {
     private readonly IntroductionScope _scope;
-    
+
     private readonly INamedType? _explicitlyImplementedInterfaceType;
 
     protected new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
@@ -50,9 +50,9 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         var templateAttributeProperties = templateAttribute?.Properties;
 
         this.MemberName = explicitName ?? templateAttributeProperties?.Name
-            ?? template?.Declaration.Name ?? throw new ArgumentNullException( nameof(explicitName) );
+            ?? template?.DeclarationRef.Name ?? throw new ArgumentNullException( nameof(explicitName) );
 
-        this.Template = template?.CreateInstance( parameters.TemplateClassInstance.TemplateProvider, parameters.SourceCompilation );
+        this.Template = template;
 
         if ( scope != IntroductionScope.Default )
         {
@@ -74,7 +74,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         this.Tags = tags;
         this._explicitlyImplementedInterfaceType = explicitlyImplementedInterfaceType;
     }
-    
+
     protected virtual void InitializeBuilderCore(
         TBuilder builder,
         TemplateAttributeProperties? templateAttributeProperties,
@@ -86,14 +86,15 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         var templateAttributeProperties = templateAttribute?.Properties;
 
         builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;
-        builder.IsSealed = templateAttributeProperties?.IsSealed ?? this.Template?.Declaration.IsSealed ?? false;
-        builder.IsVirtual = templateAttributeProperties?.IsVirtual ?? this.Template?.Declaration.IsVirtual ?? false;
+        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        builder.IsSealed = templateAttributeProperties?.IsSealed ?? templateDeclaration?.IsSealed ?? false;
+        builder.IsVirtual = templateAttributeProperties?.IsVirtual ?? templateDeclaration?.IsVirtual ?? false;
 
         // Handle the introduction scope.
 
         builder.IsStatic = this._scope switch
         {
-            IntroductionScope.Default => this.Template?.Declaration is { IsStatic: true },
+            IntroductionScope.Default => templateDeclaration is { IsStatic: true },
             IntroductionScope.Instance => false,
             IntroductionScope.Static => true,
             _ => throw new AssertionFailedException( $"Unexpected IntroductionScope: {this._scope}." )
@@ -101,7 +102,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         if ( this.Template != null )
         {
-            CopyTemplateAttributes( this.Template.Declaration!, builder, context.ServiceProvider );
+            CopyTemplateAttributes( templateDeclaration!, builder, context.ServiceProvider );
         }
 
         this.InitializeBuilderCore( builder, templateAttributeProperties, in context );
@@ -112,7 +113,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         this.ValidateBuilder( builder, this.TargetDeclaration, context.Diagnostics );
     }
-    
+
     protected virtual void ValidateBuilder( TBuilder builder, INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
     {
         // Check that static member is not virtual.

@@ -33,14 +33,14 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     protected override MemberBuilderData MemberBuilder => this._methodBuilder;
 
-    public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0 ;
+    public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
             this,
             this.Compilation.GetParameterCollection( this._methodBuilder.ToRef() ) );
-    
+
     public MethodKind MethodKind => this._methodBuilder.MethodKind;
 
     public OperatorKind OperatorKind => this._methodBuilder.OperatorKind;
@@ -55,7 +55,6 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
     IHasAccessors? IMethod.DeclaringMember => null;
-    
 
     [Memo]
     private IRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
@@ -95,7 +94,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public IMethod Definition => this.Compilation.Factory.GetMethod( this._methodBuilder ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
-    
+
     bool IMethod.IsExtern => false;
 
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );

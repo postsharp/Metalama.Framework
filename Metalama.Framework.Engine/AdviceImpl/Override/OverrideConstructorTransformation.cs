@@ -37,18 +37,16 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
-        
-        var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
+        var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
 
         var metaApi = MetaApi.ForConstructor(
             overriddenDeclaration,
             new MetaApiProperties(
                 this.OriginalCompilation,
                 context.DiagnosticSink,
-                this.Template.TemplateMember.Cast(),
+                this.Template.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,

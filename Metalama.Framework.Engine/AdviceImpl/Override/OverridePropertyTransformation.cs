@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -44,7 +43,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        var overriddenDeclaration = this.OverriddenDeclaration.As<IProperty>().GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.As<IProperty>().GetTarget( context.Compilation );
 
         if ( overriddenDeclaration.GetMethod != null )
         {
@@ -117,7 +116,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
             new MetaApiProperties(
                 this.OriginalCompilation,
                 context.DiagnosticSink,
-                accessorTemplate.TemplateMember.Cast(),
+                accessorTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,

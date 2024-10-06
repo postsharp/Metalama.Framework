@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -37,13 +36,18 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
     public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
     protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, MemberInjectionContext context )
-        => ProceedHelper.CreateMemberAccessExpression( this.OverriddenDeclaration.GetTarget(context.Compilation), this.AspectLayerId, referenceTargetKind, context.SyntaxGenerationContext );
+        => ProceedHelper.CreateMemberAccessExpression(
+            this.OverriddenDeclaration.GetTarget( context.Compilation ),
+            this.AspectLayerId,
+            referenceTargetKind,
+            context.SyntaxGenerationContext );
 
     public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration}'";
+    public override FormattableString ToDisplayString( CompilationModel compilation )
+        => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration}'";
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.OverrideMember;
 }

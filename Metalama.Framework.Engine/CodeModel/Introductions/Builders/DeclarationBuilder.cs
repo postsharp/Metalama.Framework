@@ -9,17 +9,13 @@ using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Visitors;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using MethodKind = Metalama.Framework.Code.MethodKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
@@ -70,7 +66,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    ICompilationElement? ICompilationElementImpl.Translate( CompilationModel newCompilation, IGenericContext? genericContext = null, Type? interfaceType = null ) => throw new NotSupportedException();
+    ICompilationElement? ICompilationElementImpl.Translate( CompilationModel newCompilation, IGenericContext? genericContext, Type? interfaceType )
+        => throw new NotSupportedException();
 
     public CompilationModel Compilation
         => (CompilationModel?) this.ContainingDeclaration?.Compilation
@@ -110,7 +107,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
     }
 
     public virtual void Freeze() => this.IsFrozen = true;
-    
+
     public SerializableDeclarationId ToSerializableId()
     {
         if ( !this.IsFrozen )
@@ -145,8 +142,5 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
         where TExtension : IMetric
         => this.Compilation.MetricManager.GetMetric<TExtension>( this );
 
-    
-
     public virtual bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
-    
 }

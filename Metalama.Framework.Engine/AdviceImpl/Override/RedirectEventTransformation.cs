@@ -4,13 +4,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
@@ -32,7 +30,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         return
         [
@@ -57,20 +55,20 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
         IEnumerable<AccessorDeclarationSyntax> GetAccessors()
         {
             return new[]
-                {
-                    AccessorDeclaration(
-                        SyntaxKind.AddAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        overriddenDeclaration.AddMethod.GetSyntaxModifierList(),
-                        CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
-                        null ),
-                    AccessorDeclaration(
-                        SyntaxKind.RemoveAccessorDeclaration,
-                        List<AttributeListSyntax>(),
-                        overriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
-                        CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
-                        null )
-                }.WhereNotNull();
+            {
+                AccessorDeclaration(
+                    SyntaxKind.AddAccessorDeclaration,
+                    List<AttributeListSyntax>(),
+                    overriddenDeclaration.AddMethod.GetSyntaxModifierList(),
+                    CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
+                    null ),
+                AccessorDeclaration(
+                    SyntaxKind.RemoveAccessorDeclaration,
+                    List<AttributeListSyntax>(),
+                    overriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
+                    CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
+                    null )
+            }.WhereNotNull();
         }
 
         BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )

@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
@@ -33,7 +32,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         return
         [
@@ -108,7 +107,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
         ExpressionSyntax CreateAccessTargetExpression()
         {
             return
-                this._targetProperty.GetTarget(context.Compilation).IsStatic
+                this._targetProperty.GetTarget( context.Compilation ).IsStatic
                     ? IdentifierName( this._targetProperty.Name )
                     : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetProperty.Name ) )
                         .WithAspectReferenceAnnotation( this.AspectLayerId, AspectReferenceOrder.Previous );

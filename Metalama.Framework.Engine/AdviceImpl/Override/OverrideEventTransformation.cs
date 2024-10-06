@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
@@ -44,7 +43,7 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         var eventName = context.InjectionNameProvider.GetOverrideName(
             overriddenDeclaration.DeclaringType,
@@ -111,15 +110,15 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
                         List(
                         [
                             AccessorDeclaration(
-                                    SyntaxKind.AddAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    overriddenDeclaration.AddMethod.AssertNotNull().GetSyntaxModifierList(),
-                                    addAccessorBody.AssertNotNull() ),
-                                AccessorDeclaration(
-                                    SyntaxKind.RemoveAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    overriddenDeclaration.RemoveMethod.AssertNotNull().GetSyntaxModifierList(),
-                                    removeAccessorBody.AssertNotNull() )
+                                SyntaxKind.AddAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                overriddenDeclaration.AddMethod.AssertNotNull().GetSyntaxModifierList(),
+                                addAccessorBody.AssertNotNull() ),
+                            AccessorDeclaration(
+                                SyntaxKind.RemoveAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                overriddenDeclaration.RemoveMethod.AssertNotNull().GetSyntaxModifierList(),
+                                removeAccessorBody.AssertNotNull() )
                         ] ) ) ),
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
@@ -151,7 +150,7 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
             new MetaApiProperties(
                 this.OriginalCompilation,
                 context.DiagnosticSink,
-                accessorTemplate.TemplateMember.Cast(),
+                accessorTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,

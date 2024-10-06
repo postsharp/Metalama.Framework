@@ -35,8 +35,7 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     public INamedType Type => this.Constructor.DeclaringType;
 
     [Memo]
-    public IConstructor Constructor
-        => this.MapDeclaration( this._attributeBuilder.Constructor ).AssertNotNull();
+    public IConstructor Constructor => this.MapDeclaration( this._attributeBuilder.Constructor ).AssertNotNull();
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments

@@ -64,12 +64,13 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
     [Memo]
-    public AccessorBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this.IsEventField );
+    public AccessorBuilder AddMethod => new( this, MethodKind.EventAdd, this.IsEventField );
 
     [Memo]
-    public AccessorBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this.IsEventField );
+    public AccessorBuilder RemoveMethod => new( this, MethodKind.EventRemove, this.IsEventField );
 
     IMethodBuilder IEventBuilder.AddMethod => this.AddMethod;
+
     IMethodBuilder IEventBuilder.RemoveMethod => this.RemoveMethod;
 
     public IMethodBuilder? RaiseMethod => null;
@@ -118,7 +119,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
-    public IRef<IEvent> ToRef() => this.Immutable.ToRef();
+    public new IRef<IEvent> ToRef() => this.Immutable.ToRef();
 
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
@@ -166,6 +167,5 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     }
 
     [Memo]
-    public EventBuilderData Immutable => new EventBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
-    
+    public EventBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

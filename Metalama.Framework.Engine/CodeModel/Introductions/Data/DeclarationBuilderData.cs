@@ -3,53 +3,45 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal abstract class DeclarationBuilderData
 {
-    
     public abstract DeclarationKind DeclarationKind { get; }
 
     public IRef<IDeclaration> ContainingDeclaration { get; }
 
-    [Obsolete("We want to get rid of this.")]
+    [Obsolete( "We want to get rid of this." )]
     public Advice ParentAdvice { get; }
 
     public ImmutableArray<AttributeBuilderData> Attributes { get; }
-    
+
     public SyntaxTree? PrimarySyntaxTree { get; }
-    
+
     protected DeclarationBuilderData( IDeclarationBuilderImpl builder, IRef<IDeclaration> containingDeclaration )
     {
         Invariant.Assert( builder.IsFrozen );
-        
+
         this.ParentAdvice = builder.ParentAdvice;
         this.ContainingDeclaration = containingDeclaration;
         this.PrimarySyntaxTree = builder.PrimarySyntaxTree;
         this.IsDesignTimeObservable = builder.IsDesignTimeObservable;
-        
-
 
         // ReSharper disable once VirtualMemberCallInConstructor
         this.Attributes = builder.Attributes.ToImmutable( this.ToDeclarationRef() );
     }
 
     public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
-    
+
     protected abstract IRef<IDeclaration> ToDeclarationRef();
 
-    
     public SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
-    
+
     public bool IsDesignTimeObservable { get; }
 
     /// <summary>
@@ -57,7 +49,4 @@ internal abstract class DeclarationBuilderData
     /// are not added to the <see cref="CompilationModel"/> by directly instantiated by us.
     /// </summary>
     public virtual IEnumerable<DeclarationBuilderData> GetOwnedDeclarations() => this.Attributes;
-
-
-
 }

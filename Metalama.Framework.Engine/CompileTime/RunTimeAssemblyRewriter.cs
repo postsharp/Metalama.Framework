@@ -343,7 +343,7 @@ namespace Metalama.Compiler
     private T PreserveAndAddAttribute<T>( T transformedNode, T originalNode, ISymbol symbol, bool isAsyncMethod = false, bool isIteratorMethod = false )
         where T : MemberDeclarationSyntax
     {
-        var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
+        var accessibility = symbol.DeclaredAccessibility.ToOurAccessibility();
 
         if ( accessibility is Accessibility.Public or Accessibility.Protected && !isAsyncMethod && !isIteratorMethod )
         {
@@ -365,7 +365,7 @@ namespace Metalama.Compiler
         IMethodSymbol symbol )
     {
         var isIteratorMethod = IteratorHelper.IsIteratorMethod( symbol );
-        var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
+        var accessibility = symbol.DeclaredAccessibility.ToOurAccessibility();
 
         if ( accessibility is Accessibility.Public or Accessibility.Protected
              && !isIteratorMethod )
@@ -394,11 +394,11 @@ namespace Metalama.Compiler
                     SeparatedList(
                     [
                         AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
-                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ),
-                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isAsyncMethod ) )
-                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsAsync) ) ),
-                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isIteratorMethod ) )
-                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsIteratorMethod) ) )
+                            .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ),
+                        AttributeArgument( SyntaxFactoryEx.LiteralExpression( isAsyncMethod ) )
+                            .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsAsync) ) ),
+                        AttributeArgument( SyntaxFactoryEx.LiteralExpression( isIteratorMethod ) )
+                            .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsIteratorMethod) ) )
                     ] ) ) );
 
         var attributeList = AttributeList( SingletonSeparatedList( attribute ) )

@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -24,16 +23,15 @@ internal sealed class IntroduceConstructorTransformation
     public IntroduceConstructorTransformation( Advice advice, ConstructorBuilderData introducedDeclaration ) : base( advice, introducedDeclaration )
     {
         Invariant.Assert( !introducedDeclaration.IsStatic );
-      
+
         this.ReplacedMember = introducedDeclaration.ReplacedImplicitConstructor;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var constructorBuilder = this.BuilderData.ToRef().GetTarget(context.Compilation);
-        
-        Invariant.Assert( !constructorBuilder.IsRecordCopyConstructor() );
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
 
+        Invariant.Assert( !constructorBuilder.IsRecordCopyConstructor() );
 
         var statements = Array.Empty<StatementSyntax>();
 
@@ -71,7 +69,7 @@ internal sealed class IntroduceConstructorTransformation
 
         var syntax =
             ConstructorDeclaration(
-                AdviceSyntaxGenerator.GetAttributeLists(  constructorBuilder, context ),
+                AdviceSyntaxGenerator.GetAttributeLists( constructorBuilder, context ),
                 constructorBuilder.GetSyntaxModifierList(),
                 Identifier( constructorBuilder.DeclaringType.Name ),
                 context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
@@ -102,9 +100,8 @@ internal sealed class IntroduceConstructorTransformation
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        var constructorBuilder = this.BuilderData.ToRef().GetTarget(context.Compilation);
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
 
-        
         // See https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11#auto-default-struct.
         if ( constructorBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct &&
              context.SyntaxGenerationContext.RequiresStructFieldInitialization )

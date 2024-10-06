@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
@@ -13,5 +12,5 @@ internal static class TemplateMemberExtensions
     /// Returns <c>null</c> if the input <see cref="BoundTemplateMethod"/> does not represent a method with an implementation.
     /// </summary>
     public static BoundTemplateMethod? ExplicitlyImplementedOrNull( this BoundTemplateMethod? templateMethod )
-        => templateMethod == null ? null : ((IMethodSymbol) ((ISymbolRef) templateMethod.TemplateMember.Declaration).Symbol).IsAutoAccessor() ? null : templateMethod;
+        => templateMethod == null ? null : ((IMethodSymbol) templateMethod.TemplateMember.DeclarationRef.Symbol).IsAutoAccessor() ? null : templateMethod;
 }

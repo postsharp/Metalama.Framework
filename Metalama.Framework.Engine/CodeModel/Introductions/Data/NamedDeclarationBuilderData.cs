@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
@@ -13,9 +12,7 @@ internal abstract class NamedDeclarationBuilderData : DeclarationBuilderData
         containingDeclaration )
     {
         this.Name = builder.Name;
-        
     }
 
     public string Name { get; }
-      
 }

@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
+internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef<T>
     where T : class, ICompilationElement
 {
     public ISymbol Symbol { get; }

@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -120,7 +119,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     builderData.InitializerTags,
                     out initializerExpression,
                     out initializerMethod );
-            
+
             case FieldBuilderData fieldBuilderData:
                 return AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
                     property.OriginalField.AssertNotNull(),
@@ -132,7 +131,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     builderData.InitializerTags,
                     out initializerExpression,
                     out initializerMethod );
-            
+
             default:
                 throw new AssertionFailedException();
         }

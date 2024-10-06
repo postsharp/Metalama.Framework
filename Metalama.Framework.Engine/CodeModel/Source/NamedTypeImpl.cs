@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
@@ -270,7 +269,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         return null;
     }
 
-    public bool IsPartial
+    public override bool IsPartial
     {
         get
         {
@@ -541,7 +540,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         // Find the member in introduced interfaces, including in subtypes.
         var currentTypeDefinition = this.Definition;
         var currentTypeSymbol = this.NamedTypeSymbol;
-        
+
         while ( true )
         {
             var currentGenericContext = GenericContext.Get( currentTypeSymbol, this.GetCompilationContext() );
@@ -550,7 +549,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 this.Compilation
                     .GetInterfaceImplementationCollection( currentTypeDefinition.ToRef(), false )
                     .Introductions
-                    .SingleOrDefault( i =>  currentGenericContext.Map( i.InterfaceType.GetTarget(this.Compilation) ).Equals( interfaceMember.DeclaringType ) );
+                    .SingleOrDefault( i => currentGenericContext.Map( i.InterfaceType.GetTarget( this.Compilation ) ).Equals( interfaceMember.DeclaringType ) );
 
             if ( introducedInterface != null )
             {

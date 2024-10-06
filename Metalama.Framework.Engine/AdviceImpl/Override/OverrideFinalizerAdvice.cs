@@ -4,10 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 // TODO: Check why this class is unused.
@@ -30,8 +26,7 @@ internal class OverrideFinalizerAdvice : OverrideMemberAdvice<IMethod, IMethod>
     protected override OverrideMemberAdviceResult<IMethod> Implement( in AdviceImplementationContext context )
     {
         // TODO: order should be self if the target is introduced on the same layer.
-        context.AddTransformation(
-            new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
+        context.AddTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
         return this.CreateSuccessResult();
     }

@@ -66,7 +66,7 @@ public sealed partial class DerivedTypeIndex
             DerivedTypesOptions.IncludingExternalTypesDangerous => this.GetDerivedTypes( baseType ),
             _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
         };
-    
+
     internal IEnumerable<IRef<INamedType>> GetDerivedTypesInCurrentCompilation( IRef<INamedType> baseType, DerivedTypesOptions options )
         => options switch
         {
@@ -85,7 +85,6 @@ public sealed partial class DerivedTypeIndex
         => this._relationships[baseType]
             .SelectManyRecursiveDistinct( t => this._relationships[t], this._processedTypes.KeyComparer );
 
-    
     private IEnumerable<INamedType> GetAllDerivedTypes( INamedType baseType )
         => this.GetAllDerivedTypesCore( baseType.ToRef() )
             .Select( nt => nt.GetTarget( baseType.Compilation ) );
@@ -146,7 +145,9 @@ public sealed partial class DerivedTypeIndex
 
             var introducedInterface = transformation.InterfaceType;
 
-            if ( !introducedInterface.GetStrategy().GetAssemblySymbol(introducedInterface, this._compilationContext ).Equals( this._compilationContext.Compilation.Assembly ) )
+            if ( !introducedInterface.GetStrategy()
+                    .GetAssemblySymbol( introducedInterface, this._compilationContext )
+                    .Equals( this._compilationContext.Compilation.Assembly ) )
             {
                 // The type may not have been analyzed yet.
                 builder.AnalyzeType( introducedInterface );

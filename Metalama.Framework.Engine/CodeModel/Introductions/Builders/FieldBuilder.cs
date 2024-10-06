@@ -50,19 +50,18 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     }
 
     IMethod IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;
+
     IMethod IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
 
     [Memo]
-    public AccessorBuilder GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+    public AccessorBuilder GetMethod => new( this, MethodKind.PropertyGet, true );
 
     [Memo]
-    public AccessorBuilder SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
+    public AccessorBuilder SetMethod => new( this, MethodKind.PropertySet, true );
 
     public override bool IsExplicitInterfaceImplementation => false;
 
     public override IMember? OverriddenMember => null;
-
-    
 
     public IProperty? OverridingProperty => null;
 
@@ -138,7 +137,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     public bool IsRequired { get; set; }
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
-    
+
     [Memo]
-    public FieldBuilderData Immutable => new FieldBuilderData( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public FieldBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
 }

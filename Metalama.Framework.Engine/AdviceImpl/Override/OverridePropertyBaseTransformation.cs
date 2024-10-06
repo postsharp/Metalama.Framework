@@ -32,7 +32,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         var propertyName = context.InjectionNameProvider.GetOverrideName(
             overriddenDeclaration.DeclaringType,
@@ -101,7 +101,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                 context.SyntaxGenerationContext,
                 this.CreateProceedGetExpression( context ),
                 templateKind,
-                this.OverriddenDeclaration.GetTarget(context.Compilation).GetMethod.AssertNotNull() ),
+                this.OverriddenDeclaration.GetTarget( context.Compilation ).GetMethod.AssertNotNull() ),
             MethodKind.PropertySet => new SyntaxUserExpression(
                 this.CreateProceedSetExpression( context ),
                 context.Compilation.Cache.SystemVoidType ),
@@ -112,13 +112,13 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         => TransformationHelper.CreatePropertyProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget(context.Compilation),
+            this.OverriddenDeclaration.GetTarget( context.Compilation ),
             this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreatePropertyProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget(context.Compilation),
+            this.OverriddenDeclaration.GetTarget( context.Compilation ),
             this.AspectLayerId );
 }

@@ -4,21 +4,22 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class AttributeBuilderData : DeclarationBuilderData
 {
-    private DeclarationBuilderDataRef<IAttribute> _ref;
+    private readonly DeclarationBuilderDataRef<IAttribute> _ref;
+
     public IRef<INamedType> Type { get; }
+
     public IRef<IConstructor> Constructor { get; }
 
     public ImmutableArray<TypedConstant> ConstructorArguments { get; }
 
     public INamedArgumentList NamedArguments { get; }
-    
+
     public AttributeBuilderData( AttributeBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
         this._ref = new DeclarationBuilderDataRef<IAttribute>( this );
@@ -26,7 +27,7 @@ internal class AttributeBuilderData : DeclarationBuilderData
         this.Type = builder.AttributeConstruction.Type.ToRef();
         this.ConstructorArguments = builder.AttributeConstruction.ConstructorArguments.ToImmutableArray();
         this.NamedArguments = builder.AttributeConstruction.NamedArguments;
-        
+
         // TODO: TypedConstant can still leak a CompilationModel through its typeof(.) value.
     }
 
@@ -34,6 +35,5 @@ internal class AttributeBuilderData : DeclarationBuilderData
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
-    public IRef<IAttribute> ToRef() => this._ref;
-
+    public new IRef<IAttribute> ToRef() => this._ref;
 }

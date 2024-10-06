@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Code;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 
@@ -10,11 +12,11 @@ internal class NamespaceBuilderData : NamedDeclarationBuilderData
 
     public NamespaceBuilderData( NamespaceBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<INamespace>( this);
+        this._ref = new DeclarationBuilderDataRef<INamespace>( this );
     }
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
-    
+
     public new IRef<INamespace> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;

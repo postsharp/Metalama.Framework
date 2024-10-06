@@ -33,7 +33,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
 
         var setAccessorDeclarationKind =
             overriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
@@ -93,7 +93,11 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         return overrides;
     }
 
-    protected SyntaxUserExpression CreateProceedDynamicExpression( MemberInjectionContext context, IMethod accessor, TemplateKind templateKind, IIndexer overriddenDeclaration )
+    protected SyntaxUserExpression CreateProceedDynamicExpression(
+        MemberInjectionContext context,
+        IMethod accessor,
+        TemplateKind templateKind,
+        IIndexer overriddenDeclaration )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -111,13 +115,13 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         => TransformationHelper.CreateIndexerProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget(context.Compilation),
+            this.OverriddenDeclaration.GetTarget( context.Compilation ),
             this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreateIndexerProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget(context.Compilation),
+            this.OverriddenDeclaration.GetTarget( context.Compilation ),
             this.AspectLayerId );
 }

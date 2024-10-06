@@ -22,14 +22,23 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetProperty, targetProperty, contractDirection, template, templateArguments, tags ) { }
+        IObjectReader tags,
+        TemplateProvider templateProvider ) : base(
+        advice,
+        targetProperty,
+        targetProperty,
+        contractDirection,
+        template,
+        templateProvider,
+        templateArguments,
+        tags ) { }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ) );
-        
-        var targetMember = this.TargetMember.GetTarget(context.Compilation);
-        
+
+        var targetMember = this.TargetMember.GetTarget( context.Compilation );
+
         Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
         bool? inputResult, outputResult;
@@ -91,5 +100,5 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
     }
 
     public override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Add contract to property '{this.TargetMember.GetTarget(compilation).ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+        => $"Add contract to property '{this.TargetMember.GetTarget( compilation ).ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -31,7 +30,13 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
         // TODO: What if non-auto property has the initializer template?
 
         // If template fails to expand, we will still generate the field, albeit without the initializer.
-        _ = this.BuilderData.GetPropertyInitializerExpressionOrMethod( propertyBuilder, this.BuilderData, this.ParentAdvice, context, out var initializerExpression, out var initializerMethod );
+        _ = this.BuilderData.GetPropertyInitializerExpressionOrMethod(
+            propertyBuilder,
+            this.BuilderData,
+            this.ParentAdvice,
+            context,
+            out var initializerExpression,
+            out var initializerMethod );
 
         // TODO: This should be handled by the linker.
         // If we are introducing a field into a struct in C# 10, it must have an explicit default value.
@@ -162,7 +167,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             return
                 AccessorDeclaration(
                     this.BuilderData.HasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                    AdviceSyntaxGenerator.GetAttributeLists(  propertyBuilder.SetMethod, context ),
+                    AdviceSyntaxGenerator.GetAttributeLists( propertyBuilder.SetMethod, context ),
                     TokenList( tokens ),
                     this.BuilderData.HasInitOnlySetter
                         ? Token( TriviaList(), SyntaxKind.InitKeyword, TriviaList( ElasticSpace ) )

@@ -23,11 +23,20 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetConstructor, contractTarget, contractDirection, template, templateArguments, tags ) { }
+        IObjectReader tags,
+        TemplateProvider templateProvider ) : base(
+        advice,
+        targetConstructor,
+        contractTarget,
+        contractDirection,
+        template,
+        templateProvider,
+        templateArguments,
+        tags ) { }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget.GetTarget(context.Compilation) )
+        switch ( this.ContractTarget.GetTarget( context.Compilation ) )
         {
             case IParameter param:
                 {

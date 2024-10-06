@@ -236,7 +236,7 @@ public static class DeclarationExtensions
             _ => throw new InvalidOperationException( $"Roslyn RefKind {roslynRefKind} not recognized here." )
         };
 
-    internal static Accessibility ToOurVisibility( this Microsoft.CodeAnalysis.Accessibility accessibility )
+    internal static Accessibility ToOurAccessibility( this Microsoft.CodeAnalysis.Accessibility accessibility )
         => accessibility switch
         {
             Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,

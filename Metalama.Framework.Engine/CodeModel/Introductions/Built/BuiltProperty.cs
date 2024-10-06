@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
@@ -11,7 +10,6 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
@@ -57,8 +55,7 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
-    public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
-        => this.MapDeclarationList(this.PropertyBuilder.ExplicitInterfaceImplementations );
+    public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.MapDeclarationList( this.PropertyBuilder.ExplicitInterfaceImplementations );
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
@@ -77,7 +74,6 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => new FieldOrPropertyInvoker( this )
             .ToTypedExpressionSyntax( syntaxGenerationContext );
-    
 
     [Memo]
     public IField? OriginalField => this.GetOriginalField();

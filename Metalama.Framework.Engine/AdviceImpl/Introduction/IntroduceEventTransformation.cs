@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -26,7 +25,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-        var eventBuilder =  this.BuilderData.ToRef().GetTarget();
+        var eventBuilder = this.BuilderData.ToRef().GetTarget();
 
         _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
             eventBuilder,
@@ -41,12 +40,11 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
 
         var isEventField = this.BuilderData.IsEventField;
         Invariant.Assert( !(isEventField == false && initializerExpression != null) );
-        
 
         // TODO: This should be handled by the linker.
         // If we are introducing a field into a struct in C# 10, it must have an explicit default value.
         if ( initializerExpression == null
-             && isEventField 
+             && isEventField
              && eventBuilder is { DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
              && context.SyntaxGenerationContext.RequiresStructFieldInitialization )
         {
@@ -56,7 +54,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
         // TODO: If the user adds (different) attributes to event field's accessors, we cannot use event fields.
 
         MemberDeclarationSyntax @event =
-            isEventField && eventBuilder is {  ExplicitInterfaceImplementations.Count: 0 }
+            isEventField && eventBuilder is { ExplicitInterfaceImplementations.Count: 0 }
                 ? EventFieldDeclaration(
                     AdviceSyntaxGenerator.GetAttributeLists( eventBuilder, context ).AddRange( GetAdditionalAttributeListsForEventField() ),
                     eventBuilder.GetSyntaxModifierList(),
@@ -67,11 +65,11 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                         SeparatedList(
                         [
                             VariableDeclarator(
-                                    Identifier( TriviaList(), eventBuilder.Name, TriviaList( ElasticSpace ) ),
-                                    null,
-                                    initializerExpression != null
-                                        ? EqualsValueClause( initializerExpression )
-                                        : null ) // TODO: Initializer.
+                                Identifier( TriviaList(), eventBuilder.Name, TriviaList( ElasticSpace ) ),
+                                null,
+                                initializerExpression != null
+                                    ? EqualsValueClause( initializerExpression )
+                                    : null ) // TODO: Initializer.
                         ] ) ),
                     Token( SyntaxKind.SemicolonToken ) )
                 : EventDeclaration(
@@ -130,7 +128,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                         List(
                         [
                             GenerateAccessor( eventBuilder.AddMethod, SyntaxKind.AddAccessorDeclaration ),
-                                GenerateAccessor( eventBuilder.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration )
+                            GenerateAccessor( eventBuilder.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration )
                         ] ) );
 
                 case (not null, null):
@@ -154,7 +152,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     // Special case - explicit interface implementation event field with initialized.
                     // Hide initializer expression into the single statement of the add.
                     { MethodKind: MethodKind.EventAdd } when isEventField && eventBuilder is { ExplicitInterfaceImplementations.Count: > 0 }
-                                                             && initializerExpression != null
+                                                                          && initializerExpression != null
                         => context.SyntaxGenerator.FormattedBlock(
                             ExpressionStatement(
                                 context.AspectReferenceSyntaxProvider.GetEventFieldInitializerExpression(

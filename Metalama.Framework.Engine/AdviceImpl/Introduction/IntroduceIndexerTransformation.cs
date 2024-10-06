@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.Transformations;
@@ -23,12 +22,12 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var indexer = this.BuilderData.ToRef().GetTarget( context.Compilation );
-        
+
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
         var indexerSyntax =
             IndexerDeclaration(
-               AdviceSyntaxGenerator.GetAttributeLists( indexer, context ),
+                AdviceSyntaxGenerator.GetAttributeLists( indexer, context ),
                 indexer.GetSyntaxModifierList(),
                 syntaxGenerator.Type( indexer.Type ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 indexer.ExplicitInterfaceImplementations.Count > 0
@@ -82,7 +81,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
             return
                 AccessorDeclaration(
                     SyntaxKind.GetAccessorDeclaration,
-                   AdviceSyntaxGenerator.GetAttributeLists( indexer.GetMethod, context ),
+                    AdviceSyntaxGenerator.GetAttributeLists( indexer.GetMethod, context ),
                     TokenList( tokens ),
                     Token( SyntaxKind.GetKeyword ),
                     syntaxGenerator.FormattedBlock(
@@ -106,7 +105,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
             return
                 AccessorDeclaration(
                     this.BuilderData.HasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                   AdviceSyntaxGenerator.GetAttributeLists( indexer.SetMethod, context ),
+                    AdviceSyntaxGenerator.GetAttributeLists( indexer.SetMethod, context ),
                     TokenList( tokens ),
                     this.BuilderData.HasInitOnlySetter
                         ? Token( TriviaList(), SyntaxKind.InitKeyword, TriviaList( ElasticSpace ) )

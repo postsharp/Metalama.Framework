@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -19,13 +18,11 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.AdviceImpl;
 
 internal class AdviceSyntaxGenerator
 {
-
     public static SyntaxList<AttributeListSyntax> GetAttributeLists(
         IDeclaration declaration,
         MemberInjectionContext context,
@@ -89,7 +86,7 @@ internal class AdviceSyntaxGenerator
             new MetaApiProperties(
                 advice.SourceCompilation,
                 context.DiagnosticSink,
-                initializerTemplate.Cast(),
+                initializerTemplate.AsMemberOrNamedType(),
                 tags,
                 advice.AspectLayerId,
                 context.SyntaxGenerationContext,

@@ -39,7 +39,7 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        var targetConstructor = this._targetConstructor.GetTarget(context.Compilation);
+        var targetConstructor = this._targetConstructor.GetTarget( context.Compilation );
         var contextDeclaration = this.ContextDeclaration.GetTarget( context.Compilation );
 
         var metaApi = MetaApi.ForConstructor(
@@ -47,15 +47,13 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
             new MetaApiProperties(
                 this.OriginalCompilation,
                 context.DiagnosticSink,
-                this._boundTemplate.TemplateMember.Cast(),
+                this._boundTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,
                 context.ServiceProvider,
                 targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
-
-        
 
         var expansionContext = new TemplateExpansionContext(
             context,

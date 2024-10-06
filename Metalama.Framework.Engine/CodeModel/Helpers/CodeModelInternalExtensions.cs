@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -61,36 +59,34 @@ internal static class CodeModelInternalExtensions
     public static InsertPosition ToInsertPosition( this DeclarationBuilderData declaration )
     {
         switch ( declaration )
-            {
-               
-                // TODO: This is a hack (since splitting transformations and builders).
-                // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
-                //case PromotedField promotedField:
-                 //   return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
+        {
+            // TODO: This is a hack (since splitting transformations and builders).
+            // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
+            //case PromotedField promotedField:
+            //   return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
 
-                case NamedTypeBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
-                    return new InsertPosition( InsertPositionRelation.Within, named );
-                
-                case NamedTypeBuilderData { DeclaringType: ISymbolRef declaringType }:
-                    return new InsertPosition(
-                        InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
+            case NamedTypeBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
+                return new InsertPosition( InsertPositionRelation.Within, named );
 
-                case NamedTypeBuilderData topLevelType:
-                    return new InsertPosition( topLevelType.PrimarySyntaxTree );
+            case NamedTypeBuilderData { DeclaringType: ISymbolRef declaringType }:
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-                case MemberBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
-                    return new InsertPosition( InsertPositionRelation.Within, named );
+            case NamedTypeBuilderData topLevelType:
+                return new InsertPosition( topLevelType.PrimarySyntaxTree );
 
-                case MemberBuilderData { DeclaringType: ISymbolRef declaringType }:
-                    return new InsertPosition(
-                        InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
-                
+            case MemberBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
+                return new InsertPosition( InsertPositionRelation.Within, named );
 
-                default:
-                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
-            }
+            case MemberBuilderData { DeclaringType: ISymbolRef declaringType }:
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
+
+            default:
+                throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
+        }
     }
 
     public static InsertPosition ToInsertPosition( this IRef declaration )
@@ -124,9 +120,8 @@ internal static class CodeModelInternalExtensions
 
             return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
         }
-
     }
-    
+
     public static InsertPosition ToInsertPosition( this IDeclaration declaration )
     {
         using ( StackOverflowHelper.Detect() )
@@ -140,8 +135,7 @@ internal static class CodeModelInternalExtensions
                 // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
                 //  case PromotedField promotedField:
                 //    return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
-                
-                
+
                 case SymbolBasedDeclaration baseDeclaration:
                     return baseDeclaration.Symbol.ToInsertPosition();
 

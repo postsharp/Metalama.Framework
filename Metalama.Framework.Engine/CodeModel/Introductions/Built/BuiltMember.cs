@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
@@ -29,7 +28,7 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 
     public bool HasImplementation => !this.IsAbstract; // TODO - partials?
 
-    public sealed override bool CanBeInherited => (this.IsAbstract || this.IsVirtual || this.IsOverride ) && !this.IsSealed;
+    public sealed override bool CanBeInherited => (this.IsAbstract || this.IsVirtual || this.IsOverride) && !this.IsSealed;
 
     [Memo]
     public IMember? OverriddenMember => this.MapDeclaration( this.MemberBuilder.OverriddenMember );

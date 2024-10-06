@@ -15,6 +15,8 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 
     protected TemplateClassInstance TemplateInstance { get; }
 
+    protected TemplateProvider TemplateProvider => this.TemplateInstance.TemplateProvider;
+
     public IDeclaration TargetDeclaration { get; }
 
     /// <summary>

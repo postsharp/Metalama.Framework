@@ -133,7 +133,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                         builder.IsOverride = true;
                         builder.HasNewKeyword = builder.IsNew = false;
                         builder.OverriddenMethod = existingFinalizer;
-                        
+
                         builder.Freeze();
 
                         var overriddenMethod = new OverrideFinalizerTransformation(

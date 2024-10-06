@@ -4,10 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -23,7 +19,7 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideMethod;
 
-    protected override OverrideMemberAdviceResult<IMethod> Implement( in AdviceImplementationContext context ) 
+    protected override OverrideMemberAdviceResult<IMethod> Implement( in AdviceImplementationContext context )
     {
         // TODO: order should be self if the target is introduced on the same layer.
         var targetMethod = this.TargetDeclaration;
@@ -31,20 +27,17 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
         switch ( targetMethod.MethodKind )
         {
             case MethodKind.Finalizer:
-                context.AddTransformation(
-                    new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             case MethodKind.Operator:
-                context.AddTransformation(
-                    new OverrideOperatorTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation( new OverrideOperatorTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             default:
-                context.AddTransformation(
-                    new OverrideMethodTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
 
                 break;
         }

@@ -23,27 +23,27 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base(
+        IObjectReader tags,
+        TemplateProvider templateProvider ) : base(
         advice,
         targetIndexer,
         (IRef<IDeclaration>?) indexerParameter ?? targetIndexer,
         contractDirection,
         template,
+        templateProvider,
         templateArguments,
         tags ) { }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget.GetTarget(context.Compilation) )
+        switch ( this.ContractTarget.GetTarget( context.Compilation ) )
         {
             case IIndexer:
                 {
-                    Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ));
-                    
-                    var targetMember = this.TargetMember.GetTarget(context.Compilation);
-                 
-                    
-                    
+                    Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ) );
+
+                    var targetMember = this.TargetMember.GetTarget( context.Compilation );
+
                     Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
                     bool? inputResult, outputResult;
@@ -165,5 +165,5 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
     }
 
     public override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Add default contract to indexer '{this.TargetDeclaration.GetTarget(compilation).ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+        => $"Add default contract to indexer '{this.TargetDeclaration.GetTarget( compilation ).ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
@@ -36,17 +35,15 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget(context.Compilation);
+        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
         var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
-
 
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,
             new MetaApiProperties(
                 this.OriginalCompilation,
                 context.DiagnosticSink,
-                this.BoundTemplate.TemplateMember.Cast(),
+                this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,

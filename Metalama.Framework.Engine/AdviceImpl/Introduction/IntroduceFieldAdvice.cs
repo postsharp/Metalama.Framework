@@ -37,12 +37,13 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
+        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        builder.IsRequired = templateAttributeProperties?.IsRequired ?? templateDeclaration?.IsRequired ?? false;
 
         if ( this.Template != null )
         {
-            builder.Type = this.Template.Declaration.Type;
-            builder.Writeability = this.Template.Declaration.Writeability;
+            builder.Type = templateDeclaration.Type;
+            builder.Writeability = templateDeclaration.Writeability;
         }
         else
         {
