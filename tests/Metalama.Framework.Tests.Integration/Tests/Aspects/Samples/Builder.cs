@@ -1,4 +1,8 @@
-﻿using Metalama.Framework.Advising;
+﻿#if TEST_OPTIONS
+// @RequiredConstant(NET5_0_OR_GREATER)
+#endif
+
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
