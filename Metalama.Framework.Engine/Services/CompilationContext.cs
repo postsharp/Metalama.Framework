@@ -132,6 +132,16 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );
 
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, IRef reference )
+        => reference switch
+        {
+            ISymbolRef symbolRef => this.GetSyntaxGenerationContext( options, symbolRef.Symbol.GetPrimaryDeclarationSyntax() ),
+            IBuiltDeclarationRef builtDeclarationRef => this.GetSyntaxGenerationContext(
+                options,
+                builtDeclarationRef.GetClosestContainingSymbol( this ).GetPrimaryDeclarationSyntax() ),
+            _ => throw new AssertionFailedException()
+        };
+
     internal SyntaxGenerationContext GetSyntaxGenerationContext(
         SyntaxGenerationOptions options,
         SyntaxTree tree,

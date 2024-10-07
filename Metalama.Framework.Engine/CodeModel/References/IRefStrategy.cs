@@ -31,4 +31,9 @@ internal interface IRefStrategy
     IAssemblySymbol GetAssemblySymbol( IRef reference, CompilationContext compilationContext );
 
     bool IsStatic( IRef<IMember> reference );
+
+    /// <summary>
+    /// Gets a the property or event from an accessor. 
+    /// </summary>
+    IRef<IMember> GetTypeMember( IRef<IMember> reference );
 }

@@ -210,7 +210,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( emulatedTemplateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
                 {
-                    var returnItemName = this._lexicalScopeFactory.GetLexicalScope( method ).GetUniqueIdentifier( "returnItem" );
+                    var returnItemName = this._lexicalScopeFactory.GetLexicalScope( method.ToRef() ).GetUniqueIdentifier( "returnItem" );
 
                     body = Block(
                         CreateLocalVariableDeclaration( returnVariableName ),
@@ -220,7 +220,7 @@ internal sealed partial class LinkerInjectionStep
                          or EnumerableKind.IAsyncEnumerator )
                 {
                     // TODO: #34577 This is wrong, the enumerator needs to be cloned/reset.
-                    var bufferedEnumeratorName = this._lexicalScopeFactory.GetLexicalScope( method ).GetUniqueIdentifier( "bufferedEnumerator" );
+                    var bufferedEnumeratorName = this._lexicalScopeFactory.GetLexicalScope( method.ToRef() ).GetUniqueIdentifier( "bufferedEnumerator" );
 
                     body = Block(
                         CreateLocalVariableDeclaration( bufferedEnumeratorName ),

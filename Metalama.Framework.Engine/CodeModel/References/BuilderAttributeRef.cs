@@ -10,46 +10,46 @@ using System.Diagnostics.CodeAnalysis;
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 /// <summary>
-/// An implementation of <see cref="AttributeRef"/> based on <see cref="AttributeBuilder"/>.
+/// An implementation of <see cref="AttributeRef"/> based on <see cref="BuilderData"/>.
 /// </summary>
 internal sealed class BuilderAttributeRef : AttributeRef
 {
-    public AttributeBuilderData AttributeBuilder { get; }
+    public AttributeBuilderData BuilderData { get; }
 
-    public BuilderAttributeRef( AttributeBuilderData builder ) : base(
-        builder.ContainingDeclaration,
-        builder.Type )
+    public BuilderAttributeRef( AttributeBuilderData builderData ) : base(
+        builderData.ContainingDeclaration,
+        builderData.Type )
     {
-        this.AttributeBuilder = builder;
+        this.BuilderData = builderData;
     }
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {
-        attribute = new BuiltAttribute( this.AttributeBuilder, compilation, GenericContext.Empty );
+        attribute = new BuiltAttribute( this.BuilderData, compilation, GenericContext.Empty );
 
         return true;
     }
 
     public override bool TryGetAttributeSerializationDataKey( [NotNullWhen( true )] out object? serializationDataKey )
     {
-        serializationDataKey = this.AttributeBuilder;
+        serializationDataKey = this.BuilderData;
 
         return true;
     }
 
     public override bool TryGetAttributeSerializationData( [NotNullWhen( true )] out AttributeSerializationData? serializationData )
     {
-        serializationData = new AttributeSerializationData( this.AttributeBuilder );
+        serializationData = new AttributeSerializationData( this.BuilderData );
 
         return true;
     }
 
-    public override string Name => this.AttributeBuilder.Type.Name;
+    public override string Name => this.BuilderData.Type.Name;
 
     protected override AttributeSyntax? AttributeSyntax => null;
 
     public override bool Equals( AttributeRef? other )
-        => other is BuilderAttributeRef builderAttributeRef && this.AttributeBuilder.Equals( builderAttributeRef.AttributeBuilder );
+        => other is BuilderAttributeRef builderAttributeRef && this.BuilderData.Equals( builderAttributeRef.BuilderData );
 
-    protected override int GetHashCodeCore() => this.AttributeBuilder.GetHashCode();
+    protected override int GetHashCodeCore() => this.BuilderData.GetHashCode();
 }

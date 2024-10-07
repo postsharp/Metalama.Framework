@@ -3,11 +3,14 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
@@ -33,7 +36,7 @@ internal sealed class LinkerInjectionRegistry
     private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
     private readonly IReadOnlyList<InjectedMember> _injectedMembers;
     private readonly IReadOnlyCollection<ISymbol> _overrideTargets;
-    private readonly IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
+    private readonly IReadOnlyDictionary<DeclarationBuilderData, IIntroduceDeclarationTransformation> _builderToTransformationMap;
     private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
     private readonly IReadOnlyDictionary<ISymbol, InjectedMember> _symbolToInjectedMemberMap;
     private readonly IReadOnlyDictionary<InjectedMember, ISymbol> _injectedMemberToSymbolMap;
@@ -41,15 +44,15 @@ internal sealed class LinkerInjectionRegistry
     private readonly ISet<ISymbol> _auxiliarySourceMembers;
 
     // TODO: This is used only for mapping of constructors with introduced parameters (limitation of code model).
-    private readonly IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
+    private readonly IReadOnlyDictionary<IRef<IDeclaration>, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
 
     public LinkerInjectionRegistry(
         TransformationLinkerOrderComparer comparer,
         PartialCompilation intermediateCompilation,
         IEnumerable<SyntaxTreeTransformation> transformations,
         IEnumerable<InjectedMember> injectedMembers,
-        IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
-        IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> introducedParametersByTargetDeclaration,
+        IReadOnlyDictionary<DeclarationBuilderData, IIntroduceDeclarationTransformation> builderToTransformationMap,
+        IReadOnlyDictionary<IRef<IDeclaration>, IReadOnlyList<IntroduceParameterTransformation>> introducedParametersByTargetDeclaration,
         ISet<ITransformation> transformationsCausingAuxiliaryOverrides,
         IConcurrentTaskRunner concurrentTaskRunner,
         CancellationToken cancellationToken )
@@ -89,8 +92,8 @@ internal sealed class LinkerInjectionRegistry
 
         this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMember, ISymbol>();
 
-        var overriddenDeclarations = new ConcurrentDictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
-        var builderToInjectedMemberMap = new ConcurrentDictionary<IDeclarationBuilder, InjectedMember>();
+        var overriddenDeclarations = new ConcurrentDictionary<IRef<IDeclaration>, List<ISymbol>>( RefEqualityComparer<IDeclaration>.Default );
+        var builderToInjectedMemberMap = new ConcurrentDictionary<DeclarationBuilderData, InjectedMember>();
 
         void ProcessInjectedMember( InjectedMember injectedMember )
         {
@@ -118,15 +121,10 @@ internal sealed class LinkerInjectionRegistry
                     _ => throw new AssertionFailedException( $"Unsupported transformation {injectedMember.Transformation}." )
                 };
 
-                var rootMember =
-                    overriddenMember switch
-                    {
-                        IMethod { ContainingDeclaration: IPropertyOrIndexer propertyOrIndexer } => propertyOrIndexer,
-                        _ => overriddenMember
-                    };
+                var typeMember = overriddenMember.GetStrategy().GetTypeMember( overriddenMember );
 
                 // These are auxiliary overrides created as a result of another transformation.
-                var list = overriddenDeclarations.GetOrAdd( rootMember, _ => new List<ISymbol>() );
+                var list = overriddenDeclarations.GetOrAdd( typeMember, _ => new List<ISymbol>() );
 
                 lock ( list )
                 {
@@ -141,16 +139,16 @@ internal sealed class LinkerInjectionRegistry
 
             if ( injectedMember is { Transformation: null, Semantic: InjectedMemberSemantic.AuxiliaryBody } )
             {
-                var originalDeclaration = injectedMember.Declaration;
+                var originalDeclaration = (ISymbolRef<IDeclaration>) injectedMember.Declaration;
                 ISymbol translatedSymbol;
 
                 if ( this._introducedParametersByTargetDeclaration.TryGetValue( originalDeclaration, out var introducedParameters ) )
                 {
                     // Constructors with introduced parameters cannot be found through normal translation.
                     // TODO: This is a hack, constructors with introduced parameters should be identifiable through code model.
-                    Invariant.Assert( originalDeclaration is IConstructor );
+                    Invariant.Assert( originalDeclaration is ISymbolRef<IConstructor> );
 
-                    var originalConstructor = (IMethodSymbol) originalDeclaration.GetSymbol().AssertNotNull();
+                    var originalConstructor = (IMethodSymbol) originalDeclaration.Symbol;
 
                     translatedSymbol =
                         TranslateConstructor( originalConstructor, introducedParameters )
@@ -159,7 +157,7 @@ internal sealed class LinkerInjectionRegistry
                 }
                 else
                 {
-                    translatedSymbol = intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull() )
+                    translatedSymbol = intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.Symbol )
                         .AssertNotNull();
                 }
 
@@ -176,13 +174,13 @@ internal sealed class LinkerInjectionRegistry
         concurrentTaskRunner.RunConcurrentlyAsync( this._injectedMembers, ProcessInjectedMember, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
-        void ProcessOverride( KeyValuePair<IDeclaration, List<ISymbol>> value )
+        void ProcessOverride( KeyValuePair<IRef<IDeclaration>, List<ISymbol>> value )
         {
             var declaration = value.Key;
             var overrides = value.Value;
 
             // Overrides are only supported for root type members, i.e. not for accessors.
-            Invariant.Assert( declaration is not { ContainingDeclaration: IMember } );
+            Invariant.Assert( declaration is not { ContainingDeclaration: IRef<IMember> } );
 
             var overrideTargetSymbol = GetOverrideTargetSymbol( declaration ).AssertNotNull();
 
@@ -220,17 +218,17 @@ internal sealed class LinkerInjectionRegistry
                     .GetCanonicalDefinition();
         }
 
-        ISymbol? GetOverrideTargetSymbol( IDeclaration overrideTarget )
+        ISymbol? GetOverrideTargetSymbol( IRef<IDeclaration> overrideTarget )
         {
             switch ( overrideTarget )
             {
-                case Declaration when this._introducedParametersByTargetDeclaration.TryGetValue( overrideTarget, out var introducedParameters ):
+                case ISymbolRef symbolRef when this._introducedParametersByTargetDeclaration.TryGetValue( overrideTarget, out var introducedParameters ):
                     {
                         // Constructors with introduced parameters cannot be found through normal translation.
                         // TODO: This is a hack, constructors with introduced parameters should be identifiable through code model.
-                        Invariant.Assert( overrideTarget is IConstructor );
+                        Invariant.Assert( overrideTarget is IRef<IConstructor> );
 
-                        var originalConstructor = (IMethodSymbol) overrideTarget.GetSymbol().AssertNotNull();
+                        var originalConstructor = (IMethodSymbol) symbolRef.Symbol;
 
                         var translatedConstructor =
                             TranslateConstructor( originalConstructor, introducedParameters )
@@ -240,11 +238,11 @@ internal sealed class LinkerInjectionRegistry
                         return translatedConstructor;
                     }
 
-                case Declaration originalDeclaration:
+                case ISymbolRef symbolRef:
                     {
                         var symbol =
                             this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
-                                    originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
+                                    symbolRef.Symbol.GetCanonicalDefinition().AssertNotNull(),
                                     true )
                                 .AssertNotNull();
 
@@ -258,20 +256,17 @@ internal sealed class LinkerInjectionRegistry
                         }
                     }
 
-                case IDeclarationBuilder builder:
-                    return GetFromBuilder( builder );
-
-                case BuiltMember builtMember:
+                case IBuiltDeclarationRef builtMember:
                     return GetFromBuilder( builtMember.BuilderData );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );
             }
 
-            ISymbol? GetFromBuilder( IDeclarationBuilder builder )
+            ISymbol? GetFromBuilder( DeclarationBuilderData builder )
             {
                 var introducedBuilder = builderToInjectedMemberMap[builder];
-                var sourceSyntaxTree = ((IDeclarationImpl) builder).PrimarySyntaxTree.AssertNotNull();
+                var sourceSyntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
 
@@ -393,7 +388,7 @@ internal sealed class LinkerInjectionRegistry
         }
     }
 
-    public IIntroduceDeclarationTransformation? GetTransformationForBuilder( IDeclarationBuilder builder )
+    public IIntroduceDeclarationTransformation? GetTransformationForBuilder( DeclarationBuilderData builder )
     {
         if ( this._builderToTransformationMap.TryGetValue( builder, out var transformation ) )
         {

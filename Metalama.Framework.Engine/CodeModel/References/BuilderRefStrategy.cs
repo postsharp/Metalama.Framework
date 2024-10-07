@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -93,6 +94,15 @@ internal sealed class BuilderRefStrategy : IRefStrategy
     public IAssemblySymbol GetAssemblySymbol( IRef reference, CompilationContext compilationContext ) => compilationContext.Compilation.Assembly;
 
     public bool IsStatic( IRef<IMember> reference ) => ((MemberBuilderData) ((IBuiltDeclarationRef) reference).BuilderData).IsStatic;
+
+    public IRef<IMember> GetTypeMember( IRef<IMember> reference )
+        => ((IBuiltDeclarationRef) reference).BuilderData switch
+        {
+            MethodBuilderData { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise
+                    or MethodKind.PropertyGet or MethodKind.PropertySet
+                } methodBuilderData => methodBuilderData.ContainingDeclaration.As<IMember>(),
+            _ => reference
+        };
 
     public static IRefStrategy Instance { get; } = new BuilderRefStrategy();
 }

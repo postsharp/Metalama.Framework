@@ -221,7 +221,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                         // Find the transformation for this symbol helper.
                         var overriddenMemberSymbolHelperNodeId =
-                            GetNodeId( overriddenMemberSymbolHelper.AssertNotNull().GetPrimaryDeclaration().AssertNotNull() );
+                            GetNodeId( overriddenMemberSymbolHelper.AssertNotNull().GetPrimaryDeclarationSyntax().AssertNotNull() );
 
                         overridenMember = (IDeclaration) rewriter.ObservableTransformations
                             .Single( t => ((ITestTransformation) t).SymbolHelperNodeId == overriddenMemberSymbolHelperNodeId );
@@ -284,8 +284,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                             var replacedMemberSymbolHelperNode = replacedMemberSymbolHelperSymbol switch
                             {
-                                IFieldSymbol => replacedMemberSymbolHelperSymbol.GetPrimaryDeclaration()?.Parent?.Parent,
-                                _ => replacedMemberSymbolHelperSymbol.GetPrimaryDeclaration()
+                                IFieldSymbol => replacedMemberSymbolHelperSymbol.GetPrimaryDeclarationSyntax()?.Parent?.Parent,
+                                _ => replacedMemberSymbolHelperSymbol.GetPrimaryDeclarationSyntax()
                             };
 
                             var replacedSymbolHelperNodeId = GetNodeId( replacedMemberSymbolHelperNode.AssertNotNull() );

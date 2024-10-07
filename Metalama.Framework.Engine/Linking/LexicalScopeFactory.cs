@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
@@ -27,7 +29,7 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
      */
 
     private readonly CompilationModel _compilationModel;
-    private readonly ConcurrentDictionary<IDeclaration, TemplateLexicalScope> _scopes;
+    private readonly ConcurrentDictionary<IRef<IDeclaration>, TemplateLexicalScope> _scopes;
     private readonly ConcurrentDictionary<TypeDeclarationSyntax, ImmutableHashSet<string>> _identifiersInTypeDeclaration = new();
     private readonly SemanticModelProvider _semanticModelProvider;
 
@@ -35,13 +37,13 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
     {
         this._compilationModel = compilation;
         this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
-        this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.Comparers.Default );
+        this._scopes = new ConcurrentDictionary<IRef<IDeclaration>, TemplateLexicalScope>( RefEqualityComparer<IDeclaration>.Default );
     }
 
     /// <summary>
     /// Gets a shared lexical code where consumers can add their own symbols.
     /// </summary>
-    public TemplateLexicalScope GetLexicalScope( IDeclaration declaration ) => this._scopes.GetOrAdd( declaration, this.CreateLexicalScope );
+    public TemplateLexicalScope GetLexicalScope( IRef<IDeclaration> declaration ) => this._scopes.GetOrAdd( declaration, this.CreateLexicalScope );
 
     private ImmutableHashSet<string> GetIdentifiersInTypeScope( TypeDeclarationSyntax type )
         => this._identifiersInTypeDeclaration.GetOrAdd( type, this.GetIdentifiersInTypeScopeCore );
@@ -91,19 +93,19 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
         }
     }
 
-    private TemplateLexicalScope CreateLexicalScope( IDeclaration declaration )
+    private TemplateLexicalScope CreateLexicalScope( IRef<IDeclaration> declarationRef )
     {
-        var symbol = declaration.GetSymbol();
-
-        var contextType = declaration switch
+        if ( declarationRef is IBuiltDeclarationRef )
         {
-            IMemberOrNamedType { DeclaringType: { } declaringType } => declaringType,
-            INamedType type => type,
-            _ => throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." )
-        };
-
-        if ( symbol == null )
-        {
+            var declaration = declarationRef.GetTarget( this._compilationModel );
+            
+            var contextType = declaration switch
+            {
+                IMemberOrNamedType { DeclaringType: { } declaringType } => declaringType,
+                INamedType type => type,
+                _ => throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." )
+            };
+            
             // Builder-based source.
             if ( contextType.GetPrimaryDeclarationSyntax() == null )
             {
@@ -129,8 +131,10 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
 
             return new TemplateLexicalScope( identifiers.ToImmutable() );
         }
-        else
+        else if ( declarationRef is ISymbolRef symbolRef)
         {
+            var symbol = symbolRef.Symbol;
+            
             // Symbol-based scope.
             var syntaxReference = symbol.GetPrimarySyntaxReference();
 

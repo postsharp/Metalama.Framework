@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
     {
         internal static SyntaxNode? GetPrimaryDeclarationSyntax( this IDeclaration declaration )
         {
-            return declaration.GetSymbol()?.GetPrimaryDeclaration();
+            return declaration.GetSymbol()?.GetPrimaryDeclarationSyntax();
         }
 
         public static SyntaxTree? GetPrimarySyntaxTree( this IDeclaration declaration )

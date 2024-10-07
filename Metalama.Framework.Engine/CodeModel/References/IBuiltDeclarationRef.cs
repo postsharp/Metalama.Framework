@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// <summary>
 /// A non-generic base interface for <see cref="BuiltDeclarationRef{T}"/>.
 /// </summary>
-internal interface IBuiltDeclarationRef 
+internal interface IBuiltDeclarationRef : IRefImpl 
 {
     DeclarationBuilderData BuilderData { get; }
 }

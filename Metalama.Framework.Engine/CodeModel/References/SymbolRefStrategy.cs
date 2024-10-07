@@ -238,6 +238,26 @@ internal sealed class SymbolRefStrategy : IRefStrategy
 
     public bool IsStatic( IRef<IMember> reference ) => ((ISymbolRef) reference).Symbol.IsStatic;
 
+    public IRef<IMember> GetTypeMember( IRef<IMember> reference )
+    {
+        var symbolRef = ((ISymbolRef) reference);
+
+        return symbolRef.Symbol switch
+        {
+            IMethodSymbol
+                {
+                    MethodKind: MethodKind.EventAdd or MethodKind.EventRaise or MethodKind.EventRemove
+                } accessor
+                => symbolRef.CompilationContext.RefFactory.FromSymbol<IEvent>( accessor.AssociatedSymbol ),
+            IMethodSymbol
+                {
+                    MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet
+                } accessor
+                => symbolRef.CompilationContext.RefFactory.FromSymbol<IProperty>( accessor.AssociatedSymbol )
+            _ => reference
+        };
+
+    
     private static bool IsValidSymbol( ISymbol symbol, CompilationModel compilation )
     {
         // Private symbols of external assemblies must be hidden because these references are not available in a PE reference (i.e. at compile time)

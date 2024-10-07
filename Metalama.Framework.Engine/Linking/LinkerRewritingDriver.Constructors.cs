@@ -217,7 +217,7 @@ internal sealed partial class LinkerRewritingDriver
                     switch ( member )
                     {
                         case IFieldSymbol field:
-                            var fieldDeclaration = (VariableDeclaratorSyntax) field.GetPrimaryDeclaration().AssertNotNull();
+                            var fieldDeclaration = (VariableDeclaratorSyntax) field.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             name = field.Name;
                             expression = fieldDeclaration.Initializer.AssertNotNull().Value;
@@ -225,7 +225,7 @@ internal sealed partial class LinkerRewritingDriver
                             break;
 
                         case IEventSymbol eventField:
-                            var eventFieldDeclaration = (VariableDeclaratorSyntax) eventField.GetPrimaryDeclaration().AssertNotNull();
+                            var eventFieldDeclaration = (VariableDeclaratorSyntax) eventField.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             name = eventField.Name;
                             expression = eventFieldDeclaration.Initializer.AssertNotNull().Value;
@@ -233,7 +233,7 @@ internal sealed partial class LinkerRewritingDriver
                             break;
 
                         case IPropertySymbol property:
-                            var primaryDeclaration = property.GetPrimaryDeclaration().AssertNotNull();
+                            var primaryDeclaration = property.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             switch ( primaryDeclaration )
                             {

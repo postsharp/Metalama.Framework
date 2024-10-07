@@ -21,23 +21,23 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
-    public NamedTypeBuilderData TypeBuilder { get; }
+    public NamedTypeBuilderData NamedTypeBuilderData { get; }
 
-    public BuiltNamedType( NamedTypeBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltNamedType( NamedTypeBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
-        this.TypeBuilder = builder;
+        this.NamedTypeBuilderData = builderData;
     }
 
-    public override DeclarationBuilderData BuilderData => this.TypeBuilder;
+    public override DeclarationBuilderData BuilderData => this.NamedTypeBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.TypeBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.NamedTypeBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.TypeBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.NamedTypeBuilderData;
 
     public bool HasDefaultConstructor => true; // TODO
 
     [Memo]
-    public INamedType? BaseType => this.MapDeclaration( this.TypeBuilder.BaseType );
+    public INamedType? BaseType => this.MapDeclaration( this.NamedTypeBuilderData.BaseType );
 
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(
@@ -154,31 +154,31 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public INamedType TypeDefinition => this.Definition;
 
     [Memo]
-    public INamedType Definition => this.Compilation.Factory.GetNamedType( this.TypeBuilder ).AssertNotNull();
+    public INamedType Definition => this.Compilation.Factory.GetNamedType( this.NamedTypeBuilderData ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     public INamedType UnderlyingType => this.Definition;
 
-    public TypeKind TypeKind => this.TypeBuilder.TypeKind;
+    public TypeKind TypeKind => this.NamedTypeBuilderData.TypeKind;
 
     public SpecialType SpecialType => SpecialType.None;
 
-    public bool? IsReferenceType => this.TypeBuilder.TypeKind is TypeKind.Class or TypeKind.RecordClass;
+    public bool? IsReferenceType => this.NamedTypeBuilderData.TypeKind is TypeKind.Class or TypeKind.RecordClass;
 
-    public bool IsReadOnly => this.TypeBuilder.IsReadOnly;
+    public bool IsReadOnly => this.NamedTypeBuilderData.IsReadOnly;
 
-    public bool IsRef => this.TypeBuilder.IsRef;
+    public bool IsRef => this.NamedTypeBuilderData.IsRef;
 
     public bool? IsNullable => false; // TODO: We don't have a mechanism to create nullable introduced types
 
     [Memo]
-    public ITypeParameterList TypeParameters => new TypeParameterList( this, this.TypeBuilder.TypeParameters.SelectAsReadOnlyList( t => t.ToRef() ) );
+    public ITypeParameterList TypeParameters => new TypeParameterList( this, this.NamedTypeBuilderData.TypeParameters.SelectAsReadOnlyList( t => t.ToRef() ) );
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments => this.TypeBuilder.TypeParameters.SelectAsImmutableArray( t => this.MapType( t.ToRef() ) );
+    public IReadOnlyList<IType> TypeArguments => this.NamedTypeBuilderData.TypeParameters.SelectAsImmutableArray( t => this.MapType( t.ToRef() ) );
 
-    public bool IsGeneric => this.TypeBuilder.TypeParameters.Length > 0;
+    public bool IsGeneric => this.NamedTypeBuilderData.TypeParameters.Length > 0;
 
     public bool IsCanonicalGenericInstance => this.GenericContext.IsEmptyOrIdentity;
 

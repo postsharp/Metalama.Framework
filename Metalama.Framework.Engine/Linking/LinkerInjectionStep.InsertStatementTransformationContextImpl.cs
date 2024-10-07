@@ -18,7 +18,7 @@ internal sealed partial class LinkerInjectionStep
         /// <summary>
         /// Gets the member for which this context exists.
         /// </summary>
-        public IMember ContextMember { get; }
+        public IRef<IMember> ContextMember { get; }
 
         /// <summary>
         /// Gets the first transformation that uses this context.
@@ -44,7 +44,7 @@ internal sealed partial class LinkerInjectionStep
             CompilationModel compilation,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             IInsertStatementTransformation originTransformation,
-            IMember contextMember ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
+            IRef<IMember> contextMember ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
             this.ContextMember = contextMember;
             this.OriginTransformation = originTransformation;

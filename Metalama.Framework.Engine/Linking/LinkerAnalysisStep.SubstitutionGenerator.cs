@@ -338,7 +338,7 @@ internal sealed partial class LinkerAnalysisStep
                 {
                     var context = new InliningContextIdentifier( constructor );
 
-                    var declaration = (ConstructorDeclarationSyntax?) constructor.Symbol.GetPrimaryDeclaration();
+                    var declaration = (ConstructorDeclarationSyntax?) constructor.Symbol.GetPrimaryDeclarationSyntax();
 
                     if ( declaration == null )
                     {

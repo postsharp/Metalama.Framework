@@ -879,7 +879,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private IReadOnlyList<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
     {
         // Check the aspects already on the declaration.
-        var filePath = symbol.GetPrimaryDeclaration()?.SyntaxTree.FilePath;
+        var filePath = symbol.GetPrimaryDeclarationSyntax()?.SyntaxTree.FilePath;
 
         if ( filePath == null )
         {

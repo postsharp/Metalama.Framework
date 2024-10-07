@@ -15,7 +15,7 @@ internal static class SymbolExtensions
     public static AspectLinkerDeclarationFlags GetDeclarationFlags( this ISymbol symbol )
     {
         // TODO: Partials?
-        var declaration = symbol.GetPrimaryDeclaration();
+        var declaration = symbol.GetPrimaryDeclarationSyntax();
 
         switch ( declaration )
         {
@@ -47,7 +47,7 @@ internal static class SymbolExtensions
     {
         if ( symbol is IEventSymbol eventSymbol )
         {
-            var declaration = eventSymbol.GetPrimaryDeclaration();
+            var declaration = eventSymbol.GetPrimaryDeclarationSyntax();
 
             if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
             {

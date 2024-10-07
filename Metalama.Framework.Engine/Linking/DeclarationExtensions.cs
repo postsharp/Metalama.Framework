@@ -15,7 +15,7 @@ internal static class DeclarationExtensions
             return true;
         }
 
-        if ( @event.GetPrimaryDeclaration() is { } primaryDeclaration
+        if ( @event.GetPrimaryDeclarationSyntax() is { } primaryDeclaration
              && primaryDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
         {
             return true;

@@ -217,7 +217,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( injectedMember.Transformation is IOverrideDeclarationTransformation overridden )
             {
-                declaration = (IMemberOrNamedType) overridden.OverriddenDeclaration;
+                declaration = overridden.OverriddenDeclaration;
             }
 
             if ( declaration == null )

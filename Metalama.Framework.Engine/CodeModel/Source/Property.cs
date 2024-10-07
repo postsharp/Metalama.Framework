@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         {
             // The declaration for properties created from record primary constructor parameters is ParameterSyntax.
             // Since those don't have a normal initializer, ignore them here.
-            var initializer = (this.PropertySymbol.GetPrimaryDeclaration() as PropertyDeclarationSyntax)?.Initializer;
+            var initializer = (this.PropertySymbol.GetPrimaryDeclarationSyntax() as PropertyDeclarationSyntax)?.Initializer;
 
             if ( initializer == null )
             {

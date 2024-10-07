@@ -112,7 +112,7 @@ internal sealed partial class LinkerAnalysisStep
                     var containingSemantic = containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
 
                     var sourceNode =
-                        containingSymbol.GetPrimaryDeclaration() switch
+                        containingSymbol.GetPrimaryDeclarationSyntax() switch
                         {
                             ConstructorDeclarationSyntax constructor => constructor.Body ?? (SyntaxNode?) constructor.ExpressionBody ?? constructor,
                             MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? method,
@@ -213,7 +213,7 @@ internal sealed partial class LinkerAnalysisStep
             void AnalyzeIntroducedBody( IMethodSymbol symbol )
             {
                 var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-                var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
+                var syntax = symbol.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                 var nodesWithAspectReference = syntax.GetAnnotatedNodes( AspectReferenceAnnotationExtensions.AnnotationKind );
 

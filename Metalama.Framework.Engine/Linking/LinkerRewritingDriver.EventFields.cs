@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.Linking
             IEventSymbol symbol,
             SyntaxGenerationContext context )
         {
-            var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
+            var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclarationSyntax().AssertNotNull();
 
             return
                 this.GetEventBackingField(

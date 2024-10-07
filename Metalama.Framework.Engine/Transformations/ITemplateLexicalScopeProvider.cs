@@ -7,5 +7,5 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal interface ITemplateLexicalScopeProvider
 {
-    TemplateLexicalScope GetLexicalScope( IDeclaration declaration );
+    TemplateLexicalScope GetLexicalScope( IRef<IDeclaration> declaration );
 }

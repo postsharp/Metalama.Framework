@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         private IExpression? GetInitializerExpressionCore()
         {
-            var expression = this._symbol.GetPrimaryDeclaration() switch
+            var expression = this._symbol.GetPrimaryDeclarationSyntax() switch
             {
                 VariableDeclaratorSyntax variable => variable.Initializer?.Value,
                 EnumMemberDeclarationSyntax enumMember => enumMember.EqualsValue?.Value,

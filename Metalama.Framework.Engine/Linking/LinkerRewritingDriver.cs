@@ -195,7 +195,7 @@ internal sealed partial class LinkerRewritingDriver
     /// </summary>
     private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
     {
-        var declaration = symbol.GetPrimaryDeclaration();
+        var declaration = symbol.GetPrimaryDeclarationSyntax();
 
         if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
         {
@@ -585,7 +585,7 @@ internal sealed partial class LinkerRewritingDriver
             throw new AssertionFailedException( $"{semantic} is not expected for trivia source resolution." );
         }
 
-        return symbol?.GetPrimaryDeclaration() switch
+        return symbol?.GetPrimaryDeclarationSyntax() switch
         {
             null => null,
             MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,

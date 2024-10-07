@@ -71,7 +71,7 @@ internal static class CodeModelInternalExtensions
             case NamedTypeBuilderData { DeclaringType: ISymbolRef declaringType }:
                 return new InsertPosition(
                     InsertPositionRelation.Within,
-                    (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
+                    (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
             case NamedTypeBuilderData topLevelType:
                 return new InsertPosition( topLevelType.PrimarySyntaxTree );
@@ -82,7 +82,7 @@ internal static class CodeModelInternalExtensions
             case MemberBuilderData { DeclaringType: ISymbolRef declaringType }:
                 return new InsertPosition(
                     InsertPositionRelation.Within,
-                    (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclaration().AssertNotNull() );
+                    (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
             default:
                 throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
@@ -99,7 +99,7 @@ internal static class CodeModelInternalExtensions
 
     public static InsertPosition ToInsertPosition( this ISymbol symbol )
     {
-        var primaryDeclaration = symbol.GetPrimaryDeclaration();
+        var primaryDeclaration = symbol.GetPrimaryDeclarationSyntax();
 
         if ( primaryDeclaration != null )
         {
@@ -116,7 +116,7 @@ internal static class CodeModelInternalExtensions
         }
         else
         {
-            var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
+            var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclarationSyntax().AssertNotNull();
 
             return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
         }
