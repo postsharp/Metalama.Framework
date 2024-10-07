@@ -7,7 +7,7 @@
   <PropertyGroup>
     <!-- MSBuild v17.4.0 does not support .NET 6.0 and there seems to be no benefit in referencing a high version. -->
     <MicrosoftBuildVersion>17.3.2</MicrosoftBuildVersion>
-    <PostSharpEngineeringVersion Condition="'$(PostSharpEngineeringVersion)'==''">2023.2.133</PostSharpEngineeringVersion>
+    <PostSharpEngineeringVersion Condition="'$(PostSharpEngineeringVersion)'==''">2023.2.135</PostSharpEngineeringVersion>
     <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
     <PostSharpPackageVersion>2024.1.4</PostSharpPackageVersion>
     <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
