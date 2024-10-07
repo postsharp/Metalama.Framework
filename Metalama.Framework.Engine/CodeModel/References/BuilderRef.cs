@@ -133,10 +133,20 @@ internal sealed class BuilderRef<T> : CompilationBoundRef<T>, IBuilderRef
             comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
             "Compilation mistmatch in a non-structural comparison." );
 
-        return ReferenceEquals( this.Builder, otherRef.Builder );
+        if ( !ReferenceEquals( this.Builder, otherRef.Builder ) )
+        {
+            return false;
+        }
+
+        if ( !this.GenericContext.Equals( otherRef.GenericContext ) )
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    public override int GetHashCode( RefComparison comparison ) => this.Builder.GetHashCode();
+    public override int GetHashCode( RefComparison comparison ) => HashCode.Combine( this.Builder.GetHashCode(), this.GenericContext );
 
     public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 }

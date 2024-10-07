@@ -156,20 +156,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                              existingMethod.DeclaringType),
                             this ) );
             }
-            else if ( !compilation.Comparers.Default.Is(
-                         this.Builder.ReturnType,
-                         existingMethod.ReturnType,
-                         ConversionKind.Reference ) )
-            {
-                return
-                    this.CreateFailedResult(
-                        AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                            targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
-                             existingMethod.DeclaringType, existingMethod.ReturnType),
-                            this ) );
-            }
-
+            
             switch ( this.OverrideStrategy )
             {
                 case OverrideStrategy.Fail:
@@ -215,6 +202,21 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                     }
 
                 case OverrideStrategy.Override:
+                    if ( !compilation.Comparers.Default.Is(
+                            this.Builder.ReturnType,
+                            existingMethod.ReturnType,
+                            ConversionKind.Reference ) )
+                    {
+                        // TODO: .NET Core allows overriding a method of different return type.
+                        return
+                            this.CreateFailedResult(
+                                AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                     existingMethod.DeclaringType, existingMethod.ReturnType),
+                                    this ) );
+                    }
+                    
                     if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                     {
                         var overriddenMethod = new OverrideMethodTransformation(
