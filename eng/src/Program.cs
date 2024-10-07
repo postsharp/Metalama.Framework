@@ -45,7 +45,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         // {
         //     IsTestOnly = true
         // }
-        new ManyDotNetSolutions( "Tests\\Standalone\\Licensing" ) { IsTestOnly = true }
+        new ManyDotNetSolutions( "Tests\\Standalone\\Licensing\\TestBuildFails" ) { IsTestOnly = true }
     ],
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
