@@ -94,7 +94,7 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
     }
 
     public IndexerBuilder(
-        Advice advice,
+        AdviceInfo advice,
         INamedType targetType,
         bool hasGetter,
         bool hasSetter )

@@ -24,10 +24,10 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
     private readonly IFullRef<IIndexer> _overriddenIndexer;
 
     protected OverrideIndexerBaseTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IIndexer> overriddenDeclaration,
         IObjectReader tags )
-        : base( advice, tags )
+        : base( advice, overriddenDeclaration, tags )
     {
         this._overriddenIndexer = overriddenDeclaration;
     }

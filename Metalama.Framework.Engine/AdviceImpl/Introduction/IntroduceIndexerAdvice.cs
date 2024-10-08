@@ -44,7 +44,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         var hasGet = this._getTemplate != null;
         var hasSet = this._setTemplate != null;
 
-        var builder = new IndexerBuilder( this, this.TargetDeclaration, hasGet, hasSet );
+        var builder = new IndexerBuilder( this.AdviceInfo, this.TargetDeclaration, hasGet, hasSet );
 
         foreach ( var pair in this._indices )
         {
@@ -191,7 +191,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
             // Introduce and override using the template.
             var overrideIndexerTransformation = new OverrideIndexerTransformation(
-                this,
+                this.AdviceInfo,
                 builder.ToFullRef(),
                 this._getTemplate?.ForIntroduction( builder.GetMethod ),
                 this._setTemplate?.ForIntroduction( builder.SetMethod ),
@@ -258,7 +258,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                         builder.Freeze();
 
                         var overrideIndexerTransformation = new OverrideIndexerTransformation(
-                            this,
+                            this.AdviceInfo,
                             builder.ToFullRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
                             this._setTemplate?.ForIntroduction( builder.SetMethod ),
@@ -274,7 +274,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                     if ( targetDeclaration.Equals( existingIndexer.DeclaringType ) )
                     {
                         var overrideIndexerTransformation = new OverrideIndexerTransformation(
-                            this,
+                            this.AdviceInfo,
                             existingIndexer.ToFullRef(),
                             this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
                             this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
@@ -302,7 +302,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                         builder.Freeze();
 
                         var overriddenIndexer = new OverrideIndexerTransformation(
-                            this,
+                            this.AdviceInfo,
                             builder.ToFullRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
                             this._setTemplate?.ForIntroduction( builder.SetMethod ),

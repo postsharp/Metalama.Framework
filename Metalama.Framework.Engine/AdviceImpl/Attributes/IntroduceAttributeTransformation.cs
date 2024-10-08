@@ -14,7 +14,7 @@ internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransform
 {
     public AttributeBuilderData AttributeBuilder { get; }
 
-    public IntroduceAttributeTransformation( Advice advice, AttributeBuilderData attributeBuilder ) : base( advice )
+    public IntroduceAttributeTransformation( AdviceInfo advice, AttributeBuilderData attributeBuilder ) : base( advice, attributeBuilder.ContainingDeclaration )
     {
         this.AttributeBuilder = attributeBuilder;
     }

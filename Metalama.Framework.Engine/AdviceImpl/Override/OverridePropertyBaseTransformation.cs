@@ -23,10 +23,10 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
     public IFullRef<IProperty> OverriddenProperty { get; }
 
     protected OverridePropertyBaseTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IProperty> overriddenProperty,
         IObjectReader tags )
-        : base( advice, tags )
+        : base( advice, overriddenProperty, tags )
     {
         this.OverriddenProperty = overriddenProperty;
     }

@@ -42,7 +42,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
     public override IAssembly DeclaringAssembly => this.Compilation;
 
-    public override IDeclarationOrigin Origin => this.BuilderData.ParentAdvice;
+    public override IDeclarationOrigin Origin => this.BuilderData.ParentAdvice.AspectInstance;
 
     [return: NotNullIfNotNull( nameof(type) )]
     protected IType? MapType( IRef<IType>? type )

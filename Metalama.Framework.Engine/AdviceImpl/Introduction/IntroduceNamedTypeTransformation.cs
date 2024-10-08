@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTransformation<NamedTypeBuilderData>
 {
-    public IntroduceNamedTypeTransformation( Advice advice, NamedTypeBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceNamedTypeTransformation( AdviceInfo advice, NamedTypeBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
@@ -82,7 +82,8 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                 ];
 
             default:
-                throw new AssertionFailedException( $"Unsupported containing declaration type '{typeBuilder.ContainingDeclaration.AssertNotNull().GetType()}'." );
+                throw new AssertionFailedException(
+                    $"Unsupported containing declaration type '{typeBuilder.ContainingDeclaration.AssertNotNull().GetType()}'." );
         }
     }
 }

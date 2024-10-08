@@ -32,7 +32,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public TypeParameterBuilderList TypeParameters { get; } = [];
 
-    public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
+    public NamedTypeBuilder( AdviceInfo advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
         advice,
         declaringNamespaceOrType as INamedType,
         name )

@@ -109,7 +109,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     }
 
     public PropertyBuilder(
-        Advice advice,
+        AdviceInfo advice,
         INamedType targetType,
         string name,
         bool hasGetter,

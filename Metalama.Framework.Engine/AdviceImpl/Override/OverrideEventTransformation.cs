@@ -31,12 +31,12 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
     private BoundTemplateMethod? RemoveTemplate { get; }
 
     public OverrideEventTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IEvent> overriddenDeclaration,
         BoundTemplateMethod? addTemplate,
         BoundTemplateMethod? removeTemplate,
         IObjectReader tags )
-        : base( advice, tags )
+        : base( advice, overriddenDeclaration, tags )
     {
         this._overriddenDeclaration = overriddenDeclaration;
         this.AddTemplate = addTemplate;

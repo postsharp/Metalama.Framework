@@ -24,7 +24,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 {
     internal IAttributeData AttributeConstruction { get; }
 
-    public AttributeBuilder( Advice advice, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base( advice )
+    public AttributeBuilder( AdviceInfo advice, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base( advice )
     {
         this.AttributeConstruction = attributeConstruction;
         this.ContainingDeclaration = containingDeclaration;

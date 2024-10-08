@@ -26,11 +26,11 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
     public IFullRef<IMember> TargetMember => this._targetConstructor;
 
     public TemplateBasedInitializationTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IRef<IMemberOrNamedType> initializedDeclaration,
         IFullRef<IConstructor> targetConstructor,
         BoundTemplateMethod boundTemplate,
-        IObjectReader tags ) : base( advice )
+        IObjectReader tags ) : base( advice, targetConstructor )
     {
         this.ContextDeclaration = initializedDeclaration;
         this._targetConstructor = targetConstructor;

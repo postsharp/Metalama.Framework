@@ -18,16 +18,16 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
     private readonly IFullRef<IIndexer> _targetIndexer;
 
     public ContractIndexerTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IIndexer> targetIndexer,
-        IRef<IParameter>? indexerParameter,
+        IFullRef<IParameter>? indexerParameter,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
         IObjectReader tags,
         TemplateProvider templateProvider ) : base(
         advice,
-        (IRef<IDeclaration>?) indexerParameter ?? targetIndexer,
+        (IFullRef<IDeclaration>?) indexerParameter ?? targetIndexer,
         contractDirection,
         template,
         templateProvider,

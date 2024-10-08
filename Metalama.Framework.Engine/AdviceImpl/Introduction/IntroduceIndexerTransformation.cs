@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransformation<IndexerBuilderData>
 {
-    public IntroduceIndexerTransformation( Advice advice, IndexerBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceIndexerTransformation( AdviceInfo advice, IndexerBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {

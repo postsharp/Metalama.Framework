@@ -27,8 +27,8 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
 
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideFinalizerTransformation( Advice advice, IFullRef<IMethod> targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, tags )
+    public OverrideFinalizerTransformation( AdviceInfo advice, IFullRef<IMethod> targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
+        : base( advice, targetFinalizer, tags )
     {
         this._targetFinalizer = targetFinalizer;
         this.BoundTemplate = boundTemplate;

@@ -19,7 +19,7 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
 {
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideMethodTransformation( Advice advice, IFullRef<IMethod> targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
+    public OverrideMethodTransformation( AdviceInfo advice, IFullRef<IMethod> targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
         : base( advice, targetMethod, tags )
     {
         this.BoundTemplate = boundTemplate;

@@ -57,7 +57,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
     IRef<IMethodBase> IMethodBase.ToRef() => throw new NotSupportedException();
 
     protected MethodBaseBuilder(
-        Advice advice,
+        AdviceInfo advice,
         INamedType targetType,
         string name )
         : base( targetType, name, advice ) { }

@@ -25,10 +25,10 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTr
     public IFullRef<IMember> TargetMember => this._targetConstructor;
 
     public SyntaxBasedInitializationTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IRef<IMemberOrNamedType> initializedDeclaration,
         IFullRef<IConstructor> targetConstructor,
-        Func<SyntaxGenerationContext, StatementSyntax> initializationStatement ) : base( advice )
+        Func<SyntaxGenerationContext, StatementSyntax> initializationStatement ) : base( advice, targetConstructor )
     {
         this.ContextDeclaration = initializedDeclaration;
         this._targetConstructor = targetConstructor;

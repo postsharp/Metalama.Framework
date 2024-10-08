@@ -9,9 +9,13 @@ using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
+internal abstract class Advice : IDiagnosticSource
 {
-    public IAspectInstanceInternal AspectInstance { get; }
+    public AdviceInfo AdviceInfo { get; }
+
+    public IAspectInstanceInternal AspectInstance => this.AdviceInfo.AspectInstance;
+
+    public AspectLayerId AspectLayerId => this.AdviceInfo.AspectLayerId;
 
     protected TemplateClassInstance TemplateInstance { get; }
 
@@ -22,9 +26,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
     /// <summary>
     /// Gets the compilation from which the advice was instantiated.
     /// </summary>
-    public CompilationModel SourceCompilation { get; }
-
-    public AspectLayerId AspectLayerId { get; }
+    public CompilationModel SourceCompilation => this.AdviceInfo.SourceCompilation;
 
     public abstract AdviceKind AdviceKind { get; }
 
@@ -36,18 +38,10 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
             throw new AssertionFailedException( $"Cannot override '{parameters.TargetDeclaration}' because it is external." );
         }
 #endif
-        this.AspectInstance = parameters.AspectInstance;
+        this.AdviceInfo = new AdviceInfo( parameters );
         this.TemplateInstance = parameters.TemplateInstance;
         this.TargetDeclaration = parameters.TargetDeclaration;
-        this.SourceCompilation = parameters.SourceCompilation;
-        this.AspectLayerId = new AspectLayerId( this.AspectInstance.AspectClass, parameters.LayerName );
     }
-
-    IAspectInstance IAspectDeclarationOrigin.AspectInstance => this.AspectInstance;
-
-    DeclarationOriginKind IDeclarationOrigin.Kind => DeclarationOriginKind.Aspect;
-
-    bool IDeclarationOrigin.IsCompilerGenerated => false;
 
     string IDiagnosticSource.DiagnosticSourceDescription => $"{this.GetType().Name} supplied by {this.AspectInstance.DiagnosticSourceDescription}'";
 

@@ -204,5 +204,11 @@ namespace Metalama.Framework.Engine.Aspects
             => this.Predecessors.SelectMany( p => (p.Instance as IAspectPredecessorImpl)?.PredecessorTreeClosure ?? ImmutableArray<SyntaxTree>.Empty )
                 .Distinct()
                 .ToImmutableArray();
+
+        DeclarationOriginKind IDeclarationOrigin.Kind => DeclarationOriginKind.Aspect;
+
+        bool IDeclarationOrigin.IsCompilerGenerated => true;
+
+        IAspectInstance IAspectDeclarationOrigin.AspectInstance => this;
     }
 }

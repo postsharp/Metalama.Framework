@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class AddAnnotationTransformation : BaseTransformation
 {
-    public AddAnnotationTransformation( AddAnnotationAdvice advice, IRef<IDeclaration> declaration, AnnotationInstance annotationInstance ) : base( advice )
+    public AddAnnotationTransformation( AdviceInfo advice, IRef<IDeclaration> declaration, AnnotationInstance annotationInstance ) : base( advice )
     {
         this.TargetDeclaration = declaration;
         this.AnnotationInstance = annotationInstance;

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal class IntroducePropertyTransformation : IntroduceMemberTransformation<PropertyBuilderData>
 {
-    public IntroducePropertyTransformation( Advice advice, PropertyBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroducePropertyTransformation( AdviceInfo advice, PropertyBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {

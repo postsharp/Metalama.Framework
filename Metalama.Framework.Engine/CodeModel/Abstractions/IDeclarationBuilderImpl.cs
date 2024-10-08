@@ -8,10 +8,10 @@ namespace Metalama.Framework.Engine.CodeModel.Abstractions
 {
     internal interface IDeclarationBuilderImpl : IDeclarationBuilder, IDeclarationImpl
     {
-        Advice ParentAdvice { get; }
+        AdviceInfo ParentAdvice { get; }
 
         new AttributeBuilderCollection Attributes { get; }
-        
+
         bool IsDesignTimeObservable { get; }
     }
 }

@@ -31,14 +31,14 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
     /// </summary>
     public IFieldImpl OriginalSourceFieldOrFieldBuilder { get; }
 
-    public static PromotedFieldBuilder Create( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice )
+    public static PromotedFieldBuilder Create( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, AdviceInfo advice )
         => new(
             serviceProvider,
             field,
             initializerTags,
             advice );
 
-    private PromotedFieldBuilder( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
+    private PromotedFieldBuilder( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, AdviceInfo advice ) : base(
         advice,
         field.DeclaringType,
         field.Name,

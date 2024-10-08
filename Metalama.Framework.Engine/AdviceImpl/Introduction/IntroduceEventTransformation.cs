@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceEventTransformation : IntroduceMemberTransformation<EventBuilderData>
 {
-    public IntroduceEventTransformation( Advice advice, EventBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceEventTransformation( AdviceInfo advice, EventBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {

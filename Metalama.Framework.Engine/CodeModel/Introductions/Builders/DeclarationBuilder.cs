@@ -31,7 +31,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 
     public abstract bool IsDesignTimeObservable { get; }
 
-    protected DeclarationBuilder( Advice parentAdvice )
+    protected DeclarationBuilder( AdviceInfo parentAdvice )
     {
         this.ParentAdvice = parentAdvice;
     }
@@ -42,9 +42,9 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 
     protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
-    public Advice ParentAdvice { get; }
+    public AdviceInfo ParentAdvice { get; }
 
-    public IDeclarationOrigin Origin => this.ParentAdvice;
+    public IDeclarationOrigin Origin => this.ParentAdvice.AspectInstance;
 
     public abstract IDeclaration? ContainingDeclaration { get; }
 

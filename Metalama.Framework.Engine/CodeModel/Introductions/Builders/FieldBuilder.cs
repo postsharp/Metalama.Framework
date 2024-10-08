@@ -108,7 +108,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public TemplateMember<IField>? InitializerTemplate { get; set; }
 
-    public FieldBuilder( Advice advice, INamedType targetType, string name, IObjectReader initializerTags )
+    public FieldBuilder( AdviceInfo advice, INamedType targetType, string name, IObjectReader initializerTags )
         : base( targetType, name, advice )
     {
         this.InitializerTags = initializerTags;

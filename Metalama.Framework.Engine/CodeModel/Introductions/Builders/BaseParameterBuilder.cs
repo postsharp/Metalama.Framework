@@ -39,7 +39,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public sealed override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
-    protected BaseParameterBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
+    protected BaseParameterBuilder( AdviceInfo parentAdvice ) : base( parentAdvice ) { }
 
     bool IExpression.IsAssignable => true;
 

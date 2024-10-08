@@ -140,7 +140,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
     internal void SetIsIteratorMethod( bool value ) => this._isIteratorMethod = value;
 
     public MethodBuilder(
-        Advice advice,
+        AdviceInfo advice,
         INamedType targetType,
         string name,
         DeclarationKind declarationKind = DeclarationKind.Method,

@@ -38,13 +38,13 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     public TemplateProvider TemplateProvider { get; }
 
     protected ContractBaseTransformation(
-        Advice advice,
-        IRef<IDeclaration> contractTarget,
+        AdviceInfo advice,
+        IFullRef<IDeclaration> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         TemplateProvider templateProvider,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice )
+        IObjectReader tags ) : base( advice, contractTarget )
     {
         Invariant.Assert( contractDirection is not ContractDirection.None );
 

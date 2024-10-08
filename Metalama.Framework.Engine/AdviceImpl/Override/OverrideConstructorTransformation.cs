@@ -27,11 +27,11 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
     private BoundTemplateMethod Template { get; }
 
     public OverrideConstructorTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IConstructor> overriddenDeclaration,
         BoundTemplateMethod template,
         IObjectReader tags )
-        : base( advice, tags )
+        : base( advice, overriddenDeclaration, tags )
     {
         this._overriddenDeclaration = overriddenDeclaration;
         this.Template = template;

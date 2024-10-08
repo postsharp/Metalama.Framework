@@ -28,17 +28,20 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
         switch ( targetMethod.MethodKind )
         {
             case MethodKind.Finalizer:
-                context.AddTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideFinalizerTransformation( this.AdviceInfo, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             case MethodKind.Operator:
-                context.AddTransformation( new OverrideOperatorTransformation( this, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideOperatorTransformation( this.AdviceInfo, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             default:
-                context.AddTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideMethodTransformation( this.AdviceInfo, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
         }

@@ -88,7 +88,7 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
 
     public override bool IsReturnParameter => this.Index < 0;
 
-    public ParameterBuilder( IHasParameters declaringMember, int index, string? name, IType type, RefKind refKind, Advice advice ) : base( advice )
+    public ParameterBuilder( IHasParameters declaringMember, int index, string? name, IType type, RefKind refKind, AdviceInfo advice ) : base( advice )
     {
         this.DeclaringMember = declaringMember;
         this.Index = index;

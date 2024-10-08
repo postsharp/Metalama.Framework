@@ -27,7 +27,10 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
     protected override FieldBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new FieldBuilder( this, this.TargetDeclaration, this.MemberName, this.Tags ) { InitializerTemplate = this.Template.GetInitializerTemplate() };
+        return new FieldBuilder( this.AdviceInfo, this.TargetDeclaration, this.MemberName, this.Tags )
+        {
+            InitializerTemplate = this.Template.GetInitializerTemplate()
+        };
     }
 
     protected override void InitializeBuilderCore(
@@ -137,7 +140,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
             OverrideHelper.AddTransformationsForStructField(
                 targetDeclaration,
-                this,
+                this.AdviceInfo,
                 context.AddTransformation /* We add an initializer if it does not have one */ );
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );

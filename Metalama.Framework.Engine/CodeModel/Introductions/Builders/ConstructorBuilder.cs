@@ -49,7 +49,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public List<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
-    public ConstructorBuilder( Advice advice, INamedType targetType )
+    public ConstructorBuilder( AdviceInfo advice, INamedType targetType )
         : base( advice, targetType, null! )
     {
         this.InitializerArguments = [];

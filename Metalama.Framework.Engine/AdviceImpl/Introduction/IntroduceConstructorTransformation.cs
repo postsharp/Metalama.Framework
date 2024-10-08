@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 internal sealed class IntroduceConstructorTransformation
     : IntroduceMemberTransformation<ConstructorBuilderData>, IReplaceMemberTransformation, IInsertStatementTransformation
 {
-    public IntroduceConstructorTransformation( Advice advice, ConstructorBuilderData introducedDeclaration ) : base( advice, introducedDeclaration )
+    public IntroduceConstructorTransformation( AdviceInfo advice, ConstructorBuilderData introducedDeclaration ) : base( advice, introducedDeclaration )
     {
         Invariant.Assert( !introducedDeclaration.IsStatic );
 

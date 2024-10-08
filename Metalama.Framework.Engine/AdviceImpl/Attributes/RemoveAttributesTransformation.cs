@@ -15,9 +15,9 @@ internal sealed class RemoveAttributesTransformation : BaseSyntaxTreeTransformat
     public IFullRef<INamedType> AttributeType { get; }
 
     public RemoveAttributesTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IDeclaration> targetDeclaration,
-        IFullRef<INamedType> attributeType ) : base( advice )
+        IFullRef<INamedType> attributeType ) : base( advice, targetDeclaration )
     {
         this.AttributeType = attributeType;
         this.ContainingDeclaration = targetDeclaration;

@@ -22,7 +22,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
     private BoundTemplateMethod? SetTemplate { get; }
 
     public OverridePropertyTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IProperty> overriddenProperty,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,

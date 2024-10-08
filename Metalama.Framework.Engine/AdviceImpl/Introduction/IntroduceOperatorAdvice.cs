@@ -53,7 +53,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
     protected override MethodBuilder CreateBuilder( in AdviceImplementationContext context )
     {
         var builder = new MethodBuilder(
-            this,
+            this.AdviceInfo,
             this.TargetDeclaration,
             this._operatorKind.ToOperatorMethodName(),
             DeclarationKind.Operator,
@@ -116,7 +116,12 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
         if ( existingOperator == null )
         {
-            var overriddenOperator = new OverrideOperatorTransformation( this, builder.ToFullRef(), this._template.ForIntroduction( builder ), this.Tags );
+            var overriddenOperator = new OverrideOperatorTransformation(
+                this.AdviceInfo,
+                builder.ToFullRef(),
+                this._template.ForIntroduction( builder ),
+                this.Tags );
+
             context.AddTransformation( overriddenOperator );
             context.AddTransformation( builder.ToTransformation() );
 
@@ -157,7 +162,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                         builder.Freeze();
 
                         var overriddenOperator = new OverrideOperatorTransformation(
-                            this,
+                            this.AdviceInfo,
                             builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );
@@ -172,7 +177,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                     if ( targetDeclaration.Equals( existingOperator.DeclaringType ) )
                     {
                         var overriddenOperator = new OverrideOperatorTransformation(
-                            this,
+                            this.AdviceInfo,
                             existingOperator.ToFullRef(),
                             this._template.ForIntroduction( existingOperator ),
                             this.Tags );
@@ -198,7 +203,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                         builder.OverriddenMethod = existingOperator;
 
                         var overriddenOperator = new OverrideOperatorTransformation(
-                            this,
+                            this.AdviceInfo,
                             builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );

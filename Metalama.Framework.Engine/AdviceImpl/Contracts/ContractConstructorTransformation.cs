@@ -18,9 +18,9 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
     private readonly IFullRef<IConstructor> _targetConstructor;
 
     public ContractConstructorTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IConstructor> targetConstructor,
-        IRef<IParameter> contractTarget,
+        IFullRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,

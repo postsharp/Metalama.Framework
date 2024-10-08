@@ -35,7 +35,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
     public EventBuilder(
-        Advice advice,
+        AdviceInfo advice,
         INamedType targetType,
         string name,
         bool isEventField,

@@ -18,7 +18,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
     private readonly IFullRef<IProperty> _targetProperty;
 
     public ContractPropertyTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IProperty> targetProperty,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,

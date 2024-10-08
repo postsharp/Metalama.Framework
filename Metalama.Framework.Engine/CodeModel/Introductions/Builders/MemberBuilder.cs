@@ -13,7 +13,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
     private bool _isAsync;
     private bool _isOverride;
 
-    protected MemberBuilder( INamedType declaringType, string name, Advice advice ) : base( advice, declaringType, name ) { }
+    protected MemberBuilder( INamedType declaringType, string name, AdviceInfo advice ) : base( advice, declaringType, name ) { }
 
     public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 

@@ -432,7 +432,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     {
                                         AddTransformationNoDuplicates(
                                             new OverrideMethodTransformation(
-                                                this,
+                                                this.AdviceInfo,
                                                 existingMethod.ToFullRef(),
                                                 templateMethod.AssertNotNull().ForOverride( existingMethod, this.TemplateProvider ),
                                                 mergedTags ) );
@@ -495,7 +495,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                             {
                                 AddTransformationNoDuplicates(
                                     new OverrideMethodTransformation(
-                                        this,
+                                        this.AdviceInfo,
                                         methodBuilder.ToFullRef(),
                                         templateMethod.ForIntroduction( methodBuilder, this.TemplateProvider ),
                                         mergedTags ) );
@@ -570,7 +570,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                                         AddTransformationNoDuplicates(
                                             new OverridePropertyTransformation(
-                                                this,
+                                                this.AdviceInfo,
                                                 existingProperty.ToFullRef(),
                                                 existingProperty.GetMethod != null
                                                     ? accessorTemplates.Get?.ForOverride( existingProperty.GetMethod, this.TemplateProvider )
@@ -751,7 +751,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                                     AddTransformationNoDuplicates(
                                         new OverridePropertyTransformation(
-                                            this,
+                                            this.AdviceInfo,
                                             propertyBuilder.ToRef(),
                                             propertyBuilder.GetMethod != null
                                                 ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod, this.TemplateProvider )
@@ -765,7 +765,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 {
                                     OverrideHelper.AddTransformationsForStructField(
                                         targetType.ForCompilation( compilation ),
-                                        this,
+                                        this.AdviceInfo,
                                         AddTransformationNoDuplicates );
                                 }
                             }
@@ -773,7 +773,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                             {
                                 AddTransformationNoDuplicates(
                                     new RedirectPropertyTransformation(
-                                        this,
+                                        this.AdviceInfo,
                                         propertyBuilder.ToRef(),
                                         redirectionTargetProperty.AssertNotNull().ToFullRef() ) );
                             }
@@ -841,7 +841,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                                         AddTransformationNoDuplicates(
                                             new OverrideEventTransformation(
-                                                this,
+                                                this.AdviceInfo,
                                                 existingEvent.ToFullRef(),
                                                 accessorTemplates.Add?.ForOverride( existingEvent.AddMethod, this.TemplateProvider ),
                                                 accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod, this.TemplateProvider ),
@@ -922,7 +922,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                                     AddTransformationNoDuplicates(
                                         new OverrideEventTransformation(
-                                            this,
+                                            this.AdviceInfo,
                                             eventBuilder.ToFullRef(),
                                             accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod, this.TemplateProvider ),
                                             accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod, this.TemplateProvider ),
@@ -934,7 +934,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                                     OverrideHelper.AddTransformationsForStructField(
                                         targetType.ForCompilation( compilation ),
-                                        this,
+                                        this.AdviceInfo,
                                         AddTransformationNoDuplicates );
                                 }
                             }
@@ -942,7 +942,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                             {
                                 AddTransformationNoDuplicates(
                                     new RedirectEventTransformation(
-                                        this,
+                                        this.AdviceInfo,
                                         eventBuilder.ToFullRef(),
                                         redirectionTargetEvent.AssertNotNull() ) );
                             }
@@ -978,7 +978,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             if ( !skipInterfaceBaseList )
             {
                 AddTransformationNoDuplicates(
-                    new IntroduceInterfaceTransformation( this, targetType.ToFullRef(), interfaceType.ToFullRef(), interfaceMemberMap ) );
+                    new IntroduceInterfaceTransformation( this.AdviceInfo, targetType.ToFullRef(), interfaceType.ToFullRef(), interfaceMemberMap ) );
             }
         }
 
@@ -1004,7 +1004,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     {
         var name = GetInterfaceMemberName( interfaceMethod, isExplicit );
 
-        var methodBuilder = new MethodBuilder( this, declaringType, name )
+        var methodBuilder = new MethodBuilder( this.AdviceInfo, declaringType, name )
         {
             ReturnParameter = { Type = interfaceMethod.ReturnParameter.Type, RefKind = interfaceMethod.ReturnParameter.RefKind }
         };
@@ -1072,7 +1072,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         var name = GetInterfaceMemberName( interfaceProperty, isExplicit );
 
         var propertyBuilder = new PropertyBuilder(
-            this,
+            this.AdviceInfo,
             declaringType,
             name,
             hasGetter,
@@ -1141,7 +1141,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     {
         var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 
-        var eventBuilder = new EventBuilder( this, declaringType, name, isEventField, tags ) { Type = interfaceEvent.Type };
+        var eventBuilder = new EventBuilder( this.AdviceInfo, declaringType, name, isEventField, tags ) { Type = interfaceEvent.Type };
 
         if ( isExplicit )
         {

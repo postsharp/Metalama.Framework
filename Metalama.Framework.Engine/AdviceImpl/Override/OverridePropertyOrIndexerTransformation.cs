@@ -15,9 +15,10 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
     protected abstract IFullRef<IPropertyOrIndexer> OverriddenPropertyOrIndexer { get; }
 
     protected OverridePropertyOrIndexerTransformation(
-        Advice advice,
+        AdviceInfo advice,
+        IFullRef<IPropertyOrIndexer> overriddenPropertyOrIndexer,
         IObjectReader tags )
-        : base( advice, tags ) { }
+        : base( advice, overriddenPropertyOrIndexer, tags ) { }
 
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.

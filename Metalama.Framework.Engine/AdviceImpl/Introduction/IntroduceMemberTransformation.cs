@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 internal abstract class IntroduceMemberTransformation<T> : IntroduceDeclarationTransformation<T>
     where T : MemberBuilderData
 {
-    protected IntroduceMemberTransformation( Advice advice, T introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    protected IntroduceMemberTransformation( AdviceInfo advice, T introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override TransformationObservability Observability
         => this.BuilderData.IsDesignTimeObservable ? TransformationObservability.Always : TransformationObservability.CompileTimeOnly;

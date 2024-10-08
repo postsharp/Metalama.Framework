@@ -17,7 +17,7 @@ internal static class OverrideHelper
 {
     public static IProperty OverrideProperty(
         ProjectServiceProvider serviceProvider,
-        Advice advice,
+        AdviceInfo advice,
         IFieldOrPropertyOrIndexer targetDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
@@ -59,7 +59,7 @@ internal static class OverrideHelper
         }
     }
 
-    public static void AddTransformationsForStructField( INamedType type, Advice advice, Action<ITransformation> addTransformation )
+    public static void AddTransformationsForStructField( INamedType type, AdviceInfo advice, Action<ITransformation> addTransformation )
     {
         if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
         {

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -77,7 +78,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
-            var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType )
+            var constructorBuilder = new ConstructorBuilder( this.AdviceInfo, constructor.DeclaringType )
             {
                 ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
@@ -95,7 +96,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             this._parameterName,
             this._parameterType,
             RefKind.None,
-            this ) { DefaultValue = this._defaultValue };
+            this.AdviceInfo ) { DefaultValue = this._defaultValue };
 
         var parameter = parameterBuilder;
 
@@ -104,7 +105,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         parameterBuilder.Freeze();
         var parameterBuilderData = parameterBuilder.Immutable;
 
-        context.AddTransformation( new IntroduceParameterTransformation( this, parameterBuilderData ) );
+        context.AddTransformation( new IntroduceParameterTransformation( this.AdviceInfo, parameterBuilderData ) );
 
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
@@ -157,7 +158,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
-                    var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType )
+                    var derivedConstructorBuilder = new ConstructorBuilder( this.AdviceInfo, chainedConstructor.DeclaringType )
                     {
                         ReplacedImplicitConstructor = chainedConstructor, Accessibility = Accessibility.Public
                     };
@@ -194,12 +195,12 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                             pullParameterAction.ParameterName.AssertNotNull(),
                             pullParameterAction.ParameterType.AssertNotNull(),
                             RefKind.None,
-                            this ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
+                            this.AdviceInfo ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
                         recursiveParameterBuilder.Freeze();
 
-                        contextCopy.AddTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder.Immutable ) );
+                        contextCopy.AddTransformation( new IntroduceParameterTransformation( this.AdviceInfo, recursiveParameterBuilder.Immutable ) );
 
                         var recursiveParameter = recursiveParameterBuilder;
 
@@ -215,8 +216,8 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 // Append an argument to the call to the current constructor. 
                 contextCopy.AddTransformation(
                     new IntroduceConstructorInitializerArgumentTransformation(
-                        this,
-                        initializedChainedConstructor.ToRef(),
+                        this.AdviceInfo,
+                        initializedChainedConstructor.ToFullRef(),
                         baseParameter.Index,
                         parameterValue ) );
             }

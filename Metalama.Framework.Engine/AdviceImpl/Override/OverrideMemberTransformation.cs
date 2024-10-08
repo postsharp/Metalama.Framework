@@ -25,7 +25,9 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 
     public override IRef<IDeclaration> TargetDeclaration => this.OverriddenDeclaration;
 
-    protected OverrideMemberTransformation( Advice advice, IObjectReader tags ) : base( advice )
+    protected OverrideMemberTransformation( AdviceInfo advice, IFullRef<IDeclaration> overriddenDeclaration, IObjectReader tags ) : base(
+        advice,
+        overriddenDeclaration )
     {
         Invariant.Assert( advice != null! );
         this.Tags = tags;

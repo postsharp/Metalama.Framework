@@ -34,7 +34,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
 
     protected override MethodBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new MethodBuilder( this, this.TargetDeclaration, this.MemberName );
+        return new MethodBuilder( this.AdviceInfo, this.TargetDeclaration, this.MemberName );
     }
 
     protected override void InitializeBuilderCore(
@@ -138,7 +138,12 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideMethodTransformation( this, builder.ToFullRef(), this._template.ForIntroduction( builder ), this.Tags );
+            var overriddenMethod = new OverrideMethodTransformation(
+                this.AdviceInfo,
+                builder.ToFullRef(),
+                this._template.ForIntroduction( builder ),
+                this.Tags );
+
             builder.IsOverride = false;
             builder.HasNewKeyword = builder.IsNew = false;
             builder.Freeze();
@@ -195,7 +200,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                         builder.Freeze();
 
                         var overriddenMethod = new OverrideMethodTransformation(
-                            this,
+                            this.AdviceInfo,
                             builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );
@@ -235,7 +240,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                         builder.Freeze();
 
                         var overriddenMethod = new OverrideMethodTransformation(
-                            this,
+                            this.AdviceInfo,
                             builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );

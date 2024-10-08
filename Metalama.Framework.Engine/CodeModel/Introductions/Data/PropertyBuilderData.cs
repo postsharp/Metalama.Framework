@@ -101,7 +101,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
     public bool GetPropertyInitializerExpressionOrMethod(
         IProperty property,
         PropertyBuilderData builderData,
-        Advice advice,
+        AdviceInfo advice,
         MemberInjectionContext context,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )

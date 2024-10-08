@@ -48,7 +48,7 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         return new IntroduceNamespaceTransformation( this.ParentAdvice, this.Immutable );
     }
 
-    public NamespaceBuilder( Advice advice, INamespace containingNamespace, string name ) : base( advice, name )
+    public NamespaceBuilder( AdviceInfo advice, INamespace containingNamespace, string name ) : base( advice, name )
     {
         this.ContainingNamespace = containingNamespace;
     }

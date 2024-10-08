@@ -75,7 +75,7 @@ internal class AdviceSyntaxGenerator
 
     private static bool TryExpandInitializerTemplate<T>(
         T member,
-        Advice advice,
+        AdviceInfo advice,
         MemberInjectionContext context,
         TemplateMember<T> initializerTemplate,
         IObjectReader tags,
@@ -110,7 +110,7 @@ internal class AdviceSyntaxGenerator
 
     public static bool GetInitializerExpressionOrMethod<T>(
         T member,
-        Advice advice,
+        AdviceInfo advice,
         MemberInjectionContext context,
         IType targetType,
         IExpression? initializerExpression,

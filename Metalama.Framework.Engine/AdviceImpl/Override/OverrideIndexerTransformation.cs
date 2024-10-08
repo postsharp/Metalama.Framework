@@ -22,7 +22,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
     private BoundTemplateMethod? SetTemplate { get; }
 
     public OverrideIndexerTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IIndexer> overriddenDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,

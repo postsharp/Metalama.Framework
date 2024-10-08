@@ -46,7 +46,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
 
         return new EventBuilder(
-            this,
+            this.AdviceInfo,
             this.TargetDeclaration,
             this.MemberName,
             this.Template?.DeclarationRef != null && templateDeclaration.IsEventField() == true,
@@ -181,13 +181,13 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             // There is no existing declaration, we will introduce and override the introduced.
             context.AddTransformation( builder.ToTransformation() );
 
-            OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, context.AddTransformation );
+            OverrideHelper.AddTransformationsForStructField( targetDeclaration, this.AdviceInfo, context.AddTransformation );
 
             if ( !hasNoOverrideSemantics )
             {
                 context.AddTransformation(
                     new OverrideEventTransformation(
-                        this,
+                        this.AdviceInfo,
                         builder.ToFullRef(),
                         this._addTemplate?.ForIntroduction( builder.AddMethod ),
                         this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
@@ -264,7 +264,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         else
                         {
                             var overriddenMethod = new OverrideEventTransformation(
-                                this,
+                                this.AdviceInfo,
                                 builder.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( builder.AddMethod ),
                                 this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
@@ -287,7 +287,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         else
                         {
                             var overriddenMethod = new OverrideEventTransformation(
-                                this,
+                                this.AdviceInfo,
                                 existingEvent.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( existingEvent.AddMethod ),
                                 this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ),
@@ -322,7 +322,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         else
                         {
                             var overriddenEvent = new OverrideEventTransformation(
-                                this,
+                                this.AdviceInfo,
                                 builder.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( builder.AddMethod ),
                                 this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),

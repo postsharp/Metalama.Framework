@@ -28,8 +28,8 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
 
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideOperatorTransformation( Advice advice, IFullRef<IMethod> targetOperator, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, tags )
+    public OverrideOperatorTransformation( AdviceInfo advice, IFullRef<IMethod> targetOperator, BoundTemplateMethod boundTemplate, IObjectReader tags )
+        : base( advice, targetOperator, tags )
     {
         this._targetOperator = targetOperator;
         this.BoundTemplate = boundTemplate;

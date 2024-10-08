@@ -36,25 +36,20 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
             ? new BuiltAccessor( this, this.PropertyOrIndexerBuilder.SetMethod )
             : null;
 
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => (IRef<IFieldOrPropertyOrIndexer>) this.ToFullDeclarationRef();
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.ToFullDeclarationRef().As<IFieldOrPropertyOrIndexer>();
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => (IRef<IPropertyOrIndexer>) this.ToFullDeclarationRef();
+    IRef<IPropertyOrIndexer> IPropertyOrIndexer.ToRef() => this.ToFullDeclarationRef().As<IPropertyOrIndexer>();
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
     public IEnumerable<IMethod> Accessors
-    {
-        get
+        => (this.GetMethod, this.SetMethod) switch
         {
-            return (this.GetMethod, this.SetMethod) switch
-            {
-                (null, { } setMethod) => [setMethod],
-                ({ } getMethod, null) => [getMethod],
-                ({ } getMethod, { } setMethod) => [getMethod, setMethod],
-                _ => []
-            };
-        }
-    }
+            (null, { } setMethod) => [setMethod],
+            ({ } getMethod, null) => [getMethod],
+            ({ } getMethod, { } setMethod) => [getMethod, setMethod],
+            _ => []
+        };
 }

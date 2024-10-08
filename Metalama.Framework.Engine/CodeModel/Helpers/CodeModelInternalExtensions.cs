@@ -60,10 +60,12 @@ internal static class CodeModelInternalExtensions
     {
         switch ( declaration )
         {
+            /*
             // TODO: This is a hack (since splitting transformations and builders).
             // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
-            //case PromotedField promotedField:
-            //   return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
+            case PropertyBuilderData { }
+               return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
+            */
 
             case NamedTypeBuilderData { DeclaringType: IBuiltDeclarationRef { BuilderData: NamedDeclarationBuilderData named } }:
                 return new InsertPosition( InsertPositionRelation.Within, named );

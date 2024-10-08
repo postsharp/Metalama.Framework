@@ -21,7 +21,7 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
 
     public ParameterBuilderData Parameter { get; }
 
-    public IntroduceParameterTransformation( Advice advice, ParameterBuilderData parameter ) : base( advice )
+    public IntroduceParameterTransformation( AdviceInfo advice, ParameterBuilderData parameter ) : base( advice, parameter.ContainingDeclaration )
     {
         this.Parameter = parameter;
     }

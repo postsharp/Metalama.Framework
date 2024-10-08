@@ -14,7 +14,7 @@ internal sealed class IntroduceNamespaceTransformation : BaseTransformation, IIn
 {
     private readonly NamespaceBuilderData _introducedDeclaration;
 
-    public IntroduceNamespaceTransformation( Advice advice, NamespaceBuilderData introducedDeclaration ) : base( advice )
+    public IntroduceNamespaceTransformation( AdviceInfo advice, NamespaceBuilderData introducedDeclaration ) : base( advice )
     {
         this._introducedDeclaration = introducedDeclaration.AssertNotNull();
     }

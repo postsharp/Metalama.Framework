@@ -51,7 +51,7 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
     IMethodBuilder? IPropertyOrIndexerBuilder.SetMethod => this.SetMethod;
 
     protected PropertyOrIndexerBuilder(
-        Advice advice,
+        AdviceInfo advice,
         INamedType targetType,
         string name,
         bool hasGetter,

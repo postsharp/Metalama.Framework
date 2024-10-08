@@ -12,8 +12,9 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal abstract class BaseTransformation : ITransformation
 {
-    protected BaseTransformation( Advice advice )
+    protected BaseTransformation( AdviceInfo advice )
     {
+        // Don't keep a reference to the Advice, as it's supposed to be short-lived.
         this.ParentAdvice = advice;
     }
 
@@ -33,8 +34,7 @@ internal abstract class BaseTransformation : ITransformation
 
     IAspectClass ITransformationBase.AspectClass => this.AspectInstance.AspectClass;
 
-    [Obsolete("We want to remove this relationship.")]
-    public Advice ParentAdvice { get; }
+    public AdviceInfo ParentAdvice { get; }
 
     public int OrderWithinPipelineStepAndTypeAndAspectInstance { get; set; }
 

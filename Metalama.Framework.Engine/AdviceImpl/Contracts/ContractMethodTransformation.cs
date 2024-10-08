@@ -18,9 +18,9 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
     private readonly IFullRef<IMethod> _targetMethod;
 
     public ContractMethodTransformation(
-        Advice advice,
+        AdviceInfo advice,
         IFullRef<IMethod> targetMethod,
-        IRef<IParameter> contractTarget,
+        IFullRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,

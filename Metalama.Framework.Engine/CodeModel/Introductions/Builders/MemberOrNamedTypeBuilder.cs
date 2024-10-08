@@ -94,7 +94,7 @@ internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMem
 
     public override IDeclaration ContainingDeclaration => this.DeclaringType.AssertNotNull( "Declaring type should not be null (missing override?)." );
 
-    protected MemberOrNamedTypeBuilder( Advice advice, INamedType? declaringType, string name ) : base( advice, name )
+    protected MemberOrNamedTypeBuilder( AdviceInfo advice, INamedType? declaringType, string name ) : base( advice, name )
     {
         this.DeclaringType = declaringType;
         this._usesNewKeyword = false;

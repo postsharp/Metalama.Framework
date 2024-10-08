@@ -12,7 +12,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 {
     private readonly IRef<IField> _replacedField;
 
-    public PromoteFieldTransformation( Advice advice, IField replacedField, PropertyBuilderData propertyBuilder ) : base( advice, propertyBuilder )
+    public PromoteFieldTransformation( AdviceInfo advice, IField replacedField, PropertyBuilderData propertyBuilder ) : base( advice, propertyBuilder )
     {
         this._replacedField = replacedField.ToRef();
     }

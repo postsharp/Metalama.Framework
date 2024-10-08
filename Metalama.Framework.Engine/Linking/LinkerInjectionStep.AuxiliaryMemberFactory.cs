@@ -109,7 +109,7 @@ internal sealed partial class LinkerInjectionStep
 
         public MemberDeclarationSyntax GetAuxiliaryContractMember(
             IRef<IMember> member,
-            Advice advice,
+            AdviceInfo advice,
             string? returnVariableName )
         {
             switch ( member )
@@ -460,7 +460,7 @@ internal sealed partial class LinkerInjectionStep
 
         private MemberDeclarationSyntax GetAuxiliaryContractIndexer(
             IRef<IIndexer> indexerRef,
-            Advice advice,
+            AdviceInfo advice,
             string? returnVariableName )
         {
             var indexer = indexerRef.GetTarget( this._finalCompilationModel );

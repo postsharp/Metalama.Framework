@@ -132,9 +132,9 @@ internal static class TransformationHelper
         SyntaxGenerationOptions options,
         InsertPosition insertPosition )
     {
-        if ( insertPosition is { Relation: InsertPositionRelation.Within, BuilderData: IDeclarationBuilder containingBuilder } )
+        if ( insertPosition is { Relation: InsertPositionRelation.Within, BuilderData: { } containingBuilder } )
         {
-            return GetSyntaxGenerationContext( compilationContext, options, containingBuilder );
+            return GetSyntaxGenerationContext( compilationContext, options, containingBuilder.ToInsertPosition() );
         }
 
         if ( insertPosition is { Relation: InsertPositionRelation.Root } )

@@ -40,5 +40,5 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
 
     protected abstract IMemberOrNamedType GetDefinition();
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => (IRef<IMemberOrNamedType>) this.ToFullDeclarationRef();
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.ToFullDeclarationRef().As<IMemberOrNamedType>();
 }

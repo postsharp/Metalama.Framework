@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
@@ -26,10 +27,10 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
     private ExpressionSyntax Value { get; }
 
     public IntroduceConstructorInitializerArgumentTransformation(
-        Advice advice,
-        IRef<IConstructor> constructor,
+        AdviceInfo advice,
+        IFullRef<IConstructor> constructor,
         int parameterIndex,
-        ExpressionSyntax value ) : base( advice )
+        ExpressionSyntax value ) : base( advice, constructor )
     {
         this.Constructor = constructor;
         this.ParameterIndex = parameterIndex;

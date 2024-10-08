@@ -19,7 +19,7 @@ internal abstract class NamedDeclarationBuilder : DeclarationBuilder, INamedDecl
         }
     }
 
-    protected NamedDeclarationBuilder( Advice advice, string name ) : base( advice )
+    protected NamedDeclarationBuilder( AdviceInfo advice, string name ) : base( advice )
     {
         this._name = name;
     }

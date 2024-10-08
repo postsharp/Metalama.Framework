@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformation<MethodBuilderData>
 {
-    public IntroduceMethodTransformation( Advice advice, MethodBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceMethodTransformation( AdviceInfo advice, MethodBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {

@@ -26,8 +26,8 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
 {
     public IFullRef<IMethod> OverriddenMethod { get; }
 
-    protected OverrideMethodBaseTransformation( Advice advice, IFullRef<IMethod> targetMethod, IObjectReader tags )
-        : base( advice, tags )
+    protected OverrideMethodBaseTransformation( AdviceInfo advice, IFullRef<IMethod> targetMethod, IObjectReader tags )
+        : base( advice, targetMethod, tags )
     {
         this.OverriddenMethod = targetMethod;
     }

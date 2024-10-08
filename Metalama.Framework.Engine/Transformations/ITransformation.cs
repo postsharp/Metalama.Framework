@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -11,9 +10,8 @@ namespace Metalama.Framework.Engine.Transformations;
 /// </summary>
 internal interface ITransformation : ITransformationBase
 {
-    [Obsolete( "We want to get rid of this" )]
-    Advice ParentAdvice { get; }
-    
+    AdviceInfo ParentAdvice { get; }
+
     AspectLayerId AspectLayerId { get; }
 
     IAspectInstanceInternal AspectInstance { get; }

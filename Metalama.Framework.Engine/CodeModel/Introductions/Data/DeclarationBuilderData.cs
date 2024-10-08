@@ -17,8 +17,7 @@ internal abstract class DeclarationBuilderData
 
     public IFullRef<IDeclaration> ContainingDeclaration { get; }
 
-    [Obsolete( "We want to get rid of this." )]
-    public Advice ParentAdvice { get; }
+    public AdviceInfo ParentAdvice { get; }
 
     public ImmutableArray<AttributeBuilderData> Attributes { get; }
 

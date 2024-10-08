@@ -18,7 +18,7 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
 {
     public T BuilderData { get; }
 
-    protected IntroduceDeclarationTransformation( Advice advice, T introducedDeclaration ) : base( advice, introducedDeclaration.PrimarySyntaxTree )
+    protected IntroduceDeclarationTransformation( AdviceInfo advice, T introducedDeclaration ) : base( advice, introducedDeclaration.PrimarySyntaxTree.AssertNotNull() )
     {
         this.BuilderData = introducedDeclaration.AssertNotNull();
     }
