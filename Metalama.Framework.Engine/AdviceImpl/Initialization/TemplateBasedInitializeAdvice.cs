@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
@@ -30,7 +31,7 @@ internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
         var initialization = new TemplateBasedInitializationTransformation(
             this,
             targetDeclaration.ToRef(),
-            targetCtor.ToRef(),
+            targetCtor.ToFullRef(),
             this._boundTemplate,
             this._tags );
 

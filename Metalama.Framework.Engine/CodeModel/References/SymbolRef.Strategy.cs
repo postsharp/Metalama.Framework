@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal sealed partial class SymbolRef<T>
 {
-    public override void EnumerateAttributes( CompilationModel compilation, Action<IRef<IAttribute>> add )
+    public override void EnumerateAttributes( CompilationModel compilation, Action<AttributeRef> add )
     {
         Invariant.Assert( this is IRef<IDeclaration> );
 

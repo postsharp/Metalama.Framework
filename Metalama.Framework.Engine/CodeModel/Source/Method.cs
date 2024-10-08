@@ -165,7 +165,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     [Memo]
     private IFullRef<IMethod> Ref => this.RefFactory.FromSymbolBasedDeclaration<IMethod>( this );
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public new IRef<IMethod> ToRef() => this.Ref;
 

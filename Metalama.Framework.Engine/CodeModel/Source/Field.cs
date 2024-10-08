@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         [Memo]
         private IFullRef<IField> Ref => this.RefFactory.FromSymbolBasedDeclaration<IField>( this );
 
-        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
         protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
     }

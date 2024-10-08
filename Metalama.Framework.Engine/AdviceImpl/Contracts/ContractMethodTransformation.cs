@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -14,11 +15,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractMethodTransformation : ContractBaseTransformation
 {
-    private new IRef<IMethod> TargetMember => (IRef<IMethod>) base.TargetMember;
+    private readonly IFullRef<IMethod> _targetMethod;
 
     public ContractMethodTransformation(
         Advice advice,
-        IRef<IMethod> targetMethod,
+        IFullRef<IMethod> targetMethod,
         IRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
@@ -26,13 +27,15 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
         IObjectReader tags,
         TemplateProvider templateProvider ) : base(
         advice,
-        targetMethod,
         contractTarget,
         contractDirection,
         template,
         templateProvider,
         templateArguments,
-        tags ) { }
+        tags )
+    {
+        this._targetMethod = targetMethod;
+    }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
@@ -109,5 +112,7 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
         }
     }
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add default contract to method '{this.TargetMember}'";
+    public override IFullRef<IMember> TargetMember => this._targetMethod;
+
+    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add default contract to method '{this.TargetMember}'";
 }

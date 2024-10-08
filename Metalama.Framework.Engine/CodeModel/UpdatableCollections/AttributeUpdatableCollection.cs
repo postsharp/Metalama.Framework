@@ -5,11 +5,12 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollection<IAttribute>
+internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollection<IAttribute, AttributeRef>
 {
     private readonly IRef<IDeclaration> _parent;
 
@@ -22,10 +23,12 @@ internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollect
 #endif
     }
 
-    protected override void PopulateAllItems( Action<IFullRef<IAttribute>> action )
+    protected override void PopulateAllItems( Action<AttributeRef> action )
     {
         this._parent.AsFullRef().EnumerateAttributes( this.Compilation, action );
     }
+
+    public override ImmutableArray<AttributeRef> OfName( string name ) => this.Where( r => r.Name == name ).ToImmutableArray();
 
     public void Add( AttributeBuilderData attribute )
     {

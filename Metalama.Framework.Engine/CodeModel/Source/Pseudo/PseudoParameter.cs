@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 
         public bool IsReturnParameter => this.Index < 0;
 
-        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

@@ -62,7 +62,7 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     IRef<IType> IType.ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 

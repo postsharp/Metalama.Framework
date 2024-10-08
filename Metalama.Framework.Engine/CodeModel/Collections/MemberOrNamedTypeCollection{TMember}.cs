@@ -16,7 +16,7 @@ internal abstract class MemberOrNamedTypeCollection<TMember> : DeclarationCollec
 
     public IEnumerable<TMember> OfName( string name )
     {
-        var typedSource = (IUpdatableCollection<TMember>) this.Source;
+        var typedSource = (IUpdatableCollection<IFullRef<TMember>>) this.Source;
 
         // Enumerate the source without causing a resolution of the reference.
         foreach ( var sourceItem in typedSource.OfName( name ) )

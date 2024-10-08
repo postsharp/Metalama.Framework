@@ -136,7 +136,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         AspectLayerId aspectLayerId ) : this(
         transformationContext.ServiceProvider,
         metaApi,
-        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope ),
+        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope.ToRef() ),
         transformationContext.SyntaxGenerationContext,
         template,
         proceedExpressionProvider,

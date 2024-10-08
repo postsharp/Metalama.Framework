@@ -123,7 +123,7 @@ public sealed partial class CompilationModel
         Func<CompilationModel, IFullRef<TOwner>, TCollection> createCollection )
         where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
-        where TCollection : IUpdatableCollection<TDeclaration>
+        where TCollection : IUpdatableCollection
     {
         Invariant.Assert( !(requestMutableCollection && !this.IsMutable) );
         Invariant.Assert( declaration.IsDefinition );

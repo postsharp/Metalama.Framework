@@ -22,7 +22,7 @@ internal sealed class AddAnnotationTransformation : BaseTransformation
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.AddAnnotation;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Adding annotation '{this.AnnotationInstance}' to '{this.TargetDeclaration}'.";
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;

@@ -59,7 +59,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     public IRef<IParameter> ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     bool IExpression.IsAssignable => true;
 

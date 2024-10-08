@@ -10,11 +10,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class AttributeCollection : DeclarationCollection<IAttribute>, IAttributeCollection
+    internal sealed class AttributeCollection : DeclarationCollection<IAttribute, IRef<IAttribute>>, IAttributeCollection
     {
         public static AttributeCollection Empty { get; } = new();
 
-        public AttributeCollection( IDeclaration declaration, IReadOnlyList<IFullRef<IAttribute>> sourceItems )
+        public AttributeCollection( IDeclaration declaration, IReadOnlyList<IRef<IAttribute>> sourceItems )
             : base( declaration, sourceItems ) { }
 
         /// <summary>

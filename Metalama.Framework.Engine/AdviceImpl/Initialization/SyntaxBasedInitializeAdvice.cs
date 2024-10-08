@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating.Statements;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -26,7 +27,7 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
             new SyntaxBasedInitializationTransformation(
                 this,
                 targetDeclaration.ToRef(),
-                targetCtor.ToRef(),
+                targetCtor.ToFullRef(),
                 _ => ((IStatementImpl) this._statement).GetSyntax( null ) ) );
     }
 }

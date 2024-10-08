@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class AttributeBuilderData : DeclarationBuilderData
 {
-    private readonly BuiltDeclarationRef<IAttribute> _ref;
+    private readonly AttributeRef _ref;
 
     public IFullRef<INamedType> Type { get; }
 
@@ -23,7 +23,7 @@ internal class AttributeBuilderData : DeclarationBuilderData
 
     public AttributeBuilderData( AttributeBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<IAttribute>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuilderAttributeRef( this );
         this.Constructor = builder.AttributeConstruction.Constructor.ToFullRef();
         this.Type = builder.AttributeConstruction.Type.ToFullRef();
         this.ConstructorArguments = builder.AttributeConstruction.ConstructorArguments.ToImmutableArray();
@@ -32,11 +32,11 @@ internal class AttributeBuilderData : DeclarationBuilderData
         // TODO: TypedConstant can still leak a CompilationModel through its typeof(.) value.
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => throw new NotSupportedException();
 
     public override IFullRef<INamedType>? DeclaringType => throw new NotImplementedException();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
-    public new BuiltDeclarationRef<IAttribute> ToRef() => this._ref;
+    public new AttributeRef ToRef() => this._ref;
 }

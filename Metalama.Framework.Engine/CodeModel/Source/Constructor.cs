@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         [Memo]
         private IFullRef<IConstructor> Ref => this.RefFactory.FromSymbolBasedDeclaration<IConstructor>( this );
 
-        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
         IRef<IConstructor> IConstructor.ToRef() => this.Ref;
 

@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         private IAttributeCollection AttributesImpl
             => new AttributeCollection(
                 this,
-                this.Compilation.GetAttributeCollection( this.ToDeclarationRef() ) );
+                this.Compilation.GetAttributeCollection( this.ToFullDeclarationRef() ) );
 
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );

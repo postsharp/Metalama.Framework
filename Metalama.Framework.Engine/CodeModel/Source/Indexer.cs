@@ -66,7 +66,7 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
     [Memo]
     private IFullRef<IIndexer> Ref => this.RefFactory.FromSymbol<IIndexer>( this.PropertySymbol );
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     IRef<IIndexer> IIndexer.ToRef() => this.Ref;
 

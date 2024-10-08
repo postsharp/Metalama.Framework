@@ -80,7 +80,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     [Memo]
     private IFullRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     IRef<IMember> IMember.ToRef() => this.Ref;
 

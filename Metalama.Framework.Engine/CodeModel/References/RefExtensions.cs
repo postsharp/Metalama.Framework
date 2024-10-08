@@ -44,6 +44,9 @@ public static class RefExtensions
     // ReSharper disable once SuspiciousTypeConversion.Global
     internal static SyntaxTree? GetPrimarySyntaxTree( this IFullRef reference )
         => reference.GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
+    
+    public static SyntaxTree? GetPrimarySyntaxTree( this IRef reference )
+        => ((IFullRef)reference).GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
 
     internal static Type[] GetPossibleDeclarationInterfaceTypes( this ISymbol symbol, CompilationContext compilationContext, RefTargetKind refTargetKind )
         => symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( refTargetKind );

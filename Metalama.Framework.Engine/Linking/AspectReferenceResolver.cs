@@ -416,23 +416,17 @@ internal sealed class AspectReferenceResolver
 
         if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
         {
-            IDeclaration canonicalReplacedMember = replacedMember switch
-            {
-                BuiltDeclaration builtDeclaration => builtDeclaration.BuilderData,
-                _ => replacedMember
-            };
-
-            if ( canonicalReplacedMember is IDeclarationBuilderImpl replacedBuilder )
+            if ( replacedMember is IBuiltDeclarationRef { BuilderData: { } builderData } )
             {
                 // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
                 var fieldInjectionTransformation =
-                    this._injectionRegistry.GetTransformationForBuilder( replacedBuilder )
-                    ?? throw new AssertionFailedException( $"Could not find transformation for {replacedBuilder}" );
+                    this._injectionRegistry.GetTransformationForBuilder( builderData )
+                    ?? throw new AssertionFailedException( $"Could not find transformation for {builderData}" );
 
                 // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
                 return
                     new MemberLayerIndex(
-                        this._layerIndex[replacedBuilder.AspectLayerId],
+                        this._layerIndex[builderData.ParentAdvice.AspectLayerId],
                         fieldInjectionTransformation.OrderWithinPipelineStepAndType + 1,
                         fieldInjectionTransformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
             }

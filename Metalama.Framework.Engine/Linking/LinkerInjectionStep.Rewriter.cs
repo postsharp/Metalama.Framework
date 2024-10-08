@@ -132,7 +132,7 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private void RewriteAttributeLists(
-            IRef<IDeclaration> target,
+            IFullRef<IDeclaration> target,
             SyntaxKind targetKind,
             SyntaxNode originalDeclaringNode,
             SyntaxList<AttributeListSyntax> inputAttributeLists,
@@ -228,7 +228,7 @@ internal sealed partial class LinkerInjectionStep
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
-                    var attributeModel = builderAttributeRef.GetTarget( TODO );
+                    var attributeModel = builderAttributeRef.GetTarget( this._compilation );
 
                     var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeModel )
                         .AssertNotNull();
@@ -442,7 +442,7 @@ internal sealed partial class LinkerInjectionStep
 
                 switch ( injectedMember.Declaration )
                 {
-                    case IRef<IMethodBase> methodBase:
+                    case IFullRef<IMethodBase> methodBase:
                         // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
                         var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
                         var exitStatements = this._transformationCollection.GetInjectedExitStatements( injectedMember );
@@ -455,8 +455,8 @@ internal sealed partial class LinkerInjectionStep
 
                         break;
 
-                    case IRef<IPropertyOrIndexer> propertyOrIndexerRef:
-                        var propertyOrIndexer = propertyOrIndexerRef.GetTarget( TODO );
+                    case IFullRef<IPropertyOrIndexer> propertyOrIndexerRef:
+                        var propertyOrIndexer = propertyOrIndexerRef.GetTarget( this._compilation );
 
                         if ( propertyOrIndexer.GetMethod != null )
                         {
@@ -1397,7 +1397,7 @@ internal sealed partial class LinkerInjectionStep
             List<SyntaxTrivia> outputTrivias = [];
 
             this.RewriteAttributeLists(
-                this._compilation.ToRef(),
+                this._compilation.ToFullRef(),
                 SyntaxKind.AssemblyKeyword,
                 node,
                 node.AttributeLists,

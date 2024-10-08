@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -16,17 +17,17 @@ namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
 internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTransformation, IInsertStatementTransformation
 {
-    private readonly IRef<IConstructor> _targetConstructor;
+    private readonly IFullRef<IConstructor> _targetConstructor;
     private readonly Func<SyntaxGenerationContext, StatementSyntax> _initializationStatement;
 
     private IRef<IMemberOrNamedType> ContextDeclaration { get; }
 
-    public IRef<IMember> TargetMember => this._targetConstructor;
+    public IFullRef<IMember> TargetMember => this._targetConstructor;
 
     public SyntaxBasedInitializationTransformation(
         Advice advice,
         IRef<IMemberOrNamedType> initializedDeclaration,
-        IRef<IConstructor> targetConstructor,
+        IFullRef<IConstructor> targetConstructor,
         Func<SyntaxGenerationContext, StatementSyntax> initializationStatement ) : base( advice )
     {
         this.ContextDeclaration = initializedDeclaration;
@@ -54,5 +55,5 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTr
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add a statement to '{this._targetConstructor}'.";
+    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add a statement to '{this._targetConstructor}'.";
 }

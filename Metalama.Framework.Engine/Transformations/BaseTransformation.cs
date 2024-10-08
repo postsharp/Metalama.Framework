@@ -46,5 +46,16 @@ internal abstract class BaseTransformation : ITransformation
 
     public abstract IntrospectionTransformationKind TransformationKind { get; }
 
-    public abstract FormattableString ToDisplayString( CompilationModel compilation );
+    public FormattableString? Description
+    {
+        get;
+        private set;
+    }
+
+    public void ComputeDescription( CompilationModel compilationModel )
+    {
+        this.Description = this.ToDisplayString( compilationModel );
+    }
+
+    protected abstract FormattableString ToDisplayString( CompilationModel compilation );
 }

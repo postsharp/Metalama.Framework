@@ -52,5 +52,5 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce a static constructor into '{this.TargetDeclaration}'.";
+    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce a static constructor into '{this.TargetDeclaration}'.";
 }

@@ -45,6 +45,6 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertConstructorInitializerArgument;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
 }

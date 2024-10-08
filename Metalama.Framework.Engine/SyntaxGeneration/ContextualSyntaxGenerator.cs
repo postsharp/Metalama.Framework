@@ -456,7 +456,7 @@ internal sealed partial class ContextualSyntaxGenerator
         return interpolatedString.WithContents( List( contents ) );
     }
 
-    public TypeSyntax Type( IRef<IType> type ) => this.Type( (ITypeSymbol) ((ISymbolRef) type).Symbol);
+    public TypeSyntax Type( IRef<IType> type ) => this.Type( (ITypeSymbol) ((ISymbolRef) type).Symbol );
 
     public TypeSyntax Type( IType type, bool bypassSymbols = false )
     {
@@ -569,7 +569,7 @@ internal sealed partial class ContextualSyntaxGenerator
     }
 
     public SyntaxList<AttributeListSyntax> AttributesForDeclaration(
-        IRef<IDeclaration> declaration,
+        IFullRef<IDeclaration> declaration,
         CompilationModel compilation,
         SyntaxKind attributeTargetKind = SyntaxKind.None )
     {
@@ -735,7 +735,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 break;
         }
 
-        syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToRef(), compilation ) );
+        syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToFullRef(), compilation ) );
 
         return syntax;
     }
@@ -760,7 +760,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public ParameterSyntax Parameter( IParameter parameter, CompilationModel compilation, bool removeDefaultValue )
         => SyntaxFactory.Parameter(
-            this.AttributesForDeclaration( parameter.ToRef(), compilation ),
+            this.AttributesForDeclaration( parameter.ToFullRef(), compilation ),
             parameter.GetSyntaxModifierList(),
             this.Type( parameter.Type ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
             Identifier( parameter.Name ),

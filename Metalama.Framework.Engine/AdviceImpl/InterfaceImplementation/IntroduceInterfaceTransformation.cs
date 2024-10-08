@@ -46,6 +46,6 @@ internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransform
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.ImplementInterface;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Make the type '{this.TargetType}' implement the interface '{this.InterfaceType}'.";
 }

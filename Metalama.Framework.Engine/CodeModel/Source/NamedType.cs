@@ -458,7 +458,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        private protected override IFullRef<IDeclaration> ToDeclarationRef() => ((IDeclaration) this.Implementation).ToRef();
+        private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Implementation.Ref;
 
         public bool IsSubclassOf( INamedType type )
         {

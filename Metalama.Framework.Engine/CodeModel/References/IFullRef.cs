@@ -38,7 +38,7 @@ internal interface IFullRef : IRefImpl
 
     bool IsDefinition { get; }
 
-    void EnumerateAttributes( CompilationModel compilation, Action<IRef<IAttribute>> add );
+    void EnumerateAttributes( CompilationModel compilation, Action<AttributeRef> add );
 
     void EnumerateAllImplementedInterfaces( CompilationModel compilation, Action<IFullRef<INamedType>> add );
 

@@ -27,6 +27,6 @@ internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransform
 
     public DeclarationBuilderData DeclarationBuilderData => this.AttributeBuilder;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Introduce attribute of type '{this.AttributeBuilder.Type}' into '{this.TargetDeclaration}'";
 }

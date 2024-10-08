@@ -16,5 +16,8 @@ public interface ITransformationBase
 
     IntrospectionTransformationKind TransformationKind { get; }
 
-    FormattableString ToDisplayString( CompilationModel compilation);
+    /// <summary>
+    /// Gets a human-readable description of the transformation, to be displayed in the UI.
+    /// </summary>
+    FormattableString? Description { get; }
 }

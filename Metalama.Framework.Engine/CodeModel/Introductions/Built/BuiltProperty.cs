@@ -52,7 +52,7 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]

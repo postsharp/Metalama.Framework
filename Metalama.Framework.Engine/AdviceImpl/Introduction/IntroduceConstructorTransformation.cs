@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -125,5 +126,5 @@ internal sealed class IntroduceConstructorTransformation
         return Array.Empty<InsertedStatement>();
     }
 
-    IRef<IMember> IInsertStatementTransformation.TargetMember => this.BuilderData.ToRef();
+    IFullRef<IMember> IInsertStatementTransformation.TargetMember => this.BuilderData.ToRef();
 }

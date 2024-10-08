@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
@@ -26,7 +27,7 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
                 context.AddTransformation(
                     new ContractIndexerTransformation(
                         this,
-                        indexer.ToRef(),
+                        indexer.ToFullRef(),
                         parameter.ToRef(),
                         this.Direction,
                         this.Template,
@@ -40,7 +41,7 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
                 context.AddTransformation(
                     new ContractMethodTransformation(
                         this,
-                        method.ToRef(),
+                        method.ToFullRef(),
                         parameter.ToRef(),
                         this.Direction,
                         this.Template,
@@ -54,7 +55,7 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
                 context.AddTransformation(
                     new ContractConstructorTransformation(
                         this,
-                        constructor.ToRef(),
+                        constructor.ToFullRef(),
                         parameter.ToRef(),
                         this.Direction,
                         this.Template,

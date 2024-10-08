@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -14,11 +15,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractConstructorTransformation : ContractBaseTransformation
 {
-    private new IRef<IConstructor> TargetMember => (IRef<IConstructor>) base.TargetMember;
+    private readonly IFullRef<IConstructor> _targetConstructor;
 
     public ContractConstructorTransformation(
         Advice advice,
-        IRef<IConstructor> targetConstructor,
+        IFullRef<IConstructor> targetConstructor,
         IRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
@@ -26,13 +27,15 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
         IObjectReader tags,
         TemplateProvider templateProvider ) : base(
         advice,
-        targetConstructor,
         contractTarget,
         contractDirection,
         template,
         templateProvider,
         templateArguments,
-        tags ) { }
+        tags )
+    {
+        this._targetConstructor = targetConstructor;
+    }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
@@ -93,5 +96,7 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
         }
     }
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add default contract to constructor '{this.TargetMember}'";
+    public override IFullRef<IMember> TargetMember => this._targetConstructor;
+
+    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add default contract to constructor '{this.TargetMember}'";
 }

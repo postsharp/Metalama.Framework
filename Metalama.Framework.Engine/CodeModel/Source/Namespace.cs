@@ -154,7 +154,7 @@ internal sealed class Namespace : Declaration, INamespace
     [Memo]
     private IFullRef<INamespace> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamespace>( this );
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     IRef<INamespace> INamespace.ToRef() => this.Ref;
 }

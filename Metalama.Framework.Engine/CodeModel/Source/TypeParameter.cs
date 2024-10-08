@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         [Memo]
         private IFullRef<ITypeParameter> Ref => this.RefFactory.FromSymbol<ITypeParameter>( this.TypeParameterSymbol );
 
-        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
         IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 

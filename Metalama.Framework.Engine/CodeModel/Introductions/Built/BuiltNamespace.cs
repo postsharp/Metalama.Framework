@@ -37,7 +37,7 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 
     IRef<INamespace> INamespace.ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 

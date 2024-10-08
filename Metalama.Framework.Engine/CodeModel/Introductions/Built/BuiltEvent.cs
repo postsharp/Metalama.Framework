@@ -69,7 +69,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 
     public IRef<IEvent> ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 

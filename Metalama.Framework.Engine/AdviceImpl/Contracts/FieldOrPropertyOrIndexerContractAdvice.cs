@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
@@ -44,7 +45,7 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
                 context.AddTransformation(
                     new ContractIndexerTransformation(
                         this,
-                        indexer.ToRef(),
+                        indexer.ToFullRef(),
                         null,
                         this.Direction,
                         this.Template,
@@ -63,7 +64,7 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
             contextCopy.AddTransformation(
                 new ContractPropertyTransformation(
                     this,
-                    property.ToRef(),
+                    property.ToFullRef(),
                     this.Direction,
                     this.Template,
                     this.TemplateArguments,

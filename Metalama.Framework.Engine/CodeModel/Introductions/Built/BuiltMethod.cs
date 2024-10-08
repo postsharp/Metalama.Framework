@@ -66,7 +66,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     public IRef<IMethod> ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     [Memo]
     public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );

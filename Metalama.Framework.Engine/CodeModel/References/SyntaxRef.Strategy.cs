@@ -14,7 +14,7 @@ internal sealed partial class SyntaxRef<T>
 {
     public override string? Name => throw new NotImplementedException();
 
-    public override void EnumerateAttributes( CompilationModel compilation, Action<IRef<IAttribute>> add ) => throw new NotImplementedException();
+    public override void EnumerateAttributes( CompilationModel compilation, Action<AttributeRef> add ) => throw new NotImplementedException();
 
     public override void EnumerateAllImplementedInterfaces( CompilationModel compilation, Action<IFullRef<INamedType>> add )
         => throw new NotImplementedException();

@@ -56,6 +56,6 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceParameter;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Introduce parameter '{this.Parameter.Name}' into '{this.Parameter.ContainingDeclaration}'.";
 }

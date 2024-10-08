@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
@@ -22,7 +23,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     /// <summary>
     /// Gets the target member of the contract into which contract statements will be inserted.
     /// </summary>
-    public IRef<IMember> TargetMember { get; }
+    public abstract IFullRef<IMember> TargetMember { get; }
 
     /// <summary>
     /// Gets the declaration on which the contract was applied on.
@@ -38,7 +39,6 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
 
     protected ContractBaseTransformation(
         Advice advice,
-        IRef<IMember> targetMember,
         IRef<IDeclaration> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
@@ -48,7 +48,6 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     {
         Invariant.Assert( contractDirection is not ContractDirection.None );
 
-        this.TargetMember = targetMember;
         this.ContractTarget = contractTarget;
         this.ContractDirection = contractDirection;
         this.TemplateProvider = templateProvider;

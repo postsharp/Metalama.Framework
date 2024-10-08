@@ -560,11 +560,22 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
             builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
+            string description;
+
+            if ( transformation.Description != null )
+            {
+                description = MetalamaStringFormatter.Format( transformation.Description );
+            }
+            else
+            {
+                description = transformation.ToString()!;
+            }
+
             builder.Transformations.Add(
                 new DesignTimeTransformation(
                     transformation.TargetDeclaration.ToSerializableId(),
                     transformation.AspectClass.FullName,
-                    MetalamaStringFormatter.Format( transformation.ToDisplayString( TODO ) ) ) );
+                    description ) );
         }
 
         // Split options by syntax tree.

@@ -146,7 +146,7 @@ public sealed partial class DerivedTypeIndex
 
             var introducedInterface = transformation.InterfaceType;
 
-            if ( !introducedInterface.AsFullRef()
+            if ( !introducedInterface
                     .GetAssemblySymbol( this._compilationContext )
                     .Equals( this._compilationContext.Compilation.Assembly ) )
             {

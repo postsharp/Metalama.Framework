@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating;
@@ -17,17 +18,17 @@ namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
 internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTreeTransformation, IInsertStatementTransformation
 {
-    private readonly IRef<IConstructor> _targetConstructor;
+    private readonly IFullRef<IConstructor> _targetConstructor;
     private readonly BoundTemplateMethod _boundTemplate;
 
     private IRef<IMemberOrNamedType> ContextDeclaration { get; }
 
-    public IRef<IMember> TargetMember => this._targetConstructor;
+    public IFullRef<IMember> TargetMember => this._targetConstructor;
 
     public TemplateBasedInitializationTransformation(
         Advice advice,
         IRef<IMemberOrNamedType> initializedDeclaration,
-        IRef<IConstructor> targetConstructor,
+        IFullRef<IConstructor> targetConstructor,
         BoundTemplateMethod boundTemplate,
         IObjectReader tags ) : base( advice )
     {
@@ -93,5 +94,5 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add a statement to '{this._targetConstructor}'.";
+    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add a statement to '{this._targetConstructor}'.";
 }

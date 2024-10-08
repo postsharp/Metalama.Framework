@@ -38,14 +38,16 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.ToDeclarationRef();
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToFullDeclarationRef();
+
+        private protected virtual IRef<IDeclaration> ToDeclarationRef() => this.ToFullDeclarationRef();
 
         /// <summary>
         /// Returns an <see cref="IRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
         /// but <see cref="IMethod"/>, <see cref="INamedType"/>, ... 
         /// </summary>
         /// <returns></returns>
-        private protected abstract IFullRef<IDeclaration> ToDeclarationRef();
+        private protected abstract IFullRef<IDeclaration> ToFullDeclarationRef();
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 

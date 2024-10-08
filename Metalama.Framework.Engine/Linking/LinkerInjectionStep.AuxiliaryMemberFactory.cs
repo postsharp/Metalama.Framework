@@ -87,7 +87,7 @@ internal sealed partial class LinkerInjectionStep
 
             return ConstructorDeclaration(
                 List<AttributeListSyntax>(),
-                constructor
+                constructor.GetTarget( this._finalCompilationModel )
                     .GetSyntaxModifierList( ModifierCategories.Unsafe )
                     .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                 Identifier( constructor.DeclaringType.Name ),
@@ -133,7 +133,7 @@ internal sealed partial class LinkerInjectionStep
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
-            var method = methodRef.GetTarget( compilationModel );
+            var method = methodRef.GetTarget( this._finalCompilationModel );
 
             var primaryDeclaration = method.GetPrimaryDeclarationSyntax();
 
@@ -278,8 +278,8 @@ internal sealed partial class LinkerInjectionStep
                 returnType.WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ),
                 null,
                 Identifier( this._injectionNameProvider.GetOverrideName( method.DeclaringType, aspectLayerId, method ) ),
-                syntaxGenerationContext.SyntaxGenerator.TypeParameterList( method, compilationModel ),
-                syntaxGenerationContext.SyntaxGenerator.ParameterList( method, compilationModel, true ),
+                syntaxGenerationContext.SyntaxGenerator.TypeParameterList( method, this._finalCompilationModel ),
+                syntaxGenerationContext.SyntaxGenerator.ParameterList( method, this._finalCompilationModel, true ),
                 syntaxGenerationContext.SyntaxGenerator.ConstraintClauses( method ),
                 body,
                 null );
@@ -350,7 +350,7 @@ internal sealed partial class LinkerInjectionStep
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
-            var property = propertyRef.GetTarget( compilationModel );
+            var property = propertyRef.GetTarget( this._finalCompilationModel );
             var primaryDeclaration = property.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =
@@ -463,7 +463,7 @@ internal sealed partial class LinkerInjectionStep
             Advice advice,
             string? returnVariableName )
         {
-            var indexer = indexerRef.GetTarget( compilationModel );
+            var indexer = indexerRef.GetTarget( this._finalCompilationModel );
             var primaryDeclaration = indexer.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =

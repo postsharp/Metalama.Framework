@@ -54,7 +54,7 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 
     public IRef<IIndexer> ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 

@@ -27,6 +27,6 @@ internal sealed class IntroduceNamespaceTransformation : BaseTransformation, IIn
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceMember;
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Introduce {this._introducedDeclaration.DeclarationKind} '{this._introducedDeclaration}'.";
 }

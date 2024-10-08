@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal sealed partial class NamedTypeCollection
 {
-    private sealed class FlattenedList : List<IFullRef<INamedType>>, IUpdatableCollection<INamedType>
+    private sealed class FlattenedList : List<IFullRef<INamedType>>, IUpdatableCollection<IFullRef<INamedType>>
     {
         public FlattenedList( CompilationModel compilation, IReadOnlyList<IFullRef<INamedType>> source )
         {
@@ -39,7 +39,7 @@ internal sealed partial class NamedTypeCollection
 
         public CompilationModel Compilation { get; }
 
-        public IUpdatableCollection<INamedType> Clone( CompilationModel compilation ) => throw new NotSupportedException();
+        public IUpdatableCollection Clone( CompilationModel compilation ) => throw new NotSupportedException();
 
         public ImmutableArray<IFullRef<INamedType>> OfName( string name ) => this.Where( r => r.Name == name ).ToImmutableArray();
     }

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -14,11 +15,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 {
-    private new IRef<IIndexer> TargetMember => (IRef<IIndexer>) base.TargetMember;
+    private readonly IFullRef<IIndexer> _targetIndexer;
 
     public ContractIndexerTransformation(
         Advice advice,
-        IRef<IIndexer> targetIndexer,
+        IFullRef<IIndexer> targetIndexer,
         IRef<IParameter>? indexerParameter,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
@@ -26,13 +27,15 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         IObjectReader tags,
         TemplateProvider templateProvider ) : base(
         advice,
-        targetIndexer,
         (IRef<IDeclaration>?) indexerParameter ?? targetIndexer,
         contractDirection,
         template,
         templateProvider,
         templateArguments,
-        tags ) { }
+        tags )
+    {
+        this._targetIndexer = targetIndexer;
+    }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
@@ -42,7 +45,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                 {
                     Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ) );
 
-                    var targetMember = this.TargetMember.GetTarget( context.Compilation );
+                    var targetMember = this._targetIndexer.GetTarget( context.Compilation );
 
                     Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
@@ -164,6 +167,8 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         }
     }
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    public override IFullRef<IMember> TargetMember => this._targetIndexer;
+
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Add default contract to indexer '{this.TargetDeclaration.GetTarget( compilation ).ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

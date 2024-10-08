@@ -30,7 +30,13 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
 
     [Memo]
     public FormattableString Description
-        => FormattableStringHelper.MapString( this._transformation.ToDisplayString( this._compilation.GetCompilationModel() ), this._compilation );
+        => this.GetDescription();
+
+    private FormattableString GetDescription()
+    {
+        ((BaseTransformation) this._transformation).ComputeDescription( this._compilation.GetCompilationModel() );
+        return FormattableStringHelper.MapString( this._transformation.Description, this._compilation );
+    }
 
     [Memo]
     public IDeclaration? IntroducedDeclaration

@@ -116,7 +116,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     transformation,
                     transformationCollection,
                     auxiliaryMemberTransformations,
-                    pendingInsertStatementContexts );
+                    pendingInsertStatementContexts,
+                    input.CompilationModel );
 
                 this.IndexInjectTransformation(
                     input,
@@ -139,7 +140,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     transformation,
                     transformationCollection,
                     auxiliaryMemberTransformations,
-                    pendingInsertStatementContexts );
+                    pendingInsertStatementContexts,
+                    input.CompilationModel );
 
                 IndexNodesWithModifiedAttributes( transformation, transformationCollection );
             }
@@ -222,7 +224,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 transformationCollection.AddTransformationCausingAuxiliaryOverride( pair.Value.OriginTransformation );
 
                 // This may be the only "override" present, so make sure all other effects of overrides are present.
-                AddSynthesizedSetterForPropertyIfRequired( pair.Key, transformationCollection );
+                AddSynthesizedSetterForPropertyIfRequired( pair.Key, transformationCollection, input.CompilationModel );
 
                 auxiliaryMemberTransformations
                     .GetOrAdd( pair.Key, _ => new AuxiliaryMemberTransformations() )
@@ -548,7 +550,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         ITransformation transformation,
         TransformationCollection transformationCollection,
         ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
+        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts,
+        CompilationModel compilationModel )
     {
         if ( transformation is not IOverrideDeclarationTransformation overrideDeclarationTransformation )
         {
@@ -557,7 +560,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         AddSynthesizedSetterForPropertyIfRequired(
             overrideDeclarationTransformation.OverriddenDeclaration,
-            transformationCollection );
+            transformationCollection,
+            compilationModel );
 
         if ( overrideDeclarationTransformation.OverriddenDeclaration is IFullRef<IConstructor> overriddenConstructorRef )
         {
@@ -593,20 +597,23 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     }
 
     private static void AddSynthesizedSetterForPropertyIfRequired(
-        IRef<IDeclaration> overriddenDeclaration,
-        TransformationCollection transformationCollection )
+        IRef<IDeclaration> overriddenDeclarationRef,
+        TransformationCollection transformationCollection,
+        CompilationModel compilationModel )
     {
+        var overriddenDeclaration = overriddenDeclarationRef.GetTarget( compilationModel );
+
         // If this is an auto-property that does not override a base property, we can add synthesized init-only setter.
         // If this is overridden property we need to:
         //  1) Block inlining of the first override (force the trampoline).
         //  2) Substitute all sets of the property (can be only in constructors) to use the first override instead.
-        if ( overriddenDeclaration is IFullRef<IProperty>
+        if ( overriddenDeclaration is IProperty
             {
                 IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod.IsImplicitlyDeclared: true,
                 OverriddenProperty: null or { SetMethod: not null }
             } overriddenAutoProperty )
         {
-            transformationCollection.AddAutoPropertyWithSynthesizedSetter( overriddenAutoProperty );
+            transformationCollection.AddAutoPropertyWithSynthesizedSetter( overriddenAutoProperty.ToRef() );
         }
     }
 
@@ -617,14 +624,15 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         ITransformation transformation,
         TransformationCollection transformationCollection,
         ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
+        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts,
+        CompilationModel compilationModel )
     {
         if ( transformation is not IInsertStatementTransformation insertStatementTransformation )
         {
             return;
         }
 
-        var targetMember = insertStatementTransformation.TargetMember.GetTarget( TODO );
+        var targetMember = insertStatementTransformation.TargetMember.GetTarget( compilationModel );
 
         var syntaxGenerationContext
             = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, targetMember );
@@ -679,7 +687,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         if ( targetMember is IConstructor { IsPrimary: true } overriddenConstructor )
         {
-            auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor.ToRef(), _ => new AuxiliaryMemberTransformations() ).InjectAuxiliarySourceMember();
+            auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor.ToFullRef(), _ => new AuxiliaryMemberTransformations() )
+                .InjectAuxiliarySourceMember();
 
             transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructor.DeclaringType.ToRef() )
                 .RemovePrimaryConstructor();

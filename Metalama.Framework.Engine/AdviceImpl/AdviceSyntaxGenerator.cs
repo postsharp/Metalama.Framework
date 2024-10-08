@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -29,7 +30,7 @@ internal class AdviceSyntaxGenerator
         SyntaxKind attributeTargetSyntaxKind = SyntaxKind.None )
     {
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
-            declaration.ToRef(),
+            declaration.ToFullRef(),
             context.Compilation,
             attributeTargetSyntaxKind );
 
@@ -37,7 +38,7 @@ internal class AdviceSyntaxGenerator
         {
             attributes = attributes.AddRange(
                 context.SyntaxGenerator.AttributesForDeclaration(
-                    method.ReturnParameter.ToRef(),
+                    method.ReturnParameter.ToFullRef(),
                     context.Compilation,
                     SyntaxKind.ReturnKeyword ) );
 
@@ -45,7 +46,7 @@ internal class AdviceSyntaxGenerator
             {
                 attributes = attributes.AddRange(
                     context.SyntaxGenerator.AttributesForDeclaration(
-                        method.Parameters[0].ToRef(),
+                        method.Parameters[0].ToFullRef(),
                         context.Compilation,
                         SyntaxKind.ParamKeyword ) );
             }
@@ -60,7 +61,7 @@ internal class AdviceSyntaxGenerator
 
     // TODO: This is temporary overload (see the callsite for reason).
     public static SyntaxList<AttributeListSyntax> GetAttributeLists(
-        IRef<IDeclaration> declarationRef,
+        IFullRef<IDeclaration> declarationRef,
         MemberInjectionContext context,
         SyntaxKind attributeTargetSyntaxKind = SyntaxKind.None )
     {

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -14,11 +15,11 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractPropertyTransformation : ContractBaseTransformation
 {
-    private new IRef<IProperty> TargetMember => (IRef<IProperty>) base.TargetMember;
+    private readonly IFullRef<IProperty> _targetProperty;
 
     public ContractPropertyTransformation(
         Advice advice,
-        IRef<IProperty> targetProperty,
+        IFullRef<IProperty> targetProperty,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
@@ -26,18 +27,22 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
         TemplateProvider templateProvider ) : base(
         advice,
         targetProperty,
-        targetProperty,
         contractDirection,
         template,
         templateProvider,
         templateArguments,
-        tags ) { }
+        tags )
+    {
+        this._targetProperty = targetProperty;
+    }
+
+    public override IFullRef<IMember> TargetMember => this._targetProperty;
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ) );
 
-        var targetMember = this.TargetMember.GetTarget( context.Compilation );
+        var targetMember = this._targetProperty.GetTarget( context.Compilation );
 
         Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
@@ -99,6 +104,6 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
         return statements;
     }
 
-    public override FormattableString ToDisplayString( CompilationModel compilation )
+    protected override FormattableString ToDisplayString( CompilationModel compilation )
         => $"Add contract to property '{this.TargetMember.GetTarget( compilation ).ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

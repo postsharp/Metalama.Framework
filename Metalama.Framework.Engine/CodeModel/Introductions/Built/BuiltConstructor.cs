@@ -54,7 +54,7 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     public IRef<IConstructor> ToRef() => this.Ref;
 
-    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -16,6 +17,8 @@ internal sealed partial class LinkerInjectionStep
 {
     private sealed class InjectedMemberComparer : IComparer<InjectedMember>
     {
+        private readonly CompilationModel _compilationModel;
+
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
             { DeclarationKind.Field, 0 },
@@ -36,9 +39,10 @@ internal sealed partial class LinkerInjectionStep
             { Accessibility.Private, 5 }
         }.ToImmutableDictionary();
 
-        public static InjectedMemberComparer Instance { get; } = new();
-
-        private InjectedMemberComparer() { }
+        public InjectedMemberComparer( CompilationModel compilationModel )
+        {
+            this._compilationModel = compilationModel;
+        }
 
         public int Compare( InjectedMember? x, InjectedMember? y )
         {
@@ -60,9 +64,6 @@ internal sealed partial class LinkerInjectionStep
                 return -1;
             }
 
-            var declaration = GetDeclaration( x );
-            var otherDeclaration = GetDeclaration( y );
-
             // Order by kind.
             var kindComparison = GetKindOrder( x.Kind ).CompareTo( GetKindOrder( y.Kind ) );
 
@@ -72,12 +73,15 @@ internal sealed partial class LinkerInjectionStep
             }
 
             // Order by name.
-            var nameComparison = string.CompareOrdinal( declaration.Name, otherDeclaration.Name );
+            var nameComparison = string.CompareOrdinal( x.Declaration.Name, y.Declaration.Name );
 
             if ( nameComparison != 0 )
             {
                 return nameComparison;
             }
+
+            var declaration = this.GetDeclaration( x );
+            var otherDeclaration = this.GetDeclaration( y );
 
             // Order by signature.
             if ( declaration is IMethod )
@@ -90,9 +94,9 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
+            // Order by accessibility.
             if ( declaration is IMemberOrNamedType memberOrNamedType && otherDeclaration is IMemberOrNamedType otherMemberOrNamedType )
             {
-                // Order by accessibility.
                 var accessibilityComparison =
                     GetAccessibilityOrder( memberOrNamedType.Accessibility ).CompareTo( GetAccessibilityOrder( otherMemberOrNamedType.Accessibility ) );
 
@@ -211,7 +215,7 @@ internal sealed partial class LinkerInjectionStep
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
-        private static INamedDeclaration GetDeclaration( InjectedMember injectedMember )
+        private INamedDeclaration GetDeclaration( InjectedMember injectedMember )
         {
             var declaration = injectedMember.Declaration;
 
@@ -225,7 +229,7 @@ internal sealed partial class LinkerInjectionStep
                 throw new AssertionFailedException( "Don't know how to sort." );
             }
 
-            return declaration;
+            return declaration.As<INamedDeclaration>().GetTarget( this._compilationModel );
         }
     }
 }
