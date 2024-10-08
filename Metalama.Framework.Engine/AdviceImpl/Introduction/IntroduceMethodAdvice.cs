@@ -159,17 +159,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                              existingMethod.DeclaringType),
                             this ) );
             }
-            else if ( !builder.ReturnType.Is( builder.ReturnType, ConversionKind.Reference ) )
-            {
-                return
-                    this.CreateFailedResult(
-                        AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                            targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
-                             existingMethod.DeclaringType, existingMethod.ReturnType),
-                            this ) );
-            }
-
+            
             switch ( this.OverrideStrategy )
             {
                 case OverrideStrategy.Fail:
@@ -216,17 +206,15 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                     }
 
                 case OverrideStrategy.Override:
-                    if ( targetDeclaration.Equals( existingMethod.DeclaringType ) )
+                    if ( !builder.ReturnType.Is( builder.ReturnType, ConversionKind.Reference ) )
                     {
-                        var overriddenMethod = new OverrideMethodTransformation(
-                            this,
-                            existingMethod.ToRef(),
-                            this._template.ForIntroduction( existingMethod ),
-                            this.Tags );
-
-                        context.AddTransformation( overriddenMethod );
-
-                        return this.CreateSuccessResult( AdviceOutcome.Override, existingMethod );
+                        return
+                            this.CreateFailedResult(
+                                AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
+                                     existingMethod.DeclaringType, existingMethod.ReturnType),
+                                    this ) );
                     }
                     else if ( existingMethod.IsSealed || !existingMethod.IsOverridable() )
                     {
