@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CodeModel.Comparers;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
@@ -432,7 +433,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         AddTransformationNoDuplicates(
                                             new OverrideMethodTransformation(
                                                 this,
-                                                existingMethod.ToRef(),
+                                                existingMethod.ToFullRef(),
                                                 templateMethod.AssertNotNull().ForOverride( existingMethod, this.TemplateProvider ),
                                                 mergedTags ) );
 
@@ -495,7 +496,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 AddTransformationNoDuplicates(
                                     new OverrideMethodTransformation(
                                         this,
-                                        methodBuilder.ToRef(),
+                                        methodBuilder.ToFullRef(),
                                         templateMethod.ForIntroduction( methodBuilder, this.TemplateProvider ),
                                         mergedTags ) );
                             }
@@ -504,8 +505,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 AddTransformationNoDuplicates(
                                     new RedirectMethodTransformation(
                                         this,
-                                        methodBuilder.ToRef(),
-                                        memberSpec.TargetMember.AssertNotNull().As<IMethod>() ) );
+                                        methodBuilder.ToFullRef(),
+                                        memberSpec.TargetMember.AssertNotNull().AsFullRef<IMethod>() ) );
                             }
 
                             implementedInterfaceMembers.Add(
@@ -570,7 +571,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         AddTransformationNoDuplicates(
                                             new OverridePropertyTransformation(
                                                 this,
-                                                existingProperty.ToRef(),
+                                                existingProperty.ToFullRef(),
                                                 existingProperty.GetMethod != null
                                                     ? accessorTemplates.Get?.ForOverride( existingProperty.GetMethod, this.TemplateProvider )
                                                     : null,
@@ -770,7 +771,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     new RedirectPropertyTransformation(
                                         this,
                                         propertyBuilder.ToRef(),
-                                        redirectionTargetProperty.ToRef() ) );
+                                        redirectionTargetProperty.ToFullRef() ) );
                             }
 
                             implementedInterfaceMembers.Add(
@@ -789,7 +790,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case IEvent interfaceEvent:
                         var existingEvent = targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
                         var templateEvent = memberSpec.Template?.As<IEvent>();
-                        var redirectionTargetEvent = (IEvent?) memberSpec.TargetMember;
+                        var redirectionTargetEvent = memberSpec.TargetMember.AsFullRef<IEvent>();
 
                         if ( existingEvent != null && !memberSpec.IsExplicit )
                         {
@@ -837,7 +838,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         AddTransformationNoDuplicates(
                                             new OverrideEventTransformation(
                                                 this,
-                                                existingEvent.ToRef(),
+                                                existingEvent.ToFullRef(),
                                                 accessorTemplates.Add?.ForOverride( existingEvent.AddMethod, this.TemplateProvider ),
                                                 accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod, this.TemplateProvider ),
                                                 mergedTags ) );
@@ -916,7 +917,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     AddTransformationNoDuplicates(
                                         new OverrideEventTransformation(
                                             this,
-                                            eventBuilder.ToRef(),
+                                            eventBuilder.ToFullRef(),
                                             accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod, this.TemplateProvider ),
                                             accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod, this.TemplateProvider ),
                                             mergedTags ) );
@@ -936,7 +937,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 AddTransformationNoDuplicates(
                                     new RedirectEventTransformation(
                                         this,
-                                        eventBuilder.ToRef(),
+                                        eventBuilder.ToFullRef(),
                                         redirectionTargetEvent.AssertNotNull() ) );
                             }
 
@@ -970,7 +971,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
             if ( !skipInterfaceBaseList )
             {
-                AddTransformationNoDuplicates( new IntroduceInterfaceTransformation( this, targetType.ToRef(), interfaceType.ToRef(), interfaceMemberMap ) );
+                AddTransformationNoDuplicates(
+                    new IntroduceInterfaceTransformation( this, targetType.ToFullRef(), interfaceType.ToFullRef(), interfaceMemberMap ) );
             }
         }
 

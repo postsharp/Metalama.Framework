@@ -41,5 +41,5 @@ internal class TypeIdRef<T> : StringRef<T>
         return ConvertDeclarationOrThrow( symbol, compilation );
     }
 
-    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new TypeIdRef<TOut>( this.Id );
+    protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new TypeIdRef<TOut>( this.Id );
 }

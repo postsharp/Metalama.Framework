@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -27,17 +28,17 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
         switch ( targetMethod.MethodKind )
         {
             case MethodKind.Finalizer:
-                context.AddTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             case MethodKind.Operator:
-                context.AddTransformation( new OverrideOperatorTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation( new OverrideOperatorTransformation( this, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             default:
-                context.AddTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.ToRef(), this._boundTemplate, this.Tags ) );
+                context.AddTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
         }

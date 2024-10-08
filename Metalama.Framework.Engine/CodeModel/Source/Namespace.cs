@@ -152,9 +152,9 @@ internal sealed class Namespace : Declaration, INamespace
     public override SyntaxTree? PrimarySyntaxTree => null;
 
     [Memo]
-    private IRef<INamespace> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamespace>( this );
+    private IFullRef<INamespace> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamespace>( this );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     IRef<INamespace> INamespace.ToRef() => this.Ref;
 }

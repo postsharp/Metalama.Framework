@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -21,23 +22,26 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal sealed class OverrideConstructorTransformation : OverrideMemberTransformation
 {
-    private new IRef<IConstructor> OverriddenDeclaration => (IRef<IConstructor>) base.OverriddenDeclaration;
+    private readonly IFullRef<IConstructor> _overriddenDeclaration;
 
     private BoundTemplateMethod Template { get; }
 
     public OverrideConstructorTransformation(
         Advice advice,
-        IRef<IConstructor> overriddenDeclaration,
+        IFullRef<IConstructor> overriddenDeclaration,
         BoundTemplateMethod template,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        : base( advice, tags )
     {
+        this._overriddenDeclaration = overriddenDeclaration;
         this.Template = template;
     }
 
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenDeclaration;
+
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( context.Compilation );
 
         var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
 
@@ -103,7 +107,7 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
                     newMethodBody,
                     null );
 
-        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToRef() )];
+        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToFullRef() )];
     }
 
     private ParameterListSyntax GetParameterList( MemberInjectionContext context, IConstructor overriddenDeclaration )

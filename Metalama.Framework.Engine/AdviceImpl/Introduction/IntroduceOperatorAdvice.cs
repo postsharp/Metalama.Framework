@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using System;
 
@@ -117,7 +118,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
         if ( existingOperator == null )
         {
-            var overriddenOperator = new OverrideOperatorTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
+            var overriddenOperator = new OverrideOperatorTransformation( this, builder.ToFullRef(), this._template.ForIntroduction( builder ), this.Tags );
             context.AddTransformation( overriddenOperator );
             context.AddTransformation( builder.ToTransformation() );
 
@@ -159,7 +160,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this,
-                            builder.ToRef(),
+                            builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );
 
@@ -174,7 +175,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                     {
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this,
-                            existingOperator.ToRef(),
+                            existingOperator.ToFullRef(),
                             this._template.ForIntroduction( existingOperator ),
                             this.Tags );
 
@@ -200,7 +201,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this,
-                            builder.ToRef(),
+                            builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );
 

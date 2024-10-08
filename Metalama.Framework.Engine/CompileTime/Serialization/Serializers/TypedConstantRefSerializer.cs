@@ -17,7 +17,7 @@ internal class TypedConstantRefSerializer : ValueTypeSerializer<TypedConstantRef
     public override TypedConstantRef DeserializeObject( IArgumentsReader constructorArguments )
     {
         var value = constructorArguments.GetValue<object?>( "value" );
-        var type = constructorArguments.GetValue<IRefImpl<IType>>( "type" );
+        var type = constructorArguments.GetValue<IRef<IType>>( "type" );
 
         return new TypedConstantRef( value, type );
     }

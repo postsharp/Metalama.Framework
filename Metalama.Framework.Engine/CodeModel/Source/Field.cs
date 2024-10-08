@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -194,9 +195,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
         [Memo]
-        private IRef<IField> Ref => this.RefFactory.FromSymbolBasedDeclaration<IField>( this );
+        private IFullRef<IField> Ref => this.RefFactory.FromSymbolBasedDeclaration<IField>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
     }

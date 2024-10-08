@@ -156,11 +156,6 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
 
                 break;
 
-            case IDeclarationBuilderDataRef builderDataRef:
-                this._builderCache.Remove( builderDataRef.BuilderData );
-
-                break;
-
             case IBuiltDeclarationRef builtDeclarationRef:
                 this._builderCache.Remove( builtDeclarationRef.BuilderData );
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
@@ -16,16 +17,16 @@ internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransform
 {
     //public IDeclaration ContainingDeclaration => this.TargetType;
 
-    public IRef<INamedType> InterfaceType { get; }
+    public IFullRef<INamedType> InterfaceType { get; }
 
-    public IRef<INamedType> TargetType { get; }
+    public IFullRef<INamedType> TargetType { get; }
 
     public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
     public IntroduceInterfaceTransformation(
         ImplementInterfaceAdvice implementInterfaceAdvice,
-        IRef<INamedType> targetType,
-        IRef<INamedType> interfaceType,
+        IFullRef<INamedType> targetType,
+        IFullRef<INamedType> interfaceType,
         Dictionary<IMember, IMember> memberMap ) : base( implementInterfaceAdvice )
     {
         this.TargetType = targetType;

@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -45,13 +46,13 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     [Memo]
-    private IRef<IProperty> Ref => this.RefFactory.FromBuilt<IProperty>( this );
+    private IFullRef<IProperty> Ref => this.RefFactory.FromBuilt<IProperty>( this );
 
     IRef<IProperty> IProperty.ToRef() => this.Ref;
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]

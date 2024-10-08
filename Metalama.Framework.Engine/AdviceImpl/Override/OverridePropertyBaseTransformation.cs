@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
@@ -19,20 +20,27 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrIndexerTransformation
 {
-    private new IRef<IProperty> OverriddenDeclaration => (IRef<IProperty>) base.OverriddenDeclaration;
+    public IFullRef<IProperty> OverriddenProperty { get; }
 
     protected OverridePropertyBaseTransformation(
         Advice advice,
-        IRef<IProperty> overriddenDeclaration,
+        IFullRef<IProperty> overriddenProperty,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags ) { }
+        : base( advice, tags )
+    {
+        this.OverriddenProperty = overriddenProperty;
+    }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this.OverriddenProperty;
+
+    protected override IFullRef<IPropertyOrIndexer> OverriddenPropertyOrIndexer => this.OverriddenProperty;
 
     protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
         MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenProperty.GetTarget( context.Compilation );
 
         var propertyName = context.InjectionNameProvider.GetOverrideName(
             overriddenDeclaration.DeclaringType,
@@ -88,7 +96,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                     null ),
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                overriddenDeclaration.ToRef() )
+                overriddenDeclaration.ToFullRef() )
         };
 
         return overrides;
@@ -101,7 +109,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                 context.SyntaxGenerationContext,
                 this.CreateProceedGetExpression( context ),
                 templateKind,
-                this.OverriddenDeclaration.GetTarget( context.Compilation ).GetMethod.AssertNotNull() ),
+                this.OverriddenProperty.GetTarget( context.Compilation ).GetMethod.AssertNotNull() ),
             MethodKind.PropertySet => new SyntaxUserExpression(
                 this.CreateProceedSetExpression( context ),
                 context.Compilation.Cache.SystemVoidType ),
@@ -112,13 +120,13 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         => TransformationHelper.CreatePropertyProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget( context.Compilation ),
+            this.OverriddenProperty.GetTarget( context.Compilation ),
             this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreatePropertyProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget( context.Compilation ),
+            this.OverriddenProperty.GetTarget( context.Compilation ),
             this.AspectLayerId );
 }

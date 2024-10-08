@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -130,5 +131,5 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
     public new IRef<IIndexer> ToRef() => this.Immutable.ToRef();
 
     [Memo]
-    public IndexerBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToRef() );
+    public IndexerBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
 }

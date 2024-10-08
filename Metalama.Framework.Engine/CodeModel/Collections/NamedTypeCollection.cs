@@ -10,10 +10,10 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed partial class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
-        public NamedTypeCollection( INamespaceOrNamedType declaringType, IReadOnlyList<IRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
+        public NamedTypeCollection( INamespaceOrNamedType declaringType, IReadOnlyList<IFullRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
             base( declaringType, IncludeNestedTypes( declaringType.Compilation, sourceItems, includeNestedTypes ) ) { }
 
-        public NamedTypeCollection( ICompilation declaringCompilation, IReadOnlyList<IRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
+        public NamedTypeCollection( ICompilation declaringCompilation, IReadOnlyList<IFullRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
             base( declaringCompilation, IncludeNestedTypes( declaringCompilation, sourceItems, includeNestedTypes ) ) { }
 
         public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
@@ -34,9 +34,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             }
         }
 
-        private static IReadOnlyList<IRef<INamedType>> IncludeNestedTypes(
+        private static IReadOnlyList<IFullRef<INamedType>> IncludeNestedTypes(
             ICompilation compilation,
-            IReadOnlyList<IRef<INamedType>> sourceItems,
+            IReadOnlyList<IFullRef<INamedType>> sourceItems,
             bool includeNestedTypes )
         {
             if ( !includeNestedTypes )

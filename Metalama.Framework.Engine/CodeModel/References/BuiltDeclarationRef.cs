@@ -14,10 +14,14 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// <summary>
 /// An implementation of <see cref="IRef"/> based on <see cref="IDeclarationBuilder"/>.
 /// </summary>
-internal sealed class BuiltDeclarationRef<T> : CompilationBoundRef<T>, IBuiltDeclarationRef
+internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclarationRef
     where T : class, IDeclaration
 {
-    public BuiltDeclarationRef( DeclarationBuilderData builder, GenericContext? genericContext, CompilationContext compilationContext )
+    private readonly GenericContext _genericContext; // Gives the type arguments for the builder.
+
+    public DeclarationBuilderData BuilderData { get; }
+
+    public BuiltDeclarationRef( DeclarationBuilderData builder, CompilationContext compilationContext, GenericContext? genericContext = null )
     {
         // Type parameter must match the builder type.
         Invariant.Assert(
@@ -31,26 +35,20 @@ internal sealed class BuiltDeclarationRef<T> : CompilationBoundRef<T>, IBuiltDec
         Invariant.Assert( !(typeof(T) == typeof(IField) && builder is PropertyBuilderData) );
 
         this.BuilderData = builder;
-        this.GenericContext = genericContext ?? GenericContext.Empty;
+        this._genericContext = genericContext ?? GenericContext.Empty;
         this.CompilationContext = compilationContext;
     }
 
     public override CompilationContext CompilationContext { get; }
 
-    public override bool IsDefinition => this.GenericContext.IsEmptyOrIdentity;
+    public override bool IsDefinition => this._genericContext.IsEmptyOrIdentity;
 
-    public override IRef Definition => this.IsDefinition ? this : this.BuilderData.ToRef();
+    public override IFullRef<T> Definition => this.IsDefinition ? this : (IFullRef<T>) this.BuilderData.ToRef();
 
-    public DeclarationBuilderData BuilderData { get; }
+    public override FullRef<T> WithGenericContext( GenericContext genericContext )
+        => genericContext.IsEmptyOrIdentity ? this : new BuiltDeclarationRef<T>( this.BuilderData, this.CompilationContext, genericContext );
 
-    public GenericContext GenericContext { get; } // Gives the type arguments for the builder.
-
-    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext )
-        => genericContext.IsEmptyOrIdentity ? this : new BuiltDeclarationRef<T>( this.BuilderData, genericContext, this.CompilationContext );
-
-    public override IRefStrategy Strategy => BuilderRefStrategy.Instance;
-
-    public override IRef? ContainingDeclaration => this.BuilderData.ContainingDeclaration;
+    public override IFullRef? ContainingDeclaration => this.BuilderData.ContainingDeclaration;
 
     public override string? Name
         => this.BuilderData switch
@@ -66,13 +64,11 @@ internal sealed class BuiltDeclarationRef<T> : CompilationBoundRef<T>, IBuiltDec
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => throw new NotSupportedException();
 
-    public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
+    public override ISymbol GetClosestContainingSymbol()
     {
-        Invariant.Assert( compilationContext == this.CompilationContext );
-
-        for ( IRef ancestor = this.BuilderData.ContainingDeclaration; ancestor != null; ancestor = ancestor.ContainingDeclaration )
+        for ( var ancestor = (IFullRef) this.BuilderData.ContainingDeclaration; ancestor != null; ancestor = (IFullRef) ancestor.ContainingDeclaration )
         {
-            if ( ancestor is SymbolBasedDeclaration symbolBasedDeclaration )
+            if ( ancestor is ISymbolRef symbolBasedDeclaration )
             {
                 return symbolBasedDeclaration.Symbol;
             }
@@ -84,13 +80,13 @@ internal sealed class BuiltDeclarationRef<T> : CompilationBoundRef<T>, IBuiltDec
 
     private GenericContext SelectGenericContext( IGenericContext? genericContext )
     {
-        if ( this.GenericContext.IsEmptyOrIdentity )
+        if ( this._genericContext.IsEmptyOrIdentity )
         {
             return (GenericContext?) genericContext ?? GenericContext.Empty;
         }
         else if ( genericContext is null or { IsEmptyOrIdentity: true } )
         {
-            return this.GenericContext;
+            return this._genericContext;
         }
         else
         {
@@ -108,14 +104,14 @@ internal sealed class BuiltDeclarationRef<T> : CompilationBoundRef<T>, IBuiltDec
 
     public override string ToString() => this.BuilderData.ToString()!;
 
-    public override IRefImpl<TOut> As<TOut>()
+    protected override IFullRef<TOut> CastAsFullRef<TOut>()
         => this switch
         {
-            IRefImpl<TOut> desired => desired,
+            FullRef<TOut> desired => desired,
             IRef<IField> when this.BuilderData is PropertyBuilderData promotedField && typeof(TOut) == typeof(IProperty) =>
-                (IRefImpl<TOut>) promotedField.ToRef().WithGenericContext( this.GenericContext ),
+                (IFullRef<TOut>) promotedField.ToRef().WithGenericContext( this._genericContext ),
             IRef<IProperty> when this.BuilderData is FieldBuilderData promotedField && typeof(TOut) == typeof(IField) =>
-                (IRefImpl<TOut>) promotedField.ToRef().WithGenericContext( this.GenericContext ),
+                (IFullRef<TOut>) promotedField.ToRef().WithGenericContext( this._genericContext ),
             _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
         };
 
@@ -141,7 +137,7 @@ internal sealed class BuiltDeclarationRef<T> : CompilationBoundRef<T>, IBuiltDec
             return false;
         }
 
-        if ( !this.GenericContext.Equals( otherRef.GenericContext ) )
+        if ( !this._genericContext.Equals( otherRef._genericContext ) )
         {
             return false;
         }
@@ -149,7 +145,7 @@ internal sealed class BuiltDeclarationRef<T> : CompilationBoundRef<T>, IBuiltDec
         return true;
     }
 
-    public override int GetHashCode( RefComparison comparison ) => HashCode.Combine( this.BuilderData.GetHashCode(), this.GenericContext );
+    public override int GetHashCode( RefComparison comparison ) => HashCode.Combine( this.BuilderData.GetHashCode(), this._genericContext );
 
     public override DeclarationKind DeclarationKind => this.BuilderData.DeclarationKind;
 }

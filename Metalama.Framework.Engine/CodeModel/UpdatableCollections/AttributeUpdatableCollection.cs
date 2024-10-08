@@ -22,15 +22,15 @@ internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollect
 #endif
     }
 
-    protected override void PopulateAllItems( Action<IRef<IAttribute>> action )
+    protected override void PopulateAllItems( Action<IFullRef<IAttribute>> action )
     {
-        this._parent.GetStrategy().EnumerateAttributes( this._parent, this.Compilation, action );
+        this._parent.AsFullRef().EnumerateAttributes( this.Compilation, action );
     }
 
     public void Add( AttributeBuilderData attribute )
     {
         this.EnsureComplete();
-        this.AddItem( new BuilderAttributeRef( attribute ) );
+        this.AddItem( attribute.ToRef() );
     }
 
     public void Remove( IRef<INamedType> namedType )

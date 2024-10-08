@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -22,7 +23,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
 
     public OverrideIndexerTransformation(
         Advice advice,
-        IRef<IIndexer> overriddenDeclaration,
+        IFullRef<IIndexer> overriddenDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
         IObjectReader tags )
@@ -37,7 +38,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenPropertyOrIndexer.GetTarget( context.Compilation );
 
         if ( overriddenDeclaration.GetMethod != null )
         {

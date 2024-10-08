@@ -92,7 +92,7 @@ internal sealed class LinkerInjectionRegistry
 
         this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMember, ISymbol>();
 
-        var overriddenDeclarations = new ConcurrentDictionary<IRef<IDeclaration>, List<ISymbol>>( RefEqualityComparer<IDeclaration>.Default );
+        var overriddenDeclarations = new ConcurrentDictionary<IFullRef<IDeclaration>, List<ISymbol>>( RefEqualityComparer<IDeclaration>.Default );
         var builderToInjectedMemberMap = new ConcurrentDictionary<DeclarationBuilderData, InjectedMember>();
 
         void ProcessInjectedMember( InjectedMember injectedMember )
@@ -121,7 +121,7 @@ internal sealed class LinkerInjectionRegistry
                     _ => throw new AssertionFailedException( $"Unsupported transformation {injectedMember.Transformation}." )
                 };
 
-                var typeMember = overriddenMember.GetStrategy().GetTypeMember( overriddenMember );
+                var typeMember = overriddenMember.AsFullRef().TypeMember;
 
                 // These are auxiliary overrides created as a result of another transformation.
                 var list = overriddenDeclarations.GetOrAdd( typeMember, _ => new List<ISymbol>() );
@@ -174,7 +174,7 @@ internal sealed class LinkerInjectionRegistry
         concurrentTaskRunner.RunConcurrentlyAsync( this._injectedMembers, ProcessInjectedMember, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
-        void ProcessOverride( KeyValuePair<IRef<IDeclaration>, List<ISymbol>> value )
+        void ProcessOverride( KeyValuePair<IFullRef<IDeclaration>, List<ISymbol>> value )
         {
             var declaration = value.Key;
             var overrides = value.Value;

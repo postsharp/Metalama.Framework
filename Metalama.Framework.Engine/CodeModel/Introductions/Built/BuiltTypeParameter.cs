@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -55,13 +56,13 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public bool HasDefaultConstructorConstraint => this._typeParameterBuilder.HasDefaultConstructorConstraint;
 
-    private IRef<ITypeParameter> Ref => this.RefFactory.FromBuilt<ITypeParameter>( this );
+    private IFullRef<ITypeParameter> Ref => this.RefFactory.FromBuilt<ITypeParameter>( this );
 
     IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 
     IRef<IType> IType.ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 

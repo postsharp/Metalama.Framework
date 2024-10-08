@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
     {
         public static AttributeCollection Empty { get; } = new();
 
-        public AttributeCollection( IDeclaration declaration, IReadOnlyList<IRef<IAttribute>> sourceItems )
+        public AttributeCollection( IDeclaration declaration, IReadOnlyList<IFullRef<IAttribute>> sourceItems )
             : base( declaration, sourceItems ) { }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.GetItems( this.Source.Where( a => predicate( ((AttributeRef) a).AttributeType.GetTarget( this.Compilation ) ) ) );
 
         public IEnumerable<T> GetConstructedAttributesOfType<T>()
-            where T : System.Attribute
+            where T : Attribute
             => this.OfAttributeType( typeof(T) ).Select( a => a.Construct<T>() );
 
         private IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind = ConversionKind.Default )

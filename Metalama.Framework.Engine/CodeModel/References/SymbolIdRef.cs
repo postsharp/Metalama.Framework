@@ -14,7 +14,7 @@ internal class SymbolIdRef<T> : StringRef<T>
     private SymbolIdRef( string id ) : base( id ) { }
 
     public SymbolIdRef( in SymbolId id ) : base( id.Id ) { }
-    
+
     public override SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
     public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext )
@@ -35,5 +35,5 @@ internal class SymbolIdRef<T> : StringRef<T>
         return ConvertDeclarationOrThrow( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull(), compilation );
     }
 
-    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new SymbolIdRef<TOut>( this.Id );
+    protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new SymbolIdRef<TOut>( this.Id );
 }

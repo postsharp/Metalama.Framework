@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -63,9 +64,9 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
     [Memo]
-    private IRef<IIndexer> Ref => this.RefFactory.FromSymbol<IIndexer>( this.PropertySymbol );
+    private IFullRef<IIndexer> Ref => this.RefFactory.FromSymbol<IIndexer>( this.PropertySymbol );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     IRef<IIndexer> IIndexer.ToRef() => this.Ref;
 

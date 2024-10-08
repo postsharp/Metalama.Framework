@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class IndexerBuilderData : PropertyOrIndexerBuilderData
 {
-    private readonly IRef<IIndexer> _ref;
+    private readonly BuiltDeclarationRef<IIndexer> _ref;
 
     public ImmutableArray<ParameterBuilderData> Parameters { get; }
 
@@ -21,9 +21,9 @@ internal class IndexerBuilderData : PropertyOrIndexerBuilderData
 
     public IReadOnlyList<IRef<IIndexer>> ExplicitInterfaceImplementations { get; }
 
-    public IndexerBuilderData( IndexerBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
+    public IndexerBuilderData( IndexerBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IIndexer>( this );
+        this._ref = new BuiltDeclarationRef<IIndexer>( this, containingDeclaration.CompilationContext );
         this.Parameters = builder.Parameters.ToImmutable( this._ref );
         this.OverriddenIndexer = builder.OverriddenIndexer?.ToRef();
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
@@ -39,9 +39,9 @@ internal class IndexerBuilderData : PropertyOrIndexerBuilderData
         }
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new IRef<IIndexer> ToRef() => this._ref;
+    public new IFullRef<IIndexer> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 

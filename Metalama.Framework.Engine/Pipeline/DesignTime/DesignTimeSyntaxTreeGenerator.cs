@@ -60,10 +60,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         t =>
                             t.TargetDeclaration switch
                             {
-                                INamespace @namespace => (INamespaceOrNamedType) @namespace,
-                                INamedType namedType => namedType,
-                                IMember member => member.DeclaringType,
-                                _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
+                                IFullRef<INamespace> @namespace => @namespace,
+                                IFullRef<INamedType> namedType => namedType,
+                                IFullRef<IMember> member => member.DeclaringType,
+                                _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration}" )
                             } )
                     .ToDictionary( g => g.Key.ToRef(), g => g.AsEnumerable(), RefEqualityComparer<INamespaceOrNamedType>.Default );
 
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 {
                     if ( transformation is IIntroduceDeclarationTransformation
                          {
-                             DeclarationBuilderData: INamedType namedTypeBuilder
+                             DeclarationBuilderData: NamedTypeBuilderData namedTypeBuilder
                          } introduceDeclarationTransformation
                          && !transformationsByBucket.ContainsKey(
                              introduceDeclarationTransformation.DeclarationBuilderData.ToRef().As<INamespaceOrNamedType>() ) )

@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
@@ -113,9 +114,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public IMember? OverriddenMember => this.OverriddenEvent;
 
         [Memo]
-        private IRef<IEvent> Ref => this.RefFactory.FromSymbolBasedDeclaration<IEvent>( this );
+        private IFullRef<IEvent> Ref => this.RefFactory.FromSymbolBasedDeclaration<IEvent>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         IRef<IEvent> IEvent.ToRef() => this.Ref;
 

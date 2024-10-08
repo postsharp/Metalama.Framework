@@ -20,20 +20,20 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public sealed partial class CompilationModel
 {
-    private ImmutableDictionary<IRef<INamedType>, FieldUpdatableCollection> _fields;
-    private ImmutableDictionary<IRef<INamedType>, MethodUpdatableCollection> _methods;
-    private ImmutableDictionary<IRef<INamedType>, ConstructorUpdatableCollection> _constructors;
-    private ImmutableDictionary<IRef<INamedType>, EventUpdatableCollection> _events;
-    private ImmutableDictionary<IRef<INamedType>, PropertyUpdatableCollection> _properties;
-    private ImmutableDictionary<IRef<INamedType>, IndexerUpdatableCollection> _indexers;
-    private ImmutableDictionary<IRef<INamedType>, InterfaceUpdatableCollection> _interfaceImplementations;
-    private ImmutableDictionary<IRef<INamedType>, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
-    private ImmutableDictionary<IRef<IHasParameters>, ParameterUpdatableCollection> _parameters;
-    private ImmutableDictionary<IRef<IDeclaration>, AttributeUpdatableCollection> _attributes;
-    private ImmutableDictionary<IRef<INamedType>, ConstructorBuilderData> _staticConstructors;
-    private ImmutableDictionary<IRef<INamedType>, MethodBuilderData> _finalizers;
-    private ImmutableDictionary<IRef<INamespaceOrNamedType>, TypeUpdatableCollection> _namedTypesByParent;
-    private ImmutableDictionary<IRef<INamespace>, NamespaceUpdatableCollection> _namespaces;
+    private ImmutableDictionary<IFullRef<INamedType>, FieldUpdatableCollection> _fields;
+    private ImmutableDictionary<IFullRef<INamedType>, MethodUpdatableCollection> _methods;
+    private ImmutableDictionary<IFullRef<INamedType>, ConstructorUpdatableCollection> _constructors;
+    private ImmutableDictionary<IFullRef<INamedType>, EventUpdatableCollection> _events;
+    private ImmutableDictionary<IFullRef<INamedType>, PropertyUpdatableCollection> _properties;
+    private ImmutableDictionary<IFullRef<INamedType>, IndexerUpdatableCollection> _indexers;
+    private ImmutableDictionary<IFullRef<INamedType>, InterfaceUpdatableCollection> _interfaceImplementations;
+    private ImmutableDictionary<IFullRef<INamedType>, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
+    private ImmutableDictionary<IFullRef<IHasParameters>, ParameterUpdatableCollection> _parameters;
+    private ImmutableDictionary<IFullRef<IDeclaration>, AttributeUpdatableCollection> _attributes;
+    private ImmutableDictionary<IFullRef<INamedType>, ConstructorBuilderData> _staticConstructors;
+    private ImmutableDictionary<IFullRef<INamedType>, MethodBuilderData> _finalizers;
+    private ImmutableDictionary<IFullRef<INamespaceOrNamedType>, TypeUpdatableCollection> _namedTypesByParent;
+    private ImmutableDictionary<IFullRef<INamespace>, NamespaceUpdatableCollection> _namespaces;
     private TypeUpdatableCollection? _topLevelNamedTypes;
 
     internal ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
@@ -77,7 +77,6 @@ public sealed partial class CompilationModel
     internal bool Contains( ParameterBuilderData parameterBuilder )
         => parameterBuilder.ContainingDeclaration switch
         {
-            IDeclarationBuilderDataRef declarationBuilder => this.Contains( declarationBuilder.BuilderData ),
             null => false,
             _ => this._parameters.TryGetValue( parameterBuilder.ContainingDeclaration.As<IHasParameters>(), out var parameters )
                  && parameters.Contains( parameterBuilder.ToRef() )
@@ -89,7 +88,7 @@ public sealed partial class CompilationModel
                                    ?? namedTypeBuilder.ContainingNamespace ?? throw new AssertionFailedException();
 
         return this._namedTypesByParent.TryGetValue(
-                   namespaceOrNamedType.ToRef(),
+                   namespaceOrNamedType.ToFullRef(),
                    out var namedTypes )
                && namedTypes.Contains( namedTypeBuilder.ToRef() );
     }
@@ -99,7 +98,7 @@ public sealed partial class CompilationModel
         var containingNamespace = namespaceBuilder.ContainingNamespace ?? namespaceBuilder.ContainingNamespace ?? throw new AssertionFailedException();
 
         return this._namespaces.TryGetValue(
-                   containingNamespace.ToRef(),
+                   containingNamespace.ToFullRef(),
                    out var namespaces )
                && namespaces.Contains( namespaceBuilder.ToRef() );
     }
@@ -118,16 +117,16 @@ public sealed partial class CompilationModel
         };
 
     private TCollection GetMemberCollection<TOwner, TDeclaration, TCollection>(
-        ref ImmutableDictionary<IRef<TOwner>, TCollection> dictionary,
+        ref ImmutableDictionary<IFullRef<TOwner>, TCollection> dictionary,
         bool requestMutableCollection,
-        IRef<TOwner> declaration,
-        Func<CompilationModel, IRef<TOwner>, TCollection> createCollection )
+        IFullRef<TOwner> declaration,
+        Func<CompilationModel, IFullRef<TOwner>, TCollection> createCollection )
         where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
         where TCollection : IUpdatableCollection<TDeclaration>
     {
         Invariant.Assert( !(requestMutableCollection && !this.IsMutable) );
-        Invariant.Assert( declaration.IsDefinition() );
+        Invariant.Assert( declaration.IsDefinition );
 
         // If the model is mutable, we need to return a mutable collection because it may be mutated after the
         // front-end collection is returned.
@@ -152,70 +151,70 @@ public sealed partial class CompilationModel
         return collection;
     }
 
-    internal FieldUpdatableCollection GetFieldCollection( IRef<INamedType> declaringType, bool mutable = false )
+    internal FieldUpdatableCollection GetFieldCollection( IFullRef<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IField, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
             static ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
-    internal MethodUpdatableCollection GetMethodCollection( IRef<INamedType> declaringType, bool mutable = false )
+    internal MethodUpdatableCollection GetMethodCollection( IFullRef<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IMethod, MethodUpdatableCollection>(
             ref this._methods,
             mutable,
             declaringType,
             static ( c, t ) => new MethodUpdatableCollection( c, t ) );
 
-    internal ConstructorUpdatableCollection GetConstructorCollection( IRef<INamedType> declaringType, bool mutable = false )
+    internal ConstructorUpdatableCollection GetConstructorCollection( IFullRef<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IConstructor, ConstructorUpdatableCollection>(
             ref this._constructors,
             mutable,
             declaringType,
             static ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
 
-    internal PropertyUpdatableCollection GetPropertyCollection( IRef<INamedType> declaringType, bool mutable = false )
+    internal PropertyUpdatableCollection GetPropertyCollection( IFullRef<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IProperty, PropertyUpdatableCollection>(
             ref this._properties,
             mutable,
             declaringType,
             static ( c, t ) => new PropertyUpdatableCollection( c, t ) );
 
-    internal IndexerUpdatableCollection GetIndexerCollection( IRef<INamedType> declaringType, bool mutable = false )
+    internal IndexerUpdatableCollection GetIndexerCollection( IFullRef<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IIndexer, IndexerUpdatableCollection>(
             ref this._indexers,
             mutable,
             declaringType,
             static ( c, t ) => new IndexerUpdatableCollection( c, t ) );
 
-    internal EventUpdatableCollection GetEventCollection( IRef<INamedType> declaringType, bool mutable = false )
+    internal EventUpdatableCollection GetEventCollection( IFullRef<INamedType> declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedType, IEvent, EventUpdatableCollection>(
             ref this._events,
             mutable,
             declaringType,
             static ( c, t ) => new EventUpdatableCollection( c, t ) );
 
-    internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( IRef<INamedType> declaringType, bool mutable )
+    internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( IFullRef<INamedType> declaringType, bool mutable )
         => this.GetMemberCollection<INamedType, INamedType, InterfaceUpdatableCollection>(
             ref this._interfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
 
-    internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( IRef<INamedType> declaringType, bool mutable )
+    internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( IFullRef<INamedType> declaringType, bool mutable )
         => this.GetMemberCollection<INamedType, INamedType, AllInterfaceUpdatableCollection>(
             ref this._allInterfaceImplementations,
             mutable,
             declaringType,
             static ( c, t ) => new AllInterfaceUpdatableCollection( c, t ) );
 
-    internal ParameterUpdatableCollection GetParameterCollection( IRef<IHasParameters> parent, bool mutable = false )
+    internal ParameterUpdatableCollection GetParameterCollection( IFullRef<IHasParameters> parent, bool mutable = false )
         => this.GetMemberCollection<IHasParameters, IParameter, ParameterUpdatableCollection>(
             ref this._parameters,
             mutable,
             parent,
             static ( c, t ) => new ParameterUpdatableCollection( c, t ) );
 
-    internal TypeUpdatableCollection GetNamedTypeCollectionByParent( IRef<INamespaceOrNamedType> parent, bool mutable = false )
+    internal TypeUpdatableCollection GetNamedTypeCollectionByParent( IFullRef<INamespaceOrNamedType> parent, bool mutable = false )
         => this.GetMemberCollection<INamespaceOrNamedType, INamedType, TypeUpdatableCollection>(
             ref this._namedTypesByParent,
             mutable,
@@ -241,14 +240,14 @@ public sealed partial class CompilationModel
         return this._topLevelNamedTypes;
     }
 
-    internal NamespaceUpdatableCollection GetNamespaceCollection( IRef<INamespace> declaringNamespace, bool mutable = false )
+    internal NamespaceUpdatableCollection GetNamespaceCollection( IFullRef<INamespace> declaringNamespace, bool mutable = false )
         => this.GetMemberCollection<INamespace, INamespace, NamespaceUpdatableCollection>(
             ref this._namespaces,
             mutable,
             declaringNamespace,
             static ( c, t ) => new NamespaceUpdatableCollection( c, t ) );
 
-    internal AttributeUpdatableCollection GetAttributeCollection( IRef<IDeclaration> parent, bool mutable = false )
+    internal AttributeUpdatableCollection GetAttributeCollection( IFullRef<IDeclaration> parent, bool mutable = false )
         => this.GetMemberCollection<IDeclaration, IAttribute, AttributeUpdatableCollection>(
             ref this._attributes,
             mutable,
@@ -340,8 +339,8 @@ public sealed partial class CompilationModel
 
         switch ( replaced )
         {
-            case IRef<IConstructor> replacedConstructor:
-                if ( !replacedConstructor.GetStrategy().IsStatic( replacedConstructor ) )
+            case IFullRef<IConstructor> replacedConstructor:
+                if ( !replacedConstructor.IsStatic )
                 {
                     var constructors = this.GetConstructorCollection( replacedConstructor.ContainingDeclaration.AssertNotNull().As<INamedType>(), true );
                     constructors.Remove( replacedConstructor );
@@ -353,7 +352,7 @@ public sealed partial class CompilationModel
 
                 break;
 
-            case IRef<IField> replacedField:
+            case IFullRef<IField> replacedField:
                 var fields = this.GetFieldCollection( replacedField.ContainingDeclaration.AssertNotNull().As<INamedType>(), true );
                 fields.Remove( replacedField );
 

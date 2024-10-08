@@ -1,15 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
+internal sealed partial class SyntaxRef<T> : FullRef<T>
     where T : class, ICompilationElement
 {
     public SyntaxNode SyntaxNode { get; }
@@ -23,19 +26,15 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
     public override CompilationContext CompilationContext { get; }
 
-    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext ) => throw new NotImplementedException();
-
-    public override IRefStrategy Strategy => throw new NotSupportedException();
+    public override FullRef<T> WithGenericContext( GenericContext genericContext ) => throw new NotImplementedException();
 
     public override bool IsDefinition => true;
 
-    public override IRef Definition => this;
+    public override IFullRef<T> Definition => this;
 
     public override RefTargetKind TargetKind { get; }
 
-    public override IRef? ContainingDeclaration => throw new NotImplementedException();
-
-    public override string? Name => null;
+    public override IFullRef? ContainingDeclaration => throw new NotImplementedException();
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {
@@ -80,7 +79,10 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
             _ => $"{this.SyntaxNode.GetType().Name}:{this.TargetKind}"
         };
 
-    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.CompilationContext );
+    public override bool IsValid => true;
+
+    protected override IFullRef<TOut> CastAsFullRef<TOut>()
+        => this as IFullRef<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.CompilationContext );
 
     public override bool Equals( IRef? other, RefComparison comparison )
     {

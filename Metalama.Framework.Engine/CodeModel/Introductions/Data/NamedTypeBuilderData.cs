@@ -11,13 +11,13 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class NamedTypeBuilderData : MemberOrNamedTypeBuilderData
 {
-    private readonly IRef<INamedType> _ref;
+    private readonly BuiltDeclarationRef<INamedType> _ref;
 
-    public IRef<INamedType>? BaseType { get; }
+    public IFullRef<INamedType>? BaseType { get; }
 
     public ImmutableArray<TypeParameterBuilderData> TypeParameters { get; }
 
-    public ImmutableArray<IRef<INamedType>> ImplementedInterfaces { get; }
+    public ImmutableArray<IFullRef<INamedType>> ImplementedInterfaces { get; }
 
     // Only classes are supported at the moment, so the following members can return a constant value.
 
@@ -27,17 +27,17 @@ internal class NamedTypeBuilderData : MemberOrNamedTypeBuilderData
 
     public bool IsRef => false;
 
-    public NamedTypeBuilderData( NamedTypeBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    public NamedTypeBuilderData( NamedTypeBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<INamedType>( this );
-        this.BaseType = builder.BaseType?.ToRef();
+        this._ref = new BuiltDeclarationRef<INamedType>( this, containingDeclaration.CompilationContext );
+        this.BaseType = builder.BaseType?.ToFullRef();
         this.TypeParameters = builder.TypeParameters.ToImmutable( this._ref );
-        this.ImplementedInterfaces = builder.ImplementedInterfaces.SelectAsImmutableArray( i => i.ToRef() );
+        this.ImplementedInterfaces = builder.ImplementedInterfaces.SelectAsImmutableArray( i => i.ToFullRef() );
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new IRef<INamedType> ToRef() => this._ref;
+    public new IFullRef<INamedType> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
 

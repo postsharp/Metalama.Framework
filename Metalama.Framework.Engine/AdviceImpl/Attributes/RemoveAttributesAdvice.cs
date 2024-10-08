@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
@@ -27,8 +28,8 @@ internal sealed class RemoveAttributesAdvice : Advice<RemoveAttributesAdviceResu
             context.AddTransformation(
                 new RemoveAttributesTransformation(
                     this,
-                    targetDeclaration.ToRef(),
-                    this._attributeType.ToRef() ) );
+                    targetDeclaration.ToFullRef(),
+                    this._attributeType.ToFullRef() ) );
         }
 
         return new RemoveAttributesAdviceResult();

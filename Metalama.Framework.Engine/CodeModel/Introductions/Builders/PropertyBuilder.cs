@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -140,10 +141,12 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = [interfaceProperty];
 
-    public new IRef<IProperty> ToRef() => this.Immutable.ToRef();
+    IRef<IProperty> IProperty.ToRef() => this.Immutable.ToRef();
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
 
+    public new IFullRef<IProperty> ToRef() => this.Immutable.ToRef();
+
     [Memo]
-    public PropertyBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToRef() );
+    public PropertyBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
 }

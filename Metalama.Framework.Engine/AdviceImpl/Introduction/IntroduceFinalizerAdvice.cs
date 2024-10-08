@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
@@ -88,7 +89,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideFinalizerTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
+            var overriddenMethod = new OverrideFinalizerTransformation( this, builder.ToFullRef(), this._template.ForIntroduction( builder ), this.Tags );
             builder.IsOverride = false;
             builder.HasNewKeyword = builder.IsNew = false;
 
@@ -120,7 +121,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                     {
                         var overriddenMethod = new OverrideFinalizerTransformation(
                             this,
-                            existingFinalizer.ToRef(),
+                            existingFinalizer.ToFullRef(),
                             this._template.ForIntroduction( existingFinalizer ),
                             this.Tags );
 
@@ -138,7 +139,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
 
                         var overriddenMethod = new OverrideFinalizerTransformation(
                             this,
-                            builder.ToRef(),
+                            builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );
 

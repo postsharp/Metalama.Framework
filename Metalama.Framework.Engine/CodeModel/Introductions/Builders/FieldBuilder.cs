@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
@@ -139,5 +140,5 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
     [Memo]
-    public FieldBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public FieldBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef<INamedType>() );
 }

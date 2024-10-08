@@ -42,7 +42,7 @@ internal readonly struct TypedConstantRef
         {
             null => TypedConstant.Default( type! ),
             ImmutableArray<TypedConstantRef> array => TypedConstant.Create( array.SelectAsImmutableArray( x => x.Resolve( compilation ) ), type! ),
-            IRefImpl<IType> valueAsType => TypedConstant.Create( valueAsType.GetTarget( compilation ), type! ),
+            IRef<IType> valueAsType => TypedConstant.Create( valueAsType.GetTarget( compilation ), type! ),
             _ => TypedConstant.Create( this.RawValue, type! )
         };
     }

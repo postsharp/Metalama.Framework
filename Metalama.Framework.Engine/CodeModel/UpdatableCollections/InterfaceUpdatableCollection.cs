@@ -27,8 +27,8 @@ internal sealed class InterfaceUpdatableCollection : DeclarationUpdatableCollect
         this.Introductions = this.Introductions.Add( introduction );
     }
 
-    protected override void PopulateAllItems( Action<IRef<INamedType>> action )
+    protected override void PopulateAllItems( Action<IFullRef<INamedType>> action )
     {
-        this._declaringType.GetStrategy().EnumerateImplementedInterfaces( this._declaringType, this.Compilation, action );
+        this._declaringType.AsFullRef().EnumerateImplementedInterfaces( this.Compilation, action );
     }
 }

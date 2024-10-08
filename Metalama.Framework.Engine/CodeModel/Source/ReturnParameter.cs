@@ -79,12 +79,12 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
     public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 
     [Memo]
-    private IRef<IParameter> Ref
+    private IFullRef<IParameter> Ref
         => this.RefFactory.FromSymbol<IParameter>(
             (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertSymbolNotNull(),
             RefTargetKind.Return );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     IRef<IParameter> IParameter.ToRef() => this.Ref;
 

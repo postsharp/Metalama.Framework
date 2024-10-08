@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -75,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 
         public bool IsReturnParameter => this.Index < 0;
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -113,7 +114,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
         internal override GenericContext GenericContext => (GenericContext) this.ContainingDeclaration.GenericContext;
 
         [Memo]
-        private IRef<IParameter> Ref => this.RefFactory.PseudoParameter( this );
+        private IFullRef<IParameter> Ref => this.RefFactory.PseudoParameter( this );
 
         IRef<IParameter> IParameter.ToRef() => this.Ref;
 

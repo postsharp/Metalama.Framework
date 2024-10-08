@@ -12,9 +12,9 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class ConstructorBuilderData : MemberBuilderData
 {
-    private readonly IRef<IConstructor> _ref;
+    private readonly BuiltDeclarationRef<IConstructor> _ref;
 
-    public IRef<IConstructor>? ReplacedImplicitConstructor { get; }
+    public IFullRef<IConstructor>? ReplacedImplicitConstructor { get; }
 
     public ImmutableArray<ParameterBuilderData> Parameters { get; }
 
@@ -22,20 +22,20 @@ internal class ConstructorBuilderData : MemberBuilderData
 
     public ImmutableArray<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new IRef<IConstructor> ToRef() => this._ref;
+    public new IFullRef<IConstructor> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
-    public ConstructorBuilderData( ConstructorBuilder builder, IRef<IDeclaration> containingDeclaration ) : base(
+    public ConstructorBuilderData( ConstructorBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base(
         builder,
         containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IConstructor>( this );
+        this._ref = new BuiltDeclarationRef<IConstructor>( this, containingDeclaration.CompilationContext );
 
         this.Parameters = builder.Parameters.ToImmutable( this._ref );
-        this.ReplacedImplicitConstructor = builder.ReplacedImplicitConstructor?.ToRef();
+        this.ReplacedImplicitConstructor = builder.ReplacedImplicitConstructor?.ToFullRef();
         this.InitializerKind = builder.InitializerKind;
         this.InitializerArguments = ImmutableArray.ToImmutableArray( builder.InitializerArguments );
     }

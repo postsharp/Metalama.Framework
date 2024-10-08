@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -117,9 +118,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public override int GetHashCode() => this.Compilation.CompilationContext.SymbolComparer.GetHashCode( this.Symbol );
 
         [Memo]
-        private IRef<ITypeParameter> Ref => this.RefFactory.FromSymbol<ITypeParameter>( this.TypeParameterSymbol );
+        private IFullRef<ITypeParameter> Ref => this.RefFactory.FromSymbol<ITypeParameter>( this.TypeParameterSymbol );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 

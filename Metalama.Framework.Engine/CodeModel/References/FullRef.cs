@@ -1,29 +1,38 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 /// <summary>
 /// Specialization of <see cref="BaseRef{T}"/> for references bound to a <see cref="CompilationContext"/>.
 /// </summary>
-internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRefImpl
+internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
     where T : class, ICompilationElement
 {
+    public new IFullRef<TOut> As<TOut>() where TOut : class, ICompilationElement => this.CastAsFullRef<TOut>();
+
+    protected abstract IFullRef<TOut> CastAsFullRef<TOut>() where TOut : class, ICompilationElement;
+
+    protected sealed override IRef<TOut> CastAsRef<TOut>() => this.CastAsFullRef<TOut>();
+
     public sealed override bool IsDurable => false;
 
     public abstract CompilationContext CompilationContext { get; }
 
-    public abstract ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext );
+    IFullRef<T> IFullRef<T>.WithGenericContext( GenericContext genericContext ) => this.WithGenericContext( genericContext );
 
-    public abstract IRefStrategy Strategy { get; }
+    public abstract FullRef<T> WithGenericContext( GenericContext genericContext );
 
     /// <summary>
     /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
@@ -49,7 +58,7 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     public abstract bool IsDefinition { get; }
 
-    public abstract IRef Definition { get; }
+    public abstract IFullRef<T> Definition { get; }
 
     [Memo]
     private DeclarationIdRef<T> CompilationNeutralRef => new( this.ToSerializableId() );
@@ -70,13 +79,8 @@ internal abstract class CompilationBoundRef<T> : BaseRef<T>, ICompilationBoundRe
 
     protected abstract ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false );
 
-    public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
-    {
-        Invariant.Assert( compilationContext == this.CompilationContext );
+    public virtual ISymbol GetClosestContainingSymbol() => this.GetSymbolIgnoringRefKind( this.CompilationContext );
 
-        return this.GetSymbolIgnoringRefKind( this.CompilationContext );
-    }
-    
     private ISymbol ApplyRefKind( ISymbol symbol )
         => this.TargetKind switch
         {

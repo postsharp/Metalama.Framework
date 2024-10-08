@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 
@@ -65,5 +66,5 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
 
     [Memo]
-    public NamespaceBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public NamespaceBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
 }

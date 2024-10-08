@@ -48,13 +48,13 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
     IRef<IMethodBase> IMethodBase.ToRef() => this.ToRef();
 
     [Memo]
-    private IRef<IConstructor> Ref
-        => (IRef<IConstructor>?) ((ICompilationBoundRefImpl?) this._constructorBuilder.ReplacedImplicitConstructor)?.WithGenericContext( this.GenericContext )
+    private IFullRef<IConstructor> Ref
+        => this._constructorBuilder.ReplacedImplicitConstructor?.WithGenericContext( this.GenericContext )
            ?? this.RefFactory.FromBuilt<IConstructor>( this );
 
     public IRef<IConstructor> ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class TypeParameterBuilderData : NamedDeclarationBuilderData
 {
-    private readonly IRef<ITypeParameter> _ref;
+    private readonly BuiltDeclarationRef<ITypeParameter> _ref;
 
     public int Index { get; }
 
@@ -31,9 +31,9 @@ internal class TypeParameterBuilderData : NamedDeclarationBuilderData
 
     public bool? IsNullable { get; }
 
-    public TypeParameterBuilderData( TypeParameterBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    public TypeParameterBuilderData( TypeParameterBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<ITypeParameter>( this );
+        this._ref = new BuiltDeclarationRef<ITypeParameter>( this, containingDeclaration.CompilationContext );
         this.Index = builder.Index;
         this.Variance = builder.Variance;
         this.IsConstraintNullable = builder.IsConstraintNullable;
@@ -44,9 +44,11 @@ internal class TypeParameterBuilderData : NamedDeclarationBuilderData
         this.IsNullable = builder.IsNullable;
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new IRef<ITypeParameter> ToRef() => this._ref;
+    public override IFullRef<INamedType>? DeclaringType => this.ContainingDeclaration.DeclaringType;
+
+    public new IFullRef<ITypeParameter> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 }

@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -32,11 +33,11 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
     public INamespace ContainingNamespace => this.MapDeclaration( this.NamedDeclarationBuilder.ContainingDeclaration.As<INamespace>() );
 
     [Memo]
-    private IRef<INamespace> Ref => this.RefFactory.FromBuilt<INamespace>( this );
+    private IFullRef<INamespace> Ref => this.RefFactory.FromBuilt<INamespace>( this );
 
     IRef<INamespace> INamespace.ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 

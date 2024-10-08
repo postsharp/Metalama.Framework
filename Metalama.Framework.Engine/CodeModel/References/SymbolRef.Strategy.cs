@@ -2,7 +2,14 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.Services;
+using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -12,31 +19,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Accessibility = Microsoft.CodeAnalysis.Accessibility;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRefStrategy : IRefStrategy
+internal sealed partial class SymbolRef<T>
 {
-    private readonly CompilationContext _compilationContext;
-
-    public SymbolRefStrategy( CompilationContext compilationContext )
+    public override void EnumerateAttributes( CompilationModel compilation, Action<IRef<IAttribute>> add )
     {
-        this._compilationContext = compilationContext;
-    }
+        Invariant.Assert( this is IRef<IDeclaration> );
 
-    public void EnumerateAttributes( IRef<IDeclaration> declaration, CompilationModel compilation, Action<AttributeRef> add )
-    {
-        var symbolRef = (ISymbolRef) declaration;
-
-        IEnumerable<AttributeData> attributes = symbolRef.TargetKind switch
+        IEnumerable<AttributeData> attributes = this.TargetKind switch
         {
-            RefTargetKind.Return => ((IMethodSymbol) symbolRef.Symbol).GetReturnTypeAttributes(),
-            RefTargetKind.Default => symbolRef.Symbol.GetAttributes(),
+            RefTargetKind.Return => ((IMethodSymbol) this.Symbol).GetReturnTypeAttributes(),
+            RefTargetKind.Default => this.Symbol.GetAttributes(),
             _ => throw new AssertionFailedException()
         };
 
-        if ( symbolRef.Symbol is ISourceAssemblySymbol sourceAssemblySymbol )
+        if ( this.Symbol is ISourceAssemblySymbol sourceAssemblySymbol )
         {
             // Also add [module:*] attributes.
             attributes = attributes.Concat( sourceAssemblySymbol.Modules.SelectMany( m => m.GetAttributes() ) );
@@ -50,24 +53,25 @@ internal sealed class SymbolRefStrategy : IRefStrategy
             }
 
             // Note that Roslyn can return an AttributeData that does not belong to the same compilation
-            // as the parent symbol, probably because of some bug or optimisation.
+            // as the this symbol, probably because of some bug or optimisation.
 
-            add( new SymbolAttributeRef( attribute, declaration, compilation.CompilationContext ) );
+            add( new SymbolAttributeRef( attribute, this.As<IDeclaration>(), compilation.CompilationContext ) );
         }
 
-        if ( compilation.TryGetRedirectedDeclaration( declaration, out var redirectedDeclaration ) )
+        if ( compilation.TryGetRedirectedDeclaration( this, out var redirectedDeclaration ) )
         {
             // If the declaration was redirected, we need to add the attributes from the builder.
             foreach ( var attribute in redirectedDeclaration.Attributes )
             {
-                add( (AttributeRef) attribute.ToRef() );
+                add( attribute.ToRef() );
             }
         }
     }
 
-    public void EnumerateAllImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
+    public override void EnumerateAllImplementedInterfaces( CompilationModel compilation, Action<IFullRef<INamedType>> add )
     {
-        var namedTypeSymbol = (INamedTypeSymbol) ((ISymbolRef) namedType).Symbol;
+        Invariant.Assert( this is IRef<INamedType> );
+        var namedTypeSymbol = (INamedTypeSymbol) this.Symbol;
 
         foreach ( var i in namedTypeSymbol.AllInterfaces )
         {
@@ -76,13 +80,15 @@ internal sealed class SymbolRefStrategy : IRefStrategy
                 continue;
             }
 
-            add( this._compilationContext.RefFactory.FromSymbol<INamedType>( i ) );
+            add( this.CompilationContext.RefFactory.FromSymbol<INamedType>( i ) );
         }
     }
 
-    public void EnumerateImplementedInterfaces( IRef<INamedType> namedType, CompilationModel compilation, Action<IRef<INamedType>> add )
+    public override void EnumerateImplementedInterfaces( CompilationModel compilation, Action<IFullRef<INamedType>> add )
     {
-        var namedTypeSymbol = (INamedTypeSymbol) ((ISymbolRef) namedType).Symbol;
+        Invariant.Assert( this is IRef<INamedType> );
+
+        var namedTypeSymbol = (INamedTypeSymbol) this.Symbol;
 
         foreach ( var i in namedTypeSymbol.Interfaces )
         {
@@ -91,48 +97,49 @@ internal sealed class SymbolRefStrategy : IRefStrategy
                 continue;
             }
 
-            add( this._compilationContext.RefFactory.FromSymbol<INamedType>( i ) );
+            add( this.CompilationContext.RefFactory.FromSymbol<INamedType>( i ) );
         }
     }
 
-    public IEnumerable<IRef> GetMembersOfName(
-        IRef parent,
+    public override IEnumerable<IFullRef> GetMembersOfName(
         string name,
         DeclarationKind kind,
         CompilationModel compilation )
     {
+        Invariant.Assert( this is IRef<INamedType> );
+
         switch ( kind )
         {
             case DeclarationKind.Namespace:
                 {
-                    var symbol = (INamespaceSymbol) ((ISymbolRef) parent).Symbol;
+                    var symbol = (INamespaceSymbol) this.Symbol;
 
                     return symbol.GetNamespaceMembers()
                         .Where( ns => ns.Name == name && IsValidNamespace( ns, compilation ) )
-                        .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
+                        .Select( s => this.CompilationContext.RefFactory.FromAnySymbol( s ) );
                 }
 
-            case DeclarationKind.NamedType when parent.DeclarationKind == DeclarationKind.Compilation:
+            case DeclarationKind.NamedType when this.DeclarationKind == DeclarationKind.Compilation:
                 return compilation.PartialCompilation.Types
                     .Where( t => t.Name == name && IsValidNamedType( t, compilation ) )
-                    .Select( s => this._compilationContext.RefFactory.FromSymbol<INamedType>( s ) );
+                    .Select( s => this.CompilationContext.RefFactory.FromSymbol<INamedType>( s ) );
 
             default:
                 {
-                    var symbol = (INamespaceOrTypeSymbol) ((ISymbolRef) parent).Symbol;
+                    var symbol = (INamespaceOrTypeSymbol) this.Symbol;
 
                     var predicate = GetSymbolPredicate( kind );
 
                     return symbol.GetMembers( name )
                         .Where( x => predicate( x, compilation ) )
-                        .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
+                        .Select( s => this.CompilationContext.RefFactory.FromAnySymbol( s ) );
                 }
         }
     }
 
-    public IEnumerable<IRef> GetMembers( IRef parent, DeclarationKind kind, CompilationModel compilation )
+    public override IEnumerable<IFullRef> GetMembers( DeclarationKind kind, CompilationModel compilation )
     {
-        var parentSymbol = ((ISymbolRef) parent).Symbol;
+        var parentSymbol = this.Symbol;
 
         switch ( kind )
         {
@@ -142,23 +149,23 @@ internal sealed class SymbolRefStrategy : IRefStrategy
 
                     return parentNs.GetNamespaceMembers()
                         .Where( ns => IsValidNamespace( ns, compilation ) )
-                        .Select( s => this._compilationContext.RefFactory.FromAnySymbol( s ) );
+                        .Select( s => this.CompilationContext.RefFactory.FromAnySymbol( s ) );
                 }
 
-            case DeclarationKind.NamedType when parent.DeclarationKind is DeclarationKind.Namespace or DeclarationKind.NamedType:
+            case DeclarationKind.NamedType when this.DeclarationKind is DeclarationKind.Namespace or DeclarationKind.NamedType:
                 {
                     var parentScope = (INamespaceOrTypeSymbol) parentSymbol;
 
                     return parentScope.GetTypeMembers()
                         .Where( t => IsValidNamedType( t, compilation ) )
-                        .Select( t => this._compilationContext.RefFactory.FromAnySymbol( t ) );
+                        .Select( t => this.CompilationContext.RefFactory.FromAnySymbol( t ) );
                 }
 
-            case DeclarationKind.NamedType when parent.DeclarationKind is DeclarationKind.Compilation:
+            case DeclarationKind.NamedType when this.DeclarationKind is DeclarationKind.Compilation:
                 {
                     return compilation.PartialCompilation.Types
                         .Where( t => IsValidNamedType( t, compilation ) )
-                        .Select( s => this._compilationContext.RefFactory.FromSymbol<INamedType>( s ) );
+                        .Select( s => this.CompilationContext.RefFactory.FromSymbol<INamedType>( s ) );
                 }
 
             default:
@@ -169,13 +176,15 @@ internal sealed class SymbolRefStrategy : IRefStrategy
 
                     return parentScope.GetMembers()
                         .Where( m => predicate( m, compilation ) )
-                        .Select( m => this._compilationContext.RefFactory.FromAnySymbol( m ) );
+                        .Select( m => this.CompilationContext.RefFactory.FromAnySymbol( m ) );
                 }
         }
     }
 
-    public bool IsConvertibleTo( IRef<IType> left, IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
+    public override bool IsConvertibleTo( IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
     {
+        Invariant.Assert( this is IRef<IType> );
+
         if ( right is not ISymbolRef rightSymbolRef )
         {
             throw new ArgumentOutOfRangeException( nameof(right), "Introduced types on the left side of a comparison are not supported." );
@@ -186,14 +195,14 @@ internal sealed class SymbolRefStrategy : IRefStrategy
             throw new NotImplementedException( "Only TypeComparison.Default implemented on references." );
         }
 
-        var leftSymbol = (ITypeSymbol) ((ISymbolRef) left).Symbol;
+        var leftSymbol = (ITypeSymbol) this.Symbol;
         var rightSymbol = (ITypeSymbol) rightSymbolRef.Symbol;
 
         switch ( kind )
         {
             // TODO: Process Default separately from Implicit.
             case ConversionKind.Implicit or ConversionKind.Default:
-                return this._compilationContext.Compilation.HasImplicitConversion( leftSymbol, rightSymbol );
+                return this.CompilationContext.Compilation.HasImplicitConversion( leftSymbol, rightSymbol );
 
             case ConversionKind.TypeDefinition:
 
@@ -234,30 +243,80 @@ internal sealed class SymbolRefStrategy : IRefStrategy
         }
     }
 
-    public IAssemblySymbol GetAssemblySymbol( IRef reference, CompilationContext compilationContext ) => ((ISymbolRef) reference).Symbol.ContainingAssembly.AssertBelongsToCompilationContext( compilationContext );
+    public override IAssemblySymbol GetAssemblySymbol( CompilationContext compilationContext )
+        => this.Symbol.ContainingAssembly.AssertBelongsToCompilationContext( compilationContext );
 
-    public bool IsStatic( IRef<IMember> reference ) => ((ISymbolRef) reference).Symbol.IsStatic;
+    public override bool IsStatic => this.Symbol.IsStatic;
 
-    public IRef<IMember> GetTypeMember( IRef<IMember> reference )
+    public override IFullRef<IMember> TypeMember
     {
-        var symbolRef = ((ISymbolRef) reference);
-
-        return symbolRef.Symbol switch
+        get
         {
-            IMethodSymbol
-                {
-                    MethodKind: MethodKind.EventAdd or MethodKind.EventRaise or MethodKind.EventRemove
-                } accessor
-                => symbolRef.CompilationContext.RefFactory.FromSymbol<IEvent>( accessor.AssociatedSymbol ),
-            IMethodSymbol
-                {
-                    MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet
-                } accessor
-                => symbolRef.CompilationContext.RefFactory.FromSymbol<IProperty>( accessor.AssociatedSymbol )
-            _ => reference
-        };
+            Invariant.Assert( this is IRef<IMember> );
 
-    
+            return this.Symbol switch
+            {
+                IMethodSymbol
+                    {
+                        MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRaise or RoslynMethodKind.EventRemove
+                    } accessor
+                    => this.CompilationContext.RefFactory.FromSymbol<IEvent>( accessor.AssociatedSymbol ),
+                IMethodSymbol
+                    {
+                        MethodKind: RoslynMethodKind.PropertyGet or RoslynMethodKind.PropertySet
+                    } accessor
+                    => this.CompilationContext.RefFactory.FromSymbol<IProperty>( accessor.AssociatedSymbol ),
+                _ => this.As<IMember>()
+            };
+        }
+    }
+
+    public override MethodKind MethodKind
+    {
+        get
+        {
+            Invariant.Assert( this is IRef<IMethod> );
+
+            return ((IMethodSymbol) this.Symbol).MethodKind.ToOurMethodKind();
+        }
+    }
+
+    public override bool MethodBodyReturnsVoid
+    {
+        get
+        {
+            Invariant.Assert( this is IRef<IMethod> or IRef<IConstructor> );
+
+            var methodSymbol = (IMethodSymbol) this.Symbol;
+
+            if ( methodSymbol.ReturnType.SpecialType == SpecialType.System_Void )
+            {
+                return true;
+            }
+
+            if ( !AsyncHelper.TryGetAsyncInfo( methodSymbol.ReturnType, out var returnArgumentType, out _ ) )
+            {
+                return false;
+            }
+
+            return returnArgumentType.SpecialType == SpecialType.System_Void;
+        }
+    }
+
+    public override IFullRef<INamedType> DeclaringType => this.CompilationContext.RefFactory.FromSymbol<INamedType>( this.Symbol.ContainingType );
+
+    public override bool IsPrimaryConstructor
+    {
+        get
+        {
+            Invariant.Assert( this is IRef<IConstructor> );
+
+            return ((IMethodSymbol) this.Symbol).IsPrimaryConstructor();
+        }
+    }
+
+    public override bool IsValid => this.Symbol is ITypeSymbol { TypeKind: TypeKind.Error };
+
     private static bool IsValidSymbol( ISymbol symbol, CompilationModel compilation )
     {
         // Private symbols of external assemblies must be hidden because these references are not available in a PE reference (i.e. at compile time)
@@ -294,7 +353,7 @@ internal sealed class SymbolRefStrategy : IRefStrategy
 
     private static bool IsValidConstructor( ISymbol symbol, CompilationModel compilation )
         => symbol.Kind == SymbolKind.Method &&
-           ((IMethodSymbol) symbol).MethodKind is MethodKind.Constructor && IsValidSymbol( symbol, compilation );
+           ((IMethodSymbol) symbol).MethodKind is RoslynMethodKind.Constructor && IsValidSymbol( symbol, compilation );
 
     private static bool IsValidField( ISymbol symbol, CompilationModel compilation ) => symbol.Kind == SymbolKind.Field && IsValidSymbol( symbol, compilation );
 
@@ -308,11 +367,11 @@ internal sealed class SymbolRefStrategy : IRefStrategy
                 method switch
                 {
                     // Metalama code model represents what can be seen from C#, so it hides "unspeakable" methods, namely Program.<Main>$ and SomeRecord.<Clone>$
-                    { MethodKind: MethodKind.Ordinary, CanBeReferencedByName: false } => false,
-                    { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } => false,
-                    { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } => false,
-                    { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } => false,
-                    { MethodKind: MethodKind.Destructor } => false,
+                    { MethodKind: RoslynMethodKind.Ordinary, CanBeReferencedByName: false } => false,
+                    { MethodKind: RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor } => false,
+                    { MethodKind: RoslynMethodKind.PropertyGet or RoslynMethodKind.PropertySet } => false,
+                    { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove or RoslynMethodKind.EventRaise } => false,
+                    { MethodKind: RoslynMethodKind.Destructor } => false,
                     _ => true
                 },
             _ => false

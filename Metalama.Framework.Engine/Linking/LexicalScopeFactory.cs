@@ -95,110 +95,117 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
 
     private TemplateLexicalScope CreateLexicalScope( IRef<IDeclaration> declarationRef )
     {
-        if ( declarationRef is IBuiltDeclarationRef )
+        switch ( declarationRef )
         {
-            var declaration = declarationRef.GetTarget( this._compilationModel );
-            
-            var contextType = declaration switch
-            {
-                IMemberOrNamedType { DeclaringType: { } declaringType } => declaringType,
-                INamedType type => type,
-                _ => throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." )
-            };
-            
-            // Builder-based source.
-            if ( contextType.GetPrimaryDeclarationSyntax() == null )
-            {
-                // TODO: Temp hack.
-                return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
-            }
-
-            var typeDeclaration = contextType.GetPrimaryDeclarationSyntax().AssertNotNull().GetDeclaringType().AssertNotNull();
-
-            var identifiers = this.GetIdentifiersInTypeScope( typeDeclaration ).ToBuilder();
-
-            if ( declaration is IMethod method )
-            {
-                identifiers.AddRange( method.Parameters.SelectAsReadOnlyList( p => p.Name ) );
-                identifiers.AddRange( method.TypeParameters.SelectAsReadOnlyList( p => p.Name ) );
-            }
-
-            // Accessors have implicit "value" parameter.
-            if ( declaration is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove } )
-            {
-                identifiers.Add( "value" );
-            }
-
-            return new TemplateLexicalScope( identifiers.ToImmutable() );
-        }
-        else if ( declarationRef is ISymbolRef symbolRef)
-        {
-            var symbol = symbolRef.Symbol;
-            
-            // Symbol-based scope.
-            var syntaxReference = symbol.GetPrimarySyntaxReference();
-
-            // For implicitly defined symbols, we need to try harder.
-            if ( syntaxReference == null )
-            {
-                switch ( symbol )
+            case IBuiltDeclarationRef:
                 {
-                    // For accessors, look at the associated symbol.
-                    case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
-                        syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+                    var declaration = declarationRef.GetTarget( this._compilationModel );
 
-                        if ( syntaxReference == null )
-                        {
-                            throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
-                        }
+                    var contextType = declaration switch
+                    {
+                        IMemberOrNamedType { DeclaringType: { } declaringType } => declaringType,
+                        INamedType type => type,
+                        _ => throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." )
+                    };
 
-                        break;
+                    // Builder-based source.
+                    if ( contextType.GetPrimaryDeclarationSyntax() == null )
+                    {
+                        // TODO: Temp hack.
+                        return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
+                    }
 
-                    // Otherwise (e.g. for implicit constructors), take the containing type.
-                    case { ContainingType: { } containingType }:
-                        syntaxReference = containingType.GetPrimarySyntaxReference();
+                    var typeDeclaration = contextType.GetPrimaryDeclarationSyntax().AssertNotNull().GetDeclaringType().AssertNotNull();
 
-                        if ( syntaxReference == null )
-                        {
-                            throw new AssertionFailedException( $"No syntax for '{containingType}'." );
-                        }
+                    var identifiers = this.GetIdentifiersInTypeScope( typeDeclaration ).ToBuilder();
 
-                        break;
+                    if ( declaration is IMethod method )
+                    {
+                        identifiers.AddRange( method.Parameters.SelectAsReadOnlyList( p => p.Name ) );
+                        identifiers.AddRange( method.TypeParameters.SelectAsReadOnlyList( p => p.Name ) );
+                    }
 
-                    default:
-                        throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
+                    // Accessors have implicit "value" parameter.
+                    if ( declaration is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove } )
+                    {
+                        identifiers.Add( "value" );
+                    }
+
+                    return new TemplateLexicalScope( identifiers.ToImmutable() );
                 }
-            }
 
-            var syntaxNode = syntaxReference.GetSyntax();
-            var typeDeclarationSyntax = syntaxNode.GetDeclaringType();
-
-            if ( syntaxNode is LocalFunctionStatementSyntax && typeDeclarationSyntax == null )
-            {
-                throw new AssertionFailedException( "Top-level local functions are not supported: {syntaxNode}" );
-            }
-
-            var builder = this.GetIdentifiersInTypeScope( typeDeclarationSyntax.AssertNotNull() ).ToBuilder();
-
-            // Accessors have implicit "value" parameter.
-            if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
-            {
-                builder.Add( "value" );
-            }
-
-            // Get the symbols defined in the declaration.
-            var visitor = new Visitor( builder );
-
-            var declarationSyntax =
-                syntaxReference.GetSyntax() switch
+            case ISymbolRef symbolRef:
                 {
-                    { Parent: AccessorListSyntax { Parent: IndexerDeclarationSyntax indexer } } => indexer,
-                    { } anything => anything
-                };
+                    var symbol = symbolRef.Symbol;
 
-            visitor.Visit( declarationSyntax );
+                    // Symbol-based scope.
+                    var syntaxReference = symbol.GetPrimarySyntaxReference();
 
-            return new TemplateLexicalScope( builder.ToImmutable() );
+                    // For implicitly defined symbols, we need to try harder.
+                    if ( syntaxReference == null )
+                    {
+                        switch ( symbol )
+                        {
+                            // For accessors, look at the associated symbol.
+                            case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
+                                syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+
+                                if ( syntaxReference == null )
+                                {
+                                    throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
+                                }
+
+                                break;
+
+                            // Otherwise (e.g. for implicit constructors), take the containing type.
+                            case { ContainingType: { } containingType }:
+                                syntaxReference = containingType.GetPrimarySyntaxReference();
+
+                                if ( syntaxReference == null )
+                                {
+                                    throw new AssertionFailedException( $"No syntax for '{containingType}'." );
+                                }
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
+                        }
+                    }
+
+                    var syntaxNode = syntaxReference.GetSyntax();
+                    var typeDeclarationSyntax = syntaxNode.GetDeclaringType();
+
+                    if ( syntaxNode is LocalFunctionStatementSyntax && typeDeclarationSyntax == null )
+                    {
+                        throw new AssertionFailedException( "Top-level local functions are not supported: {syntaxNode}" );
+                    }
+
+                    var builder = this.GetIdentifiersInTypeScope( typeDeclarationSyntax.AssertNotNull() ).ToBuilder();
+
+                    // Accessors have implicit "value" parameter.
+                    if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
+                    {
+                        builder.Add( "value" );
+                    }
+
+                    // Get the symbols defined in the declaration.
+                    var visitor = new Visitor( builder );
+
+                    var declarationSyntax =
+                        syntaxReference.GetSyntax() switch
+                        {
+                            { Parent: AccessorListSyntax { Parent: IndexerDeclarationSyntax indexer } } => indexer,
+                            { } anything => anything
+                        };
+
+                    visitor.Visit( declarationSyntax );
+
+                    return new TemplateLexicalScope( builder.ToImmutable() );
+                }
+
+            default:
+                throw new AssertionFailedException();
         }
     }
 }

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -79,7 +80,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
         return new AttributeCollection(
             definition,
-            this.Compilation.GetAttributeCollection( definition.ToRef() ) );
+            this.Compilation.GetAttributeCollection( definition.ToFullRef() ) );
     }
 
     public override DeclarationKind DeclarationKind => this.BuilderData.DeclarationKind;
@@ -96,16 +97,15 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     {
         switch ( other )
         {
-            case BuiltDeclaration builtDeclaration when this.BuilderData.Equals( builtDeclaration.BuilderData ):
-            case DeclarationBuilder declarationBuilder when this.BuilderData.Equals( declarationBuilder ):
-                return true;
+            case BuiltDeclaration builtDeclaration:
+                return this.BuilderData.Equals( builtDeclaration.BuilderData ) && this.GenericContext.Equals( builtDeclaration.GenericContext );
 
             default:
                 return false;
         }
     }
 
-    protected override int GetHashCodeCore() => this.BuilderData.GetHashCode();
+    protected override int GetHashCodeCore() => HashCode.Combine( this.BuilderData.GetHashCode(), this.GenericContext );
 
     public override bool BelongsToCurrentProject => true;
 

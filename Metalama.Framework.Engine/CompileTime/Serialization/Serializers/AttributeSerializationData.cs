@@ -15,11 +15,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 
 internal class AttributeSerializationData
 {
-    public IRef<IDeclaration> ContainingDeclaration { get; }
+    public IFullRef<IDeclaration> ContainingDeclaration { get; }
 
-    public IRef<INamedType> Type { get; }
+    public IFullRef<INamedType> Type { get; }
 
-    public IRef<IConstructor> Constructor { get; }
+    public IFullRef<IConstructor> Constructor { get; }
 
     public ImmutableArray<TypedConstantRef> ConstructorArguments { get; }
 
@@ -49,9 +49,9 @@ internal class AttributeSerializationData
 
     public AttributeSerializationData( IArgumentsReader reader )
     {
-        this.ContainingDeclaration = reader.GetValue<IRefImpl<IDeclaration>>( nameof(this.ContainingDeclaration) ).AssertNotNull();
-        this.Type = reader.GetValue<IRefImpl<INamedType>>( nameof(this.Type) ).AssertNotNull();
-        this.Constructor = reader.GetValue<IRefImpl<IConstructor>>( nameof(this.Constructor) ).AssertNotNull();
+        this.ContainingDeclaration = reader.GetValue<IFullRef<IDeclaration>>( nameof(this.ContainingDeclaration) ).AssertNotNull();
+        this.Type = reader.GetValue<IFullRef<INamedType>>( nameof(this.Type) ).AssertNotNull();
+        this.Constructor = reader.GetValue<IFullRef<IConstructor>>( nameof(this.Constructor) ).AssertNotNull();
         this.ConstructorArguments = reader.GetValue<ImmutableArray<TypedConstantRef>>( nameof(this.ConstructorArguments) );
 
         if ( this.ConstructorArguments.IsDefault )

@@ -14,18 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     internal interface IRefImpl : ISdkRef
     {
         IRef ToDurable();
-        
-        ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
 
         SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
-    }
-
-    internal interface IRefImpl<out T> : IRef<T>, IRefImpl
-        where T : class, ICompilationElement
-    {
-        new IRefImpl<TOut> As<TOut>()
-            where TOut : class, ICompilationElement;
-
-        new IDurableRef<T> ToDurable();
     }
 }

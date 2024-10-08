@@ -228,7 +228,9 @@ internal sealed partial class LinkerInjectionStep
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
-                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( builderAttributeRef.BuilderData )
+                    var attributeModel = builderAttributeRef.GetTarget( TODO );
+
+                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeModel )
                         .AssertNotNull();
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
@@ -455,6 +457,7 @@ internal sealed partial class LinkerInjectionStep
 
                     case IRef<IPropertyOrIndexer> propertyOrIndexerRef:
                         var propertyOrIndexer = propertyOrIndexerRef.GetTarget( TODO );
+
                         if ( propertyOrIndexer.GetMethod != null )
                         {
                             var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
@@ -462,7 +465,10 @@ internal sealed partial class LinkerInjectionStep
                                 propertyOrIndexerRef,
                                 injectedMember );
 
-                            var getExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.GetMethod.ToRef(),propertyOrIndexerRef, injectedMember );
+                            var getExitStatements = this._transformationCollection.GetInjectedExitStatements(
+                                propertyOrIndexer.GetMethod.ToRef(),
+                                propertyOrIndexerRef,
+                                injectedMember );
 
                             injectedNode = InjectStatementsIntoMemberDeclaration(
                                 propertyOrIndexer.GetMethod.ToRef(),
@@ -478,7 +484,10 @@ internal sealed partial class LinkerInjectionStep
                                 propertyOrIndexerRef,
                                 injectedMember );
 
-                            var setExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.SetMethod.ToRef(),propertyOrIndexerRef,injectedMember );
+                            var setExitStatements = this._transformationCollection.GetInjectedExitStatements(
+                                propertyOrIndexer.SetMethod.ToRef(),
+                                propertyOrIndexerRef,
+                                injectedMember );
 
                             injectedNode = InjectStatementsIntoMemberDeclaration(
                                 propertyOrIndexer.SetMethod.ToRef(),
@@ -629,9 +638,8 @@ internal sealed partial class LinkerInjectionStep
                     var returnsVoid =
                         contextDeclaration switch
                         {
-                            IConstructor => true,
-                            IMethod { IsAsync: false } contextMethod => contextMethod.ReturnType.Is( SpecialType.Void ),
-                            IMethod { IsAsync: true } contextMethod => contextMethod.GetAsyncInfo().ResultType.Is( SpecialType.Void ),
+                            IRef<IConstructor> => true,
+                            IRef<IMethod> methodRef => methodRef.AsFullRef().MethodBodyReturnsVoid,
                             _ => throw new InvalidOperationException( $"Not supported: {contextDeclaration}" )
                         };
 
@@ -659,65 +667,73 @@ internal sealed partial class LinkerInjectionStep
                             body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) );
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
+                    {
+                        Invariant.Assert( contextDeclaration is IRef<IMethod> methodRef && methodRef.AsFullRef().MethodKind == MethodKind.PropertyGet );
 
-                    return
-                        property.PartialUpdate(
-                            expressionBody: null,
-                            semicolonToken: default(SyntaxToken),
-                            accessorList: AccessorList(
-                                SingletonList(
-                                    AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                        return
+                            property.PartialUpdate(
+                                expressionBody: null,
+                                semicolonToken: default(SyntaxToken),
+                                accessorList: AccessorList(
+                                    SingletonList(
+                                        AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                    }
 
                 case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
+                    {
+                        Invariant.Assert( contextDeclaration is IRef<IMethod> methodRef && methodRef.AsFullRef().MethodKind == MethodKind.PropertyGet );
 
-                    return
-                        indexer.PartialUpdate(
-                            expressionBody: null,
-                            semicolonToken: default(SyntaxToken),
-                            accessorList: AccessorList(
-                                SingletonList(
-                                    AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                        return
+                            indexer.PartialUpdate(
+                                expressionBody: null,
+                                semicolonToken: default(SyntaxToken),
+                                accessorList: AccessorList(
+                                    SingletonList(
+                                        AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                    }
 
                 case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } );
-
-                    return
-                        propertyOrIndexer.WithAccessorList(
-                            accessorList.WithAccessors(
-                                List(
-                                    accessorList.Accessors.SelectAsArray(
-                                        a =>
-                                            IsMatchingAccessor( a, contextDeclaration )
-                                                ? a switch
-                                                {
-                                                    { Body: { } body } => a.WithBody(
-                                                        ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) ),
-                                                    { ExpressionBody: { } expressionBody } =>
-                                                        a.PartialUpdate(
-                                                            expressionBody: null,
-                                                            semicolonToken: default(SyntaxToken),
-                                                            body: ReplaceExpression(
-                                                                entryStatements,
-                                                                exitStatements,
-                                                                expressionBody.Expression,
-                                                                a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
-                                                    _ => throw new AssertionFailedException( $"Not supported: {a}" )
-                                                }
-                                                : a ) ) ) );
-
-                    static bool IsMatchingAccessor( AccessorDeclarationSyntax accessorDeclaration, IDeclaration contextDeclaration )
                     {
-                        return (accessorDeclaration.Kind(), contextDeclaration) switch
+                        var methodRef = contextDeclaration.As<IMethod>();
+                        var methodKind = methodRef.AsFullRef().MethodKind;
+                        Invariant.Assert( methodKind is MethodKind.PropertyGet or MethodKind.PropertySet );
+
+                        return
+                            propertyOrIndexer.WithAccessorList(
+                                accessorList.WithAccessors(
+                                    List(
+                                        accessorList.Accessors.SelectAsArray(
+                                            a =>
+                                                IsMatchingAccessor( a, methodKind )
+                                                    ? a switch
+                                                    {
+                                                        { Body: { } body } => a.WithBody(
+                                                            ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) ),
+                                                        { ExpressionBody: { } expressionBody } =>
+                                                            a.PartialUpdate(
+                                                                expressionBody: null,
+                                                                semicolonToken: default(SyntaxToken),
+                                                                body: ReplaceExpression(
+                                                                    entryStatements,
+                                                                    exitStatements,
+                                                                    expressionBody.Expression,
+                                                                    a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
+                                                        _ => throw new AssertionFailedException( $"Not supported: {a}" )
+                                                    }
+                                                    : a ) ) ) );
+                    }
+
+                    static bool IsMatchingAccessor( AccessorDeclarationSyntax accessorDeclaration, MethodKind methodKind )
+                    {
+                        return (accessorDeclaration.Kind(), methodKind) switch
                         {
-                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertyGet }) => true,
-                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
-                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
+                            (SyntaxKind.GetAccessorDeclaration, MethodKind.PropertyGet) => true,
+                            (SyntaxKind.SetAccessorDeclaration, MethodKind.PropertySet) => true,
+                            (SyntaxKind.InitAccessorDeclaration, MethodKind.PropertySet) => true,
                             _ => false
                         };
                     }
@@ -1223,10 +1239,10 @@ internal sealed partial class LinkerInjectionStep
             var symbol = semanticModel.GetDeclaredSymbol( originalNode );
             var property = this.CompilationContext.RefFactory.FromSymbol<IProperty>( symbol );
 
-            if ( symbol is { SetMethod: {} setMethodSymbol  } )
+            if ( symbol is { SetMethod: { } setMethodSymbol } )
             {
                 var setter = this.CompilationContext.RefFactory.FromSymbol<IMethod>( setMethodSymbol );
-                
+
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( setter, property );
 
                 node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
@@ -1262,12 +1278,10 @@ internal sealed partial class LinkerInjectionStep
 
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalNode );
-            var indexer =  this.CompilationContext.RefFactory.FromSymbol<IIndexer>( symbol );
+            var indexer = this.CompilationContext.RefFactory.FromSymbol<IIndexer>( symbol );
 
             if ( symbol != null )
             {
-                
-
                 if ( symbol.GetMethod != null )
                 {
                     var getter = this.CompilationContext.RefFactory.FromSymbol<IMethod>( symbol.GetMethod );

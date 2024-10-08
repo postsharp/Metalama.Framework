@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public CompilationBoundRef<T> FromBuilderData<T>( DeclarationBuilderData builder, GenericContext? genericContext = null )
+        public FullRef<T> FromBuilderData<T>( DeclarationBuilderData builder, GenericContext? genericContext = null )
             where T : class, IDeclaration
         {
             if ( typeof(T) == typeof(IField) && builder is PropertyBuilderData promotedField )
@@ -40,20 +40,20 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
             else
             {
-                return new BuiltDeclarationRef<T>( builder, genericContext, this._compilationContext );
+                return new BuiltDeclarationRef<T>( builder, this._compilationContext, genericContext );
             }
         }
 
-        public CompilationBoundRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
+        public FullRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
             where T : class, IDeclaration
             => this.FromBuilderData<T>( builtDeclaration.BuilderData, builtDeclaration.GenericContext );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
-        public IRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (IRef<IDeclaration>) this.FromAnySymbol( symbol );
+        public ISymbolRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (ISymbolRef<IDeclaration>) this.FromAnySymbol( symbol );
 
-        public IRef<ICompilationElement> FromAnySymbol( ISymbol symbol )
+        public ISymbolRef<ICompilationElement> FromAnySymbol( ISymbol symbol )
             => symbol.GetDeclarationKind( this._compilationContext ) switch
             {
                 DeclarationKind.Compilation => new SymbolRef<ICompilation>( symbol, this._compilationContext ),
@@ -131,11 +131,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public SymbolRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, this._compilationContext, RefTargetKind.Return );
 
-        internal SymbolRef<ICompilation> Compilation( CompilationContext compilationContext )
+        internal SymbolRef<ICompilation> ForCompilation()
         {
-            Invariant.Assert( compilationContext == this._compilationContext );
-
-            return this.FromSymbol<ICompilation>( compilationContext.Compilation.Assembly );
+            return this.FromSymbol<ICompilation>( this._compilationContext.Compilation.Assembly );
         }
 
         public SymbolRef<T> FromSymbolBasedDeclaration<T>( SymbolBasedDeclaration declaration )

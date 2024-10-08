@@ -2,12 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal abstract class NamedDeclarationBuilderData : DeclarationBuilderData
 {
-    protected NamedDeclarationBuilderData( INamedDeclarationBuilderImpl builder, IRef<IDeclaration> containingDeclaration ) : base(
+    protected NamedDeclarationBuilderData( INamedDeclarationBuilderImpl builder, IFullRef<IDeclaration> containingDeclaration ) : base(
         builder,
         containingDeclaration )
     {

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +10,9 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal abstract class PropertyOrIndexerBuilderData : MemberBuilderData
 {
-    protected PropertyOrIndexerBuilderData( PropertyOrIndexerBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
+    protected PropertyOrIndexerBuilderData( PropertyOrIndexerBuilder builder, IFullRef<INamedType> containingDeclaration ) : base(
+        builder,
+        containingDeclaration )
     {
         this.Type = builder.Type.ToRef();
         this.HasInitOnlySetter = builder.HasInitOnlySetter;

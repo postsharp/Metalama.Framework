@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
@@ -19,59 +20,59 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltField : BuiltMember, IFieldImpl
 {
-    public FieldBuilderData FieldBuilder { get; }
+    public FieldBuilderData FieldBuilderData { get; }
 
-    public BuiltField( FieldBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltField( FieldBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
-        this.FieldBuilder = builder;
+        this.FieldBuilderData = builderData;
     }
 
     // DeclarationKind is always a field even if the underlying builder may be a PromotedField i.e. a property.
     public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
-    public override DeclarationBuilderData BuilderData => this.FieldBuilder;
+    public override DeclarationBuilderData BuilderData => this.FieldBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.FieldBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.FieldBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.FieldBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.FieldBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this.FieldBuilder;
+    protected override MemberBuilderData MemberBuilder => this.FieldBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => throw new NotImplementedException();
 
-    public Writeability Writeability => this.FieldBuilder.Writeability;
+    public Writeability Writeability => this.FieldBuilderData.Writeability;
 
     public bool? IsAutoPropertyOrField => true;
 
-    public IType Type => this.MapType( this.FieldBuilder.Type );
+    public IType Type => this.MapType( this.FieldBuilderData.Type );
 
-    public RefKind RefKind => this.FieldBuilder.RefKind;
-
-    [Memo]
-    public IMethod GetMethod => new BuiltAccessor( this, this.FieldBuilder.GetMethod! );
+    public RefKind RefKind => this.FieldBuilderData.RefKind;
 
     [Memo]
-    public IMethod SetMethod => new BuiltAccessor( this, this.FieldBuilder.SetMethod! );
+    public IMethod GetMethod => new BuiltAccessor( this, this.FieldBuilderData.GetMethod! );
+
+    [Memo]
+    public IMethod SetMethod => new BuiltAccessor( this, this.FieldBuilderData.SetMethod! );
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
     [Memo]
-    public IProperty? OverridingProperty => this.MapDeclaration( this.FieldBuilder.OverridingProperty );
+    public IProperty? OverridingProperty => this.MapDeclaration( this.FieldBuilderData.OverridingProperty );
 
     [Memo]
-    private IRef<IField> Ref => this.RefFactory.FromBuilt<IField>( this );
+    private IFullRef<IField> Ref => this.RefFactory.FromBuilt<IField>( this );
 
     public IRef<IField> ToRef() => this.Ref;
 
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
-    public bool IsRequired => this.FieldBuilder.IsRequired;
+    public bool IsRequired => this.FieldBuilderData.IsRequired;
 
-    public IExpression? InitializerExpression => this.FieldBuilder.InitializerExpression;
+    public IExpression? InitializerExpression => this.FieldBuilderData.InitializerExpression;
 
     public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
@@ -85,10 +86,10 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 
     public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
-    public TypedConstant? ConstantValue => this.FieldBuilder.ConstantValue;
+    public TypedConstant? ConstantValue => this.FieldBuilderData.ConstantValue;
 
     [Memo]
-    public IField Definition => this.Compilation.Factory.GetField( this.FieldBuilder ).AssertNotNull();
+    public IField Definition => this.Compilation.Factory.GetField( this.FieldBuilderData ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 

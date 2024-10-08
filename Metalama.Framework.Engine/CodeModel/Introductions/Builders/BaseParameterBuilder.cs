@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -53,7 +54,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
                 true ) );
 
     [Memo]
-    public ParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public ParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
 
     public override bool IsDesignTimeObservable => true;
 }

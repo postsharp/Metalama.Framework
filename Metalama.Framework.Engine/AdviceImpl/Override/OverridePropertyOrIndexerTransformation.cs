@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,13 +12,12 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverridePropertyOrIndexerTransformation : OverrideMemberTransformation
 {
-    protected new IRef<IPropertyOrIndexer> OverriddenDeclaration => (IRef<IPropertyOrIndexer>) base.OverriddenDeclaration;
+    protected abstract IFullRef<IPropertyOrIndexer> OverriddenPropertyOrIndexer { get; }
 
     protected OverridePropertyOrIndexerTransformation(
         Advice advice,
-        IRef<IPropertyOrIndexer> overriddenDeclaration,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags ) { }
+        : base( advice, tags ) { }
 
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.

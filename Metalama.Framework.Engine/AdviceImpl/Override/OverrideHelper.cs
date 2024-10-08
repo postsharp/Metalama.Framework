@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -43,7 +44,7 @@ internal static class OverrideHelper
 
             case IProperty property:
                 {
-                    addTransformation( new OverridePropertyTransformation( advice, property.ToRef(), getTemplate, setTemplate, tags ) );
+                    addTransformation( new OverridePropertyTransformation( advice, property.ToFullRef(), getTemplate, setTemplate, tags ) );
 
                     if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
                     {

@@ -59,17 +59,5 @@ namespace Metalama.Framework.Code
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
         int GetHashCode( RefComparison comparison );
-
-        /// <summary>
-        /// Gets the <see cref="DeclarationKind"/> of the reference declaration, if available.
-        /// </summary>
-        DeclarationKind DeclarationKind { get; }
-        
-        IRef? ContainingDeclaration { get; }
-
-        /// <summary>
-        /// Gets the name of the referenced declaration, if available. 
-        /// </summary>
-        string? Name { get; }
     }
 }

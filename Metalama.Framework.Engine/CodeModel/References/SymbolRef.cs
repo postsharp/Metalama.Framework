@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef<T>
+internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
     where T : class, ICompilationElement
 {
     public ISymbol Symbol { get; }
@@ -21,11 +21,11 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef<T>
     public override bool IsDefinition => this.Symbol.IsDefinitionSafe();
 
     [Memo]
-    public override IRef Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
+    public override IFullRef<T> Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
 
     public override RefTargetKind TargetKind { get; }
 
-    public override IRef? ContainingDeclaration => this.CompilationContext.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
+    public override IFullRef? ContainingDeclaration => this.CompilationContext.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
 
     public override string Name => this.Symbol.Name;
 
@@ -55,7 +55,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef<T>
         this.CompilationContext = compilationContext;
     }
 
-    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext )
+    public override FullRef<T> WithGenericContext( GenericContext genericContext )
     {
         if ( genericContext.IsEmptyOrIdentity )
         {
@@ -70,8 +70,6 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef<T>
             return new SymbolRef<T>( mappedSymbol, this.CompilationContext, this.TargetKind );
         }
     }
-
-    public override IRefStrategy Strategy => this.CompilationContext.SymbolRefStrategy;
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
@@ -100,8 +98,7 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef<T>
             _ => $"{this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}:{this.TargetKind}"
         };
 
-    public override IRefImpl<TOut> As<TOut>()
-        => (IRefImpl<TOut>) (object) this; // There should be no reason to upcast since we always create instances of the right type.
+    protected override IFullRef<TOut> CastAsFullRef<TOut>() => (FullRef<TOut>) (object) this;
 
     public override int GetHashCode( RefComparison comparison )
         => HashCode.Combine( comparison.GetSymbolComparer().GetHashCode( this.Symbol ), this.TargetKind );

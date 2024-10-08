@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// <summary>
 /// The base implementation of <see cref="IRef{T}"/> except for attributes.
 /// </summary>
-internal abstract class BaseRef<T> : IRefImpl<T>
+internal abstract class BaseRef<T> : IRefImpl, IRef<T>
     where T : class, ICompilationElement
 {
     // The compilation for which the symbol (stored in Target) is valid.
@@ -28,10 +28,6 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     public virtual RefTargetKind TargetKind => RefTargetKind.Default;
 
-    public abstract IRef? ContainingDeclaration { get; }
-
-    public abstract string? Name { get; }
-
     public abstract SerializableDeclarationId ToSerializableId();
 
     public abstract SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
@@ -43,13 +39,9 @@ internal abstract class BaseRef<T> : IRefImpl<T>
 
     public abstract IDurableRef<T> ToDurable();
 
-    public abstract ISymbol GetClosestContainingSymbol( CompilationContext compilationContext );
-
     public abstract bool IsDurable { get; }
 
     IRef IRefImpl.ToDurable() => this.ToDurable();
-
-    IRef<TOut> IRef.As<TOut>() => this.As<TOut>();
 
     public T GetTarget( ICompilation compilation, IGenericContext? genericContext = null ) => this.GetTargetImpl( compilation, true, genericContext )!;
 
@@ -102,7 +94,9 @@ internal abstract class BaseRef<T> : IRefImpl<T>
         return result;
     }
 
-    public abstract IRefImpl<TOut> As<TOut>()
+    public IRef<TOut> As<TOut>() where TOut : class, ICompilationElement => this.CastAsRef<TOut>();
+
+    protected abstract IRef<TOut> CastAsRef<TOut>()
         where TOut : class, ICompilationElement;
 
     // We throw an exception when the vanilla GetHashCode is used to make sure that the caller specifies a RefEqualityComparer 
@@ -114,6 +108,4 @@ internal abstract class BaseRef<T> : IRefImpl<T>
     public abstract bool Equals( IRef? other, RefComparison comparison );
 
     public abstract int GetHashCode( RefComparison comparison );
-
-    public abstract DeclarationKind DeclarationKind { get; }
 }

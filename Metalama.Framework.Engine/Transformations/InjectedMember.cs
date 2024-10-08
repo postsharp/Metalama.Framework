@@ -49,19 +49,19 @@ internal sealed class InjectedMember
     /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
     /// are not suppressed from the introduced member.
     /// </summary>
-    public IRef<IDeclaration> Declaration { get; }
+    public IFullRef<IDeclaration> Declaration { get; }
 
     public SyntaxTree GetTargetSyntaxTree( CompilationContext compilationContext )
         => this.Transformation != null
             ? this.Transformation.TransformedSyntaxTree
-            : this.Declaration.GetPrimarySyntaxTree( compilationContext ).AssertNotNull();
+            : this.Declaration.GetPrimarySyntaxTree().AssertNotNull();
 
     public InjectedMember(
         IInjectMemberTransformation injectMemberTransformation,
         MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        IRef<IDeclaration> declaration ) : this(
+        IFullRef<IDeclaration> declaration ) : this(
         injectMemberTransformation,
         declaration.DeclarationKind,
         syntax,
@@ -74,7 +74,7 @@ internal sealed class InjectedMember
         MemberDeclarationSyntax syntax,
         AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
-        IRef<IDeclaration> declaration ) : this(
+        IFullRef<IDeclaration> declaration ) : this(
         overrideMemberTransformation,
         overrideMemberTransformation.OverriddenDeclaration.DeclarationKind,
         syntax,
@@ -88,7 +88,7 @@ internal sealed class InjectedMember
         MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        IRef<IDeclaration> declaration )
+        IFullRef<IDeclaration> declaration )
     {
         this.Transformation = transformation;
         this.Syntax = syntax;

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,11 +50,11 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     [Memo]
-    private IRef<IIndexer> Ref => this.RefFactory.FromBuilt<IIndexer>( this );
+    private IFullRef<IIndexer> Ref => this.RefFactory.FromBuilt<IIndexer>( this );
 
     public IRef<IIndexer> ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 

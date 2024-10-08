@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -84,5 +85,5 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
     IRef<IType> IType.ToRef() => this.Immutable.ToRef();
 
     [Memo]
-    public TypeParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToRef() );
+    public TypeParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
 }

@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Diagnostics;
@@ -76,10 +77,10 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = [];
 
-        ConcurrentDictionary<IRef<IMember>, InsertStatementTransformationContextImpl>
+        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl>
             pendingInsertStatementContexts = new( RefEqualityComparer<IMember>.Default );
 
-        ConcurrentDictionary<IRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new(  RefEqualityComparer<IMember>.Default );
+        ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new( RefEqualityComparer<IMember>.Default );
 
         var existingSyntaxTrees = input.CompilationModel.PartialCompilation.SyntaxTrees.Values.ToHashSet();
 
@@ -159,34 +160,34 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // It's imperative that order of transformations is preserved while grouping by syntax tree.
         // The syntax tree we group by must be the main syntax tree of the enclosing type. We should never run transformations
         // of a partial type in parallel.
-        var transformationsByCanonicalSyntaxTree = syntaxTreeTransformations.GroupBy( GetCanonicalSyntaxTree );
+        var transformationsByCanonicalSyntaxTree = syntaxTreeTransformations.GroupBy( GetPrimarySyntaxTree );
 
-        static SyntaxTree GetCanonicalSyntaxTree( ISyntaxTreeTransformation syntaxTreeTransformation )
+        static SyntaxTree GetPrimarySyntaxTree( ISyntaxTreeTransformation syntaxTreeTransformation )
         {
             return GetCanonicalTargetDeclaration( syntaxTreeTransformation.TargetDeclaration ) switch
             {
-                INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
-                ICompilation => syntaxTreeTransformation.TransformedSyntaxTree,
+                IFullRef<INamedType> namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
+                IFullRef<ICompilation> => syntaxTreeTransformation.TransformedSyntaxTree,
                 var d => throw new AssertionFailedException( $"Unsupported: {d}" )
             };
         }
 
-        static IDeclaration GetCanonicalTargetDeclaration( IDeclaration declaration )
+        static IRef<IDeclaration> GetCanonicalTargetDeclaration( IRef<IDeclaration> declaration )
         {
             return declaration switch
             {
-                IMember member => member.DeclaringType,
-                INamedType type => type,
-                IParameter parameter => GetCanonicalTargetDeclaration( parameter.ContainingDeclaration.AssertNotNull() ),
-                INamespace @namespace => @namespace.Compilation,
-                ICompilation compilation => compilation,
+                IFullRef<IMember> member => member.DeclaringType,
+                IFullRef<INamedType> type => type,
+                IFullRef<IParameter> parameter => parameter.DeclaringType,
+                IFullRef<INamespace> @namespace => @namespace.Compilation,
+                IFullRef<ICompilation> compilation => compilation,
                 var d => throw new AssertionFailedException( $"Unsupported: {d}" )
             };
         }
 
         static IEnumerable<ISyntaxTreeTransformation> GetObservableTransformationClosure( AspectLinkerInput input )
         {
-            var observedCanonicalTargetDeclarations = new HashSet<IDeclaration>( input.CompilationModel.Comparers.Default );
+            var observedCanonicalTargetDeclarations = new HashSet<IRef<IDeclaration>>( RefEqualityComparer.Default );
 
             // Mark all transformed canonical declarations with an observable part as observable.
             foreach ( var transformation in input.Transformations.OfType<ISyntaxTreeTransformation>() )
@@ -212,7 +213,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             this._concurrentTaskRunner,
             cancellationToken );
 
-        void FlushPendingInsertStatementContext( KeyValuePair<IRef<IMember>, InsertStatementTransformationContextImpl> pair )
+        void FlushPendingInsertStatementContext( KeyValuePair<IFullRef<IMember>, InsertStatementTransformationContextImpl> pair )
         {
             if ( RequiresAuxiliaryContractMember( pair.Key, pair.Value ) )
             {
@@ -234,7 +235,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         await this._concurrentTaskRunner.RunConcurrentlyAsync( pendingInsertStatementContexts, FlushPendingInsertStatementContext, cancellationToken );
 
         // Process any auxiliary member transformations in parallel.
-        void ProcessAuxiliaryMemberTransformations( KeyValuePair<IMember, AuxiliaryMemberTransformations> transformationPair )
+        void ProcessAuxiliaryMemberTransformations( KeyValuePair<IFullRef<IMember>, AuxiliaryMemberTransformations> transformationPair )
         {
             var member = transformationPair.Key;
             var transformations = transformationPair.Value;
@@ -260,7 +261,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
 
         // Replace wildcard AssemblyVersionAttribute with actual version.
-        var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
+        var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToFullRef() );
         var assemblyVersionAttributeType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
         var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionAttributeType ).FirstOrDefault();
 
@@ -268,7 +269,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         if ( assemblyVersionAttribute?.ConstructorArguments.FirstOrDefault() is { Value: string version }
              && version.Contains( '*' ) )
         {
-            attributes.Remove( assemblyVersionAttributeType );
+            attributes.Remove( assemblyVersionAttributeType.ToRef() );
 
             // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
             // We avoid to use user APIs that require a user code execution context.
@@ -284,11 +285,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             assemblyVersionAttributeConstructor.Parameters[0].Type ) )
                 };
 
-            attributes.Add(
-                new AttributeBuilder(
-                    null!,
-                    input.CompilationModel.DeclaringAssembly,
-                    newAssemblyVersionAttribute ) );
+            var attributeBuilder = new AttributeBuilder(
+                null!,
+                input.CompilationModel.DeclaringAssembly,
+                newAssemblyVersionAttribute );
+
+            attributeBuilder.Freeze();
+
+            attributes.Add( attributeBuilder.Immutable );
         }
 #pragma warning restore CA1307
 
@@ -377,9 +381,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         switch ( transformation )
         {
-            case IntroduceAttributeTransformation introduceAttributeTransformation:
+            case IntroduceAttributeTransformation { TargetDeclaration: ISymbolRef symbolRef }:
                 {
-                    foreach ( var declaringSyntax in introduceAttributeTransformation.TargetDeclaration.GetDeclaringSyntaxReferences() )
+                    foreach ( var declaringSyntax in symbolRef.Symbol.DeclaringSyntaxReferences )
                     {
                         transformationCollection.AddNodeWithModifiedAttributes( declaringSyntax.GetSyntax() );
                     }
@@ -387,9 +391,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     break;
                 }
 
-            case RemoveAttributesTransformation removeAttributesTransformation:
+            case RemoveAttributesTransformation { TargetDeclaration: ISymbolRef symbolRef }:
                 {
-                    foreach ( var declaringSyntax in removeAttributesTransformation.ContainingDeclaration.GetDeclaringSyntaxReferences() )
+                    foreach ( var declaringSyntax in symbolRef.Symbol.DeclaringSyntaxReferences )
                     {
                         transformationCollection.AddNodeWithModifiedAttributes( declaringSyntax.GetSyntax() );
                     }
@@ -423,8 +427,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         TransformationCollection transformationCollection,
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
     {
-        var compilation = input.CompilationModel;
-
         if ( transformation is not IReplaceMemberTransformation replaceMemberTransformation || replaceMemberTransformation.ReplacedMember == null )
         {
             return;
@@ -434,21 +436,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // TODO: the target may have been removed from the
         var replacedDeclaration = replaceMemberTransformation.ReplacedMember;
 
-        replacedDeclaration = GetReplacedDeclarationRecursive( replacedDeclaration );
-
-        static IRef<IDeclaration> GetReplacedDeclarationRecursive( IRef<IDeclaration> d )
-        {
-            return d switch
-            {
-                IBuiltDeclarationRef declaration => GetReplacedDeclarationRecursive( declaration.BuilderData ),
-                PromotedField promotedField => promotedField.OriginalSourceFieldOrFieldBuilder,
-                _ => d
-            };
-        }
-
         switch ( replacedDeclaration )
         {
-            case Field sourceField:
+            case ISymbolRef<IField> sourceField:
                 var fieldSyntaxReference =
                     sourceField.Symbol.GetPrimarySyntaxReference()
                     ?? throw new AssertionFailedException( $"The field '{sourceField}' does not have syntax." );
@@ -458,14 +448,16 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
                 break;
 
-            case Constructor replacedConstructor:
+            case ISymbolRef<IConstructor> replacedConstructor:
                 Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
 
                 break;
 
             // This needs to point to an interface
-            case IDeclarationBuilder replacedBuilder:
-                if ( !transformationCollection.TryGetIntroduceDeclarationTransformation( replacedBuilder, out var introduceDeclarationTransformation ) )
+            case IBuiltDeclarationRef replacedBuilder:
+                if ( !transformationCollection.TryGetIntroduceDeclarationTransformation(
+                        replacedBuilder.BuilderData,
+                        out var introduceDeclarationTransformation ) )
                 {
                     throw new AssertionFailedException( $"Builder {replacedBuilder} is missing registered transformation." );
                 }
@@ -540,8 +532,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             case IInjectInterfaceTransformation injectInterfaceTransformation:
                 {
                     // Create the SyntaxGenerationContext for the insertion point.
-                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
-                        this._syntaxGenerationOptions );
+                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions );
 
                     var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( syntaxGenerationContext );
                     var introducedInterface = new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterfaceSyntax );
@@ -556,8 +547,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     private static void IndexOverrideTransformation(
         ITransformation transformation,
         TransformationCollection transformationCollection,
-        ConcurrentDictionary<IRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-        ConcurrentDictionary<IRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
+        ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
+        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
     {
         if ( transformation is not IOverrideDeclarationTransformation overrideDeclarationTransformation )
         {
@@ -568,19 +559,18 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             overrideDeclarationTransformation.OverriddenDeclaration,
             transformationCollection );
 
-        if ( overrideDeclarationTransformation.OverriddenDeclaration is IRef<IConstructor> overriddenConstructorRef  )
+        if ( overrideDeclarationTransformation.OverriddenDeclaration is IFullRef<IConstructor> overriddenConstructorRef )
         {
-            var overriddenConstructor = overriddenConstructorRef.GetTarget( TODO );
-
-            if ( overriddenConstructor.IsPrimary )
+            if ( overriddenConstructorRef.AsFullRef().IsPrimaryConstructor )
             {
-
                 auxiliaryMemberTransformations.GetOrAdd( overriddenConstructorRef, _ => new AuxiliaryMemberTransformations() ).InjectAuxiliarySourceMember();
-                transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
+
+                transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructorRef.AsFullRef().DeclaringType )
+                    .RemovePrimaryConstructor();
             }
         }
 
-        if ( overrideDeclarationTransformation.OverriddenDeclaration is IRef<IMember> overriddenMember
+        if ( overrideDeclarationTransformation.OverriddenDeclaration is IFullRef<IMember> overriddenMember
              && pendingInsertStatementContexts.TryGetValue( overriddenMember, out var insertStatementContext ) )
         {
             // Remove context for the insert statement (there should be no race since we parallelize based on containing type).
@@ -610,15 +600,13 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // If this is overridden property we need to:
         //  1) Block inlining of the first override (force the trampoline).
         //  2) Substitute all sets of the property (can be only in constructors) to use the first override instead.
-        if ( overriddenDeclaration is IProperty
+        if ( overriddenDeclaration is IFullRef<IProperty>
             {
                 IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod.IsImplicitlyDeclared: true,
                 OverriddenProperty: null or { SetMethod: not null }
             } overriddenAutoProperty )
         {
-            transformationCollection.AddAutoPropertyWithSynthesizedSetter(
-                overriddenAutoProperty );
-            
+            transformationCollection.AddAutoPropertyWithSynthesizedSetter( overriddenAutoProperty );
         }
     }
 
@@ -628,21 +616,19 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         LexicalScopeFactory lexicalScopeFactory,
         ITransformation transformation,
         TransformationCollection transformationCollection,
-        ConcurrentDictionary<IRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-        ConcurrentDictionary<IRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
+        ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
+        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
     {
         if ( transformation is not IInsertStatementTransformation insertStatementTransformation )
         {
             return;
         }
 
-        var targetMember = insertStatementTransformation.TargetMember.GetTarget(TODO);
+        var targetMember = insertStatementTransformation.TargetMember.GetTarget( TODO );
 
         var syntaxGenerationContext
             = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, targetMember );
 
-
-        
         switch ( targetMember )
         {
             case IPropertyOrIndexer propertyOrIndexer:
@@ -680,7 +666,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
             case IMethodBase methodBase:
                 {
-
                     var insertedStatements = GetInsertedStatements( syntaxGenerationContext );
 
                     transformationCollection.AddInsertedStatements( methodBase.ToRef(), insertedStatements );
@@ -695,7 +680,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         if ( targetMember is IConstructor { IsPrimary: true } overriddenConstructor )
         {
             auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor.ToRef(), _ => new AuxiliaryMemberTransformations() ).InjectAuxiliarySourceMember();
-            transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType.ToRef() ).RemovePrimaryConstructor();
+
+            transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructor.DeclaringType.ToRef() )
+                .RemovePrimaryConstructor();
         }
 
         IReadOnlyList<InsertedStatement> GetInsertedStatements( SyntaxGenerationContext syntaxGenerationContext )
@@ -783,21 +770,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // TODO: Supports only constructors without overrides.
         //       Needs to be generalized for anything else (take into account overrides).
 
-        MemberLevelTransformations? memberLevelTransformations;
-        var declarationSyntax = memberLevelTransformation.TargetMember.GetPrimaryDeclarationSyntax();
-
-        if ( declarationSyntax != null )
-        {
-            memberLevelTransformations = transformationCollection.GetOrAddMemberLevelTransformations( declarationSyntax );
-        }
-        else
-        {
-            var parentDeclarationBuilder = (memberLevelTransformation.TargetMember as DeclarationBuilder
-                                            ?? (memberLevelTransformation.TargetMember as BuiltDeclaration)?.BuilderData)
-                .AssertNotNull();
-
-            memberLevelTransformations = transformationCollection.GetOrAddMemberLevelTransformations( parentDeclarationBuilder );
-        }
+        var memberLevelTransformations =
+            transformationCollection.GetOrAddMemberLevelTransformations( memberLevelTransformation.TargetMember );
 
         switch (transformation, memberLevelTransformation.TargetMember)
         {
@@ -823,7 +797,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         LexicalScopeFactory lexicalScopeFactory,
         AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
         LinkerInjectionNameProvider injectionNameProvider,
-        IMember member,
+        IFullRef<IMember> member,
         AuxiliaryMemberTransformations transformations )
     {
         var auxiliaryMemberFactory =
@@ -839,7 +813,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             switch ( member )
             {
-                case IConstructor { IsPrimary: true } primaryConstructor:
+                case IFullRef<IConstructor> { IsPrimaryConstructor: true } primaryConstructor:
                     transformationCollection.AddInjectedMember(
                         new InjectedMember(
                             null,
@@ -867,15 +841,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // return returnValue;
 
             var advice = originTransformation.ParentAdvice;
-            var compilationModel = (CompilationModel) originTransformation.SourceCompilation;
-
-            var rootMember =
-                member switch
-                {
-                    IMethod { ContainingDeclaration: IProperty property } => property,
-                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
-                    _ => member
-                };
+            var rootMember = member.AsFullRef().TypeMember;
 
             // TODO: Ideally, entry + exit statements should be injected here, but it complicates the transformation collection and rewriter.
             //       This now generates "well-known" structure, which is recognized by the rewriter, which is quite ugly.
@@ -884,8 +850,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             transformationCollection.AddInjectedMember(
                 new InjectedMember(
                     originTransformation,
-                    member.DeclarationKind,
-                    auxiliaryMemberFactory.GetAuxiliaryContractMember( rootMember, compilationModel, advice, returnVariableName ),
+                    member.AsFullRef().DeclarationKind,
+                    auxiliaryMemberFactory.GetAuxiliaryContractMember( rootMember, advice, returnVariableName ),
                     advice.AspectLayerId,
                     InjectedMemberSemantic.AuxiliaryBody,
                     rootMember ) );
@@ -894,7 +860,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
     // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
     //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
-    private static bool RequiresAuxiliaryContractMember( IMember member, InsertStatementTransformationContextImpl insertStatementContext )
+    private static bool RequiresAuxiliaryContractMember( IRef<IMember> member, InsertStatementTransformationContextImpl insertStatementContext )
         => insertStatementContext.WasUsedForOutputContracts
            || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
                    or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }

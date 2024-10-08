@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
@@ -18,15 +19,15 @@ public partial class DerivedTypeIndex
     internal sealed class Builder
     {
         private readonly CompilationContext _compilationContext;
-        private readonly ImmutableDictionaryOfArray<IRef<INamedType>, IRef<INamedType>>.Builder _relationships;
-        private readonly ImmutableHashSet<IRef<INamedType>>.Builder _processedTypes;
+        private readonly ImmutableDictionaryOfArray<IFullRef<INamedType>, IFullRef<INamedType>>.Builder _relationships;
+        private readonly ImmutableHashSet<IFullRef<INamedType>>.Builder _processedTypes;
 
         internal Builder( CompilationContext compilationContext )
         {
             this._compilationContext = compilationContext;
 
-            this._relationships = new ImmutableDictionaryOfArray<IRef<INamedType>, IRef<INamedType>>.Builder( RefEqualityComparer<INamedType>.Default );
-            this._processedTypes = ImmutableHashSet.CreateBuilder<IRef<INamedType>>( RefEqualityComparer<INamedType>.Default );
+            this._relationships = new ImmutableDictionaryOfArray<IFullRef<INamedType>, IFullRef<INamedType>>.Builder( RefEqualityComparer<INamedType>.Default );
+            this._processedTypes = ImmutableHashSet.CreateBuilder<IFullRef<INamedType>>( RefEqualityComparer<INamedType>.Default );
         }
 
         internal Builder( DerivedTypeIndex immutable )
@@ -45,7 +46,7 @@ public partial class DerivedTypeIndex
 
                     break;
 
-                case IBuiltDeclarationRef { BuilderData: INamedTypeBuilder builder }:
+                case IBuiltDeclarationRef { BuilderData: NamedTypeBuilderData builder }:
                     this.AnalyzeType( builder );
 
                     break;
@@ -95,42 +96,30 @@ public partial class DerivedTypeIndex
             }
         }
 
-        private void AnalyzeType( INamedTypeBuilder type )
+        private void AnalyzeType( NamedTypeBuilderData type )
         {
-            if ( type.GetSymbol() is { } symbol )
-            {
-                this.AnalyzeType( symbol );
-
-                return;
-            }
-
             if ( !this._processedTypes.Add( type.ToRef() ) )
             {
                 return;
             }
 
-            if ( type.BaseType != null && type.BaseType.TypeKind != MetalamaTypeKind.Error )
+            if ( type.BaseType is { IsValid: true } )
             {
                 var baseType = type.BaseType.Definition;
-                this._relationships.Add( baseType.ToRef(), type.ToRef() );
-                this.AnalyzeType( baseType.ToRef() );
+                this._relationships.Add( baseType, type.ToRef() );
+                this.AnalyzeType( baseType );
             }
 
             foreach ( var interfaceImpl in type.ImplementedInterfaces )
             {
-                if ( interfaceImpl.TypeKind == MetalamaTypeKind.Error )
+                if ( !interfaceImpl.IsValid )
                 {
                     continue;
                 }
 
                 var interfaceType = interfaceImpl.Definition;
-                this._relationships.Add( interfaceType.ToRef(), type.ToRef() );
-                this.AnalyzeType( interfaceType.ToRef() );
-            }
-
-            foreach ( var nestedType in type.Types )
-            {
-                this.AnalyzeType( nestedType.ToRef() );
+                this._relationships.Add( interfaceType, type.ToRef() );
+                this.AnalyzeType( interfaceType );
             }
         }
 
@@ -139,8 +128,9 @@ public partial class DerivedTypeIndex
                 baseType.ToRef( this._compilationContext ),
                 derivedType.ToRef( this._compilationContext ) );
 
-        public void AddDerivedType( IRef<INamedType> baseType, IRef<INamedType> derivedType ) => this._relationships.Add( baseType, derivedType );
-        public void AddDerivedType( INamedType baseType, INamedType derivedType ) => this._relationships.Add( baseType.ToRef(), derivedType.ToRef() );
+        public void AddDerivedType( IFullRef<INamedType> baseType, IFullRef<INamedType> derivedType ) => this._relationships.Add( baseType, derivedType );
+
+        public void AddDerivedType( INamedType baseType, INamedType derivedType ) => this._relationships.Add( baseType.ToFullRef(), derivedType.ToFullRef() );
 
         public DerivedTypeIndex ToImmutable()
         {

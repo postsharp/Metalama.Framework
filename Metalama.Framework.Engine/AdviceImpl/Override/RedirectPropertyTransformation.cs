@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -20,19 +21,22 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// </summary>
 internal sealed class RedirectPropertyTransformation : OverrideMemberTransformation
 {
-    private readonly IRef<IProperty> _targetProperty;
+    private readonly IFullRef<IProperty> _targetProperty;
 
-    private new IRef<IProperty> OverriddenDeclaration => (IRef<IProperty>) base.OverriddenDeclaration;
+    private readonly IFullRef<IProperty> _overriddenProperty;
 
-    public RedirectPropertyTransformation( Advice advice, IRef<IProperty> overriddenDeclaration, IRef<IProperty> targetProperty )
-        : base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public RedirectPropertyTransformation( Advice advice, IFullRef<IProperty> overriddenDeclaration, IFullRef<IProperty> targetProperty )
+        : base( advice, ObjectReader.Empty )
     {
         this._targetProperty = targetProperty;
+        this._overriddenProperty = overriddenDeclaration;
     }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenProperty;
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenProperty.GetTarget( context.Compilation );
 
         return
         [
@@ -54,7 +58,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
                     null ),
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                overriddenDeclaration.ToRef() )
+                overriddenDeclaration.ToFullRef() )
         ];
 
         IEnumerable<AccessorDeclarationSyntax> GetAccessors()

@@ -115,7 +115,7 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
     public IField Definition => this;
 
     [Memo]
-    public CompilationBoundRef<IField> FieldRef => (CompilationBoundRef<IField>) this.OriginalSourceFieldOrFieldBuilder.ToRef();
+    public FullRef<IField> FieldRef => (FullRef<IField>) this.OriginalSourceFieldOrFieldBuilder.ToRef();
 
     IRef<IField> IField.ToRef() => this.FieldRef;
 

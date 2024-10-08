@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -457,7 +458,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => ((IDeclaration) this.Implementation).ToRef();
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => ((IDeclaration) this.Implementation).ToRef();
 
         public bool IsSubclassOf( INamedType type )
         {

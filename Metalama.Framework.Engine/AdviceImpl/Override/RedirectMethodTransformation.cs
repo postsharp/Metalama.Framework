@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -20,19 +21,22 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// </summary>
 internal sealed class RedirectMethodTransformation : OverrideMemberTransformation
 {
-    private readonly IRef<IMethod> _targetMethod;
+    private readonly IFullRef<IMethod> _targetMethod;
 
-    private new IRef<IMethod> OverriddenDeclaration => (IRef<IMethod>) base.OverriddenDeclaration;
+    public IFullRef<IMethod> OverriddenMethod { get; }
 
-    public RedirectMethodTransformation( Advice advice, IRef<IMethod> overriddenDeclaration, IRef<IMethod> targetMethod )
-        : base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public RedirectMethodTransformation( Advice advice, IFullRef<IMethod> overriddenDeclaration, IFullRef<IMethod> targetMethod )
+        : base( advice, ObjectReader.Empty )
     {
         this._targetMethod = targetMethod;
+        this.OverriddenMethod = overriddenDeclaration;
     }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this.OverriddenMethod;
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.Compilation );
 
         var body =
             context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
@@ -66,7 +70,7 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
                     null ),
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                overriddenDeclaration.ToRef() )
+                overriddenDeclaration.ToFullRef() )
         ];
 
         ExpressionSyntax GetInvocationExpression()

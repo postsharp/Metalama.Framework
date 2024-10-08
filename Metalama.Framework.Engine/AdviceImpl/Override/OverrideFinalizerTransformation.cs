@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -22,21 +23,24 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// </summary>
 internal sealed class OverrideFinalizerTransformation : OverrideMemberTransformation
 {
+    private readonly IFullRef<IMethod> _targetFinalizer;
+
     private BoundTemplateMethod BoundTemplate { get; }
 
-    private new IRef<IMethod> OverriddenDeclaration => (IRef<IMethod>) base.OverriddenDeclaration;
-
-    public OverrideFinalizerTransformation( Advice advice, IRef<IMethod> targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, targetFinalizer, tags )
+    public OverrideFinalizerTransformation( Advice advice, IFullRef<IMethod> targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
+        : base( advice, tags )
     {
+        this._targetFinalizer = targetFinalizer;
         this.BoundTemplate = boundTemplate;
     }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this._targetFinalizer;
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var proceedExpression = this.CreateProceedExpression( context );
 
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._targetFinalizer.GetTarget( context.Compilation );
 
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,
@@ -88,7 +92,7 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
                 newMethodBody,
                 null );
 
-        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToRef() )];
+        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToFullRef() )];
     }
 
     private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )

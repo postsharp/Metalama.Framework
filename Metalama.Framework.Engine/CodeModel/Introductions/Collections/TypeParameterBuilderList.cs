@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -21,7 +22,7 @@ internal sealed class TypeParameterBuilderList : List<TypeParameterBuilder>, ITy
     // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
     public IList<TypeParameterBuilder> AsBuilderList => this;
 
-    public ImmutableArray<TypeParameterBuilderData> ToImmutable( IRef<IDeclaration> containingDeclaration )
+    public ImmutableArray<TypeParameterBuilderData> ToImmutable( IFullRef<IDeclaration> containingDeclaration )
     {
         if ( this.Count == 0 )
         {

@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -33,7 +34,7 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
         context.AddTransformation(
             new OverrideEventTransformation(
                 this,
-                this.TargetDeclaration.ToRef(),
+                this.TargetDeclaration.ToFullRef(),
                 this._addTemplate,
                 this._removeTemplate,
                 this.Tags ) );

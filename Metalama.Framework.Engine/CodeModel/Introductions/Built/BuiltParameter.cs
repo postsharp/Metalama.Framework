@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -54,11 +55,11 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     public bool IsReturnParameter => this.Index >= 0;
 
     [Memo]
-    private IRef<IParameter> Ref => this.RefFactory.FromBuilt<IParameter>( this );
+    private IFullRef<IParameter> Ref => this.RefFactory.FromBuilt<IParameter>( this );
 
     public IRef<IParameter> ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     bool IExpression.IsAssignable => true;
 

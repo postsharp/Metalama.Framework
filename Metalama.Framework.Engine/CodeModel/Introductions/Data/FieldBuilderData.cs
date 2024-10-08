@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class FieldBuilderData : MemberBuilderData
 {
-    private readonly DeclarationBuilderDataRef<IField> _ref;
+    private readonly BuiltDeclarationRef<IField> _ref;
 
     public IRef<IType> Type { get; }
 
@@ -35,9 +35,9 @@ internal class FieldBuilderData : MemberBuilderData
 
     public IRef<IProperty>? OverridingProperty { get; }
 
-    public FieldBuilderData( FieldBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    public FieldBuilderData( FieldBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IField>( this );
+        this._ref = new BuiltDeclarationRef<IField>( this, containingDeclaration.CompilationContext );
 
         this.Type = builder.Type.ToRef();
         this.Writeability = builder.Writeability;
@@ -54,9 +54,9 @@ internal class FieldBuilderData : MemberBuilderData
         this.OverridingProperty = builder.OverridingProperty?.ToRef();
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new DeclarationBuilderDataRef<IField> ToRef() => this._ref;
+    public new BuiltDeclarationRef<IField> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 

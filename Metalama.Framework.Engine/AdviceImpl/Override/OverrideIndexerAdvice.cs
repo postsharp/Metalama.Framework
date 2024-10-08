@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -29,7 +30,7 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
     {
         var targetDeclaration = this.TargetDeclaration;
 
-        context.AddTransformation( new OverrideIndexerTransformation( this, targetDeclaration.ToRef(), this._getTemplate, this._setTemplate, this.Tags ) );
+        context.AddTransformation( new OverrideIndexerTransformation( this, targetDeclaration.ToFullRef(), this._getTemplate, this._setTemplate, this.Tags ) );
 
         return this.CreateSuccessResult( targetDeclaration );
     }

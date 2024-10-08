@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
@@ -20,20 +21,27 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIndexerTransformation
 {
-    private new IRef<IIndexer> OverriddenDeclaration => (IRef<IIndexer>) base.OverriddenDeclaration;
+    private readonly IFullRef<IIndexer> _overriddenIndexer;
 
     protected OverrideIndexerBaseTransformation(
         Advice advice,
-        IRef<IIndexer> overriddenDeclaration,
+        IFullRef<IIndexer> overriddenDeclaration,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags ) { }
+        : base( advice, tags )
+    {
+        this._overriddenIndexer = overriddenDeclaration;
+    }
+
+    protected override IFullRef<IPropertyOrIndexer> OverriddenPropertyOrIndexer => this._overriddenIndexer;
+
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenIndexer;
 
     protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
         MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenIndexer.GetTarget( context.Compilation );
 
         var setAccessorDeclarationKind =
             overriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
@@ -87,7 +95,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                     default ),
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                overriddenDeclaration.ToRef() )
+                overriddenDeclaration.ToFullRef() )
         };
 
         return overrides;
@@ -115,13 +123,13 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         => TransformationHelper.CreateIndexerProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget( context.Compilation ),
+            this._overriddenIndexer.GetTarget( context.Compilation ),
             this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreateIndexerProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration.GetTarget( context.Compilation ),
+            this._overriddenIndexer.GetTarget( context.Compilation ),
             this.AspectLayerId );
 }

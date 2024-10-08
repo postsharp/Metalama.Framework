@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -137,7 +138,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideMethodTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
+            var overriddenMethod = new OverrideMethodTransformation( this, builder.ToFullRef(), this._template.ForIntroduction( builder ), this.Tags );
             builder.IsOverride = false;
             builder.HasNewKeyword = builder.IsNew = false;
             builder.Freeze();
@@ -159,7 +160,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                              existingMethod.DeclaringType),
                             this ) );
             }
-            
+
             switch ( this.OverrideStrategy )
             {
                 case OverrideStrategy.Fail:
@@ -195,7 +196,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
 
                         var overriddenMethod = new OverrideMethodTransformation(
                             this,
-                            builder.ToRef(),
+                            builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );
 
@@ -235,7 +236,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
 
                         var overriddenMethod = new OverrideMethodTransformation(
                             this,
-                            builder.ToRef(),
+                            builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );
 

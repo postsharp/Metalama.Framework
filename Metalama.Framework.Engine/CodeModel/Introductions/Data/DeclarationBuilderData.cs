@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ internal abstract class DeclarationBuilderData
 {
     public abstract DeclarationKind DeclarationKind { get; }
 
-    public IRef<IDeclaration> ContainingDeclaration { get; }
+    public IFullRef<IDeclaration> ContainingDeclaration { get; }
 
     [Obsolete( "We want to get rid of this." )]
     public Advice ParentAdvice { get; }
@@ -23,7 +24,7 @@ internal abstract class DeclarationBuilderData
 
     public SyntaxTree? PrimarySyntaxTree { get; }
 
-    protected DeclarationBuilderData( IDeclarationBuilderImpl builder, IRef<IDeclaration> containingDeclaration )
+    protected DeclarationBuilderData( IDeclarationBuilderImpl builder, IFullRef<IDeclaration> containingDeclaration )
     {
         Invariant.Assert( builder.IsFrozen );
 
@@ -36,9 +37,9 @@ internal abstract class DeclarationBuilderData
         this.Attributes = builder.Attributes.ToImmutable( this.ToDeclarationRef() );
     }
 
-    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
+    public IFullRef<IDeclaration> ToRef() => this.ToDeclarationRef();
 
-    protected abstract IRef<IDeclaration> ToDeclarationRef();
+    protected abstract IFullRef<IDeclaration> ToDeclarationRef();
 
     public SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
 
@@ -49,4 +50,6 @@ internal abstract class DeclarationBuilderData
     /// are not added to the <see cref="CompilationModel"/> by directly instantiated by us.
     /// </summary>
     public virtual IEnumerable<DeclarationBuilderData> GetOwnedDeclarations() => this.Attributes;
+
+    public abstract IFullRef<INamedType>? DeclaringType { get; }
 }

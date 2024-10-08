@@ -17,7 +17,7 @@ internal sealed class SymbolAttributeRef : AttributeRef
 {
     private readonly AttributeData _attributeData;
 
-    public SymbolAttributeRef( AttributeData attributeData, IRef<IDeclaration> containingDeclaration, CompilationContext compilationContext )
+    public SymbolAttributeRef( AttributeData attributeData, IFullRef<IDeclaration> containingDeclaration, CompilationContext compilationContext )
         : base(
             containingDeclaration,
             compilationContext.RefFactory.FromSymbol<INamedType>(

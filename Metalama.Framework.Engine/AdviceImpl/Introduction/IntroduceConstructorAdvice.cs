@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Linq;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -101,7 +102,12 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
             // There is no existing declaration, we will introduce and override the introduced.
 
-            var overriddenConstructor = new OverrideConstructorTransformation( this, builder.ToRef(), this._template.ForIntroduction( builder ), this.Tags );
+            var overriddenConstructor = new OverrideConstructorTransformation(
+                this,
+                builder.ToFullRef(),
+                this._template.ForIntroduction( builder ),
+                this.Tags );
+
             context.AddTransformation( builder.ToTransformation() );
             context.AddTransformation( overriddenConstructor );
 
@@ -128,7 +134,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
                 case OverrideStrategy.Override:
                     var overriddenMethod = new OverrideConstructorTransformation(
                         this,
-                        existingConstructor.ToRef(),
+                        existingConstructor.ToFullRef(),
                         this._template.ForIntroduction( existingConstructor ),
                         this.Tags );
 

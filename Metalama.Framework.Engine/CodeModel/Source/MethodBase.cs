@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -41,37 +42,15 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.Compilation.GetParameterCollection( this.ToRef().GetDefinition() ) );
+                this.Compilation.GetParameterCollection( this.GetMethodBaseRef().Definition ) );
 
-        public MethodKind MethodKind
-            => this.MethodSymbol.MethodKind switch
-            {
-                SymbolMethodKind.Ordinary => MethodKind.Default,
-                SymbolMethodKind.Destructor => MethodKind.Finalizer,
-                SymbolMethodKind.PropertyGet => MethodKind.PropertyGet,
-                SymbolMethodKind.PropertySet => MethodKind.PropertySet,
-                SymbolMethodKind.EventAdd => MethodKind.EventAdd,
-                SymbolMethodKind.EventRemove => MethodKind.EventRemove,
-                SymbolMethodKind.EventRaise => MethodKind.EventRaise,
-                SymbolMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
-                SymbolMethodKind.Conversion => MethodKind.Operator,
-                SymbolMethodKind.UserDefinedOperator => MethodKind.Operator,
-                SymbolMethodKind.LocalFunction => MethodKind.LocalFunction,
-                SymbolMethodKind.AnonymousFunction => MethodKind.Lambda,
-                SymbolMethodKind.DelegateInvoke => MethodKind.DelegateInvoke,
-                SymbolMethodKind.BuiltinOperator or
-                    SymbolMethodKind.ReducedExtension or
-                    SymbolMethodKind.DeclareMethod or
-                    SymbolMethodKind.FunctionPointerSignature => throw new NotSupportedException(
-                        $"The method '{this.Symbol}' is not supported because it is of kind {this.MethodSymbol.MethodKind}." ),
-                _ => throw new AssertionFailedException( $"The method '{this.Symbol}' is not expected because it is of kind {this.MethodSymbol.MethodKind}." )
-            };
+        public MethodKind MethodKind => this.MethodSymbol.MethodKind.ToOurMethodKind();
 
         public abstract System.Reflection.MethodBase ToMethodBase();
 
         public IRef<IMethodBase> ToRef() => this.GetMethodBaseRef();
 
-        protected abstract IRef<IMethodBase> GetMethodBaseRef();
+        protected abstract IFullRef<IMethodBase> GetMethodBaseRef();
 
         public override MemberInfo ToMemberInfo() => this.ToMethodBase();
     }

@@ -59,7 +59,7 @@ internal abstract class TemplateMember
 {
     protected abstract ISymbolRef<IMemberOrNamedType> GetDeclaration();
 
-    public IRef<IMemberOrNamedType> DeclarationRef => this.GetDeclaration();
+    public IFullRef<IMemberOrNamedType> DeclarationRef => this.GetDeclaration();
 
     public TemplateClassMember TemplateClassMember { get; }
 

@@ -126,9 +126,6 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
 
-    [Memo]
-    internal SymbolRefStrategy SymbolRefStrategy => new( this );
-
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );
 
@@ -138,7 +135,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
             ISymbolRef symbolRef => this.GetSyntaxGenerationContext( options, symbolRef.Symbol.GetPrimaryDeclarationSyntax() ),
             IBuiltDeclarationRef builtDeclarationRef => this.GetSyntaxGenerationContext(
                 options,
-                builtDeclarationRef.GetClosestContainingSymbol( this ).GetPrimaryDeclarationSyntax() ),
+                builtDeclarationRef.GetClosestContainingSymbol().GetPrimaryDeclarationSyntax() ),
             _ => throw new AssertionFailedException()
         };
 

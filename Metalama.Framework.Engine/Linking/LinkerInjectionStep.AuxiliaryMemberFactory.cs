@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
@@ -53,7 +54,7 @@ internal sealed partial class LinkerInjectionStep
 
         private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
 
-        public ConstructorDeclarationSyntax GetAuxiliarySourceConstructor( IConstructor constructor )
+        public ConstructorDeclarationSyntax GetAuxiliarySourceConstructor( IFullRef<IConstructor> constructor )
         {
 #if ROSLYN_4_8_0_OR_GREATER
             var syntax = (TypeDeclarationSyntax) constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
@@ -107,20 +108,19 @@ internal sealed partial class LinkerInjectionStep
         }
 
         public MemberDeclarationSyntax GetAuxiliaryContractMember(
-            IMember member,
-            CompilationModel compilationModel,
+            IRef<IMember> member,
             Advice advice,
             string? returnVariableName )
         {
             switch ( member )
             {
-                case IMethod method:
-                    return this.GetAuxiliaryContractMethod( method, compilationModel, advice.AspectLayerId, returnVariableName );
+                case IRef<IMethod> method:
+                    return this.GetAuxiliaryContractMethod( method, advice.AspectLayerId, returnVariableName );
 
-                case IProperty property:
+                case IRef<IProperty> property:
                     return this.GetAuxiliaryContractProperty( property, advice.AspectLayerId, returnVariableName );
 
-                case IIndexer indexer:
+                case IRef<IIndexer> indexer:
                     return this.GetAuxiliaryContractIndexer( indexer, advice, returnVariableName );
 
                 default:
@@ -129,11 +129,12 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractMethod(
-            IMethod method,
-            CompilationModel compilationModel,
+            IRef<IMethod> methodRef,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
+            var method = methodRef.GetTarget( compilationModel );
+
             var primaryDeclaration = method.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =
@@ -200,7 +201,7 @@ internal sealed partial class LinkerInjectionStep
                 if ( method.ReturnType.Equals( SpecialType.Void ) )
                 {
                     returnType = syntaxGenerationContext.SyntaxGenerator.Type(
-                        compilationModel.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
+                        syntaxGenerationContext.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
                 }
             }
 
@@ -345,10 +346,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractProperty(
-            IProperty property,
+            IRef<IProperty> propertyRef,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
+            var property = propertyRef.GetTarget( compilationModel );
             var primaryDeclaration = property.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =
@@ -457,10 +459,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractIndexer(
-            IIndexer indexer,
+            IRef<IIndexer> indexerRef,
             Advice advice,
             string? returnVariableName )
         {
+            var indexer = indexerRef.GetTarget( compilationModel );
             var primaryDeclaration = indexer.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =

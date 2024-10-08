@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 
 internal static class CollectionExtensions
 {
-    public static ImmutableArray<ParameterBuilderData> ToImmutable( this IParameterBuilderList parameters, IRef<IDeclaration> containingDeclaration )
+    public static ImmutableArray<ParameterBuilderData> ToImmutable( this IParameterBuilderList parameters, IFullRef<IDeclaration> containingDeclaration )
     {
         if ( parameters.Count == 0 )
         {

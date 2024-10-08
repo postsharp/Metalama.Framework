@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationCollection, ILazy, IUpdatableCollection<T>
     where T : class, IDeclaration
 {
-    private List<IRef<T>>? _allItems;
+    private List<IFullRef<T>>? _allItems;
     private volatile int _removeOperationsCount;
 
     protected DeclarationUpdatableCollection( CompilationModel compilation ) : base( compilation ) { }
@@ -39,7 +40,7 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
                 return;
             }
 
-            this._allItems = new List<IRef<T>>();
+            this._allItems = new List<IFullRef<T>>();
 
 #if DEBUG
             this.PopulateAllItems( r => this._allItems.Add( r ) );
@@ -50,9 +51,9 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
         }
     }
 
-    protected abstract void PopulateAllItems( Action<IRef<T>> action );
+    protected abstract void PopulateAllItems( Action<IFullRef<T>> action );
 
-    protected void AddItem( in IRef<T> item )
+    protected void AddItem( in IFullRef<T> item )
     {
         if ( this.IsComplete )
         {
@@ -60,7 +61,7 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
         }
     }
 
-    protected void InsertItem( int index, in IRef<T> item )
+    protected void InsertItem( int index, in IFullRef<T> item )
     {
         if ( this.IsComplete )
         {
@@ -68,7 +69,7 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
         }
     }
 
-    protected void RemoveItem( in IRef<T> item )
+    protected void RemoveItem( in IFullRef<T> item )
     {
         if ( this.IsComplete )
         {
@@ -104,7 +105,7 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
         {
             lock ( this )
             {
-                clone._allItems = new List<IRef<T>>( this._allItems.Count );
+                clone._allItems = new List<IFullRef<T>>( this._allItems.Count );
                 clone._allItems.AddRange( this._allItems );
             }
         }
@@ -112,15 +113,15 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
         return clone;
     }
 
-    public virtual ImmutableArray<IRef<T>> OfName( string name ) => this.Where( r => r.Name == name ).ToImmutableArray();
+    public virtual ImmutableArray<IFullRef<T>> OfName( string name ) => this.Where( r => r.Name == name ).ToImmutableArray();
 
-    IEnumerator<IRef<T>> IEnumerable<IRef<T>>.GetEnumerator() => this.GetEnumerator();
+    IEnumerator<IFullRef<T>> IEnumerable<IFullRef<T>>.GetEnumerator() => this.GetEnumerator();
 
     public Enumerator GetEnumerator() => new( this );
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    public IRef<T> this[ int index ]
+    public IFullRef<T> this[ int index ]
     {
         get
         {
@@ -130,7 +131,7 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
         }
     }
 
-    public struct Enumerator : IEnumerator<IRef<T>>
+    public struct Enumerator : IEnumerator<IFullRef<T>>
     {
         private readonly DeclarationUpdatableCollection<T> _parent;
         private readonly int _initialCount;
@@ -169,7 +170,7 @@ internal abstract class DeclarationUpdatableCollection<T> : BaseDeclarationColle
 
         public void Reset() => this._index = -1;
 
-        public readonly IRef<T> Current => this._parent[this._index];
+        public readonly IFullRef<T> Current => this._parent[this._index];
 
         readonly object IEnumerator.Current => this.Current;
 

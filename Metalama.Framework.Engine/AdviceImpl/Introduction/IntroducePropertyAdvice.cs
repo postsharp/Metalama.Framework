@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -326,7 +327,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     {
                         var overriddenMethod = new OverridePropertyTransformation(
                             this,
-                            existingProperty.ToRef(),
+                            existingProperty.ToFullRef(),
                             this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
                             this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
                             this.Tags );

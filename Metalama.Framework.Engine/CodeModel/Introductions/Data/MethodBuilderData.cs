@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class MethodBuilderData : MemberBuilderData
 {
-    private readonly IRef<IMethod> _ref;
+    private readonly IFullRef<IMethod> _ref;
 
     public IReadOnlyList<IRef<IMethod>> ExplicitInterfaceImplementations { get; }
 
@@ -36,11 +36,11 @@ internal class MethodBuilderData : MemberBuilderData
 
     public OperatorKind OperatorKind { get; }
 
-    public MethodBuilderData( IMethodBuilderImpl builder, IRef<IDeclaration> containingDeclaration ) : base(
+    public MethodBuilderData( IMethodBuilderImpl builder, IFullRef<IDeclaration> containingDeclaration ) : base(
         builder,
         containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IMethod>( this );
+        this._ref = new BuiltDeclarationRef<IMethod>( this, containingDeclaration.CompilationContext );
 
         this.IsReadOnly = builder.IsReadOnly;
         this.IsIteratorMethod = builder.IsIteratorMethod.AssertNotNull();
@@ -55,9 +55,9 @@ internal class MethodBuilderData : MemberBuilderData
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new IRef<IMethod> ToRef() => this._ref;
+    public new IFullRef<IMethod> ToRef() => this._ref;
 
     public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations()
         => base.GetOwnedDeclarations().Concat( this.Parameters ).Concat( this.ReturnParameter );

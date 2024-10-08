@@ -24,7 +24,7 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     /// <summary>
     /// Gets the builder into which the new node should be inserted.
     /// </summary>
-    public NamedDeclarationBuilderData? DeclarationBuilder { get; }
+    public NamedDeclarationBuilderData? BuilderData { get; }
 
     /// <summary>
     /// Gets the target syntax tree of the insertion.
@@ -38,11 +38,11 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
         this._syntaxTree = node?.SyntaxTree;
     }
 
-    public InsertPosition( InsertPositionRelation relation, NamedDeclarationBuilderData builder )
+    public InsertPosition( InsertPositionRelation relation, NamedDeclarationBuilderData builderData )
     {
         this.Relation = relation;
-        this.DeclarationBuilder = builder;
-        this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
+        this.BuilderData = builderData;
+        this._syntaxTree = builderData.PrimarySyntaxTree.AssertNotNull();
     }
 
     public InsertPosition( SyntaxTree introducedSyntaxTree )
@@ -56,18 +56,18 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     public bool Equals( InsertPosition other )
         => this.Relation == other.Relation
            && this.SyntaxNode == other.SyntaxNode
-           && this.DeclarationBuilder == other.DeclarationBuilder
+           && this.BuilderData == other.BuilderData
            && this.SyntaxTree == other.SyntaxTree;
 
-    public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode, this.DeclarationBuilder, this.SyntaxTree );
+    public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode, this.BuilderData, this.SyntaxTree );
 
     public override string ToString()
         => this.SyntaxNode != null
             ? $"{this.Relation} {this.SyntaxNode.Kind()} in {this.SyntaxNode.SyntaxTree.FilePath}"
-            : this.DeclarationBuilder switch
+            : this.BuilderData switch
             {
                 NamedTypeBuilderData namedTypeBuilder => $"{this.Relation} {namedTypeBuilder.AssertNotNull().Name} (built type)",
                 NamespaceBuilderData namespaceBuilder => $"{this.Relation} {namespaceBuilder.AssertNotNull().Name} (built namespace)",
-                _ => throw new AssertionFailedException( $"Unexpected: {this.DeclarationBuilder}" )
+                _ => throw new AssertionFailedException( $"Unexpected: {this.BuilderData}" )
             };
 }

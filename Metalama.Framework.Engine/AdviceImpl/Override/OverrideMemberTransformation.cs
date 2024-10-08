@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -18,18 +19,15 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 {
     protected IObjectReader Tags { get; }
 
-    public IRef<IMember> OverriddenDeclaration { get; }
+    public abstract IFullRef<IMember> OverriddenDeclaration { get; }
 
-    IRef<IDeclaration> IOverrideDeclarationTransformation.OverriddenDeclaration => this.OverriddenDeclaration;
+    IFullRef<IDeclaration> IOverrideDeclarationTransformation.OverriddenDeclaration => this.OverriddenDeclaration;
 
     public override IRef<IDeclaration> TargetDeclaration => this.OverriddenDeclaration;
 
-    protected OverrideMemberTransformation( Advice advice, IRef<IMember> overriddenDeclaration, IObjectReader tags ) : base( advice )
+    protected OverrideMemberTransformation( Advice advice, IObjectReader tags ) : base( advice )
     {
         Invariant.Assert( advice != null! );
-        Invariant.Assert( overriddenDeclaration != null! );
-
-        this.OverriddenDeclaration = overriddenDeclaration;
         this.Tags = tags;
     }
 

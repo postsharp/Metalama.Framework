@@ -5,9 +5,11 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -18,19 +20,21 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// </summary>
 internal sealed class RedirectEventTransformation : OverrideMemberTransformation
 {
-    private readonly IEvent _targetEvent;
+    private readonly IFullRef<IEvent> _overriddenDeclaration;
+    private readonly IFullRef<IEvent> _targetEvent;
 
-    private new IRef<IEvent> OverriddenDeclaration => (IRef<IEvent>) base.OverriddenDeclaration;
-
-    public RedirectEventTransformation( Advice advice, IRef<IEvent> overriddenDeclaration, IEvent targetEvent )
-        : base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public RedirectEventTransformation( Advice advice, IFullRef<IEvent> overriddenDeclaration, IFullRef<IEvent> targetEvent )
+        : base( advice, ObjectReader.Empty )
     {
+        this._overriddenDeclaration = overriddenDeclaration;
         this._targetEvent = targetEvent;
     }
 
+    public override IFullRef<IMember> OverriddenDeclaration => throw new NotImplementedException();
+
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( context.Compilation );
 
         return
         [
@@ -49,7 +53,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
                     AccessorList( List( GetAccessors() ) ) ),
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                overriddenDeclaration.ToRef() )
+                overriddenDeclaration.ToFullRef() )
         ];
 
         IEnumerable<AccessorDeclarationSyntax> GetAccessors()

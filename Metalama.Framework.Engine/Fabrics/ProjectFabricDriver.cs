@@ -136,7 +136,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 project,
                 fabricManager,
                 fabricInstance,
-                compilation.RefFactory.Compilation( compilation ),
+                compilation.RefFactory.ForCompilation(),
                 null ) { }
         }
     }

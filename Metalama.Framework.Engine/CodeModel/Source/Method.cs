@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -162,13 +163,13 @@ internal sealed class Method : MethodBase, IMethodImpl
     }
 
     [Memo]
-    private IRef<IMethod> Ref => this.RefFactory.FromSymbolBasedDeclaration<IMethod>( this );
+    private IFullRef<IMethod> Ref => this.RefFactory.FromSymbolBasedDeclaration<IMethod>( this );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public new IRef<IMethod> ToRef() => this.Ref;
 
-    protected override IRef<IMethodBase> GetMethodBaseRef() => this.Ref;
+    protected override IFullRef<IMethodBase> GetMethodBaseRef() => this.Ref;
 
     protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
 }

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 {
-    private readonly DeclarationBuilderDataRef<IProperty> _ref;
+    private readonly BuiltDeclarationRef<IProperty> _ref;
 
     public ImmutableArray<IAttributeData> FieldAttributes { get; }
 
@@ -43,9 +43,9 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     private readonly object? _originalField; // Can be an IFieldSymbol or a FieldBuilderData.
 
-    public PropertyBuilderData( PropertyBuilder builder, IRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
+    public PropertyBuilderData( PropertyBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IProperty>( this );
+        this._ref = new BuiltDeclarationRef<IProperty>( this, containingDeclaration.CompilationContext );
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.InitializerExpression = builder.InitializerExpression;
         this.IsAutoPropertyOrField = builder.IsAutoPropertyOrField;
@@ -61,7 +61,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
             this._originalField = builder.OriginalField switch
             {
                 Field sourceField => sourceField.Symbol,
-                BuiltField builtField => builtField.FieldBuilder,
+                BuiltField builtField => builtField.FieldBuilderData,
                 _ => throw new AssertionFailedException()
             };
         }
@@ -80,9 +80,9 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         }
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new DeclarationBuilderDataRef<IProperty> ToRef() => this._ref;
+    public new BuiltDeclarationRef<IProperty> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 

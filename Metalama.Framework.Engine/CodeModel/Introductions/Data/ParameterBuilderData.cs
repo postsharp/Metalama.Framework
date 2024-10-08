@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class ParameterBuilderData : DeclarationBuilderData
 {
-    private readonly IRef<IParameter> _ref;
+    private readonly BuiltDeclarationRef<IParameter> _ref;
 
     public string Name { get; }
 
@@ -22,9 +22,9 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     public bool IsParams { get; }
 
-    public ParameterBuilderData( BaseParameterBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    public ParameterBuilderData( BaseParameterBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IParameter>( this );
+        this._ref = new BuiltDeclarationRef<IParameter>( this, containingDeclaration.CompilationContext );
         this.Name = builder.Name;
         this.Type = builder.Type.ToRef();
         this.RefKind = builder.RefKind;
@@ -33,9 +33,11 @@ internal class ParameterBuilderData : DeclarationBuilderData
         this.IsParams = builder.IsParams;
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new IRef<IParameter> ToRef() => this._ref;
+    public override IFullRef<INamedType>? DeclaringType => this.ContainingDeclaration.DeclaringType;
+
+    public new BuiltDeclarationRef<IParameter> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 }

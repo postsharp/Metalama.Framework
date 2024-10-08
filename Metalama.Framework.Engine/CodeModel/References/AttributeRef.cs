@@ -13,20 +13,19 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// <summary>
     /// Base implementation of <see cref="IRef"/> for <see cref="IAttribute"/>.
     /// </summary>
-    internal abstract class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
+    internal abstract class AttributeRef : IRef<IAttribute>, IEquatable<AttributeRef>, IRefImpl
     {
-        protected AttributeRef( IRef<IDeclaration> containingDeclaration, IRef<INamedType> attributeType )
+        protected AttributeRef( IFullRef<IDeclaration> containingDeclaration, IRef<INamedType> attributeType )
         {
             this.ContainingDeclaration = containingDeclaration;
             this.AttributeType = attributeType;
         }
 
-        public IRef ContainingDeclaration { get; }
+        public IFullRef ContainingDeclaration { get; }
 
         public IRef<INamedType> AttributeType { get; }
-        
-        public ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
-            => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
+
+        public ISymbol GetClosestContainingSymbol() => this.ContainingDeclaration.GetClosestContainingSymbol();
 
         public abstract string? Name { get; }
 
@@ -34,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         SerializableDeclarationId IRefImpl.ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();
 
-        IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => this as IRefImpl<TOut> ?? throw new NotSupportedException();
+        IRef<TOut> IRef.As<TOut>() => this as IRef<TOut> ?? throw new NotSupportedException();
 
         public IAttribute GetTarget( ICompilation compilation, IGenericContext? genericContext = null )
         {

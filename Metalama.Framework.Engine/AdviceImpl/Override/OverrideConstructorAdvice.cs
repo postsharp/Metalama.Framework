@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -39,7 +40,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
             constructor = builder;
         }
 
-        context.AddTransformation( new OverrideConstructorTransformation( this, constructor.ToRef(), this._boundTemplate, this.Tags ) );
+        context.AddTransformation( new OverrideConstructorTransformation( this, constructor.ToFullRef(), this._boundTemplate, this.Tags ) );
 
         return this.CreateSuccessResult( constructor );
     }

@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// but <see cref="IMethod"/>, <see cref="INamedType"/>, ... 
         /// </summary>
         /// <returns></returns>
-        private protected abstract IRef<IDeclaration> ToDeclarationRef();
+        private protected abstract IFullRef<IDeclaration> ToDeclarationRef();
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 

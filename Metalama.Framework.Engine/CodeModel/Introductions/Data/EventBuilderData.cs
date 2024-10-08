@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class EventBuilderData : MemberBuilderData
 {
-    private readonly IRef<IEvent> _ref;
+    private readonly IFullRef<IEvent> _ref;
 
     public ImmutableArray<IAttributeData> FieldAttributes { get; }
 
@@ -37,9 +37,9 @@ internal class EventBuilderData : MemberBuilderData
 
     public TemplateMember<IEvent>? InitializerTemplate { get; }
 
-    public EventBuilderData( EventBuilder builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    public EventBuilderData( EventBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new DeclarationBuilderDataRef<IEvent>( this );
+        this._ref = new BuiltDeclarationRef<IEvent>( this, containingDeclaration.CompilationContext );
 
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.Type = builder.Type.ToRef();
@@ -54,9 +54,9 @@ internal class EventBuilderData : MemberBuilderData
         this.InitializerTemplate = builder.InitializerTemplate;
     }
 
-    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public new IRef<IEvent> ToRef() => this._ref;
+    public new IFullRef<IEvent> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 

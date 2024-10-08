@@ -2,13 +2,14 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal abstract class MemberBuilderData : MemberOrNamedTypeBuilderData
 {
-    protected MemberBuilderData( IMemberBuilderImpl builder, IRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    protected MemberBuilderData( IMemberBuilderImpl builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
         this.IsVirtual = builder.IsVirtual;
         this.IsAsync = builder.IsAsync;
@@ -25,5 +26,5 @@ internal abstract class MemberBuilderData : MemberOrNamedTypeBuilderData
 
     public abstract IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers { get; }
 
-    public new IRef<INamedType> DeclaringType => (IRef<INamedType>) this.ContainingDeclaration;
+    public new IFullRef<INamedType> DeclaringType => (IFullRef<INamedType>) this.ContainingDeclaration;
 }

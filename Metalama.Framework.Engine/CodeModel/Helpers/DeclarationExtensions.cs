@@ -249,6 +249,25 @@ public static class DeclarationExtensions
             _ => throw new ArgumentOutOfRangeException()
         };
 
+    internal static Code.MethodKind ToOurMethodKind( this MethodKind methodKind )
+        => methodKind switch
+        {
+            MethodKind.Ordinary => Code.MethodKind.Default,
+            MethodKind.Destructor => Code.MethodKind.Finalizer,
+            MethodKind.PropertyGet => Code.MethodKind.PropertyGet,
+            MethodKind.PropertySet => Code.MethodKind.PropertySet,
+            MethodKind.EventAdd => Code.MethodKind.EventAdd,
+            MethodKind.EventRemove => Code.MethodKind.EventRemove,
+            MethodKind.EventRaise => Code.MethodKind.EventRaise,
+            MethodKind.ExplicitInterfaceImplementation => Code.MethodKind.ExplicitInterfaceImplementation,
+            MethodKind.Conversion => Code.MethodKind.Operator,
+            MethodKind.UserDefinedOperator => Code.MethodKind.Operator,
+            MethodKind.LocalFunction => Code.MethodKind.LocalFunction,
+            MethodKind.AnonymousFunction => Code.MethodKind.Lambda,
+            MethodKind.DelegateInvoke => Code.MethodKind.DelegateInvoke,
+            _ => throw new AssertionFailedException( $"The method kind '{methodKind}' is not expected." )
+        };
+
     internal static string ToDisplayString( this DeclarationKind kind )
         => kind switch
         {

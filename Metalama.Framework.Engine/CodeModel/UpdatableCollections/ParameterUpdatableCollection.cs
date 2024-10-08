@@ -17,7 +17,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
         this._parent = parent;
     }
 
-    protected override void PopulateAllItems( Action<IRef<IParameter>> action )
+    protected override void PopulateAllItems( Action<IFullRef<IParameter>> action )
     {
         // TODO: Move to IRefCollectionStrategy.
 

@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -183,7 +184,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
             // Introduce and override using the template.
             var overrideIndexerTransformation = new OverrideIndexerTransformation(
                 this,
-                builder.ToRef(),
+                builder.ToFullRef(),
                 this._getTemplate?.ForIntroduction( builder.GetMethod ),
                 this._setTemplate?.ForIntroduction( builder.SetMethod ),
                 this.Tags );
@@ -250,7 +251,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
                         var overrideIndexerTransformation = new OverrideIndexerTransformation(
                             this,
-                            builder.ToRef(),
+                            builder.ToFullRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
                             this._setTemplate?.ForIntroduction( builder.SetMethod ),
                             this.Tags );
@@ -266,7 +267,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                     {
                         var overrideIndexerTransformation = new OverrideIndexerTransformation(
                             this,
-                            existingIndexer.ToRef(),
+                            existingIndexer.ToFullRef(),
                             this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
                             this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
                             this.Tags );
@@ -294,7 +295,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
                         var overriddenIndexer = new OverrideIndexerTransformation(
                             this,
-                            builder.ToRef(),
+                            builder.ToFullRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
                             this._setTemplate?.ForIntroduction( builder.SetMethod ),
                             this.Tags );

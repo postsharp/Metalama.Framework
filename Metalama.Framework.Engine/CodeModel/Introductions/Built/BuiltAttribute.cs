@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -23,11 +24,11 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
     [Memo]
-    private IRef<IAttribute> Ref => this._attributeBuilder.ToRef();
+    private IFullRef<IAttribute> Ref => this._attributeBuilder.ToRef();
 
     public IRef<IAttribute> ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public override DeclarationBuilderData BuilderData => this._attributeBuilder;
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
@@ -12,11 +13,11 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         private TypeParameterList() { }
 
-        public TypeParameterList( INamedType declaringType, IReadOnlyList<IRef<ITypeParameter>> sourceItems ) : base(
+        public TypeParameterList( INamedType declaringType, IReadOnlyList<IFullRef<ITypeParameter>> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
 
-        public TypeParameterList( IMethod declaringType, IReadOnlyList<IRef<ITypeParameter>> sourceItems ) : base(
+        public TypeParameterList( IMethod declaringType, IReadOnlyList<IFullRef<ITypeParameter>> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
 

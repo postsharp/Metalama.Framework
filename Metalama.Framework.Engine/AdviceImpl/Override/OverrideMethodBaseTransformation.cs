@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
@@ -23,23 +24,28 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransformation
 {
-    protected new IRef<IMethod> OverriddenDeclaration => (IRef<IMethod>) base.OverriddenDeclaration;
+    public IFullRef<IMethod> OverriddenMethod { get; }
 
-    protected OverrideMethodBaseTransformation( Advice advice, IRef<IMethod> targetMethod, IObjectReader tags )
-        : base( advice, targetMethod, tags ) { }
+    protected OverrideMethodBaseTransformation( Advice advice, IFullRef<IMethod> targetMethod, IObjectReader tags )
+        : base( advice, tags )
+    {
+        this.OverriddenMethod = targetMethod;
+    }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this.OverriddenMethod;
 
     protected SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context, TemplateKind templateKind )
         => ProceedHelper.CreateProceedDynamicExpression(
             context.SyntaxGenerationContext,
             this.CreateInvocationExpression( context ),
             templateKind,
-            this.OverriddenDeclaration.GetTarget( context.Compilation ) );
+            this.OverriddenMethod.GetTarget( context.Compilation ) );
 
     protected InjectedMember[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
     {
         TypeSyntax? returnType = null;
 
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.Compilation );
 
         var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async | ModifierCategories.Unsafe )
@@ -95,13 +101,13 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
                 introducedMethod,
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                overriddenDeclaration.ToRef() )
+                overriddenDeclaration.ToFullRef() )
         ];
     }
 
     private ExpressionSyntax CreateInvocationExpression( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.Compilation );
 
         return overriddenDeclaration.MethodKind switch
         {

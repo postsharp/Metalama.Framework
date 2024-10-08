@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
@@ -18,11 +19,11 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         internal IDeclaration? ContainingDeclaration { get; }
 
-        protected IReadOnlyList<IRef<T>> Source { get; }
+        protected IReadOnlyList<IFullRef<T>> Source { get; }
 
         internal CompilationModel Compilation => (CompilationModel) this.ContainingDeclaration.AssertNotNull().Compilation;
 
-        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<IRef<T>> source )
+        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<IFullRef<T>> source )
         {
 #if DEBUG
             if ( containingDeclaration is NamedTypeImpl )
@@ -41,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         /// </summary>
         protected DeclarationCollection()
         {
-            this.Source = ImmutableArray<IRef<T>>.Empty;
+            this.Source = ImmutableArray<IFullRef<T>>.Empty;
             this._genericContext = GenericContext.Empty;
         }
 

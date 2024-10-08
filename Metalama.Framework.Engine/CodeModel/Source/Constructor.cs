@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -29,13 +30,13 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         }
 
         [Memo]
-        private IRef<IConstructor> Ref => this.RefFactory.FromSymbolBasedDeclaration<IConstructor>( this );
+        private IFullRef<IConstructor> Ref => this.RefFactory.FromSymbolBasedDeclaration<IConstructor>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         IRef<IConstructor> IConstructor.ToRef() => this.Ref;
 
-        protected override IRef<IMethodBase> GetMethodBaseRef() => this.Ref;
+        protected override IFullRef<IMethodBase> GetMethodBaseRef() => this.Ref;
 
         protected override IRef<IMember> ToMemberRef() => this.Ref;
 

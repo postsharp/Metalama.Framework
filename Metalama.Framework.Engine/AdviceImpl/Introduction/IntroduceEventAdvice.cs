@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -187,7 +188,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                 context.AddTransformation(
                     new OverrideEventTransformation(
                         this,
-                        builder.ToRef(),
+                        builder.ToFullRef(),
                         this._addTemplate?.ForIntroduction( builder.AddMethod ),
                         this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
                         this.Tags ) );
@@ -264,7 +265,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         {
                             var overriddenMethod = new OverrideEventTransformation(
                                 this,
-                                builder.ToRef(),
+                                builder.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( builder.AddMethod ),
                                 this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
                                 this.Tags );
@@ -287,7 +288,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         {
                             var overriddenMethod = new OverrideEventTransformation(
                                 this,
-                                existingEvent.ToRef(),
+                                existingEvent.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( existingEvent.AddMethod ),
                                 this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ),
                                 this.Tags );
@@ -322,7 +323,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         {
                             var overriddenEvent = new OverrideEventTransformation(
                                 this,
-                                builder.ToRef(),
+                                builder.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( builder.AddMethod ),
                                 this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
                                 this.Tags );

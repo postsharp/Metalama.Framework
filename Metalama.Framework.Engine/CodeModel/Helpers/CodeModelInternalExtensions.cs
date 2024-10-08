@@ -65,7 +65,7 @@ internal static class CodeModelInternalExtensions
             //case PromotedField promotedField:
             //   return promotedField.OriginalSourceFieldOrFieldBuilder.ToInsertPosition();
 
-            case NamedTypeBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
+            case NamedTypeBuilderData { DeclaringType: IBuiltDeclarationRef { BuilderData: NamedDeclarationBuilderData named } }:
                 return new InsertPosition( InsertPositionRelation.Within, named );
 
             case NamedTypeBuilderData { DeclaringType: ISymbolRef declaringType }:
@@ -76,7 +76,7 @@ internal static class CodeModelInternalExtensions
             case NamedTypeBuilderData topLevelType:
                 return new InsertPosition( topLevelType.PrimarySyntaxTree );
 
-            case MemberBuilderData { DeclaringType: IDeclarationBuilderDataRef { BuilderData: NamedDeclarationBuilderData named } }:
+            case MemberBuilderData { DeclaringType: IBuiltDeclarationRef { BuilderData: NamedDeclarationBuilderData named } }:
                 return new InsertPosition( InsertPositionRelation.Within, named );
 
             case MemberBuilderData { DeclaringType: ISymbolRef declaringType }:
@@ -93,7 +93,7 @@ internal static class CodeModelInternalExtensions
         => declaration switch
         {
             ISymbolRef symbolRef => symbolRef.Symbol.ToInsertPosition(),
-            IDeclarationBuilderDataRef builderDataRef => builderDataRef.BuilderData.ToInsertPosition(),
+            IBuiltDeclarationRef builderDataRef => builderDataRef.BuilderData.ToInsertPosition(),
             _ => throw new AssertionFailedException()
         };
 

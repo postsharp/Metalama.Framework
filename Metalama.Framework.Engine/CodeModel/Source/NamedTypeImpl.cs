@@ -547,7 +547,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
             var introducedInterface =
                 this.Compilation
-                    .GetInterfaceImplementationCollection( currentTypeDefinition.ToRef(), false )
+                    .GetInterfaceImplementationCollection( currentTypeDefinition.ToFullRef(), false )
                     .Introductions
                     .SingleOrDefault( i => currentGenericContext.Map( i.InterfaceType.GetTarget( this.Compilation ) ).Equals( interfaceMember.DeclaringType ) );
 
@@ -675,7 +675,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     [Memo]
     private IRef<INamedType> Ref => this.RefFactory.FromSymbolBasedDeclaration<INamedType>( this );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     IRef<INamedType> INamedType.ToRef() => this.Ref;
 

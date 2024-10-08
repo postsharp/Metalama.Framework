@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -94,9 +95,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                     true ) );
 
         [Memo]
-        private IRef<IParameter> Ref => this.RefFactory.FromSymbolBasedDeclaration<IParameter>( this );
+        private IFullRef<IParameter> Ref => this.RefFactory.FromSymbolBasedDeclaration<IParameter>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         IRef<IParameter> IParameter.ToRef() => this.Ref;
     }

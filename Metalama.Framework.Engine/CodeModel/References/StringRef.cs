@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -17,20 +16,9 @@ internal abstract class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
         this.Id = id;
     }
 
-    public override string? Name => null;
-
     public override IDurableRef<T> ToDurable() => this;
 
     public override bool IsDurable => true;
-    
-    public sealed override IRef? ContainingDeclaration => throw new NotSupportedException();
-
-
-    public override ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
-    {
-        // TODO: Handle references to builders.
-        return this.GetSymbol( compilationContext );
-    }
 
     public override bool Equals( IRef? other, RefComparison comparison )
     {
@@ -66,6 +54,4 @@ internal abstract class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
     }
 
     public override string ToString() => this.Id;
-
-    public sealed override DeclarationKind DeclarationKind => DeclarationKind.None;
 }

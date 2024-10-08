@@ -186,9 +186,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this.CompilationContext = partialCompilation.Compilation.GetCompilationContext();
 
             this._staticConstructors =
-                ImmutableDictionary<IRef<INamedType>, ConstructorBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
+                ImmutableDictionary<IFullRef<INamedType>, ConstructorBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
-            this._finalizers = ImmutableDictionary<IRef<INamedType>, MethodBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
+            this._finalizers = ImmutableDictionary<IFullRef<INamedType>, MethodBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
             this.Annotations = annotations
                                ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty.WithKeyComparer(
@@ -205,9 +205,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
-            static void InitializeDictionary<T>( out ImmutableDictionary<IRef<INamedType>, T> dictionary )
+            static void InitializeDictionary<T>( out ImmutableDictionary<IFullRef<INamedType>, T> dictionary )
             {
-                dictionary = ImmutableDictionary.Create<IRef<INamedType>, T>( RefEqualityComparer<INamedType>.Default );
+                dictionary = ImmutableDictionary.Create<IFullRef<INamedType>, T>( RefEqualityComparer<INamedType>.Default );
             }
 
             InitializeDictionary( out this._fields );
@@ -220,14 +220,15 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._interfaceImplementations );
 
             this._namedTypesByParent =
-                ImmutableDictionary.Create<IRef<INamespaceOrNamedType>, TypeUpdatableCollection>( RefEqualityComparer<INamespaceOrNamedType>.Default );
+                ImmutableDictionary.Create<IFullRef<INamespaceOrNamedType>, TypeUpdatableCollection>( RefEqualityComparer<INamespaceOrNamedType>.Default );
 
-            this._namespaces = ImmutableDictionary.Create<IRef<INamespace>, NamespaceUpdatableCollection>( RefEqualityComparer<INamespace>.Default );
+            this._namespaces = ImmutableDictionary.Create<IFullRef<INamespace>, NamespaceUpdatableCollection>( RefEqualityComparer<INamespace>.Default );
 
-            this._parameters = ImmutableDictionary.Create<IRef<IHasParameters>, ParameterUpdatableCollection>( RefEqualityComparer<IHasParameters>.Default );
+            this._parameters =
+                ImmutableDictionary.Create<IFullRef<IHasParameters>, ParameterUpdatableCollection>( RefEqualityComparer<IHasParameters>.Default );
 
             this._attributes =
-                ImmutableDictionary.Create<IRef<IDeclaration>, AttributeUpdatableCollection>( RefEqualityComparer<IDeclaration>.Default );
+                ImmutableDictionary.Create<IFullRef<IDeclaration>, AttributeUpdatableCollection>( RefEqualityComparer<IDeclaration>.Default );
 
             this.Factory = new DeclarationFactory( this );
 
@@ -382,7 +383,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.GetAttributeCollection( this.RefFactory.Compilation( this.CompilationContext ) ) );
+                this.GetAttributeCollection( this.RefFactory.ForCompilation() ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 
@@ -411,7 +412,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType, options );
         }
 
-        public IEnumerable<IRef<INamedType>> GetDerivedTypes( IRef<INamedType> baseType, DerivedTypesOptions options = default )
+        internal IEnumerable<IFullRef<INamedType>> GetDerivedTypes( IFullRef<INamedType> baseType, DerivedTypesOptions options = default )
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
@@ -568,7 +569,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        private IRef<ICompilation> Ref => this.RefFactory.Compilation( this.CompilationContext );
+        private IFullRef<ICompilation> Ref => this.RefFactory.ForCompilation();
 
         public IRef<ICompilation> ToRef() => this.Ref;
 
@@ -634,6 +635,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool BelongsToCurrentProject => true;
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
     }
 }

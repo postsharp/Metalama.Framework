@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using System.Linq;
 
@@ -55,8 +56,8 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
                             this,
-                            targetDeclaration.ToRef(),
-                            this._attribute.Type.ToRef() );
+                            targetDeclaration.ToFullRef(),
+                            this._attribute.Type.ToFullRef() );
 
                         return AddTransformations( AdviceOutcome.Override, removeTransformation );
 

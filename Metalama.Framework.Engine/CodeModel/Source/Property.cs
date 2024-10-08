@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -105,9 +106,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
         [Memo]
-        private IRef<IProperty> Ref => this.RefFactory.FromSymbolBasedDeclaration<IProperty>( this );
+        private IFullRef<IProperty> Ref => this.RefFactory.FromSymbolBasedDeclaration<IProperty>( this );
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+        private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
         IRef<IProperty> IProperty.ToRef() => this.Ref;
 

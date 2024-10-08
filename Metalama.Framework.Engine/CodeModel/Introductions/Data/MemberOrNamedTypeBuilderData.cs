@@ -2,12 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal abstract class MemberOrNamedTypeBuilderData : NamedDeclarationBuilderData
 {
-    protected MemberOrNamedTypeBuilderData( IMemberOrNamedTypeBuilderImpl builder, IRef<IDeclaration> containingDeclaration ) : base(
+    protected MemberOrNamedTypeBuilderData( IMemberOrNamedTypeBuilderImpl builder, IFullRef<IDeclaration> containingDeclaration ) : base(
         builder,
         containingDeclaration )
     {
@@ -34,5 +35,5 @@ internal abstract class MemberOrNamedTypeBuilderData : NamedDeclarationBuilderDa
 
     public bool IsPartial { get; }
 
-    public IRef<INamedType>? DeclaringType => this.ContainingDeclaration as IRef<INamedType>;
+    public override IFullRef<INamedType>? DeclaringType => this.ContainingDeclaration as IFullRef<INamedType>;
 }

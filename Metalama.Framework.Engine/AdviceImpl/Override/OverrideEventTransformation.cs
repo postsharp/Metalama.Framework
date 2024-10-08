@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal sealed class OverrideEventTransformation : OverrideMemberTransformation
 {
-    private new IRef<IEvent> OverriddenDeclaration => (IRef<IEvent>) base.OverriddenDeclaration;
+    private readonly IFullRef<IEvent> _overriddenDeclaration;
 
     private BoundTemplateMethod? AddTemplate { get; }
 
@@ -31,19 +32,22 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
 
     public OverrideEventTransformation(
         Advice advice,
-        IRef<IEvent> overriddenDeclaration,
+        IFullRef<IEvent> overriddenDeclaration,
         BoundTemplateMethod? addTemplate,
         BoundTemplateMethod? removeTemplate,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        : base( advice, tags )
     {
+        this._overriddenDeclaration = overriddenDeclaration;
         this.AddTemplate = addTemplate;
         this.RemoveTemplate = removeTemplate;
     }
 
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenDeclaration;
+
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( context.Compilation );
 
         var eventName = context.InjectionNameProvider.GetOverrideName(
             overriddenDeclaration.DeclaringType,
@@ -122,7 +126,7 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
                         ] ) ) ),
                 this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                overriddenDeclaration.ToRef() )
+                overriddenDeclaration.ToFullRef() )
         };
 
         return overrides;

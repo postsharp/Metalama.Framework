@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
@@ -77,9 +78,9 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public IMethod Definition => this.Compilation.Factory.GetAccessor( this._accessorBuilder );
 
     [Memo]
-    private IRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
+    private IFullRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     IRef<IMember> IMember.ToRef() => this.Ref;
 

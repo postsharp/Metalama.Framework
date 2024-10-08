@@ -132,7 +132,7 @@ internal static class TransformationHelper
         SyntaxGenerationOptions options,
         InsertPosition insertPosition )
     {
-        if ( insertPosition is { Relation: InsertPositionRelation.Within, DeclarationBuilder: IDeclarationBuilder containingBuilder } )
+        if ( insertPosition is { Relation: InsertPositionRelation.Within, BuilderData: IDeclarationBuilder containingBuilder } )
         {
             return GetSyntaxGenerationContext( compilationContext, options, containingBuilder );
         }
@@ -149,7 +149,7 @@ internal static class TransformationHelper
             { Relation: InsertPositionRelation.Within, SyntaxNode: BaseTypeDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
             { Relation: InsertPositionRelation.Within, SyntaxNode: NamespaceDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
             { Relation: InsertPositionRelation.Within, SyntaxNode: FileScopedNamespaceDeclarationSyntax node } => node.Name.Span.End,
-            _ => throw new AssertionFailedException( $"Unsupported {insertPosition}." ),
+            _ => throw new AssertionFailedException( $"Unsupported {insertPosition}." )
         };
 
         return compilationContext.GetSyntaxGenerationContext( options, insertPosition.SyntaxTree, insertOffset );

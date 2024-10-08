@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -37,7 +38,7 @@ internal sealed class AttributeBuilderCollection : List<AttributeBuilder>, IAttr
 
     public bool Any( Type type, ConversionKind conversionKind ) => throw new NotImplementedException();
 
-    public ImmutableArray<AttributeBuilderData> ToImmutable( IRef<IDeclaration> containingDeclaration )
+    public ImmutableArray<AttributeBuilderData> ToImmutable( IFullRef<IDeclaration> containingDeclaration )
     {
         if ( this.Count == 0 )
         {

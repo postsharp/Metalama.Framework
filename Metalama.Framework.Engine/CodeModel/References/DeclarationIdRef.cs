@@ -36,5 +36,5 @@ internal class DeclarationIdRef<T> : StringRef<T>
         return ConvertDeclarationOrThrow( declaration, compilation );
     }
 
-    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new DeclarationIdRef<TOut>( this.Id );
+    protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new DeclarationIdRef<TOut>( this.Id );
 }

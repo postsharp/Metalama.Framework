@@ -5,11 +5,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal interface ISymbolRef : ICompilationBoundRefImpl
+internal interface ISymbolRef : IFullRef
 {
     ISymbol Symbol { get; }
 
     RefTargetKind TargetKind { get; }
 }
 
-internal interface ISymbolRef<out T> : ISymbolRef, IRefImpl<T> where T : class, ICompilationElement;
+internal interface ISymbolRef<out T> : ISymbolRef, IFullRef<T> where T : class, ICompilationElement;

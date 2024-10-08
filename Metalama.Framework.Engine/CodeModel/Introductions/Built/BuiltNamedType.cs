@@ -23,7 +23,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
     public NamedTypeBuilderData NamedTypeBuilderData { get; }
 
-    public BuiltNamedType( NamedTypeBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltNamedType( NamedTypeBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base(
+        compilation,
+        genericContext )
     {
         this.NamedTypeBuilderData = builderData;
     }
@@ -67,7 +69,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     }
 
     [Memo]
-    private IRef<INamedType> Ref => this.RefFactory.FromBuilt<INamedType>( this );
+    private IFullRef<INamedType> Ref => this.RefFactory.FromBuilt<INamedType>( this );
 
     public IRef<INamedType> ToRef() => this.Ref;
 
@@ -75,7 +77,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -95,7 +97,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IPropertyCollection Properties
         => new PropertyCollection(
             this,
-            this.Compilation.GetPropertyCollection( this.Ref.GetDefinition() ) );
+            this.Compilation.GetPropertyCollection( this.Ref.Definition ) );
 
     [Memo]
     public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
@@ -104,7 +106,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IIndexerCollection Indexers
         => new IndexerCollection(
             this,
-            this.Compilation.GetIndexerCollection( this.Ref.GetDefinition() ) );
+            this.Compilation.GetIndexerCollection( this.Ref.Definition ) );
 
     [Memo]
     public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
@@ -113,7 +115,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IFieldCollection Fields
         => new FieldCollection(
             this,
-            this.Compilation.GetFieldCollection( this.Ref.GetDefinition() ) );
+            this.Compilation.GetFieldCollection( this.Ref.Definition ) );
 
     [Memo]
     public IFieldCollection AllFields => new AllFieldsCollection( this );
@@ -127,7 +129,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IEventCollection Events
         => new EventCollection(
             this,
-            this.Compilation.GetEventCollection( this.Ref.GetDefinition() ) );
+            this.Compilation.GetEventCollection( this.Ref.Definition ) );
 
     [Memo]
     public IEventCollection AllEvents => new AllEventsCollection( this );
@@ -136,7 +138,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IMethodCollection Methods
         => new MethodCollection(
             this,
-            this.Compilation.GetMethodCollection( this.Ref.GetDefinition() ) );
+            this.Compilation.GetMethodCollection( this.Ref.Definition ) );
 
     public IMethodCollection AllMethods => new AllMethodsCollection( this );
 
@@ -145,7 +147,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
     public IConstructorCollection Constructors
         => new ConstructorCollection(
             this,
-            this.Compilation.GetConstructorCollection( this.Ref.GetDefinition() ) );
+            this.Compilation.GetConstructorCollection( this.Ref.Definition ) );
 
     IConstructor? INamedType.StaticConstructor => null;
 

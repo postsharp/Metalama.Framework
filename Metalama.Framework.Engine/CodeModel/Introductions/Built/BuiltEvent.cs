@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
@@ -64,11 +65,11 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
     [Memo]
-    private IRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
+    private IFullRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
 
     public IRef<IEvent> ToRef() => this.Ref;
 
-    private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
+    private protected override IFullRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 

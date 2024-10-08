@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -22,11 +23,11 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
 
     public OverridePropertyTransformation(
         Advice advice,
-        IRef<IProperty> overriddenDeclaration,
+        IFullRef<IProperty> overriddenProperty,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        : base( advice, overriddenProperty, tags )
     {
         // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
         // The caller is responsible for verifying the compatibility of the template with the target.
@@ -43,7 +44,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        var overriddenDeclaration = this.OverriddenDeclaration.As<IProperty>().GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenProperty.As<IProperty>().GetTarget( context.Compilation );
 
         if ( overriddenDeclaration.GetMethod != null )
         {
