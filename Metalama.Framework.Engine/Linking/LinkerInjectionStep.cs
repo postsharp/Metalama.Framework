@@ -3,16 +3,11 @@
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
@@ -30,7 +25,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using MethodBase = Metalama.Framework.Engine.CodeModel.Source.MethodBase;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
@@ -178,9 +172,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             return declaration switch
             {
-                IFullRef<IMember> member => member.DeclaringType,
+                IFullRef<IMember> member => member.DeclaringType.AssertNotNull(),
                 IFullRef<INamedType> type => type,
-                IFullRef<IParameter> parameter => parameter.DeclaringType,
+                IFullRef<IParameter> parameter => parameter.DeclaringType.AssertNotNull(),
                 IFullRef<INamespace> @namespace => @namespace.Compilation,
                 IFullRef<ICompilation> compilation => compilation,
                 var d => throw new AssertionFailedException( $"Unsupported: {d}" )
@@ -569,7 +563,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             {
                 auxiliaryMemberTransformations.GetOrAdd( overriddenConstructorRef, _ => new AuxiliaryMemberTransformations() ).InjectAuxiliarySourceMember();
 
-                transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructorRef.DeclaringType )
+                transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructorRef.DeclaringType.AssertNotNull() )
                     .RemovePrimaryConstructor();
             }
         }

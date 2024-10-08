@@ -73,12 +73,13 @@ internal interface IFullRef : IRefImpl
     bool IsPrimaryConstructor { get; }
 
     /// <summary>
-    /// Determines whether the type is valid.
+    /// Gets a value indicating whether the type is valid.
     /// </summary>
     bool IsValid { get; }
 }
 
-internal interface IFullRef<out T> : IFullRef, IRef<T> where T : class, ICompilationElement
+internal interface IFullRef<out T> : IFullRef, IRef<T>
+    where T : class, ICompilationElement
 {
     IFullRef<T> Definition { get; }
 

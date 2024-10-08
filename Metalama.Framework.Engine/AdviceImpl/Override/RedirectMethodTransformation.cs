@@ -85,11 +85,11 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
         {
             var expression =
                 overriddenDeclaration.IsStatic
-                    ? (ExpressionSyntax) IdentifierName( this._targetMethod.Name )
+                    ? (ExpressionSyntax) IdentifierName( this._targetMethod.Name.AssertNotNull() )
                     : MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ThisExpression(),
-                        IdentifierName( this._targetMethod.Name ) );
+                        IdentifierName( this._targetMethod.Name.AssertNotNull() ) );
 
             return expression
                 .WithAspectReferenceAnnotation( this.AspectLayerId, AspectReferenceOrder.Previous );

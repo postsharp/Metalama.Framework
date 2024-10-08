@@ -29,13 +29,13 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
     public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.GetTarget( this._compilation );
 
     [Memo]
-    public FormattableString Description
-        => this.GetDescription();
+    public FormattableString Description => this.GetDescription();
 
     private FormattableString GetDescription()
     {
         ((BaseTransformation) this._transformation).ComputeDescription( this._compilation.GetCompilationModel() );
-        return FormattableStringHelper.MapString( this._transformation.Description, this._compilation );
+
+        return FormattableStringHelper.MapString( this._transformation.Description.AssertNotNull(), this._compilation );
     }
 
     [Memo]

@@ -7,7 +7,6 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -497,7 +496,7 @@ namespace Metalama.Framework.Engine.Templating
             TemplateDriver.CopyTemplateArguments( templateArguments, allArguments, 1, this._templateExpansionContext.SyntaxGenerationContext );
 
             var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo(
-                templateMember.DeclarationRef.GetSymbol( this._templateExpansionContext.Compilation.RoslynCompilation ).AssertSymbolNotNull() );
+                templateMember.DeclarationRef.GetSymbol( this._templateExpansionContext.Compilation.AssertNotNull().RoslynCompilation ).AssertSymbolNotNull() );
 
             return compiledTemplateMethodInfo.Invoke( context.TemplateProvider!.Value.Object, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
 
             return TemplatingDiagnosticDescriptors.MetaMemberNotAvailable.CreateException(
-                (Declaration: this._common.Template.DeclarationRef.GetTarget( this.Compilation ), "meta.Target." + memberName, this.Declaration,
+                (this._common.Template.DeclarationRef.GetTarget( this.Compilation ), "meta.Target." + memberName, this.Declaration,
                  this.Declaration.DeclarationKind,
                  description ?? "I" + memberName, alternativeSuggestion) );
         }
@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                     : $"the target {this.Declaration.DeclarationKind} is static";
 
                 return TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (Declaration: this._common.Template.DeclarationRef.GetTarget( this.Compilation ), expressionName, this.Declaration,
+                    (this._common.Template.DeclarationRef.GetTarget( this.Compilation ), expressionName, this.Declaration,
                      this.Declaration.DeclarationKind, explanation) );
             }
 

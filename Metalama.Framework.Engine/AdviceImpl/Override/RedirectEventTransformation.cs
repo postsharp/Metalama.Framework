@@ -90,8 +90,11 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
         {
             return
                 this._targetEvent.IsStatic
-                    ? IdentifierName( this._targetEvent.Name )
-                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetEvent.Name ) )
+                    ? IdentifierName( this._targetEvent.Name.AssertNotNull() )
+                    : MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( this._targetEvent.Name.AssertNotNull() ) )
                         .WithAspectReferenceAnnotation( this.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }

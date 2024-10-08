@@ -43,7 +43,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
     protected override EventBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        var templateDeclaration = this.Template.DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
 
         return new EventBuilder(
             this,
@@ -62,7 +62,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
         var serviceProvider = context.ServiceProvider;
 
-        var templateDeclaration = this.Template.DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
 
         if ( this._addTemplate != null || this._removeTemplate != null )
         {
@@ -165,7 +165,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
     {
         builder.Freeze();
 
-        var templateDeclaration = this.Template.DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
 
         // this.Tags: Override transformations.
         var targetDeclaration = this.TargetDeclaration;

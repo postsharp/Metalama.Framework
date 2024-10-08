@@ -641,6 +641,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                             if ( templateProperty != null )
                             {
+                                Invariant.Assert( templatePropertyDeclaration != null );
+
                                 var getMethodMissingFromTemplate = interfaceProperty.GetMethod != null && templatePropertyDeclaration.GetMethod == null;
                                 var setMethodMissingFromTemplate = interfaceProperty.SetMethod != null && templatePropertyDeclaration.SetMethod == null;
                                 var getMethodUnexpectedInTemplate = interfaceProperty.GetMethod == null && templatePropertyDeclaration.GetMethod != null;
@@ -665,7 +667,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         AdviceDiagnosticDescriptors.InterfacePropertyIsMissingAccessor.CreateRoslynDiagnostic(
                                             targetType.GetDiagnosticLocation(),
                                             (this.AspectInstance.AspectClass.ShortName, interfaceProperty, targetType,
-                                             templatePropertydDeclaration: templatePropertyDeclaration,
+                                             templatePropertyDeclaration,
                                              missingAccessor),
                                             this ) );
 
@@ -713,6 +715,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                             if ( templateProperty != null )
                             {
+                                Invariant.Assert( templatePropertyDeclaration != null );
+
                                 CopyAttributes( templatePropertyDeclaration, propertyBuilder );
 
                                 if ( hasGetter )
@@ -771,7 +775,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     new RedirectPropertyTransformation(
                                         this,
                                         propertyBuilder.ToRef(),
-                                        redirectionTargetProperty.ToFullRef() ) );
+                                        redirectionTargetProperty.AssertNotNull().ToFullRef() ) );
                             }
 
                             implementedInterfaceMembers.Add(
@@ -790,7 +794,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case IEvent interfaceEvent:
                         var existingEvent = targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
                         var templateEvent = memberSpec.Template?.As<IEvent>();
-                        var redirectionTargetEvent = memberSpec.TargetMember.AsFullRef<IEvent>();
+                        var redirectionTargetEvent = memberSpec.TargetMember.AssertNotNull().AsFullRef<IEvent>();
 
                         if ( existingEvent != null && !memberSpec.IsExplicit )
                         {
@@ -900,6 +904,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                             if ( templateEvent != null )
                             {
+                                Invariant.Assert( templateEventDeclaration != null );
+
                                 CopyAttributes( templateEventDeclaration, eventBuilder );
                                 CopyAttributes( templateEventDeclaration, eventBuilder.AddMethod.AssertNotNull() );
                                 CopyAttributes( templateEventDeclaration, eventBuilder.RemoveMethod.AssertNotNull() );

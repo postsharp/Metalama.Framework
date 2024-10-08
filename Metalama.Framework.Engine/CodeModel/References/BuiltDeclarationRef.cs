@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
-using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -66,7 +65,7 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
 
     public override ISymbol GetClosestContainingSymbol()
     {
-        for ( var ancestor = (IFullRef) this.BuilderData.ContainingDeclaration; ancestor != null; ancestor = (IFullRef) ancestor.ContainingDeclaration )
+        for ( var ancestor = (IFullRef) this.BuilderData.ContainingDeclaration; ancestor != null; ancestor = ancestor.ContainingDeclaration )
         {
             if ( ancestor is ISymbolRef symbolBasedDeclaration )
             {

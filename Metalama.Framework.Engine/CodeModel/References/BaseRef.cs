@@ -94,7 +94,9 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
         return result;
     }
 
-    public IRef<TOut> As<TOut>() where TOut : class, ICompilationElement => this.CastAsRef<TOut>();
+    public IRef<TOut> As<TOut>()
+        where TOut : class, ICompilationElement
+        => this.CastAsRef<TOut>();
 
     protected abstract IRef<TOut> CastAsRef<TOut>()
         where TOut : class, ICompilationElement;

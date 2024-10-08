@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -145,7 +144,7 @@ internal sealed partial class LinkerInjectionStep
             switch ( targetType )
             {
                 case ISymbolRef symbolRef:
-                    this.AddInjectedInterface( (BaseTypeDeclarationSyntax) symbolRef.Symbol.GetPrimaryDeclarationSyntax(), injectedInterface );
+                    this.AddInjectedInterface( (BaseTypeDeclarationSyntax) symbolRef.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull(), injectedInterface );
 
                     break;
 
@@ -400,7 +399,7 @@ internal sealed partial class LinkerInjectionStep
         public MemberLevelTransformations GetOrAddMemberLevelTransformations( IRef<IDeclaration> declaration )
             => declaration switch
             {
-                ISymbolRef symbolRef => this.GetOrAddMemberLevelTransformations( symbolRef.Symbol.GetPrimaryDeclarationSyntax() ),
+                ISymbolRef symbolRef => this.GetOrAddMemberLevelTransformations( symbolRef.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() ),
                 IBuiltDeclarationRef builtDeclarationRef => this.GetOrAddMemberLevelTransformations( builtDeclarationRef.BuilderData ),
                 _ => throw new AssertionFailedException()
             };

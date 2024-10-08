@@ -112,8 +112,11 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
         {
             return
                 this._targetProperty.GetTarget( context.Compilation ).IsStatic
-                    ? IdentifierName( this._targetProperty.Name )
-                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetProperty.Name ) )
+                    ? IdentifierName( this._targetProperty.Name.AssertNotNull() )
+                    : MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( this._targetProperty.Name.AssertNotNull() ) )
                         .WithAspectReferenceAnnotation( this.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }

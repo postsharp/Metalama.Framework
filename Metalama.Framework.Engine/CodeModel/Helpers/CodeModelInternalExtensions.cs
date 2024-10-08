@@ -74,7 +74,7 @@ internal static class CodeModelInternalExtensions
                     (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
             case NamedTypeBuilderData topLevelType:
-                return new InsertPosition( topLevelType.PrimarySyntaxTree );
+                return new InsertPosition( topLevelType.PrimarySyntaxTree.AssertNotNull() );
 
             case MemberBuilderData { DeclaringType: IBuiltDeclarationRef { BuilderData: NamedDeclarationBuilderData named } }:
                 return new InsertPosition( InsertPositionRelation.Within, named );

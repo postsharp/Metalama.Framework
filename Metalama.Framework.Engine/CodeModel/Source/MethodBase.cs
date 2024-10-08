@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SymbolMethodKind = Microsoft.CodeAnalysis.MethodKind;

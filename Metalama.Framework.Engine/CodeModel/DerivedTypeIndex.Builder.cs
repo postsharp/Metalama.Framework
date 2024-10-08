@@ -2,14 +2,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using MetalamaTypeKind = Metalama.Framework.Code.TypeKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;

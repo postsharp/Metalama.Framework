@@ -12,4 +12,5 @@ internal interface ISymbolRef : IFullRef
     RefTargetKind TargetKind { get; }
 }
 
-internal interface ISymbolRef<out T> : ISymbolRef, IFullRef<T> where T : class, ICompilationElement;
+internal interface ISymbolRef<out T> : ISymbolRef, IFullRef<T>
+    where T : class, ICompilationElement;

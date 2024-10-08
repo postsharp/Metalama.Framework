@@ -48,7 +48,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     public IHasParameters DeclaringMember { get; }
 
-    public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
+    public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
     public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 

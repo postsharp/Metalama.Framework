@@ -82,7 +82,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                 ];
 
             default:
-                throw new AssertionFailedException( $"Unsupported containing declaration type '{typeBuilder.ContainingDeclaration.GetType()}'." );
+                throw new AssertionFailedException( $"Unsupported containing declaration type '{typeBuilder.ContainingDeclaration.AssertNotNull().GetType()}'." );
         }
     }
 }

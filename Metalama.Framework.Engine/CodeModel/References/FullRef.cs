@@ -1,16 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -20,9 +17,12 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
     where T : class, ICompilationElement
 {
-    public new IFullRef<TOut> As<TOut>() where TOut : class, ICompilationElement => this.CastAsFullRef<TOut>();
+    public new IFullRef<TOut> As<TOut>() 
+        where TOut : class, ICompilationElement 
+        => this.CastAsFullRef<TOut>();
 
-    protected abstract IFullRef<TOut> CastAsFullRef<TOut>() where TOut : class, ICompilationElement;
+    protected abstract IFullRef<TOut> CastAsFullRef<TOut>() 
+        where TOut : class, ICompilationElement;
 
     protected sealed override IRef<TOut> CastAsRef<TOut>() => this.CastAsFullRef<TOut>();
 

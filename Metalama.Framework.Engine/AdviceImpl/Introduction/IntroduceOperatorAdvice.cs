@@ -57,11 +57,9 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
             this.TargetDeclaration,
             this._operatorKind.ToOperatorMethodName(),
             DeclarationKind.Operator,
-            this._operatorKind );
+            this._operatorKind ) { IsStatic = true };
 
-        builder.IsStatic = true;
-
-        var runtimeParameters = this.Template.TemplateClassMember.RunTimeParameters;
+        var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
 
         // Add predefined parameters of correct types.
         var firstParameterName = !runtimeParameters.IsEmpty ? runtimeParameters[0].Name : "a";

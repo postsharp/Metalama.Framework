@@ -30,19 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public FullRef<T> FromBuilderData<T>( DeclarationBuilderData builder, GenericContext? genericContext = null )
             where T : class, IDeclaration
-        {
-            if ( typeof(T) == typeof(IField) && builder is PropertyBuilderData promotedField )
-            {
-                throw new NotImplementedException();
-
-//                return (CompilationBoundRef<T>) ((ICompilationBoundRefImpl) promotedField.OriginalSourceFieldOrFieldBuilder.ToRef())
-                //                  .WithGenericContext( genericContext ?? GenericContext.Empty );
-            }
-            else
-            {
-                return new BuiltDeclarationRef<T>( builder, this._compilationContext, genericContext );
-            }
-        }
+            => new BuiltDeclarationRef<T>( builder, this._compilationContext, genericContext );
 
         public FullRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
             where T : class, IDeclaration

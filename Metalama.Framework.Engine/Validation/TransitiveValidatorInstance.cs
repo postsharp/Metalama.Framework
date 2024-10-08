@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Validation;
 using System;

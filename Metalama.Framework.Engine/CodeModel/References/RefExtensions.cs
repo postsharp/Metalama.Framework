@@ -14,21 +14,31 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 public static class RefExtensions
 {
-    internal static IFullRef<T> ToFullRef<T>( this T compilationElement ) where T : class, IDeclaration => (IFullRef<T>) compilationElement.ToRef();
+    internal static IFullRef<T> ToFullRef<T>( this T compilationElement )
+        where T : class, IDeclaration
+        => (IFullRef<T>) compilationElement.ToRef();
 
-    internal static IFullRef<T> ToFullRef<T>( this IDeclaration compilationElement ) where T : class, IDeclaration => (IFullRef<T>) compilationElement.ToRef();
+    internal static IFullRef<T> ToFullRef<T>( this IDeclaration compilationElement )
+        where T : class, IDeclaration
+        => (IFullRef<T>) compilationElement.ToRef();
 
     internal static IFullRef AsFullRef( this IRef reference ) => (IFullRef) reference;
 
-    internal static IFullRef<T> AsFullRef<T>( this IRef<T> reference ) where T : class, ICompilationElement => (IFullRef<T>) reference;
+    internal static IFullRef<T> AsFullRef<T>( this IRef<T> reference )
+        where T : class, ICompilationElement
+        => (IFullRef<T>) reference;
 
-    internal static IFullRef<T> AsFullRef<T>( this IRef reference ) where T : class, ICompilationElement => (IFullRef<T>) reference.As<T>();
+    internal static IFullRef<T> AsFullRef<T>( this IRef reference )
+        where T : class, ICompilationElement
+        => (IFullRef<T>) reference.As<T>();
 
     [Obsolete( "This call is redundant." )]
     internal static IFullRef AsFullRef( this IFullRef reference ) => reference;
 
     [Obsolete( "This call is redundant." )]
-    internal static IFullRef<T> AsFullRef<T>( this IFullRef<T> reference ) where T : class, ICompilationElement => reference;
+    internal static IFullRef<T> AsFullRef<T>( this IFullRef<T> reference )
+        where T : class, ICompilationElement
+        => reference;
 
     internal static bool HasSymbol( this IRef reference ) => reference is ISymbolRef;
 
@@ -44,9 +54,9 @@ public static class RefExtensions
     // ReSharper disable once SuspiciousTypeConversion.Global
     internal static SyntaxTree? GetPrimarySyntaxTree( this IFullRef reference )
         => reference.GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
-    
+
     public static SyntaxTree? GetPrimarySyntaxTree( this IRef reference )
-        => ((IFullRef)reference).GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
+        => ((IFullRef) reference).GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
 
     internal static Type[] GetPossibleDeclarationInterfaceTypes( this ISymbol symbol, CompilationContext compilationContext, RefTargetKind refTargetKind )
         => symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( refTargetKind );

@@ -60,12 +60,14 @@ internal abstract class BuiltDeclaration : BaseDeclaration
         where T : class, ICompilationElement
         => declaration?.GetTarget( this.Compilation, this.GenericContext );
 
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
     protected IReadOnlyList<T> MapDeclarationList<T>( IReadOnlyList<IRef<T>> refs )
         where T : class, ICompilationElement
         => refs.Count == 0 ? [] : refs.SelectAsReadOnlyList( this.MapDeclaration );
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
 
     [Memo]
-    public override IDeclaration? ContainingDeclaration => this.MapDeclaration( this.BuilderData.ContainingDeclaration );
+    public override IDeclaration ContainingDeclaration => this.MapDeclaration( this.BuilderData.ContainingDeclaration );
 
     public sealed override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
 

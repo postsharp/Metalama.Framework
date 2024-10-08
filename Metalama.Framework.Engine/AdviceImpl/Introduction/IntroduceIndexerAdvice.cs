@@ -70,12 +70,16 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
         if ( this._getTemplate != null )
         {
+            Invariant.Assert( getTemplateDeclaration != null );
+
             var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
 
             builder.Type = typeRewriter.Visit( getTemplateDeclaration.ReturnType );
         }
         else if ( this._setTemplate != null )
         {
+            Invariant.Assert( setTemplateDeclaration != null );
+
             var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
 
             var typeRewriter = TemplateTypeRewriter.Get( this._setTemplate );
@@ -95,6 +99,8 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
         if ( this._getTemplate != null )
         {
+            Invariant.Assert( getTemplateDeclaration != null );
+
             CopyTemplateAttributes( getTemplateDeclaration, builder.GetMethod.AssertNotNull(), serviceProvider );
 
             CopyTemplateAttributes(
@@ -105,6 +111,8 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
         if ( this._setTemplate != null )
         {
+            Invariant.Assert( setTemplateDeclaration != null );
+
             CopyTemplateAttributes( setTemplateDeclaration, builder.SetMethod!, serviceProvider );
 
             var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
@@ -127,8 +135,8 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
         var (accessorTemplateForAttributeCopy, accessorTemplateDeclarationForAttributeCopy, skipLastParameter) =
             this._getTemplate == null
-                ? (this._setTemplate!.TemplateMember, setTemplateDeclaration, true)
-                : (this._getTemplate.TemplateMember, getTemplateDeclaration, false);
+                ? (this._setTemplate!.TemplateMember, setTemplateDeclaration.AssertNotNull(), true)
+                : (this._getTemplate.TemplateMember, getTemplateDeclaration.AssertNotNull(), false);
 
         var runtimeParameters = accessorTemplateForAttributeCopy.TemplateClassMember.RunTimeParameters;
 

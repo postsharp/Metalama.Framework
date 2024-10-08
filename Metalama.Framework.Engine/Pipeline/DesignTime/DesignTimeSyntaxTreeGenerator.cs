@@ -60,12 +60,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         t =>
                             t.TargetDeclaration switch
                             {
-                                IFullRef<INamespace> @namespace => (IFullRef<INamespaceOrNamedType>) @namespace,
+                                IFullRef<INamespace> @namespace => @namespace,
                                 IFullRef<INamedType> namedType => namedType,
-                                IFullRef<IMember> member => member.DeclaringType,
+                                IFullRef<IMember> member => member.DeclaringType.AssertNotNull(),
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration}" )
-                            } )
-                    .ToDictionary( g => g.Key, g => g.AsEnumerable(), RefEqualityComparer<INamespaceOrNamedType>.Default );
+                            },
+                        RefEqualityComparer<INamespaceOrNamedType>.Default )
+                    .ToDictionary( g => g.Key!, g => g.AsEnumerable(), RefEqualityComparer<INamespaceOrNamedType>.Default );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
@@ -368,9 +369,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Additionally, add all introduced constructors to the list.
             foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
             {
-                var constructorBuilder = (introducedConstructor.ToRef() as IBuiltDeclarationRef)?.BuilderData as ConstructorBuilderData;
-
-                if ( constructorBuilder is null || constructorBuilder.ReplacedImplicitConstructor != null )
+                if ( (introducedConstructor.ToRef() as IBuiltDeclarationRef)?.BuilderData is not ConstructorBuilderData { ReplacedImplicitConstructor: null } )
                 {
                     // Skip introduced constructors that are replacements.
                     continue;

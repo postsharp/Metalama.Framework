@@ -90,7 +90,7 @@ internal sealed partial class LinkerInjectionStep
                 constructor.GetTarget( this._finalCompilationModel )
                     .GetSyntaxModifierList( ModifierCategories.Unsafe )
                     .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
-                Identifier( constructor.DeclaringType.Name ),
+                Identifier( constructor.DeclaringType.AssertNotNull().Name.AssertNotNull() ),
                 parameters,
                 ConstructorInitializer(
                     SyntaxKind.ThisConstructorInitializer,

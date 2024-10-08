@@ -21,11 +21,13 @@ internal class NamedTypeBuilderData : MemberOrNamedTypeBuilderData
 
     // Only classes are supported at the moment, so the following members can return a constant value.
 
+#pragma warning disable CA1822
     public TypeKind TypeKind => TypeKind.Class;
 
     public bool IsReadOnly => false;
 
     public bool IsRef => false;
+#pragma warning restore CA1822
 
     public NamedTypeBuilderData( NamedTypeBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {

@@ -16,45 +16,6 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class TemplateMember<T> : TemplateMember
-    where T : class, IMemberOrNamedType
-{
-    protected override ISymbolRef<IMemberOrNamedType> GetDeclaration() => this.DeclarationRef;
-
-    public new ISymbolRef<T> DeclarationRef { get; }
-
-    public TemplateMember(
-        ISymbolRef<T> implementation,
-        TemplateClassMember templateClassMember,
-        IAdviceAttribute adviceAttribute,
-        TemplateKind selectedKind = TemplateKind.Default ) : this(
-        implementation,
-        templateClassMember,
-        adviceAttribute,
-        selectedKind,
-        selectedKind ) { }
-
-    public TemplateMember(
-        ISymbolRef<T> implementation,
-        TemplateClassMember templateClassMember,
-        IAdviceAttribute adviceAttribute,
-        TemplateKind selectedKind,
-        TemplateKind interpretedKind ) : base(
-        implementation,
-        templateClassMember,
-        adviceAttribute,
-        selectedKind,
-        interpretedKind )
-    {
-        this.DeclarationRef = (ISymbolRef<T>) implementation.As<T>();
-    }
-
-    public TemplateMember( TemplateMember prototype ) : base( prototype )
-    {
-        this.DeclarationRef = (ISymbolRef<T>) prototype.DeclarationRef.As<T>();
-    }
-}
-
 internal abstract class TemplateMember
 {
     protected abstract ISymbolRef<IMemberOrNamedType> GetDeclaration();

@@ -104,8 +104,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 _ => throw new NotSupportedException( "Non-default comparison of attributes is not supported." )
             };
 
-        public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
-
         public virtual bool Equals( AttributeRef? other )
         {
             if ( other == null )

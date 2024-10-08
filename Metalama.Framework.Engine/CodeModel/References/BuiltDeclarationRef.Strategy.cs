@@ -8,12 +8,10 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
@@ -156,7 +154,7 @@ internal sealed partial class BuiltDeclarationRef<T>
         }
     }
 
-    public override IFullRef<INamedType> DeclaringType => this.BuilderData.DeclaringType;
+    public override IFullRef<INamedType> DeclaringType => this.BuilderData.DeclaringType.AssertNotNull();
 
     public override bool IsPrimaryConstructor => false;
 

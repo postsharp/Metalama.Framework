@@ -42,7 +42,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
         if ( this.Template != null )
         {
-            builder.Type = templateDeclaration.Type;
+            builder.Type = templateDeclaration.AssertNotNull().Type;
             builder.Writeability = templateDeclaration.Writeability;
         }
         else

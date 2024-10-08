@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
@@ -12,16 +11,6 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal abstract class DeclarationCollection<TDeclaration> : DeclarationCollection<TDeclaration, IFullRef<TDeclaration>>
-        where TDeclaration : class, IDeclaration
-    {
-        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<IFullRef<TDeclaration>> source ) : base(
-            containingDeclaration,
-            source ) { }
-
-        protected DeclarationCollection() { }
-    }
-
     internal abstract class DeclarationCollection<TDeclaration, TRef> : IReadOnlyCollection<TDeclaration>
         where TDeclaration : class, IDeclaration
         where TRef : class, IRef<TDeclaration>
@@ -49,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration}"/> class representing an empty list.
+        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration,TRef}"/> class representing an empty list.
         /// </summary>
         protected DeclarationCollection()
         {

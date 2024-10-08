@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
@@ -23,7 +21,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -173,7 +170,7 @@ internal sealed partial class LinkerInjectionStep
 
                 foreach ( var attribute in list.Attributes )
                 {
-                    if ( !finalModelAttributes.Any( a => ((AttributeRef) a).IsSyntax( attribute ) ) )
+                    if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
                     {
                         modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives )!;
                     }
@@ -1236,7 +1233,7 @@ internal sealed partial class LinkerInjectionStep
             node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
 
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
-            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode ).AssertSymbolNotNull();
             var property = this.CompilationContext.RefFactory.FromSymbol<IProperty>( symbol );
 
             if ( symbol is { SetMethod: { } setMethodSymbol } )
@@ -1277,7 +1274,7 @@ internal sealed partial class LinkerInjectionStep
             node = (IndexerDeclarationSyntax) this.VisitIndexerDeclaration( node )!;
 
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
-            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode ).AssertSymbolNotNull();
             var indexer = this.CompilationContext.RefFactory.FromSymbol<IIndexer>( symbol );
 
             if ( symbol != null )

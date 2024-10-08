@@ -136,13 +136,13 @@ namespace Metalama.Framework.Engine
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
-        public static T AssertNotNull<T>( [NotNull] this T? obj, string? justification = null )
+        public static T AssertNotNull<T>( [NotNull] this T? obj, [CallerArgumentExpression( nameof(obj) )] string? description = null )
             where T : class
         {
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be null." );
+                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must not be null: '{description}'." );
             }
 
             return obj;
@@ -160,13 +160,13 @@ namespace Metalama.Framework.Engine
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
-        public static T AssertNotNull<T>( this T? obj, string? justification = null )
+        public static T AssertNotNull<T>( this T? obj, string? description = null )
             where T : struct
         {
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be null." );
+                throw new AssertionFailedException( description ?? $"The reference to {typeof(T).Name} must not be null." );
             }
 
             return obj.Value;

@@ -126,21 +126,3 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     [Memo]
     public ConstructorBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
 }
-
-internal static class DeclarationBuilderExtensions
-{
-    public static T AssertFrozen<T>( this T declarationBuilder )
-        where T : DeclarationBuilder
-    {
-#if DEBUG
-        if ( !declarationBuilder.IsFrozen )
-        {
-            throw new AssertionFailedException( $"The {declarationBuilder.GetType().Name} was expected to be frozen." );
-        }
-
-        return declarationBuilder;
-#else
-return declarationBuilder;
-#endif
-    }
-}

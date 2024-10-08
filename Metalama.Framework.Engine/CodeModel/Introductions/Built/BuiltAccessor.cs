@@ -137,7 +137,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     IHasAccessors IMethod.DeclaringMember => (IHasAccessors) this._builtMember;
 
-    public override IDeclaration? ContainingDeclaration => this._builtMember;
+    public override IDeclaration ContainingDeclaration => this._builtMember;
 
     public MethodBase ToMethodBase() => CompileTimeMethodInfo.Create( this );
 

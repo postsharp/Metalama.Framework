@@ -100,7 +100,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             {
                 var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
 
-                builder.Type = typeRewriter.Visit( getTemplateDeclaration.ReturnType );
+                builder.Type = typeRewriter.Visit( getTemplateDeclaration.AssertNotNull().ReturnType );
             }
             else if ( this._setTemplate != null )
             {
@@ -112,13 +112,13 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                 {
                     // There may be an invalid template without runtime parameters, in which case type cannot be determined.
 
-                    builder.Type = typeRewriter.Visit( setTemplateDeclaration.Parameters[runtimeParameters[0].SourceIndex].Type );
+                    builder.Type = typeRewriter.Visit( setTemplateDeclaration.AssertNotNull().Parameters[runtimeParameters[0].SourceIndex].Type );
                 }
             }
             else if ( this.Template != null )
             {
                 // Case for event fields.
-                builder.Type = templateDeclaration.Type;
+                builder.Type = templateDeclaration.AssertNotNull().Type;
             }
 
             builder.Accessibility =
@@ -126,10 +126,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     ? this._getTemplate.TemplateMember.Accessibility
                     : this._setTemplate?.TemplateMember.Accessibility).AssertNotNull();
 
-            if ( builder.GetMethod != null )
-            {
-                builder.GetMethod.SetIsIteratorMethod( this.Template?.IsIteratorMethod ?? this._getTemplate?.TemplateMember.IsIteratorMethod ?? false );
-            }
+            builder.GetMethod?.SetIsIteratorMethod( this.Template?.IsIteratorMethod ?? this._getTemplate?.TemplateMember.IsIteratorMethod ?? false );
 
             if ( this.Template != null )
             {
@@ -162,11 +159,14 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         {
             if ( this._getTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._getTemplate.TemplateMember.TemplateClassMember, getTemplateDeclaration, builder.GetMethod );
+                AddAttributeForAccessorTemplate(
+                    this._getTemplate.TemplateMember.TemplateClassMember,
+                    getTemplateDeclaration.AssertNotNull(),
+                    builder.GetMethod );
             }
             else if ( templateDeclaration?.GetMethod != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, templateDeclaration.GetMethod, builder.GetMethod );
+                AddAttributeForAccessorTemplate( this.Template.AssertNotNull().TemplateClassMember, templateDeclaration.GetMethod, builder.GetMethod );
             }
         }
 
@@ -174,11 +174,14 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         {
             if ( this._setTemplate != null )
             {
-                AddAttributeForAccessorTemplate( this._setTemplate.TemplateMember.TemplateClassMember, setTemplateDeclaration, builder.SetMethod );
+                AddAttributeForAccessorTemplate(
+                    this._setTemplate.TemplateMember.TemplateClassMember,
+                    setTemplateDeclaration.AssertNotNull(),
+                    builder.SetMethod );
             }
             else if ( templateDeclaration?.SetMethod != null )
             {
-                AddAttributeForAccessorTemplate( this.Template.TemplateClassMember, templateDeclaration.SetMethod, builder.SetMethod );
+                AddAttributeForAccessorTemplate( this.Template.AssertNotNull().TemplateClassMember, templateDeclaration.SetMethod, builder.SetMethod );
             }
         }
 

@@ -44,7 +44,7 @@ internal sealed class BuilderAttributeRef : AttributeRef
         return true;
     }
 
-    public override string Name => this.BuilderData.Type.AsFullRef().Name.AssertNotNull();
+    public override string Name => this.BuilderData.Type.Name.AssertNotNull();
 
     protected override AttributeSyntax? AttributeSyntax => null;
 

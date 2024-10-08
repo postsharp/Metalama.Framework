@@ -695,7 +695,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
                     (aspectClass?.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
-                     targetLanguageVersion.Value.ToDisplayString(), Declaration: templateMember.DeclarationRef.GetTarget( context.Compilation )),
+                     targetLanguageVersion.Value.ToDisplayString(), templateMember.DeclarationRef.GetTarget( context.Compilation.AssertNotNull() )),
                     deduplicationKey: aspectClass?.FullName ) );
         }
     }

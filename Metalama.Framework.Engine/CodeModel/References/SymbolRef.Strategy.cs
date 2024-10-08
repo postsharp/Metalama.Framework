@@ -2,12 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Engine.Services;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using Metalama.Framework.Code;
-using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
@@ -260,12 +254,12 @@ internal sealed partial class SymbolRef<T>
                     {
                         MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRaise or RoslynMethodKind.EventRemove
                     } accessor
-                    => this.CompilationContext.RefFactory.FromSymbol<IEvent>( accessor.AssociatedSymbol ),
+                    => this.CompilationContext.RefFactory.FromSymbol<IEvent>( accessor.AssociatedSymbol.AssertSymbolNotNull() ),
                 IMethodSymbol
                     {
                         MethodKind: RoslynMethodKind.PropertyGet or RoslynMethodKind.PropertySet
                     } accessor
-                    => this.CompilationContext.RefFactory.FromSymbol<IProperty>( accessor.AssociatedSymbol ),
+                    => this.CompilationContext.RefFactory.FromSymbol<IProperty>( accessor.AssociatedSymbol.AssertSymbolNotNull() ),
                 _ => this.As<IMember>()
             };
         }
