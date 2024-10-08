@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Linq.Parallel" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="$(RoslynVersion)" />

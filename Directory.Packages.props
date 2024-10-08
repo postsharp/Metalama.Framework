@@ -15,7 +15,7 @@
     <!--<RoslynVersion>IMPORTED!</RoslynVersion>-->
     <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
     <xUnitApiVersion>2.4.2</xUnitApiVersion>
-    <MicrosoftBuildVersion>17.10.4</MicrosoftBuildVersion>
+    <MicrosoftBuildVersion>17.11.4</MicrosoftBuildVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="DiffEngine" Version="15.3.0" />
@@ -49,7 +49,6 @@
     <PackageVersion Include="StreamJsonRpc" Version="2.7.76" />
     <!-- This should match the version used by Roslyn in RoslynApiMinVersion -->
     <PackageVersion Include="System.Collections.Immutable" Version="5.0.0" />
-    <PackageVersion Include="System.Linq.Parallel" Version="4.3.0" />
     <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageVersion Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />

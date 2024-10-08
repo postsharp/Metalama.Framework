@@ -1,4 +1,6 @@
 ﻿namespace MetaLamaTest;
 
 [MyAspect]
-public sealed class Target;
+public sealed class Target
+{    
+}

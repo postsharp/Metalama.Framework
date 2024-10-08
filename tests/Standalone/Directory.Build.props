@@ -14,6 +14,10 @@
   <!-- Imports Directory.Build.props of the upper directory. Use this code in any non-root Directory.Build.* even if the file does not exit. -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="Exists('$([MSBuild]::GetPathOfFileAbove(`Directory.Build.props`, `$(MSBuildThisFileDirectory)../`))')" />
 
+  <PropertyGroup>
+    <!-- Reset LangVersion that comes from PostSharp.Engineering BuildOptions.props. -->
+    <LangVersion></LangVersion>
+  </PropertyGroup>
 
   <!-- Versions of dependencies -->
   <Target Name="ValidateVersion">
