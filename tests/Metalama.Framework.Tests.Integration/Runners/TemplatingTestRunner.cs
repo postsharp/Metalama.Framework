@@ -254,7 +254,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     serviceProvider,
                     assembly,
                     compilationModel,
-                    template.ForIntroduction( templateMethodDeclaration ) );
+                    template.ForIntroduction( templateMethodDeclaration, default ) );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out var output );
 
@@ -318,7 +318,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScopeFactory = new LexicalScopeFactory( compilation );
-            var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod );
+            var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod.ToRef() );
             var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
 
             var proceedExpression =

@@ -13,6 +13,8 @@ internal interface ITransformation : ITransformationBase
 {
     [Obsolete( "We want to get rid of this" )]
     Advice ParentAdvice { get; }
+    
+    AspectLayerId AspectLayerId { get; }
 
     IAspectInstanceInternal AspectInstance { get; }
 

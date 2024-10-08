@@ -23,8 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 /// <summary>
 /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advice methods so the user can continue
-/// specifying the introduced declaration. They are bound to the <see cref="CompilationModel"/> that created them, but implement
-/// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
+/// specifying the introduced declaration. They are bound to the <see cref="CompilationModel"/> that created them.
 /// 
 /// </summary>
 internal abstract class DeclarationBuilder : IDeclarationBuilderImpl

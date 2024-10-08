@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Linq;
 using Xunit;
 
@@ -241,7 +242,7 @@ class C
 
         var interfaceType = initialCompilation.Types.OfName( "I" ).Single();
 
-        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToRef(), interfaceType.ToRef(), [] );
+        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToFullRef(), interfaceType.ToFullRef(), [] );
 
         var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
             [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface],

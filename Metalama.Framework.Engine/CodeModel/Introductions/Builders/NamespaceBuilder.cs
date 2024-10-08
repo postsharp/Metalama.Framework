@@ -66,5 +66,5 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
 
     [Memo]
-    public NamespaceBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
+    public NamespaceBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.AssertNotNull().ToFullRef() );
 }

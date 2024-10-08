@@ -565,11 +565,11 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         if ( overrideDeclarationTransformation.OverriddenDeclaration is IFullRef<IConstructor> overriddenConstructorRef )
         {
-            if ( overriddenConstructorRef.AsFullRef().IsPrimaryConstructor )
+            if ( overriddenConstructorRef.IsPrimaryConstructor )
             {
                 auxiliaryMemberTransformations.GetOrAdd( overriddenConstructorRef, _ => new AuxiliaryMemberTransformations() ).InjectAuxiliarySourceMember();
 
-                transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructorRef.AsFullRef().DeclaringType )
+                transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructorRef.DeclaringType )
                     .RemovePrimaryConstructor();
             }
         }
@@ -850,7 +850,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // return returnValue;
 
             var advice = originTransformation.ParentAdvice;
-            var rootMember = member.AsFullRef().TypeMember;
+            var rootMember = member.TypeMember;
 
             // TODO: Ideally, entry + exit statements should be injected here, but it complicates the transformation collection and rewriter.
             //       This now generates "well-known" structure, which is recognized by the rewriter, which is quite ugly.
@@ -859,7 +859,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             transformationCollection.AddInjectedMember(
                 new InjectedMember(
                     originTransformation,
-                    member.AsFullRef().DeclarationKind,
+                    member.DeclarationKind,
                     auxiliaryMemberFactory.GetAuxiliaryContractMember( rootMember, advice, returnVariableName ),
                     advice.AspectLayerId,
                     InjectedMemberSemantic.AuxiliaryBody,

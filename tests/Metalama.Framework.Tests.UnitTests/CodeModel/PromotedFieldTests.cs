@@ -29,7 +29,7 @@ class C
         var field = immutableCompilation.Types.Single().Fields.Single();
 
         // Create a PromotedField.
-        var promotedField = PromotedField.Create( testContext.ServiceProvider, field, null!, null! );
+        var promotedField = PromotedFieldBuilder.Create( testContext.ServiceProvider, field, null!, null! );
         Assert.Same( promotedField.Definition, promotedField );
         Assert.Same( promotedField.OverridingProperty, promotedField );
         Assert.Same( promotedField.OriginalField, promotedField );
@@ -87,7 +87,7 @@ class C<T>
             var field = immutableCompilation.Types.Single().Fields.Single();
 
             // Create a PromotedField.
-            var promotedField = PromotedField.Create( testContext.ServiceProvider, field, null!, null! );
+            var promotedField = PromotedFieldBuilder.Create( testContext.ServiceProvider, field, null!, null! );
             Assert.Same( promotedField.Definition, promotedField );
             Assert.Same( promotedField.OverridingProperty, promotedField );
             Assert.Same( promotedField.OriginalField, promotedField );
@@ -146,7 +146,7 @@ class C
         var field = immutableCompilation2.Types.Single().Fields.Single();
 
         // Create a PromotedField.
-        var promotedField = PromotedField.Create( testContext.ServiceProvider, field, null!, null! );
+        var promotedField = PromotedFieldBuilder.Create( testContext.ServiceProvider, field, null!, null! );
         Assert.Same( promotedField.Definition, promotedField );
         Assert.Same( promotedField.OverridingProperty, promotedField );
         Assert.Same( promotedField.OriginalField, promotedField );

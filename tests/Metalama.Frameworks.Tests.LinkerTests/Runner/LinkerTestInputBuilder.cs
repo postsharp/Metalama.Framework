@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
@@ -237,7 +238,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         throw new AssertionFailedException();
                     }
 
-                    A.CallTo( () => overrideDeclarationTransformation.OverriddenDeclaration ).Returns( overridenMember );
+                    A.CallTo( () => overrideDeclarationTransformation.OverriddenDeclaration ).Returns( overridenMember.ToFullRef() );
 
                     A.CallTo( () => ((IInjectMemberTransformation) overrideDeclarationTransformation).TransformedSyntaxTree )
                         .Returns( symbolHelperNode.SyntaxTree );
@@ -274,7 +275,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             // This is replaced source element.
                             var replacedMember = (IMember) initialCompilationModel.Factory.GetDeclaration( replacedMemberSymbol );
 
-                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( replacedMember );
+                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( replacedMember.ToFullRef() );
                         }
                         else
                         {

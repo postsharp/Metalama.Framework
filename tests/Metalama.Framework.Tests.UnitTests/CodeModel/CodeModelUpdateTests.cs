@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
@@ -327,7 +328,7 @@ class C
 
         // Add a field.
         var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
-        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.Immutable ) );
 
         Assert.Single( constructor.Parameters );
     }
@@ -350,7 +351,7 @@ class C
 
         // Add a field.
         var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
-        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.Immutable ) );
 
         Assert.Single( constructor.Parameters );
     }
@@ -426,8 +427,8 @@ class C
         compilation.AddTransformation(
             new RemoveAttributesTransformation(
                 null!,
-                type,
-                (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
+                type.ToFullRef(),
+                compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ).ToRef().AsFullRef<INamedType>() ) );
 
         Assert.Empty( type.Attributes );
     }

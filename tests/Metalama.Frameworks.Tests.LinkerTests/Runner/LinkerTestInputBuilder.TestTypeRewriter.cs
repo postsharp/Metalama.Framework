@@ -426,10 +426,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                         _ = declarationKind switch
                         {
-                            DeclarationKind.Method => o.Implements<IMethodImpl>().Implements<IRefImpl<IMethod>>(),
-                            DeclarationKind.Property => o.Implements<IPropertyImpl>().Implements<IRefImpl<IProperty>>(),
-                            DeclarationKind.Event => o.Implements<IEventImpl>().Implements<IRefImpl<IEvent>>(),
-                            DeclarationKind.Field => o.Implements<IFieldImpl>().Implements<IRefImpl<IField>>(),
+                            DeclarationKind.Method => o.Implements<IMethodImpl>().Implements<IFullRef<IMethod>>(),
+                            DeclarationKind.Property => o.Implements<IPropertyImpl>().Implements<IFullRef<IProperty>>(),
+                            DeclarationKind.Event => o.Implements<IEventImpl>().Implements<IFullRef<IEvent>>(),
+                            DeclarationKind.Field => o.Implements<IFieldImpl>().Implements<IFullRef<IField>>(),
                             _ => throw new AssertionFailedException( $"Unexpected declaration kind {declarationKind}." )
                         };
 
@@ -443,7 +443,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 {
                     case DeclarationKind.Method:
                         A.CallTo(
-                                () => ((IRefImpl<IMethod>) transformation).GetTarget(
+                                () => ((IFullRef<IMethod>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
                                     null ) )
                             .Returns( (IMethod) transformation );
@@ -452,7 +452,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     case DeclarationKind.Property:
                         A.CallTo(
-                                () => ((IRefImpl<IProperty>) transformation).GetTarget(
+                                () => ((IFullRef<IProperty>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
                                     null ) )
                             .Returns( (IProperty) transformation );
@@ -469,7 +469,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     case DeclarationKind.Event:
                         A.CallTo(
-                                () => ((IRefImpl<IEvent>) transformation).GetTarget(
+                                () => ((IFullRef<IEvent>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
                                     null ) )
                             .Returns( (IEvent) transformation );
@@ -485,7 +485,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     case DeclarationKind.Field:
                         A.CallTo(
-                                () => ((IRefImpl<IField>) transformation).GetTarget(
+                                () => ((IFullRef<IField>) transformation).GetTarget(
                                     A<CompilationModel>.Ignored,
                                     null ) )
                             .Returns( (IField) transformation );

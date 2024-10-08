@@ -15,8 +15,6 @@ namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
 internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransformation, IIntroduceInterfaceTransformation, IInjectInterfaceTransformation
 {
-    //public IDeclaration ContainingDeclaration => this.TargetType;
-
     public IFullRef<INamedType> InterfaceType { get; }
 
     public IFullRef<INamedType> TargetType { get; }

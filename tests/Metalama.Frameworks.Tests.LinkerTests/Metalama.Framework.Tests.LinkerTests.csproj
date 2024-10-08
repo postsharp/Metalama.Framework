@@ -43,6 +43,14 @@
         <Compile Remove="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
         <!-- But still show them in solution explorer -->
         <None Include="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
+        <Compile Update="Runners\LinkerTestRunner.cs">
+          <DependentUpon>$([System.String]::Copy('LinkerTestRunner').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Runners\LinkerTestRunnerFactory.cs">
+          <DependentUpon>$([System.String]::Copy('LinkerTestRunnerFactory').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -64,10 +72,6 @@
             <_Parameter1>EngineeringDataDirectory</_Parameter1>
             <_Parameter2>$(PostSharpEngineeringDataDirectory)</_Parameter2>
         </AssemblyAttribute>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Tests\Linker\" />
     </ItemGroup>
 
 </Project>
