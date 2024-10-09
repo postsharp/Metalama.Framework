@@ -128,7 +128,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         this.Logger.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
 
         // Initialize FileSystemWatcher.
-        var watchedFilter = Path.GetFileName( this.ProjectOptions.BuildTouchFile );
+        var watchedFilter = Path.GetFileName( this.ProjectOptions.BuildTouchFile ).AssertNotNull();
         var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
 
         if ( watchedDirectory != null )
@@ -393,7 +393,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    public bool MustReportPausedPipelineAsErrors => this._eventHub == null || !this._eventHub.IsUserInterfaceAttached;
+    public bool MustReportPausedPipelineAsErrors => this._eventHub is not { IsUserInterfaceAttached: true };
 
     protected override void Dispose( bool disposing )
     {

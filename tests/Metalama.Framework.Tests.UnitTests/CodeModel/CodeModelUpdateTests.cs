@@ -377,6 +377,7 @@ class C
             null!,
             type,
             AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
+
         attributeBuilder.Freeze();
 
         compilation.AddTransformation( attributeBuilder.ToTransformation() );

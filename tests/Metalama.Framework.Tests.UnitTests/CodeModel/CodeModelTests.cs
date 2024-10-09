@@ -9,8 +9,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -24,7 +22,6 @@ using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
@@ -580,7 +577,7 @@ class C<T>
 
             var type = Assert.Single( compilation.Types );
 
-            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeKind.TypeParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Fields.SelectAsImmutableArray( p => p.Type.TypeKind ) );
         }
@@ -1925,17 +1922,15 @@ public partial class C
                                 """;
 
             var compilation = testContext.CreateCompilationModel( code );
-            
+
             var interfaceType = (INamedType) compilation.Types.Single().Fields.OfName( "f1" ).Single().Type;
             var interfaceMethod = interfaceType.Properties.OfName( "Count" ).Single().GetMethod;
 
             Assert.True( interfaceType.TryFindImplementationForInterfaceMember( interfaceMethod, out var roundtrip ) );
             Assert.Same( interfaceMethod, roundtrip );
-            
-            var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
-            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out var memberImplementation ) );
-            
 
+            var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
+            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out _ ) );
         }
 
         private sealed class TestClassificationService : ISymbolClassificationService

@@ -20,17 +20,18 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public sealed class SideBySideVersionTests : DesignTimeTestBase
 {
-    private static async Task<(DesignTimeAspectPipelineFactory PipelineFactory, Compilation DependentCompilation, SyntaxTree DependentCodeTree)> PreparePipeline(
-        TestContext testContext,
-        string masterCode,
-        string dependentCode )
+    private static async Task<(DesignTimeAspectPipelineFactory PipelineFactory, Compilation DependentCompilation, SyntaxTree DependentCodeTree)>
+        PreparePipeline(
+            TestContext testContext,
+            string masterCode,
+            string dependentCode )
     {
         var workspaceProvider = new TestWorkspaceProvider( testContext.ServiceProvider );
 
         var entryPointManager = new DesignTimeEntryPointManager();
         var consumer = entryPointManager.GetConsumer( CurrentContractVersions.All );
 
-        var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof( IDesignTimeEntryPointConsumer ), consumer )
+        var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof(IDesignTimeEntryPointConsumer), consumer )
             .WithService( workspaceProvider );
 
         // Initialize dependencies simulating the current version.

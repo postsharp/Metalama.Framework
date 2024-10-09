@@ -118,7 +118,7 @@ class C< [MyAttribute(4)]T>
 
             Assert.Equal( DayOfWeek.Monday, attribute.GetArgumentValue<DayOfWeek>( "DayOfWeek" ) );
 
-            Assert.Equal( DayOfWeek.Wednesday, attribute.GetArgumentValue<DayOfWeek>( "X", DayOfWeek.Wednesday ) );
+            Assert.Equal( DayOfWeek.Wednesday, attribute.GetArgumentValue( "X", DayOfWeek.Wednesday ) );
         }
     }
 }

@@ -1807,7 +1807,7 @@ class D{version}
 
         var targetPipeline1 = CreatePipeline( testContext.ProjectOptions );
 
-        var targetPipeline2 = CreatePipeline( new TestProjectOptions( testContext.ProjectOptions, CodeFormattingOptions.None ) );
+        CreatePipeline( new TestProjectOptions( testContext.ProjectOptions, CodeFormattingOptions.None ) );
 
         GC.Collect();
 
@@ -1974,8 +1974,8 @@ Target.cs:
             additionalReferences: new[] { aspectCompilation1.ToMetadataReference( ["aspects1"] ), aspectCompilation2.ToMetadataReference( ["aspects2"] ) } );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        var aspectProjectPipeline1 = factory.CreatePipeline( aspectCompilation1 );
-        var aspectProjectPipeline2 = factory.CreatePipeline( aspectCompilation2 );
+        factory.CreatePipeline( aspectCompilation1 );
+        factory.CreatePipeline( aspectCompilation2 );
         var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
 
         // Execute the pipeline.
@@ -2068,10 +2068,10 @@ Target.cs:
             additionalReferences: new[] { leftCompilation.ToMetadataReference(), rightCompilation.ToMetadataReference() } );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        var aspect1ProjectPipeline = factory.CreatePipeline( aspect1Compilation );
-        var aspect2ProjectPipeline = factory.CreatePipeline( aspect2Compilation );
-        var leftProjectPipeline = factory.CreatePipeline( leftCompilation );
-        var rightProjectPipeline = factory.CreatePipeline( rightCompilation );
+        factory.CreatePipeline( aspect1Compilation );
+        factory.CreatePipeline( aspect2Compilation );
+        factory.CreatePipeline( leftCompilation );
+        factory.CreatePipeline( rightCompilation );
         var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
 
         // First execution of the pipeline.
@@ -2277,7 +2277,7 @@ partial class A<T, U>
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
-        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
     }
 
     [Fact]

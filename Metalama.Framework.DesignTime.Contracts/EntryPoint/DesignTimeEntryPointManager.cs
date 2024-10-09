@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 #if NETFRAMEWORK
 using System.Security.AccessControl;
 using System.Security.Principal;
+
+// ReSharper disable NullableWarningSuppressionIsUsed
 #endif
 
 namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
@@ -130,12 +132,18 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
                     try
                     {
 #if NETFRAMEWORK
+
                         // From https://stackoverflow.com/a/19717341/41071.
                         // As I understand it, creating a mutex without security descriptor uses default security, which could be different on different systems.
                         // I'm not certain this will actually prevent UnauthorizedAccessException, and it's not available on .NET, but it's worth trying.
 
                         var mutexSecurity = new MutexSecurity();
-                        mutexSecurity.AddAccessRule( new MutexAccessRule( new SecurityIdentifier( WellKnownSidType.WorldSid, null ), MutexRights.Synchronize | MutexRights.Modify, AccessControlType.Allow ) );
+
+                        mutexSecurity.AddAccessRule(
+                            new MutexAccessRule(
+                                new SecurityIdentifier( WellKnownSidType.WorldSid, null ),
+                                MutexRights.Synchronize | MutexRights.Modify,
+                                AccessControlType.Allow ) );
 
                         return new Mutex( false, mutexName, out _, mutexSecurity );
 #else

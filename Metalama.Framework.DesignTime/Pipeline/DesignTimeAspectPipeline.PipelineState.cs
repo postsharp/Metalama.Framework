@@ -404,7 +404,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 state._pipeline._eventHub?.PublishCompileTimeErrors(
                     state._pipeline.ProjectKey,
                     diagnosticAdder
-                        .Where( d => d.Severity == DiagnosticSeverity.Error && !d.IsSuppressed )
+                        .Where( d => d is { Severity: DiagnosticSeverity.Error, IsSuppressed: false } )
                         .Select( d => new DiagnosticData( d ) )
                         .ToReadOnlyList() );
 
