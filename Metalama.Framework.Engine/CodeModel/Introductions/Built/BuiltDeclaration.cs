@@ -61,9 +61,9 @@ internal abstract class BuiltDeclaration : BaseDeclaration
         => declaration?.GetTarget( this.Compilation, this.GenericContext );
 
 #pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
-    protected IReadOnlyList<T> MapDeclarationList<T>( IReadOnlyList<IRef<T>> refs )
+    protected ImmutableArray<T> MapDeclarationList<T>( IReadOnlyList<IRef<T>> refs )
         where T : class, ICompilationElement
-        => refs.Count == 0 ? [] : refs.SelectAsReadOnlyList( this.MapDeclaration );
+        => refs.Count == 0 ? ImmutableArray<T>.Empty : refs.SelectAsImmutableArray( this.MapDeclaration );
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
 
     [Memo]

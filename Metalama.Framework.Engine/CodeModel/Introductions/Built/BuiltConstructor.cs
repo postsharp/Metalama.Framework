@@ -47,6 +47,8 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     IRef<IMethodBase> IMethodBase.ToRef() => this.ToRef();
 
+    public override IFullRef<IMember> ToMemberFullRef() => this.Ref;
+
     [Memo]
     private IFullRef<IConstructor> Ref
         => this._constructorBuilder.ReplacedImplicitConstructor?.WithGenericContext( this.GenericContext )

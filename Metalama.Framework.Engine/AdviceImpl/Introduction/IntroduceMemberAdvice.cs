@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
@@ -65,7 +64,9 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         if ( this._scope == IntroductionScope.Target )
         {
-            this._scope = parameters.AspectLayerInstance.AspectInstance.TargetDeclaration.GetTarget( parameters.AspectLayerInstance.InitialCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
+            this._scope = parameters.AspectLayerInstance.AspectInstance.TargetDeclaration.GetTarget( parameters.AspectLayerInstance.InitialCompilation )
+                .GetClosestMemberOrNamedType()
+                ?.IsStatic == false
                 ? IntroductionScope.Instance
                 : IntroductionScope.Static;
         }
@@ -82,6 +83,8 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
     protected override void InitializeBuilder( TBuilder builder, in AdviceImplementationContext context )
     {
+        var targetDeclaration = this.TargetDeclaration;
+
         var templateAttribute = (ITemplateAttribute?) this.Template?.AdviceAttribute;
         var templateAttributeProperties = templateAttribute?.Properties;
 
@@ -107,15 +110,15 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         this.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        this.BuildAction?.Invoke( builder );
-
         SetBuilderExplicitInterfaceImplementation( builder, this._explicitlyImplementedInterfaceType );
-
-        this.ValidateBuilder( builder, this.TargetDeclaration, context.Diagnostics );
     }
 
-    protected virtual void ValidateBuilder( TBuilder builder, INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+    protected override void ValidateBuilder( TBuilder builder, IDiagnosticAdder diagnosticAdder )
     {
+        base.ValidateBuilder( builder, diagnosticAdder );
+
+        var targetDeclaration = (INamedType) this.TargetDeclaration;
+
         // Check that static member is not virtual.
         if ( builder is { IsStatic: true, IsVirtual: true } )
         {
@@ -147,7 +150,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         }
 
         // Check that virtual member is not introduced to a sealed type or a struct.
-        if ( targetDeclaration is { IsSealed: true } or { TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
+        if ( targetDeclaration is { IsSealed: true } or { DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
              && builder.IsVirtual )
         {
             diagnosticAdder.Report(

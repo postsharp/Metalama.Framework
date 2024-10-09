@@ -16,8 +16,9 @@ internal abstract class BaseSyntaxTreeTransformation : BaseTransformation, ISynt
 
     protected BaseSyntaxTreeTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IDeclaration> targetDeclaration ) : base( aspectLayerInstance )
     {
-        this.TransformedSyntaxTree = targetDeclaration.GetPrimarySyntaxTree()
-                                     ?? aspectLayerInstance.InitialCompilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
+        var primaryTree = targetDeclaration.GetPrimarySyntaxTree();
+
+        this.TransformedSyntaxTree = primaryTree ?? aspectLayerInstance.InitialCompilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
     }
 
     public SyntaxTree TransformedSyntaxTree { get; }

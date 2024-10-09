@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
-        IMember IMember.Definition => (IMember) this.GetDefinition();
+        IMember IMember.Definition => (IMember) this.GetDefinitionMemberOrNamedType();
 
         IRef<IMember> IMember.ToRef() => this.ToMemberRef();
 

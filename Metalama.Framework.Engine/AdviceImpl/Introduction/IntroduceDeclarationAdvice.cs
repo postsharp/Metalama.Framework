@@ -42,7 +42,7 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 
         this.BuildAction?.Invoke( builder );
 
-        this.ValidateBuilder( builder, this.TargetDeclaration, context.Diagnostics );
+        this.ValidateBuilder( builder, context.Diagnostics );
 
         return this.ImplementCore( builder, in context );
     }
@@ -53,7 +53,7 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 
     protected abstract IntroductionAdviceResult<TIntroduced> ImplementCore( TBuilder builder, in AdviceImplementationContext context );
 
-    protected virtual void ValidateBuilder( TBuilder builder, IDeclaration targetDeclaration, IDiagnosticAdder diagnosticAdder ) { }
+    protected virtual void ValidateBuilder( TBuilder builder, IDiagnosticAdder diagnosticAdder ) { }
 
     public override string ToString() => $"Introduce {typeof(TIntroduced).Name}";
 }

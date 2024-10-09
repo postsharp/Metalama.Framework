@@ -19,46 +19,46 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltEvent : BuiltMember, IEventImpl
 {
-    public EventBuilderData EventBuilder { get; }
+    public EventBuilderData EventBuilderData { get; }
 
-    public BuiltEvent( EventBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltEvent( EventBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
-        this.EventBuilder = builder;
+        this.EventBuilderData = builderData;
     }
 
-    public override DeclarationBuilderData BuilderData => this.EventBuilder;
+    public override DeclarationBuilderData BuilderData => this.EventBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.EventBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.EventBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.EventBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.EventBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this.EventBuilder;
+    protected override MemberBuilderData MemberBuilder => this.EventBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     [Memo]
-    public INamedType Type => this.MapDeclaration( this.EventBuilder.Type );
+    public INamedType Type => this.MapDeclaration( this.EventBuilderData.Type );
 
     public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
     [Memo]
-    public IMethod AddMethod => new BuiltAccessor( this, this.EventBuilder.AddMethod );
+    public IMethod AddMethod => new BuiltAccessor( this, this.EventBuilderData.AddMethod );
 
     [Memo]
-    public IMethod RemoveMethod => new BuiltAccessor( this, this.EventBuilder.RemoveMethod );
+    public IMethod RemoveMethod => new BuiltAccessor( this, this.EventBuilderData.RemoveMethod );
 
     public IMethod? RaiseMethod => null;
 
     [Memo]
-    public IEvent? OverriddenEvent => this.MapDeclaration( this.EventBuilder.OverriddenEvent );
+    public IEvent? OverriddenEvent => this.MapDeclaration( this.EventBuilderData.OverriddenEvent );
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-        => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
+        => this.EventBuilderData.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 
     [Memo]
-    public IEvent Definition => this.Compilation.Factory.GetEvent( this.EventBuilder ).AssertNotNull();
+    public IEvent Definition => this.Compilation.Factory.GetEvent( this.EventBuilderData ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
@@ -68,6 +68,10 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
     private IFullRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
 
     public IRef<IEvent> ToRef() => this.Ref;
+
+    public override IFullRef<IMember> ToMemberFullRef() => this.Ref;
+
+    public IExpression? InitializerExpression => this.EventBuilderData.InitializerExpression;
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 

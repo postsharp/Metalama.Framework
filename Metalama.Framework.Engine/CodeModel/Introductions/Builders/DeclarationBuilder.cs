@@ -66,7 +66,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
     ICompilationElement? ICompilationElementImpl.Translate( CompilationModel newCompilation, IGenericContext? genericContext, Type? interfaceType )
-        => throw new NotSupportedException();
+        => this.ToFullDeclarationRef().GetTarget( newCompilation, genericContext, interfaceType );
 
     public CompilationModel Compilation
         => (CompilationModel?) this.ContainingDeclaration?.Compilation

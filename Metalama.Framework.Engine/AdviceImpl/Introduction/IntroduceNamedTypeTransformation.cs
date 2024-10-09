@@ -47,9 +47,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                     Identifier( typeBuilder.Name ),
                     typeBuilder.TypeParameters.Count == 0
                         ? null
-                        : TypeParameterList(
-                            SeparatedList(
-                                ((IEnumerable<TypeParameterBuilder>) typeBuilder.TypeParameters).Select( tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
+                        : TypeParameterList( SeparatedList( typeBuilder.TypeParameters.SelectAsReadOnlyList( tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
                     baseList,
                     List<TypeParameterConstraintClauseSyntax>(),
                     List<MemberDeclarationSyntax>() )

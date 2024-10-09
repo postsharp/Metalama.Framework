@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public IField Definition
             => this._symbol == this._symbol.OriginalDefinition ? this : this.Compilation.Factory.GetField( this._symbol.OriginalDefinition );
 
-        protected override IMemberOrNamedType GetDefinition() => this.Definition;
+        protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
         [Memo]
         private IFullRef<IField> Ref => this.RefFactory.FromSymbolBasedDeclaration<IField>( this );

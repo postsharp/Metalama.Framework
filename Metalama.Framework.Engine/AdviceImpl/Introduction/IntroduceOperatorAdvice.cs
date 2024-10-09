@@ -111,7 +111,8 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
     {
         builder.Freeze();
 
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+
         var existingOperator = targetDeclaration.FindClosestVisibleMethod( builder );
 
         if ( existingOperator == null )

@@ -22,7 +22,7 @@ internal class MethodBuilderData : MemberBuilderData
 
     public ImmutableArray<TypeParameterBuilderData> TypeParameters { get; }
 
-    public override DeclarationKind DeclarationKind => DeclarationKind.Method;
+    public override DeclarationKind DeclarationKind { get; }
 
     public ParameterBuilderData ReturnParameter { get; }
 
@@ -40,6 +40,8 @@ internal class MethodBuilderData : MemberBuilderData
         builder,
         containingDeclaration )
     {
+        this.DeclarationKind = builder.DeclarationKind; // Can be Method, Finalizer, Operator.
+
         this._ref = new BuiltDeclarationRef<IMethod>( this, containingDeclaration.CompilationContext );
 
         this.IsReadOnly = builder.IsReadOnly;

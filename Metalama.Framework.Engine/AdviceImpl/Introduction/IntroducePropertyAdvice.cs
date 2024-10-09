@@ -208,12 +208,10 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
     protected override IntroductionAdviceResult<IProperty> ImplementCore( PropertyBuilder builder, in AdviceImplementationContext context )
     {
-        builder.Freeze();
-
         var serviceProvider = context.ServiceProvider;
 
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
 
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
@@ -223,6 +221,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         // TODO: Introduce attributes that are added not present on the existing member?
         if ( existingDeclaration == null )
         {
+            builder.Freeze();
+
             // There is no existing declaration.
             if ( isAutoProperty )
             {
@@ -353,6 +353,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     {
                         builder.IsOverride = true;
                         builder.OverriddenProperty = existingProperty;
+                        builder.Freeze();
 
                         context.AddTransformation( builder.ToTransformation() );
 

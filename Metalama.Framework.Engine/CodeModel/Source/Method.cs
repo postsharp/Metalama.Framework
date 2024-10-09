@@ -57,7 +57,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
 
-    protected override IMemberOrNamedType GetDefinition() => this.Definition;
+    protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
     [Memo]
     public IMethod Definition

@@ -50,6 +50,8 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 
     IRef<IProperty> IProperty.ToRef() => this.Ref;
 
+    public override IFullRef<IMember> ToMemberFullRef() => this.Ref;
+
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;

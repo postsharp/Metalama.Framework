@@ -455,7 +455,7 @@ public static class DeclarationExtensions
                 return eventSymbol.IsEventField();
 
             case BuiltEvent builtEvent:
-                return builtEvent.EventBuilder.IsEventField;
+                return builtEvent.EventBuilderData.IsEventField;
 
             case EventBuilder eventBuilder:
                 return eventBuilder.IsEventField;

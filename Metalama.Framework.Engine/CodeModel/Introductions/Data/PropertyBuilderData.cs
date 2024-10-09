@@ -140,6 +140,13 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     out initializerExpression,
                     out initializerMethod );
 
+            case IFieldSymbol:
+                // TODO: Not sure what we should do here.
+                initializerExpression = null;
+                initializerMethod = null;
+
+                return false;
+
             default:
                 throw new AssertionFailedException();
         }

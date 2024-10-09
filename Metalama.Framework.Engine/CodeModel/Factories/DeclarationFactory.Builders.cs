@@ -172,7 +172,7 @@ public partial class DeclarationFactory
                 genericContext ),
             MethodBuilderData
             {
-                ContainingDeclaration.DeclarationKind: DeclarationKind.Property or DeclarationKind.Event or DeclarationKind.Field
+                ContainingDeclaration.DeclarationKind: DeclarationKind.Property or DeclarationKind.Event or DeclarationKind.Field or DeclarationKind.Indexer
             } accessorBuilder => this.GetAccessor( accessorBuilder, genericContext ),
             FieldBuilderData fieldBuilder when interfaceType == null || interfaceType != typeof(IProperty) => this.GetField( fieldBuilder, genericContext ),
             FieldBuilderData fieldBuilder when interfaceType == typeof(IProperty) => fieldBuilder.OverridingProperty.AssertNotNull()

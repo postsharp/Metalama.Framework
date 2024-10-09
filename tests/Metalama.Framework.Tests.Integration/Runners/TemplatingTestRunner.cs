@@ -225,6 +225,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     .Single();
 
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+                var aspectInstance = Activator.CreateInstance( compiledAspectType );
+                var templateProvider = TemplateProvider.FromInstanceUnsafe( aspectInstance );
 
                 var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( templateMethod );
                 var compiledTemplateMethod = compiledAspectType.GetAnyMethod( compiledTemplateMethodName );
@@ -248,7 +250,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );
 
                 var templateMethodDeclaration = compilationModel.Factory.GetMethod( templateMethod );
-                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember, default );
+                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember, templateProvider );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
                     serviceProvider,

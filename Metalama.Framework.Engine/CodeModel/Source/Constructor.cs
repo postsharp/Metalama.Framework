@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 ? this
                 : this.Compilation.Factory.GetConstructor( this.MethodSymbol.OriginalDefinition );
 
-        protected override IMemberOrNamedType GetDefinition() => this.Definition;
+        protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
         public override System.Reflection.MethodBase ToMethodBase() => CompileTimeConstructorInfo.Create( this );
 

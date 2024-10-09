@@ -82,6 +82,8 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
         {
             (PropertyBuilder propertyBuilder, MethodKind.PropertyGet) => propertyBuilder.OverriddenProperty?.GetMethod.AssertNotNull(),
             (PropertyBuilder propertyBuilder, MethodKind.PropertySet) => propertyBuilder.OverriddenProperty?.SetMethod.AssertNotNull(),
+            (IndexerBuilder indexerBuilder, MethodKind.PropertyGet) => indexerBuilder.OverriddenIndexer?.GetMethod.AssertNotNull(),
+            (IndexerBuilder indexerBuilder, MethodKind.PropertySet) => indexerBuilder.OverriddenIndexer?.SetMethod.AssertNotNull(),
             (FieldBuilder _, _) => null,
             (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.AddMethod.AssertNotNull(),
             (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
@@ -290,6 +292,10 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
                 => propertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.GetMethod ).AssertNoneNull(),
             (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
                 => propertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.SetMethod ).AssertNoneNull(),
+            (IndexerBuilder indexerBuilder, MethodKind.PropertyGet)
+                => indexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.GetMethod ).AssertNoneNull(),
+            (IndexerBuilder indexerBuilder, MethodKind.PropertySet)
+                => indexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.SetMethod ).AssertNoneNull(),
             (FieldBuilder _, _) => Array.Empty<IMethod>(),
             (EventBuilder eventBuilder, MethodKind.EventAdd)
                 => eventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.AddMethod ),

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.UserInterface;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
@@ -7,8 +8,11 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -73,7 +77,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public IEvent Definition
             => ReferenceEquals( this._symbol, this._symbol.OriginalDefinition ) ? this : this.Compilation.Factory.GetEvent( this._symbol.OriginalDefinition );
 
-        protected override IMemberOrNamedType GetDefinition() => this.Definition;
+        protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
         public EventInfo ToEventInfo() => new CompileTimeEventInfo( this );
 
@@ -119,6 +123,27 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
         IRef<IEvent> IEvent.ToRef() => this.Ref;
+
+        [Memo]
+        public IExpression? InitializerExpression => this.GetInitializerExpressionCore();
+
+        private IExpression? GetInitializerExpressionCore()
+        {
+            var expression = this._symbol.GetPrimaryDeclarationSyntax() switch
+            {
+                VariableDeclaratorSyntax variable => variable.Initializer?.Value,
+                _ => null
+            };
+
+            if ( expression == null )
+            {
+                return null;
+            }
+            else
+            {
+                return new SourceUserExpression( expression, this.Type );
+            }
+        }
 
         protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.Ref;
     }

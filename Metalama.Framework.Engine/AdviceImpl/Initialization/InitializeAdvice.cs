@@ -88,6 +88,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
                         ReplacedImplicitConstructor = ctor, Accessibility = Accessibility.Public
                     };
 
+                builder.Freeze();
                 context.AddTransformation( builder.ToTransformation() );
                 targetCtor = builder;
             }

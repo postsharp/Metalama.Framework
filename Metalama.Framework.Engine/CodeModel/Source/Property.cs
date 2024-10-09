@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         IField? IProperty.OriginalField => null;
 
-        protected override IMemberOrNamedType GetDefinition() => this.Definition;
+        protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
         public IMember? OverriddenMember => this.OverriddenProperty;
 

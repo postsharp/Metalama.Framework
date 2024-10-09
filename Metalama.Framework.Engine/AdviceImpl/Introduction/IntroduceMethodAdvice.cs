@@ -115,7 +115,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
     protected override IntroductionAdviceResult<IMethod> ImplementCore( MethodBuilder builder, in AdviceImplementationContext context )
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
         var existingMethod = targetDeclaration.FindClosestVisibleMethod( builder );
 
         // TODO: Introduce attributes that are added not present on the existing member?
@@ -197,6 +197,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                         builder.HasNewKeyword = builder.IsNew = true;
                         builder.IsOverride = false;
                         builder.OverriddenMethod = existingMethod;
+
                         builder.Freeze();
 
                         var overriddenMethod = new OverrideMethodTransformation(
@@ -222,7 +223,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                                      existingMethod.DeclaringType, existingMethod.ReturnType),
                                     this ) );
                     }
-                    else if ( existingMethod.IsSealed || !existingMethod.IsOverridable() )
+                    else if ( !targetDeclaration.Equals( existingMethod.DeclaringType ) && !existingMethod.IsOverridable() )
                     {
                         return
                             this.CreateFailedResult(
@@ -234,9 +235,10 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                     }
                     else
                     {
-                        builder.IsOverride = true;
                         builder.HasNewKeyword = builder.IsNew = false;
+                        builder.IsOverride = true;
                         builder.OverriddenMethod = existingMethod;
+
                         builder.Freeze();
 
                         var overriddenMethod = new OverrideMethodTransformation(

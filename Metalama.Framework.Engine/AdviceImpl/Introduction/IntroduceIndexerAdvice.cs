@@ -152,9 +152,11 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
     }
 
-    protected override void ValidateBuilder( IndexerBuilder builder, INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+    protected override void ValidateBuilder( IndexerBuilder builder, IDiagnosticAdder diagnosticAdder )
     {
-        base.ValidateBuilder( builder, targetDeclaration, diagnosticAdder );
+        base.ValidateBuilder( builder, diagnosticAdder );
+
+        var targetDeclaration = (INamedType) this.TargetDeclaration;
 
         if ( builder.Parameters.Count <= 0 )
         {
@@ -177,10 +179,8 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
     protected override IntroductionAdviceResult<IIndexer> ImplementCore( IndexerBuilder builder, in AdviceImplementationContext context )
     {
-        builder.Freeze();
-
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
 
         var existingDeclaration = targetDeclaration.FindClosestVisibleIndexer( builder );
 
@@ -188,6 +188,8 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         if ( existingDeclaration == null )
         {
             // There is no existing declaration.
+
+            builder.Freeze();
 
             // Introduce and override using the template.
             var overrideIndexerTransformation = new OverrideIndexerTransformation(

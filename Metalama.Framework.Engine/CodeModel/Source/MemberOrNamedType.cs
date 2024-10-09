@@ -176,13 +176,15 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         [Memo]
         public ExecutionScope ExecutionScope => this.Compilation.Project.ClassificationService?.GetExecutionScope( this.Symbol ) ?? ExecutionScope.RunTime;
 
-        protected abstract IMemberOrNamedType GetDefinition();
+        protected override IDeclaration GetDefinitionDeclaration() => this.GetDefinitionMemberOrNamedType();
 
-        IMemberOrNamedType IMemberOrNamedType.Definition => this.GetDefinition();
+        protected abstract IMemberOrNamedType GetDefinitionMemberOrNamedType();
+
+        IMemberOrNamedType IMemberOrNamedType.Definition => this.GetDefinitionMemberOrNamedType();
 
         IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.ToMemberOrNamedTypeRef();
 
-        public virtual bool IsPartial => this.Symbol.HasModifier( SyntaxKind.PartialKeyword )??false;
+        public virtual bool IsPartial => this.Symbol.HasModifier( SyntaxKind.PartialKeyword ) ?? false;
 
         protected abstract IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef();
     }

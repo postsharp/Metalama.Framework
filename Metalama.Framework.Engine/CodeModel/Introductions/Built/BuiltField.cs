@@ -38,7 +38,7 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 
     protected override MemberBuilderData MemberBuilder => this.FieldBuilderData;
 
-    public override bool IsExplicitInterfaceImplementation => throw new NotImplementedException();
+    public override bool IsExplicitInterfaceImplementation => false;
 
     public Writeability Writeability => this.FieldBuilderData.Writeability;
 
@@ -55,6 +55,8 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     public IMethod SetMethod => new BuiltAccessor( this, this.FieldBuilderData.SetMethod! );
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
+
+    public override IFullRef<IMember> ToMemberFullRef() => this.Ref;
 
     [Memo]
     public IProperty? OverridingProperty => FieldHelper.GetOverridingProperty( this );

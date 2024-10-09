@@ -64,6 +64,8 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     IRef<IMethodBase> IMethodBase.ToRef() => this.ToRef();
 
+    public override IFullRef<IMember> ToMemberFullRef() => this.Ref;
+
     public IRef<IMethod> ToRef() => this.Ref;
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
@@ -82,7 +84,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
-    public bool IsGeneric => !this._methodBuilder.TypeParameters.IsDefault;
+    public bool IsGeneric => !this._methodBuilder.TypeParameters.IsEmpty;
 
     public bool IsCanonicalGenericInstance => throw new NotImplementedException();
 

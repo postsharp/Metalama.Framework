@@ -53,11 +53,10 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
             builder.Type = this.SourceCompilation.Cache.SystemObjectType;
             builder.Writeability = Writeability.All;
         }
-    }
 
-    protected override void ValidateBuilder( FieldBuilder builder, INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
-    {
-        if ( targetDeclaration.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetDeclaration.IsReadOnly )
+        var targetType = this.TargetDeclaration;
+
+        if ( targetType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetType.IsReadOnly )
         {
             builder.Writeability = Writeability.ConstructorOnly;
         }
@@ -67,7 +66,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
     protected override IntroductionAdviceResult<IField> ImplementCore( FieldBuilder builder, in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
         if ( existingDeclaration != null )

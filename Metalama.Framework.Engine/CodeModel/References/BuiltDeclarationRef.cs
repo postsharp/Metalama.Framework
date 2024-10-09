@@ -27,8 +27,8 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
             builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Contains( typeof(T) ),
             $"The interface type was expected to be of type {builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes()} but was {typeof(T)}." );
 
-        // Constructor replacements must be resolved upstream.
-        Invariant.Assert( builder is not ConstructorBuilderData { ReplacedImplicitConstructor: not null } );
+        // Constructor replacements must be resolved upstream, but this invariant can no longer be enforced here because the reference
+        // is built when the BuilderData is being built.
 
         // References to promoted fields must be a SymbolRef to the IFieldSymbol if it is an IRef<IField>.
         Invariant.Assert( !(typeof(T) == typeof(IField) && builder is PropertyBuilderData) );

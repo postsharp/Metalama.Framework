@@ -85,7 +85,21 @@ public static class RefExtensions
 
     // ReSharper disable once SuspiciousTypeConversion.Global
     internal static SyntaxTree? GetPrimarySyntaxTree( this IFullRef reference )
-        => reference.GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
+    {
+        var symbol = reference.GetClosestContainingSymbol();
+
+        while ( symbol.DeclaringSyntaxReferences.IsDefaultOrEmpty )
+        {
+            symbol = symbol.ContainingSymbol;
+
+            if ( symbol.Kind == SymbolKind.Namespace )
+            {
+                return null;
+            }
+        }
+
+        return symbol.GetPrimarySyntaxReference().SyntaxTree;
+    }
 
     public static SyntaxTree? GetPrimarySyntaxTree( this IRef reference )
         => ((IFullRef) reference).GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
@@ -118,7 +132,7 @@ public static class RefExtensions
                 DeclarationKind.Type => [typeof(IType)],
                 DeclarationKind.Compilation => [typeof(ICompilation)],
                 DeclarationKind.NamedType => [typeof(INamedType)],
-                DeclarationKind.Method => [typeof(IMethod)],
+                DeclarationKind.Method or DeclarationKind.Operator or DeclarationKind.Finalizer => [typeof(IMethod)],
                 DeclarationKind.Property => [typeof(IProperty), typeof(IField)],
                 DeclarationKind.Indexer => [typeof(IIndexer)],
                 DeclarationKind.Field => [typeof(IField), typeof(IProperty)],
@@ -128,8 +142,6 @@ public static class RefExtensions
                 DeclarationKind.Attribute => [typeof(IAttribute)],
                 DeclarationKind.ManagedResource => [typeof(IManagedResource)],
                 DeclarationKind.Constructor => [typeof(IConstructor)],
-                DeclarationKind.Finalizer => [typeof(IMethod)],
-                DeclarationKind.Operator => [typeof(IMethod)],
                 DeclarationKind.AssemblyReference => [typeof(IAssembly)],
                 DeclarationKind.Namespace => [typeof(INamespace)],
                 _ => throw new ArgumentOutOfRangeException( nameof(declarationKind), declarationKind, null )

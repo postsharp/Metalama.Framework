@@ -44,15 +44,13 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
         TemplateAttributeProperties? templateAttributeProperties,
         in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration;
-
         switch ( this.OverrideStrategy )
         {
             case OverrideStrategy.New:
                 context.Diagnostics.Report(
                     AdviceDiagnosticDescriptors.CannotUseNewOverrideStrategyWithFinalizers.CreateRoslynDiagnostic(
-                        targetDeclaration.GetDiagnosticLocation(),
-                        (this.AspectInstance.AspectClass.ShortName, targetDeclaration, this.OverrideStrategy),
+                        this.TargetDeclaration.GetDiagnosticLocation(),
+                        (this.AspectInstance.AspectClass.ShortName, this.TargetDeclaration, this.OverrideStrategy),
                         this ) );
 
                 break;
@@ -88,15 +86,16 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                             this ) );
             }
 
+            builder.IsOverride = false;
+            builder.HasNewKeyword = builder.IsNew = false;
+            builder.Freeze();
+
             // There is no existing declaration, we will introduce and override the introduced.
             var overriddenMethod = new OverrideFinalizerTransformation(
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
                 this._template.ForIntroduction( builder ),
                 this.Tags );
-
-            builder.IsOverride = false;
-            builder.HasNewKeyword = builder.IsNew = false;
 
             context.AddTransformation( builder.ToTransformation() );
             context.AddTransformation( overriddenMethod );

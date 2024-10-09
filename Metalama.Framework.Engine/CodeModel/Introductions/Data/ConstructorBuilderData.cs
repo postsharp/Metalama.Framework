@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal class ConstructorBuilderData : MemberBuilderData
 {
-    private readonly BuiltDeclarationRef<IConstructor> _ref;
+    private readonly IFullRef<IConstructor> _ref;
 
     public IFullRef<IConstructor>? ReplacedImplicitConstructor { get; }
 
@@ -32,7 +32,10 @@ internal class ConstructorBuilderData : MemberBuilderData
         builder,
         containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<IConstructor>( this, containingDeclaration.CompilationContext );
+        this._ref =
+            builder.ReplacedImplicitConstructor == null
+                ? new BuiltDeclarationRef<IConstructor>( this, containingDeclaration.CompilationContext )
+                : builder.ReplacedImplicitConstructor.ToFullRef();
 
         this.Parameters = builder.Parameters.ToImmutable( this._ref );
         this.ReplacedImplicitConstructor = builder.ReplacedImplicitConstructor?.ToFullRef();

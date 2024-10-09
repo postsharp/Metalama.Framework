@@ -45,7 +45,7 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
     public IIndexer Definition
         => this.PropertySymbol == this.PropertySymbol.OriginalDefinition ? this : this.Compilation.Factory.GetIndexer( this.PropertySymbol.OriginalDefinition );
 
-    protected override IMemberOrNamedType GetDefinition() => this.Definition;
+    protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
     public IIndexerInvoker With( InvokerOptions options ) => new IndexerInvoker( this, options );
 

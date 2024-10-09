@@ -608,7 +608,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     INamedType INamedType.TypeDefinition => throw new NotSupportedException();
 
-    protected override IMemberOrNamedType GetDefinition() => throw new NotSupportedException();
+    protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => throw new NotSupportedException();
 
     [Memo]
     public INamedType UnderlyingType => this.GetUnderlyingTypeCore();

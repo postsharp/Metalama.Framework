@@ -482,7 +482,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.UnderlyingType.ToRef();
 
-        protected override IMemberOrNamedType GetDefinition() => this.Definition;
+        protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
         INamedType INamedType.TypeDefinition => this.Definition;
 

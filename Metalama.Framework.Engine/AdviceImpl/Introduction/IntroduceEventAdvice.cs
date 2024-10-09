@@ -91,6 +91,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         {
             // Case for event fields.
             builder.Type = eventTemplateDeclaration.Type;
+            builder.InitializerExpression = eventTemplateDeclaration.InitializerExpression;
         }
 
         if ( this.Template != null )
@@ -166,7 +167,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         var eventTemplateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
 
         // this.Tags: Override transformations.
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
 
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 

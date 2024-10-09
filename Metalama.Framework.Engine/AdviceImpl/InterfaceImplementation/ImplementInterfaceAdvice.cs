@@ -57,7 +57,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
     private void Initialize( in AdviceImplementationContext context )
     {
-        var interfaceType = this._interfaceType;
+        var interfaceType = this._interfaceType.ForCompilation( context.Compilation );
         var contextCopy = context;
 
         switch ( this._overrideStrategy )
@@ -292,7 +292,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         //      1) Target type already implements the interface.
         //      2) Target type already implements an ancestor of the interface.
 
-        var targetType = this.TargetDeclaration;
+        var targetType = this.TargetDeclaration.ForCompilation( context.Compilation );
         var diagnostics = new DiagnosticBag();
         var implementedInterfaces = new List<ImplementationResult>();
         var implementedInterfaceMembers = new List<MemberImplementationResult>();
@@ -797,7 +797,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case IEvent interfaceEvent:
                         var existingEvent = targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
                         var templateEvent = memberSpec.Template?.As<IEvent>();
-                        var redirectionTargetEvent = memberSpec.TargetMember.AssertNotNull().AsFullRef<IEvent>();
+                        var redirectionTargetEvent = memberSpec.TargetMember?.AsFullRef<IEvent>();
 
                         if ( existingEvent != null && !memberSpec.IsExplicit )
                         {
@@ -909,11 +909,14 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                             {
                                 Invariant.Assert( templateEventDeclaration != null );
 
+                                eventBuilder.InitializerExpression = templateEventDeclaration.InitializerExpression;
+
                                 CopyAttributes( templateEventDeclaration, eventBuilder );
                                 CopyAttributes( templateEventDeclaration, eventBuilder.AddMethod.AssertNotNull() );
                                 CopyAttributes( templateEventDeclaration, eventBuilder.RemoveMethod.AssertNotNull() );
                             }
 
+                            eventBuilder.Freeze();
                             AddTransformationNoDuplicates( eventBuilder.ToTransformation() );
                             interfaceMemberMap.Add( interfaceEvent, eventBuilder );
 
