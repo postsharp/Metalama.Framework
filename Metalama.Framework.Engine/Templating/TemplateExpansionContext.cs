@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Templating;
 
 internal sealed partial class TemplateExpansionContext : UserCodeExecutionContext
 {
-    private readonly TemplateMember<IMethod>? _template;
+    private readonly TemplateMember<IMethod>? _methodTemplate;
     private readonly Func<TemplateKind, IUserExpression>? _proceedExpressionProvider;
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
@@ -131,15 +131,31 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         TransformationContext transformationContext,
         MetaApi metaApi,
         IDeclaration declarationForLexicalScope,
-        BoundTemplateMethod? template,
+        BoundTemplateMethod methodTemplate,
         Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : this(
         transformationContext.ServiceProvider,
         metaApi,
         transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope.ToRef() ),
         transformationContext.SyntaxGenerationContext,
-        template,
+        methodTemplate,
+        methodTemplate.TemplateProvider,
         proceedExpressionProvider,
+        aspectLayerId ) { }
+
+    public TemplateExpansionContext(
+        TransformationContext transformationContext,
+        MetaApi metaApi,
+        IDeclaration declarationForLexicalScope,
+        TemplateProvider templateProvider,
+        AspectLayerId aspectLayerId ) : this(
+        transformationContext.ServiceProvider,
+        metaApi,
+        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope.ToRef() ),
+        transformationContext.SyntaxGenerationContext,
+        null,
+        templateProvider,
+        null,
         aspectLayerId ) { }
 
     public TemplateExpansionContext(
@@ -147,13 +163,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         MetaApi metaApi,
         TemplateLexicalScope lexicalScope,
         SyntaxGenerationContext syntaxGenerationContext,
-        BoundTemplateMethod? template,
+        BoundTemplateMethod? methodTemplate,
+        TemplateProvider templateProvider,
         Func<TemplateKind, IUserExpression>? proceedExpressionProvider,
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         UserCodeDescription.Create(
             "executing the template method '{0}' in the context of the aspect '{1}' applied to '{2}'",
-            template?.TemplateMember.DeclarationRef.GetSymbol( syntaxGenerationContext.CompilationContext.Compilation ),
+            methodTemplate?.TemplateMember.DeclarationRef.GetSymbol( syntaxGenerationContext.CompilationContext.Compilation ),
             metaApi.AspectInstance?.AspectClass.FullName,
             metaApi.AspectInstance?.TargetDeclaration ),
         syntaxGenerationContext.CompilationContext,
@@ -163,8 +180,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         diagnostics: metaApi.Diagnostics,
         metaApi: metaApi )
     {
-        this._template = template?.TemplateMember;
-        this.TemplateProvider = template?.TemplateProvider;
+        this._methodTemplate = methodTemplate?.TemplateMember;
+        this.TemplateProvider = templateProvider;
         this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext, metaApi.Type );
         this.SyntaxGenerationContext = syntaxGenerationContext;
@@ -174,10 +191,10 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
         var templateTypeArguments = ImmutableDictionary<string, IType>.Empty.ToBuilder();
 
-        if ( template != null )
+        if ( methodTemplate != null )
         {
             templateTypeArguments.AddRange(
-                template.TemplateArguments.OfType<TemplateTypeArgumentFactory>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
+                methodTemplate.TemplateArguments.OfType<TemplateTypeArgumentFactory>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
         }
 
         if ( metaApi.Target.Declaration is IMethod { TypeParameters.Count: > 0 } targetMethod )
@@ -203,7 +220,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     private TemplateExpansionContext( TemplateExpansionContext prototype, LocalFunctionInfo localFunctionInfo ) : base( prototype )
     {
-        this._template = prototype._template;
+        this._methodTemplate = prototype._methodTemplate;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
@@ -216,9 +233,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.TemplateProvider = prototype.TemplateProvider;
     }
 
-    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> template ) : base( prototype )
+    private TemplateExpansionContext( TemplateExpansionContext prototype, TemplateMember<IMethod> methodTemplate ) : base( prototype )
     {
-        this._template = template;
+        this._methodTemplate = methodTemplate;
         this.SyntaxSerializationService = prototype.SyntaxSerializationService;
         this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
         this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
@@ -231,7 +248,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this.TemplateProvider = prototype.TemplateProvider;
     }
 
-    public TemplateProvider? TemplateProvider { get; }
+    public TemplateProvider TemplateProvider { get; }
 
     public SyntaxSerializationService SyntaxSerializationService { get; }
 
@@ -279,7 +296,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                         var method = this.MetaApi.Method;
                         var returnType = method.ReturnType;
 
-                        if ( this._template != null && this._template.MustInterpretAsAsyncTemplate() )
+                        if ( this._methodTemplate != null && this._methodTemplate.MustInterpretAsAsyncTemplate() )
                         {
                             // If we are in an awaitable async method, the consider the return type as seen by the method body,
                             // not the one as seen from outside.
@@ -297,7 +314,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                         }
                         else if ( method.GetIteratorInfoImpl() is
                                       { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                                  this._template != null && this._template.MustInterpretAsAsyncIteratorTemplate() )
+                                  this._methodTemplate != null && this._methodTemplate.MustInterpretAsAsyncIteratorTemplate() )
                         {
                             switch ( iteratorInfo.EnumerableKind )
                             {
@@ -583,7 +600,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             }
             else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
-                Invariant.Assert( this._template != null && (this._template.MustInterpretAsAsyncTemplate() || this._localFunctionInfo is { IsAsync: true }) );
+                Invariant.Assert(
+                    this._methodTemplate != null && (this._methodTemplate.MustInterpretAsAsyncTemplate() || this._localFunctionInfo is { IsAsync: true }) );
 
                 var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
 
@@ -637,7 +655,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     internal BlockSyntax AddYieldBreakIfNecessary( BlockSyntax block )
     {
-        if ( this._template?.MustInterpretAsAsyncIteratorTemplate() != true )
+        if ( this._methodTemplate?.MustInterpretAsAsyncIteratorTemplate() != true )
         {
             return block;
         }
@@ -675,7 +693,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     {
         if ( templateProvider.IsNull )
         {
-            return this._template.AssertNotNull().TemplateClassMember.TemplateClass;
+            return this._methodTemplate.AssertNotNull().TemplateClassMember.TemplateClass;
         }
 
         return this._otherTemplateClassProvider.Get( templateProvider );

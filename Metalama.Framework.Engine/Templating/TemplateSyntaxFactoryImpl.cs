@@ -498,7 +498,7 @@ namespace Metalama.Framework.Engine.Templating
             var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo(
                 templateMember.DeclarationRef.GetSymbol( this._templateExpansionContext.Compilation.AssertNotNull().RoslynCompilation ).AssertSymbolNotNull() );
 
-            return compiledTemplateMethodInfo.Invoke( context.TemplateProvider!.Value.Object, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
+            return compiledTemplateMethodInfo.Invoke( context.TemplateProvider.Object, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }
 
         public BlockSyntax InvokeTemplate( string templateName, object? templateInstanceOrType = null, object? args = null )

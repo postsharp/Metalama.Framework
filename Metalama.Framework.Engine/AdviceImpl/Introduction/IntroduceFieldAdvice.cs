@@ -136,6 +136,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
         }
         else
         {
+            builder.Freeze();
             context.AddTransformation( builder.ToTransformation() );
 
             OverrideHelper.AddTransformationsForStructField(

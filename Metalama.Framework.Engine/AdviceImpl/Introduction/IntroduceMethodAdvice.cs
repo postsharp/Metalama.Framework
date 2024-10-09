@@ -137,16 +137,16 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                             this ) );
             }
 
+            builder.IsOverride = false;
+            builder.HasNewKeyword = builder.IsNew = false;
+            builder.Freeze();
+
             // There is no existing declaration, we will introduce and override the introduced.
             var overriddenMethod = new OverrideMethodTransformation(
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
                 this._template.ForIntroduction( builder ),
                 this.Tags );
-
-            builder.IsOverride = false;
-            builder.HasNewKeyword = builder.IsNew = false;
-            builder.Freeze();
 
             context.AddTransformation( builder.ToTransformation() );
             context.AddTransformation( overriddenMethod );

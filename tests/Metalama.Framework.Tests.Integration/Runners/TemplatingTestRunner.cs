@@ -349,6 +349,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                         lexicalScope,
                         syntaxGenerationContext,
                         template,
+                        template.TemplateProvider,
                         _ => proceedExpression,
                         default ),
                     roslynTargetMethod);
