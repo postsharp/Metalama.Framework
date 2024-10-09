@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -51,4 +53,11 @@ internal abstract class DeclarationBuilderData
     public virtual IEnumerable<DeclarationBuilderData> GetOwnedDeclarations() => this.Attributes;
 
     public abstract IFullRef<INamedType>? DeclaringType { get; }
+
+    // In the future, the InsertPosition could be influenced from the Builder, for instance to select a partial file.
+
+    [Memo]
+    public InsertPosition InsertPosition => this.GetInsertPosition();
+
+    protected virtual InsertPosition GetInsertPosition() => throw new NotSupportedException();
 }

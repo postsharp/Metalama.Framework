@@ -92,7 +92,7 @@ internal sealed class IntroduceConstructorTransformation
 
     public IRef<IMember>? ReplacedMember { get; }
 
-    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.InsertPosition;
 
     public override TransformationObservability Observability
         => this.ReplacedMember == null

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -131,6 +132,24 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     builderData.InitializerTags,
                     out initializerExpression,
                     out initializerMethod );
+
+            default:
+                throw new AssertionFailedException();
+        }
+    }
+
+    protected override InsertPosition GetInsertPosition()
+    {
+        switch ( this._originalField )
+        {
+            case null:
+                return base.GetInsertPosition();
+
+            case ISymbol symbol:
+                return symbol.ToInsertPosition();
+
+            case DeclarationBuilderData builderData:
+                return builderData.InsertPosition;
 
             default:
                 throw new AssertionFailedException();

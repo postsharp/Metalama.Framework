@@ -48,7 +48,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
 
     public IRef<IMember>? ReplacedMember => this.BuilderData.ReplacedImplicitConstructor;
 
-    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.InsertPosition;
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 

@@ -3,6 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
@@ -16,4 +19,24 @@ internal abstract class NamedDeclarationBuilderData : DeclarationBuilderData
     }
 
     public string Name { get; }
+
+    protected override InsertPosition GetInsertPosition()
+    {
+        switch ( this.DeclaringType )
+        {
+            case null:
+                return new InsertPosition( this.PrimarySyntaxTree.AssertNotNull() );
+
+            case IBuiltDeclarationRef { BuilderData: NamedDeclarationBuilderData named }:
+                return new InsertPosition( InsertPositionRelation.Within, named );
+
+            case ISymbolRef declaringType:
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    (MemberDeclarationSyntax) declaringType.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+            default:
+                throw new AssertionFailedException();
+        }
+    }
 }

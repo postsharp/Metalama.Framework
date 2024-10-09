@@ -18,14 +18,16 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
 {
     public T BuilderData { get; }
 
-    protected IntroduceDeclarationTransformation( AdviceInfo advice, T introducedDeclaration ) : base( advice, introducedDeclaration.PrimarySyntaxTree.AssertNotNull() )
+    protected IntroduceDeclarationTransformation( AdviceInfo advice, T introducedDeclaration ) : base(
+        advice,
+        introducedDeclaration.PrimarySyntaxTree.AssertNotNull() )
     {
         this.BuilderData = introducedDeclaration.AssertNotNull();
     }
 
     public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
-    public virtual InsertPosition InsertPosition => this.BuilderData.ToInsertPosition();
+    public virtual InsertPosition InsertPosition => this.BuilderData.InsertPosition;
 
     DeclarationBuilderData IIntroduceDeclarationTransformation.DeclarationBuilderData => this.BuilderData;
 
