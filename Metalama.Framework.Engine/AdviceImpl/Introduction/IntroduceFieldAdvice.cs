@@ -122,6 +122,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
                     else
                     {
                         builder.HasNewKeyword = builder.IsNew = true;
+                        builder.Freeze();
                         context.AddTransformation( builder.ToTransformation() );
 
                         return this.CreateSuccessResult( AdviceOutcome.New, builder );

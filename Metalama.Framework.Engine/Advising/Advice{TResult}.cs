@@ -30,6 +30,7 @@ internal abstract class Advice<TResult> : Advice
         implementationContext.ThrowIfAnyError();
 
         context.Diagnostics.Report( initializationDiagnostics );
+        context.Diagnostics.Report( adviceResult.Diagnostics );
 
         // Set the compilation in which references must be resolved.
         adviceResult.Compilation = context.CurrentCompilation;

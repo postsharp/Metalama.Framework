@@ -43,13 +43,13 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
     protected override EventBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
 
         return new EventBuilder(
             this.AspectLayerInstance,
             this.TargetDeclaration,
             this.MemberName,
-            this.Template?.DeclarationRef != null && templateDeclaration.IsEventField() == true,
+            templateDeclaration != null && templateDeclaration.IsEventField() == true,
             this.Tags ) { InitializerTemplate = this.Template.GetInitializerTemplate() };
     }
 
@@ -62,7 +62,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
         var serviceProvider = context.ServiceProvider;
 
-        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
+        var eventTemplateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
 
         if ( this._addTemplate != null || this._removeTemplate != null )
         {
@@ -90,12 +90,12 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         else if ( this.Template != null )
         {
             // Case for event fields.
-            builder.Type = templateDeclaration.Type;
+            builder.Type = eventTemplateDeclaration.Type;
         }
 
         if ( this.Template != null )
         {
-            if ( templateDeclaration.GetSymbol().AssertSymbolNotNull().GetBackingField() is { } backingField )
+            if ( eventTemplateDeclaration.GetSymbol().AssertSymbolNotNull().GetBackingField() is { } backingField )
             {
                 var classificationService = context.ServiceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
@@ -122,7 +122,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             // Case for event fields.
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,
-                templateDeclaration.AddMethod,
+                eventTemplateDeclaration.AddMethod,
                 builder.AddMethod );
         }
 
@@ -138,7 +138,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             // Case for event fields.
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,
-                templateDeclaration.RemoveMethod,
+                eventTemplateDeclaration.RemoveMethod,
                 builder.RemoveMethod );
         }
 
@@ -163,20 +163,20 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
     protected override IntroductionAdviceResult<IEvent> ImplementCore( EventBuilder builder, in AdviceImplementationContext context )
     {
-        builder.Freeze();
-
-        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
+        var eventTemplateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
 
         // this.Tags: Override transformations.
         var targetDeclaration = this.TargetDeclaration;
 
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
-        var hasNoOverrideSemantics = this.Template?.DeclarationRef != null && templateDeclaration.IsEventField() == true;
+        var hasNoOverrideSemantics = eventTemplateDeclaration != null && eventTemplateDeclaration.IsEventField() == true;
 
         if ( existingDeclaration == null )
         {
             // TODO: validate event type.
+
+            builder.Freeze();
 
             // There is no existing declaration, we will introduce and override the introduced.
             context.AddTransformation( builder.ToTransformation() );
@@ -254,6 +254,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                     {
                         builder.HasNewKeyword = builder.IsNew = true;
                         builder.OverriddenEvent = existingEvent;
+                        builder.Freeze();
 
                         if ( hasNoOverrideSemantics )
                         {
@@ -312,6 +313,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                     {
                         builder.IsOverride = true;
                         builder.OverriddenEvent = existingEvent;
+                        builder.Freeze();
 
                         if ( hasNoOverrideSemantics )
                         {

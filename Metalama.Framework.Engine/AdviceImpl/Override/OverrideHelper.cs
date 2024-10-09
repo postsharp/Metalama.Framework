@@ -72,6 +72,8 @@ internal static class OverrideHelper
                     ReplacedImplicitConstructor = implicitConstructor, Accessibility = Accessibility.Public
                 };
 
+                constructorBuilder.Freeze();
+
                 addTransformation( constructorBuilder.ToTransformation() );
             }
         }
