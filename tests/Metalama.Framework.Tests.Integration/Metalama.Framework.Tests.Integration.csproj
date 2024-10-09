@@ -43,18 +43,6 @@
         <Compile Remove="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
         <!-- But still show them in solution explorer -->
         <None Include="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
-        <Compile Update="Tests\Aspects\Introductions\Interfaces\TryFindImplementationForInterfaceMember_Generic.cs">
-          <DependentUpon>$([System.String]::Copy('TryFindImplementationForInterfaceMember').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Tests\Aspects\Introductions\Interfaces\TryFindImplementationForInterfaceMember_FromBase_Generic.cs">
-          <DependentUpon>$([System.String]::Copy('TryFindImplementationForInterfaceMember_FromBase').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Tests\Aspects\Introductions\Interfaces\TryFindImplementationForInterfaceMember_FromBase_Generic2.cs">
-          <DependentUpon>$([System.String]::Copy('TryFindImplementationForInterfaceMember_FromBase').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
     </ItemGroup>
 
     <ItemGroup>
