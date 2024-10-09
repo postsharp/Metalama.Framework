@@ -47,7 +47,7 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( this.AspectLayerInstance.InitialCompilation );
 
         var eventName = context.InjectionNameProvider.GetOverrideName(
             overriddenDeclaration.DeclaringType,

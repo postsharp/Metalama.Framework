@@ -530,7 +530,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     // Create the SyntaxGenerationContext for the insertion point.
                     var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions );
 
-                    var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( syntaxGenerationContext );
+                    var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( syntaxGenerationContext, input.CompilationModel );
                     var introducedInterface = new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterfaceSyntax );
 
                     transformationCollection.AddInjectedInterface( injectInterfaceTransformation.TargetDeclaration.As<INamedType>(), introducedInterface );

@@ -52,7 +52,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 
     public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
-    public bool IsReturnParameter => this.Index >= 0;
+    public bool IsReturnParameter => this.Index < 0;
 
     [Memo]
     private IFullRef<IParameter> Ref => this.RefFactory.FromBuilt<IParameter>( this );

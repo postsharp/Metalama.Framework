@@ -44,7 +44,7 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._targetOperator.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._targetOperator.GetTarget( this.AspectLayerInstance.InitialCompilation );
         var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
 
         var metaApi = MetaApi.ForMethod(

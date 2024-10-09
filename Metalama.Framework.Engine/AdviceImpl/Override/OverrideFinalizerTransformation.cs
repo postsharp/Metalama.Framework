@@ -45,7 +45,7 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
     {
         var proceedExpression = this.CreateProceedExpression( context );
 
-        var overriddenDeclaration = this._targetFinalizer.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._targetFinalizer.GetTarget( this.AspectLayerInstance.InitialCompilation );
 
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,

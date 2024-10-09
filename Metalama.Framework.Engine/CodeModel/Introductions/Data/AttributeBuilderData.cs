@@ -23,9 +23,12 @@ internal class AttributeBuilderData : DeclarationBuilderData
 
     public AttributeBuilderData( AttributeBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuilderAttributeRef( this );
-        this.Constructor = builder.AttributeConstruction.Constructor.ToFullRef();
+        // Type must be set before the Ref is created.
         this.Type = builder.AttributeConstruction.Type.ToFullRef();
+
+        this._ref = new BuilderAttributeRef( this );
+
+        this.Constructor = builder.AttributeConstruction.Constructor.ToFullRef();
         this.ConstructorArguments = builder.AttributeConstruction.ConstructorArguments.ToImmutableArray();
         this.NamedArguments = builder.AttributeConstruction.NamedArguments;
         this.Attributes = ImmutableArray<AttributeBuilderData>.Empty;

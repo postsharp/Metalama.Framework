@@ -156,7 +156,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
     {
         base.ValidateBuilder( builder, diagnosticAdder );
 
-        var targetDeclaration = (INamedType) this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration;
 
         if ( builder.Parameters.Count <= 0 )
         {

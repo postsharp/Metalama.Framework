@@ -39,7 +39,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        var overriddenDeclaration = this.OverriddenPropertyOrIndexer.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenPropertyOrIndexer.GetTarget( this.AspectLayerInstance.InitialCompilation );
 
         if ( overriddenDeclaration.GetMethod != null )
         {

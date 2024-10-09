@@ -456,7 +456,12 @@ internal sealed partial class ContextualSyntaxGenerator
         return interpolatedString.WithContents( List( contents ) );
     }
 
-    public TypeSyntax Type( IRef<IType> type ) => this.Type( (ITypeSymbol) ((ISymbolRef) type).Symbol );
+    public TypeSyntax Type( IRef<IType> type, CompilationModel compilation )
+        => type switch
+        {
+            ISymbolRef symbolRef => this.Type( (ITypeSymbol) symbolRef.Symbol ),
+            _ => this.Type( type.GetTarget( compilation ) )
+        };
 
     public TypeSyntax Type( IType type, bool bypassSymbols = false )
     {

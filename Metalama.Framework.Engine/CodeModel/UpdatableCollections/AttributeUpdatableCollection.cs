@@ -40,7 +40,7 @@ internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollect
     {
         this.EnsureComplete();
 
-        var itemsToRemove = this.Where( x => x.AttributeType.IsConvertibleTo( namedType ) );
+        var itemsToRemove = this.Where( x => x.AttributeType.IsConvertibleTo( namedType ) ).ToMutableList();
 
         foreach ( var item in itemsToRemove )
         {

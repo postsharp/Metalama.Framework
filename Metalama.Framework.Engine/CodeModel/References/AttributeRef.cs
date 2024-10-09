@@ -18,14 +18,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         protected AttributeRef( IFullRef<IDeclaration> containingDeclaration, IFullRef<INamedType> attributeType )
         {
             this.ContainingDeclaration = containingDeclaration;
-            this.AttributeType = attributeType;
+            this.AttributeType = attributeType.AssertNotNull();
         }
 
         public IFullRef ContainingDeclaration { get; }
 
         public IFullRef<INamedType> AttributeType { get; }
-
-        public ISymbol GetClosestContainingSymbol() => this.ContainingDeclaration.GetClosestContainingSymbol();
 
         public abstract string? Name { get; }
 

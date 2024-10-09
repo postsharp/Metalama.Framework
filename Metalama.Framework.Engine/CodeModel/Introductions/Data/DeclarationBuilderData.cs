@@ -40,6 +40,7 @@ internal abstract class DeclarationBuilderData
 
     protected abstract IFullRef<IDeclaration> ToDeclarationRef();
 
+    // TODO: SerializableDeclarationId is used to represent inheritance, including at design time.
     public SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
 
     public bool IsDesignTimeObservable { get; }

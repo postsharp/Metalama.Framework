@@ -281,7 +281,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 var allAttributes =
                     allNewDeclarations.SelectMany( c => c.Attributes )
-                        .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
+                        .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.BuilderData ) )
                         .Select( a => new BuilderAttributeRef( a ) )
                         .ToReadOnlyList();
 

@@ -12,23 +12,23 @@ namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransformation, IIntroduceDeclarationTransformation
 {
-    public AttributeBuilderData AttributeBuilder { get; }
+    public AttributeBuilderData BuilderData { get; }
 
-    public IntroduceAttributeTransformation( AspectLayerInstance aspectLayerInstance, AttributeBuilderData attributeBuilder ) : base(
+    public IntroduceAttributeTransformation( AspectLayerInstance aspectLayerInstance, AttributeBuilderData builderData ) : base(
         aspectLayerInstance,
-        attributeBuilder.ContainingDeclaration )
+        builderData.ContainingDeclaration )
     {
-        this.AttributeBuilder = attributeBuilder;
+        this.BuilderData = builderData;
     }
 
-    public override IRef<IDeclaration> TargetDeclaration => this.AttributeBuilder.ContainingDeclaration;
+    public override IRef<IDeclaration> TargetDeclaration => this.BuilderData.ContainingDeclaration;
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceAttribute;
 
-    public DeclarationBuilderData DeclarationBuilderData => this.AttributeBuilder;
+    public DeclarationBuilderData DeclarationBuilderData => this.BuilderData;
 
     protected override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Introduce attribute of type '{this.AttributeBuilder.Type}' into '{this.TargetDeclaration}'";
+        => $"Introduce attribute of type '{this.BuilderData.Type}' into '{this.TargetDeclaration}'";
 }

@@ -89,13 +89,16 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         }
         else if ( this.Template != null )
         {
+            Invariant.Assert( eventTemplateDeclaration != null );
+
             // Case for event fields.
             builder.Type = eventTemplateDeclaration.Type;
-            builder.InitializerExpression = eventTemplateDeclaration.InitializerExpression;
         }
 
         if ( this.Template != null )
         {
+            Invariant.Assert( eventTemplateDeclaration != null );
+
             if ( eventTemplateDeclaration.GetSymbol().AssertSymbolNotNull().GetBackingField() is { } backingField )
             {
                 var classificationService = context.ServiceProvider.Global.GetRequiredService<AttributeClassificationService>();

@@ -33,10 +33,10 @@ internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransform
         this.MemberMap = memberMap;
     }
 
-    public BaseTypeSyntax GetSyntax( SyntaxGenerationContext context )
+    public BaseTypeSyntax GetSyntax( SyntaxGenerationContext context, CompilationModel compilation )
     {
         // The type already implements the interface members itself.
-        return SimpleBaseType( context.SyntaxGenerator.Type( this.InterfaceType ) );
+        return SimpleBaseType( context.SyntaxGenerator.Type( this.InterfaceType, compilation ) );
     }
 
     public override IRef<IDeclaration> TargetDeclaration => this.TargetType;

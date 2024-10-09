@@ -92,13 +92,13 @@ public static class RefExtensions
         {
             symbol = symbol.ContainingSymbol;
 
-            if ( symbol.Kind == SymbolKind.Namespace )
+            if ( symbol == null || symbol.Kind == SymbolKind.Namespace )
             {
                 return null;
             }
         }
 
-        return symbol.GetPrimarySyntaxReference().SyntaxTree;
+        return symbol.GetPrimarySyntaxReference()?.SyntaxTree;
     }
 
     public static SyntaxTree? GetPrimarySyntaxTree( this IRef reference )

@@ -51,7 +51,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         var serviceProvider = context.ServiceProvider;
         var syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
 
-        var constructor = (IConstructor) this.TargetDeclaration;
+        var constructor = (IConstructor) this.TargetDeclaration.ForCompilation( context.Compilation );
         var initializedConstructor = constructor;
 
         var existingParameter = constructor.Parameters.FirstOrDefault( p => p.Name == this._parameterName );

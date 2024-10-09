@@ -37,7 +37,7 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
             return this.CreateProceedExpression( context, kind );
         }
 
-        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( this.AspectLayerInstance.InitialCompilation );
 
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,
