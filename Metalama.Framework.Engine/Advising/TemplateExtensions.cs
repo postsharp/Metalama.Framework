@@ -25,7 +25,11 @@ namespace Metalama.Framework.Engine.Advising
                                 accessor.MethodKind,
                                 out var template ) )
                         {
-                            return TemplateMemberFactory.Create<IMethod>( accessor, template, propertyTemplate.DeclarationRef.CompilationContext );
+                            return TemplateMemberFactory.Create<IMethod>(
+                                accessor,
+                                template,
+                                propertyTemplate.TemplateProvider,
+                                propertyTemplate.DeclarationRef.CompilationContext );
                         }
                         else
                         {
@@ -55,7 +59,11 @@ namespace Metalama.Framework.Engine.Advising
                                 accessor.MethodKind,
                                 out var template ) )
                         {
-                            return TemplateMemberFactory.Create<IMethod>( accessor, template, eventTemplate.DeclarationRef.CompilationContext );
+                            return TemplateMemberFactory.Create<IMethod>(
+                                accessor,
+                                template,
+                                eventTemplate.TemplateProvider,
+                                eventTemplate.DeclarationRef.CompilationContext );
                         }
                         else
                         {
@@ -109,6 +117,7 @@ namespace Metalama.Framework.Engine.Advising
                     return TemplateMemberFactory.Create<IField>(
                         fieldTemplate.DeclarationRef.Symbol,
                         fieldTemplate.TemplateClassMember,
+                        fieldTemplate.TemplateProvider,
                         fieldTemplate.AdviceAttribute.AssertNotNull(),
                         fieldTemplate.DeclarationRef.CompilationContext,
                         TemplateKind.InitializerExpression );
@@ -139,6 +148,7 @@ namespace Metalama.Framework.Engine.Advising
                     return TemplateMemberFactory.Create<IEvent>(
                         eventFieldTemplate.DeclarationRef.Symbol,
                         eventFieldTemplate.TemplateClassMember,
+                        eventFieldTemplate.TemplateProvider,
                         eventFieldTemplate.DeclarationRef.CompilationContext,
                         TemplateKind.InitializerExpression );
                 }
@@ -165,6 +175,7 @@ namespace Metalama.Framework.Engine.Advising
                     return TemplateMemberFactory.Create<IProperty>(
                         propertyTemplate.DeclarationRef.Symbol,
                         propertyTemplate.TemplateClassMember,
+                        propertyTemplate.TemplateProvider,
                         propertyTemplate.DeclarationRef.CompilationContext,
                         TemplateKind.InitializerExpression );
                 }

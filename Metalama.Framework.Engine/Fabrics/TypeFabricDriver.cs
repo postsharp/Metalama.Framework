@@ -58,13 +58,14 @@ internal sealed class TypeFabricDriver : FabricDriver
 
     public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
     {
-        var templateInstance = new TemplateClassInstance( TemplateProvider.FromInstance( this.Fabric ), templateClass );
+        var templateProvider = TemplateProvider.FromInstance( this.Fabric );
+        var templateInstance = new TemplateClassInstance( templateProvider, templateClass );
         var targetType = (INamedType) aspectBuilder.Target;
         var compilation = aspectBuilder.Target.GetCompilationModel();
 
         // Prepare declarative advice.
         var declarativeAdvice = templateClass
-            .GetDeclarativeAdvice( aspectBuilder.ServiceProvider, compilation )
+            .GetDeclarativeAdvice( aspectBuilder.ServiceProvider, compilation, templateProvider )
             .ToReadOnlyList();
 
         // Execute the AmendType.

@@ -31,9 +31,8 @@ internal static class TemplateBindingHelper
     public static BoundTemplateMethod ForIntroduction(
         this TemplateMember<IMethod> template,
         IMethod targetMethod,
-        TemplateProvider templateProvider,
         IObjectReader? arguments = null )
-        => template.PartialForIntroduction( templateProvider, arguments ).ForIntroduction( targetMethod );
+        => template.PartialForIntroduction( arguments ).ForIntroduction( targetMethod );
 
     /// <summary>
     /// Partially binds a template with given type arguments when the target declaration is not yet known.
@@ -41,12 +40,11 @@ internal static class TemplateBindingHelper
     /// </summary>
     public static PartiallyBoundTemplateMethod PartialForIntroduction(
         this TemplateMember<IMethod> template,
-        TemplateProvider templateProvider,
         IObjectReader? arguments = null )
     {
         var templateTypeArguments = GetTemplateTypeArguments( template, arguments );
 
-        return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments, templateProvider );
+        return new PartiallyBoundTemplateMethod( template, templateTypeArguments, arguments );
     }
 
     /// <summary>
@@ -82,7 +80,7 @@ internal static class TemplateBindingHelper
         {
             var templateArguments = GetTemplateArguments( template, CreateParameterMapping() );
 
-            return new BoundTemplateMethod( template.TemplateMember, template.TemplateProvider, templateArguments );
+            return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
         else
         {
@@ -105,7 +103,7 @@ internal static class TemplateBindingHelper
 
             var templateArguments = GetTemplateArguments( template.TemplateMember, template.TemplateArguments, CreateParameterMapping() );
 
-            return new BoundTemplateMethod( template.TemplateMember, template.TemplateProvider, templateArguments );
+            return new BoundTemplateMethod( template.TemplateMember, templateArguments );
         }
     }
 
@@ -140,7 +138,7 @@ internal static class TemplateBindingHelper
 
         var templateArguments = GetTemplateArguments( template, CreateParameterMapping() );
 
-        return new BoundTemplateMethod( template.TemplateMember, template.TemplateProvider, templateArguments );
+        return new BoundTemplateMethod( template.TemplateMember, templateArguments );
     }
 
     /// <summary>
@@ -148,7 +146,6 @@ internal static class TemplateBindingHelper
     /// </summary>
     public static BoundTemplateMethod ForInitializer(
         this TemplateMember<IMethod> template,
-        TemplateProvider templateProvider,
         IObjectReader? arguments = null )
     {
         var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
@@ -171,7 +168,6 @@ internal static class TemplateBindingHelper
 
         return new BoundTemplateMethod(
             template,
-            templateProvider,
             GetTemplateArguments( template, arguments, ImmutableDictionary<string, ExpressionSyntax>.Empty ) );
     }
 
@@ -205,7 +201,6 @@ internal static class TemplateBindingHelper
     public static BoundTemplateMethod ForContract(
         this TemplateMember<IMethod> template,
         ExpressionSyntax valueExpression,
-        TemplateProvider templateProvider,
         IObjectReader? arguments = null )
     {
         var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
@@ -237,13 +232,12 @@ internal static class TemplateBindingHelper
         var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty
             .Add( "value", valueExpression );
 
-        return new BoundTemplateMethod( template, templateProvider, GetTemplateArguments( template, arguments, parameterMapping ) );
+        return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
     }
 
     public static BoundTemplateMethod ForOverride(
         this TemplateMember<IMethod> template,
         IConstructor targetConstructor,
-        TemplateProvider templateProvider,
         IObjectReader? arguments = null )
     {
         var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
@@ -300,7 +294,7 @@ internal static class TemplateBindingHelper
                     $"Cannot use the template '{template.DeclarationRef}' to override the constructor '{targetConstructor}': the template return type '{templateMethodSymbol.ReturnType}' is not compatible with 'void'." ) );
         }
 
-        return new BoundTemplateMethod( template, templateProvider, templateArguments );
+        return new BoundTemplateMethod( template, templateArguments );
     }
 
     /// <summary>
@@ -309,7 +303,6 @@ internal static class TemplateBindingHelper
     public static BoundTemplateMethod ForOverride(
         this TemplateMember<IMethod> template,
         IMethod targetMethod,
-        TemplateProvider templateProvider,
         IObjectReader? arguments = null )
     {
         var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
@@ -447,7 +440,7 @@ internal static class TemplateBindingHelper
                     $"Cannot use the template '{templateMethodSymbol}' to override the method '{targetMethod}': the template return type '{templateMethodSymbol.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
         }
 
-        return new BoundTemplateMethod( template, templateProvider, templateArguments );
+        return new BoundTemplateMethod( template, templateArguments );
     }
 
     private static bool VerifyTemplateType(

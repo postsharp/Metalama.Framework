@@ -49,8 +49,9 @@ internal sealed class AspectDriver : IAspectDriver
         // during pipeline execution, and execution has a different service provider.
 
         // Introductions must have a deterministic order because of testing.
+        // We can pass a null TemplateProvider here because the templates will not be executed, but only used to discover eligibility.
         var declarativeAdviceAttributes = aspectClass
-            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation ) )
+            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation, default ) )
             .ToReadOnlyList();
 
         if ( declarativeAdviceAttributes.Count > 0 )
@@ -231,7 +232,8 @@ internal sealed class AspectDriver : IAspectDriver
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
-                .SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision ) )
+                .SelectMany(
+                    c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision, TemplateProvider.FromInstance( aspectInstance.Aspect ) ) )
                 .ToReadOnlyList();
 
             // Create the AspectBuilder.

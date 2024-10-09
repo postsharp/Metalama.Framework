@@ -68,7 +68,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         [NotNullWhen( true )] out BlockSyntax? contractBlock )
     {
         var annotatedValueExpression = TypeAnnotationMapper.AddExpressionTypeAnnotation( valueExpression, valueType );
-        var boundTemplate = this._template.ForContract( annotatedValueExpression, this.TemplateProvider, this._templateArguments );
+        var boundTemplate = this._template.ForContract( annotatedValueExpression, this._templateArguments );
 
         var metaApiProperties = new MetaApiProperties(
             this.OriginalCompilation,

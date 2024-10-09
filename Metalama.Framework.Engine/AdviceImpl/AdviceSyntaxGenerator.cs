@@ -83,9 +83,6 @@ internal class AdviceSyntaxGenerator
         [NotNullWhen( true )] out BlockSyntax? expression )
         where T : class, IMember
     {
-        // The template provider for an initializer is always the aspect itself because one cannot specify a different one.
-        var templateProvider = TemplateProvider.FromInstance( aspectLayerInstance.AspectInstance.Aspect );
-
         var metaApi = MetaApi.ForInitializer(
             member,
             new MetaApiProperties(
@@ -103,7 +100,7 @@ internal class AdviceSyntaxGenerator
             context,
             metaApi,
             member,
-            templateProvider,
+            initializerTemplate.TemplateProvider,
             aspectLayerInstance.AspectLayerId );
 
         var templateDriver = initializerTemplate.Driver;

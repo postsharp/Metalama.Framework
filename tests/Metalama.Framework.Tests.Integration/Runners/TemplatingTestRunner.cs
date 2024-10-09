@@ -248,13 +248,13 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );
 
                 var templateMethodDeclaration = compilationModel.Factory.GetMethod( templateMethod );
-                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember );
+                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember, default );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
                     serviceProvider,
                     assembly,
                     compilationModel,
-                    template.ForIntroduction( templateMethodDeclaration, default ) );
+                    template.ForIntroduction( templateMethodDeclaration ) );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out var output );
 

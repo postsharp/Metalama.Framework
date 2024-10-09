@@ -356,7 +356,10 @@ public abstract class TemplateClass : IDiagnosticSource
         return members.ToImmutable();
     }
 
-    internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( in ProjectServiceProvider serviceProvider, CompilationModel compilation )
+    internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice(
+        in ProjectServiceProvider serviceProvider,
+        CompilationModel compilation,
+        TemplateProvider templateProvider )
     {
         var compilationModelForTemplateReflection = this._templateReflectionContext?.GetCompilationModel( compilation ) ?? compilation;
 
@@ -367,6 +370,7 @@ public abstract class TemplateClass : IDiagnosticSource
                         compilationModelForTemplateReflection.CompilationContext.SymbolTranslator.Translate( x.Symbol, x.SymbolCompilation )
                             .AssertNotNull() ),
                     x.TemplateClassMember,
+                    templateProvider,
                     x.Attribute ) );
     }
 

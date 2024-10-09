@@ -32,6 +32,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     private readonly OverrideStrategy _overrideStrategy;
     private readonly IObjectReader _tags;
     private readonly IAdviceFactoryImpl _adviceFactory;
+    private readonly TemplateProvider _templateProvider;
 
     private new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
@@ -40,7 +41,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         INamedType interfaceType,
         OverrideStrategy overrideStrategy,
         IObjectReader tags,
-        IAdviceFactoryImpl adviceFactory )
+        IAdviceFactoryImpl adviceFactory,
+        TemplateProvider templateProvider )
         : base( parameters )
     {
         this._interfaceType = interfaceType;
@@ -48,6 +50,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         this._interfaceSpecifications = [];
         this._tags = tags;
         this._adviceFactory = adviceFactory;
+        this._templateProvider = templateProvider;
     }
 
     public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
@@ -236,7 +239,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
             if ( method != null && TryGetInterfaceMemberTemplate( method, out var classMember ) )
             {
-                return TemplateMemberFactory.Create( method, classMember );
+                return TemplateMemberFactory.Create( method, classMember, this._templateProvider );
             }
 
             return null;
@@ -248,7 +251,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
             if ( property != null && TryGetInterfaceMemberTemplate( property, out var classMember ) )
             {
-                return TemplateMemberFactory.Create( property, classMember );
+                return TemplateMemberFactory.Create( property, classMember, this._templateProvider );
             }
 
             return null;
@@ -260,7 +263,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
             if ( @event != null && TryGetInterfaceMemberTemplate( @event, out var classMember ) )
             {
-                return TemplateMemberFactory.Create( @event, classMember );
+                return TemplateMemberFactory.Create( @event, classMember, this._templateProvider );
             }
 
             return null;
@@ -434,7 +437,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                             new OverrideMethodTransformation(
                                                 this.AspectLayerInstance,
                                                 existingMethod.ToFullRef(),
-                                                templateMethod.AssertNotNull().ForOverride( existingMethod, this.TemplateProvider ),
+                                                templateMethod.AssertNotNull().ForOverride( existingMethod ),
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
@@ -497,7 +500,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     new OverrideMethodTransformation(
                                         this.AspectLayerInstance,
                                         methodBuilder.ToFullRef(),
-                                        templateMethod.ForIntroduction( methodBuilder, this.TemplateProvider ),
+                                        templateMethod.ForIntroduction( methodBuilder ),
                                         mergedTags ) );
                             }
                             else
@@ -573,10 +576,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                                 this.AspectLayerInstance,
                                                 existingProperty.ToFullRef(),
                                                 existingProperty.GetMethod != null
-                                                    ? accessorTemplates.Get?.ForOverride( existingProperty.GetMethod, this.TemplateProvider )
+                                                    ? accessorTemplates.Get?.ForOverride( existingProperty.GetMethod )
                                                     : null,
                                                 existingProperty.SetMethod != null
-                                                    ? accessorTemplates.Set?.ForOverride( existingProperty.SetMethod, this.TemplateProvider )
+                                                    ? accessorTemplates.Set?.ForOverride( existingProperty.SetMethod )
                                                     : null,
                                                 mergedTags ) );
 
@@ -754,10 +757,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                             this.AspectLayerInstance,
                                             propertyBuilder.ToRef(),
                                             propertyBuilder.GetMethod != null
-                                                ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod, this.TemplateProvider )
+                                                ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod )
                                                 : null,
                                             propertyBuilder.SetMethod != null
-                                                ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod, this.TemplateProvider )
+                                                ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod )
                                                 : null,
                                             mergedTags ) );
                                 }
@@ -843,8 +846,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                             new OverrideEventTransformation(
                                                 this.AspectLayerInstance,
                                                 existingEvent.ToFullRef(),
-                                                accessorTemplates.Add?.ForOverride( existingEvent.AddMethod, this.TemplateProvider ),
-                                                accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod, this.TemplateProvider ),
+                                                accessorTemplates.Add?.ForOverride( existingEvent.AddMethod ),
+                                                accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod ),
                                                 mergedTags ) );
 
                                         implementedInterfaceMembers.Add(
@@ -924,8 +927,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         new OverrideEventTransformation(
                                             this.AspectLayerInstance,
                                             eventBuilder.ToFullRef(),
-                                            accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod, this.TemplateProvider ),
-                                            accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod, this.TemplateProvider ),
+                                            accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod ),
+                                            accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod ),
                                             mergedTags ) );
                                 }
                                 else

@@ -32,17 +32,15 @@ internal sealed class PartiallyBoundTemplateMethod
     /// </summary>
     public object?[] TypeArguments { get; }
 
-    public TemplateProvider TemplateProvider { get; }
+    public TemplateProvider TemplateProvider => this.TemplateMember.TemplateProvider;
 
     public PartiallyBoundTemplateMethod(
         TemplateMember<IMethod> template,
         object?[] typeArguments,
-        IObjectReader? argumentReader,
-        TemplateProvider templateProvider )
+        IObjectReader? argumentReader )
     {
         this.TemplateMember = template;
         this.TemplateArguments = argumentReader;
-        this.TemplateProvider = templateProvider;
         this.TypeArguments = typeArguments;
     }
 }

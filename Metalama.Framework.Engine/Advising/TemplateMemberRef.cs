@@ -83,6 +83,7 @@ internal readonly struct TemplateMemberRef
             return TemplateMemberFactory.Create(
                 typedSymbol,
                 this._templateMember,
+                templateProvider,
                 templateAttribute,
                 this._selectedKind,
                 this._interpretedKind );

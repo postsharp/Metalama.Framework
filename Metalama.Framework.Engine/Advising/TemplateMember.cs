@@ -50,10 +50,9 @@ internal abstract class TemplateMember
     /// Gets a value indicating which kind should the template be treated as, based on the selected template method.
     /// For example, a <see cref="TemplateKind.Default"/> template that is <c>async Task</c> should be treated as <see cref="TemplateKind.Async"/>.
     /// </summary>
-    public TemplateKind EffectiveKind
-    {
-        get;
-    }
+    public TemplateKind EffectiveKind { get; }
+
+    public TemplateProvider TemplateProvider { get; }
 
     private TemplateKind GetEffectiveKind( ISymbol declaration )
     {
@@ -110,15 +109,18 @@ internal abstract class TemplateMember
         this.GetAccessorAccessibility = prototype.GetAccessorAccessibility;
         this.SetAccessorAccessibility = prototype.SetAccessorAccessibility;
         this.TemplateClassMember = prototype.TemplateClassMember;
+        this.TemplateProvider = prototype.TemplateProvider;
     }
 
     protected TemplateMember(
         ISymbolRef<IMemberOrNamedType> implementation,
         TemplateClassMember templateClassMember,
+        TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind = TemplateKind.Default ) : this(
         implementation,
         templateClassMember,
+        templateProvider,
         adviceAttribute,
         selectedKind,
         selectedKind ) { }
@@ -126,6 +128,7 @@ internal abstract class TemplateMember
     protected TemplateMember(
         ISymbolRef<IMemberOrNamedType> implementation,
         TemplateClassMember templateClassMember,
+        TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
         TemplateKind selectedKind,
         TemplateKind interpretedKind )
@@ -133,6 +136,7 @@ internal abstract class TemplateMember
         var symbol = implementation.Symbol;
 
         this.TemplateClassMember = templateClassMember;
+        this.TemplateProvider = templateProvider;
         this.AdviceAttribute = adviceAttribute.AssertNotNull();
 
         if ( symbol is IMethodSymbol { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }

@@ -18,12 +18,11 @@ internal sealed class BoundTemplateMethod
     /// </summary>
     public TemplateMember<IMethod> TemplateMember { get; }
 
-    public TemplateProvider TemplateProvider { get; }
+    public TemplateProvider TemplateProvider => this.TemplateMember.TemplateProvider;
 
-    public BoundTemplateMethod( TemplateMember<IMethod> template, TemplateProvider templateProvider, object?[] templateArguments )
+    public BoundTemplateMethod( TemplateMember<IMethod> template, object?[] templateArguments )
     {
         this.TemplateMember = template;
-        this.TemplateProvider = templateProvider;
         this.TemplateArguments = templateArguments;
 
 #if DEBUG
