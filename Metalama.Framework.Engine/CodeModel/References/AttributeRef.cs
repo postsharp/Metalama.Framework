@@ -45,16 +45,23 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return attribute;
         }
 
-        ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext )
-            => this.GetTargetOrNull( compilation, genericContext );
-
         public IDurableRef<IAttribute> ToDurable() => throw new NotSupportedException();
 
         public bool IsDurable => false;
 
         IRef IRefImpl.ToDurable() => this.ToDurable();
 
-        ICompilationElement IRef.GetTarget( ICompilation compilation, IGenericContext? genericContext ) => this.GetTarget( compilation );
+        ICompilationElement? IRef.GetTargetInterface( ICompilation compilation, Type? interfaceType, IGenericContext? genericContext, bool throwIfMissing )
+        {
+            var target = this.GetTargetOrNull( compilation, genericContext );
+
+            if ( target == null && throwIfMissing )
+            {
+                throw new InvalidOperationException();
+            }
+
+            return target;
+        }
 
         public IAttribute? GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext = null )
         {

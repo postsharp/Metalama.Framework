@@ -52,7 +52,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
             return null;
         }
 
-        return type.GetTarget( this.Compilation, this.GenericContext );
+        return (IType) type.GetTarget( this.Compilation, this.GenericContext, typeof(IType) );
     }
 
     [return: NotNullIfNotNull( nameof(declaration) )]

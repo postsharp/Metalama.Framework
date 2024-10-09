@@ -21,13 +21,16 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 {
     internal sealed class TypeParameter : Declaration, ITypeParameter, ITypeImpl
     {
+        private readonly GenericContext? _genericContext;
+
         public ITypeParameterSymbol TypeParameterSymbol { get; }
 
         ITypeSymbol ISdkType.TypeSymbol => this.TypeParameterSymbol;
 
-        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal TypeParameter( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation, GenericContext? genericContext ) : base( compilation )
         {
-            this.TypeParameterSymbol = typeSymbol;
+            this._genericContext = genericContext;
+            this.TypeParameterSymbol = typeParameterSymbol;
         }
 
         public TypeKind TypeKind => TypeKind.TypeParameter;
@@ -123,6 +126,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
         IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
+
+        [Memo]
+        public IType ResolvedType => this._genericContext.IsEmptyOrIdentity ? this : this.GenericContext.Map( this );
 
         IRef<IType> IType.ToRef() => this.Ref;
     }

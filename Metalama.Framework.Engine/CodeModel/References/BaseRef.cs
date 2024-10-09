@@ -32,28 +32,28 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
 
     public abstract SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
 
-    ICompilationElement IRef.GetTarget( ICompilation compilation, IGenericContext? genericContext ) => this.GetTarget( compilation, genericContext );
-
-    ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext )
-        => this.GetTargetOrNull( compilation, genericContext );
-
     public abstract IDurableRef<T> ToDurable();
 
     public abstract bool IsDurable { get; }
 
     IRef IRefImpl.ToDurable() => this.ToDurable();
 
-    public T GetTarget( ICompilation compilation, IGenericContext? genericContext = null ) => this.GetTargetImpl( compilation, true, genericContext )!;
+    public T GetTarget( ICompilation compilation, IGenericContext? genericContext = null )
+        => (T) this.GetTargetImpl( compilation, true, genericContext, typeof(T) )!;
 
-    public T? GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext = null ) => this.GetTargetImpl( compilation, false, genericContext );
+    public T? GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext = null )
+        => (T?) this.GetTargetImpl( compilation, false, genericContext, typeof(T) );
 
-    private T? GetTargetImpl( ICompilation compilation, bool throwIfMissing, IGenericContext? genericContext = null )
+    ICompilationElement? IRef.GetTargetInterface( ICompilation compilation, Type? interfaceType, IGenericContext? genericContext, bool throwIfMissing )
+        => this.GetTargetImpl( compilation, throwIfMissing, genericContext, interfaceType );
+
+    private ICompilationElement? GetTargetImpl( ICompilation compilation, bool throwIfMissing, IGenericContext? genericContext, Type interfaceType )
     {
         using ( StackOverflowHelper.Detect() )
         {
             var compilationModel = (CompilationModel) compilation;
 
-            return this.Resolve( compilationModel, throwIfMissing, genericContext );
+            return this.Resolve( compilationModel, throwIfMissing, genericContext, interfaceType );
         }
     }
 
@@ -61,10 +61,11 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
 
     protected abstract ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false );
 
-    protected abstract T? Resolve(
+    protected abstract ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext );
+        IGenericContext? genericContext,
+        Type interfaceType );
 
     protected static T? ReturnNullOrThrow( string id, bool throwIfMissing, CompilationModel compilation, Exception? ex = null )
     {
@@ -78,16 +79,25 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
         }
     }
 
-    protected static T? ConvertDeclarationOrThrow( ICompilationElement? compilationElement, CompilationModel compilation, bool throwOnError = true )
+    protected static ICompilationElement? ConvertDeclarationOrThrow(
+        ICompilationElement? compilationElement,
+        CompilationModel compilation,
+        Type interfaceType,
+        bool throwOnError = true )
     {
+        if ( interfaceType == null )
+        {
+            return compilationElement;
+        }
+
         var result = compilationElement switch
         {
             null => null,
-            T desired => desired,
-            IProperty property when typeof(T) == typeof(IField) && property.OriginalField != null => (T) property.OriginalField,
-            IField field when typeof(T) == typeof(IProperty) && field.OverridingProperty != null => (T) field.OverridingProperty,
+            _ when interfaceType.IsInstanceOfType( compilationElement ) => compilationElement,
+            IProperty property when interfaceType == typeof(IField) && property.OriginalField != null => property.OriginalField,
+            IField field when interfaceType == typeof(IProperty) && field.OverridingProperty != null => (T) field.OverridingProperty,
             _ when throwOnError => throw new InvalidCastException(
-                $"Cannot convert the '{compilationElement}' {compilationElement.DeclarationKind.ToDisplayString()} into a {typeof(T).Name} within the compilation '{compilation.Identity}'." ),
+                $"Cannot convert the '{compilationElement}' {compilationElement.DeclarationKind.ToDisplayString()} into a {interfaceType.Name} within the compilation '{compilation.Identity}'." ),
             _ => null
         };
 

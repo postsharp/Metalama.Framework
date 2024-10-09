@@ -82,6 +82,8 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     IRef<ITypeParameter> ITypeParameter.ToRef() => this.Immutable.ToRef();
 
+    public IType ResolvedType => this;
+
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     IRef<IType> IType.ToRef() => this.Immutable.ToRef();

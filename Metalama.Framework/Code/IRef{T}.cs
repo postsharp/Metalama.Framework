@@ -14,17 +14,4 @@ namespace Metalama.Framework.Code;
 /// <para>Use <see cref="RefEqualityComparer{T}"/> to compare instances of <see cref="IRef"/>.</para>
 /// </remarks>
 public interface IRef<out T> : IRef
-    where T : class, ICompilationElement
-{
-    /// <summary>
-    /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
-    /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
-    /// </summary>
-    new T GetTarget( ICompilation compilation, IGenericContext? genericContext = null );
-
-    /// <summary>
-    /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
-    /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
-    /// </summary>
-    new T? GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext = null );
-}
+    where T : class, ICompilationElement { }

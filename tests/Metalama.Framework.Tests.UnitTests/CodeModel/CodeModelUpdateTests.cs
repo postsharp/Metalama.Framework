@@ -758,8 +758,7 @@ class D : C<int>;
         var c = compilation.Types.OfName( "C" ).Single();
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, c, "M" );
-        methodBuilder.ReturnType = c.TypeParameters[0];
+        var methodBuilder = new MethodBuilder( null!, c, "M" ) { ReturnType = c.TypeParameters[0] };
         methodBuilder.AddParameter( "p", c.TypeParameters[0] );
         methodBuilder.Freeze();
 

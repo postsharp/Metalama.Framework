@@ -60,6 +60,9 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 
+    [Memo]
+    public IType ResolvedType => this.MapType( this.Ref );
+
     IRef<IType> IType.ToRef() => this.Ref;
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;

@@ -158,7 +158,7 @@ public partial class DeclarationFactory
     internal IDeclaration GetDeclaration(
         DeclarationBuilderData builder,
         IGenericContext? genericContext = null,
-        Type? interfaceType = null )
+        Type interfaceType = null )
     {
         // Note that interfaceType may be a non-final interface, e.g. IFieldOrProperty.
         Invariant.Assert( interfaceType == null || builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Any( interfaceType.IsAssignableFrom ) );

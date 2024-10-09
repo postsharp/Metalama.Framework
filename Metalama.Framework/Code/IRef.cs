@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Validation;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
 {
@@ -42,22 +43,23 @@ namespace Metalama.Framework.Code
         /// </summary>
         bool IsDurable { get; }
 
-        /// <summary>
-        /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
-        /// </summary>
-        ICompilationElement GetTarget( ICompilation compilation, IGenericContext? genericContext = null );
-
-        /// <summary>
-        /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
-        /// </summary>
-        ICompilationElement? GetTargetOrNull(
-            ICompilation compilation,
-            IGenericContext? genericContext = null );
-
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
         int GetHashCode( RefComparison comparison );
+
+        /// <summary>
+        /// Gets the target of the reference for a given compilation, and specify the type of the interface to be returned.
+        /// Normally, the extension methods <see cref="RefExtensions.GetTarget{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/>
+        /// or <see cref="RefExtensions.GetTargetOrNull{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/>
+        /// should be used instead of this one.
+        /// </summary>
+        ICompilationElement? GetTargetInterface(
+            ICompilation compilation,
+            Type? interfaceType,
+            IGenericContext? genericContext = null,
+            bool throwIfMissing = false );
+
+        // GetTargetInterface is intentionally in the IRef (and not in some IRefInternal) to avoid casts because we are in a performance-critical path.
+        // It is named differently than GetTarget to avoid name resolution problems.
     }
 }

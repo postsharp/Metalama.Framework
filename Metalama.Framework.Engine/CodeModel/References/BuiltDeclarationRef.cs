@@ -93,13 +93,15 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
         }
     }
 
-    protected override T? Resolve(
+    protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext )
+        IGenericContext? genericContext,
+        Type interfaceType )
         => ConvertDeclarationOrThrow(
-            compilation.Factory.GetDeclaration( this.BuilderData, this.SelectGenericContext( genericContext ), typeof(T) ),
-            compilation );
+            compilation.Factory.GetDeclaration( this.BuilderData, this.SelectGenericContext( genericContext ), interfaceType ),
+            compilation,
+            interfaceType );
 
     public override string ToString() => this.BuilderData.ToString()!;
 

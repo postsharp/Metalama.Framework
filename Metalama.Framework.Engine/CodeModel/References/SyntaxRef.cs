@@ -55,10 +55,11 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
                ?? throw new AssertionFailedException( $"Cannot get a symbol for {this.SyntaxNode.GetType().Name}." );
     }
 
-    protected override T? Resolve(
+    protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext )
+        IGenericContext? genericContext,
+        Type interfaceType )
     {
         return ConvertDeclarationOrThrow(
             compilation.Factory.GetCompilationElement(
@@ -66,7 +67,8 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
                     this.TargetKind,
                     genericContext )
                 .AssertNotNull(),
-            compilation );
+            compilation,
+            interfaceType );
     }
 
     public override string ToString()

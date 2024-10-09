@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -24,7 +25,11 @@ internal class DeclarationIdRef<T> : StringRef<T>
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => new SerializableDeclarationId( this.Id ).ResolveToSymbol( compilationContext );
 
-    protected override T? Resolve( CompilationModel compilation, bool throwIfMissing, IGenericContext? genericContext )
+    protected override ICompilationElement? Resolve(
+        CompilationModel compilation,
+        bool throwIfMissing,
+        IGenericContext? genericContext,
+        Type interfaceType )
     {
         var declaration = new SerializableDeclarationId( this.Id ).ResolveToDeclaration( compilation );
 
@@ -33,7 +38,7 @@ internal class DeclarationIdRef<T> : StringRef<T>
             return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
         }
 
-        return ConvertDeclarationOrThrow( declaration, compilation );
+        return ConvertDeclarationOrThrow( declaration, compilation, interfaceType );
     }
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new DeclarationIdRef<TOut>( this.Id );

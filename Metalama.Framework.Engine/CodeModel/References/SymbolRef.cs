@@ -74,10 +74,11 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
 
-    protected override T? Resolve(
+    protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext )
+        IGenericContext? genericContext,
+        Type interfaceType )
     {
         var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( this.Symbol, this.CompilationContext.Compilation );
 
@@ -87,8 +88,9 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
         }
 
         return ConvertDeclarationOrThrow(
-            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, genericContext ).AssertNotNull(),
-            compilation );
+            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, genericContext, interfaceType ).AssertNotNull(),
+            compilation,
+            interfaceType );
     }
 
     public override string ToString()

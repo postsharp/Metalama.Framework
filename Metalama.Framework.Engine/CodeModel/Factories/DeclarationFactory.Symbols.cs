@@ -22,7 +22,7 @@ public partial class DeclarationFactory
 // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
     private readonly Cache<ITypeSymbol, IType> _typeCache;
 
-    private readonly record struct CreateFromSymbolArgs<TSymbol>( TSymbol Symbol, DeclarationFactory Factory )
+    private readonly record struct CreateFromSymbolArgs<TSymbol>( TSymbol Symbol, DeclarationFactory Factory, GenericContext GenericContext )
     {
         public CompilationModel Compilation => this.Factory._compilationModel;
     }
@@ -55,9 +55,42 @@ public partial class DeclarationFactory
                         return x.me.GetDeclaration( redirectedDefinition, genericContext, typeof(TDeclaration) );
                     }
 
-                    return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me ) );
+                    return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, GenericContext.Empty ) );
                 },
                 (me: this, symbol, createDeclaration, supportsRedirection) );
+        }
+    }
+
+    private TDeclaration GetDeclarationFromSymbol<TDeclaration, TSymbol>(
+        TSymbol symbol,
+        CreateFromSymbolDelegate<TDeclaration, TSymbol> createDeclaration,
+        GenericContext genericContext,
+        bool supportsRedirection = false )
+        where TSymbol : ISymbol
+        where TDeclaration : class, IDeclaration
+    {
+        using ( StackOverflowHelper.Detect() )
+        {
+            symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
+
+            return (TDeclaration) this._symbolCache.GetOrAdd(
+                symbol,
+                genericContext,
+                typeof(TDeclaration),
+                static ( _, _, x ) =>
+                {
+                    if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
+                            x.me.CompilationContext.RefFactory.FromSymbol<TDeclaration>( x.symbol.OriginalDefinition ),
+                            out var redirectedDefinition ) )
+                    {
+                        var newGenericContext = GenericContext.Get( x.symbol, x.me.CompilationContext );
+
+                        return x.me.GetDeclaration( redirectedDefinition, newGenericContext, typeof(TDeclaration) );
+                    }
+
+                    return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ) );
+                },
+                (me: this, symbol, createDeclaration, supportsRedirection, genericContext) );
         }
     }
 
@@ -76,7 +109,7 @@ public partial class DeclarationFactory
                 symbol,
                 GenericContext.Empty,
                 typeof(IType),
-                static ( a, b, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me ) ),
+                static ( a, b, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, GenericContext.Empty ) ),
                 (me: this, symbol, createDeclaration: createType, supportsRedirection) );
         }
     }
@@ -148,10 +181,17 @@ public partial class DeclarationFactory
     }
 
     public ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol )
-        => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
+        => this.GetDeclarationFromSymbol<ITypeParameter, ITypeParameterSymbol>(
             typeParameterSymbol,
             static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
-                new TypeParameter( args.Symbol, args.Compilation ) );
+                new TypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
+
+    private ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol, GenericContext genericContext )
+        => this.GetDeclarationFromSymbol<ITypeParameter, ITypeParameterSymbol>(
+            typeParameterSymbol,
+            static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
+                new TypeParameter( args.Symbol, args.Compilation, args.GenericContext ),
+            genericContext );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
     {
@@ -245,8 +285,30 @@ public partial class DeclarationFactory
 
         symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
+        var typedGenericContext = genericContext.AsGenericContext();
+
         var mappedSymbol = genericContext.AsGenericContext().Map( symbol );
 
+        if ( interfaceType == typeof(ITypeParameter) )
+        {
+            // We intentionally don't pass the mapped symbol because it may be mapped to a non-ITypeParameterSymbol.
+            // The Roslyn code model does not support "generic instances" of type parameters, the support for this feature in
+            // our code model is done in the TypeParameter class.
+
+            return this.GetTypeParameter( (ITypeParameterSymbol) symbol, typedGenericContext );
+        }
+        else
+        {
+            return this.GetCompilationElementCore( mappedSymbol, targetKind, typedGenericContext, interfaceType );
+        }
+    }
+
+    private ICompilationElement GetCompilationElementCore(
+        ISymbol mappedSymbol,
+        RefTargetKind targetKind,
+        GenericContext genericContext,
+        Type? interfaceType )
+    {
         switch ( mappedSymbol.Kind )
         {
             case SymbolKind.NamedType:
