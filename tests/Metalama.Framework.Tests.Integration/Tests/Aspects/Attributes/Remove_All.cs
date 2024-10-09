@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Remove;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Remove_All;
 
 public class MyAspect : Aspect, IAspect<IDeclaration>
 {
@@ -16,9 +16,9 @@ public class MyAspect : Aspect, IAspect<IDeclaration>
     }
 }
 
-internal class KeepItAttribute : Attribute { }
+#pragma warning disable CS0414, CS8618
 
-#pragma warning disable CS0414, CS1696, CS8618, CS0067
+internal class KeepItAttribute : Attribute { }
 
 // <target>
 [MyAspect]

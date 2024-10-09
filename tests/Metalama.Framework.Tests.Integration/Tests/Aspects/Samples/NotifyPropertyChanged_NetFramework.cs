@@ -55,6 +55,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
         }
     }
 
+#pragma warning disable CS8618
+
     // <target>
     [NotifyPropertyChanged]
     internal class Car

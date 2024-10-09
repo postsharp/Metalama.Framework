@@ -1,8 +1,3 @@
-#if TEST_OPTIONS
-// In C# 10, we generate slightly different code.
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
-# endif
-
 using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;

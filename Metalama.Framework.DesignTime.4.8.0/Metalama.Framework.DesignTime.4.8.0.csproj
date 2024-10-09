@@ -1,5 +1,5 @@
 <Project>
-    
+
     <PropertyGroup>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -9,7 +9,7 @@
         <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'" />
     </ItemGroup>
 
-    <Import Project="../build/RoslynVersion/Roslyn.4.0.1.props" />
+    <Import Project="../build/RoslynVersion/Roslyn.4.8.0.props" />
 
     <Import Project="../Metalama.Framework.DesignTime/Metalama.Framework.DesignTime.csproj" />
 

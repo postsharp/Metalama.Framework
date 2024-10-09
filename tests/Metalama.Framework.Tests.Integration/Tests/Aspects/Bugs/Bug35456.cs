@@ -38,4 +38,4 @@ public class TheAspect : TypeAspect
 internal class C { }
 
 // <target>
-internal class D : C;
+internal class D : C { }

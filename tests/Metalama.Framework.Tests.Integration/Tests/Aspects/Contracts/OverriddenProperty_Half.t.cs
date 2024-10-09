@@ -1,4 +1,3 @@
-// Warning CS8618 on `Default`: `Non-nullable property 'Default' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.`
 internal class C : B
 {
   public override string Default => "C";

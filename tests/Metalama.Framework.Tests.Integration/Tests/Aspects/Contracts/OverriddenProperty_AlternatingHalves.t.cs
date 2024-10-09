@@ -1,4 +1,3 @@
-// Warning CS8618 on `P`: `Non-nullable property 'P' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.`
 internal class B
 {
   public virtual string P { get; set; }

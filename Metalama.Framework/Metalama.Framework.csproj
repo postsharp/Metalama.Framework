@@ -14,17 +14,18 @@
     
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.Framework.Sdk" />
-        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
+
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.12.0" />
 
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.0.1" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.12.0" />
         
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.0.1" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.12.0" />
         
         <InternalsVisibleTo Include="Metalama.Roslyn" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />

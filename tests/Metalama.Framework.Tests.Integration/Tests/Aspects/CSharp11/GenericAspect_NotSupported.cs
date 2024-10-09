@@ -1,9 +1,3 @@
-#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
-#endif
-
-#if ROSLYN_4_4_0_OR_GREATER
-
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
@@ -20,5 +14,3 @@ public class GenericAspect<T> : TypeAspect
 // <target>
 [GenericAspect<int>( 5 )]
 public class C { }
-
-#endif

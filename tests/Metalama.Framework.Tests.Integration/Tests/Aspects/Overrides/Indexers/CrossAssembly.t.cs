@@ -18,13 +18,13 @@ internal class TargetClass
       return;
     }
   }
-  public dynamic this[global::System.Int32 index]
+  public dynamic? this[global::System.Int32 index]
   {
     get
     {
       global::System.Console.WriteLine("Override");
       global::System.Console.WriteLine("Introduced.");
-      return default(dynamic);
+      return default(dynamic? );
     }
     set
     {

@@ -105,6 +105,13 @@ public static class SerializableDeclarationIdProvider
                         {
                             var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
 
+                            if ( documentationId == null )
+                            {
+                                id = default;
+
+                                return false;
+                            }
+
                             if ( targetKind == RefTargetKind.Default )
                             {
                                 id = new SerializableDeclarationId( documentationId );

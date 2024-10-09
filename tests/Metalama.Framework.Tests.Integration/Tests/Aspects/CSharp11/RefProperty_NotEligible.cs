@@ -1,9 +1,3 @@
-#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
-#endif
-
-#if ROSLYN_4_4_0_OR_GREATER
-
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
@@ -25,5 +19,3 @@ internal class C
     [TheAspect]
     public ref int X => ref _x;
 }
-
-#endif

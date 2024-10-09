@@ -15,6 +15,8 @@ public class IntroductionAttribute : TypeAspect
     }
 }
 
+#pragma warning disable CS8618
+
 // <target>
 [IntroductionAttribute]
 public class TargetType { }

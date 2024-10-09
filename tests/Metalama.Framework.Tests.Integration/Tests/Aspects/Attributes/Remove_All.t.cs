@@ -1,8 +1,3 @@
-// Warning CS8618 on `C`: `Non-nullable event 'MyEvent1' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
-// Warning CS8618 on `C`: `Non-nullable event 'MyEvent2' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
-// Warning CS8618 on `C`: `Non-nullable event 'MyEvent3' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
-// Warning CS0414 on `_a`: `The field 'C._a' is assigned but its value is never used`
-// Warning CS0414 on `_b`: `The field 'C._b' is assigned but its value is never used`
 internal class C
 {
   [KeepIt]

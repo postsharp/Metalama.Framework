@@ -1,9 +1,3 @@
-#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
-#endif
-
-#if ROSLYN_4_4_0_OR_GREATER
-
 using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
@@ -35,5 +29,3 @@ internal class Target
     [TheAspect]
     private void M() { }
 }
-
-#endif

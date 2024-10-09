@@ -10,4 +10,4 @@ using Metalama.Framework.Serialization;
 namespace Metalama.Framework.Tests.Integration.Tests.Fabrics.SelectAttributes_Inheritable_Ref;
 
 // <target>
-public class DerivedClass : BaseClass;
+public class DerivedClass : BaseClass { }

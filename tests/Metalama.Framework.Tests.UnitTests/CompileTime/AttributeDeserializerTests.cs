@@ -476,7 +476,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             Assert.Contains( diagnosticBag, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
         }
 
-#if ROSLYN_4_4_0_OR_GREATER
         [Fact]
         public void GenericAttribute()
         {
@@ -515,7 +514,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var attribute = compilation.Attributes.Single();
             Assert.Equal( "x", attribute.NamedArguments["Property"].Value );
         }
-#endif
 
         // ReSharper disable UnusedParameter.Local
 #pragma warning disable SA1401
