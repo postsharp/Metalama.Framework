@@ -52,6 +52,7 @@ internal class FieldBuilderData : MemberBuilderData
         // TODO: Potentional CompilationModel leak. (they could be safely ignored at design time)
         this.InitializerTags = builder.InitializerTags;
         this.OverridingProperty = builder.OverridingProperty?.ToRef();
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;

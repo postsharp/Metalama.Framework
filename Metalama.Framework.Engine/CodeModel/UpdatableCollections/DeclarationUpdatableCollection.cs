@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -49,14 +50,12 @@ internal abstract class DeclarationUpdatableCollection<TDeclaration, TRef> : Bas
                 return;
             }
 
-            this._allItems = new List<TRef>();
-
-#if DEBUG
-            this.PopulateAllItems( r => this._allItems.Add( r ) );
-#else
-            this.PopulateAllItems( this._allItems.Add );
-#endif
-            this.IsComplete = true;
+            using ( StackOverflowHelper.Detect() )
+            {
+                this._allItems = new List<TRef>();
+                this.PopulateAllItems( r => this._allItems.Add( r ) );
+                this.IsComplete = true;
+            }
         }
     }
 

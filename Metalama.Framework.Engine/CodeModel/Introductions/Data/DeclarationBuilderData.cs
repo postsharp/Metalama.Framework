@@ -21,7 +21,8 @@ internal abstract class DeclarationBuilderData
 
     public AspectLayerInstance ParentAdvice { get; }
 
-    public ImmutableArray<AttributeBuilderData> Attributes { get; }
+    // Must be initialized from the final constructor when the reference to the current object is known.
+    public ImmutableArray<AttributeBuilderData> Attributes { get; protected init; }
 
     public SyntaxTree? PrimarySyntaxTree { get; }
 
@@ -33,9 +34,6 @@ internal abstract class DeclarationBuilderData
         this.ContainingDeclaration = containingDeclaration;
         this.PrimarySyntaxTree = builder.PrimarySyntaxTree;
         this.IsDesignTimeObservable = builder.IsDesignTimeObservable;
-
-        // ReSharper disable once VirtualMemberCallInConstructor
-        this.Attributes = builder.Attributes.ToImmutable( this.ToDeclarationRef() );
     }
 
     public IFullRef<IDeclaration> ToRef() => this.ToDeclarationRef();

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
@@ -13,6 +14,7 @@ internal class NamespaceBuilderData : NamedDeclarationBuilderData
     public NamespaceBuilderData( NamespaceBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
         this._ref = new BuiltDeclarationRef<INamespace>( this, containingDeclaration.CompilationContext );
+        this.Attributes = ImmutableArray<AttributeBuilderData>.Empty;
     }
 
     protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;

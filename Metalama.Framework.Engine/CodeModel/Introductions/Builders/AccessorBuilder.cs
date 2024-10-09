@@ -7,7 +7,9 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -297,8 +299,6 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public MethodBase ToMethodBase() => throw new NotImplementedException();
 
-    IRef<IMethodBase> IMethodBase.ToRef() => throw new NotSupportedException();
-
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
@@ -306,4 +306,24 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
+
+    public override void Freeze()
+    {
+        base.Freeze();
+        this.ReturnParameter.Freeze();
+
+        foreach ( var parameter in this.Parameters )
+        {
+            parameter.Freeze();
+        }
+    }
+
+    IRef<IMethodBase> IMethodBase.ToRef() => this.Immutable.ToRef();
+
+    public new IRef<IMethod> ToRef() => this.Immutable.ToRef();
+
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+
+    [Memo]
+    public MethodBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
 }

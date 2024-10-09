@@ -94,6 +94,8 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
                 }
             }
         }
+
+        this.Freeze();
     }
 
     public override Writeability Writeability

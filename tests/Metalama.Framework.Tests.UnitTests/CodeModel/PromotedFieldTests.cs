@@ -136,6 +136,7 @@ class C
         var introducedField = new FieldBuilder( null!, immutableCompilation1.Types.Single(), "_f", ObjectReader.Empty );
         introducedField.Accessibility = Accessibility.Private;
         introducedField.Type = immutableCompilation1.Factory.GetSpecialType( SpecialType.Int32 );
+        introducedField.Freeze();
 
         // Add an introduced field to a compilation.
         var compilation1 = immutableCompilation1.CreateMutableClone();

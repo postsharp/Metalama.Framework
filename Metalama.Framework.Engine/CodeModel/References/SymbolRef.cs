@@ -98,7 +98,7 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
             _ => $"{this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}:{this.TargetKind}"
         };
 
-    protected override IFullRef<TOut> CastAsFullRef<TOut>() => (FullRef<TOut>) (object) this;
+    protected override IFullRef<TOut> CastAsFullRef<TOut>() => (IFullRef<TOut>) (object) this;
 
     public override int GetHashCode( RefComparison comparison )
         => HashCode.Combine( comparison.GetSymbolComparer().GetHashCode( this.Symbol ), this.TargetKind );

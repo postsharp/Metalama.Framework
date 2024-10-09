@@ -52,6 +52,7 @@ internal class EventBuilderData : MemberBuilderData
         this.IsEventField = builder.IsEventField;
         this.InitializerExpression = builder.InitializerExpression;
         this.InitializerTemplate = builder.InitializerTemplate;
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;

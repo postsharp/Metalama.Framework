@@ -42,6 +42,7 @@ internal class TypeParameterBuilderData : NamedDeclarationBuilderData
         this.TypeKindConstraint = builder.TypeKindConstraint;
         this.IsReferenceType = builder.IsReferenceType;
         this.IsNullable = builder.IsNullable;
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;

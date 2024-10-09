@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -53,9 +54,12 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 // We don't use the list enumeration pattern because this may lead to infinite recursions
                 // if the loop body adds items during the enumeration.
 
-                foreach ( var reference in updatableCollection )
+                using ( StackOverflowHelper.Detect() )
                 {
-                    yield return this.GetItem( reference );
+                    foreach ( var reference in updatableCollection )
+                    {
+                        yield return this.GetItem( reference );
+                    }
                 }
             }
             else

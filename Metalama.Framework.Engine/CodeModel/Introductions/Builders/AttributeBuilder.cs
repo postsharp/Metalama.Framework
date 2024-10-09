@@ -79,4 +79,6 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     public AttributeBuilderData Immutable => new( this, this.ContainingDeclaration.ToFullRef() );
 
     public new IRef<IAttribute> ToRef() => this.Immutable.ToRef();
+
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => throw new NotSupportedException();
 }

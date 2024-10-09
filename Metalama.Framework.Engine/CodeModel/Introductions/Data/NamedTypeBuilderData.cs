@@ -35,6 +35,7 @@ internal class NamedTypeBuilderData : MemberOrNamedTypeBuilderData
         this.BaseType = builder.BaseType?.ToFullRef();
         this.TypeParameters = builder.TypeParameters.ToImmutable( this._ref );
         this.ImplementedInterfaces = builder.ImplementedInterfaces.SelectAsImmutableArray( i => i.ToFullRef() );
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;

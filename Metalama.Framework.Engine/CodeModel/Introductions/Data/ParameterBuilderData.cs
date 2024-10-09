@@ -10,7 +10,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 {
     private readonly BuiltDeclarationRef<IParameter> _ref;
 
-    public string Name { get; }
+    public string? Name { get; }
 
     public IRef<IType> Type { get; }
 
@@ -25,12 +25,18 @@ internal class ParameterBuilderData : DeclarationBuilderData
     public ParameterBuilderData( BaseParameterBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
         this._ref = new BuiltDeclarationRef<IParameter>( this, containingDeclaration.CompilationContext );
-        this.Name = builder.Name;
+
+        if ( !builder.IsReturnParameter )
+        {
+            this.Name = builder.Name;
+        }
+
         this.Type = builder.Type.ToRef();
         this.RefKind = builder.RefKind;
         this.Index = builder.Index;
         this.DefaultValue = builder.DefaultValue;
         this.IsParams = builder.IsParams;
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;

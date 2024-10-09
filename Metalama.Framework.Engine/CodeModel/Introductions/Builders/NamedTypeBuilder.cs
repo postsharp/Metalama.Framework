@@ -196,9 +196,6 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 
-    [Memo]
-    public new IAttributeCollection Attributes => new AttributeBuilderCollection();
-
     public override bool IsDesignTimeObservable => true;
 
     public int Depth => this.ContainingNamespace.Depth + 1;
@@ -212,6 +209,8 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
 
     public override bool CanBeInherited => false;
+
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     public ISymbol? Symbol => this.TypeSymbol;
 
@@ -258,7 +257,9 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
 
-    public new IRef<INamedType> ToRef() => this.Immutable.ToRef();
+    IRef<INamedType> INamedType.ToRef() => this.Immutable.ToRef();
+
+    public new IFullRef<INamedType> ToRef() => this.Immutable.ToRef();
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
 

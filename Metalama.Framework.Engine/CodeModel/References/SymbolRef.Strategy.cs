@@ -100,8 +100,6 @@ internal sealed partial class SymbolRef<T>
         DeclarationKind kind,
         CompilationModel compilation )
     {
-        Invariant.Assert( this is IRef<INamedType> );
-
         switch ( kind )
         {
             case DeclarationKind.Namespace:

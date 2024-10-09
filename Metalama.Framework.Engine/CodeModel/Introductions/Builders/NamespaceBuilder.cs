@@ -63,6 +63,8 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     IRef<INamespace> INamespace.ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
 
     [Memo]

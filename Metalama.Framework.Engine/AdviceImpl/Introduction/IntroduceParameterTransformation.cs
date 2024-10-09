@@ -35,7 +35,7 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
             default,
             syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type )
                 .WithOptionalTrailingTrivia( SyntaxFactory.ElasticSpace, syntaxGenerationContext.Options ),
-            SyntaxFactory.Identifier( this.Parameter.Name ),
+            SyntaxFactory.Identifier( this.Parameter.Name.AssertNotNull() ),
             null );
 
         if ( this.Parameter.DefaultValue != null )

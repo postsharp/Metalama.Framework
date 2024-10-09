@@ -51,6 +51,7 @@ internal class MethodBuilderData : MemberBuilderData
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
         this.MethodKind = builder.MethodKind;
         this.OperatorKind = builder.OperatorKind;
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;

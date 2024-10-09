@@ -57,4 +57,6 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
     public ParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
 
     public override bool IsDesignTimeObservable => true;
+
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 }

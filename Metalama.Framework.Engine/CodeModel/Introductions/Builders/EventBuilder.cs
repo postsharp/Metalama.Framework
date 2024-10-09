@@ -123,6 +123,8 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public new IRef<IEvent> ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
     public IEventInvoker With( object? target, InvokerOptions options = default ) => new EventInvoker( this, options, target );

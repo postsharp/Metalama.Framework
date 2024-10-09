@@ -69,6 +69,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Immutable.ToRef();
 
     IRef<IField> IField.ToRef() => this.Immutable.ToRef();
@@ -142,4 +144,11 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     [Memo]
     public FieldBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef<INamedType>() );
+
+    public override void Freeze()
+    {
+        base.Freeze();
+        this.GetMethod.Freeze();
+        this.SetMethod.Freeze();
+    }
 }

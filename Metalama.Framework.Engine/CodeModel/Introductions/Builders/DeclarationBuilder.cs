@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Metrics;
@@ -104,7 +105,15 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
         this.Attributes.RemoveAll( a => a.Type.Is( type ) );
     }
 
-    public virtual void Freeze() => this.IsFrozen = true;
+    public virtual void Freeze()
+    {
+        this.IsFrozen = true;
+
+        foreach ( var attribute in this.Attributes )
+        {
+            attribute.Freeze();
+        }
+    }
 
     public SerializableDeclarationId ToSerializableId()
     {
@@ -116,7 +125,9 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
         return this.GetSerializableId();
     }
 
-    public IRef<IDeclaration> ToRef() => throw new NotSupportedException();
+    public IRef<IDeclaration> ToRef() => this.ToFullDeclarationRef();
+
+    protected abstract IFullRef<IDeclaration> ToFullDeclarationRef();
 
     ISymbol? ISdkDeclaration.Symbol => null;
 

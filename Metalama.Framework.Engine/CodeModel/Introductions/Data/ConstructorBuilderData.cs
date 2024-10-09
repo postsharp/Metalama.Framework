@@ -38,6 +38,7 @@ internal class ConstructorBuilderData : MemberBuilderData
         this.ReplacedImplicitConstructor = builder.ReplacedImplicitConstructor?.ToFullRef();
         this.InitializerKind = builder.InitializerKind;
         this.InitializerArguments = ImmutableArray.ToImmutableArray( builder.InitializerArguments );
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     public override IRef<IMember>? OverriddenMember => null;

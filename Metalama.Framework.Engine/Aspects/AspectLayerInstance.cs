@@ -16,6 +16,18 @@ internal class AspectLayerInstance
         this.AspectLayerId = new AspectLayerId( aspectInstance.AspectClass, layerName );
     }
 
+    private AspectLayerInstance( CompilationModel initialCompilation )
+    {
+        this.InitialCompilation = initialCompilation;
+        this.AspectInstance = null!;
+        this.AspectLayerId = default;
+    }
+
+    public static AspectLayerInstance CreateTestInstance( CompilationModel initialCompilation )
+    {
+        return new AspectLayerInstance( initialCompilation );
+    }
+
     public IAspectInstanceInternal AspectInstance { get; }
 
     public AspectLayerId AspectLayerId { get; }

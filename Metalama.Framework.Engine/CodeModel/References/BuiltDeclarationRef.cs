@@ -106,10 +106,10 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
     protected override IFullRef<TOut> CastAsFullRef<TOut>()
         => this switch
         {
-            FullRef<TOut> desired => desired,
-            IRef<IField> when this.BuilderData is PropertyBuilderData promotedField && typeof(TOut) == typeof(IProperty) =>
+            IFullRef<TOut> desired => desired,
+            IFullRef<IField> when this.BuilderData is PropertyBuilderData promotedField && typeof(TOut) == typeof(IProperty) =>
                 (IFullRef<TOut>) promotedField.ToRef().WithGenericContext( this._genericContext ),
-            IRef<IProperty> when this.BuilderData is FieldBuilderData promotedField && typeof(TOut) == typeof(IField) =>
+            IFullRef<IProperty> when this.BuilderData is FieldBuilderData promotedField && typeof(TOut) == typeof(IField) =>
                 (IFullRef<TOut>) promotedField.ToRef().WithGenericContext( this._genericContext ),
             _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
         };

@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Testing.UnitTesting;
@@ -328,6 +329,7 @@ class C
 
         // Add a field.
         var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
+        parameterBuilder.Freeze();
         compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.Immutable ) );
 
         Assert.Single( constructor.Parameters );
@@ -349,9 +351,20 @@ class C
 
         var constructor = compilation.Types.Single().Constructors.Single();
 
+        var aspectLayerInstance = AspectLayerInstance.CreateTestInstance( immutableCompilation );
+
         // Add a field.
-        var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
-        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.Immutable ) );
+
+        var parameterBuilder = new ParameterBuilder(
+            constructor,
+            0,
+            "p",
+            compilation.Factory.GetTypeByReflectionType( typeof(int) ),
+            RefKind.In,
+            aspectLayerInstance );
+
+        parameterBuilder.Freeze();
+        compilation.AddTransformation( new IntroduceParameterTransformation( aspectLayerInstance, parameterBuilder.Immutable ) );
 
         Assert.Single( constructor.Parameters );
     }
@@ -397,12 +410,16 @@ class C
 
         Assert.Empty( compilation.Attributes );
 
-        compilation.AddTransformation(
-            new AttributeBuilder(
-                    null!,
-                    compilation,
-                    AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) )
-                .ToTransformation() );
+        var aspectLayerInstance = AspectLayerInstance.CreateTestInstance( immutableCompilation );
+
+        var attributeBuilder = new AttributeBuilder(
+            aspectLayerInstance!,
+            compilation,
+            AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
+
+        attributeBuilder.Freeze();
+
+        compilation.AddTransformation( attributeBuilder.ToTransformation() );
 
         Assert.Single( compilation.Attributes );
     }
@@ -456,6 +473,7 @@ class C
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        typeBuilder.Freeze();
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
@@ -487,6 +505,7 @@ class C
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        typeBuilder.Freeze();
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
@@ -515,6 +534,7 @@ class C
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        typeBuilder.Freeze();
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
@@ -543,6 +563,7 @@ class C
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        typeBuilder.Freeze();
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
@@ -570,6 +591,7 @@ class C
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        typeBuilder.Freeze();
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -597,6 +619,7 @@ class C
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        typeBuilder.Freeze();
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -738,6 +761,7 @@ class D : C<int>;
         var methodBuilder = new MethodBuilder( null!, c, "M" );
         methodBuilder.ReturnType = c.TypeParameters[0];
         methodBuilder.AddParameter( "p", c.TypeParameters[0] );
+        methodBuilder.Freeze();
 
         compilation.AddTransformation( methodBuilder.ToTransformation() );
 

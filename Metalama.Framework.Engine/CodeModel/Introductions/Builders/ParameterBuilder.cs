@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Reflection;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -102,6 +103,8 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
         this._type = this.Translate( type );
         this._refKind = refKind;
     }
+
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 }

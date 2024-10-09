@@ -37,6 +37,8 @@ internal class IndexerBuilderData : PropertyOrIndexerBuilderData
         {
             this.SetMethod = new MethodBuilderData( builder.SetMethod, this._ref );
         }
+
+        this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
     protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;

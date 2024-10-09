@@ -28,6 +28,7 @@ internal class AttributeBuilderData : DeclarationBuilderData
         this.Type = builder.AttributeConstruction.Type.ToFullRef();
         this.ConstructorArguments = builder.AttributeConstruction.ConstructorArguments.ToImmutableArray();
         this.NamedArguments = builder.AttributeConstruction.NamedArguments;
+        this.Attributes = ImmutableArray<AttributeBuilderData>.Empty;
 
         // TODO: TypedConstant can still leak a CompilationModel through its typeof(.) value.
     }

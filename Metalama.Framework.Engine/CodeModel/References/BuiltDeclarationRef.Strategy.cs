@@ -3,7 +3,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
@@ -53,41 +52,45 @@ internal sealed partial class BuiltDeclarationRef<T>
         }
     }
 
-    private static INamedDeclarationCollection<INamedDeclaration> GetCollection( IDeclaration parent, DeclarationKind kind )
-    {
-        return kind switch
-        {
-            DeclarationKind.Event => ((INamedType) parent).Events,
-            DeclarationKind.Constructor => ((INamedType) parent).Constructors,
-            DeclarationKind.Field => ((INamedType) parent).Fields,
-            DeclarationKind.Indexer => ((INamedType) parent).Indexers,
-            DeclarationKind.Method => ((INamedType) parent).Methods,
-            DeclarationKind.Property => ((INamedType) parent).Properties,
-            DeclarationKind.Namespace => ((INamespace) parent).Namespaces,
-            DeclarationKind.NamedType => ((INamespaceOrNamedType) parent).Types,
-            _ => throw new ArgumentOutOfRangeException( nameof(kind) )
-        };
-    }
-
     public override IEnumerable<IFullRef> GetMembersOfName(
         string name,
         DeclarationKind kind,
         CompilationModel compilation )
     {
-        var parentDeclaration = compilation.Factory.GetDeclaration( this.BuilderData );
-
-        var collection = GetCollection( parentDeclaration, kind );
-
-        return collection.OfName( name ).Select( x => x.ToFullRef() );
+        return Enumerable.Empty<IFullRef>();
+        /*
+        return kind switch
+        {
+            DeclarationKind.Event => compilation.GetEventCollection( this.BuilderData.ToRef().As<INamedType>() ).OfName( name ),
+            DeclarationKind.Constructor => compilation.GetConstructorCollection( this.BuilderData.ToRef().As<INamedType>() ).OfName( name ),
+            DeclarationKind.Field => compilation.GetFieldCollection( this.BuilderData.ToRef().As<INamedType>() ).OfName( name ),
+            DeclarationKind.Indexer => compilation.GetIndexerCollection( this.BuilderData.ToRef().As<INamedType>() ).OfName( name ),
+            DeclarationKind.Method => compilation.GetMethodCollection( this.BuilderData.ToRef().As<INamedType>() ).OfName( name ),
+            DeclarationKind.Property => compilation.GetPropertyCollection( this.BuilderData.ToRef().As<INamedType>() ).OfName( name ),
+            DeclarationKind.Namespace => compilation.GetNamespaceCollection( this.BuilderData.ToRef().As<INamespace>() ).OfName( name ),
+            DeclarationKind.NamedType => compilation.GetNamedTypeCollectionByParent( this.BuilderData.ToRef().As<INamespaceOrNamedType>() ).OfName( name ),
+            _ => throw new ArgumentOutOfRangeException( nameof(kind) )
+        };
+        */
     }
 
     public override IEnumerable<IFullRef> GetMembers( DeclarationKind kind, CompilationModel compilation )
     {
-        var parentDeclaration = compilation.Factory.GetDeclaration( this.BuilderData );
-
-        var collection = GetCollection( parentDeclaration, kind );
-
-        return collection.SelectAsReadOnlyCollection( x => x.ToFullRef() );
+        return Enumerable.Empty<IFullRef>();
+        /*
+        return kind switch
+        {
+            DeclarationKind.Event => compilation.GetEventCollection( this.BuilderData.ToRef().As<INamedType>() ),
+            DeclarationKind.Constructor => compilation.GetConstructorCollection( this.BuilderData.ToRef().As<INamedType>() ),
+            DeclarationKind.Field => compilation.GetFieldCollection( this.BuilderData.ToRef().As<INamedType>() ),
+            DeclarationKind.Indexer => compilation.GetIndexerCollection( this.BuilderData.ToRef().As<INamedType>() ),
+            DeclarationKind.Method => compilation.GetMethodCollection( this.BuilderData.ToRef().As<INamedType>() ),
+            DeclarationKind.Property => compilation.GetPropertyCollection( this.BuilderData.ToRef().As<INamedType>() ),
+            DeclarationKind.Namespace => compilation.GetNamespaceCollection( this.BuilderData.ToRef().As<INamespace>() ),
+            DeclarationKind.NamedType => compilation.GetNamedTypeCollectionByParent( this.BuilderData.ToRef().As<INamespaceOrNamedType>() ),
+            _ => throw new ArgumentOutOfRangeException( nameof(kind) )
+        };
+        */
     }
 
     public override bool IsConvertibleTo( IRef<IType> right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
