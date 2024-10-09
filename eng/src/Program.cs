@@ -70,7 +70,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
     },
     SourceDependencies = new[] { MetalamaDependencies.MetalamaFrameworkPrivate },
-    ExportedProperties = { { @"eng\Versions.props", new[] { "RoslynApiMaxVersion" } } },
+    ExportedProperties = { { @"eng\Directory.Packages.props", new[] { "RoslynApiMaxVersion" } } },
     Configurations = Product.DefaultConfigurations
         .WithValue(
             BuildConfiguration.Debug,
