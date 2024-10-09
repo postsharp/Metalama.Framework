@@ -23,8 +23,8 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
     private readonly IFullRef<IEvent> _overriddenDeclaration;
     private readonly IFullRef<IEvent> _targetEvent;
 
-    public RedirectEventTransformation( AdviceInfo advice, IFullRef<IEvent> overriddenDeclaration, IFullRef<IEvent> targetEvent )
-        : base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public RedirectEventTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IEvent> overriddenDeclaration, IFullRef<IEvent> targetEvent )
+        : base( aspectLayerInstance, overriddenDeclaration, ObjectReader.Empty )
     {
         this._overriddenDeclaration = overriddenDeclaration;
         this._targetEvent = targetEvent;

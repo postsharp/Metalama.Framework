@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Linking;
@@ -20,7 +20,9 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceEventTransformation : IntroduceMemberTransformation<EventBuilderData>
 {
-    public IntroduceEventTransformation( AdviceInfo advice, EventBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceEventTransformation( AspectLayerInstance aspectLayerInstance, EventBuilderData introducedDeclaration ) : base(
+        aspectLayerInstance,
+        introducedDeclaration ) { }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
@@ -29,7 +31,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
 
         _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
             eventBuilder,
-            this.ParentAdvice,
+            this.AspectLayerInstance,
             context,
             eventBuilder.Type,
             this.BuilderData.InitializerExpression,

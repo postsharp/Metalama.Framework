@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -19,8 +20,12 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
 {
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideMethodTransformation( AdviceInfo advice, IFullRef<IMethod> targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, targetMethod, tags )
+    public OverrideMethodTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IMethod> targetMethod,
+        BoundTemplateMethod boundTemplate,
+        IObjectReader tags )
+        : base( aspectLayerInstance, targetMethod, tags )
     {
         this.BoundTemplate = boundTemplate;
     }

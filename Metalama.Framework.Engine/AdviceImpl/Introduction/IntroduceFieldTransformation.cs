@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -14,7 +14,9 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilderData>
 {
-    public IntroduceFieldTransformation( AdviceInfo advice, FieldBuilderData introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceFieldTransformation( AspectLayerInstance aspectLayerInstance, FieldBuilderData introducedDeclaration ) : base(
+        aspectLayerInstance,
+        introducedDeclaration ) { }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
@@ -24,7 +26,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
         // If template fails to expand, we will still generate the field, albeit without the initializer.
         _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
             fieldBuilder,
-            this.ParentAdvice,
+            this.AspectLayerInstance,
             context,
             fieldBuilder.Type,
             fieldBuilder.InitializerExpression,

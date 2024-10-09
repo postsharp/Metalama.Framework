@@ -59,13 +59,13 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
-    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice, name )
+    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.AspectLayerInstance, name )
     {
         this.ContainingDeclaration = containingMethod;
         this.Index = index;
     }
 
-    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.ParentAdvice, name )
+    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.AspectLayerInstance, name )
     {
         this.ContainingDeclaration = containingType;
         this.Index = index;

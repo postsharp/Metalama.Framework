@@ -27,7 +27,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
     protected override FieldBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new FieldBuilder( this.AdviceInfo, this.TargetDeclaration, this.MemberName, this.Tags )
+        return new FieldBuilder( this.AspectLayerInstance, this.TargetDeclaration, this.MemberName, this.Tags )
         {
             InitializerTemplate = this.Template.GetInitializerTemplate()
         };
@@ -140,7 +140,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
             OverrideHelper.AddTransformationsForStructField(
                 targetDeclaration,
-                this.AdviceInfo,
+                this.AspectLayerInstance,
                 context.AddTransformation /* We add an initializer if it does not have one */ );
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );

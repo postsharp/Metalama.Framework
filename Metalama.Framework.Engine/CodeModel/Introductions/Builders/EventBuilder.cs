@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
@@ -35,12 +36,12 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
     public EventBuilder(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
         string name,
         bool isEventField,
         IObjectReader initializerTags )
-        : base( targetType, name, advice )
+        : base( targetType, name, aspectLayerInstance )
     {
         this.InitializerTags = initializerTags;
         this.IsEventField = isEventField;
@@ -140,7 +141,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public IInjectMemberTransformation ToTransformation()
     {
-        return new IntroduceEventTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroduceEventTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );

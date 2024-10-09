@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Introspection;
@@ -12,20 +11,20 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal abstract class BaseTransformation : ITransformation
 {
-    protected BaseTransformation( AdviceInfo advice )
+    protected BaseTransformation( AspectLayerInstance aspectLayerInstance )
     {
         // Don't keep a reference to the Advice, as it's supposed to be short-lived.
-        this.ParentAdvice = advice;
+        this.AspectLayerInstance = aspectLayerInstance;
     }
 
-    public AspectLayerId AspectLayerId => this.ParentAdvice.AspectLayerId;
+    public AspectLayerId AspectLayerId => this.AspectLayerInstance.AspectLayerId;
 
-    public IAspectInstanceInternal AspectInstance => this.ParentAdvice.AspectInstance;
+    public IAspectInstanceInternal AspectInstance => this.AspectLayerInstance.AspectInstance;
 
     /// <summary>
     /// Gets the <see cref="CompilationModel"/> on which the templates should be executed.
     /// </summary>
-    public CompilationModel OriginalCompilation => this.ParentAdvice.SourceCompilation;
+    public CompilationModel OriginalCompilation => this.AspectLayerInstance.InitialCompilation;
 
     /// <summary>
     /// Gets the declaration that is transformed, or the declaration into which a new declaration is being introduced. 
@@ -34,7 +33,7 @@ internal abstract class BaseTransformation : ITransformation
 
     IAspectClass ITransformationBase.AspectClass => this.AspectInstance.AspectClass;
 
-    public AdviceInfo ParentAdvice { get; }
+    public AspectLayerInstance AspectLayerInstance { get; }
 
     public int OrderWithinPipelineStepAndTypeAndAspectInstance { get; set; }
 

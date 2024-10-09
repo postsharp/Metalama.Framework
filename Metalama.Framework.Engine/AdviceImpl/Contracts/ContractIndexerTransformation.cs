@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
@@ -18,7 +19,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
     private readonly IFullRef<IIndexer> _targetIndexer;
 
     public ContractIndexerTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IIndexer> targetIndexer,
         IFullRef<IParameter>? indexerParameter,
         ContractDirection contractDirection,
@@ -26,7 +27,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         IObjectReader templateArguments,
         IObjectReader tags,
         TemplateProvider templateProvider ) : base(
-        advice,
+        aspectLayerInstance,
         (IFullRef<IDeclaration>?) indexerParameter ?? targetIndexer,
         contractDirection,
         template,

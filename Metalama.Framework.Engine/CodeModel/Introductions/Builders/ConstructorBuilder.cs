@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -49,8 +49,8 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public List<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
-    public ConstructorBuilder( AdviceInfo advice, INamedType targetType )
-        : base( advice, targetType, null! )
+    public ConstructorBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType )
+        : base( aspectLayerInstance, targetType, null! )
     {
         this.InitializerArguments = [];
     }
@@ -111,8 +111,8 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public IInjectMemberTransformation ToTransformation()
     {
         return this.IsStatic
-            ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this.Immutable )
-            : new IntroduceConstructorTransformation( this.ParentAdvice, this.Immutable );
+            ? new IntroduceStaticConstructorTransformation( this.AspectLayerInstance, this.Immutable )
+            : new IntroduceConstructorTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
 /*

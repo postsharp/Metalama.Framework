@@ -32,7 +32,7 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
 
     protected override NamedTypeBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new NamedTypeBuilder( this.AdviceInfo, (INamespaceOrNamedType) this.TargetDeclaration.AssertNotNull(), this._explicitName );
+        return new NamedTypeBuilder( this.AspectLayerInstance, (INamespaceOrNamedType) this.TargetDeclaration.AssertNotNull(), this._explicitName );
     }
 
     protected override IntroductionAdviceResult<INamedType> ImplementCore( NamedTypeBuilder builder, in AdviceImplementationContext context )

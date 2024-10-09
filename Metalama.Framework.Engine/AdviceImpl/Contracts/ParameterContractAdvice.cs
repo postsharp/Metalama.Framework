@@ -26,7 +26,7 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
             case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
                 context.AddTransformation(
                     new ContractIndexerTransformation(
-                        this.AdviceInfo,
+                        this.AspectLayerInstance,
                         indexer.ToFullRef(),
                         parameter.ToFullRef(),
                         this.Direction,
@@ -40,7 +40,7 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
             case IParameter { ContainingDeclaration: IMethod method } parameter:
                 context.AddTransformation(
                     new ContractMethodTransformation(
-                        this.AdviceInfo,
+                        this.AspectLayerInstance,
                         method.ToFullRef(),
                         parameter.ToFullRef(),
                         this.Direction,
@@ -54,7 +54,7 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
             case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
                 context.AddTransformation(
                     new ContractConstructorTransformation(
-                        this.AdviceInfo,
+                        this.AspectLayerInstance,
                         constructor.ToFullRef(),
                         parameter.ToFullRef(),
                         this.Direction,

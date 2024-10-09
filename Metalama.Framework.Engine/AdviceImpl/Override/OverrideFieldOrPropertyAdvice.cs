@@ -33,7 +33,7 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
 
         var promotedField = OverrideHelper.OverrideProperty(
             context.ServiceProvider,
-            this.AdviceInfo,
+            this.AspectLayerInstance,
             targetDeclaration,
             this._getTemplate,
             this._setTemplate,

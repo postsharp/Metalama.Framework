@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
@@ -90,15 +90,15 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public IInjectMemberTransformation ToTransformation()
     {
-        return new IntroduceIndexerTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroduceIndexerTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
     public IndexerBuilder(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
         bool hasGetter,
         bool hasSetter )
-        : base( advice, targetType, "this[]", hasGetter, hasSetter, false, false )
+        : base( aspectLayerInstance, targetType, "this[]", hasGetter, hasSetter, false, false )
     {
         Invariant.Assert( hasGetter || hasSetter );
 
@@ -109,7 +109,7 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
     {
         this.CheckNotFrozen();
 
-        var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind, this.ParentAdvice );
+        var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind, this.AspectLayerInstance );
         parameter.DefaultValue = defaultValue;
         this.Parameters.Add( parameter );
 

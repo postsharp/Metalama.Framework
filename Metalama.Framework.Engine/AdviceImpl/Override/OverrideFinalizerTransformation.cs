@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -27,8 +28,12 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
 
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideFinalizerTransformation( AdviceInfo advice, IFullRef<IMethod> targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, targetFinalizer, tags )
+    public OverrideFinalizerTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IMethod> targetFinalizer,
+        BoundTemplateMethod boundTemplate,
+        IObjectReader tags )
+        : base( aspectLayerInstance, targetFinalizer, tags )
     {
         this._targetFinalizer = targetFinalizer;
         this.BoundTemplate = boundTemplate;

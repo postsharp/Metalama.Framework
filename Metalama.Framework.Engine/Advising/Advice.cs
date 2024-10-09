@@ -11,11 +11,11 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal abstract class Advice : IDiagnosticSource
 {
-    public AdviceInfo AdviceInfo { get; }
+    public AspectLayerInstance AspectLayerInstance { get; }
 
-    public IAspectInstanceInternal AspectInstance => this.AdviceInfo.AspectInstance;
+    public IAspectInstanceInternal AspectInstance => this.AspectLayerInstance.AspectInstance;
 
-    public AspectLayerId AspectLayerId => this.AdviceInfo.AspectLayerId;
+    public AspectLayerId AspectLayerId => this.AspectLayerInstance.AspectLayerId;
 
     protected TemplateClassInstance TemplateInstance { get; }
 
@@ -26,7 +26,7 @@ internal abstract class Advice : IDiagnosticSource
     /// <summary>
     /// Gets the compilation from which the advice was instantiated.
     /// </summary>
-    public CompilationModel SourceCompilation => this.AdviceInfo.SourceCompilation;
+    public CompilationModel SourceCompilation => this.AspectLayerInstance.InitialCompilation;
 
     public abstract AdviceKind AdviceKind { get; }
 
@@ -38,7 +38,7 @@ internal abstract class Advice : IDiagnosticSource
             throw new AssertionFailedException( $"Cannot override '{parameters.TargetDeclaration}' because it is external." );
         }
 #endif
-        this.AdviceInfo = new AdviceInfo( parameters );
+        this.AspectLayerInstance = parameters.AspectLayerInstance;
         this.TemplateInstance = parameters.TemplateInstance;
         this.TargetDeclaration = parameters.TargetDeclaration;
     }
@@ -49,29 +49,23 @@ internal abstract class Advice : IDiagnosticSource
     /// Parameter object containing parameters shared by constructors of all advice types.
     /// </summary>
     public record struct AdviceConstructorParameters(
-        IAspectInstanceInternal AspectInstance,
+        AspectLayerInstance AspectLayerInstance,
         TemplateClassInstance TemplateInstance,
-        IDeclaration TargetDeclaration,
-        CompilationModel SourceCompilation,
-        string? LayerName );
+        IDeclaration TargetDeclaration );
 
     /// <summary>
     /// Generic version of parameter object containing parameters shared by constructors of all advice types.
     /// </summary>
     public record struct AdviceConstructorParameters<T>(
-        IAspectInstanceInternal AspectInstance,
+        AspectLayerInstance AspectLayerInstance,
         TemplateClassInstance TemplateClassInstance,
-        T TargetDeclaration,
-        CompilationModel SourceCompilation,
-        string? LayerName )
+        T TargetDeclaration )
         where T : IDeclaration
     {
         public static implicit operator AdviceConstructorParameters( AdviceConstructorParameters<T> parameters )
             => new(
-                parameters.AspectInstance,
+                parameters.AspectLayerInstance,
                 parameters.TemplateClassInstance,
-                parameters.TargetDeclaration,
-                parameters.SourceCompilation,
-                parameters.LayerName );
+                parameters.TargetDeclaration );
     }
 }

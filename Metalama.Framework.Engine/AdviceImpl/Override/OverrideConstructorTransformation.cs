@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -27,11 +28,11 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
     private BoundTemplateMethod Template { get; }
 
     public OverrideConstructorTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IConstructor> overriddenDeclaration,
         BoundTemplateMethod template,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        : base( aspectLayerInstance, overriddenDeclaration, tags )
     {
         this._overriddenDeclaration = overriddenDeclaration;
         this.Template = template;

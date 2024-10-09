@@ -58,7 +58,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                      || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : this._setTemplate != null);
 
         var builder = new PropertyBuilder(
-            this.AdviceInfo,
+            this.AspectLayerInstance,
             this.TargetDeclaration,
             name,
             hasGet,
@@ -229,13 +229,13 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                 // Introduced auto property.
                 context.AddTransformation( builder.ToTransformation() );
 
-                OverrideHelper.AddTransformationsForStructField( targetDeclaration, this.AdviceInfo, context.AddTransformation );
+                OverrideHelper.AddTransformationsForStructField( targetDeclaration, this.AspectLayerInstance, context.AddTransformation );
             }
             else
             {
                 // Introduce and override using the template.
                 var overriddenProperty = new OverridePropertyTransformation(
-                    this.AdviceInfo,
+                    this.AspectLayerInstance,
                     builder.ToRef(),
                     this._getTemplate?.ForIntroduction( builder.GetMethod ),
                     this._setTemplate?.ForIntroduction( builder.SetMethod ),
@@ -313,7 +313,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         builder.Freeze();
 
                         var overriddenProperty = new OverridePropertyTransformation(
-                            this.AdviceInfo,
+                            this.AspectLayerInstance,
                             builder.ToRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
                             this._setTemplate?.ForIntroduction( builder.SetMethod ),
@@ -329,7 +329,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     if ( targetDeclaration.Equals( existingProperty.DeclaringType ) )
                     {
                         var overriddenMethod = new OverridePropertyTransformation(
-                            this.AdviceInfo,
+                            this.AspectLayerInstance,
                             existingProperty.ToFullRef(),
                             this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
                             this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
@@ -358,7 +358,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
                         OverrideHelper.OverrideProperty(
                             serviceProvider,
-                            this.AdviceInfo,
+                            this.AspectLayerInstance,
                             builder,
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
                             this._setTemplate?.ForIntroduction( builder.SetMethod ),

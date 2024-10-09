@@ -18,7 +18,7 @@ internal partial class AccessorBuilder
 
         private readonly AccessorBuilder _accessor;
 
-        public IndexerParameterBuilder( AccessorBuilder accessor, int? index ) : base( accessor.ParentAdvice )
+        public IndexerParameterBuilder( AccessorBuilder accessor, int? index ) : base( accessor.AspectLayerInstance )
         {
             this._accessor = accessor;
             this._index = index;

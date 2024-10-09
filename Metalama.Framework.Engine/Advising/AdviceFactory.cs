@@ -360,11 +360,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
 
         return new Advice.AdviceConstructorParameters<TDeclaration>(
-            this._state.AspectInstance,
+            this._state.AspectLayerInstance,
             this._templateClassInstance,
-            target,
-            this._compilation,
-            this._layerName );
+            target );
     }
 
     public IOverrideAdviceResult<IMethod> Override(
@@ -1587,11 +1585,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             var advice = new AddAnnotationAdvice(
                 new Advice.AdviceConstructorParameters(
-                    this._state.AspectInstance,
+                    this._state.AspectLayerInstance,
                     this._templateClassInstance,
-                    declaration,
-                    this._compilation,
-                    LayerName: null ),
+                    declaration ),
                 new AnnotationInstance( annotation, export, declaration.ToRef() ) );
 
             advice.Execute( this._state );

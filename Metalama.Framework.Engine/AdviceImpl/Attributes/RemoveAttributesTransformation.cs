@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
@@ -15,9 +15,9 @@ internal sealed class RemoveAttributesTransformation : BaseSyntaxTreeTransformat
     public IFullRef<INamedType> AttributeType { get; }
 
     public RemoveAttributesTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IDeclaration> targetDeclaration,
-        IFullRef<INamedType> attributeType ) : base( advice, targetDeclaration )
+        IFullRef<INamedType> attributeType ) : base( aspectLayerInstance, targetDeclaration )
     {
         this.AttributeType = attributeType;
         this.ContainingDeclaration = targetDeclaration;

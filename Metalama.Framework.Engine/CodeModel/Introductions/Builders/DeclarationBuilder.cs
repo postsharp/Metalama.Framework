@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
@@ -31,9 +31,9 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 
     public abstract bool IsDesignTimeObservable { get; }
 
-    protected DeclarationBuilder( AdviceInfo parentAdvice )
+    protected DeclarationBuilder( AspectLayerInstance aspectLayerInstance )
     {
-        this.ParentAdvice = parentAdvice;
+        this.AspectLayerInstance = aspectLayerInstance;
     }
 
     protected T Translate<T>( T compilationElement )
@@ -42,9 +42,9 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 
     protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
-    public AdviceInfo ParentAdvice { get; }
+    public AspectLayerInstance AspectLayerInstance { get; }
 
-    public IDeclarationOrigin Origin => this.ParentAdvice.AspectInstance;
+    public IDeclarationOrigin Origin => this.AspectLayerInstance.AspectInstance;
 
     public abstract IDeclaration? ContainingDeclaration { get; }
 
@@ -87,14 +87,14 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
     {
         this.CheckNotFrozen();
 
-        this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
+        this.Attributes.Add( new AttributeBuilder( this.AspectLayerInstance, this, attribute ) );
     }
 
     public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
     {
         this.CheckNotFrozen();
 
-        this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
+        this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.AspectLayerInstance, this, a ) ) );
     }
 
     public void RemoveAttributes( INamedType type )

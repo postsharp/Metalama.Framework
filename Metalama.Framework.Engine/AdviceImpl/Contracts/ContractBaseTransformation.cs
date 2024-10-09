@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -38,13 +39,13 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     public TemplateProvider TemplateProvider { get; }
 
     protected ContractBaseTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IDeclaration> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         TemplateProvider templateProvider,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, contractTarget )
+        IObjectReader tags ) : base( aspectLayerInstance, contractTarget )
     {
         Invariant.Assert( contractDirection is not ContractDirection.None );
 

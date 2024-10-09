@@ -34,17 +34,17 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
                 return AddContractToProperty( overridingProperty );
 
             case IField field:
-                var promotedField = PromotedFieldBuilder.Create( serviceProvider, field, ObjectReader.Empty, this.AdviceInfo );
+                var promotedField = PromotedFieldBuilder.Create( serviceProvider, field, ObjectReader.Empty, this.AspectLayerInstance );
                 promotedField.Freeze();
                 context.AddTransformation( promotedField.ToTransformation() );
-                OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this.AdviceInfo, context.AddTransformation );
+                OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this.AspectLayerInstance, context.AddTransformation );
 
                 return AddContractToProperty( promotedField );
 
             case IIndexer indexer:
                 context.AddTransformation(
                     new ContractIndexerTransformation(
-                        this.AdviceInfo,
+                        this.AspectLayerInstance,
                         indexer.ToFullRef(),
                         null,
                         this.Direction,
@@ -63,7 +63,7 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
         {
             contextCopy.AddTransformation(
                 new ContractPropertyTransformation(
-                    this.AdviceInfo,
+                    this.AspectLayerInstance,
                     property.ToFullRef(),
                     this.Direction,
                     this.Template,

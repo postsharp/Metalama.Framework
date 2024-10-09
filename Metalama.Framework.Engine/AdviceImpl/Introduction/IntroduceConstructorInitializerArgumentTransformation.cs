@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
@@ -27,10 +27,10 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
     private ExpressionSyntax Value { get; }
 
     public IntroduceConstructorInitializerArgumentTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IConstructor> constructor,
         int parameterIndex,
-        ExpressionSyntax value ) : base( advice, constructor )
+        ExpressionSyntax value ) : base( aspectLayerInstance, constructor )
     {
         this.Constructor = constructor;
         this.ParameterIndex = parameterIndex;

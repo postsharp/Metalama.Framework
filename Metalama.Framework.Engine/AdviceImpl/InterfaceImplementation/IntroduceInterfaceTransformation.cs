@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -23,10 +23,10 @@ internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransform
     public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
     public IntroduceInterfaceTransformation(
-        AdviceInfo implementInterfaceAdvice,
+        AspectLayerInstance implementInterfaceAspectLayerInstance,
         IFullRef<INamedType> targetType,
         IFullRef<INamedType> interfaceType,
-        Dictionary<IMember, IMember> memberMap ) : base( implementInterfaceAdvice, targetType )
+        Dictionary<IMember, IMember> memberMap ) : base( implementInterfaceAspectLayerInstance, targetType )
     {
         this.TargetType = targetType;
         this.InterfaceType = interfaceType;

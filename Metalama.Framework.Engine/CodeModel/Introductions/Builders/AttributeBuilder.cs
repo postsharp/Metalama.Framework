@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -24,7 +23,8 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 {
     internal IAttributeData AttributeConstruction { get; }
 
-    public AttributeBuilder( AdviceInfo advice, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base( advice )
+    public AttributeBuilder( AspectLayerInstance aspectLayerInstance, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base(
+        aspectLayerInstance )
     {
         this.AttributeConstruction = attributeConstruction;
         this.ContainingDeclaration = containingDeclaration;
@@ -64,7 +64,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     public ITransformation ToTransformation()
     {
-        return new IntroduceAttributeTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroduceAttributeTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
     int IAspectPredecessor.PredecessorDegree => 0;

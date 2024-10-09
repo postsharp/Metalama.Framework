@@ -20,11 +20,13 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
 
     public CompilationModel CurrentCompilation { get; }
 
-    public IAspectInstanceInternal AspectInstance { get; }
+    public IAspectInstanceInternal AspectInstance => this.AspectLayerInstance.AspectInstance;
+
+    public AspectLayerInstance AspectLayerInstance { get; }
 
     public ref readonly ProjectServiceProvider ServiceProvider => ref this._serviceProvider;
 
-    public CompilationModel InitialCompilation { get; }
+    public CompilationModel InitialCompilation => this.AspectLayerInstance.InitialCompilation;
 
     public IDiagnosticAdder Diagnostics { get; }
 
@@ -38,9 +40,8 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
 
     public AdviceFactoryState(
         in ProjectServiceProvider serviceProvider,
-        CompilationModel initialCompilation,
+        AspectLayerInstance aspectLayerInstance,
         CompilationModel currentCompilation,
-        IAspectInstanceInternal aspectInstance,
         IDiagnosticAdder diagnostics,
         UserCodeExecutionContext executionContext,
         int pipelineStepIndex,
@@ -48,9 +49,8 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
     {
         this._pipelineStepIndex = pipelineStepIndex;
         this._orderWithinType = orderWithinType;
-        this.InitialCompilation = initialCompilation;
+        this.AspectLayerInstance = aspectLayerInstance;
         this.CurrentCompilation = currentCompilation;
-        this.AspectInstance = aspectInstance;
         this._serviceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();

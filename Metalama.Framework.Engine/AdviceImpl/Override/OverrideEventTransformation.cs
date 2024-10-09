@@ -31,12 +31,12 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
     private BoundTemplateMethod? RemoveTemplate { get; }
 
     public OverrideEventTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IEvent> overriddenDeclaration,
         BoundTemplateMethod? addTemplate,
         BoundTemplateMethod? removeTemplate,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        : base( aspectLayerInstance, overriddenDeclaration, tags )
     {
         this._overriddenDeclaration = overriddenDeclaration;
         this.AddTemplate = addTemplate;

@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
@@ -140,12 +140,12 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
     internal void SetIsIteratorMethod( bool value ) => this._isIteratorMethod = value;
 
     public MethodBuilder(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
         string name,
         DeclarationKind declarationKind = DeclarationKind.Method,
         OperatorKind operatorKind = OperatorKind.None )
-        : base( advice, targetType, name )
+        : base( aspectLayerInstance, targetType, name )
     {
         Invariant.Assert(
             declarationKind == DeclarationKind.Operator
@@ -162,7 +162,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
                 null,
                 this.Compilation.Cache.SystemVoidType.AssertNotNull(),
                 RefKind.None,
-                this.ParentAdvice );
+                this.AspectLayerInstance );
     }
 
     public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = [interfaceMethod];
@@ -173,7 +173,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     public IInjectMemberTransformation ToTransformation()
     {
-        return new IntroduceMethodTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroduceMethodTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
     public new IRef<IMethod> ToRef() => this.Immutable.ToRef();

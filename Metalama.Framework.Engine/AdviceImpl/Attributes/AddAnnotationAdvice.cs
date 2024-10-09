@@ -20,7 +20,7 @@ internal sealed class AddAnnotationAdvice : Advice<AddAnnotationAdviceResult>
 
     protected override AddAnnotationAdviceResult Implement( in AdviceImplementationContext context )
     {
-        context.AddTransformation( new AddAnnotationTransformation( this.AdviceInfo, this.TargetDeclaration.ToRef(), this._annotationInstance ) );
+        context.AddTransformation( new AddAnnotationTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToRef(), this._annotationInstance ) );
 
         return new AddAnnotationAdviceResult();
     }

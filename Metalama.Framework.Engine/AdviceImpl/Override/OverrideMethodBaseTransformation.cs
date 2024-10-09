@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -26,8 +25,8 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
 {
     public IFullRef<IMethod> OverriddenMethod { get; }
 
-    protected OverrideMethodBaseTransformation( AdviceInfo advice, IFullRef<IMethod> targetMethod, IObjectReader tags )
-        : base( advice, targetMethod, tags )
+    protected OverrideMethodBaseTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IMethod> targetMethod, IObjectReader tags )
+        : base( aspectLayerInstance, targetMethod, tags )
     {
         this.OverriddenMethod = targetMethod;
     }

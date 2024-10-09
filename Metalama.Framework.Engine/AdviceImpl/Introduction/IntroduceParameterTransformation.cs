@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -21,7 +21,9 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
 
     public ParameterBuilderData Parameter { get; }
 
-    public IntroduceParameterTransformation( AdviceInfo advice, ParameterBuilderData parameter ) : base( advice, parameter.ContainingDeclaration )
+    public IntroduceParameterTransformation( AspectLayerInstance aspectLayerInstance, ParameterBuilderData parameter ) : base(
+        aspectLayerInstance,
+        parameter.ContainingDeclaration )
     {
         this.Parameter = parameter;
     }

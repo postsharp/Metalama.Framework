@@ -29,7 +29,7 @@ internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
     protected override void AddTransformation( IMemberOrNamedType targetDeclaration, IConstructor targetCtor, Action<ITransformation> addTransformation )
     {
         var initialization = new TemplateBasedInitializationTransformation(
-            this.AdviceInfo,
+            this.AspectLayerInstance,
             targetDeclaration.ToRef(),
             targetCtor.ToFullRef(),
             this._boundTemplate,

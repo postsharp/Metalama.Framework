@@ -31,7 +31,7 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
         var targetDeclaration = this.TargetDeclaration;
 
         context.AddTransformation(
-            new OverrideIndexerTransformation( this.AdviceInfo, targetDeclaration.ToFullRef(), this._getTemplate, this._setTemplate, this.Tags ) );
+            new OverrideIndexerTransformation( this.AspectLayerInstance, targetDeclaration.ToFullRef(), this._getTemplate, this._setTemplate, this.Tags ) );
 
         return this.CreateSuccessResult( targetDeclaration );
     }

@@ -29,7 +29,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
         if ( constructor.IsImplicitInstanceConstructor() )
         {
             // Missing implicit ctor.
-            var builder = new ConstructorBuilder( this.AdviceInfo, constructor.DeclaringType )
+            var builder = new ConstructorBuilder( this.AspectLayerInstance, constructor.DeclaringType )
             {
                 ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
@@ -40,7 +40,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
             constructor = builder;
         }
 
-        context.AddTransformation( new OverrideConstructorTransformation( this.AdviceInfo, constructor.ToFullRef(), this._boundTemplate, this.Tags ) );
+        context.AddTransformation( new OverrideConstructorTransformation( this.AspectLayerInstance, constructor.ToFullRef(), this._boundTemplate, this.Tags ) );
 
         return this.CreateSuccessResult( constructor );
     }

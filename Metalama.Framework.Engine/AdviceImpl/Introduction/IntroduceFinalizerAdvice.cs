@@ -36,7 +36,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
 
     protected override MethodBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new MethodBuilder( this.AdviceInfo, this.TargetDeclaration, "Finalize", DeclarationKind.Finalizer );
+        return new MethodBuilder( this.AspectLayerInstance, this.TargetDeclaration, "Finalize", DeclarationKind.Finalizer );
     }
 
     protected override void InitializeBuilderCore(
@@ -90,7 +90,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
 
             // There is no existing declaration, we will introduce and override the introduced.
             var overriddenMethod = new OverrideFinalizerTransformation(
-                this.AdviceInfo,
+                this.AspectLayerInstance,
                 builder.ToFullRef(),
                 this._template.ForIntroduction( builder ),
                 this.Tags );
@@ -125,7 +125,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                     if ( targetDeclaration.Equals( existingFinalizer.DeclaringType ) )
                     {
                         var overriddenMethod = new OverrideFinalizerTransformation(
-                            this.AdviceInfo,
+                            this.AspectLayerInstance,
                             existingFinalizer.ToFullRef(),
                             this._template.ForIntroduction( existingFinalizer ),
                             this.Tags );
@@ -143,7 +143,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                         builder.Freeze();
 
                         var overriddenMethod = new OverrideFinalizerTransformation(
-                            this.AdviceInfo,
+                            this.AspectLayerInstance,
                             builder.ToFullRef(),
                             this._template.ForIntroduction( builder ),
                             this.Tags );

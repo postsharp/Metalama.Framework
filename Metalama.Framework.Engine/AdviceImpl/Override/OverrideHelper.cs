@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
@@ -17,7 +18,7 @@ internal static class OverrideHelper
 {
     public static IProperty OverrideProperty(
         ProjectServiceProvider serviceProvider,
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFieldOrPropertyOrIndexer targetDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
@@ -27,28 +28,28 @@ internal static class OverrideHelper
         switch ( targetDeclaration )
         {
             case IField { OverridingProperty: { } overridingProperty }:
-                return OverrideProperty( serviceProvider, advice, overridingProperty, getTemplate, setTemplate, tags, addTransformation );
+                return OverrideProperty( serviceProvider, aspectLayerInstance, overridingProperty, getTemplate, setTemplate, tags, addTransformation );
 
             case IField field:
                 {
-                    var propertyBuilder = PromotedFieldBuilder.Create( serviceProvider, field, tags, advice );
+                    var propertyBuilder = PromotedFieldBuilder.Create( serviceProvider, field, tags, aspectLayerInstance );
                     propertyBuilder.Freeze();
 
                     addTransformation( propertyBuilder.ToTransformation() );
-                    addTransformation( new OverridePropertyTransformation( advice, propertyBuilder.ToRef(), getTemplate, setTemplate, tags ) );
+                    addTransformation( new OverridePropertyTransformation( aspectLayerInstance, propertyBuilder.ToRef(), getTemplate, setTemplate, tags ) );
 
-                    AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+                    AddTransformationsForStructField( targetDeclaration.DeclaringType, aspectLayerInstance, addTransformation );
 
                     return propertyBuilder;
                 }
 
             case IProperty property:
                 {
-                    addTransformation( new OverridePropertyTransformation( advice, property.ToFullRef(), getTemplate, setTemplate, tags ) );
+                    addTransformation( new OverridePropertyTransformation( aspectLayerInstance, property.ToFullRef(), getTemplate, setTemplate, tags ) );
 
                     if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
                     {
-                        AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+                        AddTransformationsForStructField( targetDeclaration.DeclaringType, aspectLayerInstance, addTransformation );
                     }
 
                     return property;
@@ -59,14 +60,14 @@ internal static class OverrideHelper
         }
     }
 
-    public static void AddTransformationsForStructField( INamedType type, AdviceInfo advice, Action<ITransformation> addTransformation )
+    public static void AddTransformationsForStructField( INamedType type, AspectLayerInstance aspectLayerInstance, Action<ITransformation> addTransformation )
     {
         if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
         {
             // If there is no 'this()' constructor, add one.
             if ( type.Constructors.FirstOrDefault() is { IsImplicitlyDeclared: true } implicitConstructor )
             {
-                var constructorBuilder = new ConstructorBuilder( advice, type )
+                var constructorBuilder = new ConstructorBuilder( aspectLayerInstance, type )
                 {
                     ReplacedImplicitConstructor = implicitConstructor, Accessibility = Accessibility.Public
                 };

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -75,7 +76,7 @@ internal class AdviceSyntaxGenerator
 
     private static bool TryExpandInitializerTemplate<T>(
         T member,
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         MemberInjectionContext context,
         TemplateMember<T> initializerTemplate,
         IObjectReader tags,
@@ -85,13 +86,13 @@ internal class AdviceSyntaxGenerator
         var metaApi = MetaApi.ForInitializer(
             member,
             new MetaApiProperties(
-                advice.SourceCompilation,
+                aspectLayerInstance.InitialCompilation,
                 context.DiagnosticSink,
                 initializerTemplate.AsMemberOrNamedType(),
                 tags,
-                advice.AspectLayerId,
+                aspectLayerInstance.AspectLayerId,
                 context.SyntaxGenerationContext,
-                advice.AspectInstance,
+                aspectLayerInstance.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
@@ -101,7 +102,7 @@ internal class AdviceSyntaxGenerator
             member,
             default,
             null,
-            advice.AspectLayerId );
+            aspectLayerInstance.AspectLayerId );
 
         var templateDriver = initializerTemplate.Driver;
 
@@ -110,7 +111,7 @@ internal class AdviceSyntaxGenerator
 
     public static bool GetInitializerExpressionOrMethod<T>(
         T member,
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         MemberInjectionContext context,
         IType targetType,
         IExpression? initializerExpression,
@@ -166,7 +167,7 @@ internal class AdviceSyntaxGenerator
         }
         else if ( initializerTemplate != null )
         {
-            if ( !TryExpandInitializerTemplate( member, advice, context, initializerTemplate, tags, out var initializerBlock ) )
+            if ( !TryExpandInitializerTemplate( member, aspectLayerInstance, context, initializerTemplate, tags, out var initializerBlock ) )
             {
                 // Template expansion error.
                 initializerMethodSyntax = null;
@@ -184,7 +185,7 @@ internal class AdviceSyntaxGenerator
                 return true;
             }
 
-            var initializerName = context.InjectionNameProvider.GetInitializerName( member.DeclaringType, advice.AspectLayerId, member );
+            var initializerName = context.InjectionNameProvider.GetInitializerName( member.DeclaringType, aspectLayerInstance.AspectLayerId, member );
 
             initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
 

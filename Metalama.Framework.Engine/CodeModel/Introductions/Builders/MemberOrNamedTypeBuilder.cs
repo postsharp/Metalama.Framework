@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -94,7 +94,7 @@ internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMem
 
     public override IDeclaration ContainingDeclaration => this.DeclaringType.AssertNotNull( "Declaring type should not be null (missing override?)." );
 
-    protected MemberOrNamedTypeBuilder( AdviceInfo advice, INamedType? declaringType, string name ) : base( advice, name )
+    protected MemberOrNamedTypeBuilder( AspectLayerInstance aspectLayerInstance, INamedType? declaringType, string name ) : base( aspectLayerInstance, name )
     {
         this.DeclaringType = declaringType;
         this._usesNewKeyword = false;

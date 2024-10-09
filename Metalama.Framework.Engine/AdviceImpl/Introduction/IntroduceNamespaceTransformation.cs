@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
@@ -14,7 +14,7 @@ internal sealed class IntroduceNamespaceTransformation : BaseTransformation, IIn
 {
     private readonly NamespaceBuilderData _introducedDeclaration;
 
-    public IntroduceNamespaceTransformation( AdviceInfo advice, NamespaceBuilderData introducedDeclaration ) : base( advice )
+    public IntroduceNamespaceTransformation( AspectLayerInstance aspectLayerInstance, NamespaceBuilderData introducedDeclaration ) : base( aspectLayerInstance )
     {
         this._introducedDeclaration = introducedDeclaration.AssertNotNull();
     }

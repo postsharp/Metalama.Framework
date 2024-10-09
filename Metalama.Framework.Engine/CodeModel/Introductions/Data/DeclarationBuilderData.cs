@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
@@ -19,7 +19,7 @@ internal abstract class DeclarationBuilderData
 
     public IFullRef<IDeclaration> ContainingDeclaration { get; }
 
-    public AdviceInfo ParentAdvice { get; }
+    public AspectLayerInstance ParentAdvice { get; }
 
     public ImmutableArray<AttributeBuilderData> Attributes { get; }
 
@@ -29,7 +29,7 @@ internal abstract class DeclarationBuilderData
     {
         Invariant.Assert( builder.IsFrozen );
 
-        this.ParentAdvice = builder.ParentAdvice;
+        this.ParentAdvice = builder.AspectLayerInstance;
         this.ContainingDeclaration = containingDeclaration;
         this.PrimarySyntaxTree = builder.PrimarySyntaxTree;
         this.IsDesignTimeObservable = builder.IsDesignTimeObservable;

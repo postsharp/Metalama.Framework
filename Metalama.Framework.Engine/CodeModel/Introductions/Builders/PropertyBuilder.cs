@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
@@ -71,7 +72,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public virtual IInjectMemberTransformation ToTransformation()
     {
-        return new IntroducePropertyTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroducePropertyTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
     public IExpression? InitializerExpression
@@ -109,7 +110,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     }
 
     public PropertyBuilder(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
         string name,
         bool hasGetter,
@@ -119,7 +120,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
         bool hasImplicitGetter,
         bool hasImplicitSetter,
         IObjectReader initializerTags )
-        : base( advice, targetType, name, hasGetter, hasSetter, hasImplicitGetter, hasImplicitSetter )
+        : base( aspectLayerInstance, targetType, name, hasGetter, hasSetter, hasImplicitGetter, hasImplicitSetter )
     {
         // TODO: Sanity checks.
 

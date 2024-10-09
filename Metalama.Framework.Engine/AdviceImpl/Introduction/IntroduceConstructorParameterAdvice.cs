@@ -78,7 +78,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
-            var constructorBuilder = new ConstructorBuilder( this.AdviceInfo, constructor.DeclaringType )
+            var constructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, constructor.DeclaringType )
             {
                 ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
             };
@@ -96,7 +96,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             this._parameterName,
             this._parameterType,
             RefKind.None,
-            this.AdviceInfo ) { DefaultValue = this._defaultValue };
+            this.AspectLayerInstance ) { DefaultValue = this._defaultValue };
 
         var parameter = parameterBuilder;
 
@@ -105,7 +105,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         parameterBuilder.Freeze();
         var parameterBuilderData = parameterBuilder.Immutable;
 
-        context.AddTransformation( new IntroduceParameterTransformation( this.AdviceInfo, parameterBuilderData ) );
+        context.AddTransformation( new IntroduceParameterTransformation( this.AspectLayerInstance, parameterBuilderData ) );
 
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
@@ -158,7 +158,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
-                    var derivedConstructorBuilder = new ConstructorBuilder( this.AdviceInfo, chainedConstructor.DeclaringType )
+                    var derivedConstructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, chainedConstructor.DeclaringType )
                     {
                         ReplacedImplicitConstructor = chainedConstructor, Accessibility = Accessibility.Public
                     };
@@ -195,12 +195,12 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                             pullParameterAction.ParameterName.AssertNotNull(),
                             pullParameterAction.ParameterType.AssertNotNull(),
                             RefKind.None,
-                            this.AdviceInfo ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
+                            this.AspectLayerInstance ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
                         recursiveParameterBuilder.Freeze();
 
-                        contextCopy.AddTransformation( new IntroduceParameterTransformation( this.AdviceInfo, recursiveParameterBuilder.Immutable ) );
+                        contextCopy.AddTransformation( new IntroduceParameterTransformation( this.AspectLayerInstance, recursiveParameterBuilder.Immutable ) );
 
                         var recursiveParameter = recursiveParameterBuilder;
 
@@ -216,7 +216,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 // Append an argument to the call to the current constructor. 
                 contextCopy.AddTransformation(
                     new IntroduceConstructorInitializerArgumentTransformation(
-                        this.AdviceInfo,
+                        this.AspectLayerInstance,
                         initializedChainedConstructor.ToFullRef(),
                         baseParameter.Index,
                         parameterValue ) );

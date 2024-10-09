@@ -55,7 +55,7 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
-                            this.AdviceInfo,
+                            this.AspectLayerInstance,
                             targetDeclaration.ToFullRef(),
                             this._attribute.Type.ToFullRef() );
 
@@ -79,14 +79,14 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicitlyDeclared: true } constructor )
             {
                 contextCopy.AddTransformation(
-                    new ConstructorBuilder( this.AdviceInfo, constructor.DeclaringType )
+                    new ConstructorBuilder( this.AspectLayerInstance, constructor.DeclaringType )
                         {
                             ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
                         }
                         .ToTransformation() );
             }
 
-            var attributeBuilder = new AttributeBuilder( this.AdviceInfo, targetDeclaration, this._attribute );
+            var attributeBuilder = new AttributeBuilder( this.AspectLayerInstance, targetDeclaration, this._attribute );
             attributeBuilder.Freeze();
             contextCopy.AddTransformation( attributeBuilder.ToTransformation() );
 

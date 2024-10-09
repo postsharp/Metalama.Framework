@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -22,12 +23,12 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
     private BoundTemplateMethod? SetTemplate { get; }
 
     public OverrideIndexerTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IIndexer> overriddenDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        : base( aspectLayerInstance, overriddenDeclaration, tags )
     {
         this.GetTemplate = getTemplate;
         this.SetTemplate = setTemplate;

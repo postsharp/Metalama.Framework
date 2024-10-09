@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
@@ -14,7 +14,9 @@ internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransform
 {
     public AttributeBuilderData AttributeBuilder { get; }
 
-    public IntroduceAttributeTransformation( AdviceInfo advice, AttributeBuilderData attributeBuilder ) : base( advice, attributeBuilder.ContainingDeclaration )
+    public IntroduceAttributeTransformation( AspectLayerInstance aspectLayerInstance, AttributeBuilderData attributeBuilder ) : base(
+        aspectLayerInstance,
+        attributeBuilder.ContainingDeclaration )
     {
         this.AttributeBuilder = attributeBuilder;
     }

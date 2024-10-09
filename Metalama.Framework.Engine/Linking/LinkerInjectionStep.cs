@@ -843,7 +843,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // <output_contracts>
             // return returnValue;
 
-            var advice = originTransformation.ParentAdvice;
+            var advice = originTransformation.AspectLayerInstance;
             var rootMember = member.TypeMember;
 
             // TODO: Ideally, entry + exit statements should be injected here, but it complicates the transformation collection and rewriter.

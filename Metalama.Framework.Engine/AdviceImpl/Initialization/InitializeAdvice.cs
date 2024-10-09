@@ -47,7 +47,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
             if ( staticConstructor == null || staticConstructor.IsImplicitlyDeclared )
             {
                 var staticConstructorBuilder =
-                    new ConstructorBuilder( this.AdviceInfo, containingType ) { IsStatic = true, ReplacedImplicitConstructor = staticConstructor };
+                    new ConstructorBuilder( this.AspectLayerInstance, containingType ) { IsStatic = true, ReplacedImplicitConstructor = staticConstructor };
 
                 staticConstructorBuilder.Freeze();
                 staticConstructor = staticConstructorBuilder;
@@ -83,7 +83,10 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
             {
                 // Missing explicit ctor.
                 var builder =
-                    new ConstructorBuilder( this.AdviceInfo, ctor.DeclaringType ) { ReplacedImplicitConstructor = ctor, Accessibility = Accessibility.Public };
+                    new ConstructorBuilder( this.AspectLayerInstance, ctor.DeclaringType )
+                    {
+                        ReplacedImplicitConstructor = ctor, Accessibility = Accessibility.Public
+                    };
 
                 context.AddTransformation( builder.ToTransformation() );
                 targetCtor = builder;

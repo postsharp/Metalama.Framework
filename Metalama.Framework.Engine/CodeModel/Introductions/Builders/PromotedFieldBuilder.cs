@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -31,15 +31,23 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
     /// </summary>
     public IFieldImpl OriginalSourceFieldOrFieldBuilder { get; }
 
-    public static PromotedFieldBuilder Create( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, AdviceInfo advice )
+    public static PromotedFieldBuilder Create(
+        in ProjectServiceProvider serviceProvider,
+        IField field,
+        IObjectReader initializerTags,
+        AspectLayerInstance aspectLayerInstance )
         => new(
             serviceProvider,
             field,
             initializerTags,
-            advice );
+            aspectLayerInstance );
 
-    private PromotedFieldBuilder( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, AdviceInfo advice ) : base(
-        advice,
+    private PromotedFieldBuilder(
+        in ProjectServiceProvider serviceProvider,
+        IField field,
+        IObjectReader initializerTags,
+        AspectLayerInstance aspectLayerInstance ) : base(
+        aspectLayerInstance,
         field.DeclaringType,
         field.Name,
         true,
@@ -100,7 +108,7 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
     public override SyntaxTree? PrimarySyntaxTree => this.OriginalSourceFieldOrFieldBuilder.PrimarySyntaxTree;
 
     public override IInjectMemberTransformation ToTransformation()
-        => new PromoteFieldTransformation( this.ParentAdvice, this.OriginalSourceFieldOrFieldBuilder, this.Immutable );
+        => new PromoteFieldTransformation( this.AspectLayerInstance, this.OriginalSourceFieldOrFieldBuilder, this.Immutable );
 
     public override bool Equals( IDeclaration? other )
         => ReferenceEquals( this, other ) || (other is PromotedFieldBuilder otherPromotedField

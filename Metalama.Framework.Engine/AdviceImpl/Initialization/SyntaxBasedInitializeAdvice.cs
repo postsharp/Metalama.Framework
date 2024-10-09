@@ -25,7 +25,7 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
         // TODO: The statement can now be more complex, including invoking a template. For this we need to pass a TemplateSyntaxFactoryImpl.
         addTransformation(
             new SyntaxBasedInitializationTransformation(
-                this.AdviceInfo,
+                this.AspectLayerInstance,
                 targetDeclaration.ToRef(),
                 targetCtor.ToFullRef(),
                 _ => ((IStatementImpl) this._statement).GetSyntax( null ) ) );

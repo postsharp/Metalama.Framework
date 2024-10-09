@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
@@ -102,7 +103,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
     public bool GetPropertyInitializerExpressionOrMethod(
         IProperty property,
         PropertyBuilderData builderData,
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         MemberInjectionContext context,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
@@ -112,7 +113,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
             case null:
                 return AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
                     property,
-                    advice,
+                    aspectLayerInstance,
                     context,
                     property.Type,
                     property.InitializerExpression,
@@ -124,7 +125,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
             case FieldBuilderData fieldBuilderData:
                 return AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
                     property.OriginalField.AssertNotNull(),
-                    advice,
+                    aspectLayerInstance,
                     context,
                     property.Type,
                     fieldBuilderData.InitializerExpression,

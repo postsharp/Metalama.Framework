@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -21,7 +21,9 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 internal sealed class IntroduceConstructorTransformation
     : IntroduceMemberTransformation<ConstructorBuilderData>, IReplaceMemberTransformation, IInsertStatementTransformation
 {
-    public IntroduceConstructorTransformation( AdviceInfo advice, ConstructorBuilderData introducedDeclaration ) : base( advice, introducedDeclaration )
+    public IntroduceConstructorTransformation( AspectLayerInstance aspectLayerInstance, ConstructorBuilderData introducedDeclaration ) : base(
+        aspectLayerInstance,
+        introducedDeclaration )
     {
         Invariant.Assert( !introducedDeclaration.IsStatic );
 

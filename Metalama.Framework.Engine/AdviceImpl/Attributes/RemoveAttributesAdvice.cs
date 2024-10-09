@@ -27,7 +27,7 @@ internal sealed class RemoveAttributesAdvice : Advice<RemoveAttributesAdviceResu
         {
             context.AddTransformation(
                 new RemoveAttributesTransformation(
-                    this.AdviceInfo,
+                    this.AspectLayerInstance,
                     targetDeclaration.ToFullRef(),
                     this._attributeType.ToFullRef() ) );
         }

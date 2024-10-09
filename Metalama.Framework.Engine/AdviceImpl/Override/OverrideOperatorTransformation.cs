@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -28,8 +29,12 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
 
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideOperatorTransformation( AdviceInfo advice, IFullRef<IMethod> targetOperator, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, targetOperator, tags )
+    public OverrideOperatorTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IMethod> targetOperator,
+        BoundTemplateMethod boundTemplate,
+        IObjectReader tags )
+        : base( aspectLayerInstance, targetOperator, tags )
     {
         this._targetOperator = targetOperator;
         this.BoundTemplate = boundTemplate;

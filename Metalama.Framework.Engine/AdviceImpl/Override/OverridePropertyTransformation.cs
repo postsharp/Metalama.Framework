@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -22,12 +23,12 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
     private BoundTemplateMethod? SetTemplate { get; }
 
     public OverridePropertyTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IProperty> overriddenProperty,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
         IObjectReader tags )
-        : base( advice, overriddenProperty, tags )
+        : base( aspectLayerInstance, overriddenProperty, tags )
     {
         // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
         // The caller is responsible for verifying the compatibility of the template with the target.

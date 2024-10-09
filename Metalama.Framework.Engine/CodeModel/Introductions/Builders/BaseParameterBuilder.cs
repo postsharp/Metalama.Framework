@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -39,7 +39,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public sealed override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
-    protected BaseParameterBuilder( AdviceInfo parentAdvice ) : base( parentAdvice ) { }
+    protected BaseParameterBuilder( AspectLayerInstance aspectLayerInstance ) : base( aspectLayerInstance ) { }
 
     bool IExpression.IsAssignable => true;
 

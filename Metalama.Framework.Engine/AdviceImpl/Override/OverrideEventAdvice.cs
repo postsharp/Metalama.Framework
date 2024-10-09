@@ -33,7 +33,7 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
         // TODO: order should be self if the target is introduced on the same layer.
         context.AddTransformation(
             new OverrideEventTransformation(
-                this.AdviceInfo,
+                this.AspectLayerInstance,
                 this.TargetDeclaration.ToFullRef(),
                 this._addTemplate,
                 this._removeTemplate,

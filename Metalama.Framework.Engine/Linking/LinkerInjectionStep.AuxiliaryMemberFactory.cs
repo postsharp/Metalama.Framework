@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -109,19 +108,19 @@ internal sealed partial class LinkerInjectionStep
 
         public MemberDeclarationSyntax GetAuxiliaryContractMember(
             IRef<IMember> member,
-            AdviceInfo advice,
+            AspectLayerInstance aspectLayerInstance,
             string? returnVariableName )
         {
             switch ( member )
             {
                 case IRef<IMethod> method:
-                    return this.GetAuxiliaryContractMethod( method, advice.AspectLayerId, returnVariableName );
+                    return this.GetAuxiliaryContractMethod( method, aspectLayerInstance.AspectLayerId, returnVariableName );
 
                 case IRef<IProperty> property:
-                    return this.GetAuxiliaryContractProperty( property, advice.AspectLayerId, returnVariableName );
+                    return this.GetAuxiliaryContractProperty( property, aspectLayerInstance.AspectLayerId, returnVariableName );
 
                 case IRef<IIndexer> indexer:
-                    return this.GetAuxiliaryContractIndexer( indexer, advice, returnVariableName );
+                    return this.GetAuxiliaryContractIndexer( indexer, aspectLayerInstance, returnVariableName );
 
                 default:
                     throw new AssertionFailedException( $"Unsupported kind: {member}" );
@@ -460,7 +459,7 @@ internal sealed partial class LinkerInjectionStep
 
         private MemberDeclarationSyntax GetAuxiliaryContractIndexer(
             IRef<IIndexer> indexerRef,
-            AdviceInfo advice,
+            AspectLayerInstance aspectLayerInstance,
             string? returnVariableName )
         {
             var indexer = indexerRef.GetTarget( this._finalCompilationModel );
@@ -487,7 +486,7 @@ internal sealed partial class LinkerInjectionStep
                                             null,
                                             EqualsValueClause(
                                                 this._aspectReferenceSyntaxProvider.GetIndexerReference(
-                                                    advice.AspectLayerId,
+                                                    aspectLayerInstance.AspectLayerId,
                                                     indexer,
                                                     AspectReferenceTargetKind.PropertyGetAccessor,
                                                     syntaxGenerationContext.SyntaxGenerator ) ) ) ) ) ),
@@ -502,7 +501,7 @@ internal sealed partial class LinkerInjectionStep
                                     this._aspectReferenceSyntaxProvider,
                                     syntaxGenerationContext,
                                     indexer,
-                                    advice.AspectLayerId ),
+                                    aspectLayerInstance.AspectLayerId ),
                                 Token( SyntaxKind.SemicolonToken ) ) )
                     : null;
 
@@ -525,7 +524,7 @@ internal sealed partial class LinkerInjectionStep
                                 this._aspectReferenceSyntaxProvider,
                                 syntaxGenerationContext,
                                 indexer,
-                                advice.AspectLayerId ) ) )
+                                aspectLayerInstance.AspectLayerId ) ) )
                     : null;
 
             var modifiers = indexer
@@ -544,7 +543,7 @@ internal sealed partial class LinkerInjectionStep
                         this._finalCompilationModel,
                         syntaxGenerationContext,
                         indexer,
-                        this._injectionNameProvider.GetAuxiliaryType( advice.AspectInstance, indexer, syntaxGenerationContext ) ),
+                        this._injectionNameProvider.GetAuxiliaryType( aspectLayerInstance.AspectInstance, indexer, syntaxGenerationContext ) ),
                     AccessorList(
                         List(
                             new[]

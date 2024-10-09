@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -45,10 +45,10 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     {
         this.Freeze();
 
-        return new IntroduceNamespaceTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroduceNamespaceTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
-    public NamespaceBuilder( AdviceInfo advice, INamespace containingNamespace, string name ) : base( advice, name )
+    public NamespaceBuilder( AspectLayerInstance aspectLayerInstance, INamespace containingNamespace, string name ) : base( aspectLayerInstance, name )
     {
         this.ContainingNamespace = containingNamespace;
     }

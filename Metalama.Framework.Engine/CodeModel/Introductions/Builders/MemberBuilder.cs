@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using System;
 
@@ -13,7 +13,8 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
     private bool _isAsync;
     private bool _isOverride;
 
-    protected MemberBuilder( INamedType declaringType, string name, AdviceInfo advice ) : base( advice, declaringType, name ) { }
+    protected MemberBuilder( INamedType declaringType, string name, AspectLayerInstance aspectLayerInstance ) :
+        base( aspectLayerInstance, declaringType, name ) { }
 
     public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 

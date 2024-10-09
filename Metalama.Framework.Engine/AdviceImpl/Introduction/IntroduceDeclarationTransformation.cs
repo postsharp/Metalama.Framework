@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
@@ -18,8 +18,8 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
 {
     public T BuilderData { get; }
 
-    protected IntroduceDeclarationTransformation( AdviceInfo advice, T introducedDeclaration ) : base(
-        advice,
+    protected IntroduceDeclarationTransformation( AspectLayerInstance aspectLayerInstance, T introducedDeclaration ) : base(
+        aspectLayerInstance,
         introducedDeclaration.PrimarySyntaxTree.AssertNotNull() )
     {
         this.BuilderData = introducedDeclaration.AssertNotNull();

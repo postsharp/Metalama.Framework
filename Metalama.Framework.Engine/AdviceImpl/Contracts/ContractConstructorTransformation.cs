@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
@@ -18,7 +19,7 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
     private readonly IFullRef<IConstructor> _targetConstructor;
 
     public ContractConstructorTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IConstructor> targetConstructor,
         IFullRef<IParameter> contractTarget,
         ContractDirection contractDirection,
@@ -26,7 +27,7 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
         IObjectReader templateArguments,
         IObjectReader tags,
         TemplateProvider templateProvider ) : base(
-        advice,
+        aspectLayerInstance,
         contractTarget,
         contractDirection,
         template,

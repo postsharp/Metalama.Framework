@@ -29,19 +29,19 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
         {
             case MethodKind.Finalizer:
                 context.AddTransformation(
-                    new OverrideFinalizerTransformation( this.AdviceInfo, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                    new OverrideFinalizerTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             case MethodKind.Operator:
                 context.AddTransformation(
-                    new OverrideOperatorTransformation( this.AdviceInfo, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                    new OverrideOperatorTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
 
             default:
                 context.AddTransformation(
-                    new OverrideMethodTransformation( this.AdviceInfo, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                    new OverrideMethodTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
 
                 break;
         }

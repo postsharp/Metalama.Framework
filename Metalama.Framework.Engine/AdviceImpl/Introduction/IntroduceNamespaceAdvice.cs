@@ -21,7 +21,7 @@ internal sealed class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INam
 
     protected override NamespaceBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new NamespaceBuilder( this.AdviceInfo, (INamespace) this.TargetDeclaration.AssertNotNull(), this._name );
+        return new NamespaceBuilder( this.AspectLayerInstance, (INamespace) this.TargetDeclaration.AssertNotNull(), this._name );
     }
 
     protected override IntroductionAdviceResult<INamespace> ImplementCore( NamespaceBuilder builder, in AdviceImplementationContext context )

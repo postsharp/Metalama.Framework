@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.Transformations;
@@ -12,7 +12,9 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 {
     private readonly IRef<IField> _replacedField;
 
-    public PromoteFieldTransformation( AdviceInfo advice, IField replacedField, PropertyBuilderData propertyBuilder ) : base( advice, propertyBuilder )
+    public PromoteFieldTransformation( AspectLayerInstance aspectLayerInstance, IField replacedField, PropertyBuilderData propertyBuilder ) : base(
+        aspectLayerInstance,
+        propertyBuilder )
     {
         this._replacedField = replacedField.ToRef();
     }

@@ -34,7 +34,7 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     internal void SetIsIteratorMethod( bool value ) => this._isIteratorMethod = value;
 
-    public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit ) : base( containingDeclaration.ParentAdvice )
+    public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit ) : base( containingDeclaration.AspectLayerInstance )
     {
         this.ContainingMember = containingDeclaration;
         this._accessibility = null;

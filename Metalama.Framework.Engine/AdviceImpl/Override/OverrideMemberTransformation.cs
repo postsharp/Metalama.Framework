@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -25,11 +24,11 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 
     public override IRef<IDeclaration> TargetDeclaration => this.OverriddenDeclaration;
 
-    protected OverrideMemberTransformation( AdviceInfo advice, IFullRef<IDeclaration> overriddenDeclaration, IObjectReader tags ) : base(
-        advice,
+    protected OverrideMemberTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IDeclaration> overriddenDeclaration, IObjectReader tags ) : base(
+        aspectLayerInstance,
         overriddenDeclaration )
     {
-        Invariant.Assert( advice != null! );
+        Invariant.Assert( aspectLayerInstance != null! );
         this.Tags = tags;
     }
 

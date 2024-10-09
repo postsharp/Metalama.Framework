@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using System;
 using System.Reflection;
@@ -88,7 +88,13 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
 
     public override bool IsReturnParameter => this.Index < 0;
 
-    public ParameterBuilder( IHasParameters declaringMember, int index, string? name, IType type, RefKind refKind, AdviceInfo advice ) : base( advice )
+    public ParameterBuilder(
+        IHasParameters declaringMember,
+        int index,
+        string? name,
+        IType type,
+        RefKind refKind,
+        AspectLayerInstance aspectLayerInstance ) : base( aspectLayerInstance )
     {
         this.DeclaringMember = declaringMember;
         this.Index = index;

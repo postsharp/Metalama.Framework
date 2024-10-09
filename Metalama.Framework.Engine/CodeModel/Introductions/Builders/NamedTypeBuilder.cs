@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
@@ -32,8 +32,8 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public TypeParameterBuilderList TypeParameters { get; } = [];
 
-    public NamedTypeBuilder( AdviceInfo advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
-        advice,
+    public NamedTypeBuilder( AspectLayerInstance aspectLayerInstance, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
+        aspectLayerInstance,
         declaringNamespaceOrType as INamedType,
         name )
     {
@@ -235,7 +235,7 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public IntroduceNamedTypeTransformation ToTransformation()
     {
-        return new IntroduceNamedTypeTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroduceNamedTypeTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )

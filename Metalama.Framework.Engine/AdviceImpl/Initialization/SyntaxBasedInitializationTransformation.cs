@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
@@ -25,10 +25,10 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTr
     public IFullRef<IMember> TargetMember => this._targetConstructor;
 
     public SyntaxBasedInitializationTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IRef<IMemberOrNamedType> initializedDeclaration,
         IFullRef<IConstructor> targetConstructor,
-        Func<SyntaxGenerationContext, StatementSyntax> initializationStatement ) : base( advice, targetConstructor )
+        Func<SyntaxGenerationContext, StatementSyntax> initializationStatement ) : base( aspectLayerInstance, targetConstructor )
     {
         this.ContextDeclaration = initializedDeclaration;
         this._targetConstructor = targetConstructor;

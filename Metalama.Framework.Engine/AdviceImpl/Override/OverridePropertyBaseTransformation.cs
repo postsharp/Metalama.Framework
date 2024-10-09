@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -23,10 +23,10 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
     public IFullRef<IProperty> OverriddenProperty { get; }
 
     protected OverridePropertyBaseTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IProperty> overriddenProperty,
         IObjectReader tags )
-        : base( advice, overriddenProperty, tags )
+        : base( aspectLayerInstance, overriddenProperty, tags )
     {
         this.OverriddenProperty = overriddenProperty;
     }

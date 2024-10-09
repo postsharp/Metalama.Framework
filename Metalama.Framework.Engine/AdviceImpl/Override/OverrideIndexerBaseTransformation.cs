@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -24,10 +24,10 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
     private readonly IFullRef<IIndexer> _overriddenIndexer;
 
     protected OverrideIndexerBaseTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IFullRef<IIndexer> overriddenDeclaration,
         IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        : base( aspectLayerInstance, overriddenDeclaration, tags )
     {
         this._overriddenIndexer = overriddenDeclaration;
     }

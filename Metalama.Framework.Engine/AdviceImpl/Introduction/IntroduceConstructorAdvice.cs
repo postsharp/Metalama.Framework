@@ -40,7 +40,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
     protected override ConstructorBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new ConstructorBuilder( this.AdviceInfo, this.TargetDeclaration );
+        return new ConstructorBuilder( this.AspectLayerInstance, this.TargetDeclaration );
     }
 
     protected override void InitializeBuilderCore(
@@ -103,7 +103,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             // There is no existing declaration, we will introduce and override the introduced.
 
             var overriddenConstructor = new OverrideConstructorTransformation(
-                this.AdviceInfo,
+                this.AspectLayerInstance,
                 builder.ToFullRef(),
                 this._template.ForIntroduction( builder ),
                 this.Tags );
@@ -133,7 +133,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
                 case OverrideStrategy.Override:
                     var overriddenMethod = new OverrideConstructorTransformation(
-                        this.AdviceInfo,
+                        this.AspectLayerInstance,
                         existingConstructor.ToFullRef(),
                         this._template.ForIntroduction( existingConstructor ),
                         this.Tags );

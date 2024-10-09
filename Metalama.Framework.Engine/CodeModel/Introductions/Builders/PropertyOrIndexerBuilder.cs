@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
@@ -51,14 +51,14 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
     IMethodBuilder? IPropertyOrIndexerBuilder.SetMethod => this.SetMethod;
 
     protected PropertyOrIndexerBuilder(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
         string name,
         bool hasGetter,
         bool hasSetter,
         bool hasImplicitGetter,
         bool hasImplicitSetter )
-        : base( targetType, name, advice )
+        : base( targetType, name, aspectLayerInstance )
     {
         Invariant.Assert( hasGetter || hasSetter );
 

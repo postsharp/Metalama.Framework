@@ -209,12 +209,14 @@ internal sealed class AspectDriver : IAspectDriver
             // Apply options.
             ApplyOptions( aspectInstance, targetDeclaration, diagnosticSink, userCodeInvoker, buildAspectExecutionContext );
 
+            // Create the AspectLayerInstance.
+            var aspectLayerInstance = new AspectLayerInstance( aspectInstance, layer, initialCompilationRevision );
+
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(
                 serviceProvider,
-                initialCompilationRevision,
+                aspectLayerInstance,
                 currentCompilationRevision,
-                aspectInstance,
                 diagnosticSink,
                 buildAspectExecutionContext,
                 pipelineStepIndex,

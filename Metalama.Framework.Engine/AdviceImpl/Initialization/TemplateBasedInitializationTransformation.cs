@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
@@ -26,11 +27,11 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
     public IFullRef<IMember> TargetMember => this._targetConstructor;
 
     public TemplateBasedInitializationTransformation(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         IRef<IMemberOrNamedType> initializedDeclaration,
         IFullRef<IConstructor> targetConstructor,
         BoundTemplateMethod boundTemplate,
-        IObjectReader tags ) : base( advice, targetConstructor )
+        IObjectReader tags ) : base( aspectLayerInstance, targetConstructor )
     {
         this.ContextDeclaration = initializedDeclaration;
         this._targetConstructor = targetConstructor;

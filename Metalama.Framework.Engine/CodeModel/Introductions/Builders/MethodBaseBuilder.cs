@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using System;
@@ -31,7 +31,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
     {
         this.CheckNotFrozen();
 
-        var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind, this.ParentAdvice );
+        var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind, this.AspectLayerInstance );
         parameter.DefaultValue = defaultValue;
         this.Parameters.Add( parameter );
 
@@ -57,8 +57,8 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
     IRef<IMethodBase> IMethodBase.ToRef() => throw new NotSupportedException();
 
     protected MethodBaseBuilder(
-        AdviceInfo advice,
+        AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
         string name )
-        : base( targetType, name, advice ) { }
+        : base( targetType, name, aspectLayerInstance ) { }
 }

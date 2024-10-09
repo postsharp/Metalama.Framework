@@ -65,7 +65,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         if ( this._scope == IntroductionScope.Target )
         {
-            this._scope = parameters.AspectInstance.TargetDeclaration.GetTarget( parameters.SourceCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
+            this._scope = parameters.AspectLayerInstance.AspectInstance.TargetDeclaration.GetTarget( parameters.AspectLayerInstance.InitialCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
                 ? IntroductionScope.Instance
                 : IntroductionScope.Static;
         }

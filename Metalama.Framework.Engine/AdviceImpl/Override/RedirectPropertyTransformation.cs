@@ -25,8 +25,11 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
 
     private readonly IFullRef<IProperty> _overriddenProperty;
 
-    public RedirectPropertyTransformation( AdviceInfo advice, IFullRef<IProperty> overriddenDeclaration, IFullRef<IProperty> targetProperty )
-        : base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public RedirectPropertyTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IProperty> overriddenDeclaration,
+        IFullRef<IProperty> targetProperty )
+        : base( aspectLayerInstance, overriddenDeclaration, ObjectReader.Empty )
     {
         this._targetProperty = targetProperty;
         this._overriddenProperty = overriddenDeclaration;

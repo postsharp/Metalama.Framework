@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
@@ -74,7 +75,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public IInjectMemberTransformation ToTransformation()
     {
-        return new IntroduceFieldTransformation( this.ParentAdvice, this.Immutable );
+        return new IntroduceFieldTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
     public Writeability Writeability
@@ -108,8 +109,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public TemplateMember<IField>? InitializerTemplate { get; set; }
 
-    public FieldBuilder( AdviceInfo advice, INamedType targetType, string name, IObjectReader initializerTags )
-        : base( targetType, name, advice )
+    public FieldBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType, string name, IObjectReader initializerTags )
+        : base( targetType, name, aspectLayerInstance )
     {
         this.InitializerTags = initializerTags;
         this._type = this.Compilation.Cache.SystemObjectType;
