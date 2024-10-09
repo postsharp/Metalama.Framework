@@ -33,7 +33,7 @@ internal class FieldBuilderData : MemberBuilderData
 
     public MethodBuilderData SetMethod { get; }
 
-    public IRef<IProperty>? OverridingProperty { get; }
+    public IFullRef<IProperty>? OverridingProperty { get; }
 
     public FieldBuilderData( FieldBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
@@ -49,9 +49,8 @@ internal class FieldBuilderData : MemberBuilderData
         this.GetMethod = new MethodBuilderData( builder.GetMethod, this._ref );
         this.SetMethod = new MethodBuilderData( builder.SetMethod, this._ref );
 
-        // TODO: Potentional CompilationModel leak. (they could be safely ignored at design time)
         this.InitializerTags = builder.InitializerTags;
-        this.OverridingProperty = builder.OverridingProperty?.ToRef();
+        this.OverridingProperty = builder.OverridingProperty?.ToFullRef();
         this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 

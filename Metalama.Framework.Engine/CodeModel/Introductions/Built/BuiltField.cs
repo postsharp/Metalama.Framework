@@ -57,7 +57,7 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
     [Memo]
-    public IProperty? OverridingProperty => this.MapDeclaration( this.FieldBuilderData.OverridingProperty );
+    public IProperty? OverridingProperty => FieldHelper.GetOverridingProperty( this );
 
     [Memo]
     private IFullRef<IField> Ref => this.RefFactory.FromBuilt<IField>( this );

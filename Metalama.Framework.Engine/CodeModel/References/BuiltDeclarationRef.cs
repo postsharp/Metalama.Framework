@@ -106,15 +106,32 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
     public override string ToString() => this.BuilderData.ToString()!;
 
     protected override IFullRef<TOut> CastAsFullRef<TOut>()
-        => this switch
+    {
+        if ( this is IFullRef<TOut> desired )
         {
-            IFullRef<TOut> desired => desired,
-            IFullRef<IField> when this.BuilderData is PropertyBuilderData promotedField && typeof(TOut) == typeof(IProperty) =>
-                (IFullRef<TOut>) promotedField.ToRef().WithGenericContext( this._genericContext ),
-            IFullRef<IProperty> when this.BuilderData is FieldBuilderData promotedField && typeof(TOut) == typeof(IField) =>
-                (IFullRef<TOut>) promotedField.ToRef().WithGenericContext( this._genericContext ),
-            _ => throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." )
-        };
+            return desired;
+        }
+        else if ( this.BuilderData.DeclarationKind == DeclarationKind.Property && typeof(TOut) == typeof(IField) )
+        {
+            var redirectedField = ((PropertyBuilderData) this.BuilderData).OriginalField;
+
+            if ( redirectedField != null )
+            {
+                return (IFullRef<TOut>) redirectedField.WithGenericContext( this._genericContext );
+            }
+        }
+        else if ( this.BuilderData.DeclarationKind == DeclarationKind.Field && typeof(TOut) == typeof(IProperty) )
+        {
+            var overridingProperty = ((FieldBuilderData) this.BuilderData).OverridingProperty;
+
+            if ( overridingProperty != null )
+            {
+                return (IFullRef<TOut>) overridingProperty.WithGenericContext( this._genericContext );
+            }
+        }
+
+        throw new InvalidCastException( $"Cannot convert the IRef<{typeof(T).Name}> to IRef<{typeof(TOut).Name}>) for '{this}'." );
+    }
 
     public override bool Equals( IRef? other, RefComparison comparison )
     {

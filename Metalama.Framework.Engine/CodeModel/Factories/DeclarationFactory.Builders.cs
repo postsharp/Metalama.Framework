@@ -89,7 +89,7 @@ public partial class DeclarationFactory
             static ( in CreateFromBuilderArgs<MethodBuilderData> args ) => new BuiltMethod( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IMethod GetAccessor( MethodBuilderData methodBuilder, IGenericContext? genericContext = null )
-        => this.GetDeclarationFromBuilder<IMethod, MethodBuilderData>(
+        => this.GetDeclarationFromBuilder(
             methodBuilder,
             genericContext,
             static ( in CreateFromBuilderArgs<MethodBuilderData> args ) =>
@@ -106,14 +106,14 @@ public partial class DeclarationFactory
             static ( in CreateFromBuilderArgs<ConstructorBuilderData> args ) => new BuiltConstructor( args.Builder, args.Compilation, args.GenericContext ),
             true );
 
+    // Fields support redirections, but fields redirect to properties, so it is not handled at this level.
     internal IField GetField(
         FieldBuilderData fieldBuilder,
         IGenericContext? genericContext = null )
         => this.GetDeclarationFromBuilder<IField, FieldBuilderData>(
             fieldBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<FieldBuilderData> args ) => new BuiltField( args.Builder, args.Compilation, args.GenericContext ),
-            true );
+            static ( in CreateFromBuilderArgs<FieldBuilderData> args ) => new BuiltField( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IProperty GetProperty(
         PropertyBuilderData propertyBuilder,
@@ -158,7 +158,7 @@ public partial class DeclarationFactory
     internal IDeclaration GetDeclaration(
         DeclarationBuilderData builder,
         IGenericContext? genericContext = null,
-        Type interfaceType = null )
+        Type? interfaceType = null )
     {
         // Note that interfaceType may be a non-final interface, e.g. IFieldOrProperty.
         Invariant.Assert( interfaceType == null || builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Any( interfaceType.IsAssignableFrom ) );

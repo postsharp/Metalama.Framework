@@ -16,32 +16,32 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 {
-    public PropertyBuilderData PropertyBuilder { get; }
+    public PropertyBuilderData PropertyBuilderData { get; }
 
-    public BuiltProperty( PropertyBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltProperty( PropertyBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
-        this.PropertyBuilder = builder;
+        this.PropertyBuilderData = builderData;
     }
 
-    public override DeclarationBuilderData BuilderData => this.PropertyBuilder;
+    public override DeclarationBuilderData BuilderData => this.PropertyBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.PropertyBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.PropertyBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.PropertyBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.PropertyBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this.PropertyBuilder;
+    protected override MemberBuilderData MemberBuilder => this.PropertyBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilder => this.PropertyBuilder;
+    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilder => this.PropertyBuilderData;
 
-    public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
-
-    [Memo]
-    public IProperty? OverriddenProperty => this.MapDeclaration( this.PropertyBuilder.OverriddenProperty );
+    public bool? IsAutoPropertyOrField => this.PropertyBuilderData.IsAutoPropertyOrField;
 
     [Memo]
-    public IProperty Definition => this.Compilation.Factory.GetProperty( this.PropertyBuilder ).AssertNotNull();
+    public IProperty? OverriddenProperty => this.MapDeclaration( this.PropertyBuilderData.OverriddenProperty );
+
+    [Memo]
+    public IProperty Definition => this.Compilation.Factory.GetProperty( this.PropertyBuilderData ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
@@ -56,13 +56,13 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
-    public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.MapDeclarationList( this.PropertyBuilder.ExplicitInterfaceImplementations );
+    public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.MapDeclarationList( this.PropertyBuilderData.ExplicitInterfaceImplementations );
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
-    public bool IsRequired => this.PropertyBuilder.IsRequired;
+    public bool IsRequired => this.PropertyBuilderData.IsRequired;
 
-    public IExpression? InitializerExpression => this.PropertyBuilder.InitializerExpression;
+    public IExpression? InitializerExpression => this.PropertyBuilderData.InitializerExpression;
 
     public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 
@@ -85,7 +85,7 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
         {
             // Intentionally not using MapDeclaration to avoid the strong typing.
 
-            return this.PropertyBuilder.GetOriginalField( this.Compilation, this.GenericContext );
+            return this.PropertyBuilderData.GetOriginalField( this.Compilation, this.GenericContext );
         }
     }
 }

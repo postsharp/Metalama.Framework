@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
@@ -25,6 +26,45 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
+    internal static class FieldHelper
+    {
+        public static IProperty? GetOverridingProperty( IField field )
+        {
+            if ( !field.GenericContext.IsEmptyOrIdentity )
+            {
+                var propertyDefinition = GetOverridingPropertyDefinition( field.Definition );
+
+                if ( propertyDefinition == null )
+                {
+                    return null;
+                }
+                else
+                {
+                    return propertyDefinition.ForTypeInstance( field.DeclaringType );
+                }
+            }
+            else
+            {
+                return GetOverridingPropertyDefinition( field );
+            }
+        }
+
+        private static IProperty? GetOverridingPropertyDefinition( IField field )
+        {
+            Invariant.Assert( field.Definition == field );
+            var compilation = field.GetCompilationModel();
+
+            if ( compilation.TryGetRedirectedDeclaration( field.ToRef(), out var builderData ) )
+            {
+                return compilation.Factory.GetProperty( (PropertyBuilderData) builderData );
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
     internal sealed class Field : Member, IFieldImpl
     {
         private readonly IFieldSymbol _symbol;
@@ -63,7 +103,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public IRef<IField> ToRef() => this.Ref;
 
-        IProperty? IField.OverridingProperty => null;
+        [Memo]
+        public IProperty? OverridingProperty => FieldHelper.GetOverridingProperty( this );
 
         IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 

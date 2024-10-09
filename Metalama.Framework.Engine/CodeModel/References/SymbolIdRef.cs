@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SymbolIdRef<T> : StringRef<T>
+internal class SymbolIdRef<T> : DurableRef<T>
     where T : class, ICompilationElement
 {
     private SymbolIdRef( string id ) : base( id ) { }
@@ -40,4 +40,12 @@ internal class SymbolIdRef<T> : StringRef<T>
     }
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new SymbolIdRef<TOut>( this.Id );
+
+    public override IFullRef ToFullRef( CompilationContext compilation )
+    {
+        var symbol = new SymbolId( this.Id ).Resolve( compilation.Compilation )
+                     ?? throw new InvalidOperationException( $"Cannot find the symbol '{this.Id}' in '{compilation}'." );
+
+        return compilation.RefFactory.FromAnySymbol( symbol );
+    }
 }

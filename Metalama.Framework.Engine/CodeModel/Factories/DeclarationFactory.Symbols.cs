@@ -216,12 +216,17 @@ public partial class DeclarationFactory
             static ( in CreateFromSymbolArgs<IPropertySymbol> args ) =>
                 new Indexer( args.Symbol, args.Compilation ) );
 
+    // Fields support redirections, but fields redirect to properties, so it is not handled at this level.
     public IField GetField( IFieldSymbol fieldSymbol )
         => this.GetDeclarationFromSymbol<IField, IFieldSymbol>(
             fieldSymbol,
             static ( in CreateFromSymbolArgs<IFieldSymbol> args ) =>
-                new Field( args.Symbol, args.Compilation ),
-            true );
+                new Field( args.Symbol, args.Compilation ) );
+
+    internal IField GetField( IFieldSymbol fieldSymbol, GenericContext genericContext )
+    {
+        return this.GetField( (IFieldSymbol) genericContext.Map( fieldSymbol ) );
+    }
 
     public IConstructor GetConstructor( IMethodSymbol methodSymbol )
         => this.GetDeclarationFromSymbol<IConstructor, IMethodSymbol>(
@@ -303,7 +308,7 @@ public partial class DeclarationFactory
         }
     }
 
-    private ICompilationElement GetCompilationElementCore(
+    private ICompilationElement? GetCompilationElementCore(
         ISymbol mappedSymbol,
         RefTargetKind targetKind,
         GenericContext genericContext,

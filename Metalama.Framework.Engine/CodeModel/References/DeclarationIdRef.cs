@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// <summary>
 /// Implementation of <see cref="IDurableRef{T}"/> based on <see cref="SerializableDeclarationId"/>.
 /// </summary>
-internal class DeclarationIdRef<T> : StringRef<T>
+internal class DeclarationIdRef<T> : DurableRef<T>
     where T : class, ICompilationElement
 {
     private DeclarationIdRef( string id ) : base( id ) { }
@@ -42,4 +42,12 @@ internal class DeclarationIdRef<T> : StringRef<T>
     }
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new DeclarationIdRef<TOut>( this.Id );
+
+    public override IFullRef ToFullRef( CompilationContext compilation )
+    {
+        // TODO: BuilderData
+        var symbol = new SerializableDeclarationId( this.Id ).ResolveToSymbol( compilation );
+
+        return compilation.RefFactory.FromAnySymbol( symbol );
+    }
 }

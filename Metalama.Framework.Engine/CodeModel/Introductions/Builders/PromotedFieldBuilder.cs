@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
@@ -29,7 +30,7 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
     /// <summary>
     /// Gets the original <see cref="Field"/> or <see cref="FieldBuilder"/>.
     /// </summary>
-    public IFieldImpl OriginalSourceFieldOrFieldBuilder { get; }
+    public IFieldImpl OriginalSourceFieldOrBuiltField { get; }
 
     public static PromotedFieldBuilder Create(
         in ProjectServiceProvider serviceProvider,
@@ -58,23 +59,23 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
         true,
         initializerTags )
     {
-        Invariant.Assert( field is Field or FieldBuilder );
+        Invariant.Assert( field is (Field or BuiltField) );
 
-        this.OriginalSourceFieldOrFieldBuilder = (IFieldImpl) field;
+        this.OriginalSourceFieldOrBuiltField = (IFieldImpl) field;
         this.Type = field.Type;
-        this.Accessibility = this.OriginalSourceFieldOrFieldBuilder.Accessibility;
-        this.IsStatic = this.OriginalSourceFieldOrFieldBuilder.IsStatic;
-        this.IsRequired = this.OriginalSourceFieldOrFieldBuilder.IsRequired;
-        this.IsNew = this.OriginalSourceFieldOrFieldBuilder.IsNew;
-        this.HasNewKeyword = this.OriginalSourceFieldOrFieldBuilder.HasNewKeyword.AssertNotNull();
+        this.Accessibility = this.OriginalSourceFieldOrBuiltField.Accessibility;
+        this.IsStatic = this.OriginalSourceFieldOrBuiltField.IsStatic;
+        this.IsRequired = this.OriginalSourceFieldOrBuiltField.IsRequired;
+        this.IsNew = this.OriginalSourceFieldOrBuiltField.IsNew;
+        this.HasNewKeyword = this.OriginalSourceFieldOrBuiltField.HasNewKeyword.AssertNotNull();
 
-        this.GetMethod.AssertNotNull().Accessibility = this.OriginalSourceFieldOrFieldBuilder.Accessibility;
+        this.GetMethod.AssertNotNull().Accessibility = this.OriginalSourceFieldOrBuiltField.Accessibility;
 
         this.SetMethod.AssertNotNull().Accessibility =
-            this.OriginalSourceFieldOrFieldBuilder switch
+            this.OriginalSourceFieldOrBuiltField switch
             {
                 { Writeability: Writeability.ConstructorOnly } => Accessibility.Private,
-                _ => this.OriginalSourceFieldOrFieldBuilder.Accessibility
+                _ => this.OriginalSourceFieldOrBuiltField.Accessibility
             };
 
         if ( field.Attributes.Count > 0 )
@@ -99,33 +100,33 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
     }
 
     public override Writeability Writeability
-        => this.OriginalSourceFieldOrFieldBuilder.Writeability switch
+        => this.OriginalSourceFieldOrBuiltField.Writeability switch
         {
             Writeability.None => Writeability.None,
             Writeability.ConstructorOnly => Writeability.InitOnly, // Read-only fields are promoted to init-only properties.
             Writeability.All => Writeability.All,
-            _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.OriginalSourceFieldOrFieldBuilder.Writeability}." )
+            _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.OriginalSourceFieldOrBuiltField.Writeability}." )
         };
 
-    public override SyntaxTree? PrimarySyntaxTree => this.OriginalSourceFieldOrFieldBuilder.PrimarySyntaxTree;
+    public override SyntaxTree? PrimarySyntaxTree => this.OriginalSourceFieldOrBuiltField.PrimarySyntaxTree;
 
     public override IInjectMemberTransformation ToTransformation()
-        => new PromoteFieldTransformation( this.AspectLayerInstance, this.OriginalSourceFieldOrFieldBuilder, this.Immutable );
+        => new PromoteFieldTransformation( this.AspectLayerInstance, this.OriginalSourceFieldOrBuiltField, this.Immutable );
 
     public override bool Equals( IDeclaration? other )
         => ReferenceEquals( this, other ) || (other is PromotedFieldBuilder otherPromotedField
-                                              && otherPromotedField.OriginalSourceFieldOrFieldBuilder.Equals( this.OriginalSourceFieldOrFieldBuilder ));
+                                              && otherPromotedField.OriginalSourceFieldOrBuiltField.Equals( this.OriginalSourceFieldOrBuiltField ));
 
     public override bool IsDesignTimeObservable => false;
 
     public FieldInfo ToFieldInfo() => throw new NotImplementedException();
 
-    public TypedConstant? ConstantValue => this.OriginalSourceFieldOrFieldBuilder.ConstantValue;
+    public TypedConstant? ConstantValue => this.OriginalSourceFieldOrBuiltField.ConstantValue;
 
     public IField Definition => this;
 
     [Memo]
-    public FullRef<IField> FieldRef => (FullRef<IField>) this.OriginalSourceFieldOrFieldBuilder.ToRef();
+    public FullRef<IField> FieldRef => (FullRef<IField>) this.OriginalSourceFieldOrBuiltField.ToRef();
 
     IRef<IField> IField.ToRef() => this.FieldRef;
 

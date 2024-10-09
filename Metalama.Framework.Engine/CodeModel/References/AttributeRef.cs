@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// </summary>
     internal abstract class AttributeRef : IRef<IAttribute>, IEquatable<AttributeRef>, IRefImpl
     {
-        protected AttributeRef( IFullRef<IDeclaration> containingDeclaration, IRef<INamedType> attributeType )
+        protected AttributeRef( IFullRef<IDeclaration> containingDeclaration, IFullRef<INamedType> attributeType )
         {
             this.ContainingDeclaration = containingDeclaration;
             this.AttributeType = attributeType;
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public IFullRef ContainingDeclaration { get; }
 
-        public IRef<INamedType> AttributeType { get; }
+        public IFullRef<INamedType> AttributeType { get; }
 
         public ISymbol GetClosestContainingSymbol() => this.ContainingDeclaration.GetClosestContainingSymbol();
 

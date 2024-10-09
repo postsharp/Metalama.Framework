@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class TypeIdRef<T> : StringRef<T>
+internal class TypeIdRef<T> : DurableRef<T>
     where T : class, ICompilationElement
 {
     private TypeIdRef( string id ) : base( id )
@@ -46,4 +46,14 @@ internal class TypeIdRef<T> : StringRef<T>
     }
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new TypeIdRef<TOut>( this.Id );
+
+    public override IFullRef ToFullRef( CompilationContext compilationContext )
+    {
+        if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( this.Id ), out var symbol ) )
+        {
+            throw new InvalidOperationException( $"Unable to resolve type id: {this.Id}." );
+        }
+
+        return compilationContext.RefFactory.FromAnySymbol( symbol );
+    }
 }

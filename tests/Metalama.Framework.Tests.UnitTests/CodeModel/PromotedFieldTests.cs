@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
@@ -34,15 +36,8 @@ class C
         Assert.Same( promotedField.OverridingProperty, promotedField );
         Assert.Same( promotedField.OriginalField, promotedField );
 
-        _ = promotedField.PrimarySyntaxTree;
-
         // Verify that all properties work.
-        var objectReader = new ObjectReaderFactory( testContext.ServiceProvider ).GetReader( promotedField );
-
-        foreach ( var property in objectReader.Keys )
-        {
-            _ = objectReader[property];
-        }
+        CheckDeclarationProperties( testContext, promotedField );
 
         // Add the PromotedField to a compilation.
         var compilation = immutableCompilation.CreateMutableClone();
@@ -50,7 +45,7 @@ class C
 
         // Assertions on declarations.
         var fieldAfter = field.ForCompilation( compilation );
-        Assert.IsType<BuiltField>( fieldAfter );
+        Assert.IsType<Field>( fieldAfter );
         Assert.NotNull( fieldAfter.OverridingProperty );
         Assert.NotNull( fieldAfter.OverridingProperty.OriginalField );
         Assert.Same( fieldAfter, fieldAfter.OverridingProperty.OriginalField );
@@ -103,8 +98,10 @@ class C<T>
 
             // Assertions on declarations.
             var genericFieldAfter = genericField.ForCompilation( compilation );
-            Assert.IsType<BuiltField>( genericFieldAfter );
+            Assert.IsType<Field>( genericFieldAfter );
+            Assert.Equal( SpecialType.Int32, genericFieldAfter.Type.SpecialType );
             Assert.NotNull( genericFieldAfter.OverridingProperty );
+            Assert.Equal( SpecialType.Int32, genericFieldAfter.OverridingProperty.Type.SpecialType );
             Assert.NotNull( genericFieldAfter.OverridingProperty.OriginalField );
             Assert.Same( genericFieldAfter, genericFieldAfter.OverridingProperty.OriginalField );
             Assert.Equal( DeclarationKind.Field, genericFieldAfter.DeclarationKind );
@@ -155,12 +152,7 @@ class C
         _ = promotedField.PrimarySyntaxTree;
 
         // Verify that all properties work.
-        var objectReader = new ObjectReaderFactory( testContext.ServiceProvider ).GetReader( promotedField );
-
-        foreach ( var property in objectReader.Keys )
-        {
-            _ = objectReader[property];
-        }
+        CheckDeclarationProperties( testContext, promotedField );
 
         // Add the PromotedField to a compilation.
         var compilation2 = immutableCompilation1.CreateMutableClone();
@@ -183,5 +175,18 @@ class C
         Assert.Same( fieldAfter, field.ToRef().GetTarget( compilation2 ) );
         Assert.True( RefEqualityComparer<IField>.Default.Equals( field.ToRef(), promotedField.ToRef().As<IField>() ) );
         Assert.NotEqual<IRef>( promotedField.ToRef(), promotedField.ToRef().As<IField>() );
+    }
+
+    private static void CheckDeclarationProperties( TestContext testContext, IDeclaration declaration )
+    {
+        var objectReader = new ObjectReaderFactory( testContext.ServiceProvider ).GetReader( declaration );
+
+        foreach ( var property in objectReader.Keys )
+        {
+            if ( property != nameof(IDeclaration.Origin) )
+            {
+                _ = objectReader[property];
+            }
+        }
     }
 }

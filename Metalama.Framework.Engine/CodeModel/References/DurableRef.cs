@@ -1,16 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Services;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal abstract class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
+internal abstract class DurableRef<T> : BaseRef<T>, IDurableRef<T>
     where T : class, ICompilationElement
 {
     public string Id { get; }
 
-    protected StringRef( string id )
+    public abstract IFullRef ToFullRef( CompilationContext compilationContext );
+
+    protected DurableRef( string id )
     {
         this.Id = id;
     }
@@ -26,7 +29,7 @@ internal abstract class StringRef<T> : BaseRef<T>, IStringRef, IDurableRef<T>
             return false;
         }
 
-        if ( other is not IStringRef stringRef )
+        if ( other is not IDurableRef stringRef )
         {
             if ( comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability )
             {

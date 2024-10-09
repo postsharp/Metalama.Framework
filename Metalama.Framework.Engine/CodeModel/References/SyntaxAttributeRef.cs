@@ -18,7 +18,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
     private readonly AttributeSyntax _attributeSyntax;
 
     public SyntaxAttributeRef(
-        IRef<INamedType> attributeType,
+        IFullRef<INamedType> attributeType,
         AttributeSyntax attributeSyntax,
         SyntaxNode declaration,
         CompilationContext compilationContext,
@@ -31,7 +31,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
     }
 
     public SyntaxAttributeRef(
-        IRef<INamedType> attributeType,
+        IFullRef<INamedType> attributeType,
         AttributeSyntax attributeSyntax,
         ISymbol symbol,
         CompilationContext compilationContext ) : base(

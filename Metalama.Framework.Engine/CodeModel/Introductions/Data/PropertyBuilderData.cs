@@ -41,6 +41,8 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     public override MethodBuilderData? SetMethod { get; }
 
+    public IFullRef<IField>? OriginalField { get; }
+
     public bool IsRequired { get; }
 
     private readonly object? _originalField; // Can be an IFieldSymbol or a FieldBuilderData.
@@ -55,12 +57,14 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         this.InitializerTemplate = builder.InitializerTemplate;
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
         this.IsRequired = builder.IsRequired;
+        this.OriginalField = builder.OriginalField?.ToFullRef();
 
         if ( builder.OriginalField != null )
         {
             Invariant.Assert( builder.OriginalField.GenericContext.IsEmptyOrIdentity );
+            Invariant.Assert( builder is PromotedFieldBuilder );
 
-            this._originalField = builder.OriginalField switch
+            this._originalField = ((PromotedFieldBuilder) builder).OriginalSourceFieldOrBuiltField switch
             {
                 Field sourceField => sourceField.Symbol,
                 BuiltField builtField => builtField.FieldBuilderData,
@@ -97,7 +101,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
     public IField GetOriginalField( CompilationModel compilation, GenericContext genericContext )
         => this._originalField switch
         {
-            IFieldSymbol fieldSymbol => compilation.Factory.GetField( fieldSymbol ),
+            IFieldSymbol fieldSymbol => compilation.Factory.GetField( fieldSymbol, genericContext ),
             FieldBuilderData fieldBuilderData => compilation.Factory.GetField( fieldBuilderData, genericContext ),
             _ => throw new AssertionFailedException()
         };

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -245,7 +246,7 @@ class C
 
         var interfaceType = initialCompilation.Types.OfName( "I" ).Single();
 
-        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToFullRef(), interfaceType.ToFullRef(), [] );
+        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToFullRef<INamedType>(), interfaceType.ToFullRef(), [] );
 
         var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
             [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface],

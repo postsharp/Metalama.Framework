@@ -14,9 +14,34 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 public static class RefExtensions
 {
-    internal static IFullRef<T> ToFullRef<T>( this T compilationElement )
-        where T : class, IDeclaration
-        => (IFullRef<T>) compilationElement.ToRef();
+    internal static IFullRef<INamedType> ToFullRef( this INamedType declaration ) => (IFullRef<INamedType>) declaration.ToRef();
+
+    internal static IFullRef<IMethod> ToFullRef( this IMethod declaration ) => (IFullRef<IMethod>) declaration.ToRef();
+
+    internal static IFullRef<IField> ToFullRef( this IField declaration ) => (IFullRef<IField>) declaration.ToRef();
+
+    internal static IFullRef<IProperty> ToFullRef( this IProperty declaration ) => (IFullRef<IProperty>) declaration.ToRef();
+
+    internal static IFullRef<IIndexer> ToFullRef( this IIndexer declaration ) => (IFullRef<IIndexer>) declaration.ToRef();
+
+    internal static IFullRef<INamespace> ToFullRef( this INamespace declaration ) => (IFullRef<INamespace>) declaration.ToRef();
+
+    internal static IFullRef<IMember> ToFullRef( this IMember declaration ) => (IFullRef<IMember>) declaration.ToRef();
+
+    internal static IFullRef<IParameter> ToFullRef( this IParameter declaration ) => (IFullRef<IParameter>) declaration.ToRef();
+
+    internal static IFullRef<ITypeParameter> ToFullRef( this ITypeParameter declaration ) => (IFullRef<ITypeParameter>) declaration.ToRef();
+
+    internal static IFullRef<IType> ToFullRef( this IType declaration ) => (IFullRef<IType>) declaration.ToRef();
+
+    internal static IFullRef<IDeclaration> ToFullRef( this IDeclaration declaration ) => (IFullRef<IDeclaration>) declaration.ToRef();
+
+    internal static IFullRef<IConstructor> ToFullRef( this IConstructor declaration ) => (IFullRef<IConstructor>) declaration.ToRef();
+
+    internal static IFullRef<IEvent> ToFullRef( this IEvent declaration ) => (IFullRef<IEvent>) declaration.ToRef();
+
+    internal static IFullRef<INamespaceOrNamedType> ToFullRef( this INamespaceOrNamedType declaration )
+        => (IFullRef<INamespaceOrNamedType>) declaration.ToRef();
 
     internal static IFullRef<T> ToFullRef<T>( this IDeclaration compilationElement )
         where T : class, IDeclaration
@@ -27,6 +52,13 @@ public static class RefExtensions
     internal static IFullRef<T> AsFullRef<T>( this IRef<T> reference )
         where T : class, ICompilationElement
         => (IFullRef<T>) reference;
+
+    /// <summary>
+    /// Converts an <see cref="IDurableRef"/> to a <see cref="IFullRef{T}"/> given a <see cref="CompilationContext"/>.
+    /// </summary>
+    internal static IFullRef<T> ToFullRef<T>( this IRef<T> reference, CompilationContext compilationContext )
+        where T : class, ICompilationElement
+        => reference as IFullRef<T> ?? (IFullRef<T>) ((IDurableRef) reference).ToFullRef( compilationContext );
 
     internal static IFullRef<T> AsFullRef<T>( this IRef reference )
         where T : class, ICompilationElement
