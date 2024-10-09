@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
@@ -55,7 +56,9 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
 
     IMember IMember.Definition => this;
 
-    IRef<IMember> IMember.ToRef() => throw new NotSupportedException();
+    IRef<IMember> IMember.ToRef() => this.ToMemberFullRef();
+
+    protected abstract IFullRef<IMember> ToMemberFullRef();
 
     public bool HasImplementation => true;
 

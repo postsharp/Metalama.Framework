@@ -178,6 +178,8 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     public new IRef<IMethod> ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     [Memo]

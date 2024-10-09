@@ -34,7 +34,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 
     protected override MemberBuilderData MemberBuilder => this.EventBuilder;
 
-    public override bool IsExplicitInterfaceImplementation => throw new NotImplementedException();
+    public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     [Memo]
     public INamedType Type => this.MapDeclaration( this.EventBuilder.Type );

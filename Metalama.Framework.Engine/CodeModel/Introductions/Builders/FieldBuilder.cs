@@ -69,6 +69,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Immutable.ToRef();

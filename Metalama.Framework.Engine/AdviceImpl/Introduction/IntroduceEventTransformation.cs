@@ -27,7 +27,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-        var eventBuilder = this.BuilderData.ToRef().GetTarget();
+        var eventBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
 
         _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
             eventBuilder,

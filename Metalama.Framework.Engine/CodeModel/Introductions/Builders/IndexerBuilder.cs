@@ -130,6 +130,8 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public new IRef<IIndexer> ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     [Memo]

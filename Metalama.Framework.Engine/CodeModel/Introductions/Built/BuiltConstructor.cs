@@ -35,7 +35,7 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     protected override MemberBuilderData MemberBuilder => this._constructorBuilder;
 
-    public override bool IsExplicitInterfaceImplementation => throw new NotImplementedException();
+    public override bool IsExplicitInterfaceImplementation => false;
 
     [Memo]
     public IParameterList Parameters

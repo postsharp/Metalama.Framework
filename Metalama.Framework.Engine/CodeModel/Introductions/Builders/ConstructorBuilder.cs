@@ -93,6 +93,8 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public new IRef<IConstructor> ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );

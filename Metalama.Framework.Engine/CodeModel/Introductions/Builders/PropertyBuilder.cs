@@ -144,6 +144,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     IRef<IProperty> IProperty.ToRef() => this.Immutable.ToRef();
 
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
