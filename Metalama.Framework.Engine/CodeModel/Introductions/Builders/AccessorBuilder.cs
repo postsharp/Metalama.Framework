@@ -160,6 +160,13 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
                 throw new InvalidOperationException( $"Cannot change event accessor accessibility." );
             }
 
+            if ( value == Accessibility.Undefined )
+            {
+                this._accessibility = null;
+
+                return;
+            }
+
             if ( !value.IsSubsetOrEqual( propertyBuilder.Accessibility ) )
             {
                 throw new InvalidOperationException(
