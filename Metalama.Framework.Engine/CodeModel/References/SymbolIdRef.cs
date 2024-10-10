@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class SymbolIdRef<T> : DurableRef<T>
+internal sealed class SymbolIdRef<T> : DurableRef<T>
     where T : class, ICompilationElement
 {
     private SymbolIdRef( string id ) : base( id ) { }
@@ -16,7 +16,10 @@ internal class SymbolIdRef<T> : DurableRef<T>
     public SymbolIdRef( in SymbolId id ) : base( id.Id ) { }
 
     public override SerializableDeclarationId ToSerializableId()
-        => throw new NotSupportedException( "The durable reference must be first resolved to a full reference." );
+        => throw new NotSupportedException( "Supply the CompilationContext argument for a SymbolIdRef." );
+
+    public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext )
+        => this.GetSymbol( compilationContext ).GetSerializableId( this.TargetKind );
 
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => new SymbolId( this.Id ).Resolve( compilationContext.Compilation, ignoreAssemblyKey ).AssertSymbolNotNull();

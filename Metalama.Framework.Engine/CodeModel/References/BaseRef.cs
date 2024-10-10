@@ -29,6 +29,8 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
     public virtual RefTargetKind TargetKind => RefTargetKind.Default;
 
     public abstract SerializableDeclarationId ToSerializableId();
+    
+    public virtual SerializableDeclarationId ToSerializableId( CompilationContext compilationContext ) => this.ToSerializableId();
 
     public abstract IDurableRef<T> ToDurable();
 

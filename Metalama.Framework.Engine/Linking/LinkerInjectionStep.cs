@@ -76,7 +76,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new( RefEqualityComparer<IMember>.Default );
 
-        var existingSyntaxTrees = input.CompilationModel.PartialCompilation.SyntaxTrees.Values.ToHashSet();
+        var existingSyntaxTrees = input.CompilationModel.PartialCompilation.SyntaxTrees;
 
         void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ISyntaxTreeTransformation> transformationGroup )
         {
@@ -294,7 +294,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // intermediate registry needs to create a map of transformation target syntax tree to modified syntax tree.
         var compilationWithIntroducedTrees =
             input.CompilationModel.PartialCompilation.Update(
-                transformationCollection.IntroducedSyntaxTrees.Select( SyntaxTreeTransformation.AddTree ).ToReadOnlyList() );
+                transformationCollection.IntroducedSyntaxTrees.SelectAsArray( SyntaxTreeTransformation.AddTree ) );
 
         // Update the syntax trees and create a new partial compilation.
         var transformations = new ConcurrentQueue<SyntaxTreeTransformation>();
@@ -398,7 +398,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     }
 
     private static void IndexIntroduceDeclarationTransformation(
-        HashSet<SyntaxTree> existingSyntaxTrees,
+        ImmutableDictionary<string, SyntaxTree> existingSyntaxTrees,
         ISyntaxTreeTransformation transformation,
         TransformationCollection transformationCollection )
     {
@@ -408,7 +408,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 introduceDeclarationTransformation.DeclarationBuilderData,
                 introduceDeclarationTransformation );
 
-            if ( !existingSyntaxTrees.Contains( transformation.TransformedSyntaxTree ) )
+            if ( !existingSyntaxTrees.ContainsKey( transformation.TransformedSyntaxTree.FilePath ) )
             {
                 transformationCollection.AddIntroducedSyntaxTree( transformation.TransformedSyntaxTree );
             }
@@ -869,6 +869,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         IFullRef<IMember> member,
         InsertStatementTransformationContextImpl insertStatementContext )
         => insertStatementContext.WasUsedForOutputContracts
-           || member is IFullRef<IFieldOrProperty> { Definition.IsAutoPropertyOrField: true } || (member is IFullRef<IMethod> { Definition: { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } } or
-                                                                                                      { IsPartial: true, HasImplementation: false } } && insertStatementContext.WasUsedForInputContracts);
+           || member is IFullRef<IFieldOrProperty> { Definition.IsAutoPropertyOrField: true } || (member is IFullRef<IMethod>
+           {
+               Definition: { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } } or
+               { IsPartial: true, HasImplementation: false }
+           } && insertStatementContext.WasUsedForInputContracts);
 }

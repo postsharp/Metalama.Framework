@@ -55,7 +55,7 @@ internal sealed partial class LinkerInjectionStep
 
         private readonly HashSet<ITransformation> _transformationsCausingAuxiliaryOverrides;
 
-        private readonly HashSet<SyntaxTree> _introducedSyntaxTrees;
+        private readonly Dictionary<string,SyntaxTree> _introducedSyntaxTrees;
         private readonly InjectedMemberComparer _injectedMemberComparer;
 
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
@@ -71,7 +71,7 @@ internal sealed partial class LinkerInjectionStep
         public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
 
         // ReSharper disable once InconsistentlySynchronizedField
-        public ISet<SyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees;
+        public IReadOnlyCollection<SyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees.Values;
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
@@ -653,9 +653,21 @@ internal sealed partial class LinkerInjectionStep
 
         public void AddIntroducedSyntaxTree( SyntaxTree transformedSyntaxTree )
         {
+            // HACK: When dependencies are incorrectly computed, the partial compilation may fail to contain all observed syntax trees.
+            // In this case, there will be an attempt to add an existing syntax tree to the compilation. Here we work around this issue,
+            // however the problem is upstream. Even if we solve the issue, it may be good to be tolerant of upstream bugs in this code.
+
+            if ( this._finalCompilationModel.RoslynCompilation.GetIndexedSyntaxTrees().ContainsKey( transformedSyntaxTree.FilePath ) )
+            {
+                return;
+            }
+                
             lock ( this._introducedSyntaxTrees )
             {
-                this._introducedSyntaxTrees.Add( transformedSyntaxTree );
+                var added = this._introducedSyntaxTrees.TryAdd( transformedSyntaxTree.FilePath, transformedSyntaxTree );
+
+                // If the tree was not added, check that it was identically the same as the existing one with the same path.
+                Invariant.Assert( added || this._introducedSyntaxTrees[transformedSyntaxTree.FilePath] == transformedSyntaxTree );
             }
         }
     }
