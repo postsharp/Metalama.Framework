@@ -175,6 +175,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
                                 .Select( m => m.Syntax );
 
+                            // We don't need to add introduced parameters because the transformation already added them.
+                            /*
                             if ( injectMemberTransformation is IIntroduceDeclarationTransformation
                                 {
                                     DeclarationBuilderData: ConstructorBuilderData constructorBuilder
@@ -186,6 +188,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                     finalCompilationModel,
                                     syntaxGenerationContext );
                             }
+                            */
 
                             if ( injectMemberTransformation is IIntroduceDeclarationTransformation { DeclarationBuilderData: NamedTypeBuilderData } )
                             {
@@ -244,7 +247,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 // Choose the best syntax tree
                 var originalSyntaxTree = ((IDeclarationImpl) declaringType).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
                     .OrderBy( s => s.FilePath.Length )
-                    .First();
+                    .FirstOrDefault();
 
                 var compilationUnit = CompilationUnit()
                     .WithMembers( SingletonList( AddHeader( topDeclaration ) ) );

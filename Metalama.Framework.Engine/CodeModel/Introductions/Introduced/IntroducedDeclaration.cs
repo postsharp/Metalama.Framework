@@ -69,7 +69,7 @@ internal abstract class IntroducedDeclaration : BaseDeclaration
     [Memo]
     public override IDeclaration ContainingDeclaration => this.MapDeclaration( this.BuilderData.ContainingDeclaration );
 
-    public sealed override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration.GetPrimarySyntaxTree();
+    public sealed override SyntaxTree? PrimarySyntaxTree => this.BuilderData.PrimarySyntaxTree;
 
     [Memo]
     public override IAttributeCollection Attributes => this.GetAttributes();

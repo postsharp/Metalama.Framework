@@ -29,6 +29,7 @@ internal abstract class DeclarationBuilderData
     protected DeclarationBuilderData( IDeclarationBuilderImpl builder, IFullRef<IDeclaration> containingDeclaration )
     {
         Invariant.Assert( builder.IsFrozen );
+        Invariant.Assert( builder.DeclarationKind == DeclarationKind.Namespace || builder.PrimarySyntaxTree != null );
 
         this.ParentAdvice = builder.AspectLayerInstance;
         this.ContainingDeclaration = containingDeclaration;
