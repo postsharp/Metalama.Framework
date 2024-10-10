@@ -10,7 +10,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 {
     private readonly BuiltDeclarationRef<IParameter> _ref;
 
-    public string? Name { get; }
+    public string Name { get; }
 
     public IRef<IType> Type { get; }
 

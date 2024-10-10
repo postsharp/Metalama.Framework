@@ -15,25 +15,25 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
 {
     protected BuiltPropertyOrIndexer( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
-    protected abstract PropertyOrIndexerBuilderData PropertyOrIndexerBuilder { get; }
+    protected abstract PropertyOrIndexerBuilderData PropertyOrIndexerBuilderData { get; }
 
-    public RefKind RefKind => this.PropertyOrIndexerBuilder.RefKind;
+    public RefKind RefKind => this.PropertyOrIndexerBuilderData.RefKind;
 
-    public Writeability Writeability => this.PropertyOrIndexerBuilder.Writeability;
+    public Writeability Writeability => this.PropertyOrIndexerBuilderData.Writeability;
 
     [Memo]
-    public IType Type => this.MapType( this.PropertyOrIndexerBuilder.Type ).AssertNotNull();
+    public IType Type => this.MapType( this.PropertyOrIndexerBuilderData.Type ).AssertNotNull();
 
     [Memo]
     public IMethod? GetMethod
-        => this.PropertyOrIndexerBuilder.GetMethod != null
-            ? new BuiltAccessor( this, this.PropertyOrIndexerBuilder.GetMethod )
+        => this.PropertyOrIndexerBuilderData.GetMethod != null
+            ? new BuiltAccessor( this, this.PropertyOrIndexerBuilderData.GetMethod )
             : null;
 
     [Memo]
     public IMethod? SetMethod
-        => this.PropertyOrIndexerBuilder.SetMethod != null
-            ? new BuiltAccessor( this, this.PropertyOrIndexerBuilder.SetMethod )
+        => this.PropertyOrIndexerBuilderData.SetMethod != null
+            ? new BuiltAccessor( this, this.PropertyOrIndexerBuilderData.SetMethod )
             : null;
 
     IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.ToFullDeclarationRef().As<IFieldOrPropertyOrIndexer>();

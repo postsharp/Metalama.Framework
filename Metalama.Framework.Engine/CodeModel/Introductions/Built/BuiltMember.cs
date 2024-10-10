@@ -14,24 +14,24 @@ internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
 {
     protected BuiltMember( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
-    protected abstract MemberBuilderData MemberBuilder { get; }
+    protected abstract MemberBuilderData MemberBuilderData { get; }
 
     public abstract bool IsExplicitInterfaceImplementation { get; }
 
     public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
-    public bool IsVirtual => this.MemberBuilder.IsVirtual;
+    public bool IsVirtual => this.MemberBuilderData.IsVirtual;
 
-    public bool IsAsync => this.MemberBuilder.IsAsync;
+    public bool IsAsync => this.MemberBuilderData.IsAsync;
 
-    public bool IsOverride => this.MemberBuilder.IsOverride;
+    public bool IsOverride => this.MemberBuilderData.IsOverride;
 
     public bool HasImplementation => !this.IsAbstract; // TODO - partials?
 
     public sealed override bool CanBeInherited => (this.IsAbstract || this.IsVirtual || this.IsOverride) && !this.IsSealed;
 
     [Memo]
-    public IMember? OverriddenMember => this.MapDeclaration( this.MemberBuilder.OverriddenMember );
+    public IMember? OverriddenMember => this.MapDeclaration( this.MemberBuilderData.OverriddenMember );
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
     {

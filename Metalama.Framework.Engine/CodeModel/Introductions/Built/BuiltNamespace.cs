@@ -13,16 +13,16 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 {
-    private readonly NamespaceBuilderData _namedDeclarationBuilder;
+    private readonly NamespaceBuilderData _namedDeclarationBuilderData;
 
-    public BuiltNamespace( NamespaceBuilderData builder, CompilationModel compilation ) : base( compilation, GenericContext.Empty )
+    public BuiltNamespace( NamespaceBuilderData builderData, CompilationModel compilation ) : base( compilation, GenericContext.Empty )
     {
-        this._namedDeclarationBuilder = builder;
+        this._namedDeclarationBuilderData = builderData;
     }
 
-    public override DeclarationBuilderData BuilderData => this.NamedDeclarationBuilder;
+    public override DeclarationBuilderData BuilderData => this.NamedDeclarationBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._namedDeclarationBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this._namedDeclarationBuilderData;
 
     [Memo]
     public string FullName => this.ContainingNamespace.IsGlobalNamespace ? this.Name : this.ContainingNamespace.FullName + "." + this.Name;
@@ -30,7 +30,7 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
     public bool IsGlobalNamespace => false;
 
     [Memo]
-    public INamespace ContainingNamespace => this.MapDeclaration( this.NamedDeclarationBuilder.ContainingDeclaration.As<INamespace>() );
+    public INamespace ContainingNamespace => this.MapDeclaration( this.NamedDeclarationBuilderData.ContainingDeclaration.As<INamespace>() );
 
     [Memo]
     private IFullRef<INamespace> Ref => this.RefFactory.FromBuilt<INamespace>( this );
@@ -46,12 +46,12 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollectionByParent( this._namedDeclarationBuilder.ToRef() ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this._namedDeclarationBuilderData.ToRef() ) );
 
     public INamespaceCollection Namespaces
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this.NamedDeclarationBuilder.ToRef().As<INamespace>() ) );
+            this.Compilation.GetNamespaceCollection( this.NamedDeclarationBuilderData.ToRef().As<INamespace>() ) );
 
     public bool IsPartial
     {

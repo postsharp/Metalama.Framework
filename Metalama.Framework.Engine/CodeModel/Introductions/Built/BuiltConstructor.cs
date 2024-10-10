@@ -17,22 +17,22 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 {
-    private readonly ConstructorBuilderData _constructorBuilder;
+    private readonly ConstructorBuilderData _builderData;
 
-    public BuiltConstructor( ConstructorBuilderData constructorBuilder, CompilationModel compilation, IGenericContext genericContext ) : base(
+    public BuiltConstructor( ConstructorBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base(
         compilation,
         genericContext )
     {
-        this._constructorBuilder = constructorBuilder;
+        this._builderData = builderData;
     }
 
-    public override DeclarationBuilderData BuilderData => this._constructorBuilder;
+    public override DeclarationBuilderData BuilderData => this._builderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._constructorBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this._builderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._constructorBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData => this._builderData;
 
-    protected override MemberBuilderData MemberBuilder => this._constructorBuilder;
+    protected override MemberBuilderData MemberBuilderData => this._builderData;
 
     public override bool IsExplicitInterfaceImplementation => false;
 
@@ -40,7 +40,7 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.Compilation.GetParameterCollection( this._constructorBuilder.ToRef() ) );
+            this.Compilation.GetParameterCollection( this._builderData.ToRef() ) );
 
     public MethodBase ToMethodBase() => this.ToConstructorInfo();
 
@@ -50,21 +50,21 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     [Memo]
     private IFullRef<IConstructor> Ref
-        => this._constructorBuilder.ReplacedImplicitConstructor?.WithGenericContext( this.GenericContext )
+        => this._builderData.ReplacedImplicitConstructor?.WithGenericContext( this.GenericContext )
            ?? this.RefFactory.FromBuilt<IConstructor>( this );
 
     public IRef<IConstructor> ToRef() => this.Ref;
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
-    public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
+    public ConstructorInitializerKind InitializerKind => this._builderData.InitializerKind;
 
     bool IConstructor.IsPrimary => false;
 
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
     [Memo]
-    public IConstructor Definition => this.Compilation.Factory.GetConstructor( this._constructorBuilder ).AssertNotNull();
+    public IConstructor Definition => this.Compilation.Factory.GetConstructor( this._builderData ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 

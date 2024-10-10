@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -31,38 +30,73 @@ internal interface IFullRef : IRefImpl
 
     new IFullRef<TOut> As<TOut>()
         where TOut : class, ICompilationElement;
-
-    CompilationContext CompilationContext { get; }
-
+    
+    /// <summary>
+    /// Gets the parent factory.
+    /// </summary>
     RefFactory RefFactory { get; }
 
-    ResolvedAttributeRef GetAttributeData();
+    /// <summary>
+    /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
+    /// the code model.
+    /// </summary>
+    ResolvedAttributeRef GetAttributes();
 
+    /// <summary>
+    /// Gets a value indicating whether the current reference points to a definition, as opposed to a generic construct.
+    /// </summary>
     bool IsDefinition { get; }
 
+    /// <summary>
+    /// Enumerates all attributes declared in source code or in the builder, but not introduced attributes.
+    /// </summary>
     void EnumerateAttributes( CompilationModel compilation, Action<AttributeRef> add );
 
+    /// <summary>
+    /// Enumerates all interfaces implemented in source code or in the builder, but not introduced interfaces. Only for named types.
+    /// </summary>
     void EnumerateAllImplementedInterfaces( CompilationModel compilation, Action<IFullRef<INamedType>> add );
 
+    /// <summary>
+    /// Enumerates all interfaces implemented in source code or in the builder, but not introduced interfaces. Only for named types.
+    /// </summary>
     void EnumerateImplementedInterfaces( CompilationModel compilation, Action<IFullRef<INamedType>> add );
 
+    /// <summary>
+    /// Gets all members of a given name declared in source code (but not introduced ones). For builders, this returns an empty collection.
+    /// </summary>
     IEnumerable<IFullRef> GetMembersOfName( string name, DeclarationKind kind, CompilationModel compilation );
 
+    /// <summary>
+    /// Gets all members declared in source code (but not introduced ones). For builders, this returns an empty collection.
+    /// </summary>
     IEnumerable<IFullRef> GetMembers( DeclarationKind kind, CompilationModel compilation );
 }
 
 internal interface IFullRef<out T> : IFullRef, IRef<T>
     where T : class, ICompilationElement
 {
+    /// <summary>
+    /// Gets a reference to the generic definition.
+    /// </summary>
     IFullRef<T> DefinitionRef { get; }
 
+    /// <summary>
+    /// Gets a reference with a generic context, i.e. assigning type parameters.
+    /// </summary>
+    /// <param name="genericContext"></param>
+    /// <returns></returns>
     IFullRef<T> WithGenericContext( GenericContext genericContext );
 
     /// <summary>
     /// Gets the <see cref="IDeclaration"/> in the canonical <see cref="CompilationModel"/> of the current <see cref="RefFactory"/>.
-    /// Try to use this property instead of <see cref="Declaration"/> when the generic context does not matter.
+    /// Try to use this property instead of <see cref="ConstructedDeclaration"/> when the generic context does not matter.
     /// </summary>
     T Definition { get; }
     
-    T Declaration { get; }
+    /// <summary>
+    /// Gets the <see cref="IDeclaration"/> in the canonical <see cref="CompilationModel"/> of the current <see cref="RefFactory"/>,
+    /// constructed for the <see cref="GenericContext"/>. Use the <see cref="Definition"/> whenever possible to avoid allocating too many instances.
+    /// </summary>
+    T ConstructedDeclaration { get; }
 }

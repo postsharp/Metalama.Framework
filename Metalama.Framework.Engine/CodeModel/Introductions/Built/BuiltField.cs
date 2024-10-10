@@ -31,11 +31,11 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
 
     public override DeclarationBuilderData BuilderData => this.FieldBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.FieldBuilderData;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this.FieldBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.FieldBuilderData;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData => this.FieldBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this.FieldBuilderData;
+    protected override MemberBuilderData MemberBuilderData => this.FieldBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => false;
 

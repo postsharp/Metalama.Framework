@@ -9,7 +9,7 @@ internal abstract class BuiltNamedDeclaration : BuiltDeclaration, INamedDeclarat
 {
     protected BuiltNamedDeclaration( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
-    protected abstract NamedDeclarationBuilderData NamedDeclarationBuilder { get; }
+    protected abstract NamedDeclarationBuilderData NamedDeclarationBuilderData { get; }
 
-    public string Name => this.NamedDeclarationBuilder.Name;
+    public string Name => this.NamedDeclarationBuilderData.Name;
 }

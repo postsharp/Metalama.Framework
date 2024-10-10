@@ -44,7 +44,7 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
         {
             if ( this.IsDefinition )
             {
-                return this.Declaration;
+                return this.ConstructedDeclaration;
             }
             else
             {
@@ -62,17 +62,13 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
     }
 
     [Memo]
-    public T Declaration => this.GetTarget( this.RefFactory.CanonicalCompilation );
+    public T ConstructedDeclaration => this.GetTarget( this.RefFactory.CanonicalCompilation );
 
     public abstract FullRef<T> WithGenericContext( GenericContext genericContext );
 
     public RefFactory RefFactory { get; }
-
-    /// <summary>
-    /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
-    /// the code model.
-    /// </summary>
-    public ResolvedAttributeRef GetAttributeData()
+    
+    public ResolvedAttributeRef GetAttributes()
     {
         switch ( this.TargetKind )
         {

@@ -32,9 +32,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public override DeclarationBuilderData BuilderData => this.NamedTypeBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.NamedTypeBuilderData;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData => this.NamedTypeBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.NamedTypeBuilderData;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this.NamedTypeBuilderData;
 
     public bool HasDefaultConstructor => true; // TODO
 

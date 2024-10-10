@@ -15,17 +15,17 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 {
-    private readonly AttributeBuilderData _attributeBuilder;
+    private readonly AttributeBuilderData _builderDataData;
 
     public BuiltAttribute( AttributeBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
-        this._attributeBuilder = builder;
+        this._builderDataData = builder;
     }
 
     IDeclaration IAttribute.ContainingDeclaration => this.ContainingDeclaration.AssertNotNull();
 
     [Memo]
-    private AttributeRef Ref => this._attributeBuilder.ToRef();
+    private AttributeRef Ref => this._builderDataData.ToRef();
 
     public IRef<IAttribute> ToRef() => this.Ref;
 
@@ -33,30 +33,30 @@ internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
 
     private protected override IRef<IDeclaration> ToDeclarationRef() => this.Ref;
 
-    public override DeclarationBuilderData BuilderData => this._attributeBuilder;
+    public override DeclarationBuilderData BuilderData => this._builderDataData;
 
     [Memo]
     public INamedType Type => this.Constructor.DeclaringType;
 
     [Memo]
-    public IConstructor Constructor => this.MapDeclaration( this._attributeBuilder.Constructor ).AssertNotNull();
+    public IConstructor Constructor => this.MapDeclaration( this._builderDataData.Constructor ).AssertNotNull();
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments
-        => this._attributeBuilder.ConstructorArguments.Select( a => a.ForCompilation( this.Compilation ) )
+        => this._builderDataData.ConstructorArguments.Select( a => a.ForCompilation( this.Compilation ) )
             .ToImmutableArray();
 
     [Memo]
     public INamedArgumentList NamedArguments
         => new NamedArgumentList(
-            this._attributeBuilder.NamedArguments.SelectAsArray(
+            this._builderDataData.NamedArguments.SelectAsArray(
                 a => new KeyValuePair<string, TypedConstant>(
                     a.Key,
                     a.Value.ForCompilation( this.Compilation ) ) ) );
 
     int IAspectPredecessor.PredecessorDegree => 0;
 
-    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this._attributeBuilder.ContainingDeclaration;
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this._builderDataData.ContainingDeclaration;
 
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 

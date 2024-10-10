@@ -19,20 +19,20 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 {
-    private readonly MethodBuilderData _methodBuilder;
+    private readonly MethodBuilderData _methodBuilderData;
 
-    public BuiltMethod( MethodBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltMethod( MethodBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
-        this._methodBuilder = builder;
+        this._methodBuilderData = builderData;
     }
 
-    public override DeclarationBuilderData BuilderData => this._methodBuilder;
+    public override DeclarationBuilderData BuilderData => this._methodBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._methodBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this._methodBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._methodBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData => this._methodBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this._methodBuilder;
+    protected override MemberBuilderData MemberBuilderData => this._methodBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
@@ -40,18 +40,18 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.Compilation.GetParameterCollection( this._methodBuilder.ToRef() ) );
+            this.Compilation.GetParameterCollection( this._methodBuilderData.ToRef() ) );
 
-    public MethodKind MethodKind => this._methodBuilder.MethodKind;
+    public MethodKind MethodKind => this._methodBuilderData.MethodKind;
 
-    public OperatorKind OperatorKind => this._methodBuilder.OperatorKind;
+    public OperatorKind OperatorKind => this._methodBuilderData.OperatorKind;
 
-    public bool IsReadOnly => this._methodBuilder.IsReadOnly;
+    public bool IsReadOnly => this._methodBuilderData.IsReadOnly;
 
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => this._methodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
+        => this._methodBuilderData.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
@@ -71,30 +71,30 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );
+    public IParameter ReturnParameter => new BuiltParameter( this._methodBuilderData.ReturnParameter, this.Compilation, this.GenericContext, this );
 
     [Memo]
-    public IType ReturnType => this.MapType( this._methodBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.MapType( this._methodBuilderData.ReturnParameter.Type );
 
     [Memo]
     public ITypeParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this._methodBuilder.TypeParameters.Select( x => this.RefFactory.FromBuilderData<ITypeParameter>( x ) ).ToReadOnlyList() );
+            this._methodBuilderData.TypeParameters.Select( x => this.RefFactory.FromBuilderData<ITypeParameter>( x ) ).ToReadOnlyList() );
 
     public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
-    public bool IsGeneric => !this._methodBuilder.TypeParameters.IsEmpty;
+    public bool IsGeneric => !this._methodBuilderData.TypeParameters.IsEmpty;
 
     public bool IsCanonicalGenericInstance => throw new NotImplementedException();
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
     [Memo]
-    public IMethod? OverriddenMethod => this.MapDeclaration( this._methodBuilder.OverriddenMethod );
+    public IMethod? OverriddenMethod => this.MapDeclaration( this._methodBuilderData.OverriddenMethod );
 
     [Memo]
-    public IMethod Definition => this.Compilation.Factory.GetMethod( this._methodBuilder ).AssertNotNull();
+    public IMethod Definition => this.Compilation.Factory.GetMethod( this._methodBuilderData ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
@@ -112,5 +112,5 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
-    public bool? IsIteratorMethod => this._methodBuilder.IsIteratorMethod;
+    public bool? IsIteratorMethod => this._methodBuilderData.IsIteratorMethod;
 }

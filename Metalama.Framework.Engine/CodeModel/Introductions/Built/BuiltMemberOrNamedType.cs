@@ -13,24 +13,24 @@ internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberO
 {
     protected BuiltMemberOrNamedType( CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext ) { }
 
-    protected abstract MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder { get; }
+    protected abstract MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData { get; }
 
-    public Accessibility Accessibility => this.MemberOrNamedTypeBuilder.Accessibility;
+    public Accessibility Accessibility => this.MemberOrNamedTypeBuilderData.Accessibility;
 
-    public bool IsAbstract => this.MemberOrNamedTypeBuilder.IsAbstract;
+    public bool IsAbstract => this.MemberOrNamedTypeBuilderData.IsAbstract;
 
-    public bool IsStatic => this.MemberOrNamedTypeBuilder.IsStatic;
+    public bool IsStatic => this.MemberOrNamedTypeBuilderData.IsStatic;
 
-    public bool IsSealed => this.MemberOrNamedTypeBuilder.IsSealed;
+    public bool IsSealed => this.MemberOrNamedTypeBuilderData.IsSealed;
 
-    public bool IsNew => this.MemberOrNamedTypeBuilder.IsNew;
+    public bool IsNew => this.MemberOrNamedTypeBuilderData.IsNew;
 
-    public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
+    public bool? HasNewKeyword => this.MemberOrNamedTypeBuilderData.HasNewKeyword;
 
-    public bool IsPartial => this.MemberOrNamedTypeBuilder.IsPartial;
+    public bool IsPartial => this.MemberOrNamedTypeBuilderData.IsPartial;
 
     [Memo]
-    public INamedType? DeclaringType => this.MapDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );
+    public INamedType? DeclaringType => this.MapDeclaration( this.MemberOrNamedTypeBuilderData.DeclaringType );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 

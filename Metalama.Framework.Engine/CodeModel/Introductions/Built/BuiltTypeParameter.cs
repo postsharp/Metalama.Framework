@@ -13,16 +13,16 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 {
-    private readonly TypeParameterBuilderData _typeParameterBuilder;
+    private readonly TypeParameterBuilderData _typeParameterBuilderData;
 
     public BuiltTypeParameter( TypeParameterBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base(
         compilation,
         genericContext )
     {
-        this._typeParameterBuilder = builder;
+        this._typeParameterBuilderData = builder;
     }
 
-    public override DeclarationBuilderData BuilderData => this._typeParameterBuilder;
+    public override DeclarationBuilderData BuilderData => this._typeParameterBuilderData;
 
     public TypeKind TypeKind => TypeKind.TypeParameter;
 
@@ -30,9 +30,9 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public Type ToType() => throw new NotImplementedException();
 
-    public bool? IsReferenceType => this._typeParameterBuilder.IsReferenceType;
+    public bool? IsReferenceType => this._typeParameterBuilderData.IsReferenceType;
 
-    public bool? IsNullable => this._typeParameterBuilder.IsNullable;
+    public bool? IsNullable => this._typeParameterBuilderData.IsNullable;
 
     bool IType.Equals( SpecialType specialType ) => false;
 
@@ -41,20 +41,20 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    public string Name => this._typeParameterBuilder.Name;
+    public string Name => this._typeParameterBuilderData.Name;
 
-    public int Index => this._typeParameterBuilder.Index;
+    public int Index => this._typeParameterBuilderData.Index;
 
     [Memo]
-    public IReadOnlyList<IType> TypeConstraints => this.MapDeclarationList( this._typeParameterBuilder.TypeConstraints );
+    public IReadOnlyList<IType> TypeConstraints => this.MapDeclarationList( this._typeParameterBuilderData.TypeConstraints );
 
-    public TypeKindConstraint TypeKindConstraint => this._typeParameterBuilder.TypeKindConstraint;
+    public TypeKindConstraint TypeKindConstraint => this._typeParameterBuilderData.TypeKindConstraint;
 
-    public VarianceKind Variance => this._typeParameterBuilder.Variance;
+    public VarianceKind Variance => this._typeParameterBuilderData.Variance;
 
-    public bool? IsConstraintNullable => this._typeParameterBuilder.IsConstraintNullable;
+    public bool? IsConstraintNullable => this._typeParameterBuilderData.IsConstraintNullable;
 
-    public bool HasDefaultConstructorConstraint => this._typeParameterBuilder.HasDefaultConstructorConstraint;
+    public bool HasDefaultConstructorConstraint => this._typeParameterBuilderData.HasDefaultConstructorConstraint;
 
     private IFullRef<ITypeParameter> Ref => this.RefFactory.FromBuilt<ITypeParameter>( this );
 
@@ -69,7 +69,7 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
-    public override int GetHashCode() => this._typeParameterBuilder.GetHashCode();
+    public override int GetHashCode() => this._typeParameterBuilderData.GetHashCode();
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration.AssertNotNull()).CanBeInherited;
 

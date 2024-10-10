@@ -23,43 +23,43 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 {
     private readonly BuiltMember _builtMember;
-    private readonly MethodBuilderData _accessorBuilder;
+    private readonly MethodBuilderData _builderDataData;
 
     public BuiltAccessor( BuiltMember builtMember, MethodBuilderData builder ) : base( builtMember.Compilation, builtMember.GenericContext )
     {
         this._builtMember = builtMember;
-        this._accessorBuilder = builder;
+        this._builderDataData = builder;
     }
 
-    public override DeclarationBuilderData BuilderData => this._accessorBuilder;
+    public override DeclarationBuilderData BuilderData => this._builderDataData;
 
-    public Accessibility Accessibility => this._accessorBuilder.Accessibility;
+    public Accessibility Accessibility => this._builderDataData.Accessibility;
 
-    public string Name => this._accessorBuilder.Name;
+    public string Name => this._builderDataData.Name;
 
-    public bool IsPartial => this._accessorBuilder.IsPartial;
+    public bool IsPartial => this._builderDataData.IsPartial;
 
     public bool HasImplementation => !this._builtMember.IsAbstract;
 
-    public bool IsAbstract => this._accessorBuilder.IsAbstract;
+    public bool IsAbstract => this._builderDataData.IsAbstract;
 
-    public bool IsStatic => this._accessorBuilder.IsStatic;
+    public bool IsStatic => this._builderDataData.IsStatic;
 
-    public bool IsVirtual => this._accessorBuilder.IsVirtual;
+    public bool IsVirtual => this._builderDataData.IsVirtual;
 
-    public bool IsSealed => this._accessorBuilder.IsSealed;
+    public bool IsSealed => this._builderDataData.IsSealed;
 
-    public bool IsReadOnly => this._accessorBuilder.IsReadOnly;
+    public bool IsReadOnly => this._builderDataData.IsReadOnly;
 
-    public bool IsOverride => this._accessorBuilder.IsOverride;
+    public bool IsOverride => this._builderDataData.IsOverride;
 
     public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-    public bool IsNew => this._accessorBuilder.IsNew;
+    public bool IsNew => this._builderDataData.IsNew;
 
     public bool? HasNewKeyword => false;
 
-    public bool IsAsync => this._accessorBuilder.IsAsync;
+    public bool IsAsync => this._builderDataData.IsAsync;
 
     public override bool IsImplicitlyDeclared
         => this is { MethodKind: MethodKind.PropertySet, ContainingDeclaration: IProperty { Writeability: Writeability.ConstructorOnly } };
@@ -70,12 +70,12 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
             this,
             this.Compilation.GetParameterCollection( this.Ref ) );
 
-    public MethodKind MethodKind => this._accessorBuilder.MethodKind;
+    public MethodKind MethodKind => this._builderDataData.MethodKind;
 
-    public OperatorKind OperatorKind => this._accessorBuilder.OperatorKind;
+    public OperatorKind OperatorKind => this._builderDataData.OperatorKind;
 
     [Memo]
-    public IMethod Definition => this.Compilation.Factory.GetAccessor( this._accessorBuilder );
+    public IMethod Definition => this.Compilation.Factory.GetAccessor( this._builderDataData );
 
     [Memo]
     private IFullRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
@@ -109,10 +109,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
     [Memo]
-    public IParameter ReturnParameter => new BuiltParameter( this._accessorBuilder.ReturnParameter, this.Compilation, this.GenericContext, this );
+    public IParameter ReturnParameter => new BuiltParameter( this._builderDataData.ReturnParameter, this.Compilation, this.GenericContext, this );
 
     [Memo]
-    public IType ReturnType => this.MapType( this._accessorBuilder.ReturnParameter.Type );
+    public IType ReturnType => this.MapType( this._builderDataData.ReturnParameter.Type );
 
     public ITypeParameterList TypeParameters => TypeParameterList.Empty;
 
@@ -126,12 +126,12 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
         => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
     [Memo]
-    public IMethod? OverriddenMethod => this.MapDeclaration( this._accessorBuilder.OverriddenMethod );
+    public IMethod? OverriddenMethod => this.MapDeclaration( this._builderDataData.OverriddenMethod );
 
     public INamedType DeclaringType => this._builtMember.DeclaringType;
 
     [Memo]
-    public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.MapDeclarationList( this._accessorBuilder.ExplicitInterfaceImplementations );
+    public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.MapDeclarationList( this._builderDataData.ExplicitInterfaceImplementations );
 
     public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
@@ -146,9 +146,9 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
     [Memo]
-    public IMember? OverriddenMember => this.MapDeclaration( this._accessorBuilder.OverriddenMember );
+    public IMember? OverriddenMember => this.MapDeclaration( this._builderDataData.OverriddenMember );
 
-    public bool? IsIteratorMethod => this._accessorBuilder.IsIteratorMethod;
+    public bool? IsIteratorMethod => this._builderDataData.IsIteratorMethod;
 
     public override bool CanBeInherited => this._builtMember.CanBeInherited;
 

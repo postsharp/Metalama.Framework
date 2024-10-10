@@ -62,7 +62,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         }
 
         // Find the parent declaration.
-        var resolved = this.ContainingDeclaration.ToFullRef( this._refFactory ).GetAttributeData();
+        var resolved = this.ContainingDeclaration.ToFullRef( this._refFactory ).GetAttributes();
 
         // In the parent, find the AttributeData corresponding to the current item.
 

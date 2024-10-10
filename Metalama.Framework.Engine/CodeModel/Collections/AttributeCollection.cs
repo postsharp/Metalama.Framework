@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.GetItems( this.Source.Where(
                                   a =>
                                   {
-                                      var attributeType = ((AttributeRef) a).AttributeType.ToFullRef( type.GetRefFactory() ).Declaration;
+                                      var attributeType = ((AttributeRef) a).AttributeType.ToFullRef( type.GetRefFactory() ).ConstructedDeclaration;
 
                                       return attributeType.Is( type, conversionKind );
                                   } ) );

@@ -27,11 +27,11 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
 
     public override DeclarationBuilderData BuilderData => this.EventBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.EventBuilderData;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this.EventBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.EventBuilderData;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData => this.EventBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this.EventBuilderData;
+    protected override MemberBuilderData MemberBuilderData => this.EventBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 

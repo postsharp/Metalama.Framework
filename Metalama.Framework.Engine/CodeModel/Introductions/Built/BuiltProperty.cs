@@ -25,15 +25,15 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 
     public override DeclarationBuilderData BuilderData => this.PropertyBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this.PropertyBuilderData;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this.PropertyBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this.PropertyBuilderData;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData => this.PropertyBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this.PropertyBuilderData;
+    protected override MemberBuilderData MemberBuilderData => this.PropertyBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilder => this.PropertyBuilderData;
+    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilderData => this.PropertyBuilderData;
 
     public bool? IsAutoPropertyOrField => this.PropertyBuilderData.IsAutoPropertyOrField;
 

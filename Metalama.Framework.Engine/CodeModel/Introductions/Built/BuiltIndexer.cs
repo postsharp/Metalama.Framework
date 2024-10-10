@@ -16,24 +16,24 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;
 
 internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 {
-    private readonly IndexerBuilderData _indexerBuilder;
+    private readonly IndexerBuilderData _indexerBuilderData;
 
-    public BuiltIndexer( IndexerBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public BuiltIndexer( IndexerBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
     {
-        this._indexerBuilder = builder;
+        this._indexerBuilderData = builderData;
     }
 
-    public override DeclarationBuilderData BuilderData => this._indexerBuilder;
+    public override DeclarationBuilderData BuilderData => this._indexerBuilderData;
 
-    protected override NamedDeclarationBuilderData NamedDeclarationBuilder => this._indexerBuilder;
+    protected override NamedDeclarationBuilderData NamedDeclarationBuilderData => this._indexerBuilderData;
 
-    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilder => this._indexerBuilder;
+    protected override MemberOrNamedTypeBuilderData MemberOrNamedTypeBuilderData => this._indexerBuilderData;
 
-    protected override MemberBuilderData MemberBuilder => this._indexerBuilder;
+    protected override MemberBuilderData MemberBuilderData => this._indexerBuilderData;
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
-    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilder => this._indexerBuilder;
+    protected override PropertyOrIndexerBuilderData PropertyOrIndexerBuilderData => this._indexerBuilderData;
 
     [Memo]
     public IParameterList Parameters
@@ -42,10 +42,10 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
             this.Compilation.GetParameterCollection( this.Ref ) );
 
     [Memo]
-    public IIndexer? OverriddenIndexer => this.MapDeclaration( this._indexerBuilder.OverriddenIndexer );
+    public IIndexer? OverriddenIndexer => this.MapDeclaration( this._indexerBuilderData.OverriddenIndexer );
 
     [Memo]
-    public IIndexer Definition => this.Compilation.Factory.GetIndexer( this._indexerBuilder ).AssertNotNull();
+    public IIndexer Definition => this.Compilation.Factory.GetIndexer( this._indexerBuilderData ).AssertNotNull();
 
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
@@ -69,5 +69,5 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
     // TODO: When an interface is introduced, explicit implementation should appear here.
     [Memo]
     public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
-        => this._indexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
+        => this._indexerBuilderData.ExplicitInterfaceImplementations.SelectAsImmutableArray( this.MapDeclaration );
 }
