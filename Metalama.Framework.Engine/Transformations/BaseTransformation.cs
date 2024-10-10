@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Introspection;
 using System;
 
@@ -26,10 +27,12 @@ internal abstract class BaseTransformation : ITransformation
     /// </summary>
     public CompilationModel InitialCompilation => this.AspectLayerInstance.InitialCompilation;
 
+    IRef<IDeclaration> ITransformationBase.TargetDeclaration => this.TargetDeclaration;
+    
     /// <summary>
     /// Gets the declaration that is transformed, or the declaration into which a new declaration is being introduced. 
     /// </summary>
-    public abstract IRef<IDeclaration> TargetDeclaration { get; }
+    public abstract IFullRef<IDeclaration> TargetDeclaration { get; }
 
     IAspectClass ITransformationBase.AspectClass => this.AspectInstance.AspectClass;
 
@@ -45,16 +48,5 @@ internal abstract class BaseTransformation : ITransformation
 
     public abstract IntrospectionTransformationKind TransformationKind { get; }
 
-    public FormattableString? Description
-    {
-        get;
-        private set;
-    }
-
-    public void ComputeDescription( CompilationModel compilationModel )
-    {
-        this.Description = this.ToDisplayString( compilationModel );
-    }
-
-    protected abstract FormattableString ToDisplayString( CompilationModel compilation );
+    public abstract FormattableString ToDisplayString();
 }

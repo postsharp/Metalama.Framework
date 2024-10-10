@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
-    public IRef<IMember> TargetMember => this.Parameter.ContainingDeclaration.As<IMember>();
+    public IFullRef<IMember> TargetMember => this.Parameter.ContainingDeclaration.As<IMember>();
 
     public ParameterBuilderData Parameter { get; }
 
@@ -57,12 +57,11 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
         return syntax;
     }
 
-    public override IRef<IDeclaration> TargetDeclaration => this.TargetMember;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceParameter;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Introduce parameter '{this.Parameter.Name}' into '{this.Parameter.ContainingDeclaration}'.";
+    public override FormattableString ToDisplayString() => $"Introduce parameter '{this.Parameter.Name}' into '{this.Parameter.ContainingDeclaration}'.";
 }

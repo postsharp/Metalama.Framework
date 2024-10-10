@@ -57,7 +57,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         this._tags = tags;
     }
 
-    public override IRef<IDeclaration> TargetDeclaration => this.TargetMember;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public abstract IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 

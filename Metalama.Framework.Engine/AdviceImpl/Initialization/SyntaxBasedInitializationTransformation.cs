@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
@@ -49,11 +48,11 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTr
         ];
     }
 
-    public override IRef<IDeclaration> TargetDeclaration => this.TargetMember;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add a statement to '{this._targetConstructor}'.";
+    public override FormattableString ToDisplayString() => $"Add a statement to '{this._targetConstructor}'.";
 }

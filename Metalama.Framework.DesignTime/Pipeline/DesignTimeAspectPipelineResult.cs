@@ -560,16 +560,8 @@ internal sealed partial class DesignTimeAspectPipelineResult : ITransitiveAspect
 
             builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
-            string description;
-
-            if ( transformation.Description != null )
-            {
-                description = MetalamaStringFormatter.Format( transformation.Description );
-            }
-            else
-            {
-                description = transformation.ToString()!;
-            }
+            var formattable = transformation.ToDisplayString();
+            var description = formattable != null ? MetalamaStringFormatter.Format( formattable ) : transformation.ToString()!;
 
             builder.Transformations.Add(
                 new DesignTimeTransformation(

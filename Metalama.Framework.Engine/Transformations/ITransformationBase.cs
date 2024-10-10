@@ -18,5 +18,5 @@ public interface ITransformationBase
     /// <summary>
     /// Gets a human-readable description of the transformation, to be displayed in the UI.
     /// </summary>
-    FormattableString? Description { get; }
+    FormattableString? ToDisplayString();
 }

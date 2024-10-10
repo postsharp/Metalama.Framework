@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -29,14 +28,7 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
     public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.GetTarget( this._compilation );
 
     [Memo]
-    public FormattableString Description => this.GetDescription();
-
-    private FormattableString GetDescription()
-    {
-        ((BaseTransformation) this._transformation).ComputeDescription( this._compilation.GetCompilationModel() );
-
-        return FormattableStringHelper.MapString( this._transformation.Description.AssertNotNull(), this._compilation );
-    }
+    public FormattableString Description => FormattableStringHelper.MapString( this._transformation.ToDisplayString().AssertNotNull(), this._compilation );
 
     [Memo]
     public IDeclaration? IntroducedDeclaration

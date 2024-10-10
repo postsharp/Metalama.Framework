@@ -39,12 +39,11 @@ internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransform
         return SimpleBaseType( context.SyntaxGenerator.Type( this.InterfaceType, compilation ) );
     }
 
-    public override IRef<IDeclaration> TargetDeclaration => this.TargetType;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.TargetType;
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.ImplementInterface;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Make the type '{this.TargetType}' implement the interface '{this.InterfaceType}'.";
+    public override FormattableString ToDisplayString() => $"Make the type '{this.TargetType}' implement the interface '{this.InterfaceType}'.";
 }

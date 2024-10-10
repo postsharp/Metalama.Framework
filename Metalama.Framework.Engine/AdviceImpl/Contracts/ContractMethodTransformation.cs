@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -115,5 +114,5 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
 
     public override IFullRef<IMember> TargetMember => this._targetMethod;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Add default contract to method '{this.TargetMember}'";
+    public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetMember}'";
 }

@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using System;
@@ -31,12 +31,12 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
 
     DeclarationBuilderData IIntroduceDeclarationTransformation.DeclarationBuilderData => this.BuilderData;
 
-    public override IRef<IDeclaration> TargetDeclaration => this.BuilderData.ContainingDeclaration.AssertNotNull();
+    public override IFullRef<IDeclaration> TargetDeclaration => this.BuilderData.ContainingDeclaration.AssertNotNull();
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceMember;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Introduce {this.BuilderData.DeclarationKind.ToDisplayString()} '{this.BuilderData.Name}' into '{this.BuilderData.ContainingDeclaration.GetTarget( compilation ).ToDisplayString()}'.";
+    public override FormattableString ToDisplayString()
+        => $"Introduce {this.BuilderData.DeclarationKind.ToDisplayString()} '{this.BuilderData.Name}' into '{this.BuilderData.ContainingDeclaration.Definition.ToDisplayString()}'.";
 
     public override string ToString() => $"{{{this.GetType().Name} Builder={{{this.BuilderData}}}";
 }

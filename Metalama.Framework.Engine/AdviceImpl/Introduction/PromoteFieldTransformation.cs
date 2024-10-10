@@ -102,5 +102,5 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 
     IFullRef<IMember>? IReplaceMemberTransformation.ReplacedMember => this._replacedField;
 
-    public override IRef<IDeclaration> TargetDeclaration => this._replacedField;
+    public override IFullRef<IDeclaration> TargetDeclaration => this._replacedField;
 }

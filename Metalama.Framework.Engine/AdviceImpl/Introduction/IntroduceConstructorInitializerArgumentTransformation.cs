@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
@@ -18,9 +17,9 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 /// </summary>
 internal sealed class IntroduceConstructorInitializerArgumentTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
-    private IRef<IConstructor> Constructor { get; }
+    private readonly IFullRef<IConstructor> _constructor;
 
-    IRef<IMember> IMemberLevelTransformation.TargetMember => this.Constructor;
+    IFullRef<IMember> IMemberLevelTransformation.TargetMember => this._constructor;
 
     public int ParameterIndex { get; }
 
@@ -32,7 +31,7 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
         int parameterIndex,
         ExpressionSyntax value ) : base( aspectLayerInstance, constructor )
     {
-        this.Constructor = constructor;
+        this._constructor = constructor;
         this.ParameterIndex = parameterIndex;
         this.Value = value;
     }
@@ -40,12 +39,11 @@ internal sealed class IntroduceConstructorInitializerArgumentTransformation : Ba
     public ArgumentSyntax ToSyntax()
         => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.AspectInstance.AspectClass.GeneratedCodeAnnotation );
 
-    public override IRef<IDeclaration> TargetDeclaration => this.Constructor;
+    public override IFullRef<IDeclaration> TargetDeclaration => this._constructor;
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertConstructorInitializerArgument;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
+    public override FormattableString ToDisplayString() => $"Introduce an argument to the initializer of constructor '{this._constructor}'.";
 }

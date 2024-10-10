@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using System;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class AddAnnotationTransformation : BaseTransformation
 {
-    public AddAnnotationTransformation( AspectLayerInstance aspectLayerInstance, IRef<IDeclaration> declaration, AnnotationInstance annotationInstance ) : base(
+    public AddAnnotationTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IDeclaration> declaration, AnnotationInstance annotationInstance ) : base(
         aspectLayerInstance )
     {
         this.TargetDeclaration = declaration;
@@ -20,12 +21,11 @@ internal sealed class AddAnnotationTransformation : BaseTransformation
 
     public AnnotationInstance AnnotationInstance { get; }
 
-    public override IRef<IDeclaration> TargetDeclaration { get; }
+    public override IFullRef<IDeclaration> TargetDeclaration { get; }
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.AddAnnotation;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Adding annotation '{this.AnnotationInstance}' to '{this.TargetDeclaration}'.";
+    public override FormattableString ToDisplayString() => $"Adding annotation '{this.AnnotationInstance}' to '{this.TargetDeclaration}'.";
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 }

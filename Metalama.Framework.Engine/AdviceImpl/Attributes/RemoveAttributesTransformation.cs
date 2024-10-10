@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
@@ -25,12 +24,11 @@ internal sealed class RemoveAttributesTransformation : BaseSyntaxTreeTransformat
 
     public IFullRef<IDeclaration> ContainingDeclaration { get; }
 
-    public override IRef<IDeclaration> TargetDeclaration => this.ContainingDeclaration;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.ContainingDeclaration;
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.RemoveAttributes;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation )
-        => $"Remove attributes of type '{this.AttributeType}' from '{this.TargetDeclaration}'";
+    public override FormattableString ToDisplayString() => $"Remove attributes of type '{this.AttributeType}' from '{this.TargetDeclaration}'";
 }

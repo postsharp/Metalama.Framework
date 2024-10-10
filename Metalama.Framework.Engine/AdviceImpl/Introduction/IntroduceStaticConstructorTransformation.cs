@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -55,5 +54,5 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
-    protected override FormattableString ToDisplayString( CompilationModel compilation ) => $"Introduce a static constructor into '{this.TargetDeclaration}'.";
+    public override FormattableString ToDisplayString() => $"Introduce a static constructor into '{this.TargetDeclaration}'.";
 }
