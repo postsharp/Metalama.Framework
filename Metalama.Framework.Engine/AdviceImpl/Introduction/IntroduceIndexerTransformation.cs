@@ -24,7 +24,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var indexer = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var indexer = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -37,7 +37,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
                     ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( indexer.ExplicitInterfaceImplementations.Single().DeclaringType ) )
                     : null,
                 Token( SyntaxKind.ThisKeyword ),
-                context.SyntaxGenerator.ParameterList( indexer, context.Compilation ),
+                context.SyntaxGenerator.ParameterList( indexer, context.FinalCompilation ),
                 GenerateAccessorList(),
                 null,
                 default );

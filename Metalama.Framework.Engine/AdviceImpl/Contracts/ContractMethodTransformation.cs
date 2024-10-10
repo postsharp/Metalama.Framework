@@ -40,7 +40,7 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget.GetTarget( context.Compilation ) )
+        switch ( this.ContractTarget.GetTarget( context.FinalCompilation ) )
         {
             case IParameter { IsReturnParameter: true } returnValueParam:
                 {

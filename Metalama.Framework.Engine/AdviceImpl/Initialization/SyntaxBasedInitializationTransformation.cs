@@ -43,7 +43,7 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTr
                 this._initializationStatement( context.SyntaxGenerationContext )
                     .WithGeneratedCodeAnnotation( this.AspectInstance.AspectClass.GeneratedCodeAnnotation )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                this.ContextDeclaration.GetTarget( context.Compilation ),
+                this.ContextDeclaration.GetTarget( context.FinalCompilation ),
                 this,
                 InsertedStatementKind.Initializer )
         ];

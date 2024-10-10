@@ -40,13 +40,13 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget.GetTarget( context.Compilation ) )
+        switch ( this.ContractTarget.GetTarget( context.FinalCompilation ) )
         {
             case IIndexer:
                 {
                     Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ) );
 
-                    var targetMember = this._targetIndexer.GetTarget( context.Compilation );
+                    var targetMember = this._targetIndexer.GetTarget( context.FinalCompilation );
 
                     Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 

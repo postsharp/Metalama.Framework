@@ -35,14 +35,14 @@ internal sealed class IntroduceConstructorTransformation
         // TODO: We must generate the code based on our _initial_ compilation because the last compilation may already contain introduced
         // parameters, but these parameters will be added by the linker. We would have duplicates by adding them here.
         // However, if we resolve to the initial compilation, we may get the replaced (implicit) constructor instead of the new one.
-        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         Invariant.Assert( !constructorBuilder.IsRecordCopyConstructor() );
 
         var statements = Array.Empty<StatementSyntax>();
 
         var syntaxSerializationContext = new SyntaxSerializationContext(
-            context.Compilation,
+            context.FinalCompilation,
             context.SyntaxGenerationContext,
             constructorBuilder.DeclaringType );
 
@@ -78,7 +78,7 @@ internal sealed class IntroduceConstructorTransformation
                 AdviceSyntaxGenerator.GetAttributeLists( constructorBuilder, context ),
                 constructorBuilder.GetSyntaxModifierList(),
                 Identifier( constructorBuilder.DeclaringType.Name ),
-                context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
+                context.SyntaxGenerator.ParameterList( constructorBuilder, context.FinalCompilation ),
                 initializer,
                 context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock( statements )
                     .WithGeneratedCodeAnnotation( this.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
@@ -106,7 +106,7 @@ internal sealed class IntroduceConstructorTransformation
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         // See https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11#auto-default-struct.
         if ( constructorBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct &&

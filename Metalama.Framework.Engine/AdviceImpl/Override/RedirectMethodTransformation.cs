@@ -36,7 +36,7 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.FinalCompilation );
 
         var body =
             context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
@@ -63,8 +63,8 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
                             overriddenDeclaration.DeclaringType,
                             this.AspectLayerId,
                             overriddenDeclaration ) ),
-                    context.SyntaxGenerator.TypeParameterList( overriddenDeclaration, context.Compilation ),
-                    context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.Compilation, removeDefaultValues: true ),
+                    context.SyntaxGenerator.TypeParameterList( overriddenDeclaration, context.FinalCompilation ),
+                    context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.FinalCompilation, removeDefaultValues: true ),
                     context.SyntaxGenerator.ConstraintClauses( overriddenDeclaration ),
                     body,
                     null ),

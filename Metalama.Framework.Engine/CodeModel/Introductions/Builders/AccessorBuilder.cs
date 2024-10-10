@@ -122,12 +122,6 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this;
 
-    IRef<IMethod> IMethod.ToRef() => throw new NotSupportedException();
-
-    IRef<IMember> IMember.ToRef() => throw new NotSupportedException();
-
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => throw new NotSupportedException();
-
     public bool IsPartial => false;
 
     public bool HasImplementation => true;
@@ -334,6 +328,12 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
     IRef<IMethodBase> IMethodBase.ToRef() => this.Immutable.ToRef();
 
     public new IRef<IMethod> ToRef() => this.Immutable.ToRef();
+
+    IRef<IMethod> IMethod.ToRef() => this.Immutable.ToRef();
+
+    IRef<IMember> IMember.ToRef() => this.Immutable.ToRef();
+
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Immutable.ToRef();
 
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 

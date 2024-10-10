@@ -42,14 +42,14 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( this.AspectLayerInstance.InitialCompilation );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( this.InitialCompilation );
 
         var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
 
         var metaApi = MetaApi.ForConstructor(
             overriddenDeclaration,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 this.Template.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
@@ -113,7 +113,7 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
 
     private ParameterListSyntax GetParameterList( MemberInjectionContext context, IConstructor overriddenDeclaration )
     {
-        var originalParameterList = context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.Compilation, true );
+        var originalParameterList = context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.FinalCompilation, true );
 
         var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType(
             this.AspectInstance,
@@ -131,7 +131,7 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
                     this.AspectLayerId,
                     overriddenDeclaration,
                     context.SyntaxGenerator ),
-            context.Compilation.Cache.SystemVoidType );
+            context.FinalCompilation.Cache.SystemVoidType );
 
     public override TransformationObservability Observability => TransformationObservability.None;
 }

@@ -38,13 +38,13 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             context.SyntaxGenerationContext,
             this.CreateInvocationExpression( context ),
             templateKind,
-            this.OverriddenMethod.GetTarget( context.Compilation ) );
+            this.OverriddenMethod.GetTarget( context.FinalCompilation ) );
 
     protected InjectedMember[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
     {
         TypeSyntax? returnType = null;
 
-        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.FinalCompilation );
 
         var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async | ModifierCategories.Unsafe )
@@ -87,8 +87,8 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
                     overriddenDeclaration.DeclaringType,
                     this.AspectLayerId,
                     overriddenDeclaration ) ),
-            context.SyntaxGenerator.TypeParameterList( overriddenDeclaration, context.Compilation ),
-            context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.Compilation, true ),
+            context.SyntaxGenerator.TypeParameterList( overriddenDeclaration, context.FinalCompilation ),
+            context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.FinalCompilation, true ),
             context.SyntaxGenerator.ConstraintClauses( overriddenDeclaration ),
             newMethodBody,
             null );
@@ -106,7 +106,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
 
     private ExpressionSyntax CreateInvocationExpression( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.FinalCompilation );
 
         return overriddenDeclaration.MethodKind switch
         {
@@ -122,7 +122,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             MethodKind.Operator =>
                 context.AspectReferenceSyntaxProvider.GetOperatorReference(
                     this.AspectLayerId,
-                    (IMethod) this.TargetDeclaration.GetTarget( context.Compilation ),
+                    (IMethod) this.TargetDeclaration.GetTarget( context.FinalCompilation ),
                     context.SyntaxGenerator ),
             _ => throw new AssertionFailedException( $"Unsupported method kind: {overriddenDeclaration} is {overriddenDeclaration.MethodKind}." )
         };

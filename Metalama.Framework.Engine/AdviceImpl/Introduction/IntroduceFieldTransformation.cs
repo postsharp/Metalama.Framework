@@ -21,7 +21,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-        var fieldBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var fieldBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         // If template fails to expand, we will still generate the field, albeit without the initializer.
         _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(

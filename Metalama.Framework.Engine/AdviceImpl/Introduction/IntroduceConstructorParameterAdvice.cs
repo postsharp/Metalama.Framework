@@ -47,11 +47,12 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
     protected override IntroduceConstructorParameterAdviceResult Implement( in AdviceImplementationContext context )
     {
+        var compilation = context.Compilation;
         var contextCopy = context;
         var serviceProvider = context.ServiceProvider;
         var syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
 
-        var constructor = (IConstructor) this.TargetDeclaration.ForCompilation( context.Compilation );
+        var constructor = (IConstructor) this.TargetDeclaration.ForCompilation( compilation );
         var initializedConstructor = constructor;
 
         var existingParameter = constructor.Parameters.FirstOrDefault( p => p.Name == this._parameterName );
@@ -118,7 +119,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             var sameTypeConstructors =
                 baseConstructor.DeclaringType.Constructors.Where( c => c.InitializerKind == ConstructorInitializerKind.This );
 
-            var derivedConstructors = contextCopy.Compilation
+            var derivedConstructors = compilation
                 .GetDerivedTypes( baseConstructor.DeclaringType, DerivedTypesOptions.DirectOnly )
                 .SelectMany( t => t.Constructors )
                 .Where( c => c.InitializerKind != ConstructorInitializerKind.This && !c.IsRecordCopyConstructor() );
@@ -130,7 +131,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             // Process all of these constructors.
             foreach ( var chainedConstructor in chainedConstructors )
             {
-                var chainedSyntaxGenerationContext = contextCopy.Compilation.CompilationContext.GetSyntaxGenerationContext(
+                var chainedSyntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext(
                     syntaxGenerationOptions,
                     constructor.GetPrimaryDeclarationSyntax()
                     ?? constructor.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
@@ -141,7 +142,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 {
                     using ( UserCodeExecutionContext.WithContext(
                                serviceProvider,
-                               contextCopy.Compilation,
+                               compilation,
                                UserCodeDescription.Create( "evaluating the pull action for {0}", this ) ) )
                     {
                         // Ask the IPullStrategy what to do.
@@ -180,8 +181,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                     case PullActionKind.UseExpression:
                         parameterValue =
                             pullParameterAction.Expression.AssertNotNull()
-                                .ToExpressionSyntax(
-                                    new SyntaxSerializationContext( contextCopy.Compilation, chainedSyntaxGenerationContext, constructor.DeclaringType ) );
+                                .ToExpressionSyntax( new SyntaxSerializationContext( compilation, chainedSyntaxGenerationContext, constructor.DeclaringType ) );
 
                         break;
 

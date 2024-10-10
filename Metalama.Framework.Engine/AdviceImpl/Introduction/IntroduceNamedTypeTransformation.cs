@@ -26,7 +26,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var typeBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var typeBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         BaseListSyntax? baseList;
 

@@ -146,13 +146,13 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
                 MethodKind.EventRemove => this.CreateRemoveExpression( context ),
                 _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
             },
-            context.Compilation.Cache.SystemVoidType );
+            context.FinalCompilation.Cache.SystemVoidType );
 
         var metaApi = MetaApi.ForEvent(
             overriddenDeclaration,
             accessor,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 accessorTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,

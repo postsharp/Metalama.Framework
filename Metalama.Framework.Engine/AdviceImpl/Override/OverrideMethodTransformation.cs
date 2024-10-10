@@ -37,12 +37,12 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
             return this.CreateProceedExpression( context, kind );
         }
 
-        var overriddenDeclaration = this.OverriddenMethod.GetTarget( this.AspectLayerInstance.InitialCompilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( this.InitialCompilation );
 
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,

@@ -43,7 +43,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
     {
         Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ) );
 
-        var targetMember = this._targetProperty.GetTarget( context.Compilation );
+        var targetMember = this._targetProperty.GetTarget( context.FinalCompilation );
 
         Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 

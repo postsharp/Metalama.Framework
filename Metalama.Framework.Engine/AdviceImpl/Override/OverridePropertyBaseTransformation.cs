@@ -40,7 +40,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this.OverriddenProperty.GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenProperty.GetTarget( context.FinalCompilation );
 
         var propertyName = context.InjectionNameProvider.GetOverrideName(
             overriddenDeclaration.DeclaringType,
@@ -109,10 +109,10 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                 context.SyntaxGenerationContext,
                 this.CreateProceedGetExpression( context ),
                 templateKind,
-                this.OverriddenProperty.GetTarget( context.Compilation ).GetMethod.AssertNotNull() ),
+                this.OverriddenProperty.GetTarget( context.FinalCompilation ).GetMethod.AssertNotNull() ),
             MethodKind.PropertySet => new SyntaxUserExpression(
                 this.CreateProceedSetExpression( context ),
-                context.Compilation.Cache.SystemVoidType ),
+                context.FinalCompilation.Cache.SystemVoidType ),
             _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 
@@ -120,13 +120,13 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         => TransformationHelper.CreatePropertyProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenProperty.GetTarget( context.Compilation ),
+            this.OverriddenProperty.GetTarget( context.FinalCompilation ),
             this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreatePropertyProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenProperty.GetTarget( context.Compilation ),
+            this.OverriddenProperty.GetTarget( context.FinalCompilation ),
             this.AspectLayerId );
 }

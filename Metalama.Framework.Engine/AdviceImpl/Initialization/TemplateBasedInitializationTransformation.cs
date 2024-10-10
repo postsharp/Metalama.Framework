@@ -41,13 +41,13 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        var targetConstructor = this._targetConstructor.GetTarget( context.Compilation );
-        var contextDeclaration = this.ContextDeclaration.GetTarget( context.Compilation );
+        var targetConstructor = this._targetConstructor.GetTarget( this.InitialCompilation );
+        var contextDeclaration = this.ContextDeclaration.GetTarget( this.InitialCompilation );
 
         var metaApi = MetaApi.ForConstructor(
             targetConstructor,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 this._boundTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,

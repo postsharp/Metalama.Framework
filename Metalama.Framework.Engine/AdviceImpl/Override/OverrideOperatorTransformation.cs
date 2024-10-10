@@ -44,13 +44,13 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._targetOperator.GetTarget( this.AspectLayerInstance.InitialCompilation );
+        var overriddenDeclaration = this._targetOperator.GetTarget( this.InitialCompilation );
         var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
 
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
@@ -96,7 +96,7 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
                         this.AspectLayerId,
                         overriddenDeclaration ) ),
                 null,
-                context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.Compilation, removeDefaultValues: true ),
+                context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.FinalCompilation, removeDefaultValues: true ),
                 List<TypeParameterConstraintClauseSyntax>(),
                 newMethodBody,
                 null );

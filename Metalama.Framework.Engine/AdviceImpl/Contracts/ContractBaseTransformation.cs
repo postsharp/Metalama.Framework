@@ -71,7 +71,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         var boundTemplate = this._template.ForContract( annotatedValueExpression, this._templateArguments );
 
         var metaApiProperties = new MetaApiProperties(
-            this.OriginalCompilation,
+            this.InitialCompilation,
             context.DiagnosticSink,
             this._template.AsMemberOrNamedType(),
             this._tags,
@@ -82,14 +82,14 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
             MetaApiStaticity.Default );
 
         var metaApi = MetaApi.ForDeclaration(
-            this.ContractTarget.GetTarget( context.Compilation ),
+            this.ContractTarget.GetTarget( context.FinalCompilation ),
             metaApiProperties,
             this.ContractDirection );
 
         var expansionContext = new TemplateExpansionContext(
             context,
             metaApi,
-            this.TargetMember.GetTarget( context.Compilation ),
+            this.TargetMember.GetTarget( context.FinalCompilation ),
             boundTemplate,
             null,
             this.AspectLayerId );

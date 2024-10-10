@@ -50,7 +50,7 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
         var metaApi = MetaApi.ForMethod(
             overriddenDeclaration,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,
@@ -103,7 +103,7 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
     private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )
         => new(
             context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.AspectLayerId ),
-            context.Compilation.Cache.SystemVoidType );
+            context.FinalCompilation.Cache.SystemVoidType );
 
     public override TransformationObservability Observability => TransformationObservability.None;
 }

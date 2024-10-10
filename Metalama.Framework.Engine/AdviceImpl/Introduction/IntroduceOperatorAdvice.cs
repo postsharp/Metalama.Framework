@@ -109,8 +109,6 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
     protected override IntroductionAdviceResult<IMethod> ImplementCore( MethodBuilder builder, in AdviceImplementationContext context )
     {
-        builder.Freeze();
-
         var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
 
         var existingOperator = targetDeclaration.FindClosestVisibleMethod( builder );
@@ -202,6 +200,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                         builder.IsOverride = true;
                         builder.HasNewKeyword = builder.IsNew = false;
                         builder.OverriddenMethod = existingOperator;
+                        builder.Freeze();
 
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this.AspectLayerInstance,

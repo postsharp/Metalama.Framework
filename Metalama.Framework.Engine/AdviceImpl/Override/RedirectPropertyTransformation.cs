@@ -39,7 +39,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._overriddenProperty.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenProperty.GetTarget( context.FinalCompilation );
 
         return
         [
@@ -114,7 +114,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
         ExpressionSyntax CreateAccessTargetExpression()
         {
             return
-                this._targetProperty.GetTarget( context.Compilation ).IsStatic
+                this._targetProperty.GetTarget( context.FinalCompilation ).IsStatic
                     ? IdentifierName( this._targetProperty.Name.AssertNotNull() )
                     : MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,

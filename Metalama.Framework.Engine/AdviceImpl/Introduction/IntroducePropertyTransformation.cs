@@ -26,7 +26,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var propertyBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var propertyBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
         // TODO: What if non-auto property has the initializer template?

@@ -85,9 +85,9 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
     {
         var templateAttribute = (ITemplateAttribute?) this.Template?.AdviceAttribute;
         var templateAttributeProperties = templateAttribute?.Properties;
+        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
 
         builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;
-        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
         builder.IsSealed = templateAttributeProperties?.IsSealed ?? templateDeclaration?.IsSealed ?? false;
         builder.IsVirtual = templateAttributeProperties?.IsVirtual ?? templateDeclaration?.IsVirtual ?? false;
 

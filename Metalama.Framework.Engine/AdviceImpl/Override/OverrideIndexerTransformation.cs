@@ -98,7 +98,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         IMethod accessor,
         [NotNullWhen( true )] out BlockSyntax? body )
     {
-        var overriddenDeclaration = (IIndexer) this.OverriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = (IIndexer) this.OverriddenDeclaration.GetTarget( context.FinalCompilation );
 
         SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind )
         {
@@ -109,7 +109,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
             overriddenDeclaration,
             accessor,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 accessorTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,

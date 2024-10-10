@@ -41,7 +41,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this._overriddenIndexer.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenIndexer.GetTarget( context.FinalCompilation );
 
         var setAccessorDeclarationKind =
             overriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
@@ -64,7 +64,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                     null,
                     Token( SyntaxKind.ThisKeyword ),
                     TransformationHelper.GetIndexerOverrideParameterList(
-                        context.Compilation,
+                        context.FinalCompilation,
                         context.SyntaxGenerationContext,
                         overriddenDeclaration,
                         context.InjectionNameProvider.GetOverriddenByType(
@@ -123,13 +123,13 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         => TransformationHelper.CreateIndexerProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this._overriddenIndexer.GetTarget( context.Compilation ),
+            this._overriddenIndexer.GetTarget( context.FinalCompilation ),
             this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreateIndexerProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this._overriddenIndexer.GetTarget( context.Compilation ),
+            this._overriddenIndexer.GetTarget( context.FinalCompilation ),
             this.AspectLayerId );
 }

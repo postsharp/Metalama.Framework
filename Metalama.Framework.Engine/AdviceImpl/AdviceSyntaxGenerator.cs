@@ -32,7 +32,7 @@ internal class AdviceSyntaxGenerator
     {
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
             declaration.ToFullRef(),
-            context.Compilation,
+            context.FinalCompilation,
             attributeTargetSyntaxKind );
 
         if ( declaration is IMethod method )
@@ -40,7 +40,7 @@ internal class AdviceSyntaxGenerator
             attributes = attributes.AddRange(
                 context.SyntaxGenerator.AttributesForDeclaration(
                     method.ReturnParameter.ToFullRef(),
-                    context.Compilation,
+                    context.FinalCompilation,
                     SyntaxKind.ReturnKeyword ) );
 
             if ( method.MethodKind is MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.PropertySet )
@@ -48,7 +48,7 @@ internal class AdviceSyntaxGenerator
                 attributes = attributes.AddRange(
                     context.SyntaxGenerator.AttributesForDeclaration(
                         method.Parameters[0].ToFullRef(),
-                        context.Compilation,
+                        context.FinalCompilation,
                         SyntaxKind.ParamKeyword ) );
             }
         }
@@ -68,7 +68,7 @@ internal class AdviceSyntaxGenerator
     {
         var attributes = context.SyntaxGenerator.AttributesForDeclaration(
             declarationRef,
-            context.Compilation,
+            context.FinalCompilation,
             attributeTargetSyntaxKind );
 
         return attributes;
@@ -151,7 +151,7 @@ internal class AdviceSyntaxGenerator
             {
                 initializerExpressionSyntax =
                     initializerExpression.ToExpressionSyntax(
-                        new SyntaxSerializationContext( context.Compilation, context.SyntaxGenerationContext, member.DeclaringType ) );
+                        new SyntaxSerializationContext( context.FinalCompilation, context.SyntaxGenerationContext, member.DeclaringType ) );
             }
             catch ( Exception ex )
             {

@@ -45,7 +45,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        var overriddenDeclaration = this.OverriddenProperty.As<IProperty>().GetTarget( context.Compilation );
+        var overriddenDeclaration = this.OverriddenProperty.As<IProperty>().GetTarget( context.FinalCompilation );
 
         if ( overriddenDeclaration.GetMethod != null )
         {
@@ -116,7 +116,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
             overriddenDeclaration,
             accessor,
             new MetaApiProperties(
-                this.OriginalCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
                 accessorTemplate.TemplateMember.AsMemberOrNamedType(),
                 this.Tags,

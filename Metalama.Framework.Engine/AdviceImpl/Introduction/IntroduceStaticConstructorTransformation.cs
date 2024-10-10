@@ -25,7 +25,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         var syntax =
             ConstructorDeclaration(

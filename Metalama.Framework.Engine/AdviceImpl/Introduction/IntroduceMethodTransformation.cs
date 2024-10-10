@@ -24,7 +24,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var methodBuilder = this.BuilderData.ToRef().GetTarget( context.Compilation );
+        var methodBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -58,7 +58,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                     context.SyntaxGenerator.Type( methodBuilder.ReturnType )
                         .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
-                    context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
+                    context.SyntaxGenerator.ParameterList( methodBuilder, context.FinalCompilation ),
                     null,
                     ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType ) ),
                     Token( SyntaxKind.SemicolonToken ) );
@@ -77,7 +77,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                     explicitInterfaceSpecifier,
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                     SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
-                    context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
+                    context.SyntaxGenerator.ParameterList( methodBuilder, context.FinalCompilation ),
                     null,
                     ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType ) ),
                     Token( SyntaxKind.SemicolonToken ) );
@@ -121,8 +121,8 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                 context.SyntaxGenerator.ReturnType( methodBuilder ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 explicitInterfaceSpecifier,
                 methodBuilder.GetCleanName(),
-                context.SyntaxGenerator.TypeParameterList( methodBuilder, context.Compilation ),
-                context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
+                context.SyntaxGenerator.TypeParameterList( methodBuilder, context.FinalCompilation ),
+                context.SyntaxGenerator.ParameterList( methodBuilder, context.FinalCompilation ),
                 context.SyntaxGenerator.ConstraintClauses( methodBuilder ),
                 block,
                 null );

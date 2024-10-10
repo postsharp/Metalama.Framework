@@ -30,11 +30,11 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
         this._targetEvent = targetEvent;
     }
 
-    public override IFullRef<IMember> OverriddenDeclaration => throw new NotImplementedException();
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenDeclaration;
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( context.Compilation );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( context.FinalCompilation );
 
         return
         [
