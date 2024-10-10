@@ -109,8 +109,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     transformation,
                     transformationCollection,
                     auxiliaryMemberTransformations,
-                    pendingInsertStatementContexts,
-                    input.CompilationModel );
+                    pendingInsertStatementContexts );
 
                 this.IndexInjectTransformation(
                     input,
@@ -134,8 +133,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     transformation,
                     transformationCollection,
                     auxiliaryMemberTransformations,
-                    pendingInsertStatementContexts,
-                    input.CompilationModel );
+                    pendingInsertStatementContexts );
 
                 IndexNodesWithModifiedAttributes( transformation, transformationCollection );
             }
@@ -168,14 +166,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             };
         }
 
-        static IRef<IDeclaration> GetCanonicalTargetDeclaration( IRef<IDeclaration> declaration )
+        static IFullRef<IDeclaration> GetCanonicalTargetDeclaration( IRef<IDeclaration> declaration )
         {
             return declaration switch
             {
                 IFullRef<IMember> member => member.DeclaringType.AssertNotNull(),
                 IFullRef<INamedType> type => type,
                 IFullRef<IParameter> parameter => parameter.DeclaringType.AssertNotNull(),
-                IFullRef<INamespace> @namespace => @namespace.Compilation,
+                IFullRef<INamespace> @namespace => @namespace.Definition.Compilation.ToFullRef(),
                 IFullRef<ICompilation> compilation => compilation,
                 var d => throw new AssertionFailedException( $"Unsupported: {d}" )
             };
@@ -211,14 +209,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         void FlushPendingInsertStatementContext( KeyValuePair<IFullRef<IMember>, InsertStatementTransformationContextImpl> pair )
         {
-            if ( RequiresAuxiliaryContractMember( pair.Key, pair.Value, input.CompilationModel ) )
+            if ( RequiresAuxiliaryContractMember( pair.Key, pair.Value ) )
             {
                 pair.Value.Complete();
 
                 transformationCollection.AddTransformationCausingAuxiliaryOverride( pair.Value.OriginTransformation );
 
                 // This may be the only "override" present, so make sure all other effects of overrides are present.
-                AddSynthesizedSetterForPropertyIfRequired( pair.Key, transformationCollection, input.CompilationModel );
+                AddSynthesizedSetterForPropertyIfRequired( pair.Key, transformationCollection );
 
                 auxiliaryMemberTransformations
                     .GetOrAdd( pair.Key, _ => new AuxiliaryMemberTransformations() )
@@ -265,7 +263,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         if ( assemblyVersionAttribute?.ConstructorArguments.FirstOrDefault() is { Value: string version }
              && version.Contains( '*' ) )
         {
-            attributes.Remove( assemblyVersionAttributeType.ToRef() );
+            attributes.Remove( assemblyVersionAttributeType.ToFullRef() );
 
             // It's hacky to add an AttributeBuilder with null Advice, but it seems to work fine.
             // We avoid to use user APIs that require a user code execution context.
@@ -543,8 +541,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         ITransformation transformation,
         TransformationCollection transformationCollection,
         ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts,
-        CompilationModel compilationModel )
+        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
     {
         if ( transformation is not IOverrideDeclarationTransformation overrideDeclarationTransformation )
         {
@@ -553,14 +550,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         AddSynthesizedSetterForPropertyIfRequired(
             overrideDeclarationTransformation.OverriddenDeclaration,
-            transformationCollection,
-            compilationModel );
+            transformationCollection );
 
-        if ( overrideDeclarationTransformation.OverriddenDeclaration is IFullRef<IConstructor> { IsPrimaryConstructor: true } overriddenConstructorRef )
+        if ( overrideDeclarationTransformation.OverriddenDeclaration is IFullRef<IConstructor> { Definition.IsPrimary: true } overriddenConstructorRef )
         {
             auxiliaryMemberTransformations.GetOrAdd( overriddenConstructorRef, _ => new AuxiliaryMemberTransformations() ).InjectAuxiliarySourceMember();
 
-            transformationCollection.GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructorRef.DeclaringType.AssertNotNull() )
+            transformationCollection
+                .GetOrAddLateTypeLevelTransformations( (ISymbolRef<INamedType>) overriddenConstructorRef.ContainingDeclaration.AssertNotNull() )
                 .RemovePrimaryConstructor();
         }
 
@@ -571,7 +568,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             pendingInsertStatementContexts.TryRemove( overriddenMember, out _ );
 
             // Auxiliary member is needed for output contracts
-            if ( RequiresAuxiliaryContractMember( overriddenMember, insertStatementContext, compilationModel ) )
+            if ( RequiresAuxiliaryContractMember( overriddenMember, insertStatementContext ) )
             {
                 insertStatementContext.Complete();
 
@@ -587,11 +584,10 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     }
 
     private static void AddSynthesizedSetterForPropertyIfRequired(
-        IRef<IDeclaration> overriddenDeclarationRef,
-        TransformationCollection transformationCollection,
-        CompilationModel compilationModel )
+        IFullRef<IDeclaration> overriddenDeclarationRef,
+        TransformationCollection transformationCollection )
     {
-        var overriddenDeclaration = overriddenDeclarationRef.GetTarget( compilationModel );
+        var overriddenDeclaration = overriddenDeclarationRef.Definition;
 
         // If this is an auto-property that does not override a base property, we can add synthesized init-only setter.
         // If this is overridden property we need to:
@@ -614,15 +610,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         ITransformation transformation,
         TransformationCollection transformationCollection,
         ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts,
-        CompilationModel compilationModel )
+        ConcurrentDictionary<IFullRef<IMember>, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
     {
         if ( transformation is not IInsertStatementTransformation insertStatementTransformation )
         {
             return;
         }
 
-        var targetMember = insertStatementTransformation.TargetMember.GetTarget( compilationModel );
+        var targetMember = insertStatementTransformation.TargetMember.Definition;
 
         var syntaxGenerationContext
             = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, targetMember );
@@ -823,7 +818,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             switch ( member )
             {
-                case IFullRef<IConstructor> { IsPrimaryConstructor: true } primaryConstructor:
+                case IFullRef<IConstructor> { Definition.IsPrimary: true } primaryConstructor:
                     transformationCollection.AddInjectedMember(
                         new InjectedMember(
                             null,
@@ -851,7 +846,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // return returnValue;
 
             var advice = originTransformation.AspectLayerInstance;
-            var rootMember = member.TypeMember;
+            var rootMember = member.GetTypeMember();
 
             // TODO: Ideally, entry + exit statements should be injected here, but it complicates the transformation collection and rewriter.
             //       This now generates "well-known" structure, which is recognized by the rewriter, which is quite ugly.
@@ -872,12 +867,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
     private static bool RequiresAuxiliaryContractMember(
         IFullRef<IMember> member,
-        InsertStatementTransformationContextImpl insertStatementContext,
-        CompilationModel helperCompilationModel )
+        InsertStatementTransformationContextImpl insertStatementContext )
         => insertStatementContext.WasUsedForOutputContracts
-           || (member is IFullRef<IFieldOrProperty> fieldOrProperty && fieldOrProperty.GetTarget( helperCompilationModel ) is { IsAutoPropertyOrField: true })
-           || (member is IFullRef<IMethod> method
-               && method.GetTarget( helperCompilationModel ) is { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } } or
-                   { IsPartial: true, HasImplementation: false }
-               && insertStatementContext.WasUsedForInputContracts);
+           || member is IFullRef<IFieldOrProperty> { Definition.IsAutoPropertyOrField: true } || (member is IFullRef<IMethod> { Definition: { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } } or
+                                                                                                      { IsPartial: true, HasImplementation: false } } && insertStatementContext.WasUsedForInputContracts);
 }

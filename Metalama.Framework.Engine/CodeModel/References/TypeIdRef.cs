@@ -47,13 +47,13 @@ internal class TypeIdRef<T> : DurableRef<T>
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new TypeIdRef<TOut>( this.Id );
 
-    public override IFullRef ToFullRef( CompilationContext compilationContext )
+    public override IFullRef ToFullRef( RefFactory refFactory )
     {
-        if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( this.Id ), out var symbol ) )
+        if ( !refFactory.CompilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( this.Id ), out var symbol ) )
         {
             throw new InvalidOperationException( $"Unable to resolve type id: {this.Id}." );
         }
 
-        return compilationContext.RefFactory.FromAnySymbol( symbol );
+        return refFactory.FromAnySymbol( symbol );
     }
 }

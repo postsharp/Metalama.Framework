@@ -24,7 +24,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     public ParameterBuilderData( BaseParameterBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<IParameter>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<IParameter>( this, containingDeclaration.RefFactory );
 
         if ( !builder.IsReturnParameter )
         {

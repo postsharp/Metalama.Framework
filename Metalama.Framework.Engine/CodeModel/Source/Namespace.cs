@@ -90,7 +90,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamedTypeCollection TypesCore
         => new NamedTypeCollection(
             this.Compilation,
-            this.Compilation.GetNamedTypeCollectionByParent( this._symbol.ToRef( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this._symbol.ToRef( this.RefFactory ) ) );
 
     // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
 
@@ -111,7 +111,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamespaceCollection NamespacesCore
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._symbol.ToRef( this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamespaceCollection( this._symbol.ToRef( this.RefFactory ) ) );
 
     public INamespace? GetDescendant( string ns )
     {

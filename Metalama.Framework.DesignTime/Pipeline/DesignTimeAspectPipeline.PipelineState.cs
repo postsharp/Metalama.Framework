@@ -54,7 +54,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
         public ProjectVersion? ProjectVersion { get; }
 
-        public AspectPipelineResult PipelineResult { get; }
+        public DesignTimeAspectPipelineResult PipelineResult { get; }
 
         private long SnapshotId { get; }
 
@@ -62,7 +62,7 @@ internal sealed partial class DesignTimeAspectPipeline
         {
             this._pipeline = pipeline;
             this._dependencies = DependencyGraph.Empty;
-            this.PipelineResult = new AspectPipelineResult();
+            this.PipelineResult = new DesignTimeAspectPipelineResult();
             this.CompileTimeSyntaxTrees = null;
             this.Configuration = null;
             this.Status = DesignTimeAspectPipelineStatus.Default;
@@ -96,7 +96,7 @@ internal sealed partial class DesignTimeAspectPipeline
             ImmutableDictionary<string, bool> compileTimeSyntaxTrees,
             DesignTimeAspectPipelineStatus status,
             ProjectVersion projectVersion,
-            AspectPipelineResult pipelineResult,
+            DesignTimeAspectPipelineResult pipelineResult,
             DependencyGraph dependencies,
             FallibleResultWithDiagnostics<AspectPipelineConfiguration>? configuration )
             : this( prototype )
@@ -124,7 +124,7 @@ internal sealed partial class DesignTimeAspectPipeline
         private PipelineState(
             PipelineState prototype,
             ProjectVersion projectVersion,
-            AspectPipelineResult pipelineResult,
+            DesignTimeAspectPipelineResult pipelineResult,
             DependencyGraph dependencies ) : this( prototype )
         {
             this.PipelineResult = pipelineResult;
@@ -201,7 +201,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             ImmutableDictionary<string, bool> newCompileTimeSyntaxTrees;
             DependencyGraph newDependencyGraph;
-            AspectPipelineResult newAspectPipelineResult;
+            DesignTimeAspectPipelineResult newAspectPipelineResult;
 
             if ( newChanges.HasCompileTimeCodeChange )
             {
@@ -277,7 +277,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 if ( invalidateCompilationResult )
                 {
                     newDependencyGraph = DependencyGraph.Empty;
-                    newAspectPipelineResult = new AspectPipelineResult();
+                    newAspectPipelineResult = new DesignTimeAspectPipelineResult();
                 }
                 else
                 {
@@ -465,11 +465,12 @@ internal sealed partial class DesignTimeAspectPipeline
         /// <summary>
         /// Executes the pipeline.
         /// </summary>
-        public static async Task<( FallibleResultWithDiagnostics<AspectPipelineResultAndState> CompilationResult, PipelineState NewState)> ExecuteAsync(
-            PipelineState state,
-            PartialCompilation compilation,
-            DesignTimeProjectVersion projectVersion,
-            TestableCancellationToken cancellationToken )
+        public static async Task<( FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState> CompilationResult, PipelineState NewState)>
+            ExecuteAsync(
+                PipelineState state,
+                PartialCompilation compilation,
+                DesignTimeProjectVersion projectVersion,
+                TestableCancellationToken cancellationToken )
         {
             if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
             {
@@ -495,7 +496,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 state = new PipelineState( state, getConfigurationResult, DesignTimeAspectPipelineStatus.Default );
 
-                return (FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( getConfigurationResult.Diagnostics ), state);
+                return (FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>.Failed( getConfigurationResult.Diagnostics ), state);
             }
 
             DiagnosticBag diagnosticBag = new();
@@ -592,7 +593,7 @@ internal sealed partial class DesignTimeAspectPipeline
             // in case of cancellation. From our point of view, this is a safe place to commit.
             state = state.SetPipelineResult( compilation, result, newDependencies, projectVersion, getConfigurationResult.Value );
 
-            return (new AspectPipelineResultAndState(
+            return (new DesignTimeAspectPipelineResultAndState(
                         state.ProjectVersion.AssertNotNull(),
                         state.PipelineResult,
                         state.Status,

@@ -88,7 +88,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
         ExpressionSyntax CreateAccessTargetExpression()
         {
             return
-                this._targetEvent.IsStatic
+                this._targetEvent.Definition.IsStatic
                     ? IdentifierName( this._targetEvent.Name.AssertNotNull() )
                     : MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,

@@ -41,11 +41,11 @@ internal class SymbolIdRef<T> : DurableRef<T>
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new SymbolIdRef<TOut>( this.Id );
 
-    public override IFullRef ToFullRef( CompilationContext compilation )
+    public override IFullRef ToFullRef( RefFactory refFactory )
     {
-        var symbol = new SymbolId( this.Id ).Resolve( compilation.Compilation )
-                     ?? throw new InvalidOperationException( $"Cannot find the symbol '{this.Id}' in '{compilation}'." );
+        var symbol = new SymbolId( this.Id ).Resolve( refFactory.CompilationContext.Compilation )
+                     ?? throw new InvalidOperationException( $"Cannot find the symbol '{this.Id}' in '{refFactory.CompilationContext.Compilation}'." );
 
-        return compilation.RefFactory.FromAnySymbol( symbol );
+        return refFactory.FromAnySymbol( symbol );
     }
 }

@@ -47,7 +47,7 @@ public partial class DeclarationFactory
                 static ( _, _, x ) =>
                 {
                     if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
-                            x.me.CompilationContext.RefFactory.FromSymbol<TDeclaration>( x.symbol.OriginalDefinition ),
+                            x.me._compilationModel.RefFactory.FromSymbol<TDeclaration>( x.symbol.OriginalDefinition ),
                             out var redirectedDefinition ) )
                     {
                         var genericContext = GenericContext.Get( x.symbol, x.me.CompilationContext );

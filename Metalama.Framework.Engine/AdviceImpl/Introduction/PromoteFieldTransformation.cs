@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 
@@ -18,7 +19,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 {
     public PropertyBuilder OverridingProperty { get; }
 
-    private readonly IRef<IField> _replacedField;
+    private readonly IFullRef<IField> _replacedField;
 
     public static PromoteFieldTransformation Create(
         ProjectServiceProvider serviceProvider,
@@ -94,12 +95,12 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
         overridingProperty.Immutable )
     {
         this.OverridingProperty = overridingProperty;
-        this._replacedField = replacedField.ToRef();
+        this._replacedField = replacedField.ToFullRef();
     }
 
     public override InsertPosition InsertPosition => this._replacedField.ToInsertPosition();
 
-    IRef<IMember> IReplaceMemberTransformation.ReplacedMember => this._replacedField;
+    IFullRef<IMember>? IReplaceMemberTransformation.ReplacedMember => this._replacedField;
 
     public override IRef<IDeclaration> TargetDeclaration => this._replacedField;
 }

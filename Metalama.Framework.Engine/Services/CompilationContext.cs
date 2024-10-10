@@ -43,9 +43,6 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     internal CompilationComparers Comparers => new( this.Compilation );
 
-    [Memo]
-    internal RefFactory RefFactory => new( this );
-
     public Compilation Compilation { get; }
 
     CompilationContext ITemplateReflectionContext.CompilationContext => this;

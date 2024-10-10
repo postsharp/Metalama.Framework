@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Advising
                                 accessor,
                                 template,
                                 propertyTemplate.TemplateProvider,
-                                propertyTemplate.DeclarationRef.CompilationContext );
+                                propertyTemplate.DeclarationRef.RefFactory );
                         }
                         else
                         {
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Advising
                                 accessor,
                                 template,
                                 eventTemplate.TemplateProvider,
-                                eventTemplate.DeclarationRef.CompilationContext );
+                                eventTemplate.DeclarationRef.RefFactory );
                         }
                         else
                         {
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Advising
                         fieldTemplate.TemplateClassMember,
                         fieldTemplate.TemplateProvider,
                         fieldTemplate.AdviceAttribute.AssertNotNull(),
-                        fieldTemplate.DeclarationRef.CompilationContext,
+                        fieldTemplate.DeclarationRef.RefFactory,
                         TemplateKind.InitializerExpression );
                 }
                 else
@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Advising
                         eventFieldTemplate.DeclarationRef.Symbol,
                         eventFieldTemplate.TemplateClassMember,
                         eventFieldTemplate.TemplateProvider,
-                        eventFieldTemplate.DeclarationRef.CompilationContext,
+                        eventFieldTemplate.DeclarationRef.RefFactory,
                         TemplateKind.InitializerExpression );
                 }
                 else
@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.Advising
                         propertyTemplate.DeclarationRef.Symbol,
                         propertyTemplate.TemplateClassMember,
                         propertyTemplate.TemplateProvider,
-                        propertyTemplate.DeclarationRef.CompilationContext,
+                        propertyTemplate.DeclarationRef.RefFactory,
                         TemplateKind.InitializerExpression );
                 }
                 else

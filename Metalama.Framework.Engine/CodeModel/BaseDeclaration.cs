@@ -109,6 +109,6 @@ namespace Metalama.Framework.Engine.CodeModel
         protected abstract int GetHashCodeCore();
 
         [Memo]
-        private protected RefFactory RefFactory => this.GetCompilationContext().RefFactory;
+        private protected RefFactory RefFactory => this.Compilation.RefFactory;
     }
 }

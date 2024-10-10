@@ -40,7 +40,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
     private sealed record CodePointData(
         string FilePath,
         ISymbol Symbol,
-        AspectPipelineResult PipelineResult );
+        DesignTimeAspectPipelineResult PipelineResult );
 
     private async ValueTask<CodePointData?> GetCodePointDataAsync(
         ProjectKey projectKey,

@@ -18,12 +18,11 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
         {
-            var typeDefinitionRef = typeDefinition.ToRef();
-
-            // Enumerate the source without causing a resolution of the reference.
+            var typeRef = typeDefinition.ToRef();
+            
             foreach ( var reference in this.Source )
             {
-                if ( reference.IsConvertibleTo( typeDefinitionRef, ConversionKind.TypeDefinition ) )
+                if ( reference.Definition.ToRef().Equals( typeRef ) )
                 {
                     // Resolve the reference and store the declaration.
                     var member = this.GetItem( reference );

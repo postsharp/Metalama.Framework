@@ -43,11 +43,11 @@ internal class DeclarationIdRef<T> : DurableRef<T>
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new DeclarationIdRef<TOut>( this.Id );
 
-    public override IFullRef ToFullRef( CompilationContext compilation )
+    public override IFullRef ToFullRef( RefFactory refFactory )
     {
         // TODO: BuilderData
-        var symbol = new SerializableDeclarationId( this.Id ).ResolveToSymbol( compilation );
+        var symbol = new SerializableDeclarationId( this.Id ).ResolveToSymbol( refFactory.CompilationContext );
 
-        return compilation.RefFactory.FromAnySymbol( symbol );
+        return refFactory.FromAnySymbol( symbol );
     }
 }

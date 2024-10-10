@@ -140,7 +140,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this._facade,
-            this.Compilation.GetNamedTypeCollectionByParent( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetNamedTypeCollectionByParent( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) ) );
 
     INamedTypeCollection INamedType.NestedTypes => this.Types;
 
@@ -151,7 +151,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IPropertyCollection Properties
         => new PropertyCollection(
             this._facade,
-            this.Compilation.GetPropertyCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetPropertyCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) ) );
 
     [Memo]
     public IPropertyCollection AllProperties => new AllPropertiesCollection( this._facade );
@@ -160,7 +160,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IIndexerCollection Indexers
         => new IndexerCollection(
             this._facade,
-            this.Compilation.GetIndexerCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetIndexerCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) ) );
 
     [Memo]
     public IIndexerCollection AllIndexers => new AllIndexersCollection( this._facade );
@@ -169,7 +169,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IFieldCollection Fields
         => new FieldCollection(
             this._facade,
-            this.Compilation.GetFieldCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetFieldCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) ) );
 
     [Memo]
     public IFieldCollection AllFields => new AllFieldsCollection( this._facade );
@@ -184,7 +184,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IEventCollection Events
         => new EventCollection(
             this._facade,
-            this.Compilation.GetEventCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetEventCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) ) );
 
     [Memo]
     public IEventCollection AllEvents => new AllEventsCollection( this._facade );
@@ -193,7 +193,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IMethodCollection Methods
         => new MethodCollection(
             this._facade,
-            this.Compilation.GetMethodCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetMethodCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) ) );
 
     [Memo]
     public IMethodCollection AllMethods => new AllMethodsCollection( this._facade );
@@ -202,7 +202,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IConstructorCollection Constructors
         => new ConstructorCollection(
             this._facade,
-            this.Compilation.GetConstructorCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) ) );
+            this.Compilation.GetConstructorCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) ) );
 
     [Memo]
     public IConstructor? PrimaryConstructor => this.GetPrimaryConstructorImpl();
@@ -214,7 +214,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     private IConstructor? GetPrimaryConstructorImpl()
     {
-        var constructors = this.Compilation.GetConstructorCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ) );
+        var constructors = this.Compilation.GetConstructorCollection( this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ) );
 
         foreach ( var constructor in constructors )
         {
@@ -341,7 +341,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         => new AllImplementedInterfacesCollection(
             this._facade,
             this.Compilation.GetAllInterfaceImplementationCollection(
-                this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ),
+                this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ),
                 false ) );
 
     [Memo]
@@ -349,7 +349,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         => new ImplementedInterfacesCollection(
             this._facade,
             this.Compilation.GetInterfaceImplementationCollection(
-                this.NamedTypeSymbol.OriginalDefinition.ToRef( this.GetCompilationContext() ),
+                this.NamedTypeSymbol.OriginalDefinition.ToRef( this.RefFactory ),
                 false ) );
 
     ICompilation ICompilationElement.Compilation => this.Compilation;

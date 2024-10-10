@@ -28,7 +28,13 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.OfAttributeType( type, conversionKind );
 
         private IEnumerable<IAttribute> OfAttributeType( IType type, ConversionKind conversionKind = ConversionKind.Default )
-            => this.GetItems( this.Source.Where( a => ((AttributeRef) a).AttributeType.IsConvertibleTo( type.ToRef(), conversionKind ) ) );
+            => this.GetItems( this.Source.Where(
+                                  a =>
+                                  {
+                                      var attributeType = ((AttributeRef) a).AttributeType.ToFullRef( type.GetRefFactory() ).Declaration;
+
+                                      return attributeType.Is( type, conversionKind );
+                                  } ) );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
 

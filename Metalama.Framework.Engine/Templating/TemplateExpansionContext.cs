@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
@@ -136,7 +137,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         AspectLayerId aspectLayerId ) : this(
         transformationContext.ServiceProvider,
         metaApi,
-        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope.ToRef() ),
+        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope.ToFullRef() ),
         transformationContext.SyntaxGenerationContext,
         methodTemplate,
         methodTemplate.TemplateProvider,
@@ -151,7 +152,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         AspectLayerId aspectLayerId ) : this(
         transformationContext.ServiceProvider,
         metaApi,
-        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope.ToRef() ),
+        transformationContext.LexicalScopeProvider.GetLexicalScope( declarationForLexicalScope.ToFullRef() ),
         transformationContext.SyntaxGenerationContext,
         null,
         templateProvider,

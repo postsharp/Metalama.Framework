@@ -24,7 +24,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
+internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl, IMemberOrNamedTypeBuilderImpl
 {
     private IType _type;
     private Writeability _writeability = Writeability.All;

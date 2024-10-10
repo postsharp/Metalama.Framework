@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
-using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -15,36 +15,37 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal sealed class SyntaxAttributeRef : AttributeRef
 {
+    private readonly IFullRef<INamedType> _attributeType;
     private readonly AttributeSyntax _attributeSyntax;
-
-    public SyntaxAttributeRef(
-        IFullRef<INamedType> attributeType,
-        AttributeSyntax attributeSyntax,
-        SyntaxNode declaration,
-        CompilationContext compilationContext,
-        RefTargetKind targetKind = RefTargetKind.Default ) : base(
-        new SyntaxRef<IDeclaration>( declaration, targetKind, compilationContext ),
-        attributeType )
-    {
-        this._attributeSyntax = attributeSyntax;
-        this.CompilationContext = compilationContext;
-    }
-
-    public SyntaxAttributeRef(
-        IFullRef<INamedType> attributeType,
-        AttributeSyntax attributeSyntax,
-        ISymbol symbol,
-        CompilationContext compilationContext ) : base(
-        symbol.ToRef( compilationContext ),
-        attributeType )
-    {
-        this._attributeSyntax = attributeSyntax;
-        this.CompilationContext = compilationContext;
-    }
-
-    public CompilationContext CompilationContext { get; }
+    private readonly RefFactory _refFactory;
+    private readonly RefTargetKind _targetKind;
+    private readonly SyntaxNode _syntaxNode;
 
     private ResolvedAttributeRef? _resolvedRef;
+
+    public SyntaxAttributeRef(
+        IFullRef<INamedType> attributeType,
+        AttributeSyntax attributeSyntax,
+        SyntaxNode syntaxNode,
+        RefFactory refFactory,
+        RefTargetKind targetKind = RefTargetKind.Default )
+    {
+        this._attributeType = attributeType;
+        this._attributeSyntax = attributeSyntax;
+        this._syntaxNode = syntaxNode;
+        this._refFactory = refFactory;
+        this._targetKind = targetKind;
+    }
+
+    [Memo]
+    public override IRef<IDeclaration> ContainingDeclaration
+        => this._targetKind switch
+        {
+            RefTargetKind.Module or RefTargetKind.Assembly => this._refFactory.ForCompilation(),
+            _ => new SyntaxRef<IDeclaration>( this._syntaxNode, this._targetKind, this._refFactory )
+        };
+
+    public override IRef<INamedType> AttributeType => this._attributeType;
 
     private ResolvedAttributeRef? ResolveAttributeData( AttributeSyntax attributeSyntax )
     {
@@ -61,7 +62,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         }
 
         // Find the parent declaration.
-        var resolved = this.ContainingDeclaration.GetAttributeData();
+        var resolved = this.ContainingDeclaration.ToFullRef( this._refFactory ).GetAttributeData();
 
         // In the parent, find the AttributeData corresponding to the current item.
 
@@ -124,7 +125,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
             return false;
         }
 
-        serializationData = new AttributeSerializationData( resolved.ParentSymbol, resolved.Attributes[0], this.CompilationContext );
+        serializationData = new AttributeSerializationData( resolved.ParentSymbol, resolved.Attributes[0], this._refFactory );
 
         return true;
     }

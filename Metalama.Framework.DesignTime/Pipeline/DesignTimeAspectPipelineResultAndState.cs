@@ -1,15 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal sealed class AspectPipelineResultAndState
+internal sealed class DesignTimeAspectPipelineResultAndState
 {
-    public AspectPipelineResult Result { get; }
+    public DesignTimeAspectPipelineResult Result { get; }
 
     public AspectPipelineConfiguration Configuration { get; }
 
@@ -17,9 +18,9 @@ internal sealed class AspectPipelineResultAndState
 
     public DesignTimeAspectPipelineStatus Status { get; }
 
-    internal AspectPipelineResultAndState(
+    internal DesignTimeAspectPipelineResultAndState(
         ProjectVersion projectVersion,
-        AspectPipelineResult result,
+        DesignTimeAspectPipelineResult result,
         DesignTimeAspectPipelineStatus status,
         AspectPipelineConfiguration configuration )
     {

@@ -27,7 +27,7 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 /// <summary>
 /// Caches the pipeline results for each syntax tree.
 /// </summary>
-internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
+internal sealed partial class DesignTimeAspectPipelineResult : ITransitiveAspectsManifest
 {
     private static readonly ImmutableDictionary<string, SyntaxTreePipelineResult> _emptySyntaxTreeResults =
         ImmutableDictionary.Create<string, SyntaxTreePipelineResult>( StringComparer.Ordinal );
@@ -76,7 +76,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
     private byte[]? _serializedTransitiveAspectManifest;
 
-    private AspectPipelineResult(
+    private DesignTimeAspectPipelineResult(
         AspectPipelineConfiguration? configuration,
         ImmutableDictionary<string, SyntaxTreePipelineResult> syntaxTreeResults,
         ImmutableDictionary<string, SyntaxTreePipelineResult> invalidSyntaxTreeResults,
@@ -106,17 +106,17 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         }
     }
 
-    internal AspectPipelineResult() { }
+    internal DesignTimeAspectPipelineResult() { }
 
     /// <summary>
-    /// Gets the pipeline configuration, or potentially <c>null</c>  if the current <see cref="AspectPipelineResult"/> is empty.
+    /// Gets the pipeline configuration, or potentially <c>null</c>  if the current <see cref="DesignTimeAspectPipelineResult"/> is empty.
     /// </summary>
     public AspectPipelineConfiguration? Configuration { get; }
 
     /// <summary>
     /// Updates cache with a <see cref="DesignTimePipelineExecutionResult"/> that includes results for several syntax trees.
     /// </summary>
-    internal AspectPipelineResult Update(
+    internal DesignTimeAspectPipelineResult Update(
         PartialCompilation compilation,
         DesignTimeProjectVersion projectVersion,
         DesignTimePipelineExecutionResult pipelineResults,
@@ -318,7 +318,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         var inheritableOptions = inheritableOptionsBuilder?.ToImmutable() ?? this.InheritableOptions;
         var annotations = annotationsBuilder?.ToImmutable() ?? this.Annotations;
 
-        return new AspectPipelineResult(
+        return new DesignTimeAspectPipelineResult(
             configuration,
             syntaxTreeResultBuilder.ToImmutable(),
             ImmutableDictionary<string, SyntaxTreePipelineResult>.Empty,
@@ -662,12 +662,10 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
     // the providers of referenced projects. However cross-project references are still used for PE references.
     ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.ReferenceValidators => ImmutableArray<TransitiveValidatorInstance>.Empty;
 
-    public byte[] GetSerializedTransitiveAspectManifest( in ProjectServiceProvider serviceProvider, Compilation compilation )
+    public byte[] GetSerializedTransitiveAspectManifest( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
         if ( this._serializedTransitiveAspectManifest == null )
         {
-            var compilationContext = compilation.GetCompilationContext();
-
             var manifest = TransitiveAspectsManifest.Create(
                 this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
                 this.ReferenceValidators.ToTransitiveValidatorInstances( compilationContext ),

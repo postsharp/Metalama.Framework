@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Diagnostics;
@@ -43,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         [Memo]
-        private IRef<IType> Ref => this.Symbol.ToRef( this.GetCompilationContext() );
+        private IRef<IType> Ref => this.Symbol.ToRef( this.Compilation.RefFactory );
 
         IRef<IType> IType.ToRef() => this.Ref;
 

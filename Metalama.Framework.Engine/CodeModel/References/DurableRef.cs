@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Services;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
@@ -11,7 +10,7 @@ internal abstract class DurableRef<T> : BaseRef<T>, IDurableRef<T>
 {
     public string Id { get; }
 
-    public abstract IFullRef ToFullRef( CompilationContext compilationContext );
+    public abstract IFullRef ToFullRef( RefFactory refFactory );
 
     protected DurableRef( string id )
     {

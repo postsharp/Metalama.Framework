@@ -42,7 +42,7 @@ internal class MethodBuilderData : MemberBuilderData
     {
         this.DeclarationKind = builder.DeclarationKind; // Can be Method, Finalizer, Operator.
 
-        this._ref = new BuiltDeclarationRef<IMethod>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<IMethod>( this, containingDeclaration.RefFactory );
 
         this.IsReadOnly = builder.IsReadOnly;
         this.IsIteratorMethod = builder.IsIteratorMethod.AssertNotNull();

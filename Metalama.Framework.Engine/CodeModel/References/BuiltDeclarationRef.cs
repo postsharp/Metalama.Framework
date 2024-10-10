@@ -20,7 +20,7 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
 
     public DeclarationBuilderData BuilderData { get; }
 
-    public BuiltDeclarationRef( DeclarationBuilderData builder, CompilationContext compilationContext, GenericContext? genericContext = null )
+    public BuiltDeclarationRef( DeclarationBuilderData builder, RefFactory refFactory, GenericContext? genericContext = null ) : base( refFactory )
     {
         // Type parameter must match the builder type.
         Invariant.Assert(
@@ -35,19 +35,18 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
 
         this.BuilderData = builder;
         this._genericContext = genericContext ?? GenericContext.Empty;
-        this.CompilationContext = compilationContext;
     }
-
-    public override CompilationContext CompilationContext { get; }
 
     public override bool IsDefinition => this._genericContext.IsEmptyOrIdentity;
 
-    public override IFullRef<T> Definition => this.IsDefinition ? this : (IFullRef<T>) this.BuilderData.ToRef();
+    public override IFullRef<T> DefinitionRef => this.IsDefinition ? this : (IFullRef<T>) this.BuilderData.ToRef();
 
     public override FullRef<T> WithGenericContext( GenericContext genericContext )
-        => genericContext.IsEmptyOrIdentity ? this : new BuiltDeclarationRef<T>( this.BuilderData, this.CompilationContext, genericContext );
+        => genericContext.IsEmptyOrIdentity ? this : new BuiltDeclarationRef<T>( this.BuilderData, this.RefFactory, genericContext );
 
     public override IFullRef? ContainingDeclaration => this.BuilderData.ContainingDeclaration;
+
+    public override IFullRef<INamedType> DeclaringType => this.BuilderData.DeclaringType.AssertNotNull();
 
     public override string? Name
         => this.BuilderData switch

@@ -16,26 +16,28 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
 {
     public ISymbol Symbol { get; }
 
-    public override CompilationContext CompilationContext { get; }
-
     public override bool IsDefinition => this.Symbol.IsDefinitionSafe();
 
     [Memo]
-    public override IFullRef<T> Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
+    public override IFullRef<T> DefinitionRef => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.RefFactory, this.TargetKind );
 
     public override RefTargetKind TargetKind { get; }
 
-    public override IFullRef ContainingDeclaration => this.CompilationContext.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
+    [Memo]
+    public override IFullRef ContainingDeclaration => this.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
+
+    [Memo]
+    public override IFullRef<INamedType> DeclaringType => this.RefFactory.FromSymbol<INamedType>( this.Symbol.ContainingType );
 
     public override string Name => this.Symbol.Name;
 
     public override SerializableDeclarationId ToSerializableId() => this.Symbol.GetSerializableId();
 
-    public SymbolRef( ISymbol symbol, CompilationContext compilationContext, RefTargetKind targetKind = RefTargetKind.Default )
+    public SymbolRef( ISymbol symbol, RefFactory refFactory, RefTargetKind targetKind = RefTargetKind.Default ) : base( refFactory )
     {
         Invariant.Assert(
-            symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
-            $"The interface type was expected to be of type {symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind )} but was {typeof(T)}." );
+            symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
+            $"The interface type was expected to be of type {symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind )} but was {typeof(T)}." );
 
         // Verify that RefTargetKind is used only in reference to declarations that don't have a symbol, i.e. the reference must be normalized
         // before calling the constructor.
@@ -52,7 +54,6 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
 
         this.Symbol = symbol;
         this.TargetKind = targetKind;
-        this.CompilationContext = compilationContext;
     }
 
     public override FullRef<T> WithGenericContext( GenericContext genericContext )
@@ -67,7 +68,7 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
             var mappedSymbol =
                 genericContext.NamedTypeSymbol!.GetMembers( this.Symbol.Name ).Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
 
-            return new SymbolRef<T>( mappedSymbol, this.CompilationContext, this.TargetKind );
+            return new SymbolRef<T>( mappedSymbol, this.RefFactory, this.TargetKind );
         }
     }
 

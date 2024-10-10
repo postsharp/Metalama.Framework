@@ -137,8 +137,9 @@ class C<T>
         }
 
         // Also test a Ref roundtrip.
-        var symbolRoundtripFromRef = compilation.GetCompilationContext()
-            .RefFactory.FromAnySymbol( symbol )
+        var symbolRoundtripFromRef = compilation
+            .GetRefFactory()
+            .FromAnySymbol( symbol )
             .GetSymbol( compilation.GetRoslynCompilation() );
 
         if ( requireSameInstance )

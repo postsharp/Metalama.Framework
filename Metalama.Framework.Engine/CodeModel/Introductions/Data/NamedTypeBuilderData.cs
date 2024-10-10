@@ -31,7 +31,7 @@ internal class NamedTypeBuilderData : MemberOrNamedTypeBuilderData
 
     public NamedTypeBuilderData( NamedTypeBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<INamedType>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<INamedType>( this, containingDeclaration.RefFactory );
         this.BaseType = builder.BaseType?.ToFullRef();
         this.TypeParameters = builder.TypeParameters.ToImmutable( this._ref );
         this.ImplementedInterfaces = builder.ImplementedInterfaces.SelectAsImmutableArray( i => i.ToFullRef() );

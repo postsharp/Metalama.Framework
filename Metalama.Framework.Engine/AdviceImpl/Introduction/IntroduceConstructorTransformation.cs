@@ -95,7 +95,7 @@ internal sealed class IntroduceConstructorTransformation
         ];
     }
 
-    public IRef<IMember>? ReplacedMember { get; }
+    public IFullRef<IMember>? ReplacedMember { get; }
 
     public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.InsertPosition;
 

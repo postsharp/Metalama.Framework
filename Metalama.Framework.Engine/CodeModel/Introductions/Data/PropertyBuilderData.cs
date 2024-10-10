@@ -44,7 +44,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     public PropertyBuilderData( PropertyBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<IProperty>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<IProperty>( this, containingDeclaration.RefFactory );
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.InitializerExpression = builder.InitializerExpression;
         this.IsAutoPropertyOrField = builder.IsAutoPropertyOrField;

@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advising
@@ -27,12 +26,12 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
             IAdviceAttribute adviceAttribute,
-            CompilationContext compilationContext,
+            RefFactory refFactory,
             TemplateKind selectedKind,
             TemplateKind interpretedKind )
             where T : class, IMemberOrNamedType
             => new(
-                compilationContext.RefFactory.FromSymbol<T>( symbol ),
+                refFactory.FromSymbol<T>( symbol ),
                 templateClassMember,
                 templateProvider,
                 adviceAttribute,
@@ -53,10 +52,10 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
             IAdviceAttribute adviceAttribute,
-            CompilationContext compilationContext,
+            RefFactory refFactory,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
-            => new( compilationContext.RefFactory.FromSymbol<T>( symbol ), templateClassMember, templateProvider, adviceAttribute, selectedKind );
+            => new( refFactory.FromSymbol<T>( symbol ), templateClassMember, templateProvider, adviceAttribute, selectedKind );
 
         public static TemplateMember<T> Create<T>(
             T implementation,
@@ -75,11 +74,11 @@ namespace Metalama.Framework.Engine.Advising
             ISymbol symbol,
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
-            CompilationContext compilationContext,
+            RefFactory refFactory,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
             => new(
-                compilationContext.RefFactory.FromSymbol<T>( symbol ),
+                refFactory.FromSymbol<T>( symbol ),
                 templateClassMember,
                 templateProvider,
                 (ITemplateAttribute) templateClassMember.Attribute.AssertNotNull(),

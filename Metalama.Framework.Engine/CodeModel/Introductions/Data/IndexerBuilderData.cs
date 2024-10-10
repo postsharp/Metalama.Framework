@@ -23,7 +23,7 @@ internal class IndexerBuilderData : PropertyOrIndexerBuilderData
 
     public IndexerBuilderData( IndexerBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<IIndexer>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<IIndexer>( this, containingDeclaration.RefFactory );
         this.Parameters = builder.Parameters.ToImmutable( this._ref );
         this.OverriddenIndexer = builder.OverriddenIndexer?.ToRef();
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );

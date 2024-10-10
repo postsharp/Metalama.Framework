@@ -14,24 +14,23 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
 {
     public SyntaxNode SyntaxNode { get; }
 
-    public SyntaxRef( SyntaxNode syntaxNode, RefTargetKind targetKind, CompilationContext compilationContext )
+    public SyntaxRef( SyntaxNode syntaxNode, RefTargetKind targetKind, RefFactory refFactory ) : base( refFactory )
     {
         this.SyntaxNode = syntaxNode.AssertNotNull();
         this.TargetKind = targetKind;
-        this.CompilationContext = compilationContext;
     }
-
-    public override CompilationContext CompilationContext { get; }
 
     public override FullRef<T> WithGenericContext( GenericContext genericContext ) => throw new NotImplementedException();
 
     public override bool IsDefinition => true;
 
-    public override IFullRef<T> Definition => this;
+    public override IFullRef<T> DefinitionRef => this;
 
     public override RefTargetKind TargetKind { get; }
 
     public override IFullRef? ContainingDeclaration => throw new NotImplementedException();
+
+    public override IFullRef<INamedType> DeclaringType => throw new NotImplementedException();
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {
@@ -78,10 +77,8 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
             _ => $"{this.SyntaxNode.GetType().Name}:{this.TargetKind}"
         };
 
-    public override bool IsValid => true;
-
     protected override IFullRef<TOut> CastAsFullRef<TOut>()
-        => this as IFullRef<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.CompilationContext );
+        => this as IFullRef<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.RefFactory );
 
     public override bool Equals( IRef? other, RefComparison comparison )
     {

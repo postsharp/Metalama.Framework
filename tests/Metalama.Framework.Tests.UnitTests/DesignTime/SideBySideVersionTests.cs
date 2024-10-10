@@ -63,7 +63,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         return (currentVersionPipelineFactory, dependentCompilation, dependentCodeSyntaxTree);
     }
 
-    private async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> RunPipeline( string masterCode, string dependentCode )
+    private async Task<FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>> RunPipeline( string masterCode, string dependentCode )
     {
         using var testContext = this.CreateTestContext();
         var (pipelineFactory, dependentCompilation, _) = await PreparePipeline( testContext, masterCode, dependentCode );

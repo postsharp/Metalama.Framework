@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -31,19 +30,19 @@ internal static class TypedConstantExtensions
         return TypedConstant.CreateUnchecked( value, type );
     }
 
-    public static TypedConstantRef ToOurTypedConstantRef( this RoslynTypedConstant constant, CompilationContext compilationContext )
+    public static TypedConstantRef ToOurTypedConstantRef( this RoslynTypedConstant constant, RefFactory refFactory )
     {
-        var type = constant.Type.AssertSymbolNotNull().ToRef( compilationContext );
+        var type = constant.Type.AssertSymbolNotNull().ToRef( refFactory );
 
         return constant.Kind switch
         {
             TypedConstantKind.Enum => new TypedConstantRef( constant.Value, type ),
             Primitive => new TypedConstantRef( constant.Value, default ),
             TypedConstantKind.Type => new TypedConstantRef(
-                ((ITypeSymbol) constant.Value.AssertNotNull()).ToRef( compilationContext ),
+                ((ITypeSymbol) constant.Value.AssertNotNull()).ToRef( refFactory ),
                 type ),
             TypedConstantKind.Array => new TypedConstantRef(
-                constant.Values.Select( x => ToOurTypedConstantRef( x, compilationContext ) ).ToImmutableArray(),
+                constant.Values.Select( x => ToOurTypedConstantRef( x, refFactory ) ).ToImmutableArray(),
                 type ),
             _ => throw new ArgumentException( nameof(constant) )
         };

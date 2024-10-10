@@ -15,15 +15,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// </summary>
     internal abstract class AttributeRef : IRef<IAttribute>, IEquatable<AttributeRef>, IRefImpl
     {
-        protected AttributeRef( IFullRef<IDeclaration> containingDeclaration, IFullRef<INamedType> attributeType )
-        {
-            this.ContainingDeclaration = containingDeclaration;
-            this.AttributeType = attributeType.AssertNotNull();
-        }
+        // Note: These references are not necessarily full refs in case of deserialization.
+        public abstract IRef<IDeclaration> ContainingDeclaration { get; }
 
-        public IFullRef ContainingDeclaration { get; }
-
-        public IFullRef<INamedType> AttributeType { get; }
+        public abstract IRef<INamedType> AttributeType { get; }
 
         public abstract string? Name { get; }
 

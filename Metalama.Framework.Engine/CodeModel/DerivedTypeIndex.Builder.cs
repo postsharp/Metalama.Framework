@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
@@ -9,23 +8,23 @@ using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
 public partial class DerivedTypeIndex
 {
-    internal sealed class Builder
+    internal sealed partial class Builder
     {
+        private readonly ImmutableDictionaryOfArray<NamedTypeRef, NamedTypeRef>.Builder _relationships;
+        private readonly ImmutableHashSet<NamedTypeRef>.Builder _processedTypes;
         private readonly CompilationContext _compilationContext;
-        private readonly ImmutableDictionaryOfArray<IFullRef<INamedType>, IFullRef<INamedType>>.Builder _relationships;
-        private readonly ImmutableHashSet<IFullRef<INamedType>>.Builder _processedTypes;
 
         internal Builder( CompilationContext compilationContext )
         {
             this._compilationContext = compilationContext;
-
-            this._relationships = new ImmutableDictionaryOfArray<IFullRef<INamedType>, IFullRef<INamedType>>.Builder( RefEqualityComparer<INamedType>.Default );
-            this._processedTypes = ImmutableHashSet.CreateBuilder<IFullRef<INamedType>>( RefEqualityComparer<INamedType>.Default );
+            this._relationships = new ImmutableDictionaryOfArray<NamedTypeRef, NamedTypeRef>.Builder();
+            this._processedTypes = ImmutableHashSet.CreateBuilder<NamedTypeRef>();
         }
 
         internal Builder( DerivedTypeIndex immutable )
@@ -56,7 +55,7 @@ public partial class DerivedTypeIndex
 
         public void AnalyzeType( INamedTypeSymbol type )
         {
-            if ( !this._processedTypes.Add( type.ToRef( this._compilationContext ) ) )
+            if ( !this._processedTypes.Add( new NamedTypeRef( type ) ) )
             {
                 return;
             }
@@ -66,8 +65,8 @@ public partial class DerivedTypeIndex
                 var baseType = type.BaseType.OriginalDefinition;
 
                 this._relationships.Add(
-                    baseType.ToRef( this._compilationContext ),
-                    type.ToRef( this._compilationContext ) );
+                    new NamedTypeRef( baseType ),
+                    new NamedTypeRef( type ) );
 
                 this.AnalyzeType( baseType );
             }
@@ -82,8 +81,8 @@ public partial class DerivedTypeIndex
                 var interfaceType = interfaceImpl.OriginalDefinition;
 
                 this._relationships.Add(
-                    interfaceType.ToRef( this._compilationContext ),
-                    type.ToRef( this._compilationContext ) );
+                    new NamedTypeRef( interfaceType ),
+                    new NamedTypeRef( type ) );
 
                 this.AnalyzeType( interfaceType );
             }
@@ -96,46 +95,48 @@ public partial class DerivedTypeIndex
 
         private void AnalyzeType( NamedTypeBuilderData type )
         {
-            if ( !this._processedTypes.Add( type.ToRef() ) )
+            if ( !this._processedTypes.Add( new NamedTypeRef( type ) ) )
             {
                 return;
             }
 
-            if ( type.BaseType is { IsValid: true } )
+            if ( type.BaseType is { Definition.TypeKind: not TypeKind.Error } )
             {
-                var baseType = type.BaseType.Definition;
-                this._relationships.Add( baseType, type.ToRef() );
+                var baseType = type.BaseType.DefinitionRef;
+                this._relationships.Add( new NamedTypeRef( baseType ), new NamedTypeRef( type ) );
                 this.AnalyzeType( baseType );
             }
 
             foreach ( var interfaceImpl in type.ImplementedInterfaces )
             {
-                if ( !interfaceImpl.IsValid )
+                if ( interfaceImpl is { Definition.TypeKind: TypeKind.Error } )
                 {
                     continue;
                 }
 
-                var interfaceType = interfaceImpl.Definition;
-                this._relationships.Add( interfaceType, type.ToRef() );
+                var interfaceType = interfaceImpl.DefinitionRef;
+                this._relationships.Add( new NamedTypeRef( interfaceType ), new NamedTypeRef( type ) );
                 this.AnalyzeType( interfaceType );
             }
         }
 
         public void AddDerivedType( INamedTypeSymbol baseType, INamedTypeSymbol derivedType )
             => this._relationships.Add(
-                baseType.ToRef( this._compilationContext ),
-                derivedType.ToRef( this._compilationContext ) );
+                new NamedTypeRef( baseType ),
+                new NamedTypeRef( derivedType ) );
 
-        public void AddDerivedType( IFullRef<INamedType> baseType, IFullRef<INamedType> derivedType ) => this._relationships.Add( baseType, derivedType );
+        public void AddDerivedType( IFullRef<INamedType> baseType, IFullRef<INamedType> derivedType )
+            => this._relationships.Add( new NamedTypeRef( baseType ), new NamedTypeRef( derivedType ) );
 
-        public void AddDerivedType( INamedType baseType, INamedType derivedType ) => this._relationships.Add( baseType.ToFullRef(), derivedType.ToFullRef() );
+        public void AddDerivedType( INamedType baseType, INamedType derivedType )
+            => this._relationships.Add( new NamedTypeRef( baseType.ToFullRef() ), new NamedTypeRef( derivedType.ToFullRef() ) );
 
         public DerivedTypeIndex ToImmutable()
         {
             return new DerivedTypeIndex(
-                this._compilationContext,
                 this._relationships.ToImmutable(),
-                this._processedTypes.ToImmutable() );
+                this._processedTypes.ToImmutable(),
+                this._compilationContext );
         }
     }
 }

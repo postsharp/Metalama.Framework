@@ -13,7 +13,7 @@ internal class NamespaceBuilderData : NamedDeclarationBuilderData
 
     public NamespaceBuilderData( NamespaceBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<INamespace>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<INamespace>( this, containingDeclaration.RefFactory );
         this.Attributes = ImmutableArray<AttributeBuilderData>.Empty;
     }
 

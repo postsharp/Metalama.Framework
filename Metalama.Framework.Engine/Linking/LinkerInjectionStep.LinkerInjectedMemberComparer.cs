@@ -16,8 +16,6 @@ internal sealed partial class LinkerInjectionStep
 {
     private sealed class InjectedMemberComparer : IComparer<InjectedMember>
     {
-        private readonly CompilationModel _compilationModel;
-
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
             { DeclarationKind.Field, 0 },
@@ -37,12 +35,7 @@ internal sealed partial class LinkerInjectionStep
             { Accessibility.PrivateProtected, 4 },
             { Accessibility.Private, 5 }
         }.ToImmutableDictionary();
-
-        public InjectedMemberComparer( CompilationModel compilationModel )
-        {
-            this._compilationModel = compilationModel;
-        }
-
+        
         public int Compare( InjectedMember? x, InjectedMember? y )
         {
             if ( x == y )
@@ -79,8 +72,8 @@ internal sealed partial class LinkerInjectionStep
                 return nameComparison;
             }
 
-            var declaration = this.GetDeclaration( x );
-            var otherDeclaration = this.GetDeclaration( y );
+            var declaration = GetDeclaration( x );
+            var otherDeclaration = GetDeclaration( y );
 
             // Order by signature.
             if ( declaration is IMethod )
@@ -214,7 +207,7 @@ internal sealed partial class LinkerInjectionStep
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
-        private INamedDeclaration GetDeclaration( InjectedMember injectedMember )
+        private static INamedDeclaration GetDeclaration( InjectedMember injectedMember )
         {
             var declaration = injectedMember.Declaration;
 
@@ -228,7 +221,7 @@ internal sealed partial class LinkerInjectionStep
                 throw new AssertionFailedException( "Don't know how to sort." );
             }
 
-            return declaration.As<INamedDeclaration>().GetTarget( this._compilationModel );
+            return declaration.As<INamedDeclaration>().Definition;
         }
     }
 }

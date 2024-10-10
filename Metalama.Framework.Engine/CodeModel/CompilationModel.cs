@@ -43,6 +43,8 @@ namespace Metalama.Framework.Engine.CodeModel
         private static int _nextId;
         private readonly int _id = Interlocked.Increment( ref _nextId );
 
+        internal new RefFactory RefFactory { get; }
+
         static CompilationModel()
         {
             MetalamaEngineModuleInitializer.EnsureInitialized();
@@ -157,7 +159,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IProject ICompilation.Project => this.Project;
 
-        internal CompilationContext CompilationContext { get; }
+        public CompilationContext CompilationContext { get; }
 
         public PartialCompilation PartialCompilation { get; }
 
@@ -183,8 +185,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Project = project;
             this._debugLabel = debugLabel;
             this.ExternalAnnotationProvider = externalAnnotationProvider;
-
             this.CompilationContext = partialCompilation.Compilation.GetCompilationContext();
+            this.RefFactory = new RefFactory( this );
 
             this._staticConstructors =
                 ImmutableDictionary<IFullRef<INamedType>, ConstructorBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
@@ -236,7 +238,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.SerializableTypeIdResolver = new SerializableTypeIdResolverForIType( this );
 
             // Discover custom attributes.
-            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
+            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this );
 
             foreach ( var tree in partialCompilation.SyntaxTrees )
             {
@@ -307,6 +309,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private CompilationModel( CompilationModel prototype, bool mutable, string? debugLabel, CompilationModelOptions? options = null )
         {
             this.IsMutable = mutable;
+            this.RefFactory = prototype.RefFactory; // Intentionally sharing the RefFactory.
             this.Project = prototype.Project;
             this.Helpers = prototype.Helpers;
             this.Options = options ?? prototype.Options;

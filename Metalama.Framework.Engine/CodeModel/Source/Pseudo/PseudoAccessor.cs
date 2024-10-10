@@ -94,7 +94,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
     [Memo]
-    private IRef<IMethod> Ref => this.GetCompilationContext().RefFactory.PseudoAccessor( this );
+    private IRef<IMethod> Ref => this.Compilation.RefFactory.PseudoAccessor( this );
 
     public IRef<IMethod> ToRef() => this.Ref;
 

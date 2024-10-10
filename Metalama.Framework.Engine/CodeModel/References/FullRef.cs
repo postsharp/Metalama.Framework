@@ -18,22 +18,55 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
     where T : class, ICompilationElement
 {
-    public new IFullRef<TOut> As<TOut>() 
-        where TOut : class, ICompilationElement 
+    protected FullRef( RefFactory refFactory )
+    {
+        this.RefFactory = refFactory;
+    }
+
+    public new IFullRef<TOut> As<TOut>()
+        where TOut : class, ICompilationElement
         => this.CastAsFullRef<TOut>();
 
-    protected abstract IFullRef<TOut> CastAsFullRef<TOut>() 
+    protected abstract IFullRef<TOut> CastAsFullRef<TOut>()
         where TOut : class, ICompilationElement;
 
     protected sealed override IRef<TOut> CastAsRef<TOut>() => this.CastAsFullRef<TOut>();
 
     public sealed override bool IsDurable => false;
 
-    public abstract CompilationContext CompilationContext { get; }
+    public CompilationContext CompilationContext => this.RefFactory.CompilationContext;
 
     IFullRef<T> IFullRef<T>.WithGenericContext( GenericContext genericContext ) => this.WithGenericContext( genericContext );
 
+    public T Definition
+    {
+        get
+        {
+            if ( this.IsDefinition )
+            {
+                return this.Declaration;
+            }
+            else
+            {
+#if DEBUG
+                using ( StackOverflowHelper.Detect() )
+                {
+#endif
+                    return this.DefinitionRef.Definition;
+
+#if DEBUG
+                }
+#endif
+            }
+        }
+    }
+
+    [Memo]
+    public T Declaration => this.GetTarget( this.RefFactory.CanonicalCompilation );
+
     public abstract FullRef<T> WithGenericContext( GenericContext genericContext );
+
+    public RefFactory RefFactory { get; }
 
     /// <summary>
     /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
@@ -59,7 +92,7 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
 
     public abstract bool IsDefinition { get; }
 
-    public abstract IFullRef<T> Definition { get; }
+    public abstract IFullRef<T> DefinitionRef { get; }
 
     [Memo]
     private DeclarationIdRef<T> CompilationNeutralRef => new( this.ToSerializableId() );

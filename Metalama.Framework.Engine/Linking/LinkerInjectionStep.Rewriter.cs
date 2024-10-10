@@ -48,7 +48,7 @@ internal sealed partial class LinkerInjectionStep
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
         }
 
-        private RefFactory RefFactory => this._compilation.CompilationContext.RefFactory;
+        private RefFactory RefFactory => this._compilation.RefFactory;
 
         private CompilationContext CompilationContext => this._parent._compilationContext;
 
@@ -453,7 +453,7 @@ internal sealed partial class LinkerInjectionStep
                         break;
 
                     case IFullRef<IPropertyOrIndexer> propertyOrIndexerRef:
-                        var propertyOrIndexer = propertyOrIndexerRef.GetTarget( this._compilation );
+                        var propertyOrIndexer = propertyOrIndexerRef.Definition;
 
                         if ( propertyOrIndexer.GetMethod != null )
                         {
@@ -636,7 +636,7 @@ internal sealed partial class LinkerInjectionStep
                         contextDeclaration switch
                         {
                             IFullRef<IConstructor> => true,
-                            IFullRef<IMethod> methodRef => methodRef.MethodBodyReturnsVoid,
+                            IFullRef<IMethod> methodRef => methodRef.DoReturnStatementsRequireArgument(),
                             _ => throw new InvalidOperationException( $"Not supported: {contextDeclaration}" )
                         };
 
@@ -665,7 +665,7 @@ internal sealed partial class LinkerInjectionStep
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
                     {
-                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { MethodKind: MethodKind.PropertyGet } );
+                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { Definition.MethodKind: MethodKind.PropertyGet } );
 
                         return
                             property.PartialUpdate(
@@ -680,7 +680,7 @@ internal sealed partial class LinkerInjectionStep
 
                 case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
                     {
-                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { MethodKind: MethodKind.PropertyGet } );
+                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { Definition.MethodKind: MethodKind.PropertyGet } );
 
                         return
                             indexer.PartialUpdate(
@@ -696,7 +696,7 @@ internal sealed partial class LinkerInjectionStep
                 case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
                     {
                         var methodRef = contextDeclaration.As<IMethod>();
-                        var methodKind = methodRef.MethodKind;
+                        var methodKind = methodRef.Definition.MethodKind;
                         Invariant.Assert( methodKind is MethodKind.PropertyGet or MethodKind.PropertySet );
 
                         return
@@ -1115,7 +1115,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var constructor = this._compilation.CompilationContext.RefFactory.FromSymbol<IConstructor>( symbol );
+                var constructor = this._compilation.RefFactory.FromSymbol<IConstructor>( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( constructor );
 
                 node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
@@ -1143,7 +1143,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null && symbol is not { PartialImplementationPart: not null } )
             {
-                var method = this._compilation.CompilationContext.RefFactory.FromSymbol<IMethod>( symbol );
+                var method = this._compilation.RefFactory.FromSymbol<IMethod>( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
                 node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
@@ -1167,7 +1167,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var method = this._compilation.CompilationContext.RefFactory.FromSymbol<IMethod>( symbol );
+                var method = this._compilation.RefFactory.FromSymbol<IMethod>( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
                 node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
@@ -1234,11 +1234,11 @@ internal sealed partial class LinkerInjectionStep
 
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalNode ).AssertSymbolNotNull();
-            var property = this.CompilationContext.RefFactory.FromSymbol<IProperty>( symbol );
+            var property = this._compilation.RefFactory.FromSymbol<IProperty>( symbol );
 
             if ( symbol is { SetMethod: { } setMethodSymbol } )
             {
-                var setter = this.CompilationContext.RefFactory.FromSymbol<IMethod>( setMethodSymbol );
+                var setter = this._compilation.RefFactory.FromSymbol<IMethod>( setMethodSymbol );
 
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( setter, property );
 
@@ -1275,14 +1275,14 @@ internal sealed partial class LinkerInjectionStep
 
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalNode );
-            
+
             if ( symbol != null )
             {
-                var indexer = this.CompilationContext.RefFactory.FromSymbol<IIndexer>( symbol );
+                var indexer = this.RefFactory.FromSymbol<IIndexer>( symbol );
 
                 if ( symbol.GetMethod != null )
                 {
-                    var getter = this.CompilationContext.RefFactory.FromSymbol<IMethod>( symbol.GetMethod );
+                    var getter = this.RefFactory.FromSymbol<IMethod>( symbol.GetMethod );
                     var entryStatements = this._transformationCollection.GetInjectedEntryStatements( getter, indexer );
 
                     node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
@@ -1294,7 +1294,7 @@ internal sealed partial class LinkerInjectionStep
 
                 if ( symbol.SetMethod != null )
                 {
-                    var setter = this.CompilationContext.RefFactory.FromSymbol<IMethod>( symbol.SetMethod );
+                    var setter = this._compilation.RefFactory.FromSymbol<IMethod>( symbol.SetMethod );
                     var entryStatements = this._transformationCollection.GetInjectedEntryStatements( setter );
 
                     node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(

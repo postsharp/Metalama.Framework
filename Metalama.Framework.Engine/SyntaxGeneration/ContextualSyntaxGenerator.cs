@@ -44,6 +44,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
     private readonly ConcurrentDictionary<IRef<IType>, TypeSyntax> _typeSyntaxCache;
+    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSymbolSyntaxCache;
 
     public bool IsNullAware { get; }
 
@@ -54,6 +55,7 @@ internal sealed partial class ContextualSyntaxGenerator
         this.SyntaxGenerationContext = context;
         this._syntaxGeneratorForIType = new SyntaxGeneratorForIType( context.Options );
         this._typeSyntaxCache = new ConcurrentDictionary<IRef<IType>, TypeSyntax>( RefEqualityComparer<IType>.IncludeNullability );
+        this._typeSymbolSyntaxCache = new ConcurrentDictionary<ITypeSymbol, TypeSyntax>( SymbolEqualityComparer.IncludeNullability );
         this.IsNullAware = nullAware;
     }
 
@@ -488,8 +490,8 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
-            return this._typeSyntaxCache.GetOrAdd(
-                symbol.ToRef( this.SyntaxGenerationContext.CompilationContext ),
+            return this._typeSymbolSyntaxCache.GetOrAdd(
+                symbol,
                 static ( _, x ) => x.This.TypeCore( x.Type ),
                 (This: this, Type: symbol) );
         }

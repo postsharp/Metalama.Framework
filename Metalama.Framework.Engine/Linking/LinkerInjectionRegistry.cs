@@ -117,7 +117,7 @@ internal sealed class LinkerInjectionRegistry
                     _ => throw new AssertionFailedException( $"Unsupported transformation {injectedMember.Transformation}." )
                 };
 
-                var typeMember = overriddenMember.TypeMember;
+                var typeMember = overriddenMember.GetTypeMember();
 
                 // These are auxiliary overrides created as a result of another transformation.
                 var list = overriddenDeclarations.GetOrAdd( typeMember, _ => new List<ISymbol>() );

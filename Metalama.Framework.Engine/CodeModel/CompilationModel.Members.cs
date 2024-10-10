@@ -255,14 +255,14 @@ public sealed partial class CompilationModel
 
     internal ConstructorBuilderData? GetStaticConstructor( INamedTypeSymbol declaringType )
     {
-        this._staticConstructors.TryGetValue( declaringType.ToRef( this.CompilationContext ), out var value );
+        this._staticConstructors.TryGetValue( declaringType.ToRef( this.RefFactory ), out var value );
 
         return value;
     }
 
     internal MethodBuilderData? GetFinalizer( INamedTypeSymbol declaringType )
     {
-        this._finalizers.TryGetValue( declaringType.ToRef( this.CompilationContext ), out var value );
+        this._finalizers.TryGetValue( declaringType.ToRef( this.RefFactory ), out var value );
 
         return value;
     }
@@ -339,7 +339,7 @@ public sealed partial class CompilationModel
         switch ( replaced )
         {
             case IFullRef<IConstructor> replacedConstructor:
-                if ( !replacedConstructor.IsStatic )
+                if ( !replacedConstructor.Definition.IsStatic )
                 {
                     var constructors = this.GetConstructorCollection( replacedConstructor.ContainingDeclaration.AssertNotNull().As<INamedType>(), true );
                     constructors.Remove( replacedConstructor );

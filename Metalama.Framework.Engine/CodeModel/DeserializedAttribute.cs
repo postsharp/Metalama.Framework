@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Utilities;
@@ -56,7 +55,7 @@ internal class DeserializedAttribute : IAttributeImpl
     public IDeclaration ContainingDeclaration => this._serializationData.ContainingDeclaration.GetTarget( this.Compilation );
 
     [Memo]
-    private AttributeRef AttributeRef => new DeserializedAttributeRef( this._serializationData, this.GetCompilationContext() );
+    private AttributeRef AttributeRef => new DeserializedAttributeRef( this._serializationData );
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.AttributeRef;
 

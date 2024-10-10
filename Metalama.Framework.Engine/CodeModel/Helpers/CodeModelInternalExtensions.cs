@@ -23,6 +23,8 @@ internal static class CodeModelInternalExtensions
 {
     public static CompilationModel GetCompilationModel( this ICompilationElement declaration ) => (CompilationModel) declaration.Compilation;
 
+    public static RefFactory GetRefFactory( this ICompilationElement declaration ) => ((CompilationModel) declaration.Compilation).RefFactory;
+
     [Obsolete( "Use the Compilation property." )]
     public static CompilationModel GetCompilationModel( this ICompilationElementImpl declaration ) => declaration.Compilation;
 

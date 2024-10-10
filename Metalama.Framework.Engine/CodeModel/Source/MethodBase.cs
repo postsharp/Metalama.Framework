@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.Compilation.GetParameterCollection( this.GetMethodBaseRef().Definition ) );
+                this.Compilation.GetParameterCollection( this.GetMethodBaseRef().DefinitionRef ) );
 
         public MethodKind MethodKind => this.MethodSymbol.MethodKind.ToOurMethodKind();
 

@@ -104,7 +104,7 @@ internal sealed partial class LinkerInjectionStep
 
             this._transformationsCausingAuxiliaryOverrides = [];
             this._introducedSyntaxTrees = [];
-            this._injectedMemberComparer = new InjectedMemberComparer( finalCompilationModel );
+            this._injectedMemberComparer = new InjectedMemberComparer();
         }
 
         public void AddInjectedMember( InjectedMember injectedMember )

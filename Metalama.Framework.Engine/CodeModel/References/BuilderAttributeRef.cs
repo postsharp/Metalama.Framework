@@ -16,12 +16,14 @@ internal sealed class BuilderAttributeRef : AttributeRef
 {
     public AttributeBuilderData BuilderData { get; }
 
-    public BuilderAttributeRef( AttributeBuilderData builderData ) : base(
-        builderData.ContainingDeclaration,
-        builderData.Type )
+    public BuilderAttributeRef( AttributeBuilderData builderData )
     {
         this.BuilderData = builderData;
     }
+
+    public override IRef<IDeclaration> ContainingDeclaration => this.BuilderData.ContainingDeclaration;
+
+    public override IRef<INamedType> AttributeType => this.BuilderData.Constructor.DeclaringType.AssertNotNull();
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -18,7 +19,7 @@ internal sealed partial class LinkerInjectionStep
         /// <summary>
         /// Gets the member for which this context exists.
         /// </summary>
-        public IRef<IMember> ContextMember { get; }
+        public IFullRef<IMember> ContextMember { get; }
 
         /// <summary>
         /// Gets the first transformation that uses this context.
@@ -44,7 +45,7 @@ internal sealed partial class LinkerInjectionStep
             CompilationModel compilation,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             IInsertStatementTransformation originTransformation,
-            IRef<IMember> contextMember ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
+            IFullRef<IMember> contextMember ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
             this.ContextMember = contextMember;
             this.OriginTransformation = originTransformation;

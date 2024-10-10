@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
@@ -48,7 +49,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         ];
     }
 
-    public IRef<IMember>? ReplacedMember => this.BuilderData.ReplacedImplicitConstructor;
+    public IFullRef<IMember>? ReplacedMember => this.BuilderData.ReplacedImplicitConstructor;
 
     public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.InsertPosition;
 

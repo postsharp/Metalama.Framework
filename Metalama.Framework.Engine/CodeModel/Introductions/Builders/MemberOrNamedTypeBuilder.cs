@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.Abstractions;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -11,7 +9,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberOrNamedTypeImpl
+internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMemberOrNamedTypeBuilderImpl
 {
     private Accessibility _accessibility;
     private bool _isSealed;

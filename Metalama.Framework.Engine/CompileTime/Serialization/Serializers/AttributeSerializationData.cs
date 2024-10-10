@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -25,17 +24,16 @@ internal class AttributeSerializationData
 
     public ImmutableArray<KeyValuePair<string, TypedConstantRef>> NamedArguments { get; }
 
-    public AttributeSerializationData( ISymbol symbol, AttributeData attributeData, CompilationContext compilationContext )
+    public AttributeSerializationData( ISymbol symbol, AttributeData attributeData, RefFactory refFactory )
     {
-        this.ContainingDeclaration = compilationContext.RefFactory.FromDeclarationSymbol( symbol );
-        compilationContext.RefFactory.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull() );
-        this.Constructor = compilationContext.RefFactory.FromSymbol<IConstructor>( attributeData.AttributeConstructor.AssertSymbolNotNull() );
-        this.Type = compilationContext.RefFactory.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull() );
-        this.ConstructorArguments = attributeData.ConstructorArguments.SelectAsImmutableArray( c => c.ToOurTypedConstantRef( compilationContext ) );
+        this.ContainingDeclaration = refFactory.FromDeclarationSymbol( symbol );
+        this.Constructor = refFactory.FromSymbol<IConstructor>( attributeData.AttributeConstructor.AssertSymbolNotNull() );
+        this.Type = refFactory.FromSymbol<INamedType>( attributeData.AttributeClass.AssertSymbolNotNull() );
+        this.ConstructorArguments = attributeData.ConstructorArguments.SelectAsImmutableArray( c => c.ToOurTypedConstantRef( refFactory ) );
 
         this.NamedArguments =
             attributeData.NamedArguments.SelectAsImmutableArray(
-                x => new KeyValuePair<string, TypedConstantRef>( x.Key, x.Value.ToOurTypedConstantRef( compilationContext ) ) );
+                x => new KeyValuePair<string, TypedConstantRef>( x.Key, x.Value.ToOurTypedConstantRef( refFactory ) ) );
     }
 
     public AttributeSerializationData( AttributeBuilderData builder )

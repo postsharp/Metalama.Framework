@@ -39,7 +39,7 @@ internal class EventBuilderData : MemberBuilderData
 
     public EventBuilderData( EventBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<IEvent>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<IEvent>( this, containingDeclaration.RefFactory );
 
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.Type = builder.Type.ToRef();

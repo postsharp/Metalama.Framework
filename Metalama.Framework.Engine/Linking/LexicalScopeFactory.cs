@@ -29,7 +29,7 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
      */
 
     private readonly CompilationModel _compilationModel;
-    private readonly ConcurrentDictionary<IRef<IDeclaration>, TemplateLexicalScope> _scopes;
+    private readonly ConcurrentDictionary<IFullRef<IDeclaration>, TemplateLexicalScope> _scopes;
     private readonly ConcurrentDictionary<TypeDeclarationSyntax, ImmutableHashSet<string>> _identifiersInTypeDeclaration = new();
     private readonly SemanticModelProvider _semanticModelProvider;
 
@@ -37,13 +37,13 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
     {
         this._compilationModel = compilation;
         this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
-        this._scopes = new ConcurrentDictionary<IRef<IDeclaration>, TemplateLexicalScope>( RefEqualityComparer<IDeclaration>.Default );
+        this._scopes = new ConcurrentDictionary<IFullRef<IDeclaration>, TemplateLexicalScope>( RefEqualityComparer<IDeclaration>.Default );
     }
 
     /// <summary>
     /// Gets a shared lexical code where consumers can add their own symbols.
     /// </summary>
-    public TemplateLexicalScope GetLexicalScope( IRef<IDeclaration> declaration ) => this._scopes.GetOrAdd( declaration, this.CreateLexicalScope );
+    public TemplateLexicalScope GetLexicalScope( IFullRef<IDeclaration> declaration ) => this._scopes.GetOrAdd( declaration, this.CreateLexicalScope );
 
     private ImmutableHashSet<string> GetIdentifiersInTypeScope( TypeDeclarationSyntax type )
         => this._identifiersInTypeDeclaration.GetOrAdd( type, this.GetIdentifiersInTypeScopeCore );
@@ -93,13 +93,13 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
         }
     }
 
-    private TemplateLexicalScope CreateLexicalScope( IRef<IDeclaration> declarationRef )
+    private TemplateLexicalScope CreateLexicalScope( IFullRef<IDeclaration> declarationRef )
     {
         switch ( declarationRef )
         {
             case IBuiltDeclarationRef:
                 {
-                    var declaration = declarationRef.GetTarget( this._compilationModel );
+                    var declaration = declarationRef.Definition;
 
                     var contextType = declaration switch
                     {

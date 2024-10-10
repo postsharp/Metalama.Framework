@@ -33,7 +33,7 @@ internal class TypeParameterBuilderData : NamedDeclarationBuilderData
 
     public TypeParameterBuilderData( TypeParameterBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new BuiltDeclarationRef<ITypeParameter>( this, containingDeclaration.CompilationContext );
+        this._ref = new BuiltDeclarationRef<ITypeParameter>( this, containingDeclaration.RefFactory );
         this.Index = builder.Index;
         this.Variance = builder.Variance;
         this.IsConstraintNullable = builder.IsConstraintNullable;

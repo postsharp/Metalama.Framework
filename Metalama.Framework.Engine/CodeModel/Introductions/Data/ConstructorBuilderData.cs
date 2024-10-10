@@ -34,7 +34,7 @@ internal class ConstructorBuilderData : MemberBuilderData
     {
         this._ref =
             builder.ReplacedImplicitConstructor == null
-                ? new BuiltDeclarationRef<IConstructor>( this, containingDeclaration.CompilationContext )
+                ? new BuiltDeclarationRef<IConstructor>( this, containingDeclaration.RefFactory )
                 : builder.ReplacedImplicitConstructor.ToFullRef();
 
         this.Parameters = builder.Parameters.ToImmutable( this._ref );

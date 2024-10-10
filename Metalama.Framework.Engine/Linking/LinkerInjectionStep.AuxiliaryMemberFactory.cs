@@ -87,8 +87,7 @@ internal sealed partial class LinkerInjectionStep
 
             return ConstructorDeclaration(
                 List<AttributeListSyntax>(),
-                constructor.GetTarget( this._finalCompilationModel )
-                    .GetSyntaxModifierList( ModifierCategories.Unsafe )
+                constructor.Definition.GetSyntaxModifierList( ModifierCategories.Unsafe )
                     .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                 Identifier( constructor.DeclaringType.AssertNotNull().Name.AssertNotNull() ),
                 parameters,
@@ -108,19 +107,19 @@ internal sealed partial class LinkerInjectionStep
         }
 
         public MemberDeclarationSyntax GetAuxiliaryContractMember(
-            IRef<IMember> member,
+            IFullRef<IMember> member,
             AspectLayerInstance aspectLayerInstance,
             string? returnVariableName )
         {
             switch ( member )
             {
-                case IRef<IMethod> method:
+                case IFullRef<IMethod> method:
                     return this.GetAuxiliaryContractMethod( method, aspectLayerInstance.AspectLayerId, returnVariableName );
 
-                case IRef<IProperty> property:
+                case IFullRef<IProperty> property:
                     return this.GetAuxiliaryContractProperty( property, aspectLayerInstance.AspectLayerId, returnVariableName );
 
-                case IRef<IIndexer> indexer:
+                case IFullRef<IIndexer> indexer:
                     return this.GetAuxiliaryContractIndexer( indexer, aspectLayerInstance, returnVariableName );
 
                 default:
@@ -129,11 +128,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractMethod(
-            IRef<IMethod> methodRef,
+            IFullRef<IMethod> methodRef,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
-            var method = methodRef.GetTarget( this._finalCompilationModel );
+            var method = methodRef.Definition.AssertNotNull();
 
             var primaryDeclaration = method.GetPrimaryDeclarationSyntax();
 
@@ -211,7 +210,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( emulatedTemplateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
                 {
-                    var returnItemName = this._lexicalScopeFactory.GetLexicalScope( method.ToRef() ).GetUniqueIdentifier( "returnItem" );
+                    var returnItemName = this._lexicalScopeFactory.GetLexicalScope( method.ToFullRef() ).GetUniqueIdentifier( "returnItem" );
 
                     body = Block(
                         CreateLocalVariableDeclaration( returnVariableName ),
@@ -221,7 +220,7 @@ internal sealed partial class LinkerInjectionStep
                          or EnumerableKind.IAsyncEnumerator )
                 {
                     // TODO: #34577 This is wrong, the enumerator needs to be cloned/reset.
-                    var bufferedEnumeratorName = this._lexicalScopeFactory.GetLexicalScope( method.ToRef() ).GetUniqueIdentifier( "bufferedEnumerator" );
+                    var bufferedEnumeratorName = this._lexicalScopeFactory.GetLexicalScope( method.ToFullRef() ).GetUniqueIdentifier( "bufferedEnumerator" );
 
                     body = Block(
                         CreateLocalVariableDeclaration( bufferedEnumeratorName ),
@@ -346,11 +345,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractProperty(
-            IRef<IProperty> propertyRef,
+            IFullRef<IProperty> propertyRef,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
-            var property = propertyRef.GetTarget( this._finalCompilationModel );
+            var property = propertyRef.Definition;
             var primaryDeclaration = property.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =
@@ -459,11 +458,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractIndexer(
-            IRef<IIndexer> indexerRef,
+            IFullRef<IIndexer> indexerRef,
             AspectLayerInstance aspectLayerInstance,
             string? returnVariableName )
         {
-            var indexer = indexerRef.GetTarget( this._finalCompilationModel );
+            var indexer = indexerRef.Definition;
             var primaryDeclaration = indexer.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =

@@ -36,11 +36,12 @@ internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollect
         this.AddItem( attribute.ToRef() );
     }
 
-    public void Remove( IRef<INamedType> namedType )
+    public void Remove( IFullRef<INamedType> namedType )
     {
         this.EnsureComplete();
 
-        var itemsToRemove = this.Where( x => x.AttributeType.IsConvertibleTo( namedType ) ).ToMutableList();
+        var namedTypeDecl = namedType.Declaration;
+        var itemsToRemove = this.Where( x => x.AttributeType.ToFullRef(namedType.RefFactory).IsConvertibleTo( namedTypeDecl ) ).ToMutableList();
 
         foreach ( var item in itemsToRemove )
         {
