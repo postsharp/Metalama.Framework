@@ -14,6 +14,12 @@
         <!-- This property ensures the warning is only emitted once per build. -->
         <_MissingTestLicenseKeysCacheWarningEmitted>false</_MissingTestLicenseKeysCacheWarningEmitted>
 
+        <!-- Avoid user profile license and unattended license to properly test the build. -->
+        <MetalamaIgnoreUserLicenses>true</MetalamaIgnoreUserLicenses>
+
+        <!-- Disable compiler server to avoid sharing licensing settings with other builds. -->
+        <UseSharedCompilation>false</UseSharedCompilation>
+
     </PropertyGroup>
 
     <Import Project="$(_TestLicenseKeysCacheFile)" Condition="Exists('$(_TestLicenseKeysCacheFile)')" />
