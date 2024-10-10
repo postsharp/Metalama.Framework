@@ -14,9 +14,9 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaTestAutoExclude>False</MetalamaTestAutoExclude>
         <MetalamaTestGenerateDefaultRunner>False</MetalamaTestGenerateDefaultRunner>
-        <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>
+        <RootNamespace>Metalama.Framework.Tests.LinkerTests</RootNamespace>
         <OutputType>Library</OutputType>
-        <AssemblyName>Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)</AssemblyName>
+        <AssemblyName>Metalama.Framework.Tests.LinkerTests.$(ThisRoslynVersionNoPreview)</AssemblyName>
         <LangVersion Condition="'$(LangVersionOverride)'!=''">$(LangVersionOverride)</LangVersion>
     </PropertyGroup>
 

@@ -10,6 +10,8 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -443,18 +445,22 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 {
                     case DeclarationKind.Method:
                         A.CallTo(
-                                () => ((IFullRef<IMethod>) transformation).GetTarget(
+                                () => ((IFullRef<IMethod>) transformation).GetTargetInterface(
                                     A<CompilationModel>.Ignored,
-                                    null ) )
+                                    A<Type>.Ignored,
+                                    A<GenericContext>.Ignored,
+                                    A<bool>.Ignored ) )
                             .Returns( (IMethod) transformation );
 
                         break;
 
                     case DeclarationKind.Property:
                         A.CallTo(
-                                () => ((IFullRef<IProperty>) transformation).GetTarget(
+                                () => ((IFullRef<IProperty>) transformation).GetTargetInterface(
                                     A<CompilationModel>.Ignored,
-                                    null ) )
+                                    A<Type>.Ignored,
+                                    A<GenericContext>.Ignored,
+                                    A<bool>.Ignored ) )
                             .Returns( (IProperty) transformation );
 
                         var getAccessor = A.Fake<IMethodImpl>( m => m.Named( "GetMethod" ) );
@@ -469,9 +475,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     case DeclarationKind.Event:
                         A.CallTo(
-                                () => ((IFullRef<IEvent>) transformation).GetTarget(
+                                () => ((IFullRef<IEvent>) transformation).GetTargetInterface(
                                     A<CompilationModel>.Ignored,
-                                    null ) )
+                                    A<Type>.Ignored,
+                                    A<GenericContext>.Ignored,
+                                    A<bool>.Ignored ) )
                             .Returns( (IEvent) transformation );
 
                         var addAccessor = A.Fake<IMethodImpl>( m => m.Named( "AddMethod" ) );
@@ -485,9 +493,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     case DeclarationKind.Field:
                         A.CallTo(
-                                () => ((IFullRef<IField>) transformation).GetTarget(
+                                () => ((IFullRef<IField>) transformation).GetTargetInterface(
                                     A<CompilationModel>.Ignored,
-                                    null ) )
+                                    A<Type>.Ignored,
+                                    A<GenericContext>.Ignored,
+                                    A<bool>.Ignored ) )
                             .Returns( (IField) transformation );
 
                         var pseudoGetAccessor = A.Fake<IMethodImpl>( m => m.Named( "PseudoGetMethod" ) );
@@ -513,22 +523,34 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( 0 );
 
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
-                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilderData ).Returns( (IDeclarationBuilder) transformation );
+
+                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilderData )
+                    .ReturnsLazily(
+                        () =>
+                        {
+                            var builder = (DeclarationBuilder) transformation;
+                            builder.Freeze();
+
+                            return ((IIntroducedRef) builder.ToRef()).BuilderData;
+                        } );
 
                 A.CallTo( () => ((IDeclaration) transformation).DeclarationKind ).Returns( declarationKind );
-                A.CallTo( () => ((IDeclaration) transformation).ToRef() ).Returns( (IRef<IDeclaration>)transformation );
-                A.CallTo( () => ((IMember) transformation).IsExplicitInterfaceImplementation).Returns( false);
+                A.CallTo( () => ((IDeclaration) transformation).ToRef() ).Returns( (IRef<IDeclaration>) transformation );
+                A.CallTo( () => ((IMember) transformation).IsExplicitInterfaceImplementation ).Returns( false );
 
                 A.CallTo( () => transformation.Equals( A<object>._ ) ).ReturnsLazily( x => ReferenceEquals( x.Arguments[0], transformation ) );
                 A.CallTo( () => transformation.GetHashCode() ).Returns( declarationOrdinal );
-                A.CallTo( () => ((IRef) transformation).Equals( A<IRef>._, A<RefComparison>._ ) ).ReturnsLazily( x => ReferenceEquals( x.Arguments[0], transformation ) );
+
+                A.CallTo( () => ((IRef) transformation).Equals( A<IRef>._, A<RefComparison>._ ) )
+                    .ReturnsLazily( x => ReferenceEquals( x.Arguments[0], transformation ) );
+
                 A.CallTo( () => ((IRef) transformation).GetHashCode( A<RefComparison>._ ) ).Returns( declarationOrdinal );
 
-                A.CallTo( () => transformation.TargetDeclaration ).ReturnsLazily( () => ((IMemberBuilder) transformation).DeclaringType );
+                A.CallTo( () => transformation.TargetDeclaration ).ReturnsLazily( () => ((IMemberBuilder) transformation).DeclaringType.ToFullRef() );
 
-                var advice = this.CreateFakeAdvice( aspectLayer );
-                A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
-                A.CallTo( () => ((IDeclarationBuilderImpl) transformation).ParentAdvice ).Returns( advice );
+                var aspectLayerInstance = this.CreateFakeAspectLayerInstance( aspectLayer );
+                A.CallTo( () => transformation.AspectLayerInstance ).Returns( aspectLayerInstance );
+                A.CallTo( () => ((IDeclarationBuilderImpl) transformation).AspectLayerInstance ).Returns( aspectLayerInstance );
 
                 A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
@@ -540,7 +562,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 introductionSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 InjectedMemberSemantic.Introduction,
-                                (IMemberBuilder) transformation )
+                                ((IMemberBuilder) transformation).ToFullRef() )
                         } );
 
                 if ( memberNameOverride != null )
@@ -732,10 +754,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( ordinal );
 
                 A.CallTo( () => transformation.TargetDeclaration )
-                    .ReturnsLazily( () => (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
+                    .ReturnsLazily( () => ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
 
-                var advice = this.CreateFakeAdvice( aspectLayer );
-                A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
+                var aspectLayerInstance = this.CreateFakeAspectLayerInstance( aspectLayer );
+                A.CallTo( () => transformation.AspectLayerInstance ).Returns( aspectLayerInstance );
 
                 A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .ReturnsLazily(
@@ -755,7 +777,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                         EventFieldDeclarationSyntax _ => InjectedMemberSemantic.Override,
                                         _ => throw new NotSupportedException()
                                     },
-                                    (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration )
+                                    ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration )
                             } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentTypeStack.Peek().Type ) );
@@ -884,7 +906,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                     v => v.WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? v.Identifier.ValueText ) ) ) ) ) ) );
             }
 
-            private Advice CreateFakeAdvice( AspectLayerId aspectLayer )
+            private AspectLayerInstance CreateFakeAspectLayerInstance( AspectLayerId aspectLayer )
             {
                 var fakeAspectSymbol = A.Fake<INamedTypeSymbol>( s => s.Named( $"INamedTypeSymbol({aspectLayer.AspectName})" ) );
                 var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>( s => s.Named( "INamespaceSymbol(global)" ) );
@@ -911,18 +933,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), aspectClass );
 
-                return A.Fake<Advice>(
-                    i => i
-                        .Named( $"Advice({aspectLayer.AspectName})" )
-                        .WithArgumentsForConstructor(
-                        [
-                            new Advice.AdviceConstructorParameters(
-                                fakeAspectInstance,
-                                fakeAspectInstance.TemplateInstances.Values.Single(),
-                                A.Fake<IDeclarationImpl>( p => p.Named( $"Advice({aspectLayer.AspectName}).P1" ) ),
-                                A.Fake<ICompilation>( p => p.Named( $"Advice({aspectLayer.AspectName}).P2" ) ),
-                                aspectLayer.LayerName )
-                        ] ) );
+                return new AspectLayerInstance(
+                    fakeAspectInstance,
+                    aspectLayer.LayerName,
+                    A.Fake<CompilationModel>( p => p.Named( $"Advice({aspectLayer.AspectName}).P2" ) ) );
             }
         }
     }

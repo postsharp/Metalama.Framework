@@ -26,6 +26,11 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
 
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.8.0" />
+
+
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
 
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynApiMinVersion)" />

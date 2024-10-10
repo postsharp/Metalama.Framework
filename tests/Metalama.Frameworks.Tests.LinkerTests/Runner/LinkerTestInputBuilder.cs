@@ -297,7 +297,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             A.CallTo( () => ((ICompilationElement) replacedTransformation).Compilation ).Returns( initialCompilationModel );
                             A.CallTo( () => ((ICompilationElementImpl) replacedTransformation).Compilation ).Returns( initialCompilationModel );
 
-                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( (IMember) replacedTransformation );
+                            A.CallTo( () => replaceMember.ReplacedMember ).Returns( ((IMember) replacedTransformation).ToFullRef() );
                         }
                     }
 
@@ -461,7 +461,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             SyntaxNode insertPositionNode,
             string introducedElementName )
         {
-            A.CallTo( () => observableTransformation.TargetDeclaration ).Returns( containingDeclaration );
+            A.CallTo( () => observableTransformation.TargetDeclaration ).Returns( containingDeclaration.ToFullRef() );
 
             A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
                 .Returns( ((IDeclarationBuilder) observableTransformation).ToRef() );
