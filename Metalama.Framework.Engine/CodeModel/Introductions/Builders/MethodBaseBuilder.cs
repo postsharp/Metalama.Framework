@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, IMethodBaseImpl
+internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, IMethodBaseImpl, IMemberOrNamedTypeBuilderImpl
 {
     public ParameterBuilderList Parameters { get; } = [];
 
