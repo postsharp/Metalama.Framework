@@ -17,23 +17,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// <summary>
     /// Builds instances of the <see cref="IRef{T}"/> interface.
     /// </summary>
-    internal sealed class RefFactory
+    internal sealed partial class RefFactory
     {
         private readonly CompilationModel? _canonicalCompilationModel;
-        private readonly ConcurrentDictionary<SymbolCacheKey, ISymbolRef<ICompilationElement>> _symbolCache = new();
+        private readonly ConcurrentDictionary<SymbolCacheKey, ISymbolRef<ICompilationElement>> _symbolCache = new( new SymbolCacheKeyComparer() );
 
         // There is no need for a cache of builder-based references because the unique instance of the reference is stored
         // inside DeclarationBuilderData.
-
-        private readonly record struct SymbolCacheKey( ISymbol Symbol, RefTargetKind TargetKind )
-        {
-            public bool Equals( SymbolCacheKey? other )
-                => SymbolEqualityComparer.IncludeNullability.Equals( this.Symbol, other!.Value.Symbol )
-                   && this.TargetKind == other.Value.TargetKind;
-
-            public override int GetHashCode()
-                => HashCode.Combine( SymbolEqualityComparer.IncludeNullability.GetHashCode( this.Symbol ), (int) this.TargetKind );
-        }
 
         public CompilationContext CompilationContext { get; }
 
