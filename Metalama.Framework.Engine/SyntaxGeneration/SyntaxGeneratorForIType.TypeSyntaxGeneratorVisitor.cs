@@ -300,9 +300,9 @@ internal sealed partial class SyntaxGeneratorForIType
         {
             private const string _kind = "SymbolId";
 
-            public static SyntaxAnnotation Create( IType type ) => new( _kind, DeclarationIdGenerator.CreateReferenceId( type ) );
+            public static SyntaxAnnotation Create( IType type ) => new( _kind, DocumentationIdHelper.CreateReferenceId( type ) );
 
-            public static SyntaxAnnotation Create( INamespace ns ) => new( _kind, DeclarationIdGenerator.CreateReferenceId( ns ) );
+            public static SyntaxAnnotation Create( INamespace ns ) => new( _kind, DocumentationIdHelper.CreateReferenceId( ns ) );
         }
     }
 }

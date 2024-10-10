@@ -40,7 +40,7 @@ public static partial class SerializableDeclarationIdProvider
 
             case IParameter parameter:
                 {
-                    var parentId = DeclarationIdGenerator.CreateDeclarationId( parameter.DeclaringMember ).AssertNotNull();
+                    var parentId = DocumentationIdHelper.CreateDeclarationId( parameter.DeclaringMember ).AssertNotNull();
 
                     id = new SerializableDeclarationId( $"{parentId};Parameter={parameter.Index}" );
 
@@ -49,7 +49,7 @@ public static partial class SerializableDeclarationIdProvider
 
             case ITypeParameter typeParameter:
                 {
-                    var parentId = DeclarationIdGenerator.CreateDeclarationId( typeParameter.ContainingDeclaration! ).AssertNotNull();
+                    var parentId = DocumentationIdHelper.CreateDeclarationId( typeParameter.ContainingDeclaration! ).AssertNotNull();
 
                     id = new SerializableDeclarationId( $"{parentId};TypeParameter={typeParameter.Index}" );
 
@@ -77,7 +77,7 @@ public static partial class SerializableDeclarationIdProvider
 
                 try
                 {
-                    documentationId = DeclarationIdGenerator.CreateDeclarationId( declaration );
+                    documentationId = DocumentationIdHelper.CreateDeclarationId( declaration );
                 }
                 catch ( InvalidOperationException exception )
                 {

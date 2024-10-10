@@ -26,7 +26,7 @@ public static partial class SerializableDeclarationIdProvider
             var kind = parts[1];
             var ordinal = parts.Length == 3 ? int.Parse( parts[2], CultureInfo.InvariantCulture ) : -1;
 
-            var parent = DeclarationIdGenerator.GetFirstDeclarationForDeclarationId( parentId, compilation );
+            var parent = DocumentationIdHelper.GetFirstDeclarationForDeclarationId( parentId, compilation );
 
             return (parent, kind) switch
             {
@@ -67,7 +67,7 @@ public static partial class SerializableDeclarationIdProvider
         }
         else
         {
-            return DeclarationIdGenerator.GetFirstDeclarationForDeclarationId( id.ToString(), compilation );
+            return DocumentationIdHelper.GetFirstDeclarationForDeclarationId( id.ToString(), compilation );
         }
     }
 }
