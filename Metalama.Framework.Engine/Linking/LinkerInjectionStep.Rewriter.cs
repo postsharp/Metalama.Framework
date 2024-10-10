@@ -468,7 +468,7 @@ internal sealed partial class LinkerInjectionStep
                                 injectedMember );
 
                             injectedNode = InjectStatementsIntoMemberDeclaration(
-                                propertyOrIndexer.GetMethod.ToRef(),
+                                propertyOrIndexer.GetMethod.ToFullRef(),
                                 getEntryStatements,
                                 getExitStatements,
                                 injectedNode );
@@ -487,7 +487,7 @@ internal sealed partial class LinkerInjectionStep
                                 injectedMember );
 
                             injectedNode = InjectStatementsIntoMemberDeclaration(
-                                propertyOrIndexer.SetMethod.ToRef(),
+                                propertyOrIndexer.SetMethod.ToFullRef(),
                                 setEntryStatements,
                                 setExitStatements,
                                 injectedNode );
@@ -605,7 +605,7 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration(
-            IRef<IMember> contextDeclaration,
+            IFullRef<IMember> contextDeclaration,
             IReadOnlyList<StatementSyntax> entryStatements,
             IReadOnlyList<StatementSyntax> exitStatements,
             MemberDeclarationSyntax currentNode )
@@ -635,8 +635,8 @@ internal sealed partial class LinkerInjectionStep
                     var returnsVoid =
                         contextDeclaration switch
                         {
-                            IRef<IConstructor> => true,
-                            IRef<IMethod> methodRef => methodRef.AsFullRef().MethodBodyReturnsVoid,
+                            IFullRef<IConstructor> => true,
+                            IFullRef<IMethod> methodRef => methodRef.MethodBodyReturnsVoid,
                             _ => throw new InvalidOperationException( $"Not supported: {contextDeclaration}" )
                         };
 
@@ -665,7 +665,7 @@ internal sealed partial class LinkerInjectionStep
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
                     {
-                        Invariant.Assert( contextDeclaration is IRef<IMethod> methodRef && methodRef.AsFullRef().MethodKind == MethodKind.PropertyGet );
+                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { MethodKind: MethodKind.PropertyGet } );
 
                         return
                             property.PartialUpdate(
@@ -680,7 +680,7 @@ internal sealed partial class LinkerInjectionStep
 
                 case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
                     {
-                        Invariant.Assert( contextDeclaration is IRef<IMethod> methodRef && methodRef.AsFullRef().MethodKind == MethodKind.PropertyGet );
+                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { MethodKind: MethodKind.PropertyGet } );
 
                         return
                             indexer.PartialUpdate(
@@ -696,7 +696,7 @@ internal sealed partial class LinkerInjectionStep
                 case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
                     {
                         var methodRef = contextDeclaration.As<IMethod>();
-                        var methodKind = methodRef.AsFullRef().MethodKind;
+                        var methodKind = methodRef.MethodKind;
                         Invariant.Assert( methodKind is MethodKind.PropertyGet or MethodKind.PropertySet );
 
                         return
@@ -1274,11 +1274,12 @@ internal sealed partial class LinkerInjectionStep
             node = (IndexerDeclarationSyntax) this.VisitIndexerDeclaration( node )!;
 
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
-            var symbol = semanticModel.GetDeclaredSymbol( originalNode ).AssertSymbolNotNull();
-            var indexer = this.CompilationContext.RefFactory.FromSymbol<IIndexer>( symbol );
-
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+            
             if ( symbol != null )
             {
+                var indexer = this.CompilationContext.RefFactory.FromSymbol<IIndexer>( symbol );
+
                 if ( symbol.GetMethod != null )
                 {
                     var getter = this.CompilationContext.RefFactory.FromSymbol<IMethod>( symbol.GetMethod );
