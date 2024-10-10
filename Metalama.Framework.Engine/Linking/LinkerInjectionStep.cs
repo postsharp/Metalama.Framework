@@ -125,7 +125,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
                 IndexMemberLevelTransformation(
                     transformation,
-                    transformationCollection );
+                    transformationCollection,
+                    input.CompilationModel );
 
                 this.IndexInsertStatementTransformation(
                     input,
@@ -763,7 +764,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
     private static void IndexMemberLevelTransformation(
         ITransformation transformation,
-        TransformationCollection transformationCollection )
+        TransformationCollection transformationCollection,
+        CompilationModel compilationModel )
     {
         if ( transformation is not IMemberLevelTransformation memberLevelTransformation )
         {
@@ -776,15 +778,25 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var memberLevelTransformations =
             transformationCollection.GetOrAddMemberLevelTransformations( memberLevelTransformation.TargetMember );
 
-        switch (transformation, memberLevelTransformation.TargetMember)
+        switch ( transformation )
         {
-            case (IntroduceParameterTransformation introduceParameterTransformation, _):
-                memberLevelTransformations.Add( introduceParameterTransformation );
-                transformationCollection.AddIntroducedParameter( introduceParameterTransformation );
+            case IntroduceParameterTransformation introduceParameterTransformation:
+
+                if ( introduceParameterTransformation.TargetDeclaration is IBuiltDeclarationRef ||
+                     compilationModel.IsRedirected( introduceParameterTransformation.TargetDeclaration ) )
+                {
+                    // Parameters introduced into introduced constructors are discovered by IntroduceParameterTransforma because they
+                    // are a part of the CompilationModel.
+                }
+                else
+                {
+                    memberLevelTransformations.Add( introduceParameterTransformation );
+                    transformationCollection.AddIntroducedParameter( introduceParameterTransformation );
+                }
 
                 break;
 
-            case (IntroduceConstructorInitializerArgumentTransformation appendArgumentTransformation, _):
+            case IntroduceConstructorInitializerArgumentTransformation appendArgumentTransformation:
                 memberLevelTransformations.Add( appendArgumentTransformation );
 
                 break;

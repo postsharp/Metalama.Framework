@@ -33,7 +33,7 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
     {
         // We only add parameters to source declarations. For introduced declarations, the IntroductionTransformation already adds
         // the parameters.
-        Invariant.Assert( this.TargetMember is IBuiltDeclarationRef );
+        Invariant.Assert( this.TargetMember is not IBuiltDeclarationRef );
 
         var syntax = SyntaxFactory.Parameter(
             default,

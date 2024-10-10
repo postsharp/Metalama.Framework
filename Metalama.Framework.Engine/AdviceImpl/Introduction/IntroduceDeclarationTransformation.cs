@@ -20,7 +20,7 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
 
     protected IntroduceDeclarationTransformation( AspectLayerInstance aspectLayerInstance, T introducedDeclaration ) : base(
         aspectLayerInstance,
-        introducedDeclaration.PrimarySyntaxTree.AssertNotNull() )
+        introducedDeclaration.PrimarySyntaxTree.AssertNotNull( "Introduced declarations must have a PrimarySyntaxTree assigned upfront." ) )
     {
         this.BuilderData = introducedDeclaration.AssertNotNull();
     }

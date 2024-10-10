@@ -31,6 +31,7 @@ internal sealed partial class LinkerInjectionStep
     /// </summary>
     private sealed class TransformationCollection
     {
+        private readonly CompilationModel _finalCompilationModel;
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly ConcurrentQueue<InjectedMember> _injectedMembers;
         private readonly ConcurrentDictionary<InsertPosition, List<InjectedMember>> _injectedMembersByInsertPosition;
@@ -74,6 +75,7 @@ internal sealed partial class LinkerInjectionStep
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
+            this._finalCompilationModel = finalCompilationModel;
             this._comparer = comparer;
             this._injectedMembers = new ConcurrentQueue<InjectedMember>();
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
@@ -399,8 +401,10 @@ internal sealed partial class LinkerInjectionStep
         public MemberLevelTransformations GetOrAddMemberLevelTransformations( IRef<IDeclaration> declaration )
             => declaration switch
             {
-                ISymbolRef symbolRef => this.GetOrAddMemberLevelTransformations( symbolRef.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() ),
+                ISymbolRef symbolRef when symbolRef.Symbol.GetPrimaryDeclarationSyntax() is { } syntax => this.GetOrAddMemberLevelTransformations( syntax ),
                 IBuiltDeclarationRef builtDeclarationRef => this.GetOrAddMemberLevelTransformations( builtDeclarationRef.BuilderData ),
+                _ when this._finalCompilationModel.TryGetRedirectedDeclaration( declaration, out var redirectedDeclaration ) => this
+                    .GetOrAddMemberLevelTransformations( redirectedDeclaration ),
                 _ => throw new AssertionFailedException()
             };
 
