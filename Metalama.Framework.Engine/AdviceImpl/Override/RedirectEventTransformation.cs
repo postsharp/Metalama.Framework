@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 

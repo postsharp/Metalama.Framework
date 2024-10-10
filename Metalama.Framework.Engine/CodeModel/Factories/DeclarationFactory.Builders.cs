@@ -179,9 +179,10 @@ public partial class DeclarationFactory
                 .GetTarget( this._compilationModel, genericContext ),
             PropertyBuilderData propertyBuilder when interfaceType == null || interfaceType != typeof(IField) =>
                 this.GetProperty( propertyBuilder, genericContext ),
-            PropertyBuilderData propertyBuilder when interfaceType == typeof(IField) => propertyBuilder.GetOriginalField(
+            PropertyBuilderData { OriginalField: { } originalField } when interfaceType == typeof(IField) => (IDeclaration) originalField.GetTarget(
                 this._compilationModel,
-                (GenericContext?) genericContext ?? GenericContext.Empty ),
+                genericContext,
+                interfaceType ),
             IndexerBuilderData indexerBuilder => this.GetIndexer( indexerBuilder, genericContext ),
             EventBuilderData eventBuilder => this.GetEvent( eventBuilder, genericContext ),
             ParameterBuilderData parameterBuilder => this.GetParameter( parameterBuilder, genericContext ),

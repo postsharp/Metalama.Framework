@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

@@ -41,7 +41,7 @@ public readonly record struct TemplateProvider
         return new TemplateProvider( type );
     }
 
-    internal object? Object => this._value is Type ? null : this._value ?? throw new ArgumentNullException();
+    internal object? Object => this._value is Type ? null : this._value;
 
-    internal Type Type => this._value is Type type ? type : this._value?.GetType() ?? throw new ArgumentNullException();
+    internal Type? Type => this._value is Type type ? type : this._value?.GetType();
 }

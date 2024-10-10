@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
@@ -32,15 +33,16 @@ internal static class OverrideHelper
 
             case IField field:
                 {
-                    var propertyBuilder = PromotedFieldBuilder.Create( serviceProvider, field, tags, aspectLayerInstance );
-                    propertyBuilder.Freeze();
+                    var transformation = PromoteFieldTransformation.Create( serviceProvider, field, aspectLayerInstance, tags );
 
-                    addTransformation( propertyBuilder.ToTransformation() );
-                    addTransformation( new OverridePropertyTransformation( aspectLayerInstance, propertyBuilder.ToRef(), getTemplate, setTemplate, tags ) );
+                    addTransformation( transformation );
+
+                    addTransformation(
+                        new OverridePropertyTransformation( aspectLayerInstance, transformation.OverridingProperty.ToRef(), getTemplate, setTemplate, tags ) );
 
                     AddTransformationsForStructField( targetDeclaration.DeclaringType, aspectLayerInstance, addTransformation );
 
-                    return propertyBuilder;
+                    return transformation.OverridingProperty;
                 }
 
             case IProperty property:

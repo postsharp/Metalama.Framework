@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;

@@ -110,7 +110,7 @@ internal sealed partial class LinkerInjectionStep
                         SyntaxKind.ReturnKeyword,
                         originalDeclaringNode,
                         attributeLists,
-                        ( a, n ) => a.ContainingDeclaration.ContainingDeclaration!.GetPrimaryDeclarationSyntax() == n,
+                        ( a, n ) => a.ContainingDeclaration.GetPrimaryDeclarationSyntax() == n,
                         outputLists,
                         outputTrivias,
                         ref syntaxGenerationContext );

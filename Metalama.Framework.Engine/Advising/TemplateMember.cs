@@ -145,7 +145,7 @@ internal abstract class TemplateMember
             throw new AssertionFailedException(
                 $"'{symbol}' is an accessor but the template '{templateClassMember.Name}' has {templateClassMember.Parameters.Length} parameters." );
         }
-        
+
         // Get the template characteristics that may disappear or be changed during template compilation.
         var compiledTemplateAttribute = GetCompiledTemplateAttribute( symbol );
 
@@ -181,7 +181,6 @@ internal abstract class TemplateMember
         this.SelectedTemplateKind = selectedTemplateKind;
         this.InterpretedTemplateKind = interpretedTemplateKind != TemplateKind.None ? interpretedTemplateKind : selectedTemplateKind;
         this.EffectiveTemplateKind = this.GetEffectiveKind( symbol );
-
     }
 
     private static CompiledTemplateAttribute GetCompiledTemplateAttribute( ISymbol? declaration )

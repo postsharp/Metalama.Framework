@@ -7,11 +7,8 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -45,8 +42,6 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     public bool IsRequired { get; }
 
-    private readonly object? _originalField; // Can be an IFieldSymbol or a FieldBuilderData.
-
     public PropertyBuilderData( PropertyBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
         this._ref = new BuiltDeclarationRef<IProperty>( this, containingDeclaration.CompilationContext );
@@ -62,14 +57,6 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         if ( builder.OriginalField != null )
         {
             Invariant.Assert( builder.OriginalField.GenericContext.IsEmptyOrIdentity );
-            Invariant.Assert( builder is PromotedFieldBuilder );
-
-            this._originalField = ((PromotedFieldBuilder) builder).OriginalSourceFieldOrBuiltField switch
-            {
-                Field sourceField => sourceField.Symbol,
-                BuiltField builtField => builtField.FieldBuilderData,
-                _ => throw new AssertionFailedException()
-            };
         }
 
         // TODO: Potential CompilationModel leak
@@ -98,14 +85,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
 
-    public IField GetOriginalField( CompilationModel compilation, GenericContext genericContext )
-        => this._originalField switch
-        {
-            IFieldSymbol fieldSymbol => compilation.Factory.GetField( fieldSymbol, genericContext ),
-            FieldBuilderData fieldBuilderData => compilation.Factory.GetField( fieldBuilderData, genericContext ),
-            _ => throw new AssertionFailedException()
-        };
-
+    // TODO: It probably does not belong here.
     public bool GetPropertyInitializerExpressionOrMethod(
         IProperty property,
         PropertyBuilderData builderData,
@@ -114,7 +94,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
     {
-        switch ( this._originalField )
+        switch ( this.OriginalField )
         {
             case null:
                 return AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
@@ -128,7 +108,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     out initializerExpression,
                     out initializerMethod );
 
-            case FieldBuilderData fieldBuilderData:
+            case IBuiltDeclarationRef { BuilderData: FieldBuilderData fieldBuilderData }:
                 return AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
                     property.OriginalField.AssertNotNull(),
                     aspectLayerInstance,
@@ -140,7 +120,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     out initializerExpression,
                     out initializerMethod );
 
-            case IFieldSymbol:
+            case ISymbolRef:
                 // TODO: Not sure what we should do here.
                 initializerExpression = null;
                 initializerMethod = null;
@@ -154,16 +134,16 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     protected override InsertPosition GetInsertPosition()
     {
-        switch ( this._originalField )
+        switch ( this.OriginalField )
         {
             case null:
                 return base.GetInsertPosition();
 
-            case ISymbol symbol:
-                return symbol.ToInsertPosition();
+            case ISymbolRef symbolRef:
+                return symbolRef.Symbol.ToInsertPosition();
 
-            case DeclarationBuilderData builderData:
-                return builderData.InsertPosition;
+            case IBuiltDeclarationRef builtDeclarationRef:
+                return builtDeclarationRef.BuilderData.InsertPosition;
 
             default:
                 throw new AssertionFailedException();

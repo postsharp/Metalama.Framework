@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 {
     internal sealed class TypeParameter : Declaration, ITypeParameter, ITypeImpl
     {
-        private readonly GenericContext? _genericContext;
+        private readonly GenericContext _genericContext;
 
         public ITypeParameterSymbol TypeParameterSymbol { get; }
 
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         internal TypeParameter( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation, GenericContext? genericContext ) : base( compilation )
         {
-            this._genericContext = genericContext;
+            this._genericContext = genericContext ?? GenericContext.Empty;
             this.TypeParameterSymbol = typeParameterSymbol;
         }
 

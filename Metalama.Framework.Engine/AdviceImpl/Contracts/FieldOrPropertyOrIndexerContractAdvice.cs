@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
@@ -34,12 +34,11 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
                 return AddContractToProperty( overridingProperty );
 
             case IField field:
-                var promotedField = PromotedFieldBuilder.Create( serviceProvider, field, ObjectReader.Empty, this.AspectLayerInstance );
-                promotedField.Freeze();
-                context.AddTransformation( promotedField.ToTransformation() );
+                var transformation = PromoteFieldTransformation.Create( serviceProvider, field, this.AspectLayerInstance );
+                context.AddTransformation( transformation );
                 OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this.AspectLayerInstance, context.AddTransformation );
 
-                return AddContractToProperty( promotedField );
+                return AddContractToProperty( transformation.OverridingProperty );
 
             case IIndexer indexer:
                 context.AddTransformation(

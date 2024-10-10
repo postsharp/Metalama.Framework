@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Built;
@@ -31,17 +32,17 @@ class C
         var field = immutableCompilation.Types.Single().Fields.Single();
 
         // Create a PromotedField.
-        var promotedField = PromotedFieldBuilder.Create( testContext.ServiceProvider, field, null!, null! );
-        Assert.Same( promotedField.Definition, promotedField );
-        Assert.Same( promotedField.OverridingProperty, promotedField );
-        Assert.Same( promotedField.OriginalField, promotedField );
+        var promoteFieldTransformation = PromoteFieldTransformation.Create( testContext.ServiceProvider, field, null! );
+        var overridingProperty = promoteFieldTransformation.OverridingProperty;
+        Assert.Same( overridingProperty.Definition, overridingProperty );
+        Assert.Same( overridingProperty.OriginalField, field );
 
         // Verify that all properties work.
-        CheckDeclarationProperties( testContext, promotedField );
+        CheckDeclarationProperties( testContext, overridingProperty );
 
         // Add the PromotedField to a compilation.
         var compilation = immutableCompilation.CreateMutableClone();
-        compilation.AddTransformation( promotedField.ToTransformation() );
+        compilation.AddTransformation( promoteFieldTransformation );
 
         // Assertions on declarations.
         var fieldAfter = field.ForCompilation( compilation );
@@ -59,8 +60,8 @@ class C
 
         // Declaration on references.
         Assert.Same( fieldAfter, field.ToRef().GetTarget( compilation ) );
-        Assert.True( RefEqualityComparer<IField>.Default.Equals( field.ToRef(), promotedField.ToRef().As<IField>() ) );
-        Assert.NotEqual<IRef>( promotedField.ToRef(), promotedField.ToRef().As<IField>() );
+        Assert.True( RefEqualityComparer<IField>.Default.Equals( field.ToRef(), overridingProperty.ToRef().As<IField>() ) );
+        Assert.NotEqual<IRef>( overridingProperty.ToRef(), overridingProperty.ToRef().As<IField>() );
     }
 
     [Fact]
@@ -82,15 +83,15 @@ class C<T>
             var field = immutableCompilation.Types.Single().Fields.Single();
 
             // Create a PromotedField.
-            var promotedField = PromotedFieldBuilder.Create( testContext.ServiceProvider, field, null!, null! );
-            Assert.Same( promotedField.Definition, promotedField );
-            Assert.Same( promotedField.OverridingProperty, promotedField );
-            Assert.Same( promotedField.OriginalField, promotedField );
+            var promoteFieldTransformation = PromoteFieldTransformation.Create( testContext.ServiceProvider, field, null! );
+            var overridingProperty = promoteFieldTransformation.OverridingProperty;
 
             // Add the PromotedField to a compilation.
             var compilation = immutableCompilation.CreateMutableClone();
-            compilation.AddTransformation( promotedField.ToTransformation() );
+            compilation.AddTransformation( promoteFieldTransformation );
             var builtPromotedField = field.ForCompilation( compilation );
+            Assert.Same( builtPromotedField.Definition, builtPromotedField );
+            Assert.Same( builtPromotedField.OverridingProperty.OriginalField, builtPromotedField );
 
             // Get generic instances.
             var genericField = field.ForTypeInstance( field.DeclaringType.WithTypeArguments( typeof(int) ) );
@@ -144,19 +145,19 @@ class C
         var field = immutableCompilation2.Types.Single().Fields.Single();
 
         // Create a PromotedField.
-        var promotedField = PromotedFieldBuilder.Create( testContext.ServiceProvider, field, null!, null! );
-        Assert.Same( promotedField.Definition, promotedField );
-        Assert.Same( promotedField.OverridingProperty, promotedField );
-        Assert.Same( promotedField.OriginalField, promotedField );
+        var promoteFieldTransformation = PromoteFieldTransformation.Create( testContext.ServiceProvider, field, null! );
+        var overridingProperty = promoteFieldTransformation.OverridingProperty;
+        Assert.Same( overridingProperty.Definition, overridingProperty );
+        Assert.Same( overridingProperty.OriginalField, field );
 
-        _ = promotedField.PrimarySyntaxTree;
+        _ = overridingProperty.PrimarySyntaxTree;
 
         // Verify that all properties work.
-        CheckDeclarationProperties( testContext, promotedField );
+        CheckDeclarationProperties( testContext, overridingProperty );
 
         // Add the PromotedField to a compilation.
         var compilation2 = immutableCompilation1.CreateMutableClone();
-        compilation2.AddTransformation( promotedField.ToTransformation() );
+        compilation2.AddTransformation( promoteFieldTransformation );
 
         // Assertions on declarations.
         var fieldAfter = field.ForCompilation( compilation2 );
@@ -173,8 +174,8 @@ class C
 
         // Declaration on references.
         Assert.Same( fieldAfter, field.ToRef().GetTarget( compilation2 ) );
-        Assert.True( RefEqualityComparer<IField>.Default.Equals( field.ToRef(), promotedField.ToRef().As<IField>() ) );
-        Assert.NotEqual<IRef>( promotedField.ToRef(), promotedField.ToRef().As<IField>() );
+        Assert.True( RefEqualityComparer<IField>.Default.Equals( field.ToRef(), overridingProperty.ToRef().As<IField>() ) );
+        Assert.NotEqual<IRef>( overridingProperty.ToRef(), overridingProperty.ToRef().As<IField>() );
     }
 
     private static void CheckDeclarationProperties( TestContext testContext, IDeclaration declaration )

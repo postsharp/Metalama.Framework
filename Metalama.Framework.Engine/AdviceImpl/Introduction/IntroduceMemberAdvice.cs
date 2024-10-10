@@ -115,7 +115,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
     {
         base.ValidateBuilder( builder, diagnosticAdder );
 
-        var targetDeclaration = (INamedType) this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration;
 
         // Check that static member is not virtual.
         if ( builder is { IsStatic: true, IsVirtual: true } )

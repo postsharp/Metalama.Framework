@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 {
     private IType _type;
-    private Writeability _writeability;
+    private Writeability _writeability = Writeability.All;
 
     public IObjectReader InitializerTags { get; }
 

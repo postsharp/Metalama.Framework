@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Data;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Built;

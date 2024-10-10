@@ -58,9 +58,9 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public IProperty? OverriddenProperty { get; set; }
 
-    IProperty IProperty.Definition => this;
+    public IProperty Definition => this;
 
-    public virtual IField? OriginalField => null;
+    public IField? OriginalField { get; set; }
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
@@ -72,6 +72,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public virtual IInjectMemberTransformation ToTransformation()
     {
+        Invariant.Assert( this.OriginalField == null );
+
         return new IntroducePropertyTransformation( this.AspectLayerInstance, this.Immutable );
     }
 
@@ -154,4 +156,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     [Memo]
     public PropertyBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
+
+    public bool? IsDesignTimeObservableOverride { get; set; }
+
+    public override bool IsDesignTimeObservable => this.IsDesignTimeObservableOverride ?? base.IsDesignTimeObservable;
 }

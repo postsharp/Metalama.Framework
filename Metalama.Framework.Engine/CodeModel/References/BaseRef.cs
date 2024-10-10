@@ -45,7 +45,7 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
         => (T?) this.GetTargetImpl( compilation, false, genericContext, typeof(T) );
 
     ICompilationElement? IRef.GetTargetInterface( ICompilation compilation, Type? interfaceType, IGenericContext? genericContext, bool throwIfMissing )
-        => this.GetTargetImpl( compilation, throwIfMissing, genericContext, interfaceType );
+        => this.GetTargetImpl( compilation, throwIfMissing, genericContext, interfaceType ?? typeof(T) );
 
     private ICompilationElement? GetTargetImpl( ICompilation compilation, bool throwIfMissing, IGenericContext? genericContext, Type interfaceType )
     {

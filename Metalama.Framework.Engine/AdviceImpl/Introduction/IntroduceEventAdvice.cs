@@ -123,6 +123,8 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         }
         else if ( this.Template != null )
         {
+            Invariant.Assert( eventTemplateDeclaration != null );
+
             // Case for event fields.
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,
@@ -139,6 +141,8 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         }
         else if ( this.Template != null )
         {
+            Invariant.Assert( eventTemplateDeclaration != null );
+
             // Case for event fields.
             AddAttributeForAccessorTemplate(
                 this.Template.TemplateClassMember,

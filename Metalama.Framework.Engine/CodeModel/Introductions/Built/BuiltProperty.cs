@@ -85,9 +85,7 @@ internal class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
     {
         using ( StackOverflowHelper.Detect() )
         {
-            // Intentionally not using MapDeclaration to avoid the strong typing.
-
-            return this.PropertyBuilderData.GetOriginalField( this.Compilation, this.GenericContext );
+            return this.MapDeclaration( this.PropertyBuilderData.OriginalField );
         }
     }
 }

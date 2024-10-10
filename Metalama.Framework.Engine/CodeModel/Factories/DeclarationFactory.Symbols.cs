@@ -63,8 +63,8 @@ public partial class DeclarationFactory
 
     private TDeclaration GetDeclarationFromSymbol<TDeclaration, TSymbol>(
         TSymbol symbol,
-        CreateFromSymbolDelegate<TDeclaration, TSymbol> createDeclaration,
         GenericContext genericContext,
+        CreateFromSymbolDelegate<TDeclaration, TSymbol> createDeclaration,
         bool supportsRedirection = false )
         where TSymbol : ISymbol
         where TDeclaration : class, IDeclaration
@@ -111,6 +111,27 @@ public partial class DeclarationFactory
                 typeof(IType),
                 static ( a, b, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, GenericContext.Empty ) ),
                 (me: this, symbol, createDeclaration: createType, supportsRedirection) );
+        }
+    }
+
+    private TType GetTypeFromSymbol<TType, TSymbol>(
+        TSymbol symbol,
+        GenericContext genericContext,
+        CreateFromSymbolDelegate<TType, TSymbol> createType,
+        bool supportsRedirection = false )
+        where TSymbol : ITypeSymbol
+        where TType : class, IType
+    {
+        using ( StackOverflowHelper.Detect() )
+        {
+            symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
+
+            return (TType) this._typeCache.GetOrAdd(
+                symbol,
+                genericContext,
+                typeof(IType),
+                static ( a, b, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ) ),
+                (me: this, symbol, createDeclaration: createType, supportsRedirection, genericContext) );
         }
     }
 
@@ -180,18 +201,19 @@ public partial class DeclarationFactory
                 new NamedType( args.Symbol, args.Compilation ) );
     }
 
+    // We must use GetTypeFromSymbol and not GetDeclarationFromSymbol because of nullability.
     public ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol )
-        => this.GetDeclarationFromSymbol<ITypeParameter, ITypeParameterSymbol>(
+        => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
             typeParameterSymbol,
             static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
                 new TypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
 
     private ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol, GenericContext genericContext )
-        => this.GetDeclarationFromSymbol<ITypeParameter, ITypeParameterSymbol>(
+        => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
             typeParameterSymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
-                new TypeParameter( args.Symbol, args.Compilation, args.GenericContext ),
-            genericContext );
+                new TypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
     {
