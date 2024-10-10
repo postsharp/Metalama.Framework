@@ -16,7 +16,7 @@ namespace Metalama.Framework.Code
     {
         /// <summary>
         /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
+        /// current execution context, use the <see cref="GetTarget{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/> extension method.
         /// </summary>
         public static T GetTarget<T>( this IRef<T> reference, ICompilation compilation, IGenericContext? genericContext = null )
             where T : class, ICompilationElement
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
+        /// current execution context, use the <see cref="GetTargetOrNull{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/> extension method.
         /// </summary>
         public static T? GetTargetOrNull<T>( this IRef<T> reference, ICompilation compilation, IGenericContext? genericContext = null )
             where T : class, ICompilationElement
