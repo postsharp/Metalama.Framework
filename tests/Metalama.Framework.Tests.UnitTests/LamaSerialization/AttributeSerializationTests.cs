@@ -64,13 +64,13 @@ public class AttributeSerializationTests : SerializationTestsBase
     {
         // This is to test that two models of the same compilation have identical attribute serialization keys.
 
-        var code = """
-                   public class TheAttribute : System.Attribute;
+        const string code = """
+                            public class TheAttribute : System.Attribute;
 
-                   [TheAttribute]
-                   public class C;
+                            [TheAttribute]
+                            public class C;
 
-                   """;
+                            """;
 
         using var testContext = this.CreateTestContext( code );
 

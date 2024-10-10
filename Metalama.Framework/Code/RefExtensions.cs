@@ -20,14 +20,14 @@ namespace Metalama.Framework.Code
         /// </summary>
         public static T GetTarget<T>( this IRef<T> reference, ICompilation compilation, IGenericContext? genericContext = null )
             where T : class, ICompilationElement
-            => (T) reference.GetTargetInterface( compilation, typeof(T), genericContext, true );
+            => (T) reference.GetTargetInterface( compilation, typeof(T), genericContext, true )!;
 
         public static ICompilationElement GetTarget(
             this IRef reference,
             ICompilation compilation,
             IGenericContext? genericContext = null,
             Type? interfaceType = null )
-            => reference.GetTargetInterface( compilation, interfaceType, genericContext, true );
+            => reference.GetTargetInterface( compilation, interfaceType, genericContext, true )!;
 
         /// <summary>
         /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the

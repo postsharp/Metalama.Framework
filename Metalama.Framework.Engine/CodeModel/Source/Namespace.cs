@@ -137,7 +137,7 @@ internal sealed class Namespace : Declaration, INamespace
                 }
             }
 
-            return namespaceCursor?.GetTarget( this.Compilation );
+            return namespaceCursor.GetTarget( this.Compilation );
         }
     }
 

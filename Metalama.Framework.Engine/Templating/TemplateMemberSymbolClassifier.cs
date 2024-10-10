@@ -33,7 +33,7 @@ internal abstract class TemplateMemberSymbolClassifier
         };
 
     public static bool IsTemplateParameter( IParameterSymbol parameter )
-        => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not (MethodKind.LambdaMethod or MethodKind.AnonymousFunction or MethodKind.LocalFunction) }
+        => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not (MethodKind.LambdaMethod or MethodKind.LocalFunction) }
             or IPropertySymbol
             or IEventSymbol;
 

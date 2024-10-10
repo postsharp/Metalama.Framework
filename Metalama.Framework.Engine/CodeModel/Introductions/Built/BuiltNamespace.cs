@@ -41,7 +41,7 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 
     IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
-    INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
+    INamespace INamespace.ParentNamespace => this.ContainingNamespace;
 
     public INamedTypeCollection Types
         => new NamedTypeCollection(

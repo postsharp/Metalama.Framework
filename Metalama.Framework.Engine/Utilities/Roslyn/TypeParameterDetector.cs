@@ -17,7 +17,7 @@ internal static class TypeParameterDetector
 
         private Visitor() { }
 
-        protected override ITypeParameter? DefaultVisit( IType type ) => throw new NotImplementedException();
+        protected override ITypeParameter DefaultVisit( IType type ) => throw new NotImplementedException();
 
         protected override ITypeParameter? VisitArrayType( IArrayType arrayType ) => this.Visit( arrayType.ElementType );
 

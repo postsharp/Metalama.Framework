@@ -1,4 +1,6 @@
-﻿namespace Metalama.Framework.Code;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+namespace Metalama.Framework.Code;
 
 /// <summary>
 /// Defines strategies to compare two instances of the <see cref="IRef{T}"/> interface.
@@ -23,5 +25,5 @@ public enum RefComparison
     /// <summary>
     /// Support cross-compilation comparisons and respects nullability when comparing <c>IRef{IType}</c>.
     /// </summary>
-    StructuralIncludeNullability,
+    StructuralIncludeNullability
 }

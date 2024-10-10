@@ -65,18 +65,19 @@ internal abstract class TemplateClassFactory<T>
                         if ( typeSymbol == null )
                         {
 #if ROSLYN_4_4_0_OR_GREATER
+
                             // Two conflicting aspect types may be in aliased references.
                             // This is an edge case, but is used in tests to reproduce design-time problems, see below.
                             typeSymbol =
                                 templateDiscoveryContext.Compilation.GetTypesByMetadataName( item.TypeName )
-                                .FirstOrDefault( s => s.ContainingAssembly.Identity.Equals( item.Project.RunTimeIdentity ) );
+                                    .FirstOrDefault( s => s.ContainingAssembly.Identity.Equals( item.Project.RunTimeIdentity ) );
 
                             if ( typeSymbol == null )
                             {
                                 diagnosticAdder.Report(
-                                TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateRoslynDiagnostic(
-                                    Location.None,
-                                    (item.TypeName, item.Project.RunTimeIdentity.Name) ) );
+                                    TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateRoslynDiagnostic(
+                                        Location.None,
+                                        (item.TypeName, item.Project.RunTimeIdentity.Name) ) );
 
                                 return null;
                             }
@@ -100,7 +101,7 @@ internal abstract class TemplateClassFactory<T>
 
         var aspectTypeDataDictionary = new Dictionary<string, TemplateClassData>();
 
-        foreach (var aspectType in aspectTypeData)
+        foreach ( var aspectType in aspectTypeData )
         {
             // IMPORTANT: At design time, when a project is being renamed, we can get duplicate aspect types while project dependency tree is being updated.
             //            Two dependency projects referencing the same assembly may not be synchronized, causing two CompileTimeProjects to exist

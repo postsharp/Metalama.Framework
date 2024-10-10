@@ -88,7 +88,7 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
 
             if ( diffInfo is { Lines.Length: > 0 } )
             {
-                lineDiffInfo = diffInfo?.Lines[lineNumber];
+                lineDiffInfo = diffInfo.Lines[lineNumber];
             }
             else
             {

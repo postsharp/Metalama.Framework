@@ -76,7 +76,7 @@ public partial class DeclarationFactory
                 symbol,
                 GenericContext.Empty,
                 typeof(IType),
-                static ( a, b, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, GenericContext.Empty ) ),
+                static ( _, _, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, GenericContext.Empty ) ),
                 (me: this, symbol, createDeclaration: createType, supportsRedirection) );
         }
     }
@@ -97,7 +97,7 @@ public partial class DeclarationFactory
                 symbol,
                 genericContext,
                 typeof(IType),
-                static ( a, b, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ) ),
+                static ( _, _, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ) ),
                 (me: this, symbol, createDeclaration: createType, supportsRedirection, genericContext) );
         }
     }

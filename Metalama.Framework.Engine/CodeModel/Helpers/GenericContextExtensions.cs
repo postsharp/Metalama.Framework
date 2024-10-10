@@ -6,5 +6,5 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers;
 
 internal static class GenericContextExtensions
 {
-    public static GenericContext AsGenericContext( this IGenericContext? genericContext ) => ((GenericContext?) genericContext) ?? GenericContext.Empty;
+    public static GenericContext AsGenericContext( this IGenericContext? genericContext ) => (GenericContext?) genericContext ?? GenericContext.Empty;
 }

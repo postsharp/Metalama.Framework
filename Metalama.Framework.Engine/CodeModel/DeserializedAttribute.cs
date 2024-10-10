@@ -34,7 +34,7 @@ internal class DeserializedAttribute : IAttributeImpl
 
     internal CompilationModel Compilation { get; }
 
-    public ICompilationElement? Translate(
+    public ICompilationElement Translate(
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )

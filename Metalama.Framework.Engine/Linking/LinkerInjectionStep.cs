@@ -98,7 +98,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             foreach ( var transformation in sortedTransformations )
             {
                 IndexReplaceTransformation(
-                    input,
                     transformation,
                     transformationCollection,
                     replacedIntroduceDeclarationTransformations );
@@ -419,7 +418,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     }
 
     private static void IndexReplaceTransformation(
-        AspectLinkerInput input,
         ITransformation transformation,
         TransformationCollection transformationCollection,
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
@@ -872,10 +870,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
     // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
     //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
-    private static bool RequiresAuxiliaryContractMember( IFullRef<IMember> member, InsertStatementTransformationContextImpl insertStatementContext, CompilationModel helperCompilationModel )
+    private static bool RequiresAuxiliaryContractMember(
+        IFullRef<IMember> member,
+        InsertStatementTransformationContextImpl insertStatementContext,
+        CompilationModel helperCompilationModel )
         => insertStatementContext.WasUsedForOutputContracts
-           || (member is IFullRef<IFieldOrProperty> fieldOrProperty && fieldOrProperty.GetTarget(helperCompilationModel) is { IsAutoPropertyOrField: true } )
-            || (member is IFullRef<IMethod> method && method.GetTarget(helperCompilationModel) is { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } } or
-                    { IsPartial: true, HasImplementation: false }
+           || (member is IFullRef<IFieldOrProperty> fieldOrProperty && fieldOrProperty.GetTarget( helperCompilationModel ) is { IsAutoPropertyOrField: true })
+           || (member is IFullRef<IMethod> method
+               && method.GetTarget( helperCompilationModel ) is { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } } or
+                   { IsPartial: true, HasImplementation: false }
                && insertStatementContext.WasUsedForInputContracts);
 }

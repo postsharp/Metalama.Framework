@@ -69,7 +69,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     [Memo]
     public override IDeclaration ContainingDeclaration => this.MapDeclaration( this.BuilderData.ContainingDeclaration );
 
-    public sealed override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
+    public sealed override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration.GetPrimarySyntaxTree();
 
     [Memo]
     public override IAttributeCollection Attributes => this.GetAttributes();
@@ -91,7 +91,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
     public sealed override string ToString() => this.ToDisplayString();
 
-    public override Location? DiagnosticLocation => this.ContainingDeclaration?.GetDiagnosticLocation();
+    public override Location? DiagnosticLocation => this.ContainingDeclaration.GetDiagnosticLocation();
 
     public override bool IsImplicitlyDeclared => false;
 
@@ -113,7 +113,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
 
     public override ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 
-    internal override ICompilationElement? Translate(
+    internal override ICompilationElement Translate(
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )

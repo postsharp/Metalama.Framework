@@ -33,7 +33,7 @@ internal partial class GenericContext
 
         public static TypeSymbolVisitor Instance { get; } = new();
 
-        public override bool DefaultVisit( ISymbol symbol ) => throw new NotImplementedException( $"Symbol kind not handled: {symbol?.Kind}." );
+        public override bool DefaultVisit( ISymbol? symbol ) => throw new NotImplementedException( $"Symbol kind not handled: {symbol?.Kind}." );
 
         public override bool VisitArrayType( IArrayTypeSymbol arrayTypeSymbol ) => this.Visit( arrayTypeSymbol.ElementType );
 

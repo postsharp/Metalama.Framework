@@ -48,10 +48,10 @@ internal sealed class BuiltField : BuiltMember, IFieldImpl
     public RefKind RefKind => this.FieldBuilderData.RefKind;
 
     [Memo]
-    public IMethod GetMethod => new BuiltAccessor( this, this.FieldBuilderData.GetMethod! );
+    public IMethod GetMethod => new BuiltAccessor( this, this.FieldBuilderData.GetMethod );
 
     [Memo]
-    public IMethod SetMethod => new BuiltAccessor( this, this.FieldBuilderData.SetMethod! );
+    public IMethod SetMethod => new BuiltAccessor( this, this.FieldBuilderData.SetMethod );
 
     IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 

@@ -98,7 +98,7 @@ public abstract class DesignTimeServiceProviderFactory
             .WithService( sp => new DesignTimeExceptionHandler( sp ) );
 
         serviceProvider = serviceProvider
-            .WithUntypedService( typeof( IRpcExceptionHandler ), new RpcExceptionHandler( serviceProvider ) );
+            .WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler( serviceProvider ) );
 
         // Create a CompilerServiceProvider.
         var compilerServiceProvider = this.CreateCompilerServiceProvider();
@@ -124,7 +124,8 @@ public abstract class DesignTimeServiceProviderFactory
 
         public RpcExceptionHandler( ServiceProvider<IGlobalService> serviceProvider )
         {
-            this._exceptionHandler = serviceProvider.GetService<DesignTimeExceptionHandler>() ?? throw new InvalidOperationException("DesignTimeExceptionHandler is required.");
+            this._exceptionHandler = serviceProvider.GetService<DesignTimeExceptionHandler>()
+                                     ?? throw new InvalidOperationException( "DesignTimeExceptionHandler is required." );
         }
 
         public void OnException( Exception e, ILogger logger ) => this._exceptionHandler.ReportException( e );

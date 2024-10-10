@@ -139,7 +139,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public bool IsCanonicalGenericInstance => ReferenceEquals( this.Symbol.OriginalDefinition, this.Symbol );
 
-    public bool? IsIteratorMethod => IteratorHelper.IsIteratorMethod( this.MethodSymbol );
+    public bool? IsIteratorMethod => this.MethodSymbol.IsIteratorMethod();
 
     [Memo]
     public override ImmutableArray<SourceReference> Sources => this.GetSourcesImpl();

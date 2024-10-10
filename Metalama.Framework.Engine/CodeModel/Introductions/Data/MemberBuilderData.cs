@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Data;
 
 internal abstract class MemberBuilderData : MemberOrNamedTypeBuilderData
 {
-    protected MemberBuilderData( IMemberBuilderImpl builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
+    protected MemberBuilderData( IMemberBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( (IMemberOrNamedTypeBuilderImpl) builder, containingDeclaration )
     {
         this.IsVirtual = builder.IsVirtual;
         this.IsAsync = builder.IsAsync;

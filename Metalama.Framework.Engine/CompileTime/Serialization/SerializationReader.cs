@@ -28,7 +28,6 @@ internal sealed class SerializationReader
     private readonly InstanceFields _emptyInstanceFields;
 
     internal SerializationReader(
-        in ProjectServiceProvider serviceProvider,
         Stream stream,
         CompileTimeSerializer formatter,
         bool shouldReportExceptionCause,

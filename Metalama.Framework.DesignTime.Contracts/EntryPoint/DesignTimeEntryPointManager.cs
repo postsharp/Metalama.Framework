@@ -132,7 +132,6 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
                     try
                     {
 #if NETFRAMEWORK
-
                         // From https://stackoverflow.com/a/19717341/41071.
                         // As I understand it, creating a mutex without security descriptor uses default security, which could be different on different systems.
                         // I'm not certain this will actually prevent UnauthorizedAccessException, and it's not available on .NET, but it's worth trying.

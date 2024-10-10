@@ -294,9 +294,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         {
             var roslynCompilation = compilation.RoslynCompilation;
             var compilationServices = roslynCompilation.GetCompilationContext();
-
-            var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-
+            
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
             var targetMethod = targetMetalamaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );

@@ -56,21 +56,21 @@ internal sealed partial class LinkerRewritingDriver
                             List(
                             [
                                 AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        List<AttributeListSyntax>(),
-                                        TokenList(),
-                                        Token( SyntaxKind.GetKeyword ),
-                                        null,
-                                        null,
-                                        Token( SyntaxKind.SemicolonToken ) ),
-                                    AccessorDeclaration(
-                                        SyntaxKind.InitAccessorDeclaration,
-                                        List<AttributeListSyntax>(),
-                                        TokenList(),
-                                        Token( SyntaxKind.InitKeyword ),
-                                        null,
-                                        null,
-                                        Token( SyntaxKind.SemicolonToken ) )
+                                    SyntaxKind.GetAccessorDeclaration,
+                                    List<AttributeListSyntax>(),
+                                    TokenList(),
+                                    Token( SyntaxKind.GetKeyword ),
+                                    null,
+                                    null,
+                                    Token( SyntaxKind.SemicolonToken ) ),
+                                AccessorDeclaration(
+                                    SyntaxKind.InitAccessorDeclaration,
+                                    List<AttributeListSyntax>(),
+                                    TokenList(),
+                                    Token( SyntaxKind.InitKeyword ),
+                                    null,
+                                    null,
+                                    Token( SyntaxKind.SemicolonToken ) )
                             ] ) ),
                         null,
                         null,

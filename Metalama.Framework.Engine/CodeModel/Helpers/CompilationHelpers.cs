@@ -146,7 +146,7 @@ internal sealed class CompilationHelpers : ICompilationHelpers
     public bool TryConstructAttribute(
         IAttribute attribute,
         ScopedDiagnosticSink diagnosticSink,
-        [NotNullWhen( true )] out System.Attribute? constructedAttribute )
+        [NotNullWhen( true )] out Attribute? constructedAttribute )
     {
         return this.GetAttributeDeserializer()
             .TryCreateAttribute(
@@ -155,7 +155,7 @@ internal sealed class CompilationHelpers : ICompilationHelpers
                 out constructedAttribute );
     }
 
-    public System.Attribute ConstructAttribute( IAttribute attribute )
+    public Attribute ConstructAttribute( IAttribute attribute )
     {
         if ( this.GetAttributeDeserializer().TryCreateAttribute( attribute, ThrowingDiagnosticAdder.Instance, out var constructedAttribute ) )
         {

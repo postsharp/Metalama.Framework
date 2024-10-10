@@ -116,13 +116,12 @@ public sealed partial class CompilationModel
             _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
         };
 
-    private TCollection GetMemberCollection<TOwner, TDeclaration, TCollection>(
+    private TCollection GetMemberCollection<TOwner, TCollection>(
         ref ImmutableDictionary<IFullRef<TOwner>, TCollection> dictionary,
         bool requestMutableCollection,
         IFullRef<TOwner> declaration,
         Func<CompilationModel, IFullRef<TOwner>, TCollection> createCollection )
         where TOwner : class, IDeclaration
-        where TDeclaration : class, IDeclaration
         where TCollection : IUpdatableCollection
     {
         Invariant.Assert( !(requestMutableCollection && !this.IsMutable) );
@@ -152,70 +151,70 @@ public sealed partial class CompilationModel
     }
 
     internal FieldUpdatableCollection GetFieldCollection( IFullRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IField, FieldUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
             static ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
     internal MethodUpdatableCollection GetMethodCollection( IFullRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IMethod, MethodUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, MethodUpdatableCollection>(
             ref this._methods,
             mutable,
             declaringType,
             static ( c, t ) => new MethodUpdatableCollection( c, t ) );
 
     internal ConstructorUpdatableCollection GetConstructorCollection( IFullRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IConstructor, ConstructorUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, ConstructorUpdatableCollection>(
             ref this._constructors,
             mutable,
             declaringType,
             static ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
 
     internal PropertyUpdatableCollection GetPropertyCollection( IFullRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IProperty, PropertyUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, PropertyUpdatableCollection>(
             ref this._properties,
             mutable,
             declaringType,
             static ( c, t ) => new PropertyUpdatableCollection( c, t ) );
 
     internal IndexerUpdatableCollection GetIndexerCollection( IFullRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IIndexer, IndexerUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, IndexerUpdatableCollection>(
             ref this._indexers,
             mutable,
             declaringType,
             static ( c, t ) => new IndexerUpdatableCollection( c, t ) );
 
     internal EventUpdatableCollection GetEventCollection( IFullRef<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IEvent, EventUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, EventUpdatableCollection>(
             ref this._events,
             mutable,
             declaringType,
             static ( c, t ) => new EventUpdatableCollection( c, t ) );
 
     internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( IFullRef<INamedType> declaringType, bool mutable )
-        => this.GetMemberCollection<INamedType, INamedType, InterfaceUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, InterfaceUpdatableCollection>(
             ref this._interfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
 
     internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( IFullRef<INamedType> declaringType, bool mutable )
-        => this.GetMemberCollection<INamedType, INamedType, AllInterfaceUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, AllInterfaceUpdatableCollection>(
             ref this._allInterfaceImplementations,
             mutable,
             declaringType,
             static ( c, t ) => new AllInterfaceUpdatableCollection( c, t ) );
 
     internal ParameterUpdatableCollection GetParameterCollection( IFullRef<IHasParameters> parent, bool mutable = false )
-        => this.GetMemberCollection<IHasParameters, IParameter, ParameterUpdatableCollection>(
+        => this.GetMemberCollection<IHasParameters, ParameterUpdatableCollection>(
             ref this._parameters,
             mutable,
             parent,
             static ( c, t ) => new ParameterUpdatableCollection( c, t ) );
 
     internal TypeUpdatableCollection GetNamedTypeCollectionByParent( IFullRef<INamespaceOrNamedType> parent, bool mutable = false )
-        => this.GetMemberCollection<INamespaceOrNamedType, INamedType, TypeUpdatableCollection>(
+        => this.GetMemberCollection<INamespaceOrNamedType, TypeUpdatableCollection>(
             ref this._namedTypesByParent,
             mutable,
             parent,
@@ -241,14 +240,14 @@ public sealed partial class CompilationModel
     }
 
     internal NamespaceUpdatableCollection GetNamespaceCollection( IFullRef<INamespace> declaringNamespace, bool mutable = false )
-        => this.GetMemberCollection<INamespace, INamespace, NamespaceUpdatableCollection>(
+        => this.GetMemberCollection<INamespace, NamespaceUpdatableCollection>(
             ref this._namespaces,
             mutable,
             declaringNamespace,
             static ( c, t ) => new NamespaceUpdatableCollection( c, t ) );
 
     internal AttributeUpdatableCollection GetAttributeCollection( IFullRef<IDeclaration> parent, bool mutable = false )
-        => this.GetMemberCollection<IDeclaration, IAttribute, AttributeUpdatableCollection>(
+        => this.GetMemberCollection<IDeclaration, AttributeUpdatableCollection>(
             ref this._attributes,
             mutable,
             parent,

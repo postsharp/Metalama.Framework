@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal interface IMethodBuilderImpl : IMethodBuilder, IMethodImpl, IMemberBuilderImpl
+internal interface IMethodBuilderImpl : IMethodBuilder, IMethodImpl, IMemberOrNamedTypeBuilderImpl
 {
     new TypeParameterBuilderList TypeParameters { get; }
 

@@ -706,12 +706,12 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                             SeparatedList(
                             [
                                 Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
-                                    Argument(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            objectExpression,
-                                            IdentifierName( member.Name ) ) ),
-                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
+                                Argument(
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        objectExpression,
+                                        IdentifierName( member.Name ) ) ),
+                                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
                             ] ) ) ) ) );
         }
 
@@ -756,7 +756,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                                 SeparatedList(
                                 [
                                     Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
-                                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
+                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
                                 ] ) ) ) ) ) );
         }
 

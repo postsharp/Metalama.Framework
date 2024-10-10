@@ -191,7 +191,7 @@ internal sealed partial class LinkerInjectionStep
                         return 1;
                     }
 
-                    if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: not null and IBuiltDeclarationRef builderRefY }
+                    if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: IBuiltDeclarationRef builderRefY }
                          && builderRefY.BuilderData == x.BuilderData )
                     {
                         return -1;

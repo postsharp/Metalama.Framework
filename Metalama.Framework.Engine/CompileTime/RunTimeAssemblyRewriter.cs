@@ -364,7 +364,7 @@ namespace Metalama.Compiler
         AccessorDeclarationSyntax originalNode,
         IMethodSymbol symbol )
     {
-        var isIteratorMethod = IteratorHelper.IsIteratorMethod( symbol );
+        var isIteratorMethod = symbol.IsIteratorMethod();
         var accessibility = symbol.DeclaredAccessibility.ToOurAccessibility();
 
         if ( accessibility is Accessibility.Public or Accessibility.Protected

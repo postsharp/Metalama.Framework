@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
 
-        internal override ICompilationElement? Translate(
+        internal override ICompilationElement Translate(
             CompilationModel newCompilation,
             IGenericContext? genericContext = null,
             Type? interfaceType = null )

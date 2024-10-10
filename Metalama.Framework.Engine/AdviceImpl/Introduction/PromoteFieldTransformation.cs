@@ -99,7 +99,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 
     public override InsertPosition InsertPosition => this._replacedField.ToInsertPosition();
 
-    IRef<IMember>? IReplaceMemberTransformation.ReplacedMember => this._replacedField;
+    IRef<IMember> IReplaceMemberTransformation.ReplacedMember => this._replacedField;
 
     public override IRef<IDeclaration> TargetDeclaration => this._replacedField;
 }

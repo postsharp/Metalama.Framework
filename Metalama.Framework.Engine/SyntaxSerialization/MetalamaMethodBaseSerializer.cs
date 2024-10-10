@@ -89,11 +89,11 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         SeparatedList(
                         [
                             Argument( typeCreation ),
-                                Argument( allBindingFlags ),
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        Literal( ReflectionSignatureBuilder.GetConstructorSignature( constructor ) ) ) )
+                            Argument( allBindingFlags ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( ReflectionSignatureBuilder.GetConstructorSignature( constructor ) ) ) )
                         ] ) ) );
             }
             else
@@ -107,9 +107,9 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         SeparatedList(
                         [
                             Argument( allBindingFlags ),
-                                Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
-                                Argument( parameterTypeArray ),
-                                Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
+                            Argument( parameterTypeArray ),
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
                         ] ) ) );
             }
         }
@@ -126,15 +126,15 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         SeparatedList(
                         [
                             Argument( typeCreation ),
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        Literal( method.Name ) ) ),
-                                Argument( allBindingFlags ),
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        Literal( ReflectionSignatureBuilder.GetMethodSignature( (IMethod) method ) ) ) )
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( method.Name ) ) ),
+                            Argument( allBindingFlags ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( ReflectionSignatureBuilder.GetMethodSignature( (IMethod) method ) ) ) )
                         ] ) ) );
             }
             else
@@ -148,10 +148,10 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                         SeparatedList(
                         [
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( method.Name ) ) ),
-                                Argument( allBindingFlags ),
-                                Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
-                                Argument( parameterTypeArray ),
-                                Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
+                            Argument( allBindingFlags ),
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
+                            Argument( parameterTypeArray ),
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
                         ] ) ) );
             }
         }

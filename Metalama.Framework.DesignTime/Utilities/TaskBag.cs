@@ -40,7 +40,7 @@ public sealed class TaskBag
                 }
                 catch ( Exception e )
                 {
-                    this._exceptionHandler.ReportException(e, this._logger);
+                    this._exceptionHandler.ReportException( e, this._logger );
                 }
                 finally
                 {

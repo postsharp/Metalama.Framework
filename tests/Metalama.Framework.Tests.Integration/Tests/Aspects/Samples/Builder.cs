@@ -12,6 +12,8 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Builder;
 
+#pragma warning disable CS0618
+
 [CompileTime]
 internal static class BuilderDiagnosticDefinitions
 {

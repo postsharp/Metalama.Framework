@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    
     internal readonly struct SymbolBasedGenericMap
     {
         private readonly ImmutableArray<ITypeSymbol> _typeArguments;
@@ -17,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             this._typeArguments = typeArguments;
         }
 
-        public static readonly SymbolBasedGenericMap Empty = new SymbolBasedGenericMap( ImmutableArray<ITypeSymbol>.Empty );
+        public static readonly SymbolBasedGenericMap Empty = new( ImmutableArray<ITypeSymbol>.Empty );
 
         public bool IsEmpty => this._typeArguments.IsDefaultOrEmpty;
 

@@ -6,8 +6,8 @@ namespace Metalama.Framework.Code;
 
 /// <summary>
 /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
-/// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
-/// given an compilation, or using the <see cref="RefExtensions.GetTarget{T}"/> extension method for the compilation of the current context.
+/// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using
+/// <see cref="RefExtensions.GetTarget{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/>.
 /// </summary>
 /// <typeparam name="T">The type of the target object of the declaration or type.</typeparam>
 /// <remarks>

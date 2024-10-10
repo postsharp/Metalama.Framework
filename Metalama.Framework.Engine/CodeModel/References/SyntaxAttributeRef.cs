@@ -131,7 +131,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
 
     public override string Name => throw new NotSupportedException();
 
-    protected override AttributeSyntax? AttributeSyntax => this._attributeSyntax;
+    protected override AttributeSyntax AttributeSyntax => this._attributeSyntax;
 
     protected override int GetHashCodeCore() => this._attributeSyntax.GetHashCode();
 }

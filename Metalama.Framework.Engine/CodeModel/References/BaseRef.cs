@@ -85,7 +85,7 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
         Type interfaceType,
         bool throwOnError = true )
     {
-        if ( interfaceType == null )
+        if ( interfaceType == typeof(BaseRef<T>) )
         {
             return compilationElement;
         }

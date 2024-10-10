@@ -35,7 +35,7 @@ internal sealed class Attribute : IAttributeImpl
 
     public CompilationModel Compilation { get; }
 
-    public ICompilationElement? Translate(
+    public ICompilationElement Translate(
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )

@@ -50,7 +50,7 @@ internal readonly struct ReferencedProjectChange
         CompilationChanges? changes = null )
     {
         Invariant.Assert( changes == null || oldCompilation == changes.OldProjectVersionDangerous?.Compilation );
-        Invariant.Assert( changes == null || newCompilation == changes?.NewProjectVersion.Compilation );
+        Invariant.Assert( changes == null || newCompilation == changes.NewProjectVersion.Compilation );
 
         this._oldCompilationRef = oldCompilation == null ? null : new WeakReference<Compilation>( oldCompilation );
         this.NewCompilation = newCompilation;

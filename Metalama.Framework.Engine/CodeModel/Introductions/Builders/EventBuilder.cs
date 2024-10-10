@@ -168,8 +168,8 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
         base.Freeze();
 
-        this.AddMethod?.Freeze();
-        this.RemoveMethod?.Freeze();
+        this.AddMethod.Freeze();
+        this.RemoveMethod.Freeze();
     }
 
     [Memo]

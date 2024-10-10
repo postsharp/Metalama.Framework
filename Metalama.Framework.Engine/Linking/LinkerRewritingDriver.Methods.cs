@@ -223,7 +223,7 @@ namespace Metalama.Framework.Engine.Linking
                 resultType = returnType;
             }
 
-            var isIterator = IteratorHelper.IsIteratorMethod( symbol );
+            var isIterator = symbol.IsIteratorMethod();
 
             var emptyBody =
                 isIterator

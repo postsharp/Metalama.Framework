@@ -25,7 +25,7 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
 
     public override RefTargetKind TargetKind { get; }
 
-    public override IFullRef? ContainingDeclaration => this.CompilationContext.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
+    public override IFullRef ContainingDeclaration => this.CompilationContext.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
 
     public override string Name => this.Symbol.Name;
 
