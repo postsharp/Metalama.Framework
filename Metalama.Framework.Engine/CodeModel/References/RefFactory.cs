@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References
@@ -19,6 +20,20 @@ namespace Metalama.Framework.Engine.CodeModel.References
     internal sealed class RefFactory
     {
         private readonly CompilationModel? _canonicalCompilationModel;
+        private readonly ConcurrentDictionary<SymbolCacheKey, ISymbolRef<ICompilationElement>> _symbolCache = new();
+
+        // There is no need for a cache of builder-based references because the unique instance of the reference is stored
+        // inside DeclarationBuilderData.
+
+        private readonly record struct SymbolCacheKey( ISymbol Symbol, RefTargetKind TargetKind )
+        {
+            public bool Equals( SymbolCacheKey? other )
+                => SymbolEqualityComparer.IncludeNullability.Equals( this.Symbol, other!.Value.Symbol )
+                   && this.TargetKind == other.Value.TargetKind;
+
+            public override int GetHashCode()
+                => HashCode.Combine( SymbolEqualityComparer.IncludeNullability.GetHashCode( this.Symbol ), (int) this.TargetKind );
+        }
 
         public CompilationContext CompilationContext { get; }
 
@@ -51,27 +66,30 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public ISymbolRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (ISymbolRef<IDeclaration>) this.FromAnySymbol( symbol );
 
         public ISymbolRef<ICompilationElement> FromAnySymbol( ISymbol symbol )
-            => symbol.GetDeclarationKind( this.CompilationContext ) switch
-            {
-                DeclarationKind.Compilation => new SymbolRef<ICompilation>( symbol, this ),
-                DeclarationKind.NamedType => new SymbolRef<INamedType>( symbol, this ),
-                DeclarationKind.Method => new SymbolRef<IMethod>( symbol, this ),
-                DeclarationKind.Property => new SymbolRef<IProperty>( symbol, this ),
-                DeclarationKind.Indexer => new SymbolRef<IIndexer>( symbol, this ),
-                DeclarationKind.Field => new SymbolRef<IField>( symbol, this ),
-                DeclarationKind.Event => new SymbolRef<IEvent>( symbol, this ),
-                DeclarationKind.Parameter => new SymbolRef<IParameter>( symbol, this ),
-                DeclarationKind.TypeParameter => new SymbolRef<ITypeParameter>( symbol, this ),
-                DeclarationKind.Attribute => new SymbolRef<IAttribute>( symbol, this ),
-                DeclarationKind.ManagedResource => new SymbolRef<IManagedResource>( symbol, this ),
-                DeclarationKind.Constructor => new SymbolRef<IConstructor>( symbol, this ),
-                DeclarationKind.Finalizer => new SymbolRef<IMethod>( symbol, this ),
-                DeclarationKind.Operator => new SymbolRef<IMethod>( symbol, this ),
-                DeclarationKind.AssemblyReference => new SymbolRef<IAssembly>( symbol, this ),
-                DeclarationKind.Namespace => new SymbolRef<INamespace>( symbol, this ),
-                DeclarationKind.Type => new SymbolRef<IType>( symbol, this ),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            => this._symbolCache.GetOrAdd(
+                new SymbolCacheKey( symbol, RefTargetKind.Default ),
+                static ( key, me ) => key.Symbol.GetDeclarationKind( me.CompilationContext ) switch
+                {
+                    DeclarationKind.Compilation => new SymbolRef<ICompilation>( key.Symbol, me ),
+                    DeclarationKind.NamedType => new SymbolRef<INamedType>( key.Symbol, me ),
+                    DeclarationKind.Method => new SymbolRef<IMethod>( key.Symbol, me ),
+                    DeclarationKind.Property => new SymbolRef<IProperty>( key.Symbol, me ),
+                    DeclarationKind.Indexer => new SymbolRef<IIndexer>( key.Symbol, me ),
+                    DeclarationKind.Field => new SymbolRef<IField>( key.Symbol, me ),
+                    DeclarationKind.Event => new SymbolRef<IEvent>( key.Symbol, me ),
+                    DeclarationKind.Parameter => new SymbolRef<IParameter>( key.Symbol, me ),
+                    DeclarationKind.TypeParameter => new SymbolRef<ITypeParameter>( key.Symbol, me ),
+                    DeclarationKind.Attribute => new SymbolRef<IAttribute>( key.Symbol, me ),
+                    DeclarationKind.ManagedResource => new SymbolRef<IManagedResource>( key.Symbol, me ),
+                    DeclarationKind.Constructor => new SymbolRef<IConstructor>( key.Symbol, me ),
+                    DeclarationKind.Finalizer => new SymbolRef<IMethod>( key.Symbol, me ),
+                    DeclarationKind.Operator => new SymbolRef<IMethod>( key.Symbol, me ),
+                    DeclarationKind.AssemblyReference => new SymbolRef<IAssembly>( key.Symbol, me ),
+                    DeclarationKind.Namespace => new SymbolRef<INamespace>( key.Symbol, me ),
+                    DeclarationKind.Type => new SymbolRef<IType>( key.Symbol, me ),
+                    _ => throw new ArgumentOutOfRangeException()
+                },
+                this );
 
         public SymbolRef<IMethod> PseudoAccessor( IMethod accessor )
         {
@@ -124,14 +142,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
             ISymbol symbol,
             RefTargetKind targetKind = RefTargetKind.Default )
             where T : class, ICompilationElement
-            => new( symbol, this, targetKind );
+            => (SymbolRef<T>)
+                this._symbolCache.GetOrAdd(
+                    new SymbolCacheKey( symbol, targetKind ),
+                    static ( key, me ) => new SymbolRef<T>( key.Symbol, me, key.TargetKind ),
+                    this );
 
-        public SymbolRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol ) => new( methodSymbol, this, RefTargetKind.Return );
+        public SymbolRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol ) => this.FromSymbol<IParameter>( methodSymbol, RefTargetKind.Return );
 
-        internal SymbolRef<ICompilation> ForCompilation()
-        {
-            return this.FromSymbol<ICompilation>( this.CompilationContext.Compilation.Assembly );
-        }
+        internal SymbolRef<ICompilation> ForCompilation() => this.FromSymbol<ICompilation>( this.CompilationContext.Compilation.Assembly );
 
         public SymbolRef<T> FromSymbolBasedDeclaration<T>( SymbolBasedDeclaration declaration )
             where T : class, IDeclaration

@@ -12,6 +12,21 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
     {
         internal static SyntaxNode? GetPrimaryDeclarationSyntax( this IDeclaration declaration ) => declaration.GetSymbol()?.GetPrimaryDeclarationSyntax();
 
+        internal static SyntaxNode? GetClosestPrimaryDeclarationSyntax( this IDeclaration declaration )
+        {
+            for ( var symbol = declaration.GetSymbol(); symbol != null && symbol.Kind != SymbolKind.Namespace; symbol = symbol.ContainingSymbol )
+            {
+                var syntax = symbol.GetPrimaryDeclarationSyntax();
+
+                if ( syntax != null )
+                {
+                    return syntax;
+                }
+            }
+
+            return null;
+        }
+
         internal static SyntaxNode? GetPrimaryDeclarationSyntax( this IFullRef declaration )
             => declaration.GetClosestContainingSymbol().GetPrimaryDeclarationSyntax();
 

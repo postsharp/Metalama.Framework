@@ -6,6 +6,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -294,7 +295,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         {
             var roslynCompilation = compilation.RoslynCompilation;
             var compilationServices = roslynCompilation.GetCompilationContext();
-            
+
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
             var targetMethod = targetMetalamaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
@@ -318,7 +319,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScopeFactory = new LexicalScopeFactory( compilation );
-            var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod.ToRef() );
+            var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod.ToFullRef() );
             var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
 
             var proceedExpression =

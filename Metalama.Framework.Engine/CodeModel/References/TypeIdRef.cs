@@ -17,9 +17,8 @@ internal class TypeIdRef<T> : DurableRef<T>
 
     public TypeIdRef( SerializableTypeId id ) : base( id.Id ) { }
 
-    public override SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
-
-    public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();
+    public override SerializableDeclarationId ToSerializableId()
+        => throw new NotSupportedException( "The durable reference must be first resolved to a full reference." );
 
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {

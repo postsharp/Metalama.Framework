@@ -55,9 +55,7 @@ internal sealed partial class BuiltDeclarationRef<T> : FullRef<T>, IBuiltDeclara
             _ => null
         };
 
-    public override SerializableDeclarationId ToSerializableId() => this.BuilderData.ToSerializableId();
-
-    public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext ) => this.BuilderData.ToSerializableId();
+    public override SerializableDeclarationId ToSerializableId() => this.Declaration.ToSerializableId();
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => throw new NotSupportedException();

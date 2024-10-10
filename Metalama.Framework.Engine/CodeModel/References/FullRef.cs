@@ -99,11 +99,9 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
 
     public sealed override IDurableRef<T> ToDurable() => this.CompilationNeutralRef;
 
-    public override SerializableDeclarationId ToSerializableId() => this.ToSerializableId( this.CompilationContext );
-
-    public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext )
+    public override SerializableDeclarationId ToSerializableId()
     {
-        var symbol = this.GetSymbolIgnoringRefKind( compilationContext, true );
+        var symbol = this.GetSymbolIgnoringRefKind( this.RefFactory.CompilationContext, true );
 
         return symbol.GetSerializableId( this.TargetKind );
     }

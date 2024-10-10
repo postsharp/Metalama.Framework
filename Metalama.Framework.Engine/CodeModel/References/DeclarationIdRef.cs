@@ -20,8 +20,6 @@ internal class DeclarationIdRef<T> : DurableRef<T>
 
     public override SerializableDeclarationId ToSerializableId() => new( this.Id );
 
-    public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext ) => new( this.Id );
-
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => new SerializableDeclarationId( this.Id ).ResolveToSymbol( compilationContext );
 

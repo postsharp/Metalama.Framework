@@ -30,8 +30,6 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
 
     public abstract SerializableDeclarationId ToSerializableId();
 
-    public abstract SerializableDeclarationId ToSerializableId( CompilationContext compilationContext );
-
     public abstract IDurableRef<T> ToDurable();
 
     public abstract bool IsDurable { get; }

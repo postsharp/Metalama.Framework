@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -23,8 +22,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public abstract string? Name { get; }
 
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
-
-        SerializableDeclarationId IRefImpl.ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();
 
         IRef<TOut> IRef.As<TOut>() => this as IRef<TOut> ?? throw new NotSupportedException();
 

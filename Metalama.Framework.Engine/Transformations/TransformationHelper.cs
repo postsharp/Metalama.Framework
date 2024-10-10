@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -110,17 +109,12 @@ internal static class TransformationHelper
         switch ( declaration )
         {
             case SymbolBasedDeclaration symbolBasedDeclaration:
-                var primaryDeclaration = symbolBasedDeclaration.GetPrimaryDeclarationSyntax().AssertNotNull();
+                var primaryDeclaration = symbolBasedDeclaration.GetClosestPrimaryDeclarationSyntax().AssertNotNull();
 
                 return compilationContext.GetSyntaxGenerationContext( options, primaryDeclaration );
 
             case BuiltDeclaration builtDeclaration:
                 return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.BuilderData.InsertPosition );
-
-            case IDeclarationBuilder builder:
-                var insertPosition = builder.ToInsertPosition();
-
-                return GetSyntaxGenerationContext( compilationContext, options, insertPosition );
 
             default:
                 throw new AssertionFailedException( $"Unexpected declaration: {declaration}" );
