@@ -115,6 +115,8 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
         if ( existingOperator == null )
         {
+            builder.Freeze();
+            
             var overriddenOperator = new OverrideOperatorTransformation(
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
