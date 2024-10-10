@@ -38,7 +38,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     [Memo]
     public IType Type => this.MapType( this._parameterBuilder.Type );
 
-    public string Name => this._parameterBuilder.Name ?? throw new NotSupportedException( "Cannot get the name of the return parameter." );
+    public string Name => this._parameterBuilder.Name;
 
     public int Index => this._parameterBuilder.Index;
 

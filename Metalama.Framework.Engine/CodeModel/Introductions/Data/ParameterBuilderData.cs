@@ -26,11 +26,8 @@ internal class ParameterBuilderData : DeclarationBuilderData
     {
         this._ref = new BuiltDeclarationRef<IParameter>( this, containingDeclaration.RefFactory );
 
-        if ( !builder.IsReturnParameter )
-        {
-            this.Name = builder.Name;
-        }
-
+        this.Name = !builder.IsReturnParameter ? builder.Name : "<return>";
+        
         this.Type = builder.Type.ToRef();
         this.RefKind = builder.RefKind;
         this.Index = builder.Index;

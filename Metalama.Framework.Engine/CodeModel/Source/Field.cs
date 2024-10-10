@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public IRef<IField> ToRef() => this.Ref;
 
-        [Memo]
+        // Intentionally no cached with [Memo] because it can be changed by promoting the field.
         public IProperty? OverridingProperty => FieldHelper.GetOverridingProperty( this );
 
         IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;

@@ -23,7 +23,7 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
     {
         var serviceProvider = context.ServiceProvider;
         var contextCopy = context;
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         switch ( targetDeclaration )
         {
