@@ -81,8 +81,15 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
 
             default:
                 var symbol = this.GetSymbol( this.CompilationContext, true );
+                var attributes = symbol.GetAttributes();
 
-                return new ResolvedAttributeRef( symbol.GetAttributes(), symbol, RefTargetKind.Default );
+                if ( symbol is IAssemblySymbol assemblySymbol )
+                {
+                    // Also return module-level attributes.
+                    attributes = attributes.AddRange( assemblySymbol.Modules.SelectMany( m => m.GetAttributes() ));
+                }
+
+                return new ResolvedAttributeRef( attributes, symbol, RefTargetKind.Default );
         }
     }
 
