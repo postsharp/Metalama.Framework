@@ -180,7 +180,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
     protected override IntroductionAdviceResult<IIndexer> ImplementCore( IndexerBuilder builder, in AdviceImplementationContext context )
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var existingDeclaration = targetDeclaration.FindClosestVisibleIndexer( builder );
 

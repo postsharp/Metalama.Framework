@@ -57,7 +57,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
     private void Initialize( in AdviceImplementationContext context )
     {
-        var interfaceType = this._interfaceType.ForCompilation( context.Compilation );
+        var interfaceType = this._interfaceType.ForCompilation( context.MutableCompilation );
         var contextCopy = context;
 
         switch ( this._overrideStrategy )
@@ -283,7 +283,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     {
         var contextCopy = context;
         var serviceProvider = context.ServiceProvider;
-        var compilation = context.Compilation;
+        var compilation = context.MutableCompilation;
 
         this.Initialize( context );
         context.ThrowIfAnyError();
@@ -292,7 +292,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         //      1) Target type already implements the interface.
         //      2) Target type already implements an ancestor of the interface.
 
-        var targetType = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetType = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
         var diagnostics = new DiagnosticBag();
         var implementedInterfaces = new List<ImplementationResult>();
         var implementedInterfaceMembers = new List<MemberImplementationResult>();
@@ -303,7 +303,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             bool skipInterfaceBaseList;
             var forceIgnore = false;
 
-            var interfaceType = interfaceSpecification.InterfaceType.GetTarget( context.Compilation );
+            var interfaceType = interfaceSpecification.InterfaceType.GetTarget( context.MutableCompilation );
 
             if ( targetType.AllImplementedInterfaces.Any( t => t.Equals( interfaceType ) ) )
             {
@@ -374,7 +374,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 contextCopy.AddTransformation( transformation );
             }
 
-            var interfaceMemberMap = new Dictionary<IMember, IMember>( context.Compilation.Comparers.Default );
+            var interfaceMemberMap = new Dictionary<IMember, IMember>( context.MutableCompilation.Comparers.Default );
 
             foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
             {
@@ -382,15 +382,15 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 var mergedTags = ObjectReader.Merge( this._tags, memberSpec.Tags );
                 var templateAttributeProperties = (memberSpec.Template?.AdviceAttribute as ITemplateAttribute)?.Properties;
 
-                var interfaceMember = memberSpec.InterfaceMember.GetTarget( context.Compilation );
+                var interfaceMember = memberSpec.InterfaceMember.GetTarget( context.MutableCompilation );
 
                 switch ( interfaceMember )
                 {
                     case IMethod interfaceMethod:
                         var existingMethod = targetType.AllMethods.OfName( interfaceMethod.Name ).SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
                         var templateMethod = memberSpec.Template?.As<IMethod>();
-                        var templateMethodDeclaration = templateMethod?.DeclarationRef.GetTarget( context.Compilation );
-                        var redirectionTargetMethod = memberSpec.TargetMember?.As<IMethod>().GetTarget( context.Compilation );
+                        var templateMethodDeclaration = templateMethod?.DeclarationRef.GetTarget( context.MutableCompilation );
+                        var redirectionTargetMethod = memberSpec.TargetMember?.As<IMethod>().GetTarget( context.MutableCompilation );
 
                         if ( existingMethod != null && !memberSpec.IsExplicit )
                         {
@@ -525,8 +525,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case IProperty interfaceProperty:
                         var existingProperty = targetType.Properties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
                         var templateProperty = memberSpec.Template?.As<IProperty>();
-                        var templatePropertyDeclaration = templateProperty?.DeclarationRef.GetTarget( context.Compilation );
-                        var redirectionTargetProperty = memberSpec.TargetMember?.As<IProperty>().GetTarget( context.Compilation );
+                        var templatePropertyDeclaration = templateProperty?.DeclarationRef.GetTarget( context.MutableCompilation );
+                        var redirectionTargetProperty = memberSpec.TargetMember?.As<IProperty>().GetTarget( context.MutableCompilation );
 
                         if ( existingProperty != null && !memberSpec.IsExplicit )
                         {
@@ -892,7 +892,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                         void IntroduceEvent( bool isExplicit, bool isOverride )
                         {
-                            var templateEventDeclaration = templateEvent?.DeclarationRef.GetTarget( contextCopy.Compilation );
+                            var templateEventDeclaration = templateEvent?.DeclarationRef.GetTarget( contextCopy.MutableCompilation );
                             var isEventField = templateEventDeclaration?.IsEventField() ?? false;
                             var isVirtual = templateAttributeProperties?.IsVirtual ?? templateEventDeclaration is { IsVirtual: true };
 

@@ -170,7 +170,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         var eventTemplateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
 
         // this.Tags: Override transformations.
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 

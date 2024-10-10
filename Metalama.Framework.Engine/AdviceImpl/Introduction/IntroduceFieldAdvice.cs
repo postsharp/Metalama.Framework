@@ -66,7 +66,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
     protected override IntroductionAdviceResult<IField> ImplementCore( FieldBuilder builder, in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
         if ( existingDeclaration != null )

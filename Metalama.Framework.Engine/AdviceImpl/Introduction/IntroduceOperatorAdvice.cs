@@ -109,7 +109,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
 
     protected override IntroductionAdviceResult<IMethod> ImplementCore( MethodBuilder builder, in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var existingOperator = targetDeclaration.FindClosestVisibleMethod( builder );
 

@@ -269,7 +269,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         return new AdviceFactory<TNewTarget>( target, this._state, this._templateClassInstance, this._layerName, this._explicitlyImplementedInterfaceType );
     }
 
-    public ICompilation MutableCompilation => this._state.CurrentCompilation;
+    public ICompilation MutableCompilation => this._state.MutableCompilation;
 
     private void Validate( IDeclaration declaration, AdviceKind adviceKind, params IDeclaration[] otherTargets )
     {
@@ -320,7 +320,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         void ValidateOneTarget( IDeclaration target )
         {
             // Check that the compilation match.
-            if ( !ReferenceEquals( target.Compilation, this._compilation ) && !ReferenceEquals( target.Compilation, this._state.CurrentCompilation ) )
+            if ( !ReferenceEquals( target.Compilation, this._compilation ) && !ReferenceEquals( target.Compilation, this._state.MutableCompilation ) )
             {
                 throw new InvalidOperationException( "The target declaration is not in the current compilation." );
             }

@@ -25,7 +25,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
 
     protected override AddInitializerAdviceResult Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var containingType = targetDeclaration.GetClosestNamedType().AssertNotNull();
 

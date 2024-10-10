@@ -18,7 +18,7 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
     private readonly ProjectServiceProvider _serviceProvider;
     private int _nextTransformationOrder;
 
-    public CompilationModel CurrentCompilation { get; }
+    public CompilationModel MutableCompilation { get; }
 
     public IAspectInstanceInternal AspectInstance => this.AspectLayerInstance.AspectInstance;
 
@@ -50,7 +50,7 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
         this._pipelineStepIndex = pipelineStepIndex;
         this._orderWithinType = orderWithinType;
         this.AspectLayerInstance = aspectLayerInstance;
-        this.CurrentCompilation = currentCompilation;
+        this.MutableCompilation = currentCompilation;
         this._serviceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
@@ -65,7 +65,7 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
         {
             if ( transformation.Observability != TransformationObservability.None )
             {
-                this.CurrentCompilation.AddTransformation( transformation );
+                this.MutableCompilation.AddTransformation( transformation );
 
                 if ( transformation is ISyntaxTreeTransformation syntaxTreeTransformation )
                 {

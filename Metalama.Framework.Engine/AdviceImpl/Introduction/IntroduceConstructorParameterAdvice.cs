@@ -47,7 +47,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
     protected override IntroduceConstructorParameterAdviceResult Implement( in AdviceImplementationContext context )
     {
-        var compilation = context.Compilation;
+        var compilation = context.MutableCompilation;
         var contextCopy = context;
         var serviceProvider = context.ServiceProvider;
         var syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();

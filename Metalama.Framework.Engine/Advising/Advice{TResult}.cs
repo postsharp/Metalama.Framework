@@ -33,9 +33,9 @@ internal abstract class Advice<TResult> : Advice
         context.Diagnostics.Report( adviceResult.Diagnostics );
 
         // Set the compilation in which references must be resolved.
-        adviceResult.Compilation = context.CurrentCompilation;
+        adviceResult.Compilation = context.MutableCompilation;
 
-        context.IntrospectionListener?.AddAdviceResult( this.AspectInstance, this, adviceResult, context.CurrentCompilation );
+        context.IntrospectionListener?.AddAdviceResult( this.AspectInstance, this, adviceResult, context.MutableCompilation );
 
         // Process outcome.
         switch ( adviceResult.Outcome )
@@ -97,7 +97,7 @@ internal abstract class Advice<TResult> : Advice
             }
         }
 
-        public CompilationModel Compilation => this.AdviceExecutionContext.CurrentCompilation;
+        public CompilationModel MutableCompilation => this.AdviceExecutionContext.MutableCompilation;
 
         public IAdviceExecutionContext AdviceExecutionContext { get; }
 

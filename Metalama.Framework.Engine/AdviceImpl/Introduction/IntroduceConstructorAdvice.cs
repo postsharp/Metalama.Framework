@@ -75,7 +75,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
     protected override IntroductionAdviceResult<IConstructor> ImplementCore( ConstructorBuilder builder, in AdviceImplementationContext context )
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var existingImplicitConstructor =
             builder.IsStatic

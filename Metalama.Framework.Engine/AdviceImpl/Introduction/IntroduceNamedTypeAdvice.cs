@@ -37,7 +37,7 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
 
     protected override IntroductionAdviceResult<INamedType> ImplementCore( NamedTypeBuilder builder, in AdviceImplementationContext context )
     {
-        var targetDeclaration = (INamespaceOrNamedType) this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = (INamespaceOrNamedType) this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var existingType =
             targetDeclaration switch

@@ -115,7 +115,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
     protected override IntroductionAdviceResult<IMethod> ImplementCore( MethodBuilder builder, in AdviceImplementationContext context )
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
         var existingMethod = targetDeclaration.FindClosestVisibleMethod( builder );
 
         // TODO: Introduce attributes that are added not present on the existing member?

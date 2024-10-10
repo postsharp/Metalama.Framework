@@ -211,7 +211,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         var serviceProvider = context.ServiceProvider;
 
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 

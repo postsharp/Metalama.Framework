@@ -29,7 +29,7 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
     {
         // TODO: Translate templates to this compilation.
         // TODO: order should be self if the target is introduced on the same layer.
-        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var promotedField = OverrideHelper.OverrideProperty(
             context.ServiceProvider,

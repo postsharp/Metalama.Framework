@@ -27,7 +27,7 @@ internal sealed class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INam
     protected override IntroductionAdviceResult<INamespace> ImplementCore( NamespaceBuilder builder, in AdviceImplementationContext context )
     {
         builder.Freeze();
-        var targetDeclaration = (INamespace) this.TargetDeclaration.ForCompilation( context.Compilation );
+        var targetDeclaration = (INamespace) this.TargetDeclaration.ForCompilation( context.MutableCompilation );
         var existingNamespace = targetDeclaration.Namespaces.OfName( builder.Name );
 
         if ( existingNamespace == null )
