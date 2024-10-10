@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;

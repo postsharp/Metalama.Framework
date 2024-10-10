@@ -9,7 +9,7 @@ using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
-using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;

@@ -10,6 +10,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System;
@@ -21,12 +22,12 @@ using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExt
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn
+namespace Metalama.Framework.Engine.SerializableIds
 {
     /// <summary>
     /// APIs for constructing documentation comment ids, and finding declarations that match ids.
     /// </summary>
-    internal static class DeclarationDocumentationCommentId
+    internal static class DeclarationIdGenerator
     {
         /// <summary>
         /// Creates an id string used by external documentation comment files to identify declarations

@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;

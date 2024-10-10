@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using System;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn;
+namespace Metalama.Framework.Engine.SerializableIds;
 
 public static partial class SerializableDeclarationIdProvider
 {
@@ -40,7 +40,7 @@ public static partial class SerializableDeclarationIdProvider
 
             case IParameter parameter:
                 {
-                    var parentId = DeclarationDocumentationCommentId.CreateDeclarationId( parameter.DeclaringMember ).AssertNotNull();
+                    var parentId = DeclarationIdGenerator.CreateDeclarationId( parameter.DeclaringMember ).AssertNotNull();
 
                     id = new SerializableDeclarationId( $"{parentId};Parameter={parameter.Index}" );
 
@@ -49,7 +49,7 @@ public static partial class SerializableDeclarationIdProvider
 
             case ITypeParameter typeParameter:
                 {
-                    var parentId = DeclarationDocumentationCommentId.CreateDeclarationId( typeParameter.ContainingDeclaration! ).AssertNotNull();
+                    var parentId = DeclarationIdGenerator.CreateDeclarationId( typeParameter.ContainingDeclaration! ).AssertNotNull();
 
                     id = new SerializableDeclarationId( $"{parentId};TypeParameter={typeParameter.Index}" );
 
@@ -77,7 +77,7 @@ public static partial class SerializableDeclarationIdProvider
 
                 try
                 {
-                    documentationId = DeclarationDocumentationCommentId.CreateDeclarationId( declaration );
+                    documentationId = DeclarationIdGenerator.CreateDeclarationId( declaration );
                 }
                 catch ( InvalidOperationException exception )
                 {

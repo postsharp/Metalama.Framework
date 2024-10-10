@@ -2,9 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.SyntaxGeneration;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn;
+namespace Metalama.Framework.Engine.SerializableIds;
 
 public static class SerializableTypeIdGenerator
 {

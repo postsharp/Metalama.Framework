@@ -3,11 +3,12 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn;
+namespace Metalama.Framework.Engine.SerializableIds;
 
 public static partial class SerializableDeclarationIdProvider
 {
@@ -25,7 +26,7 @@ public static partial class SerializableDeclarationIdProvider
             var kind = parts[1];
             var ordinal = parts.Length == 3 ? int.Parse( parts[2], CultureInfo.InvariantCulture ) : -1;
 
-            var parent = DeclarationDocumentationCommentId.GetFirstDeclarationForDeclarationId( parentId, compilation );
+            var parent = DeclarationIdGenerator.GetFirstDeclarationForDeclarationId( parentId, compilation );
 
             return (parent, kind) switch
             {
@@ -66,7 +67,7 @@ public static partial class SerializableDeclarationIdProvider
         }
         else
         {
-            return DeclarationDocumentationCommentId.GetFirstDeclarationForDeclarationId( id.ToString(), compilation );
+            return DeclarationIdGenerator.GetFirstDeclarationForDeclarationId( id.ToString(), compilation );
         }
     }
 }

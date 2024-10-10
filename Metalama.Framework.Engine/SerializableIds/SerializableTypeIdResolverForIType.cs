@@ -3,12 +3,14 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn;
+namespace Metalama.Framework.Engine.SerializableIds;
 
 // ReSharper disable once MemberCanBeInternal
 public sealed class SerializableTypeIdResolverForIType : SerializableTypeIdResolver<IType, INamespaceOrNamedType>

@@ -1,5 +1,5 @@
 ﻿using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.SerializableIds;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 

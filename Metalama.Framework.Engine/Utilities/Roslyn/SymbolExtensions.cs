@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;

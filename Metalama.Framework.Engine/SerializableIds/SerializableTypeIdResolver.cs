@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,7 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn;
+namespace Metalama.Framework.Engine.SerializableIds;
 
 public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
     where TType : class

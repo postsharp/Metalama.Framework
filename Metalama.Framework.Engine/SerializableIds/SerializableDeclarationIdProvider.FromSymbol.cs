@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn;
+namespace Metalama.Framework.Engine.SerializableIds;
 
 public static partial class SerializableDeclarationIdProvider
 {

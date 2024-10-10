@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
-namespace Metalama.Framework.Engine.Utilities.Roslyn;
+namespace Metalama.Framework.Engine.SerializableIds;
 
 public sealed class SerializableTypeIdResolverForSymbol : SerializableTypeIdResolver<ITypeSymbol, INamespaceOrTypeSymbol>
 {
