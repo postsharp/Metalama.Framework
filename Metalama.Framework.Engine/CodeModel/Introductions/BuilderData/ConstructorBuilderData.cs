@@ -22,7 +22,7 @@ internal class ConstructorBuilderData : MemberBuilderData
 
     public ImmutableArray<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => this._ref;
 
     public new IFullRef<IConstructor> ToRef() => this._ref;
 

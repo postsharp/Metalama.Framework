@@ -55,7 +55,7 @@ internal class EventBuilderData : MemberBuilderData
         this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => this._ref;
 
     public new IFullRef<IEvent> ToRef() => this._ref;
 

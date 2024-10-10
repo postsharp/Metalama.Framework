@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                              DeclarationBuilderData: NamedTypeBuilderData namedTypeBuilder
                          } introduceDeclarationTransformation
                          && !transformationsByBucket.ContainsKey(
-                             introduceDeclarationTransformation.DeclarationBuilderData.ToRef().As<INamespaceOrNamedType>() ) )
+                             introduceDeclarationTransformation.DeclarationBuilderData.ToFullRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
                         ProcessTransformationsOnType( namedTypeBuilder.ToRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );

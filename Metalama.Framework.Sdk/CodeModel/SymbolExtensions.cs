@@ -82,11 +82,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return declaration;
         }
-        
+
         // We don't use ISymbol.IsDefinition because it uses identity comparison to give its result, while we want
         // to be tolerance to non-identical but equal instances.
-        public static bool IsDefinitionSafe( this ISymbol symbol )
-            => symbol.Equals( symbol.OriginalDefinition );
+        public static bool IsDefinitionSafe( this ISymbol symbol ) => symbol.Equals( symbol.OriginalDefinition );
 
         private sealed class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
         {

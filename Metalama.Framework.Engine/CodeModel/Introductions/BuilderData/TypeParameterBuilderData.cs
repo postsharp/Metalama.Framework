@@ -45,7 +45,7 @@ internal class TypeParameterBuilderData : NamedDeclarationBuilderData
         this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => this._ref;
 
     public override IFullRef<INamedType>? DeclaringType => this.ContainingDeclaration.DeclaringType;
 

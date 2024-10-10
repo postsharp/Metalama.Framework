@@ -36,7 +36,12 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceMember;
 
     public override FormattableString ToDisplayString()
-        => $"Introduce {this.BuilderData.DeclarationKind.ToDisplayString()} '{this.BuilderData.Name}' into '{this.BuilderData.ContainingDeclaration.Definition.ToDisplayString()}'.";
+    {
+        var containingDeclarationDefinition = this.BuilderData.ContainingDeclaration.Definition;
+
+        return
+            $"Introduce {this.BuilderData.DeclarationKind.ToDisplayString()} '{this.BuilderData.ToDisplayString()}' into {containingDeclarationDefinition.DeclarationKind.ToDisplayString()} '{containingDeclarationDefinition.ToDisplayString()}'.";
+    }
 
     public override string ToString() => $"{{{this.GetType().Name} Builder={{{this.BuilderData}}}";
 }

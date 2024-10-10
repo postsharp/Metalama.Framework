@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -63,5 +64,11 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceParameter;
 
-    public override FormattableString ToDisplayString() => $"Introduce parameter '{this.Parameter.Name}' into '{this.Parameter.ContainingDeclaration}'.";
+    public override FormattableString ToDisplayString()
+    {
+        var containingDeclarationDefinition = this.Parameter.ContainingDeclaration.Definition;
+
+        return
+            $"Introduce parameter '{this.Parameter.Name}' into {containingDeclarationDefinition.DeclarationKind.ToDisplayString()} '{containingDeclarationDefinition}'.";
+    }
 }

@@ -136,6 +136,6 @@ internal abstract class IntroducedDeclaration : BaseDeclaration
             combinedGenericContext = this.GenericContext;
         }
 
-        return this.BuilderData.ToRef().GetTarget( newCompilation, combinedGenericContext );
+        return this.BuilderData.ToFullRef().GetTarget( newCompilation, combinedGenericContext );
     }
 }

@@ -39,7 +39,7 @@ public partial class DeclarationFactory
                 static ( _, gc, x ) =>
                 {
                     if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
-                            x.builder.ToRef(),
+                            x.builder.ToFullRef(),
                             out var redirected ) )
                     {
                         // It's normal that redirections redirect to builders that have the same reference!

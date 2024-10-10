@@ -191,9 +191,9 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
         AssertAspectTransformations(
             [
                 "Add the 'MethodAspect' aspect to 'Target.M()'.",
-                "Introduce constructor 'Target.Target()'.",
-                "Introduce field 'Target.i'.",
-                "Introduce parameter 'p' into 'Target.Target()'."
+                "Introduce constructor 'Target.Target()' into type 'Target'.",
+                "Introduce field 'Target.i' into type 'Target'.",
+                "Introduce parameter 'p' into constructor 'Target.Target()'."
             ],
             aspectInstances );
 
@@ -416,7 +416,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
                     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
-                        Assert.Equal( "Introduce parameter 'p' into 'WithCtor.WithCtor()'.", transformation.Description );
+                        Assert.Equal( "Introduce parameter 'p' into constructor 'WithCtor.WithCtor()'.", transformation.Description );
                         Assert.Equal( "M:WithCtor.#ctor", transformation.TargetDeclarationId );
                     } );
             },
@@ -430,14 +430,14 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
                     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
-                        Assert.Equal( "Introduce parameter 'p' into 'WithoutCtor.WithoutCtor()'.", transformation.Description );
+                        Assert.Equal( "Introduce parameter 'p' into constructor 'WithoutCtor.WithoutCtor()'.", transformation.Description );
                         Assert.Equal( "M:WithoutCtor.#ctor", transformation.TargetDeclarationId );
                     },
 
                     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
-                        Assert.Equal( "Introduce constructor 'WithoutCtor.WithoutCtor()'.", transformation.Description );
+                        Assert.Equal( "Introduce constructor 'WithoutCtor.WithoutCtor()' into type 'WithoutCtor'.", transformation.Description );
                     } );
             } );
 #pragma warning restore IDE0053

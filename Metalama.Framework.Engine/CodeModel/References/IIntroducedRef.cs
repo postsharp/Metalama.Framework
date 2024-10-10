@@ -10,4 +10,6 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal interface IIntroducedRef : IFullRef
 {
     DeclarationBuilderData BuilderData { get; }
+
+    IFullRef? ReplacedDeclaration { get; }
 }

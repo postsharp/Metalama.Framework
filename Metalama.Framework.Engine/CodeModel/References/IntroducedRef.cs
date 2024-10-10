@@ -20,6 +20,14 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
 
     public DeclarationBuilderData BuilderData { get; }
 
+    public IFullRef? ReplacedDeclaration
+        => this.BuilderData switch
+        {
+            ConstructorBuilderData { ReplacedImplicitConstructor: { } replacedImplicitConstructor } => replacedImplicitConstructor,
+            PropertyBuilderData { OriginalField: { } originalField } => originalField,
+            _ => null
+        };
+
     public IntroducedRef( DeclarationBuilderData builder, RefFactory refFactory, GenericContext? genericContext = null ) : base( refFactory )
     {
         // Type parameter must match the builder type.
@@ -39,7 +47,7 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
 
     public override bool IsDefinition => this._genericContext.IsEmptyOrIdentity;
 
-    public override IFullRef<T> DefinitionRef => this.IsDefinition ? this : (IFullRef<T>) this.BuilderData.ToRef();
+    public override IFullRef<T> DefinitionRef => this.IsDefinition ? this : (IFullRef<T>) this.BuilderData.ToFullRef();
 
     public override FullRef<T> WithGenericContext( GenericContext genericContext )
         => genericContext.IsEmptyOrIdentity ? this : new IntroducedRef<T>( this.BuilderData, this.RefFactory, genericContext );

@@ -51,7 +51,7 @@ internal sealed class IntroducedNamespace : IntroducedNamedDeclaration, INamespa
     public INamespaceCollection Namespaces
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this.NamedDeclarationBuilderData.ToRef().As<INamespace>() ) );
+            this.Compilation.GetNamespaceCollection( this.NamedDeclarationBuilderData.ToFullRef().As<INamespace>() ) );
 
     public bool IsPartial
     {

@@ -10,6 +10,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.SerializableIds;
@@ -199,11 +200,11 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             // but we need the original declaration to get the correct serializable ID.
             // We can do that by going through the symbol, when it exists, which is never modified.
 
-            if ( declaration.GetSymbol() is { } symbol )
+            if ( declaration.GetOriginalSymbol() is { } symbol )
             {
                 return symbol.GetSerializableId().Id;
             }
-
+            
             return declaration.ToSerializableId().Id;
         }
 

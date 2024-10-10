@@ -38,7 +38,7 @@ internal class NamedTypeBuilderData : MemberOrNamedTypeBuilderData
         this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => this._ref;
 
     public new IFullRef<INamedType> ToRef() => this._ref;
 

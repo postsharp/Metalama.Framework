@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -183,5 +185,20 @@ public static class RefExtensions
             RefComparison.StructuralIncludeNullability => StructuralSymbolComparer.IncludeNullability,
             RefComparison.IncludeNullability => SymbolEqualityComparer.IncludeNullability,
             _ => throw new ArgumentOutOfRangeException()
+        };
+
+    public static ISymbol? GetOriginalSymbol( this IRef reference )
+        => reference switch
+        {
+            ISymbolRef symbolRef => symbolRef.Symbol,
+            IIntroducedRef { ReplacedDeclaration: { } replacedDeclaration } => replacedDeclaration.GetOriginalSymbol(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    
+    public static ISymbol? GetOriginalSymbol( this IDeclaration declaration )
+        => declaration switch
+        {
+            SymbolBasedDeclaration symbolBased => symbolBased.Symbol,
+            _ => declaration.ToRef().GetOriginalSymbol(),
         };
 }

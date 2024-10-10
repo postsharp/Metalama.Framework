@@ -36,7 +36,9 @@ internal class AttributeBuilderData : DeclarationBuilderData
         // TODO: TypedConstant can still leak a CompilationModel through its typeof(.) value.
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => throw new NotSupportedException();
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => throw new NotSupportedException("Cannot get an IFullRef for an Attribute.");
+
+    protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
     public override IFullRef<INamedType>? DeclaringType => throw new NotImplementedException();
 

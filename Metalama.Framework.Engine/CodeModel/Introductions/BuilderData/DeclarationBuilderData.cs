@@ -37,9 +37,13 @@ internal abstract class DeclarationBuilderData
         this.IsDesignTimeObservable = builder.IsDesignTimeObservable;
     }
 
-    public IFullRef<IDeclaration> ToRef() => this.ToDeclarationRef();
+    public IFullRef<IDeclaration> ToFullRef() => this.ToDeclarationFullRef();
+    
+    public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
 
-    protected abstract IFullRef<IDeclaration> ToDeclarationRef();
+    protected abstract IFullRef<IDeclaration> ToDeclarationFullRef();
+
+    protected virtual IRef<IDeclaration> ToDeclarationRef() => this.ToDeclarationFullRef();
 
     public bool IsDesignTimeObservable { get; }
 
@@ -57,4 +61,6 @@ internal abstract class DeclarationBuilderData
     public InsertPosition InsertPosition => this.GetInsertPosition();
 
     protected virtual InsertPosition GetInsertPosition() => throw new NotSupportedException();
+
+    public string ToDisplayString() => this.ToDeclarationFullRef().Definition.ToDisplayString();
 }

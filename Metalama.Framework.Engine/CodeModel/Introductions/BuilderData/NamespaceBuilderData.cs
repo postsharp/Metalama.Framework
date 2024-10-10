@@ -17,7 +17,7 @@ internal class NamespaceBuilderData : NamedDeclarationBuilderData
         this.Attributes = ImmutableArray<AttributeBuilderData>.Empty;
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => this._ref;
 
     public override IFullRef<INamedType>? DeclaringType => null;
 

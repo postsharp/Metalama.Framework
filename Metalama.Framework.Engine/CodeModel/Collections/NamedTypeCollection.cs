@@ -18,11 +18,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
         {
-            var typeRef = typeDefinition.ToRef();
-            
             foreach ( var reference in this.Source )
             {
-                if ( reference.Definition.ToRef().Equals( typeRef ) )
+                if ( reference.IsConvertibleTo( typeDefinition, ConversionKind.TypeDefinition ) )
                 {
                     // Resolve the reference and store the declaration.
                     var member = this.GetItem( reference );

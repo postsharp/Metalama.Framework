@@ -75,7 +75,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationRef() => this._ref;
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => this._ref;
 
     public new IntroducedRef<IProperty> ToRef() => this._ref;
 

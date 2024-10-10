@@ -272,6 +272,8 @@ public static class DeclarationExtensions
         => kind switch
         {
             DeclarationKind.TypeParameter => "generic parameter",
+            DeclarationKind.NamedType => "type",
+            DeclarationKind.AssemblyReference => "assembly reference",
             _ => kind.ToString().ToLowerInvariant()
         };
 
