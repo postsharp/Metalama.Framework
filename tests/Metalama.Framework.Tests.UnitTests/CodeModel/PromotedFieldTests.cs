@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Testing.UnitTesting;
 using System.Linq;
@@ -159,7 +159,7 @@ class C
 
         // Assertions on declarations.
         var fieldAfter = field.ForCompilation( compilation2 );
-        Assert.IsType<BuiltField>( fieldAfter );
+        Assert.IsType<IntroducedField>( fieldAfter );
         Assert.NotNull( fieldAfter.OverridingProperty );
         Assert.NotNull( fieldAfter.OverridingProperty.OriginalField );
         Assert.Same( fieldAfter, fieldAfter.OverridingProperty.OriginalField );

@@ -131,7 +131,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         => reference switch
         {
             ISymbolRef symbolRef => this.GetSyntaxGenerationContext( options, symbolRef.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() ),
-            IBuiltDeclarationRef builtDeclarationRef => this.GetSyntaxGenerationContext(
+            IIntroducedRef builtDeclarationRef => this.GetSyntaxGenerationContext(
                 options,
                 builtDeclarationRef.GetClosestContainingSymbol().GetPrimaryDeclarationSyntax().AssertNotNull() ),
             _ => throw new AssertionFailedException()

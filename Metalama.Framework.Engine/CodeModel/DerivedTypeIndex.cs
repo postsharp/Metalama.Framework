@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
@@ -58,7 +58,7 @@ public sealed partial class DerivedTypeIndex
             case ISymbolRef { Symbol: INamedTypeSymbol symbol }:
                 return this.IsCurrentCompilation( symbol.ContainingAssembly );
 
-            case IBuiltDeclarationRef { BuilderData: NamedTypeBuilderData }:
+            case IIntroducedRef { BuilderData: NamedTypeBuilderData }:
                 // Builders are always "in" the current Roslyn compilation.
                 return true;
 

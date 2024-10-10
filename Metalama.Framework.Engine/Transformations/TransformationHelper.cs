@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -113,7 +113,7 @@ internal static class TransformationHelper
 
                 return compilationContext.GetSyntaxGenerationContext( options, primaryDeclaration );
 
-            case BuiltDeclaration builtDeclaration:
+            case IntroducedDeclaration builtDeclaration:
                 return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.BuilderData.InsertPosition );
 
             default:

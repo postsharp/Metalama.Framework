@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
@@ -252,7 +252,7 @@ internal sealed class LinkerInjectionRegistry
                         }
                     }
 
-                case IBuiltDeclarationRef builtMember:
+                case IIntroducedRef builtMember:
                     return GetFromBuilder( builtMember.BuilderData );
 
                 default:

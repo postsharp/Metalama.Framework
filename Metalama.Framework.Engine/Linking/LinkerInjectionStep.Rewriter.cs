@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
@@ -220,7 +220,7 @@ internal sealed partial class LinkerInjectionStep
             foreach ( var attribute in finalModelAttributes )
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                if ( attribute is BuilderAttributeRef builderAttributeRef && isPrimaryNode( builderAttributeRef.BuilderData, originalDeclaringNode ) )
+                if ( attribute is IntroducedAttributeRef builderAttributeRef && isPrimaryNode( builderAttributeRef.BuilderData, originalDeclaringNode ) )
 #pragma warning restore CS0618 // Type or member is obsolete
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );

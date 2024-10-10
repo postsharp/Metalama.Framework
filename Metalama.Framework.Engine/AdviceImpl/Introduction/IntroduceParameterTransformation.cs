@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
@@ -33,7 +33,7 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
     {
         // We only add parameters to source declarations. For introduced declarations, the IntroductionTransformation already adds
         // the parameters.
-        Invariant.Assert( this.TargetMember is not IBuiltDeclarationRef );
+        Invariant.Assert( this.TargetMember is not IIntroducedRef );
 
         var syntax = SyntaxFactory.Parameter(
             default,

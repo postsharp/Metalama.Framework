@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
@@ -27,7 +27,7 @@ public partial class DerivedTypeIndex
         {
             this.Value = reference switch
             {
-                IBuiltDeclarationRef builtDeclarationRef => builtDeclarationRef.BuilderData,
+                IIntroducedRef builtDeclarationRef => builtDeclarationRef.BuilderData,
                 ISymbolRef symbolRef => symbolRef.Symbol,
                 _ => throw new ArgumentException()
             };

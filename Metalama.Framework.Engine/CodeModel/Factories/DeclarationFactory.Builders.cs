@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -57,7 +57,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IAttribute, AttributeBuilderData>(
             attributeBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<AttributeBuilderData> args ) => new BuiltAttribute( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<AttributeBuilderData> args ) => new IntroducedAttribute( args.Builder, args.Compilation, args.GenericContext ) );
 
     private IParameter GetParameter(
         ParameterBuilderData parameterBuilder,
@@ -65,7 +65,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IParameter, ParameterBuilderData>(
             parameterBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<ParameterBuilderData> args ) => new BuiltParameter(
+            static ( in CreateFromBuilderArgs<ParameterBuilderData> args ) => new IntroducedParameter(
                 args.Builder,
                 args.Compilation,
                 args.GenericContext,
@@ -78,7 +78,7 @@ public partial class DeclarationFactory
             typeParameterBuilder,
             genericContext,
             static ( in CreateFromBuilderArgs<TypeParameterBuilderData> args )
-                => new BuiltTypeParameter( args.Builder, args.Compilation, args.GenericContext ) );
+                => new IntroducedTypeParameter( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IMethod GetMethod(
         MethodBuilderData methodBuilder,
@@ -86,7 +86,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IMethod, MethodBuilderData>(
             methodBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<MethodBuilderData> args ) => new BuiltMethod( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<MethodBuilderData> args ) => new IntroducedMethod( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IMethod GetAccessor( MethodBuilderData methodBuilder, IGenericContext? genericContext = null )
         => this.GetDeclarationFromBuilder(
@@ -103,7 +103,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IConstructor, ConstructorBuilderData>(
             constructorBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<ConstructorBuilderData> args ) => new BuiltConstructor( args.Builder, args.Compilation, args.GenericContext ),
+            static ( in CreateFromBuilderArgs<ConstructorBuilderData> args ) => new IntroducedConstructor( args.Builder, args.Compilation, args.GenericContext ),
             true );
 
     // Fields support redirections, but fields redirect to properties, so it is not handled at this level.
@@ -113,7 +113,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IField, FieldBuilderData>(
             fieldBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<FieldBuilderData> args ) => new BuiltField( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<FieldBuilderData> args ) => new IntroducedField( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IProperty GetProperty(
         PropertyBuilderData propertyBuilder,
@@ -121,7 +121,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IProperty, PropertyBuilderData>(
             propertyBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<PropertyBuilderData> args ) => new BuiltProperty( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<PropertyBuilderData> args ) => new IntroducedProperty( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IIndexer GetIndexer(
         IndexerBuilderData indexerBuilder,
@@ -129,7 +129,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IIndexer, IndexerBuilderData>(
             indexerBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<IndexerBuilderData> args ) => new BuiltIndexer( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<IndexerBuilderData> args ) => new IntroducedIndexer( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal IEvent GetEvent(
         EventBuilderData eventBuilder,
@@ -137,7 +137,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IEvent, EventBuilderData>(
             eventBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<EventBuilderData> args ) => new BuiltEvent( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<EventBuilderData> args ) => new IntroducedEvent( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal INamedType GetNamedType(
         NamedTypeBuilderData namedTypeBuilder,
@@ -145,7 +145,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<INamedType, NamedTypeBuilderData>(
             namedTypeBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<NamedTypeBuilderData> args ) => new BuiltNamedType( args.Builder, args.Compilation, args.GenericContext ) );
+            static ( in CreateFromBuilderArgs<NamedTypeBuilderData> args ) => new IntroducedNamedType( args.Builder, args.Compilation, args.GenericContext ) );
 
     internal INamespace GetNamespace(
         NamespaceBuilderData namespaceBuilder,
@@ -153,7 +153,7 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<INamespace, NamespaceBuilderData>(
             namespaceBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<NamespaceBuilderData> args ) => new BuiltNamespace( args.Builder, args.Compilation ) );
+            static ( in CreateFromBuilderArgs<NamespaceBuilderData> args ) => new IntroducedNamespace( args.Builder, args.Compilation ) );
 
     internal IDeclaration GetDeclaration(
         DeclarationBuilderData builder,

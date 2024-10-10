@@ -414,7 +414,7 @@ internal sealed class AspectReferenceResolver
 
         if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
         {
-            if ( replacedMember is IBuiltDeclarationRef { BuilderData: { } builderData } )
+            if ( replacedMember is IIntroducedRef { BuilderData: { } builderData } )
             {
                 // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
                 var fieldInjectionTransformation =

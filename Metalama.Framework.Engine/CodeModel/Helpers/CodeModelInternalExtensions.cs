@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
@@ -61,7 +61,7 @@ internal static class CodeModelInternalExtensions
         => declaration switch
         {
             ISymbolRef symbolRef => symbolRef.Symbol.ToInsertPosition(),
-            IBuiltDeclarationRef builtDeclarationRef => builtDeclarationRef.BuilderData.InsertPosition,
+            IIntroducedRef builtDeclarationRef => builtDeclarationRef.BuilderData.InsertPosition,
             _ => throw new AssertionFailedException()
         };
 
@@ -96,7 +96,7 @@ internal static class CodeModelInternalExtensions
         {
             switch ( declaration )
             {
-                case BuiltDeclaration builtDeclaration:
+                case IntroducedDeclaration builtDeclaration:
                     return builtDeclaration.BuilderData.InsertPosition;
 
                 case SymbolBasedDeclaration baseDeclaration:

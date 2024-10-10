@@ -11,7 +11,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -285,7 +285,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 var allAttributes =
                     allNewDeclarations.SelectMany( c => c.Attributes )
                         .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.BuilderData ) )
-                        .Select( a => new BuilderAttributeRef( a ) )
+                        .Select( a => new IntroducedAttributeRef( a ) )
                         .ToReadOnlyList();
 
                 // TODO: this cache may need to be smartly invalidated when we have interface introductions.

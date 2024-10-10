@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
@@ -454,7 +454,7 @@ public static class DeclarationExtensions
 
                 return eventSymbol.IsEventField();
 
-            case BuiltEvent builtEvent:
+            case IntroducedEvent builtEvent:
                 return builtEvent.EventBuilderData.IsEventField;
 
             case EventBuilder eventBuilder:

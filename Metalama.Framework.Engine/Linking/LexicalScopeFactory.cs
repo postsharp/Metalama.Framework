@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Templating;
@@ -76,7 +76,7 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
         static void CollectIntroducedRecursive( INamedType type, ImmutableHashSet<string>.Builder builder )
         {
             // TODO: It may be worthwhile to cache this for better performance on large hierarchies.
-            foreach ( var builtMember in type.Members().OfType<BuiltMember>() )
+            foreach ( var builtMember in type.Members().OfType<IntroducedMember>() )
             {
                 builder.Add( builtMember.Name );
             }
@@ -97,7 +97,7 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
     {
         switch ( declarationRef )
         {
-            case IBuiltDeclarationRef:
+            case IIntroducedRef:
                 {
                     var declaration = declarationRef.Definition;
 

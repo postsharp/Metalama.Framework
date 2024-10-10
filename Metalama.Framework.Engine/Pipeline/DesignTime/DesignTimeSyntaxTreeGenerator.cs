@@ -6,8 +6,8 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -369,7 +369,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Additionally, add all introduced constructors to the list.
             foreach ( var introducedConstructor in finalType.Constructors.Where( c => c.Origin is { Kind: DeclarationOriginKind.Aspect } ) )
             {
-                if ( (introducedConstructor.ToRef() as IBuiltDeclarationRef)?.BuilderData is not ConstructorBuilderData { ReplacedImplicitConstructor: null } )
+                if ( (introducedConstructor.ToRef() as IIntroducedRef)?.BuilderData is not ConstructorBuilderData { ReplacedImplicitConstructor: null } )
                 {
                     // Skip introduced constructors that are replacements.
                     continue;
@@ -391,7 +391,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     continue;
                 }
 
-                if ( initialConstructor is BuiltDeclaration )
+                if ( initialConstructor is IntroducedDeclaration )
                 {
                     continue;
                 }

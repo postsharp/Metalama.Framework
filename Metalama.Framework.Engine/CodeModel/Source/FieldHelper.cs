@@ -1,6 +1,6 @@
 ﻿using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 

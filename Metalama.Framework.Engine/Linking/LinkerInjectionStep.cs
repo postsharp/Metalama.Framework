@@ -447,7 +447,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 break;
 
             // This needs to point to an interface
-            case IBuiltDeclarationRef replacedBuilder:
+            case IIntroducedRef replacedBuilder:
                 if ( !transformationCollection.TryGetIntroduceDeclarationTransformation(
                         replacedBuilder.BuilderData,
                         out var introduceDeclarationTransformation ) )
@@ -772,7 +772,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             case IntroduceParameterTransformation introduceParameterTransformation:
 
-                if ( introduceParameterTransformation.TargetDeclaration is IBuiltDeclarationRef ||
+                if ( introduceParameterTransformation.TargetDeclaration is IIntroducedRef ||
                      compilationModel.IsRedirected( introduceParameterTransformation.TargetDeclaration ) )
                 {
                     // Parameters introduced into introduced constructors are discovered by IntroduceParameterTransforma because they

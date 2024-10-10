@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -150,7 +150,7 @@ internal sealed partial class LinkerInjectionStep
 
                     break;
 
-                case IBuiltDeclarationRef builtDeclarationRef:
+                case IIntroducedRef builtDeclarationRef:
                     this.AddInjectedInterface( (NamedTypeBuilderData) builtDeclarationRef.BuilderData, injectedInterface );
 
                     break;
@@ -195,7 +195,7 @@ internal sealed partial class LinkerInjectionStep
 
                     break;
 
-                case IBuiltDeclarationRef builtDeclarationRef:
+                case IIntroducedRef builtDeclarationRef:
                     this.AddAutoPropertyWithSynthesizedSetter( (PropertyBuilderData) builtDeclarationRef.BuilderData );
 
                     break;
@@ -402,7 +402,7 @@ internal sealed partial class LinkerInjectionStep
             => declaration switch
             {
                 ISymbolRef symbolRef when symbolRef.Symbol.GetPrimaryDeclarationSyntax() is { } syntax => this.GetOrAddMemberLevelTransformations( syntax ),
-                IBuiltDeclarationRef builtDeclarationRef => this.GetOrAddMemberLevelTransformations( builtDeclarationRef.BuilderData ),
+                IIntroducedRef builtDeclarationRef => this.GetOrAddMemberLevelTransformations( builtDeclarationRef.BuilderData ),
                 _ when this._finalCompilationModel.TryGetRedirectedDeclaration( declaration, out var redirectedDeclaration ) => this
                     .GetOrAddMemberLevelTransformations( redirectedDeclaration ),
                 _ => throw new AssertionFailedException()

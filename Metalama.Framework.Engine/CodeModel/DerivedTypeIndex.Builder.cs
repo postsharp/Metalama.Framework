@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
@@ -43,7 +43,7 @@ public partial class DerivedTypeIndex
 
                     break;
 
-                case IBuiltDeclarationRef { BuilderData: NamedTypeBuilderData builder }:
+                case IIntroducedRef { BuilderData: NamedTypeBuilderData builder }:
                     this.AnalyzeType( builder );
 
                     break;

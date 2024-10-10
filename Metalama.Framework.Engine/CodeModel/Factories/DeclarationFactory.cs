@@ -5,7 +5,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
@@ -157,7 +157,7 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
 
                 break;
 
-            case IBuiltDeclarationRef builtDeclarationRef:
+            case IIntroducedRef builtDeclarationRef:
                 this._builderCache.Remove( builtDeclarationRef.BuilderData );
 
                 break;

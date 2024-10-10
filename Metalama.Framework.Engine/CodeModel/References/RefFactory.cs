@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Introductions.Built;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
@@ -54,11 +54,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public FullRef<T> FromBuilderData<T>( DeclarationBuilderData builder, GenericContext? genericContext = null )
             where T : class, IDeclaration
-            => new BuiltDeclarationRef<T>( builder, this, genericContext );
+            => new IntroducedRef<T>( builder, this, genericContext );
 
-        public FullRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
+        public FullRef<T> FromBuilt<T>( IntroducedDeclaration introducedDeclaration )
             where T : class, IDeclaration
-            => this.FromBuilderData<T>( builtDeclaration.BuilderData, builtDeclaration.GenericContext );
+            => this.FromBuilderData<T>( introducedDeclaration.BuilderData, introducedDeclaration.GenericContext );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.

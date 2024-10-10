@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.Introductions.Data;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
@@ -39,7 +39,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuiltDeclarationRef { BuilderData: MethodBuilderData builder }:
+            case IIntroducedRef { BuilderData: MethodBuilderData builder }:
                 foreach ( var p in builder.Parameters )
                 {
                     action( this.RefFactory.FromBuilderData<IParameter>( p ) );
@@ -47,7 +47,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuiltDeclarationRef { BuilderData: ConstructorBuilderData builder }:
+            case IIntroducedRef { BuilderData: ConstructorBuilderData builder }:
                 foreach ( var p in builder.Parameters )
                 {
                     action( this.RefFactory.FromBuilderData<IParameter>( p ) );
@@ -55,7 +55,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuiltDeclarationRef { BuilderData: IndexerBuilderData indexerBuilder }:
+            case IIntroducedRef { BuilderData: IndexerBuilderData indexerBuilder }:
                 foreach ( var p in indexerBuilder.Parameters )
                 {
                     action( this.RefFactory.FromBuilderData<IParameter>( p ) );
