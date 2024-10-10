@@ -413,7 +413,7 @@ class C
         var aspectLayerInstance = AspectLayerInstance.CreateTestInstance( immutableCompilation );
 
         var attributeBuilder = new AttributeBuilder(
-            aspectLayerInstance!,
+            aspectLayerInstance,
             compilation,
             AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
 

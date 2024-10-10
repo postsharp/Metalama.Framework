@@ -225,7 +225,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     .Single();
 
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+
                 var aspectInstance = Activator.CreateInstance( compiledAspectType );
+
+                // In templating tests, test classes do not implement ITemplateProvider so we use FromInstanceUnsafe.
                 var templateProvider = TemplateProvider.FromInstanceUnsafe( aspectInstance );
 
                 var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( templateMethod );
@@ -293,9 +296,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var compilationServices = roslynCompilation.GetCompilationContext();
 
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-
-            // In templating tests, test classes do not implement ITemplateProvider so we use FromInstanceUnsafe.
-            var templateProvider = TemplateProvider.FromInstanceUnsafe( Activator.CreateInstance( templateType )! );
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
@@ -84,7 +83,6 @@ class C<T>
 
             // Create a PromotedField.
             var promoteFieldTransformation = PromoteFieldTransformation.Create( testContext.ServiceProvider, field, null! );
-            var overridingProperty = promoteFieldTransformation.OverridingProperty;
 
             // Add the PromotedField to a compilation.
             var compilation = immutableCompilation.CreateMutableClone();

@@ -61,39 +61,6 @@ public partial class DeclarationFactory
         }
     }
 
-    private TDeclaration GetDeclarationFromSymbol<TDeclaration, TSymbol>(
-        TSymbol symbol,
-        GenericContext genericContext,
-        CreateFromSymbolDelegate<TDeclaration, TSymbol> createDeclaration,
-        bool supportsRedirection = false )
-        where TSymbol : ISymbol
-        where TDeclaration : class, IDeclaration
-    {
-        using ( StackOverflowHelper.Detect() )
-        {
-            symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
-
-            return (TDeclaration) this._symbolCache.GetOrAdd(
-                symbol,
-                genericContext,
-                typeof(TDeclaration),
-                static ( _, _, x ) =>
-                {
-                    if ( x.supportsRedirection && x.me._compilationModel.TryGetRedirectedDeclaration(
-                            x.me.CompilationContext.RefFactory.FromSymbol<TDeclaration>( x.symbol.OriginalDefinition ),
-                            out var redirectedDefinition ) )
-                    {
-                        var newGenericContext = GenericContext.Get( x.symbol, x.me.CompilationContext );
-
-                        return x.me.GetDeclaration( redirectedDefinition, newGenericContext, typeof(TDeclaration) );
-                    }
-
-                    return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ) );
-                },
-                (me: this, symbol, createDeclaration, supportsRedirection, genericContext) );
-        }
-    }
-
     private TType GetTypeFromSymbol<TType, TSymbol>(
         TSymbol symbol,
         CreateFromSymbolDelegate<TType, TSymbol> createType,

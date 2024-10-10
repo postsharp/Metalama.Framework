@@ -68,7 +68,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var (pipelineFactory, dependentCompilation, _) = await PreparePipeline( testContext, masterCode, dependentCode );
 
-        return await pipelineFactory.ExecuteAsync( dependentCompilation!, AsyncExecutionContext.Get() );
+        return await pipelineFactory.ExecuteAsync( dependentCompilation, AsyncExecutionContext.Get() );
     }
 
     private async Task<List<Diagnostic>> RunAnalyzer( string masterCode, string dependentCode )
@@ -76,7 +76,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var (pipelineFactory, dependentCompilation, dependentSyntaxTree) = await PreparePipeline( testContext, masterCode, dependentCode );
 
-        var semanticModel = dependentCompilation!.GetSemanticModel( dependentSyntaxTree! );
+        var semanticModel = dependentCompilation.GetSemanticModel( dependentSyntaxTree );
 
         var analyzer = new TheDiagnosticAnalyzer( pipelineFactory.ServiceProvider );
         var analysisContext = new TestSemanticModelAnalysisContext( semanticModel, testContext.ProjectOptions );

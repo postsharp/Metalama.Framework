@@ -1908,7 +1908,7 @@ class D{version}
 
         var warning = Assert.Single( result.GetAllDiagnostics() );
 
-        Assert.Equal( "Not enabled.", warning.GetMessage( null ) );
+        Assert.Equal( "Not enabled.", warning.GetMessage( CultureInfo.InvariantCulture ) );
 
         code["optionsAttribute.cs"] = optionsAttribute;
 
