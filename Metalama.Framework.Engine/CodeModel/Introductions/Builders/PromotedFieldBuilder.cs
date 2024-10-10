@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 /// Represents a property that has been created from a field. It implements both the <see cref="IField"/> and <see cref="IProperty"/>
 /// interfaces.
 /// </summary>
-internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IFieldBuilder
+internal sealed class PromotedFieldBuilder : PropertyBuilder
 {
     /// <summary>
     /// Gets the original <see cref="Field"/> or <see cref="FieldBuilder"/>.
@@ -123,14 +123,4 @@ internal sealed class PromotedFieldBuilder : PropertyBuilder, IFieldImpl, IField
 
     public TypedConstant? ConstantValue => this.OriginalSourceFieldOrBuiltField.ConstantValue;
 
-    public IField Definition => this;
-
-    [Memo]
-    public FullRef<IField> FieldRef => (FullRef<IField>) this.OriginalSourceFieldOrBuiltField.ToRef();
-
-    IRef<IField> IField.ToRef() => this.FieldRef;
-
-    public IProperty? OverridingProperty => this;
-
-    public override IField OriginalField => this;
 }
