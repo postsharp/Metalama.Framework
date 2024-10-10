@@ -13,12 +13,12 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
     where TIntroduced : class, IDeclaration
     where TBuilder : DeclarationBuilder, TIntroduced
 {
-    protected Action<TBuilder>? BuildAction { get; }
+    private readonly Action<TBuilder>? _buildAction;
 
     protected IntroduceDeclarationAdvice( AdviceConstructorParameters parameters, Action<TBuilder>? buildAction )
         : base( parameters )
     {
-        this.BuildAction = buildAction;
+        this._buildAction = buildAction;
     }
 
     protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome, TIntroduced introducedMember )
@@ -40,7 +40,7 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 
         this.InitializeBuilder( builder, in context );
 
-        this.BuildAction?.Invoke( builder );
+        this._buildAction?.Invoke( builder );
 
         this.ValidateBuilder( builder, context.Diagnostics );
 

@@ -27,7 +27,7 @@ internal static class ProceedHelper
         TemplateKind selectedTemplateKind,
         IMethod overriddenMethod )
     {
-        var runtimeAspectHelperType =
+        TypeSyntax GetRuntimeAspectHelperTypeSyntax() =>
             generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
         switch ( selectedTemplateKind )
@@ -47,7 +47,7 @@ internal static class ProceedHelper
                             InvocationExpression(
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
-                                        runtimeAspectHelperType,
+                                        GetRuntimeAspectHelperTypeSyntax(),
                                         IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
                                 .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
                                 .WithSimplifierAnnotationIfNecessary( generationContext );
@@ -127,7 +127,7 @@ internal static class ProceedHelper
                 InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            runtimeAspectHelperType,
+                            GetRuntimeAspectHelperTypeSyntax(),
                             IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                     .WithArgumentList( arguments )
                     .WithSimplifierAnnotationIfNecessary( generationContext );

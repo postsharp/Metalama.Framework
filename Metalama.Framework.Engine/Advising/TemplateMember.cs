@@ -27,13 +27,13 @@ internal abstract class TemplateMember
     // Can be null in the default instance.
     public IAdviceAttribute? AdviceAttribute { get; }
 
-    public TemplateKind SelectedKind { get; }
+    public TemplateKind SelectedTemplateKind { get; }
 
     /// <summary>
     /// Gets a value indicating which kind should the template be interpreted as, based on the target method.
     /// For example, a <see cref="TemplateKind.Default"/> template that is applied to an <c>async Task</c> method should be interpreted as <see cref="TemplateKind.Async"/>.
     /// </summary>
-    public TemplateKind InterpretedKind { get; }
+    public TemplateKind InterpretedTemplateKind { get; }
 
     public Accessibility Accessibility { get; }
 
@@ -50,13 +50,13 @@ internal abstract class TemplateMember
     /// Gets a value indicating which kind should the template be treated as, based on the selected template method.
     /// For example, a <see cref="TemplateKind.Default"/> template that is <c>async Task</c> should be treated as <see cref="TemplateKind.Async"/>.
     /// </summary>
-    public TemplateKind EffectiveKind { get; }
+    public TemplateKind EffectiveTemplateKind { get; }
 
     public TemplateProvider TemplateProvider { get; }
 
     private TemplateKind GetEffectiveKind( ISymbol declaration )
     {
-        if ( this.SelectedKind == TemplateKind.Default )
+        if ( this.SelectedTemplateKind == TemplateKind.Default )
         {
             if ( declaration is IMethodSymbol method && method.IsAsyncSafe() )
             {
@@ -91,7 +91,7 @@ internal abstract class TemplateMember
             }
         }
 
-        return this.SelectedKind;
+        return this.SelectedTemplateKind;
     }
 
     [Memo]
@@ -100,12 +100,12 @@ internal abstract class TemplateMember
     protected TemplateMember( TemplateMember prototype )
     {
         this.Accessibility = prototype.Accessibility;
-        this.InterpretedKind = prototype.InterpretedKind;
+        this.InterpretedTemplateKind = prototype.InterpretedTemplateKind;
         this.Accessibility = prototype.Accessibility;
         this.AdviceAttribute = prototype.AdviceAttribute;
         this.IsIteratorMethod = prototype.IsIteratorMethod;
-        this.EffectiveKind = prototype.EffectiveKind;
-        this.SelectedKind = prototype.SelectedKind;
+        this.EffectiveTemplateKind = prototype.EffectiveTemplateKind;
+        this.SelectedTemplateKind = prototype.SelectedTemplateKind;
         this.GetAccessorAccessibility = prototype.GetAccessorAccessibility;
         this.SetAccessorAccessibility = prototype.SetAccessorAccessibility;
         this.TemplateClassMember = prototype.TemplateClassMember;
@@ -117,21 +117,21 @@ internal abstract class TemplateMember
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
-        TemplateKind selectedKind = TemplateKind.Default ) : this(
+        TemplateKind selectedTemplateKind = TemplateKind.Default ) : this(
         implementation,
         templateClassMember,
         templateProvider,
         adviceAttribute,
-        selectedKind,
-        selectedKind ) { }
+        selectedTemplateKind,
+        selectedTemplateKind ) { }
 
     protected TemplateMember(
         ISymbolRef<IMemberOrNamedType> implementation,
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
-        TemplateKind selectedKind,
-        TemplateKind interpretedKind )
+        TemplateKind selectedTemplateKind,
+        TemplateKind interpretedTemplateKind )
     {
         var symbol = implementation.Symbol;
 
@@ -145,14 +145,11 @@ internal abstract class TemplateMember
             throw new AssertionFailedException(
                 $"'{symbol}' is an accessor but the template '{templateClassMember.Name}' has {templateClassMember.Parameters.Length} parameters." );
         }
-
-        this.SelectedKind = selectedKind;
-        this.InterpretedKind = interpretedKind != TemplateKind.None ? interpretedKind : selectedKind;
-        this.EffectiveKind = this.GetEffectiveKind( symbol );
-
+        
         // Get the template characteristics that may disappear or be changed during template compilation.
         var compiledTemplateAttribute = GetCompiledTemplateAttribute( symbol );
 
+        // Set the accessibility.
         // The one defined on the [Template] attribute has priority, then on [Accessibility],
         // then the accessibility of the template itself.
         if ( adviceAttribute is ITemplateAttribute { Properties.Accessibility: { } templateAccessibility } )
@@ -179,6 +176,12 @@ internal abstract class TemplateMember
                 this.SetAccessorAccessibility = GetCompiledTemplateAttribute( property.SetMethod ).Accessibility;
             }
         }
+
+        // Set the template kind.
+        this.SelectedTemplateKind = selectedTemplateKind;
+        this.InterpretedTemplateKind = interpretedTemplateKind != TemplateKind.None ? interpretedTemplateKind : selectedTemplateKind;
+        this.EffectiveTemplateKind = this.GetEffectiveKind( symbol );
+
     }
 
     private static CompiledTemplateAttribute GetCompiledTemplateAttribute( ISymbol? declaration )
@@ -232,5 +235,5 @@ internal abstract class TemplateMember
         where TOther : class, IMemberOrNamedType
         => this as TemplateMember<TOther> ?? new TemplateMember<TOther>( this );
 
-    public override string ToString() => $"{this.DeclarationRef.Name}:{this.SelectedKind}";
+    public override string ToString() => $"{this.DeclarationRef.Name}:{this.SelectedTemplateKind}";
 }

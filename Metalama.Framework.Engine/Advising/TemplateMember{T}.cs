@@ -20,27 +20,27 @@ internal sealed class TemplateMember<T> : TemplateMember
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
-        TemplateKind selectedKind = TemplateKind.Default ) : this(
+        TemplateKind selectedTemplateKind = TemplateKind.Default ) : this(
         implementation,
         templateClassMember,
         templateProvider,
         adviceAttribute,
-        selectedKind,
-        selectedKind ) { }
+        selectedTemplateKind,
+        selectedTemplateKind ) { }
 
     public TemplateMember(
         ISymbolRef<T> implementation,
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
-        TemplateKind selectedKind,
-        TemplateKind interpretedKind ) : base(
+        TemplateKind selectedTemplateKind,
+        TemplateKind interpretedTemplateKind ) : base(
         implementation,
         templateClassMember,
         templateProvider,
         adviceAttribute,
-        selectedKind,
-        interpretedKind )
+        selectedTemplateKind,
+        interpretedTemplateKind )
     {
         this.DeclarationRef = (ISymbolRef<T>) implementation.As<T>();
     }

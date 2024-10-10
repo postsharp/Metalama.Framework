@@ -213,7 +213,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                     }
 
                 case OverrideStrategy.Override:
-                    if ( !builder.ReturnType.Is( builder.ReturnType, ConversionKind.Reference ) )
+                    if ( !builder.ReturnType.Is( existingMethod.ReturnType, ConversionKind.Reference ) )
                     {
                         return
                             this.CreateFailedResult(
@@ -223,7 +223,19 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                                      existingMethod.DeclaringType, existingMethod.ReturnType),
                                     this ) );
                     }
-                    else if ( !targetDeclaration.Equals( existingMethod.DeclaringType ) && !existingMethod.IsOverridable() )
+                    else if ( targetDeclaration.Equals( existingMethod.DeclaringType ) )
+                    {
+                        var overriddenMethod = new OverrideMethodTransformation(
+                            this.AspectLayerInstance,
+                            existingMethod.ToFullRef(),
+                            this._template.ForIntroduction( existingMethod ),
+                            this.Tags );
+
+                        context.AddTransformation( overriddenMethod );
+
+                        return this.CreateSuccessResult( AdviceOutcome.Override, existingMethod );
+                    }
+                    else if ( !existingMethod.IsOverridable() )
                     {
                         return
                             this.CreateFailedResult(

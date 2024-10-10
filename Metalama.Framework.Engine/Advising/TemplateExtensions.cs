@@ -98,11 +98,11 @@ namespace Metalama.Framework.Engine.Advising
 
         public static bool MustInterpretAsAsyncTemplate( this TemplateMember<IMethod> template )
             => ((IMethodSymbol) template.DeclarationRef.Symbol).IsAsyncSafe()
-               || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsyncTemplate());
+               || (template.SelectedTemplateKind == TemplateKind.Default && template.InterpretedTemplateKind.IsAsyncTemplate());
 
         public static bool MustInterpretAsAsyncIteratorTemplate( this TemplateMember<IMethod> template )
-            => template.InterpretedKind.IsAsyncIteratorTemplate()
-               && (((IMethodSymbol) template.DeclarationRef.Symbol).IsAsyncSafe() || template.SelectedKind == TemplateKind.Default);
+            => template.InterpretedTemplateKind.IsAsyncIteratorTemplate()
+               && (((IMethodSymbol) template.DeclarationRef.Symbol).IsAsyncSafe() || template.SelectedTemplateKind == TemplateKind.Default);
 
         public static TemplateMember<IField>? GetInitializerTemplate( this TemplateMember<IField>? fieldTemplate )
         {
