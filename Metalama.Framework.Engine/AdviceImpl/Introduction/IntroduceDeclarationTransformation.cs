@@ -40,7 +40,7 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTr
         var containingDeclarationDefinition = this.BuilderData.ContainingDeclaration.Definition;
 
         return
-            $"Introduce {this.BuilderData.DeclarationKind.ToDisplayString()} '{this.BuilderData.ToDisplayString()}' into {containingDeclarationDefinition.DeclarationKind.ToDisplayString()} '{containingDeclarationDefinition.ToDisplayString()}'.";
+            $"Introduce {this.BuilderData.DeclarationKind.ToDisplayString()} '{this.BuilderData.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}' into {containingDeclarationDefinition.DeclarationKind.ToDisplayString()} '{containingDeclarationDefinition.ToDisplayString()}'.";
     }
 
     public override string ToString() => $"{{{this.GetType().Name} Builder={{{this.BuilderData}}}";

@@ -38,7 +38,7 @@ internal abstract class IntroducedDeclaration : BaseDeclaration
     internal override GenericContext GenericContext { get; }
 
     public sealed override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => DisplayStringFormatter.Format( this );
+        => DisplayStringFormatter.Format( this, format, context );
 
     public override IAssembly DeclaringAssembly => this.Compilation;
 

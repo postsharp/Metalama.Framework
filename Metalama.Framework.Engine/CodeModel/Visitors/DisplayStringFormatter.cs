@@ -9,13 +9,17 @@ namespace Metalama.Framework.Engine.CodeModel.Visitors;
 
 internal class DisplayStringFormatter : CompilationElementVisitor
 {
+    private readonly CodeDisplayFormat _format;
     private readonly StringBuilder _stringBuilder = new();
 
-    private DisplayStringFormatter() { }
-
-    public static string Format( ICompilationElement element )
+    private DisplayStringFormatter( CodeDisplayFormat? format )
     {
-        var formatter = new DisplayStringFormatter();
+        this._format = format ?? CodeDisplayFormat.ShortDiagnosticMessage;
+    }
+
+    public static string Format( ICompilationElement element, CodeDisplayFormat? format, CodeDisplayContext? context )
+    {
+        var formatter = new DisplayStringFormatter( format );
         formatter.Visit( element );
 
         return formatter.ToString();
@@ -59,11 +63,15 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
     public override void VisitConstructor( IConstructor declaration )
     {
-        this.VisitNamedType( declaration.DeclaringType );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
 
         if ( declaration.IsStatic )
         {
-            this.Append( "..cctor" );
+            this.Append( ".cctor" );
         }
         else
         {
@@ -85,9 +93,12 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
     public override void VisitParameter( IParameter declaration )
     {
-        this.Visit( declaration.DeclaringMember );
-        this.Append( "@" );
-
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringMember );
+            this.Append( "@" );
+        }
+        
         if ( declaration.IsReturnParameter )
         {
             this.Append( "<return>" );
@@ -100,37 +111,57 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
     public override void VisitIndexer( IIndexer declaration )
     {
-        this.VisitNamedType( declaration.DeclaringType );
-        this.Append( ".this[" );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+        
+        this.Append( "this[" );
         this.VisitParameterList( declaration.Parameters );
         this.Append( "]" );
     }
 
     public override void VisitEvent( IEvent declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+
         this.Append( declaration.Name );
     }
 
     public override void VisitField( IField declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+
         this.Append( declaration.Name );
     }
 
     public override void VisitProperty( IProperty declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+
         this.Append( declaration.Name );
     }
 
     public override void VisitMethod( IMethod declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
 
         switch ( declaration.MethodKind )
         {

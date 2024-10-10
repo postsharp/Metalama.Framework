@@ -38,7 +38,7 @@ internal abstract class DeclarationBuilderData
     }
 
     public IFullRef<IDeclaration> ToFullRef() => this.ToDeclarationFullRef();
-    
+
     public IRef<IDeclaration> ToRef() => this.ToDeclarationRef();
 
     protected abstract IFullRef<IDeclaration> ToDeclarationFullRef();
@@ -62,5 +62,5 @@ internal abstract class DeclarationBuilderData
 
     protected virtual InsertPosition GetInsertPosition() => throw new NotSupportedException();
 
-    public string ToDisplayString() => this.ToDeclarationFullRef().Definition.ToDisplayString();
+    public string ToDisplayString( CodeDisplayFormat? codeDisplayFormat = null ) => this.ToDeclarationFullRef().Definition.ToDisplayString( codeDisplayFormat );
 }

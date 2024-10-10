@@ -192,7 +192,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
             [
                 "Add the 'MethodAspect' aspect to 'Target.M()'.",
                 "Introduce constructor 'Target.Target()' into type 'Target'.",
-                "Introduce field 'Target.i' into type 'Target'.",
+                "Introduce field 'i' into type 'Target'.",
                 "Introduce parameter 'p' into constructor 'Target.Target()'."
             ],
             aspectInstances );

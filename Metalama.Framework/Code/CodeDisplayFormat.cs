@@ -14,26 +14,31 @@ namespace Metalama.Framework.Code
     public sealed class CodeDisplayFormat
     {
         // Prevents creation of custom instances.
-        private CodeDisplayFormat() { }
+        private CodeDisplayFormat( bool includeParent )
+        {
+            this.IncludeParent = includeParent;
+        }
 
         /// <summary>
         /// Emits fully-qualified code references, including namespaces and aliases.
         /// </summary>
-        public static CodeDisplayFormat FullyQualified { get; } = new();
+        public static CodeDisplayFormat FullyQualified { get; } = new( true );
 
         /// <summary>
         /// Formats code references as in a C# error message.
         /// </summary>
-        public static CodeDisplayFormat DiagnosticMessage { get; } = new();
+        public static CodeDisplayFormat DiagnosticMessage { get; } = new( true );
 
         /// <summary>
         /// Emits minimally-qualified code references.
         /// </summary>
-        public static CodeDisplayFormat MinimallyQualified { get; } = new();
+        public static CodeDisplayFormat MinimallyQualified { get; } = new( false );
 
         /// <summary>
         /// Formats code references as in a C# short error message.
         /// </summary>
-        public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new();
+        public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new( true );
+
+        internal bool IncludeParent { get; }
     }
 }

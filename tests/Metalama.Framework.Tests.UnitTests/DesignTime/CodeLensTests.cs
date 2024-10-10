@@ -92,13 +92,17 @@ public sealed class CodeLensTests : DesignTimeTestBase
 
         var details = await codeLensService.GetCodeLensDetailsAsync( projectKey, targetClassId, default );
 
+        var detailsText = details.Entries.SelectAsArray( e => e.Fields.SelectAsArray( f => f.Text ) );
+
         Assert.Equal(
-            new[]
-            {
-                new[] { "RepositoryAspect", "Repository", "Custom attribute", "Introduce method 'Repository.Get(int)'." },
-                new[] { "InjectedLogger", "Repository.Get(int)", "Child of 'RepositoryAspect' on 'Repository'", "Introduce field 'Repository._logger'." }
-            },
-            details.Entries.SelectAsReadOnlyList( e => e.Fields.SelectAsReadOnlyList( f => f.Text ) ) );
+            [
+                ["RepositoryAspect", "Repository", "Custom attribute", "Introduce method 'Get(int)' into type 'Repository'."],
+                [
+                    "InjectedLogger", "Repository.Get(int)", "Child of 'RepositoryAspect' on 'Repository'",
+                    "Introduce field '_logger' into type 'Repository'."
+                ]
+            ],
+            detailsText );
     }
 
     [Fact]
@@ -179,10 +183,10 @@ public sealed class CodeLensTests : DesignTimeTestBase
 
         Assert.Equal(
             [
-                ["MyAspect", "C1", "Custom attribute", "Introduce field 'C1.i'."],
-                ["", "", "", "Introduce method 'C1.Template()'."],
+                ["MyAspect", "C1", "Custom attribute", "Introduce field 'i' into type 'C1'."],
+                ["", "", "", "Introduce method 'Template()' into type 'C1'."],
                 ["", "", "", "(The aspect also transforms 1 child declaration.)"],
-                ["MyChildAspect", "C1", "Child of 'MyAspect' on 'C1'", "Introduce field 'C1.child'."]
+                ["MyChildAspect", "C1", "Child of 'MyAspect' on 'C1'", "Introduce field 'child' into type 'C1'."]
             ],
             details1.Entries.SelectAsReadOnlyList( e => e.Fields.SelectAsReadOnlyList( f => f.Text ) ) );
 
