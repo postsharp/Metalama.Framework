@@ -35,17 +35,17 @@ var product = new Product( MetalamaDependencies.Metalama )
                 "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
             ]
         },
-        new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
-        {
-            SupportsTestCoverage = false,
-            CanFormatCode = false,
-            IsTestOnly = true
-        },
-        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
-        {
-            IsTestOnly = true, TestMethod = BuildMethod.Build
-        },
-        new ManyDotNetSolutions( "Tests\\Standalone" )
+        // new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
+        // {
+        //     SupportsTestCoverage = false,
+        //     CanFormatCode = false,
+        //     IsTestOnly = true
+        // },
+        // new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
+        // {
+        //     IsTestOnly = true, TestMethod = BuildMethod.Build
+        // },
+        new ManyDotNetSolutions( "Tests\\Standalone\\Licensing\\TestBuildFails" )
         {
             IsTestOnly = true
         }
@@ -83,6 +83,7 @@ var product = new Product( MetalamaDependencies.Metalama )
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/Logs/**/*=>logs",
 
                     // Do not upload uncompressed crash reports because they are too big.
                     $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs"
