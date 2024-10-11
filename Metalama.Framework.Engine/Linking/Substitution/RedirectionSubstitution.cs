@@ -20,7 +20,7 @@ internal sealed class RedirectionSubstitution : SyntaxNodeSubstitution
         this._targetSemantic = targetSemantic;
     }
 
-    public override SyntaxNode TargetNode => this._referencingNode;
+    public override SyntaxNode ReplacedNode => this._referencingNode;
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {

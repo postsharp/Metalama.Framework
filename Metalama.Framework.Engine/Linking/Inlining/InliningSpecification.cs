@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Linking.Inlining;
 
@@ -40,7 +41,7 @@ internal sealed class InliningSpecification
     /// <summary>
     /// Gets the statement replaced by inlining.
     /// </summary>
-    public SyntaxNode ReplacedRootNode { get; }
+    public SyntaxNode ReplacedNode { get; }
 
     /// <summary>
     /// Gets a value indicating whether simple inlining (no return transformation) may be used.
@@ -73,7 +74,7 @@ internal sealed class InliningSpecification
         InliningId? parentInliningId,
         ResolvedAspectReference aspectReference,
         Inliner inliner,
-        SyntaxNode replacedRootNode,
+        SyntaxNode replacedNode,
         bool useSimpleInlining,
         bool declareReturnVariable,
         string? returnVariableIdentifier,
@@ -90,7 +91,7 @@ internal sealed class InliningSpecification
         this.AspectReference = aspectReference;
         this.Inliner = inliner;
         this.UseSimpleInlining = useSimpleInlining;
-        this.ReplacedRootNode = replacedRootNode;
+        this.ReplacedNode = replacedNode;
         this.DeclareReturnVariable = declareReturnVariable;
         this.ReturnVariableIdentifier = returnVariableIdentifier;
         this.ReturnLabelIdentifier = returnLabelIdentifier;
@@ -98,7 +99,7 @@ internal sealed class InliningSpecification
     }
 
     public override string ToString()
-        => $"Inline {(this.AspectReference.HasResolvedSemanticBody ? this.AspectReference.ResolvedSemanticBody : this.AspectReference.ResolvedSemantic)} "
+        => $"Inline {this.ReplacedNode.Kind()} {(this.AspectReference.HasResolvedSemanticBody ? this.AspectReference.ResolvedSemanticBody : this.AspectReference.ResolvedSemantic)} "
            +
            $"into {this.DestinationSemantic} (id: {this._inliningId})";
 }

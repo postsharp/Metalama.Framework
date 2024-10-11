@@ -20,7 +20,7 @@ internal abstract class SyntaxNodeSubstitution
     /// <summary>
     /// Gets a node that was initially marked for replacement.
     /// </summary>
-    public abstract SyntaxNode TargetNode { get; }
+    public abstract SyntaxNode ReplacedNode { get; }
 
     /// <summary>
     /// Replaces the current node, which is a result of recursive replacements.

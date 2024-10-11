@@ -19,7 +19,7 @@ internal sealed class BlockWithReturnBeforeUsingLocalSubstitution : SyntaxNodeSu
         this.RootBlock = rootBlock;
     }
 
-    public override SyntaxNode TargetNode => this.RootBlock;
+    public override SyntaxNode ReplacedNode => this.RootBlock;
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {
