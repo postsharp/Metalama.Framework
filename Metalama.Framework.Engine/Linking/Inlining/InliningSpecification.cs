@@ -6,8 +6,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining;
 
 internal sealed class InliningSpecification
 {
-    private readonly int _inliningId;
-    private readonly int? _parentInliningId;
+    private readonly InliningId _inliningId;
+    private readonly InliningId? _parentInliningId;
 
     /// <summary>
     /// Gets the semantic which is a the destination of inlining (the top-level semantic which will contain the body).
@@ -69,8 +69,8 @@ internal sealed class InliningSpecification
 
     public InliningSpecification(
         IntermediateSymbolSemantic<IMethodSymbol> destinationSemantic,
-        int inliningId,
-        int? parentInliningId,
+        InliningId inliningId,
+        InliningId? parentInliningId,
         ResolvedAspectReference aspectReference,
         Inliner inliner,
         SyntaxNode replacedRootNode,

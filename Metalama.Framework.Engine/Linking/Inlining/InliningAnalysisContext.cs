@@ -2,6 +2,8 @@
 
 namespace Metalama.Framework.Engine.Linking.Inlining;
 
+internal record struct InliningId ( int Value );
+
 internal sealed class InliningAnalysisContext
 {
     private readonly PersistentContext _persistentContext;
@@ -10,36 +12,36 @@ internal sealed class InliningAnalysisContext
 
     public string? ReturnVariableIdentifier { get; }
 
-    public int Ordinal { get; }
+    public InliningId Id { get; }
 
-    public int? ParentOrdinal { get; }
+    public InliningId? ParentId { get; }
 
     public InliningAnalysisContext() : this( null, new PersistentContext(), true, null ) { }
 
-    private InliningAnalysisContext( int? parentOrdinal, PersistentContext identifierProvider, bool usingSimpleInlining, string? returnVariableIdentifier )
+    private InliningAnalysisContext( InliningId? parentId, PersistentContext identifierProvider, bool usingSimpleInlining, string? returnVariableIdentifier )
     {
         this.UsingSimpleInlining = usingSimpleInlining;
         this._persistentContext = identifierProvider;
-        this.Ordinal = this._persistentContext.GetNextOrdinal();
-        this.ParentOrdinal = parentOrdinal;
+        this.Id = this._persistentContext.GetNextId();
+        this.ParentId = parentId;
         this.ReturnVariableIdentifier = returnVariableIdentifier;
     }
 
     public string AllocateReturnLabel() => this._persistentContext.AllocateReturnLabel();
 
-    internal InliningAnalysisContext Recurse() => new( this.Ordinal, this._persistentContext, this.UsingSimpleInlining, null );
+    internal InliningAnalysisContext Recurse() => new( this.Id, this._persistentContext, this.UsingSimpleInlining, null );
 
-    internal InliningAnalysisContext RecurseWithSimpleInlining() => new( this.Ordinal, this._persistentContext, true, null );
+    internal InliningAnalysisContext RecurseWithSimpleInlining() => new( this.Id, this._persistentContext, true, null );
 
     internal InliningAnalysisContext RecurseWithComplexInlining( string? returnVariableIdentifier )
-        => new( this.Ordinal, this._persistentContext, false, returnVariableIdentifier );
+        => new( this.Id, this._persistentContext, false, returnVariableIdentifier );
 
     private sealed class PersistentContext
     {
-        private int _nextOrdinal;
+        private int _nextOrdinal = 1;
         private int _nextReturnLabelIdentifier = 1;
 
-        public int GetNextOrdinal() => this._nextOrdinal++;
+        public InliningId GetNextId() => new InliningId( this._nextOrdinal++ );
 
         public string AllocateReturnLabel()
         {

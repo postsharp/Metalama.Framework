@@ -155,8 +155,8 @@ internal sealed partial class LinkerAnalysisStep
                             inliningSpecifications.Enqueue(
                                 new InliningSpecification(
                                     destinationSemantic,
-                                    context.Ordinal,
-                                    context.ParentOrdinal,
+                                    context.Id,
+                                    context.ParentId,
                                     aspectReference,
                                     inliner,
                                     info.ReplacedRootNode,
@@ -175,8 +175,8 @@ internal sealed partial class LinkerAnalysisStep
                             inliningSpecifications.Enqueue(
                                 new InliningSpecification(
                                     destinationSemantic,
-                                    context.Ordinal,
-                                    context.ParentOrdinal,
+                                    context.Id,
+                                    context.ParentId,
                                     aspectReference,
                                     inliner,
                                     info.ReplacedRootNode,
@@ -206,8 +206,8 @@ internal sealed partial class LinkerAnalysisStep
                             inliningSpecifications.Enqueue(
                                 new InliningSpecification(
                                     destinationSemantic,
-                                    context.Ordinal,
-                                    context.ParentOrdinal,
+                                    context.Id,
+                                    context.ParentId,
                                     aspectReference,
                                     inliner,
                                     info.ReplacedRootNode,
