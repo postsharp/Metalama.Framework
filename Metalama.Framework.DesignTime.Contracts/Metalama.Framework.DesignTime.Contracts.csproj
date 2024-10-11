@@ -3,7 +3,13 @@
     <PropertyGroup>
         <TargetFrameworks>net472;net6.0</TargetFrameworks>
         <RootNamespace>Metalama.Framework.DesignTime.Contracts</RootNamespace>
+
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="..\Metalama.Framework.CompilerExtensions\MutexAcl.cs" Link="MutexAcl.cs" />
+    </ItemGroup>
 
     <ItemGroup>
         <!-- It is essential that the package version remains constant.-->
