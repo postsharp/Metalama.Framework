@@ -171,4 +171,5 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
     public override int GetHashCode( RefComparison comparison ) => HashCode.Combine( this.BuilderData.GetHashCode(), this._genericContext );
 
     public override DeclarationKind DeclarationKind => this.BuilderData.DeclarationKind;
+    
 }

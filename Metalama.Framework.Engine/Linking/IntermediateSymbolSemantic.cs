@@ -39,7 +39,7 @@ internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSym
         => new( symbol, this.Kind );
 
     // Coverage: ignore (useful for debugging)
-    public override string ToString() => $"({this.Kind}, {this.Symbol})";
+    public override string ToString() => $"{{{this.Kind}, {this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}}}";
 }
 
 internal readonly struct IntermediateSymbolSemantic<TSymbol> : IEquatable<IntermediateSymbolSemantic<TSymbol>>
@@ -68,5 +68,5 @@ internal readonly struct IntermediateSymbolSemantic<TSymbol> : IEquatable<Interm
     public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value ) => new( value.Symbol, value.Kind );
 
     // Coverage: ignore (useful for debugging)
-    public override string ToString() => $"({this.Kind}, {this.Symbol})";
+    public override string ToString() => $"{{{this.Kind}, {this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}}}";
 }

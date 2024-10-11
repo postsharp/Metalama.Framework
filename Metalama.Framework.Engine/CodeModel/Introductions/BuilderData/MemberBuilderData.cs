@@ -28,4 +28,6 @@ internal abstract class MemberBuilderData : MemberOrNamedTypeBuilderData
     public abstract IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers { get; }
 
     public new IFullRef<INamedType> DeclaringType => (IFullRef<INamedType>) this.ContainingDeclaration;
+    
+    public override string ToString() => this.ContainingDeclaration + "." + this.Name;
 }

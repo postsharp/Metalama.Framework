@@ -39,4 +39,6 @@ internal abstract class NamedDeclarationBuilderData : DeclarationBuilderData
                 throw new AssertionFailedException();
         }
     }
+    
+    public override string ToString() => this.Name;
 }

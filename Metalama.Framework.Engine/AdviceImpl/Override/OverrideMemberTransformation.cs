@@ -44,4 +44,6 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
         => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration.Definition.ToDisplayString()}'";
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.OverrideMember;
+
+    public override string ToString() => $"{{{this.GetType().Name} OverriddenDeclaration={{{this.OverriddenDeclaration}}}";
 }

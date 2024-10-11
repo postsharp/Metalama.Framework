@@ -64,4 +64,7 @@ internal class MethodBuilderData : MemberBuilderData
 
     public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations()
         => base.GetOwnedDeclarations().Concat( this.Parameters ).Concat( this.ReturnParameter );
+
+    public override string ToString()
+        => $"{this.ContainingDeclaration}.{this.Name}({string.Join( ", ", this.Parameters.Select( p => p.Type.ToString() ) )})";
 }

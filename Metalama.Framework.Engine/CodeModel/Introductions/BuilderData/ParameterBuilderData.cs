@@ -44,4 +44,6 @@ internal class ParameterBuilderData : DeclarationBuilderData
     public new IntroducedRef<IParameter> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
+
+    public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
 }
