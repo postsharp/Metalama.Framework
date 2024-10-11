@@ -40,7 +40,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this._overriddenIndexer.GetTarget( context.FinalCompilation );
+        var overriddenDeclaration = this._overriddenIndexer.GetTarget( this.InitialCompilation );
 
         var setAccessorDeclarationKind =
             overriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly

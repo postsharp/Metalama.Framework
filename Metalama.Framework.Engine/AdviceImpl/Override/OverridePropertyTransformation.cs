@@ -44,7 +44,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        var overriddenDeclaration = this.OverriddenProperty.As<IProperty>().GetTarget( context.FinalCompilation );
+        var overriddenDeclaration = this.OverriddenProperty.As<IProperty>().GetTarget( this.InitialCompilation );
 
         if ( overriddenDeclaration.GetMethod != null )
         {

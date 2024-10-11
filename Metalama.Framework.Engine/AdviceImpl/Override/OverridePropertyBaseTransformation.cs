@@ -39,7 +39,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var overriddenDeclaration = this.OverriddenProperty.GetTarget( context.FinalCompilation );
+        var overriddenDeclaration = this.OverriddenProperty.GetTarget( this.InitialCompilation );
 
         var propertyName = context.InjectionNameProvider.GetOverrideName(
             overriddenDeclaration.DeclaringType,

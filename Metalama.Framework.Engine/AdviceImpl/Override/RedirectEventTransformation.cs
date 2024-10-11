@@ -32,7 +32,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( context.FinalCompilation );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( this.InitialCompilation );
 
         return
         [

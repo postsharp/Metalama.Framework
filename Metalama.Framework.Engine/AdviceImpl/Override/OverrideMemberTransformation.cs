@@ -31,7 +31,7 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 
     protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, MemberInjectionContext context )
         => ProceedHelper.CreateMemberAccessExpression(
-            this.OverriddenDeclaration.GetTarget( context.FinalCompilation ),
+            this.OverriddenDeclaration.GetTarget( this.InitialCompilation ),
             this.AspectLayerId,
             referenceTargetKind,
             context.SyntaxGenerationContext );

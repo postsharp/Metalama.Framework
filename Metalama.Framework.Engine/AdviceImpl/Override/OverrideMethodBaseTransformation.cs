@@ -44,7 +44,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
     {
         TypeSyntax? returnType = null;
 
-        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.FinalCompilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( this.InitialCompilation );
 
         var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async | ModifierCategories.Unsafe )

@@ -36,7 +36,7 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.FinalCompilation );
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( this.InitialCompilation );
 
         var body =
             context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(

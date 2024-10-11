@@ -38,7 +38,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var overriddenDeclaration = this._overriddenProperty.GetTarget( context.FinalCompilation );
+        var overriddenDeclaration = this._overriddenProperty.GetTarget( this.InitialCompilation );
 
         return
         [
