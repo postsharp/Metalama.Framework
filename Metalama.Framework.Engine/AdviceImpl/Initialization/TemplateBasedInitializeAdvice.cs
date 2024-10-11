@@ -32,8 +32,7 @@ internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
             this.AspectLayerInstance,
             targetDeclaration.ToRef(),
             targetCtor.ToFullRef(),
-            this._boundTemplate,
-            this._tags );
+            this._boundTemplate );
 
         addTransformation( initialization );
     }

@@ -46,7 +46,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             this.BuilderData,
             this.AspectLayerInstance,
             context,
-            this._template.GetInitializerTemplate(),
+            this._template?.GetInitializerTemplate(),
             out var initializerExpression,
             out var initializerMethod );
 

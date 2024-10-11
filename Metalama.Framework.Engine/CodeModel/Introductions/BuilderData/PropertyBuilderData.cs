@@ -82,7 +82,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         PropertyBuilderData builderData,
         AspectLayerInstance aspectLayerInstance,
         MemberInjectionContext context,
-        TemplateMember<IProperty> initializerTemplate,
+        TemplateMember<IProperty>? initializerTemplate,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
     {
@@ -106,7 +106,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     context,
                     property.Type,
                     fieldBuilderData.InitializerExpression,
-                    initializerTemplate.As<IField>(),
+                    initializerTemplate?.As<IField>(),
                     out initializerExpression,
                     out initializerMethod );
 

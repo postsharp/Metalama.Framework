@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Collections
         {
             for ( var i = 0; i < array.Length; i++ )
             {
-                yield return (T) array.GetValue( i );
+                yield return (T) array.GetValue( i )!;
             }
         }
     }

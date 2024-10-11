@@ -2,8 +2,6 @@
 
 namespace Metalama.Framework.Engine.Linking.Inlining;
 
-internal record struct InliningId ( int Value );
-
 internal sealed class InliningAnalysisContext
 {
     private readonly PersistentContext _persistentContext;

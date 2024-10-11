@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
@@ -29,13 +28,11 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
         AspectLayerInstance aspectLayerInstance,
         IRef<IMemberOrNamedType> initializedDeclaration,
         IFullRef<IConstructor> targetConstructor,
-        BoundTemplateMethod boundTemplate,
-        IObjectReader tags ) : base( aspectLayerInstance, targetConstructor )
+        BoundTemplateMethod boundTemplate ) : base( aspectLayerInstance, targetConstructor )
     {
         this.ContextDeclaration = initializedDeclaration;
         this._targetConstructor = targetConstructor;
         this._boundTemplate = boundTemplate;
-        this.Tags = tags;
     }
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
@@ -85,8 +82,7 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
         ];
     }
 
-    private IObjectReader Tags { get; }
-
+    
     public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.None;

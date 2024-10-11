@@ -186,9 +186,11 @@ internal sealed partial class ContextualSyntaxGenerator
         }
     }
 
-    public DefaultExpressionSyntax DefaultExpression( IFullRef<IType> type )
-        => SyntaxFactory.DefaultExpression( this.Type( type ) )
-            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
+    public ExpressionSyntax DefaultExpression( IFullRef<IType>? type )
+        => type == null
+            ? Default
+            : SyntaxFactory.DefaultExpression( this.Type( type ) )
+                .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
     public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax elementType, IEnumerable<SyntaxNode> elements )
     {
@@ -432,19 +434,19 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public ExpressionSyntax TypedConstant( in TypedConstantRef typedConstant, RefFactory refFactory )
     {
-        var type = typedConstant.Type.ToFullRef( refFactory );
+        var type = typedConstant.Type?.ToFullRef( refFactory );
 
         if ( typedConstant.RawValue == null )
         {
             return this.DefaultExpression( type );
         }
-        else if ( type.Definition is INamedType { TypeKind: TypeKind.Enum } enumType )
+        else if ( type?.Definition is INamedType { TypeKind: TypeKind.Enum } enumType )
         {
             return this.EnumValueExpression( enumType, typedConstant.RawValue! );
         }
         else if ( typedConstant.RawValue is Array array )
         {
-            var elementType = type.AssertCast<IArrayType>().ElementType;
+            var elementType = type.AssertNotNull().AssertCast<IArrayType>().ElementType;
 
             return this.ArrayCreationExpression(
                 this.Type( elementType ),

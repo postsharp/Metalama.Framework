@@ -897,7 +897,7 @@ internal sealed partial class LinkerInjectionStep
             SyntaxGenerationContext syntaxGenerationContext )
         {
             constructorDeclaration = constructorDeclaration.WithParameterList(
-                this.AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
+                AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
 
             constructorDeclaration = constructorDeclaration.WithInitializer(
                 this.AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
@@ -919,7 +919,7 @@ internal sealed partial class LinkerInjectionStep
             Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
             Invariant.AssertNot( typeDeclaration.GetParameterList() == null );
 
-            parameterList = this.AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            parameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
             baseList = typeDeclaration.BaseList;
 
             if ( memberLevelTransformations.Arguments.Length > 0 )
@@ -955,7 +955,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        private ParameterListSyntax AppendParameters(
+        private static ParameterListSyntax AppendParameters(
             ParameterListSyntax existingParameters,
             ImmutableArray<IntroduceParameterTransformation> newParameters,
             SyntaxGenerationContext syntaxGenerationContext )
