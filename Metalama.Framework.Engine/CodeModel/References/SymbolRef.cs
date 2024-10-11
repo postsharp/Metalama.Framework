@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -74,6 +75,8 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
+
+    public override SyntaxTree? PrimarySyntaxTree => this.Symbol.GetClosestPrimaryDeclarationSyntax()?.SyntaxTree;
 
     protected override ICompilationElement? Resolve(
         CompilationModel compilation,

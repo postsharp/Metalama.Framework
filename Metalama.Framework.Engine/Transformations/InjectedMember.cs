@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -51,10 +50,10 @@ internal sealed class InjectedMember
     /// </summary>
     public IFullRef<IDeclaration> Declaration { get; }
 
-    public SyntaxTree GetTargetSyntaxTree( CompilationContext compilationContext )
+    public SyntaxTree GetTargetSyntaxTree()
         => this.Transformation != null
             ? this.Transformation.TransformedSyntaxTree
-            : this.Declaration.GetPrimarySyntaxTree().AssertNotNull();
+            : this.Declaration.PrimarySyntaxTree.AssertNotNull();
 
     public InjectedMember(
         IInjectMemberTransformation injectMemberTransformation,

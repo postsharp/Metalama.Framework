@@ -197,7 +197,7 @@ internal sealed class LinkerInjectionRegistry
 
         ISymbol GetCanonicalSymbolForInjectedMember( InjectedMember injectedMember )
         {
-            var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.GetTargetSyntaxTree( this._intermediateCompilation.CompilationContext )];
+            var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.GetTargetSyntaxTree()];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
 
             SyntaxNode symbolSyntax = intermediateSyntax switch

@@ -14,6 +14,8 @@ internal interface IFullRef : IRefImpl
 {
     ISymbol GetClosestContainingSymbol();
 
+    SyntaxTree? PrimarySyntaxTree { get; }
+
     /// <summary>
     /// Gets the <see cref="DeclarationKind"/> of the reference declaration, if available.
     /// </summary>
@@ -30,7 +32,7 @@ internal interface IFullRef : IRefImpl
 
     new IFullRef<TOut> As<TOut>()
         where TOut : class, ICompilationElement;
-    
+
     /// <summary>
     /// Gets the parent factory.
     /// </summary>
@@ -93,7 +95,7 @@ internal interface IFullRef<out T> : IFullRef, IRef<T>
     /// Try to use this property instead of <see cref="ConstructedDeclaration"/> when the generic context does not matter.
     /// </summary>
     T Definition { get; }
-    
+
     /// <summary>
     /// Gets the <see cref="IDeclaration"/> in the canonical <see cref="CompilationModel"/> of the current <see cref="RefFactory"/>,
     /// constructed for the <see cref="GenericContext"/>. Use the <see cref="Definition"/> whenever possible to avoid allocating too many instances.

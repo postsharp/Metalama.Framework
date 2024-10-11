@@ -116,6 +116,8 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
 
     public virtual ISymbol GetClosestContainingSymbol() => this.GetSymbolIgnoringRefKind( this.CompilationContext );
 
+    public abstract SyntaxTree? PrimarySyntaxTree { get; }
+
     private ISymbol ApplyRefKind( ISymbol symbol )
         => this.TargetKind switch
         {

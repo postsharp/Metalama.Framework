@@ -160,7 +160,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             return GetCanonicalTargetDeclaration( syntaxTreeTransformation.TargetDeclaration ) switch
             {
-                IFullRef<INamedType> namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
+                IFullRef<INamedType> namedType => namedType.PrimarySyntaxTree.AssertNotNull(),
                 IFullRef<ICompilation> => syntaxTreeTransformation.TransformedSyntaxTree,
                 var d => throw new AssertionFailedException( $"Unsupported: {d}" )
             };

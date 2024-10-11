@@ -87,8 +87,15 @@ public static class RefExtensions
     internal static bool IsConvertibleTo( this IFullRef<IType> type, IFullRef<IType> otherType, ConversionKind conversionKind = ConversionKind.Default )
         => type.ConstructedDeclaration.Is( otherType.ConstructedDeclaration, conversionKind );
 
-    // ReSharper disable once SuspiciousTypeConversion.Global
-    internal static SyntaxTree? GetPrimarySyntaxTree( this IFullRef reference )
+    [Obsolete( "Use the PrimarySyntaxTree property instead." )]
+    internal static SyntaxTree? GetPrimarySyntaxTree( this IFullRef reference ) => reference.PrimarySyntaxTree;
+
+    public static SyntaxTree? GetPrimarySyntaxTree( this IRef reference ) => ((IFullRef) reference).PrimarySyntaxTree;
+
+    public static SyntaxTree? GetPrimarySourceSyntaxTree( this IRef reference )
+        => ((IFullRef) reference).GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
+
+    internal static SyntaxTree? GetPrimarySourceSyntaxTree( this IFullRef reference )
     {
         var symbol = reference.GetClosestContainingSymbol();
 
@@ -104,9 +111,6 @@ public static class RefExtensions
 
         return symbol.GetPrimarySyntaxReference()?.SyntaxTree;
     }
-
-    public static SyntaxTree? GetPrimarySyntaxTree( this IRef reference )
-        => ((IFullRef) reference).GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
 
     internal static Type[] GetPossibleDeclarationInterfaceTypes( this ISymbol symbol, CompilationContext compilationContext, RefTargetKind refTargetKind )
         => symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( refTargetKind );
@@ -193,11 +197,11 @@ public static class RefExtensions
             IIntroducedRef { ReplacedDeclaration: { } replacedDeclaration } => replacedDeclaration.GetOriginalSymbol(),
             _ => throw new ArgumentOutOfRangeException()
         };
-    
+
     public static ISymbol? GetOriginalSymbol( this IDeclaration declaration )
         => declaration switch
         {
             SymbolBasedDeclaration symbolBased => symbolBased.Symbol,
-            _ => declaration.ToRef().GetOriginalSymbol(),
+            _ => declaration.ToRef().GetOriginalSymbol()
         };
 }

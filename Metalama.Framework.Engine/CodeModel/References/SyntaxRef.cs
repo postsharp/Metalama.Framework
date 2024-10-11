@@ -39,6 +39,8 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
         return this.Symbol;
     }
 
+    public override SyntaxTree? PrimarySyntaxTree => this.SyntaxNode.SyntaxTree;
+
     [Memo]
     private ISymbol Symbol => this.GetSymbol();
 
