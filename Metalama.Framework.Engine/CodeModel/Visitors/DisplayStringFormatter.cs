@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using System.Collections.Generic;
 using System.Text;
 
@@ -90,6 +91,21 @@ internal class DisplayStringFormatter : CompilationElementVisitor
         this.Append( "]" );
     }
 
+    private void PrintDeclarationName( IMember member )
+    {
+        if ( member.IsExplicitInterfaceImplementation )
+        {
+            var interfaceMember = member.GetExplicitInterfaceImplementation();
+            this.Append( interfaceMember.DeclaringType.Name );
+            this.Append( "." );
+            this.Append( interfaceMember.Name );
+        }
+        else
+        {
+            this.Append( member.Name );
+        }
+    }
+
     public override void VisitParameter( IParameter declaration )
     {
         if ( this._format.IncludeParent )
@@ -129,7 +145,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
             this.Append( "." );
         }
 
-        this.Append( declaration.Name );
+        this.PrintDeclarationName( declaration );
     }
 
     public override void VisitField( IField declaration )
@@ -151,7 +167,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
             this.Append( "." );
         }
 
-        this.Append( declaration.Name );
+        this.PrintDeclarationName( declaration );
     }
 
     public override void VisitMethod( IMethod declaration )
@@ -165,31 +181,31 @@ internal class DisplayStringFormatter : CompilationElementVisitor
         switch ( declaration.MethodKind )
         {
             case MethodKind.PropertyGet:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".get" );
 
                 break;
 
             case MethodKind.PropertySet:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".set" );
 
                 break;
 
             case MethodKind.EventAdd:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".add" );
 
                 break;
 
             case MethodKind.EventRemove:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".remove" );
 
                 break;
 
             case MethodKind.EventRaise:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".raise" );
 
                 break;
@@ -201,7 +217,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
                 break;
 
             default:
-                this.Append( declaration.Name );
+                this.PrintDeclarationName( declaration );
 
                 break;
         }

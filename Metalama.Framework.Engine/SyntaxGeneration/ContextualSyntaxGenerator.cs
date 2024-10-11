@@ -169,9 +169,22 @@ internal sealed partial class ContextualSyntaxGenerator
 #pragma warning restore LAMA0830
     }
 
-    public DefaultExpressionSyntax DefaultExpression( IType type )
-        => SyntaxFactory.DefaultExpression( this.Type( type ) )
-            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
+    public ExpressionSyntax DefaultExpression( IType type, IType? targetType = null )
+    {
+        if ( targetType == null )
+        {
+            return SyntaxFactory.DefaultExpression( this.Type( type ) )
+                .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
+        }
+        else if ( type.IsReferenceType == true )
+        {
+            return Null;
+        }
+        else
+        {
+            return Default;
+        }
+    }
 
     public DefaultExpressionSyntax DefaultExpression( IFullRef<IType> type )
         => SyntaxFactory.DefaultExpression( this.Type( type ) )
@@ -681,11 +694,11 @@ internal sealed partial class ContextualSyntaxGenerator
         };
     }
 
-    public ExpressionSyntax TypedConstantExpression( TypedConstant typedConstant )
+    public ExpressionSyntax TypedConstantExpression( TypedConstant typedConstant, IType? targetType = null )
     {
         if ( typedConstant.IsNullOrDefault )
         {
-            return this.DefaultExpression( typedConstant.Type );
+            return this.DefaultExpression( typedConstant.Type, targetType );
         }
 
         ExpressionSyntax GetValue( object? value, IType type )
@@ -801,7 +814,7 @@ internal sealed partial class ContextualSyntaxGenerator
         // We intentionally generate non-literal values to be more tolerant to invalid inputs.
         var equalsValueClause = removeDefaultValue || parameter.DefaultValue == null
             ? null
-            : EqualsValueClause( this.TypedConstantExpression( parameter.DefaultValue.Value ) );
+            : EqualsValueClause( this.TypedConstantExpression( parameter.DefaultValue.Value, parameter.Type ) );
 
         return SyntaxFactory.Parameter(
             this.AttributesForDeclaration( parameter.ToFullRef(), compilation ),

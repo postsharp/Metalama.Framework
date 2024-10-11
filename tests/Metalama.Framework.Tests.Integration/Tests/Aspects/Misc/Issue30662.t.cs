@@ -8,7 +8,7 @@ internal class Foo
 }
 internal class Bar : Foo
 {
-  public Bar(global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30662.IInstanceRegistry instanceRegistry = default(global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30662.IInstanceRegistry)) : base(instanceRegistry)
+  public Bar(global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30662.IInstanceRegistry instanceRegistry = null) : base(instanceRegistry)
   {
   }
 }

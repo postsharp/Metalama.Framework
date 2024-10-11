@@ -13,32 +13,37 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public sealed class CodeDisplayFormat
     {
+        private readonly string _name;
+
         // Prevents creation of custom instances.
-        private CodeDisplayFormat( bool includeParent )
+        private CodeDisplayFormat( string name, bool includeParent )
         {
+            this._name = name;
             this.IncludeParent = includeParent;
         }
 
         /// <summary>
         /// Emits fully-qualified code references, including namespaces and aliases.
         /// </summary>
-        public static CodeDisplayFormat FullyQualified { get; } = new( true );
+        public static CodeDisplayFormat FullyQualified { get; } = new( nameof(FullyQualified), true );
 
         /// <summary>
         /// Formats code references as in a C# error message.
         /// </summary>
-        public static CodeDisplayFormat DiagnosticMessage { get; } = new( true );
+        public static CodeDisplayFormat DiagnosticMessage { get; } = new( nameof(DiagnosticMessage), true );
 
         /// <summary>
         /// Emits minimally-qualified code references.
         /// </summary>
-        public static CodeDisplayFormat MinimallyQualified { get; } = new( false );
+        public static CodeDisplayFormat MinimallyQualified { get; } = new( nameof(MinimallyQualified), false );
 
         /// <summary>
         /// Formats code references as in a C# short error message.
         /// </summary>
-        public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new( true );
+        public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new( nameof(ShortDiagnosticMessage), true );
 
         internal bool IncludeParent { get; }
+
+        public override string ToString() => this._name;
     }
 }
