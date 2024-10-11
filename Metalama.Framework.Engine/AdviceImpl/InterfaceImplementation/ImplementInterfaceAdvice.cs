@@ -970,15 +970,11 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
         foreach ( var interfaceGenericParameter in interfaceMethod.TypeParameters )
         {
-            // TODO: Move this initialization into a second overload of add generic parameter.
-            var genericParameterBuilder = methodBuilder.AddTypeParameter( interfaceGenericParameter.Name );
-            genericParameterBuilder.Variance = interfaceGenericParameter.Variance;
-            genericParameterBuilder.TypeKindConstraint = interfaceGenericParameter.TypeKindConstraint;
-            genericParameterBuilder.HasDefaultConstructorConstraint = interfaceGenericParameter.HasDefaultConstructorConstraint;
+            var genericParameterBuilder = methodBuilder.AddTypeParameter( interfaceGenericParameter );
 
-            foreach ( var templateGenericParameterConstraint in genericParameterBuilder.TypeConstraints )
+            foreach ( var interfaceGenericParameterConstraint in interfaceGenericParameter.TypeConstraints )
             {
-                genericParameterBuilder.AddTypeConstraint( templateGenericParameterConstraint );
+                genericParameterBuilder.AddTypeConstraint( interfaceGenericParameterConstraint );
             }
         }
 

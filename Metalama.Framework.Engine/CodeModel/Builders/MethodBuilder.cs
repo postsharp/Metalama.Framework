@@ -64,6 +64,22 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
         return builder;
     }
 
+    /// <summary>
+    /// Adds a type parameter based on a prototype type parameter. Does not copy type constraints or attributes.
+    /// </summary>
+    internal ITypeParameterBuilder AddTypeParameter( ITypeParameter prototype )
+    {
+        var typeParameterBuilder = this.AddTypeParameter( prototype.Name );
+
+        typeParameterBuilder.Variance = prototype.Variance;
+        typeParameterBuilder.HasDefaultConstructorConstraint = prototype.HasDefaultConstructorConstraint;
+        typeParameterBuilder.TypeKindConstraint = prototype.TypeKindConstraint;
+        typeParameterBuilder.IsConstraintNullable = prototype.IsConstraintNullable;
+        typeParameterBuilder.AllowsRefStruct = prototype.AllowsRefStruct;
+
+        return typeParameterBuilder;
+    }
+
     IParameterBuilder IMethodBuilder.ReturnParameter => this.ReturnParameter;
 
     public IType ReturnType
