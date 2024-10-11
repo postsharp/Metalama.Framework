@@ -19,8 +19,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
 {
     private readonly TemplateMember<IMethod> _template;
     private readonly IObjectReader _templateArguments;
-    private readonly IObjectReader _tags;
-
+    
     /// <summary>
     /// Gets the target member of the contract into which contract statements will be inserted.
     /// </summary>
@@ -44,8 +43,7 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         TemplateProvider templateProvider,
-        IObjectReader templateArguments,
-        IObjectReader tags ) : base( aspectLayerInstance, contractTarget )
+        IObjectReader templateArguments ) : base( aspectLayerInstance, contractTarget )
     {
         Invariant.Assert( contractDirection is not ContractDirection.None );
 
@@ -54,7 +52,6 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         this.TemplateProvider = templateProvider;
         this._template = template;
         this._templateArguments = templateArguments;
-        this._tags = tags;
     }
 
     public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;

@@ -33,7 +33,7 @@ internal sealed class CompileTimeEventInfoSerializer : ObjectSerializer<CompileT
                     SeparatedList(
                     [
                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ),
-                            Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) )
+                        Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) )
                     ] ) ) )
             .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
 

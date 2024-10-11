@@ -16,7 +16,6 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal sealed class SyntaxAttributeRef : AttributeRef
 {
     private readonly IFullRef<INamedType> _attributeType;
-    private readonly AttributeSyntax _attributeSyntax;
     private readonly RefFactory _refFactory;
     private readonly RefTargetKind _targetKind;
     private readonly SyntaxNode _syntaxNode;
@@ -31,7 +30,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
         RefTargetKind targetKind = RefTargetKind.Default )
     {
         this._attributeType = attributeType;
-        this._attributeSyntax = attributeSyntax;
+        this.AttributeSyntax = attributeSyntax;
         this._syntaxNode = syntaxNode;
         this._refFactory = refFactory;
         this._targetKind = targetKind;
@@ -90,7 +89,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {
-        var resolved = this.ResolveAttributeData( this._attributeSyntax );
+        var resolved = this.ResolveAttributeData( this.AttributeSyntax );
 
         if ( resolved == null )
         {
@@ -109,14 +108,14 @@ internal sealed class SyntaxAttributeRef : AttributeRef
 
     public override bool TryGetAttributeSerializationDataKey( [NotNullWhen( true )] out object? serializationDataKey )
     {
-        serializationDataKey = this._attributeSyntax;
+        serializationDataKey = this.AttributeSyntax;
 
         return true;
     }
 
     public override bool TryGetAttributeSerializationData( [NotNullWhen( true )] out AttributeSerializationData? serializationData )
     {
-        var resolved = this.ResolveAttributeData( this._attributeSyntax );
+        var resolved = this.ResolveAttributeData( this.AttributeSyntax );
 
         if ( resolved == null )
         {
@@ -132,7 +131,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
 
     public override string Name => throw new NotSupportedException();
 
-    protected override AttributeSyntax AttributeSyntax => this._attributeSyntax;
+    protected override AttributeSyntax AttributeSyntax { get; }
 
-    protected override int GetHashCodeCore() => this._attributeSyntax.GetHashCode();
+    protected override int GetHashCodeCore() => this.AttributeSyntax.GetHashCode();
 }

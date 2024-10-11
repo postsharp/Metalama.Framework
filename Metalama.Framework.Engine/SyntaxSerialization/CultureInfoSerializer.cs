@@ -17,7 +17,7 @@ internal sealed class CultureInfoSerializer : ObjectSerializer<CultureInfo>
                     SeparatedList(
                     [
                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( obj.Name ) ) ),
-                            Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) )
+                        Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) )
                     ] ) ),
                 null )
             .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );

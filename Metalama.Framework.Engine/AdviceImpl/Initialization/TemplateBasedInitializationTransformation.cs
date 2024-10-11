@@ -82,7 +82,6 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
         ];
     }
 
-    
     public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.None;

@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -88,7 +87,7 @@ internal sealed class IntroducedField : IntroducedMember, IFieldImpl
 
     public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
-    public TypedConstant? ConstantValue => this.FieldBuilderData.ConstantValue.ToTypedConstant( this.Compilation );
+    public TypedConstant? ConstantValue => this.FieldBuilderData.ConstantValue?.ToTypedConstant( this.Compilation );
 
     [Memo]
     public IField Definition => this.Compilation.Factory.GetField( this.FieldBuilderData ).AssertNotNull();

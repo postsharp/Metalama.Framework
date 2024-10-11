@@ -859,7 +859,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         SeparatedList(
                         [
                             Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( node.Expression )! ) ),
-                                Argument( SyntaxFactoryEx.LiteralExpression( node.Name.Identifier.ValueText ) )
+                            Argument( SyntaxFactoryEx.LiteralExpression( node.Name.Identifier.ValueText ) )
                         ] ) ) );
             }
         }
@@ -1842,10 +1842,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                                                 SeparatedList(
                                                                 [
                                                                     Argument(
-                                                                            SyntaxFactoryEx.LiteralExpression(
-                                                                                localFunctionInfo.ReturnType.GetSerializableTypeId().Id ) ),
-                                                                        Argument( map ),
-                                                                        Argument( SyntaxFactoryEx.LiteralExpression( localFunctionInfo.IsAsync ) )
+                                                                        SyntaxFactoryEx.LiteralExpression(
+                                                                            localFunctionInfo.ReturnType.GetSerializableTypeId().Id ) ),
+                                                                    Argument( map ),
+                                                                    Argument( SyntaxFactoryEx.LiteralExpression( localFunctionInfo.IsAsync ) )
                                                                 ] ) ) ) ) ) ) ) )
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
@@ -2013,7 +2013,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                             SeparatedList(
                                             [
                                                 Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ),
-                                                    Argument( expressionSyntax )
+                                                Argument( expressionSyntax )
                                             ] ) ) ) ) );
 
                         newContext.Statements.Add( add.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia ) );

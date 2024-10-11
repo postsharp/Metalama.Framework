@@ -10,7 +10,7 @@ public class TypedConstantSerializationTests : SerializationTestsBase
 {
     private static void RoundtripTest( SerializationTestContext testContext, TypedConstant typedConstant )
     {
-        var roundtrip = SerializeDeserialize( typedConstant.ToRef(), testContext ).Resolve( testContext.Compilation );
+        var roundtrip = SerializeDeserialize( typedConstant.ToRef(), testContext ).ToTypedConstant( testContext.Compilation );
 
         Assert.Equal( typedConstant, roundtrip );
     }

@@ -2,10 +2,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 
@@ -17,7 +19,7 @@ internal class AttributeBuilderData : DeclarationBuilderData
 
     public IFullRef<IConstructor> Constructor { get; }
 
-    public ImmutableArray<TypedConstant> ConstructorArguments { get; }
+    public ImmutableArray<TypedConstantRef> ConstructorArguments { get; }
 
     public INamedArgumentList NamedArguments { get; }
 
@@ -29,14 +31,12 @@ internal class AttributeBuilderData : DeclarationBuilderData
         this._ref = new IntroducedAttributeRef( this );
 
         this.Constructor = builder.AttributeConstruction.Constructor.ToFullRef();
-        this.ConstructorArguments = builder.AttributeConstruction.ConstructorArguments.ToImmutableArray();
+        this.ConstructorArguments = builder.AttributeConstruction.ConstructorArguments.SelectAsImmutableArray( a => a.ToRef() );
         this.NamedArguments = builder.AttributeConstruction.NamedArguments;
         this.Attributes = ImmutableArray<AttributeBuilderData>.Empty;
-
-        // TODO: TypedConstant can still leak a CompilationModel through its typeof(.) value.
     }
 
-    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => throw new NotSupportedException("Cannot get an IFullRef for an Attribute.");
+    protected override IFullRef<IDeclaration> ToDeclarationFullRef() => throw new NotSupportedException( "Cannot get an IFullRef for an Attribute." );
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 

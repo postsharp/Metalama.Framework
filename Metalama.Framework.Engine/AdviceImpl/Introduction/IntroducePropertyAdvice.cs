@@ -36,7 +36,6 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IPropertyBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, explicitName, propertyTemplate, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {

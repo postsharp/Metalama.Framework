@@ -35,14 +35,14 @@ namespace Metalama.Framework.Code
         /// </summary>
         public static T? GetTargetOrNull<T>( this IRef<T> reference, ICompilation compilation, IGenericContext? genericContext = null )
             where T : class, ICompilationElement
-            => (T?) reference.GetTargetInterface( compilation, typeof(T), genericContext, false );
+            => (T?) reference.GetTargetInterface( compilation, typeof(T), genericContext );
 
         public static ICompilationElement? GetTargetOrNull(
             this IRef reference,
             ICompilation compilation,
             IGenericContext? genericContext = null,
             Type? interfaceType = null )
-            => reference.GetTargetInterface( compilation, interfaceType, genericContext, false );
+            => reference.GetTargetInterface( compilation, interfaceType, genericContext );
 
         [Obsolete( "Use the overload that accepts a RefComparison" )]
         public static bool Equals( this IRef a, IRef? b, bool includeNullability )

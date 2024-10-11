@@ -33,7 +33,6 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IEventBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, explicitName, eventTemplate, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {

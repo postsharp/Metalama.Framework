@@ -47,7 +47,7 @@ internal class IndexerBuilderData : PropertyOrIndexerBuilderData
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
-    public override IRef<IMember>? OverriddenMember => throw new NotImplementedException();
+    public override IRef<IMember> OverriddenMember => throw new NotImplementedException();
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
 

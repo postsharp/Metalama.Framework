@@ -17,7 +17,9 @@ internal sealed class IntroducedAttribute : IntroducedDeclaration, IAttribute
 {
     private readonly AttributeBuilderData _builderDataData;
 
-    public IntroducedAttribute( AttributeBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public IntroducedAttribute( AttributeBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base(
+        compilation,
+        genericContext )
     {
         this._builderDataData = builder;
     }
@@ -43,7 +45,7 @@ internal sealed class IntroducedAttribute : IntroducedDeclaration, IAttribute
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments
-        => this._builderDataData.ConstructorArguments.Select( a => a.ForCompilation( this.Compilation ) )
+        => this._builderDataData.ConstructorArguments.Select( a => a.ToTypedConstant( this.Compilation ) )
             .ToImmutableArray();
 
     [Memo]

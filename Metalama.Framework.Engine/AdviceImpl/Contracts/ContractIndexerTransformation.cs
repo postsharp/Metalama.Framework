@@ -24,15 +24,13 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags,
         TemplateProvider templateProvider ) : base(
         aspectLayerInstance,
         (IFullRef<IDeclaration>?) indexerParameter ?? targetIndexer,
         contractDirection,
         template,
         templateProvider,
-        templateArguments,
-        tags )
+        templateArguments )
     {
         this._targetIndexer = targetIndexer;
     }

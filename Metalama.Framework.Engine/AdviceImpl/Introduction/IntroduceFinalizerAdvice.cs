@@ -19,8 +19,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
     public IntroduceFinalizerAdvice(
         AdviceConstructorParameters<INamedType> parameters,
         PartiallyBoundTemplateMethod template,
-        OverrideStrategy overrideStrategy,
-        IObjectReader tags )
+        OverrideStrategy overrideStrategy )
         : base(
             parameters,
             null,

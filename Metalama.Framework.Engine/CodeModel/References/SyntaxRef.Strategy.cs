@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal sealed partial class SyntaxRef<T>
 {
-    public override string? Name => throw new NotImplementedException();
+    public override string Name => throw new NotImplementedException();
 
     public override void EnumerateAttributes( CompilationModel compilation, Action<AttributeRef> add ) => throw new NotImplementedException();
 

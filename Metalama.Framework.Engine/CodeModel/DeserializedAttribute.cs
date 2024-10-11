@@ -89,13 +89,13 @@ internal class DeserializedAttribute : IAttributeImpl
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments
-        => this._serializationData.ConstructorArguments.SelectAsImmutableArray( x => x.Resolve( this.Compilation ) );
+        => this._serializationData.ConstructorArguments.SelectAsImmutableArray( x => x.ToTypedConstant( this.Compilation ) );
 
     [Memo]
     public INamedArgumentList NamedArguments
         => new NamedArgumentList(
             this._serializationData.NamedArguments.SelectAsMutableList(
-                x => new KeyValuePair<string, TypedConstant>( x.Key, x.Value.Resolve( this.Compilation ) ) ) );
+                x => new KeyValuePair<string, TypedConstant>( x.Key, x.Value.ToTypedConstant( this.Compilation ) ) ) );
 
     int IAspectPredecessor.PredecessorDegree => 0;
 

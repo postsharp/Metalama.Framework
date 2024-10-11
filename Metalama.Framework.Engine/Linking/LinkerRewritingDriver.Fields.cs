@@ -66,16 +66,16 @@ namespace Metalama.Framework.Engine.Linking
                     List(
                     [
                         AccessorDeclaration(
-                                SyntaxKind.GetAccessorDeclaration,
-                                List<AttributeListSyntax>(),
-                                TokenList(),
-                                Token( SyntaxKind.GetKeyword ),
-                                null,
-                                ArrowExpressionClause( DefaultExpression( type ) ),
-                                Token( SyntaxKind.SemicolonToken ) ),
-                            AccessorDeclaration(
-                                setAccessorKind,
-                                context.SyntaxGenerator.FormattedBlock() )
+                            SyntaxKind.GetAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            Token( SyntaxKind.GetKeyword ),
+                            null,
+                            ArrowExpressionClause( DefaultExpression( type ) ),
+                            Token( SyntaxKind.SemicolonToken ) ),
+                        AccessorDeclaration(
+                            setAccessorKind,
+                            context.SyntaxGenerator.FormattedBlock() )
                     ] ) );
 
             return

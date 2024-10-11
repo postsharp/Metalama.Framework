@@ -32,7 +32,6 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
                         this.Direction,
                         this.Template,
                         this.TemplateArguments,
-                        this.Tags,
                         this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
@@ -46,7 +45,6 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
                         this.Direction,
                         this.Template,
                         this.TemplateArguments,
-                        this.Tags,
                         this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
@@ -60,7 +58,6 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
                         this.Direction,
                         this.Template,
                         this.TemplateArguments,
-                        this.Tags,
                         this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );

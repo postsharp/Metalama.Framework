@@ -103,19 +103,6 @@ public sealed partial class CompilationModel
                && namespaces.Contains( namespaceBuilder.ToRef() );
     }
 
-    private bool Contains( DeclarationBuilderData builder )
-        => builder switch
-        {
-            FieldBuilderData fieldBuilder => this.Contains( fieldBuilder ),
-            MethodBuilderData methodBuilder => this.Contains( methodBuilder ),
-            ConstructorBuilderData constructorBuilder => this.Contains( constructorBuilder ),
-            EventBuilderData eventBuilder => this.Contains( eventBuilder ),
-            PropertyBuilderData propertyBuilder => this.Contains( propertyBuilder ),
-            IndexerBuilderData indexerBuilder => this.Contains( indexerBuilder ),
-            ParameterBuilderData parameterBuilder => this.Contains( parameterBuilder ),
-            _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
-        };
-
     private TCollection GetMemberCollection<TOwner, TCollection>(
         ref ImmutableDictionary<IFullRef<TOwner>, TCollection> dictionary,
         bool requestMutableCollection,

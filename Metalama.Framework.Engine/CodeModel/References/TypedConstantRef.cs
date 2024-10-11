@@ -30,7 +30,7 @@ internal readonly struct TypedConstantRef
         this.Type = type;
     }
 
-    public TypedConstant Resolve( CompilationModel compilation )
+    public TypedConstant ToTypedConstant( CompilationModel compilation )
     {
         var type = this.Type?.GetTargetOrNull( compilation );
 
@@ -42,7 +42,7 @@ internal readonly struct TypedConstantRef
         return this.RawValue switch
         {
             null => TypedConstant.Default( type! ),
-            ImmutableArray<TypedConstantRef> array => TypedConstant.Create( array.SelectAsImmutableArray( x => x.Resolve( compilation ) ), type! ),
+            ImmutableArray<TypedConstantRef> array => TypedConstant.Create( array.SelectAsImmutableArray( x => x.ToTypedConstant( compilation ) ), type! ),
             IRef<IType> valueAsType => TypedConstant.Create( valueAsType.GetTarget( compilation ), type! ),
             _ => TypedConstant.Create( this.RawValue, type! )
         };

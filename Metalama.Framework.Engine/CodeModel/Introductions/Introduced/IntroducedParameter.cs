@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -43,7 +42,7 @@ internal sealed class IntroducedParameter : IntroducedDeclaration, IParameterImp
 
     public int Index => this._parameterBuilder.Index;
 
-    public TypedConstant? DefaultValue => this._parameterBuilder.DefaultValue.ToTypedConstant( this.Compilation );
+    public TypedConstant? DefaultValue => this._parameterBuilder.DefaultValue?.ToTypedConstant( this.Compilation );
 
     public bool IsParams => this._parameterBuilder.IsParams;
 

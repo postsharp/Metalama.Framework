@@ -145,7 +145,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     }
                     else
                     {
-                        var memberSpecification = new MemberSpecification( interfaceMember.ToRef(), null, memberTemplate.As<IMember>(), null );
+                        var memberSpecification = new MemberSpecification( interfaceMember.ToRef(), null, memberTemplate.As<IMember>() );
 
                         var isPublic = memberTemplate.Accessibility == Accessibility.Public;
 
@@ -379,7 +379,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
             {
                 // Collect implemented interface members and add non-observable transformations.
-                var mergedTags = ObjectReader.Merge( this._tags, memberSpec.Tags );
                 var templateAttributeProperties = (memberSpec.Template?.AdviceAttribute as ITemplateAttribute)?.Properties;
 
                 var interfaceMember = memberSpec.InterfaceMember.GetTarget( context.MutableCompilation );
@@ -710,8 +709,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 isExplicit,
                                 isVirtual,
                                 isOverride,
-                                hasImplicitSetter,
-                                mergedTags );
+                                hasImplicitSetter );
 
                             if ( templateProperty != null )
                             {
@@ -892,8 +890,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 isEventField,
                                 isExplicit,
                                 isVirtual,
-                                isOverride,
-                                mergedTags );
+                                isOverride );
 
                             if ( templateEvent != null )
                             {
@@ -954,15 +951,15 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                         throw new AssertionFailedException( $"Unexpected kind of declaration: '{interfaceMember}'." );
                 }
 
-                void CopyAttributes( IDeclaration interfaceMember, DeclarationBuilder builder )
+                void CopyAttributes( IDeclaration source, DeclarationBuilder destination )
                 {
                     var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
-                    foreach ( var codeElementAttribute in interfaceMember.Attributes )
+                    foreach ( var codeElementAttribute in source.Attributes )
                     {
                         if ( classificationService.MustCopyTemplateAttribute( codeElementAttribute ) )
                         {
-                            builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
+                            destination.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
                         }
                     }
                 }
@@ -1059,8 +1056,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         bool isExplicit,
         bool isVirtual,
         bool isOverride,
-        bool hasImplicitSetter,
-        IObjectReader tags )
+        bool hasImplicitSetter )
     {
         var name = GetInterfaceMemberName( interfaceProperty, isExplicit );
 
@@ -1128,8 +1124,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
         bool isEventField,
         bool isExplicit,
         bool isVirtual,
-        bool isOverride,
-        IObjectReader tags )
+        bool isOverride )
     {
         var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 

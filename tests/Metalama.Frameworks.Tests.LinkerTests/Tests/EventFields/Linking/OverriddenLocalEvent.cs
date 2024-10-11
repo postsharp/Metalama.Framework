@@ -1,23 +1,26 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 #pragma warning disable CS0067
 
 namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.OverriddenLocalEvent
 {
-    [PseudoLayerOrder("TestAspect0")]
-    [PseudoLayerOrder("TestAspect1")]
-    [PseudoLayerOrder("TestAspect2")]
-    [PseudoLayerOrder("TestAspect3")]
-    [PseudoLayerOrder("TestAspect4")]
-    [PseudoLayerOrder("TestAspect5")]
-    [PseudoLayerOrder("TestAspect6")]
+    [PseudoLayerOrder( "TestAspect0" )]
+    [PseudoLayerOrder( "TestAspect1" )]
+    [PseudoLayerOrder( "TestAspect2" )]
+    [PseudoLayerOrder( "TestAspect3" )]
+    [PseudoLayerOrder( "TestAspect4" )]
+    [PseudoLayerOrder( "TestAspect5" )]
+    [PseudoLayerOrder( "TestAspect6" )]
+
     // <target>
-    class Target
+    internal class Target
     {
         public event EventHandler? Foo;
 
-        [PseudoOverride(nameof(Foo), "TestAspect0")]
+        [PseudoOverride( nameof(Foo), "TestAspect0" )]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public event EventHandler Foo_Override0
@@ -26,10 +29,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke source code.
                 link[_this.Bar.add, @base] += value;
+
                 // Should invoke source code.
                 link[_this.Bar.add, previous] += value;
+
                 // Should invoke source code.
                 link[_this.Bar.add, current] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, final] += value;
             }
@@ -38,16 +44,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke source code.
                 link[_this.Bar.remove, @base] -= value;
+
                 // Should invoke source code.
                 link[_this.Bar.remove, previous] -= value;
+
                 // Should invoke source code.
                 link[_this.Bar.remove, current] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, final] -= value;
             }
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect2")]
+        [PseudoOverride( nameof(Foo), "TestAspect2" )]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public event EventHandler Foo_Override2
@@ -56,10 +65,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 1.
                 link[_this.Bar.add, @base] += value;
+
                 // Should invoke override 1.
                 link[_this.Bar.add, previous] += value;
+
                 // Should invoke override 1.
                 link[_this.Bar.add, current] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, final] += value;
             }
@@ -68,16 +80,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 1.
                 link[_this.Bar.remove, @base] -= value;
+
                 // Should invoke override 1.
                 link[_this.Bar.remove, previous] -= value;
+
                 // Should invoke override 1.
                 link[_this.Bar.remove, current] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, final] -= value;
             }
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect4")]
+        [PseudoOverride( nameof(Foo), "TestAspect4" )]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public event EventHandler Foo_Override4
@@ -86,10 +101,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 3.
                 link[_this.Bar.add, @base] += value;
+
                 // Should invoke override 3.
                 link[_this.Bar.add, previous] += value;
+
                 // Should invoke override 3.
                 link[_this.Bar.add, current] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, final] += value;
             }
@@ -98,16 +116,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 3.
                 link[_this.Bar.remove, @base] -= value;
+
                 // Should invoke override 3.
                 link[_this.Bar.remove, previous] -= value;
+
                 // Should invoke override 3.
                 link[_this.Bar.remove, current] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, final] -= value;
             }
         }
 
-        [PseudoOverride(nameof(Foo), "TestAspect6")]
+        [PseudoOverride( nameof(Foo), "TestAspect6" )]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public event EventHandler Foo_Override6
@@ -116,10 +137,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke the final declaration.
                 link[_this.Bar.add, @base] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, previous] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, current] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, final] += value;
             }
@@ -128,10 +152,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, @base] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, previous] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, current] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, final] -= value;
             }
@@ -139,7 +166,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
 
         public event EventHandler? Bar;
 
-        [PseudoOverride(nameof(Bar), "TestAspect1")]
+        [PseudoOverride( nameof(Bar), "TestAspect1" )]
         [PseudoNotInlineable]
         public event EventHandler Bar_Override1
         {
@@ -147,10 +174,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke source code.
                 link[_this.Bar.add, @base] += value;
+
                 // Should invoke source code.
                 link[_this.Bar.add, previous] += value;
+
                 // Should invoke override 1.
                 link[_this.Bar.add, current] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, final] += value;
             }
@@ -159,16 +189,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke source code.
                 link[_this.Bar.remove, @base] -= value;
+
                 // Should invoke source code.
                 link[_this.Bar.remove, previous] -= value;
+
                 // Should invoke override 1.
                 link[_this.Bar.remove, current] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, final] -= value;
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect3")]
+        [PseudoOverride( nameof(Bar), "TestAspect3" )]
         [PseudoNotInlineable]
         public event EventHandler Bar_Override3
         {
@@ -176,10 +209,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 1.
                 link[_this.Bar.add, @base] += value;
+
                 // Should invoke override 1.
                 link[_this.Bar.add, previous] += value;
+
                 // Should invoke override 3.
                 link[_this.Bar.add, current] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, final] += value;
             }
@@ -188,16 +224,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 1.
                 link[_this.Bar.remove, @base] -= value;
+
                 // Should invoke override 1.
                 link[_this.Bar.remove, previous] -= value;
+
                 // Should invoke override 3.
                 link[_this.Bar.remove, current] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, final] -= value;
             }
         }
 
-        [PseudoOverride(nameof(Bar), "TestAspect5")]
+        [PseudoOverride( nameof(Bar), "TestAspect5" )]
         [PseudoNotInlineable]
         public event EventHandler Bar_Override5
         {
@@ -205,10 +244,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 3.
                 link[_this.Bar.add, @base] += value;
+
                 // Should invoke override 3.
                 link[_this.Bar.add, previous] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, current] += value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.add, final] += value;
             }
@@ -217,10 +259,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.
             {
                 // Should invoke override 3.
                 link[_this.Bar.remove, @base] -= value;
+
                 // Should invoke override 3.
                 link[_this.Bar.remove, previous] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, current] -= value;
+
                 // Should invoke the final declaration.
                 link[_this.Bar.remove, final] -= value;
             }

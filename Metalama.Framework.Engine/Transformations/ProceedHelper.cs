@@ -27,8 +27,8 @@ internal static class ProceedHelper
         TemplateKind selectedTemplateKind,
         IMethod overriddenMethod )
     {
-        TypeSyntax GetRuntimeAspectHelperTypeSyntax() =>
-            generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
+        TypeSyntax GetRuntimeAspectHelperTypeSyntax()
+            => generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
         switch ( selectedTemplateKind )
         {

@@ -41,7 +41,7 @@ internal class AttributeSerializationData
         this.ContainingDeclaration = builder.ContainingDeclaration;
         this.Constructor = builder.Constructor;
         this.Type = builder.Type;
-        this.ConstructorArguments = builder.ConstructorArguments.SelectAsImmutableArray( a => a.ToRef() );
+        this.ConstructorArguments = builder.ConstructorArguments;
         this.NamedArguments = builder.NamedArguments.SelectAsImmutableArray( x => new KeyValuePair<string, TypedConstantRef>( x.Key, x.Value.ToRef() ) );
     }
 

@@ -41,7 +41,7 @@ internal sealed class AttributeUpdatableCollection : DeclarationUpdatableCollect
         this.EnsureComplete();
 
         var namedTypeDecl = namedType.ConstructedDeclaration;
-        var itemsToRemove = this.Where( x => x.AttributeType.ToFullRef(namedType.RefFactory).IsConvertibleTo( namedTypeDecl ) ).ToMutableList();
+        var itemsToRemove = this.Where( x => x.AttributeType.ToFullRef( namedType.RefFactory ).IsConvertibleTo( namedTypeDecl ) ).ToMutableList();
 
         foreach ( var item in itemsToRemove )
         {

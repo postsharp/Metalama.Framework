@@ -25,7 +25,6 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IMethodBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, explicitName: null, template.TemplateMember, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {

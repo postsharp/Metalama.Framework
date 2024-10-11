@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
@@ -15,7 +14,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
 {
     private readonly BoundTemplateMethod _boundTemplate;
 
-    public OverrideConstructorAdvice( AdviceConstructorParameters<IConstructor> parameters, BoundTemplateMethod boundTemplate, IObjectReader tags )
+    public OverrideConstructorAdvice( AdviceConstructorParameters<IConstructor> parameters, BoundTemplateMethod boundTemplate )
         : base( parameters )
     {
         this._boundTemplate = boundTemplate;

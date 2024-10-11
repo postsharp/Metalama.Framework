@@ -67,7 +67,7 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
     public abstract FullRef<T> WithGenericContext( GenericContext genericContext );
 
     public RefFactory RefFactory { get; }
-    
+
     public ResolvedAttributeRef GetAttributes()
     {
         switch ( this.TargetKind )
@@ -86,7 +86,7 @@ internal abstract partial class FullRef<T> : BaseRef<T>, IFullRef<T>
                 if ( symbol is IAssemblySymbol assemblySymbol )
                 {
                     // Also return module-level attributes.
-                    attributes = attributes.AddRange( assemblySymbol.Modules.SelectMany( m => m.GetAttributes() ));
+                    attributes = attributes.AddRange( assemblySymbol.Modules.SelectMany( m => m.GetAttributes() ) );
                 }
 
                 return new ResolvedAttributeRef( attributes, symbol, RefTargetKind.Default );

@@ -30,7 +30,6 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IIndexerBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {

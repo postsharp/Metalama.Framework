@@ -31,7 +31,6 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         PartiallyBoundTemplateMethod template,
         OverrideStrategy overrideStrategy,
         Action<IMethodBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
         : base(
             parameters,

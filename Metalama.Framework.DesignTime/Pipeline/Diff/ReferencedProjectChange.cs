@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// <summary>
 /// Represents a change in a referenced project.
 /// </summary>
-internal readonly struct ReferencedProjectChange
+internal readonly struct ReferencedProjectChange : IEquatable<ReferencedProjectChange>
 {
     private readonly WeakReference<Compilation>? _oldCompilationRef;
 
@@ -57,4 +57,14 @@ internal readonly struct ReferencedProjectChange
         this.ChangeKind = changeKind;
         this.Changes = changes;
     }
+
+    public bool Equals( ReferencedProjectChange other )
+        => ReferenceEquals( this._oldCompilationRef, other._oldCompilationRef )
+           && this.ChangeKind == other.ChangeKind
+           && ReferenceEquals( this.NewCompilation, other.NewCompilation )
+           && ReferenceEquals( this.Changes, other.Changes );
+
+    public override bool Equals( object? obj ) => obj is ReferencedProjectChange other && this.Equals( other );
+
+    public override int GetHashCode() => HashCode.Combine( this._oldCompilationRef, (int) this.ChangeKind, this.NewCompilation, this.Changes );
 }

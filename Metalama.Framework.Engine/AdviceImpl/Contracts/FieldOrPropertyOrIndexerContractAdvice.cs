@@ -49,7 +49,6 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
                         this.Direction,
                         this.Template,
                         this.TemplateArguments,
-                        this.Tags,
                         this.TemplateProvider ) );
 
                 return CreateSuccessResult( indexer );
@@ -67,7 +66,6 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
                     this.Direction,
                     this.Template,
                     this.TemplateArguments,
-                    this.Tags,
                     this.TemplateProvider ) );
 
             return CreateSuccessResult( property );

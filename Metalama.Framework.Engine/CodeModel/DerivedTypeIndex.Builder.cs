@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public partial class DerivedTypeIndex
 {
-    internal sealed partial class Builder
+    internal sealed class Builder
     {
         private readonly ImmutableDictionaryOfArray<NamedTypeRef, NamedTypeRef>.Builder _relationships;
         private readonly ImmutableHashSet<NamedTypeRef>.Builder _processedTypes;

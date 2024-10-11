@@ -264,7 +264,7 @@ namespace Metalama.Framework.Engine.CodeModel
             IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
             ImmutableArray<ManagedResource> resources = default );
 
-        private record Closure( ImmutableHashSet<INamedTypeSymbol> DeclaredTypes, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypeIndex );
+        private sealed record Closure( ImmutableHashSet<INamedTypeSymbol> DeclaredTypes, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypeIndex );
 
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.

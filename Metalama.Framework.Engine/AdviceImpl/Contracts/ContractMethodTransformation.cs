@@ -24,15 +24,13 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags,
         TemplateProvider templateProvider ) : base(
         aspectLayerInstance,
         contractTarget,
         contractDirection,
         template,
         templateProvider,
-        templateArguments,
-        tags )
+        templateArguments )
     {
         this._targetMethod = targetMethod;
     }

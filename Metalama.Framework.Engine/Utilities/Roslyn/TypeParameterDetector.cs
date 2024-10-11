@@ -51,6 +51,6 @@ internal static class TypeParameterDetector
 
         protected override ITypeParameter? VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => null;
 
-        protected override ITypeParameter? VisitTypeParameter( ITypeParameter typeParameter ) => typeParameter;
+        protected override ITypeParameter VisitTypeParameter( ITypeParameter typeParameter ) => typeParameter;
     }
 }

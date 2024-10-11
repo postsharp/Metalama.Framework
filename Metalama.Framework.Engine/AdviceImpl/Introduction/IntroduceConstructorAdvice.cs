@@ -23,8 +23,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         AdviceConstructorParameters<INamedType> parameters,
         PartiallyBoundTemplateMethod template,
         OverrideStrategy overrideStrategy,
-        Action<IConstructorBuilder>? buildAction,
-        IObjectReader tags )
+        Action<IConstructorBuilder>? buildAction )
         : base(
             parameters,
             null,
