@@ -24,9 +24,8 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
 
     protected OverridePropertyBaseTransformation(
         AspectLayerInstance aspectLayerInstance,
-        IFullRef<IProperty> overriddenProperty,
-        IObjectReader tags )
-        : base( aspectLayerInstance, overriddenProperty, tags )
+        IFullRef<IProperty> overriddenProperty )
+        : base( aspectLayerInstance, overriddenProperty )
     {
         this.OverriddenProperty = overriddenProperty;
     }

@@ -32,8 +32,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
     protected OverrideStrategy OverrideStrategy { get; }
 
-    protected IObjectReader Tags { get; }
-
     protected IntroduceMemberAdvice(
         AdviceConstructorParameters<INamedType> parameters,
         string? explicitName,
@@ -41,7 +39,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<TBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, buildAction )
     {
@@ -72,7 +69,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         }
 
         this.OverrideStrategy = overrideStrategy;
-        this.Tags = tags;
         this._explicitlyImplementedInterfaceType = explicitlyImplementedInterfaceType;
     }
 

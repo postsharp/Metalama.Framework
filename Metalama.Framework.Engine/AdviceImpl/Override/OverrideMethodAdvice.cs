@@ -13,7 +13,7 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
     private readonly BoundTemplateMethod _boundTemplate;
 
     public OverrideMethodAdvice( AdviceConstructorParameters<IMethod> parameters, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( parameters, tags )
+        : base( parameters )
     {
         this._boundTemplate = boundTemplate;
     }
@@ -29,19 +29,19 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
         {
             case MethodKind.Finalizer:
                 context.AddTransformation(
-                    new OverrideFinalizerTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                    new OverrideFinalizerTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate ) );
 
                 break;
 
             case MethodKind.Operator:
                 context.AddTransformation(
-                    new OverrideOperatorTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                    new OverrideOperatorTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate ) );
 
                 break;
 
             default:
                 context.AddTransformation(
-                    new OverrideMethodTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate, this.Tags ) );
+                    new OverrideMethodTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate ) );
 
                 break;
         }

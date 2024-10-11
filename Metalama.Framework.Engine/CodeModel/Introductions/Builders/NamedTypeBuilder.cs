@@ -232,11 +232,6 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    public IntroduceNamedTypeTransformation ToTransformation()
-    {
-        return new IntroduceNamedTypeTransformation( this.AspectLayerInstance, this.Immutable );
-    }
-
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 

@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
@@ -15,7 +16,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
     private readonly BoundTemplateMethod _boundTemplate;
 
     public OverrideConstructorAdvice( AdviceConstructorParameters<IConstructor> parameters, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( parameters, tags )
+        : base( parameters )
     {
         this._boundTemplate = boundTemplate;
     }
@@ -36,11 +37,11 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
 
             builder.Freeze();
 
-            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation() );
             constructor = builder;
         }
 
-        context.AddTransformation( new OverrideConstructorTransformation( this.AspectLayerInstance, constructor.ToFullRef(), this._boundTemplate, this.Tags ) );
+        context.AddTransformation( new OverrideConstructorTransformation( this.AspectLayerInstance, constructor.ToFullRef(), this._boundTemplate ) );
 
         return this.CreateSuccessResult( constructor );
     }

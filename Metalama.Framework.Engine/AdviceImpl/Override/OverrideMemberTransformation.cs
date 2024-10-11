@@ -15,20 +15,17 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformation, IInjectMemberTransformation, IOverrideDeclarationTransformation
 {
-    protected IObjectReader Tags { get; }
-
     public abstract IFullRef<IMember> OverriddenDeclaration { get; }
 
     IFullRef<IDeclaration> IOverrideDeclarationTransformation.OverriddenDeclaration => this.OverriddenDeclaration;
 
     public override IFullRef<IDeclaration> TargetDeclaration => this.OverriddenDeclaration;
 
-    protected OverrideMemberTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IDeclaration> overriddenDeclaration, IObjectReader tags ) : base(
+    protected OverrideMemberTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IDeclaration> overriddenDeclaration ) : base(
         aspectLayerInstance,
         overriddenDeclaration )
     {
         Invariant.Assert( aspectLayerInstance != null! );
-        this.Tags = tags;
     }
 
     public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
@@ -44,7 +41,8 @@ internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformat
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
-    public override FormattableString ToDisplayString() => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration.Definition.ToDisplayString()}'";
+    public override FormattableString ToDisplayString()
+        => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration.Definition.ToDisplayString()}'";
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.OverrideMember;
 }

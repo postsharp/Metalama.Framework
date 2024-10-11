@@ -62,11 +62,6 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     public override SyntaxTree PrimarySyntaxTree
         => this.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
-    public ITransformation ToTransformation()
-    {
-        return new IntroduceAttributeTransformation( this.AspectLayerInstance, this.Immutable );
-    }
-
     int IAspectPredecessor.PredecessorDegree => 0;
 
     IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();

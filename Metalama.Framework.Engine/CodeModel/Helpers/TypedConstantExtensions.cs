@@ -48,6 +48,8 @@ internal static class TypedConstantExtensions
         };
     }
 
+    public static TypedConstantRef? ToRef( this TypedConstant? constant ) => constant?.ToRef();
+
     public static TypedConstantRef ToRef( this TypedConstant constant )
     {
         if ( !constant.IsInitialized )
@@ -67,4 +69,7 @@ internal static class TypedConstantExtensions
             return new TypedConstantRef( constant.Value, constant.Type.ToRef() );
         }
     }
+
+    public static TypedConstant? ToTypedConstant( this TypedConstantRef? typedConstantRef, CompilationModel compilation )
+        => typedConstantRef?.Resolve( compilation );
 }

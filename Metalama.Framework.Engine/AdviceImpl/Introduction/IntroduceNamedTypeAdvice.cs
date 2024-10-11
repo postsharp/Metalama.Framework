@@ -57,7 +57,7 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
         {
             builder.Freeze();
 
-            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation() );
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
@@ -78,7 +78,7 @@ internal sealed class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INam
                 case OverrideStrategy.New:
                     builder.HasNewKeyword = builder.IsNew = true;
                     builder.Freeze();
-                    context.AddTransformation( builder.ToTransformation() );
+                    context.AddTransformation( builder.CreateTransformation() );
 
                     return this.CreateSuccessResult( AdviceOutcome.Default, builder );
 

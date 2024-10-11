@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
@@ -30,9 +29,8 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
     public OverrideConstructorTransformation(
         AspectLayerInstance aspectLayerInstance,
         IFullRef<IConstructor> overriddenDeclaration,
-        BoundTemplateMethod template,
-        IObjectReader tags )
-        : base( aspectLayerInstance, overriddenDeclaration, tags )
+        BoundTemplateMethod template )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
         this._overriddenDeclaration = overriddenDeclaration;
         this.Template = template;
@@ -52,7 +50,6 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
                 this.InitialCompilation,
                 context.DiagnosticSink,
                 this.Template.TemplateMember.AsMemberOrNamedType(),
-                this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,

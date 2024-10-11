@@ -40,7 +40,6 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
             IntroductionScope.Static,
             overrideStrategy,
             buildAction,
-            tags,
             explicitlyImplementedInterfaceType )
     {
         this._operatorKind = operatorKind;
@@ -116,12 +115,11 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         if ( existingOperator == null )
         {
             builder.Freeze();
-            
+
             var overriddenOperator = new OverrideOperatorTransformation(
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
-                this._template.ForIntroduction( builder ),
-                this.Tags );
+                this._template.ForIntroduction( builder ) );
 
             context.AddTransformation( overriddenOperator );
             context.AddTransformation( builder.ToTransformation() );
@@ -165,8 +163,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this.AspectLayerInstance,
                             builder.ToFullRef(),
-                            this._template.ForIntroduction( builder ),
-                            this.Tags );
+                            this._template.ForIntroduction( builder ) );
 
                         context.AddTransformation( overriddenOperator );
                         context.AddTransformation( builder.ToTransformation() );
@@ -180,8 +177,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this.AspectLayerInstance,
                             existingOperator.ToFullRef(),
-                            this._template.ForIntroduction( existingOperator ),
-                            this.Tags );
+                            this._template.ForIntroduction( existingOperator ) );
 
                         context.AddTransformation( overriddenOperator );
 
@@ -207,8 +203,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                         var overriddenOperator = new OverrideOperatorTransformation(
                             this.AspectLayerInstance,
                             builder.ToFullRef(),
-                            this._template.ForIntroduction( builder ),
-                            this.Tags );
+                            this._template.ForIntroduction( builder ) );
 
                         context.AddTransformation( builder.ToTransformation() );
                         context.AddTransformation( overriddenOperator );

@@ -87,7 +87,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             constructorBuilder.Freeze();
 
             initializedConstructor = constructorBuilder;
-            context.AddTransformation( constructorBuilder.ToTransformation() );
+            context.AddTransformation( constructorBuilder.CreateTransformation() );
         }
 
         // Create the parameter.
@@ -165,7 +165,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                     };
 
                     derivedConstructorBuilder.Freeze();
-                    contextCopy.AddTransformation( derivedConstructorBuilder.ToTransformation() );
+                    contextCopy.AddTransformation( derivedConstructorBuilder.CreateTransformation() );
                     initializedChainedConstructor = derivedConstructorBuilder;
                 }
 

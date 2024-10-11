@@ -20,11 +20,13 @@ internal sealed class TemplateMember<T> : TemplateMember
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
+        IObjectReader tags,
         TemplateKind selectedTemplateKind = TemplateKind.Default ) : this(
         implementation,
         templateClassMember,
         templateProvider,
         adviceAttribute,
+        tags,
         selectedTemplateKind,
         selectedTemplateKind ) { }
 
@@ -33,12 +35,14 @@ internal sealed class TemplateMember<T> : TemplateMember
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
+        IObjectReader tags,
         TemplateKind selectedTemplateKind,
         TemplateKind interpretedTemplateKind ) : base(
         implementation,
         templateClassMember,
         templateProvider,
         adviceAttribute,
+        tags,
         selectedTemplateKind,
         interpretedTemplateKind )
     {

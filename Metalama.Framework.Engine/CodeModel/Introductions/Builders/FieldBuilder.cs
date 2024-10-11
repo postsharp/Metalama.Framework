@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
@@ -24,12 +23,10 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl, IMemberOrNamedTypeBuilderImpl
+internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 {
     private IType _type;
     private Writeability _writeability = Writeability.All;
-
-    public IObjectReader InitializerTags { get; }
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
@@ -77,11 +74,6 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl, I
 
     IRef<IField> IField.ToRef() => this.Immutable.ToRef();
 
-    public IInjectMemberTransformation ToTransformation()
-    {
-        return new IntroduceFieldTransformation( this.AspectLayerInstance, this.Immutable );
-    }
-
     public Writeability Writeability
     {
         get => this._writeability;
@@ -111,12 +103,11 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl, I
         => new FieldOrPropertyInvoker( this )
             .ToTypedExpressionSyntax( syntaxGenerationContext );
 
-    public TemplateMember<IField>? InitializerTemplate { get; set; }
+    // public TemplateMember<IField>? InitializerTemplate { get; set; }
 
-    public FieldBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType, string name, IObjectReader initializerTags )
+    public FieldBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType, string name )
         : base( targetType, name, aspectLayerInstance )
     {
-        this.InitializerTags = initializerTags;
         this._type = this.Compilation.Cache.SystemObjectType;
     }
 

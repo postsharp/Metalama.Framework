@@ -29,7 +29,8 @@ namespace Metalama.Framework.Engine.Advising
                                 accessor,
                                 template,
                                 propertyTemplate.TemplateProvider,
-                                propertyTemplate.DeclarationRef.RefFactory );
+                                propertyTemplate.DeclarationRef.RefFactory,
+                                propertyTemplate.Tags );
                         }
                         else
                         {
@@ -63,7 +64,8 @@ namespace Metalama.Framework.Engine.Advising
                                 accessor,
                                 template,
                                 eventTemplate.TemplateProvider,
-                                eventTemplate.DeclarationRef.RefFactory );
+                                eventTemplate.DeclarationRef.RefFactory,
+                                eventTemplate.Tags );
                         }
                         else
                         {
@@ -120,6 +122,7 @@ namespace Metalama.Framework.Engine.Advising
                         fieldTemplate.TemplateProvider,
                         fieldTemplate.AdviceAttribute.AssertNotNull(),
                         fieldTemplate.DeclarationRef.RefFactory,
+                        fieldTemplate.Tags,
                         TemplateKind.InitializerExpression );
                 }
                 else
@@ -150,6 +153,7 @@ namespace Metalama.Framework.Engine.Advising
                         eventFieldTemplate.TemplateClassMember,
                         eventFieldTemplate.TemplateProvider,
                         eventFieldTemplate.DeclarationRef.RefFactory,
+                        eventFieldTemplate.Tags,
                         TemplateKind.InitializerExpression );
                 }
                 else
@@ -177,6 +181,7 @@ namespace Metalama.Framework.Engine.Advising
                         propertyTemplate.TemplateClassMember,
                         propertyTemplate.TemplateProvider,
                         propertyTemplate.DeclarationRef.RefFactory,
+                        propertyTemplate.Tags,
                         TemplateKind.InitializerExpression );
                 }
                 else

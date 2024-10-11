@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using System.Linq;
@@ -20,14 +21,14 @@ public sealed partial class CodeModelUpdateTests
 
         var type = new NamedTypeBuilder( null!, compilation.GlobalNamespace, "C" );
         type.Freeze();
-        compilation.AddTransformation( type.ToTransformation() );
+        compilation.AddTransformation( type.CreateTransformation() );
 
         Assert.Single( compilation.GlobalNamespace.Types.OfName( "C" ) );
         Assert.Single( compilation.Types.OfName( "C" ) );
 
         var nestedType = new NamedTypeBuilder( null!, compilation.Types.OfName( "Outer" ).Single(), "Inner" );
         nestedType.Freeze();
-        compilation.AddTransformation( nestedType.ToTransformation() );
+        compilation.AddTransformation( nestedType.CreateTransformation() );
 
         Assert.Single( compilation.GlobalNamespace.Types.OfName( "Outer" ).Single().Types );
         Assert.Single( compilation.AllTypes.OfName( "Inner" ) );
@@ -42,11 +43,11 @@ public sealed partial class CodeModelUpdateTests
 
         var nsBuilder = new NamespaceBuilder( null!, compilation.GlobalNamespace, "NS" );
         nsBuilder.Freeze();
-        compilation.AddTransformation( nsBuilder.ToTransformation() );
+        compilation.AddTransformation( nsBuilder.CreateTransformation() );
 
         var typeBuilder = new NamedTypeBuilder( null!, nsBuilder, "C" );
         typeBuilder.Freeze();
-        compilation.AddTransformation( typeBuilder.ToTransformation() );
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
 
         var ns = compilation.GlobalNamespace.GetDescendant( "NS" );
 
@@ -76,7 +77,7 @@ class C
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
         typeBuilder.Freeze();
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -119,7 +120,7 @@ class C
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
         typeBuilder.Freeze();
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -162,7 +163,7 @@ class C
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
         typeBuilder.Freeze();
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -202,7 +203,7 @@ class C
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
         typeBuilder.Freeze();
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -249,7 +250,7 @@ class C
         var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToFullRef<INamedType>(), interfaceType.ToFullRef(), [] );
 
         var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
-            [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface],
+            [baseType.CreateTransformation(), derivedType.CreateTransformation(), implementInterface],
             null,
             null );
 

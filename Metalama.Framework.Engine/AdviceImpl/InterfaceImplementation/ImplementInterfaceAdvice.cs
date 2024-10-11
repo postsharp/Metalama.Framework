@@ -239,7 +239,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
             if ( method != null && TryGetInterfaceMemberTemplate( method, out var classMember ) )
             {
-                return TemplateMemberFactory.Create( method, classMember, this._templateProvider );
+                return TemplateMemberFactory.Create( method, classMember, this._templateProvider, this._tags );
             }
 
             return null;
@@ -251,7 +251,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
             if ( property != null && TryGetInterfaceMemberTemplate( property, out var classMember ) )
             {
-                return TemplateMemberFactory.Create( property, classMember, this._templateProvider );
+                return TemplateMemberFactory.Create( property, classMember, this._templateProvider, this._tags );
             }
 
             return null;
@@ -263,7 +263,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
             if ( @event != null && TryGetInterfaceMemberTemplate( @event, out var classMember ) )
             {
-                return TemplateMemberFactory.Create( @event, classMember, this._templateProvider );
+                return TemplateMemberFactory.Create( @event, classMember, this._templateProvider, this._tags );
             }
 
             return null;
@@ -437,8 +437,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                             new OverrideMethodTransformation(
                                                 this.AspectLayerInstance,
                                                 existingMethod.ToFullRef(),
-                                                templateMethod.AssertNotNull().ForOverride( existingMethod ),
-                                                mergedTags ) );
+                                                templateMethod.AssertNotNull().ForOverride( existingMethod ) ) );
 
                                         implementedInterfaceMembers.Add(
                                             new MemberImplementationResult(
@@ -500,8 +499,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     new OverrideMethodTransformation(
                                         this.AspectLayerInstance,
                                         methodBuilder.ToFullRef(),
-                                        templateMethod.ForIntroduction( methodBuilder ),
-                                        mergedTags ) );
+                                        templateMethod.ForIntroduction( methodBuilder ) ) );
                             }
                             else
                             {
@@ -580,8 +578,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                                     : null,
                                                 existingProperty.SetMethod != null
                                                     ? accessorTemplates.Set?.ForOverride( existingProperty.SetMethod )
-                                                    : null,
-                                                mergedTags ) );
+                                                    : null ) );
 
                                         implementedInterfaceMembers.Add(
                                             new MemberImplementationResult(
@@ -735,15 +732,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                         templatePropertyDeclaration.SetMethod.AssertNotNull(),
                                         propertyBuilder.SetMethod.AssertNotNull() );
                                 }
-
-                                if ( isAutoProperty )
-                                {
-                                    propertyBuilder.InitializerTemplate = templateProperty.GetInitializerTemplate();
-                                }
                             }
 
                             propertyBuilder.Freeze();
-                            AddTransformationNoDuplicates( propertyBuilder.ToTransformation() );
+                            AddTransformationNoDuplicates( propertyBuilder.CreateTransformation( templateProperty.GetInitializerTemplate() ) );
                             interfaceMemberMap.Add( interfaceProperty, propertyBuilder );
 
                             if ( templateProperty != null )
@@ -761,8 +753,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                                 : null,
                                             propertyBuilder.SetMethod != null
                                                 ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod )
-                                                : null,
-                                            mergedTags ) );
+                                                : null ) );
                                 }
                                 else
                                 {
@@ -847,8 +838,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                                 this.AspectLayerInstance,
                                                 existingEvent.ToFullRef(),
                                                 accessorTemplates.Add?.ForOverride( existingEvent.AddMethod ),
-                                                accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod ),
-                                                mergedTags ) );
+                                                accessorTemplates.Remove?.ForOverride( existingEvent.RemoveMethod ) ) );
 
                                         implementedInterfaceMembers.Add(
                                             new MemberImplementationResult(
@@ -917,7 +907,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                             }
 
                             eventBuilder.Freeze();
-                            AddTransformationNoDuplicates( eventBuilder.ToTransformation() );
+                            AddTransformationNoDuplicates( eventBuilder.CreateTransformation( templateEvent ) );
                             interfaceMemberMap.Add( interfaceEvent, eventBuilder );
 
                             if ( templateEvent != null )
@@ -931,13 +921,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                             this.AspectLayerInstance,
                                             eventBuilder.ToFullRef(),
                                             accessorTemplates.Add?.ForOverride( eventBuilder.AddMethod ),
-                                            accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod ),
-                                            mergedTags ) );
+                                            accessorTemplates.Remove?.ForOverride( eventBuilder.RemoveMethod ) ) );
                                 }
                                 else
                                 {
-                                    eventBuilder.InitializerTemplate = templateEvent.GetInitializerTemplate();
-
                                     OverrideHelper.AddTransformationsForStructField(
                                         targetType.ForCompilation( compilation ),
                                         this.AspectLayerInstance,
@@ -1086,8 +1073,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             isAutoProperty,
             interfaceProperty.Writeability == Writeability.InitOnly,
             false,
-            hasImplicitSetter,
-            tags ) { Type = interfaceProperty.Type };
+            hasImplicitSetter ) { Type = interfaceProperty.Type };
 
         if ( isExplicit )
         {
@@ -1147,7 +1133,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     {
         var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 
-        var eventBuilder = new EventBuilder( this.AspectLayerInstance, declaringType, name, isEventField, tags ) { Type = interfaceEvent.Type };
+        var eventBuilder = new EventBuilder( this.AspectLayerInstance, declaringType, name, isEventField ) { Type = interfaceEvent.Type };
 
         if ( isExplicit )
         {

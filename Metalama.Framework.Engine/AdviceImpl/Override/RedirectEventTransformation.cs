@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -23,7 +22,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
     private readonly IFullRef<IEvent> _targetEvent;
 
     public RedirectEventTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IEvent> overriddenDeclaration, IFullRef<IEvent> targetEvent )
-        : base( aspectLayerInstance, overriddenDeclaration, ObjectReader.Empty )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
         this._overriddenDeclaration = overriddenDeclaration;
         this._targetEvent = targetEvent;

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -16,9 +15,8 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
     public OverrideIndexerAdvice(
         AdviceConstructorParameters<IIndexer> parameters,
         BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
-        IObjectReader tags )
-        : base( parameters, tags )
+        BoundTemplateMethod? setTemplate )
+        : base( parameters )
     {
         this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
         this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
@@ -31,7 +29,7 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
         var targetDeclaration = this.TargetDeclaration;
 
         context.AddTransformation(
-            new OverrideIndexerTransformation( this.AspectLayerInstance, targetDeclaration.ToFullRef(), this._getTemplate, this._setTemplate, this.Tags ) );
+            new OverrideIndexerTransformation( this.AspectLayerInstance, targetDeclaration.ToFullRef(), this._getTemplate, this._setTemplate ) );
 
         return this.CreateSuccessResult( targetDeclaration );
     }

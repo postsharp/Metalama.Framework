@@ -25,8 +25,8 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
 {
     public IFullRef<IMethod> OverriddenMethod { get; }
 
-    protected OverrideMethodBaseTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IMethod> targetMethod, IObjectReader tags )
-        : base( aspectLayerInstance, targetMethod, tags )
+    protected OverrideMethodBaseTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IMethod> targetMethod )
+        : base( aspectLayerInstance, targetMethod )
     {
         this.OverriddenMethod = targetMethod;
     }

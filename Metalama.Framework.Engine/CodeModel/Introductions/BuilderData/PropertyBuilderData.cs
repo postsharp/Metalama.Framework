@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl;
 using Metalama.Framework.Engine.Advising;
@@ -24,11 +23,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     public IExpression? InitializerExpression { get; }
 
-    public TemplateMember<IProperty>? InitializerTemplate { get; }
-
     public bool IsAutoPropertyOrField { get; }
-
-    public IObjectReader InitializerTags { get; }
 
     public IRef<IProperty>? OverriddenProperty { get; }
 
@@ -49,7 +44,6 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         this.InitializerExpression = builder.InitializerExpression;
         this.IsAutoPropertyOrField = builder.IsAutoPropertyOrField;
         this.OverriddenProperty = builder.OverriddenProperty?.ToRef();
-        this.InitializerTemplate = builder.InitializerTemplate;
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
         this.IsRequired = builder.IsRequired;
         this.OriginalField = builder.OriginalField?.ToFullRef();
@@ -58,9 +52,6 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         {
             Invariant.Assert( builder.OriginalField.GenericContext.IsEmptyOrIdentity );
         }
-
-        // TODO: Potential CompilationModel leak
-        this.InitializerTags = builder.InitializerTags;
 
         if ( builder.GetMethod != null )
         {
@@ -91,6 +82,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         PropertyBuilderData builderData,
         AspectLayerInstance aspectLayerInstance,
         MemberInjectionContext context,
+        TemplateMember<IProperty> initializerTemplate,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
     {
@@ -103,8 +95,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     context,
                     property.Type,
                     property.InitializerExpression,
-                    builderData.InitializerTemplate,
-                    builderData.InitializerTags,
+                    initializerTemplate,
                     out initializerExpression,
                     out initializerMethod );
 
@@ -115,8 +106,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                     context,
                     property.Type,
                     fieldBuilderData.InitializerExpression,
-                    fieldBuilderData.InitializerTemplate,
-                    builderData.InitializerTags,
+                    initializerTemplate.As<IField>(),
                     out initializerExpression,
                     out initializerMethod );
 

@@ -88,11 +88,6 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public override IMember? OverriddenMember => this.OverriddenIndexer;
 
-    public IInjectMemberTransformation ToTransformation()
-    {
-        return new IntroduceIndexerTransformation( this.AspectLayerInstance, this.Immutable );
-    }
-
     public IndexerBuilder(
         AspectLayerInstance aspectLayerInstance,
         INamedType targetType,

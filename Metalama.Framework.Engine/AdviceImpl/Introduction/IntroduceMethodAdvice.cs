@@ -27,7 +27,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
         Action<IMethodBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName: null, template.TemplateMember, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
+        : base( parameters, explicitName: null, template.TemplateMember, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {
         this._template = template;
     }
@@ -145,8 +145,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
             var overriddenMethod = new OverrideMethodTransformation(
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
-                this._template.ForIntroduction( builder ),
-                this.Tags );
+                this._template.ForIntroduction( builder ) );
 
             context.AddTransformation( builder.ToTransformation() );
             context.AddTransformation( overriddenMethod );
@@ -203,8 +202,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                         var overriddenMethod = new OverrideMethodTransformation(
                             this.AspectLayerInstance,
                             builder.ToFullRef(),
-                            this._template.ForIntroduction( builder ),
-                            this.Tags );
+                            this._template.ForIntroduction( builder ) );
 
                         context.AddTransformation( overriddenMethod );
                         context.AddTransformation( builder.ToTransformation() );
@@ -228,8 +226,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                         var overriddenMethod = new OverrideMethodTransformation(
                             this.AspectLayerInstance,
                             existingMethod.ToFullRef(),
-                            this._template.ForIntroduction( existingMethod ),
-                            this.Tags );
+                            this._template.ForIntroduction( existingMethod ) );
 
                         context.AddTransformation( overriddenMethod );
 
@@ -256,8 +253,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                         var overriddenMethod = new OverrideMethodTransformation(
                             this.AspectLayerInstance,
                             builder.ToFullRef(),
-                            this._template.ForIntroduction( builder ),
-                            this.Tags );
+                            this._template.ForIntroduction( builder ) );
 
                         context.AddTransformation( builder.ToTransformation() );
                         context.AddTransformation( overriddenMethod );

@@ -25,7 +25,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 {
     private readonly List<IAttributeData> _fieldAttributes;
     private IExpression? _initializerExpression;
-    private TemplateMember<IProperty>? _initializerTemplate;
+
+    // private TemplateMember<IProperty>? _initializerTemplate;
 
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
@@ -54,8 +55,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     bool? IFieldOrProperty.IsAutoPropertyOrField => this.IsAutoPropertyOrField;
 
-    public IObjectReader InitializerTags { get; }
-
     public IProperty? OverriddenProperty { get; set; }
 
     public IProperty Definition => this;
@@ -69,13 +68,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     public override IMember? OverriddenMember => this.OverriddenProperty;
-
-    public virtual IInjectMemberTransformation ToTransformation()
-    {
-        Invariant.Assert( this.OriginalField == null );
-
-        return new IntroducePropertyTransformation( this.AspectLayerInstance, this.Immutable );
-    }
 
     public IExpression? InitializerExpression
     {
@@ -100,17 +92,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
         => new FieldOrPropertyInvoker( this )
             .ToTypedExpressionSyntax( syntaxGenerationContext );
 
-    public TemplateMember<IProperty>? InitializerTemplate
-    {
-        get => this._initializerTemplate;
-        set
-        {
-            this.CheckNotFrozen();
-
-            this._initializerTemplate = value;
-        }
-    }
-
     public PropertyBuilder(
         AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
@@ -120,8 +101,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
         bool isAutoProperty,
         bool hasInitOnlySetter,
         bool hasImplicitGetter,
-        bool hasImplicitSetter,
-        IObjectReader initializerTags )
+        bool hasImplicitSetter )
         : base( aspectLayerInstance, targetType, name, hasGetter, hasSetter, hasImplicitGetter, hasImplicitSetter )
     {
         // TODO: Sanity checks.
@@ -131,7 +111,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
         Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
 
         this.IsAutoPropertyOrField = isAutoProperty;
-        this.InitializerTags = initializerTags;
         this.HasInitOnlySetter = hasInitOnlySetter;
         this._fieldAttributes = [];
     }

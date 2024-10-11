@@ -112,13 +112,6 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
         => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IInjectMemberTransformation ToTransformation()
-    {
-        return this.IsStatic
-            ? new IntroduceStaticConstructorTransformation( this.AspectLayerInstance, this.Immutable )
-            : new IntroduceConstructorTransformation( this.AspectLayerInstance, this.Immutable );
-    }
-
 /*
     public override ICompilationElement? Translate(
         CompilationModel newCompilation,

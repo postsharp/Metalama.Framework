@@ -129,14 +129,14 @@ class C
 
         var immutableCompilation1 = testContext.CreateCompilationModel( code );
 
-        var introducedField = new FieldBuilder( null!, immutableCompilation1.Types.Single(), "_f", ObjectReader.Empty );
+        var introducedField = new FieldBuilder( null!, immutableCompilation1.Types.Single(), "_f" );
         introducedField.Accessibility = Accessibility.Private;
         introducedField.Type = immutableCompilation1.Factory.GetSpecialType( SpecialType.Int32 );
         introducedField.Freeze();
 
         // Add an introduced field to a compilation.
         var compilation1 = immutableCompilation1.CreateMutableClone();
-        compilation1.AddTransformation( introducedField.ToTransformation() );
+        compilation1.AddTransformation( introducedField.CreateTransformation() );
 
         var immutableCompilation2 = compilation1.CreateImmutableClone();
 

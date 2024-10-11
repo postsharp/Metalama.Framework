@@ -16,6 +16,7 @@ internal readonly struct TypedConstantRef
     public object? RawValue { get; }
 
     // This property may be null if the type can be assumed from the value.
+    // It's not necesseraly a IFulLRef since it could be deserialized.
     public IRef<IType>? Type { get; }
 
     public TypedConstantRef( object? value, IRef<IType>? type )

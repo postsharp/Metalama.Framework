@@ -41,13 +41,6 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public override bool CanBeInherited => false;
 
-    public IntroduceNamespaceTransformation ToTransformation()
-    {
-        this.Freeze();
-
-        return new IntroduceNamespaceTransformation( this.AspectLayerInstance, this.Immutable );
-    }
-
     public NamespaceBuilder( AspectLayerInstance aspectLayerInstance, INamespace containingNamespace, string name ) : base( aspectLayerInstance, name )
     {
         this.ContainingNamespace = containingNamespace;

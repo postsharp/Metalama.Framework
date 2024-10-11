@@ -972,7 +972,7 @@ internal sealed partial class LinkerInjectionStep
                         existingParameters.Parameters.InsertRange(
                             existingParameters.Parameters.Count - 1,
                             newParameters.Select(
-                                x => x.ToSyntax( syntaxGenerationContext, this._compilation )
+                                x => x.ToSyntax( syntaxGenerationContext )
                                     .WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
                 else
@@ -980,7 +980,7 @@ internal sealed partial class LinkerInjectionStep
                     return existingParameters.WithParameters(
                         existingParameters.Parameters.AddRange(
                             newParameters.Select(
-                                x => x.ToSyntax( syntaxGenerationContext, this._compilation )
+                                x => x.ToSyntax( syntaxGenerationContext )
                                     .WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
             }

@@ -79,7 +79,6 @@ internal class AdviceSyntaxGenerator
         AspectLayerInstance aspectLayerInstance,
         MemberInjectionContext context,
         TemplateMember<T> initializerTemplate,
-        IObjectReader tags,
         [NotNullWhen( true )] out BlockSyntax? expression )
         where T : class, IMember
     {
@@ -89,7 +88,6 @@ internal class AdviceSyntaxGenerator
                 aspectLayerInstance.InitialCompilation,
                 context.DiagnosticSink,
                 initializerTemplate.AsMemberOrNamedType(),
-                tags,
                 aspectLayerInstance.AspectLayerId,
                 context.SyntaxGenerationContext,
                 aspectLayerInstance.AspectInstance,
@@ -115,7 +113,6 @@ internal class AdviceSyntaxGenerator
         IType targetType,
         IExpression? initializerExpression,
         TemplateMember<T>? initializerTemplate,
-        IObjectReader tags,
         out ExpressionSyntax? initializerExpressionSyntax,
         out MethodDeclarationSyntax? initializerMethodSyntax )
         where T : class, IMember
@@ -166,7 +163,7 @@ internal class AdviceSyntaxGenerator
         }
         else if ( initializerTemplate != null )
         {
-            if ( !TryExpandInitializerTemplate( member, aspectLayerInstance, context, initializerTemplate, tags, out var initializerBlock ) )
+            if ( !TryExpandInitializerTemplate( member, aspectLayerInstance, context, initializerTemplate, out var initializerBlock ) )
             {
                 // Template expansion error.
                 initializerMethodSyntax = null;

@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -228,9 +227,9 @@ class C
         Assert.Empty( type.Fields );
 
         // Add a field.
-        var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        var fieldBuilder = new FieldBuilder( null!, type, "F" );
         fieldBuilder.Freeze();
-        compilation.AddTransformation( fieldBuilder.ToTransformation() );
+        compilation.AddTransformation( fieldBuilder.CreateTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields );
@@ -252,9 +251,9 @@ class C
         var type = Assert.Single( compilation.Types );
 
         // Add a field.
-        var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        var fieldBuilder = new FieldBuilder( null!, type, "F" );
         fieldBuilder.Freeze();
-        compilation.AddTransformation( fieldBuilder.ToTransformation() );
+        compilation.AddTransformation( fieldBuilder.CreateTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields );
@@ -279,9 +278,9 @@ class C
         Assert.Empty( type.Fields.OfName( "F" ) );
 
         // Add a field.
-        var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        var fieldBuilder = new FieldBuilder( null!, type, "F" );
         fieldBuilder.Freeze();
-        compilation.AddTransformation( fieldBuilder.ToTransformation() );
+        compilation.AddTransformation( fieldBuilder.CreateTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );
@@ -303,9 +302,9 @@ class C
         var type = Assert.Single( compilation.Types );
 
         // Add a field.
-        var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
+        var fieldBuilder = new FieldBuilder( null!, type, "F" );
         fieldBuilder.Freeze();
-        compilation.AddTransformation( fieldBuilder.ToTransformation() );
+        compilation.AddTransformation( fieldBuilder.CreateTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );
@@ -393,7 +392,7 @@ class C
 
         attributeBuilder.Freeze();
 
-        compilation.AddTransformation( attributeBuilder.ToTransformation() );
+        compilation.AddTransformation( attributeBuilder.CreateTransformation() );
 
         Assert.Single( type.Attributes );
     }
@@ -419,7 +418,7 @@ class C
 
         attributeBuilder.Freeze();
 
-        compilation.AddTransformation( attributeBuilder.ToTransformation() );
+        compilation.AddTransformation( attributeBuilder.CreateTransformation() );
 
         Assert.Single( compilation.Attributes );
     }
@@ -474,7 +473,7 @@ class C
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         typeBuilder.Freeze();
-        compilation.AddTransformation( typeBuilder.ToTransformation() );
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.Single( type.Types );
@@ -506,7 +505,7 @@ class C
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         typeBuilder.Freeze();
-        compilation.AddTransformation( typeBuilder.ToTransformation() );
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.Single( type.Types.OfName( "T" ) );
@@ -535,7 +534,7 @@ class C
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         typeBuilder.Freeze();
-        compilation.AddTransformation( typeBuilder.ToTransformation() );
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.Single( type.Types );
@@ -564,7 +563,7 @@ class C
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         typeBuilder.Freeze();
-        compilation.AddTransformation( typeBuilder.ToTransformation() );
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.Single( type.Types.OfName( "T" ) );
@@ -592,7 +591,7 @@ class C
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         typeBuilder.Freeze();
-        compilation.AddTransformation( typeBuilder.ToTransformation() );
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
 
         // Assert that the method has been added.
         Assert.Equal( 2, type.Types.OfName( "T" ).Count() );
@@ -620,7 +619,7 @@ class C
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         typeBuilder.Freeze();
-        compilation.AddTransformation( typeBuilder.ToTransformation() );
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
 
         // Assert that the method has been added.
         Assert.Equal( 2, type.Types.OfName( "T" ).Count() );
@@ -645,7 +644,8 @@ class C
 
         // Add a namespace.
         var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
-        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+        namespaceBuilder.Freeze();
+        compilation.AddTransformation( namespaceBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.Single( globalNamespace.Namespaces );
@@ -673,7 +673,9 @@ class C
 
         // Add a namespace.
         var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
-        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+        namespaceBuilder.Freeze();
+
+        compilation.AddTransformation( namespaceBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.NotNull( globalNamespace.Namespaces.OfName( "N" ) );
@@ -705,7 +707,8 @@ class C
 
         // Add a namespace.
         var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
-        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+        namespaceBuilder.Freeze();
+        compilation.AddTransformation( namespaceBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.Single( globalNamespace.Namespaces );
@@ -733,7 +736,8 @@ class C
 
         // Add a namespace.
         var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
-        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+        namespaceBuilder.Freeze();
+        compilation.AddTransformation( namespaceBuilder.CreateTransformation() );
 
         // Assert that the type has been added.
         Assert.NotNull( globalNamespace.Namespaces.OfName( "N" ) );

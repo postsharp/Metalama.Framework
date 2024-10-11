@@ -35,7 +35,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         Action<IEventBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName, eventTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
+        : base( parameters, explicitName, eventTemplate, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {
         this._addTemplate = addTemplate;
         this._removeTemplate = removeTemplate;
@@ -49,8 +49,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             this.AspectLayerInstance,
             this.TargetDeclaration,
             this.MemberName,
-            templateDeclaration != null && templateDeclaration.IsEventField() == true,
-            this.Tags ) { InitializerTemplate = this.Template.GetInitializerTemplate() };
+            templateDeclaration != null && templateDeclaration.IsEventField() == true );
     }
 
     protected override void InitializeBuilderCore(
@@ -187,7 +186,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             builder.Freeze();
 
             // There is no existing declaration, we will introduce and override the introduced.
-            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
             OverrideHelper.AddTransformationsForStructField( targetDeclaration, this.AspectLayerInstance, context.AddTransformation );
 
@@ -198,8 +197,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                         this.AspectLayerInstance,
                         builder.ToFullRef(),
                         this._addTemplate?.ForIntroduction( builder.AddMethod ),
-                        this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
-                        this.Tags ) );
+                        this._removeTemplate?.ForIntroduction( builder.RemoveMethod ) ) );
             }
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );
@@ -266,7 +264,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
                         if ( hasNoOverrideSemantics )
                         {
-                            context.AddTransformation( builder.ToTransformation() );
+                            context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
                             return this.CreateSuccessResult( AdviceOutcome.New, builder );
                         }
@@ -276,10 +274,9 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                                 this.AspectLayerInstance,
                                 builder.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( builder.AddMethod ),
-                                this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
-                                this.Tags );
+                                this._removeTemplate?.ForIntroduction( builder.RemoveMethod ) );
 
-                            context.AddTransformation( builder.ToTransformation() );
+                            context.AddTransformation( builder.CreateTransformation( this.Template ) );
                             context.AddTransformation( overriddenMethod );
 
                             return this.CreateSuccessResult( AdviceOutcome.New, builder );
@@ -299,8 +296,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                                 this.AspectLayerInstance,
                                 existingEvent.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( existingEvent.AddMethod ),
-                                this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ),
-                                this.Tags );
+                                this._removeTemplate?.ForIntroduction( existingEvent.RemoveMethod ) );
 
                             context.AddTransformation( overriddenMethod );
 
@@ -325,7 +321,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
                         if ( hasNoOverrideSemantics )
                         {
-                            context.AddTransformation( builder.ToTransformation() );
+                            context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
                             return this.CreateSuccessResult( AdviceOutcome.Override, builder );
                         }
@@ -335,10 +331,9 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                                 this.AspectLayerInstance,
                                 builder.ToFullRef(),
                                 this._addTemplate?.ForIntroduction( builder.AddMethod ),
-                                this._removeTemplate?.ForIntroduction( builder.RemoveMethod ),
-                                this.Tags );
+                                this._removeTemplate?.ForIntroduction( builder.RemoveMethod ) );
 
-                            context.AddTransformation( builder.ToTransformation() );
+                            context.AddTransformation( builder.CreateTransformation( this.Template ) );
                             context.AddTransformation( overriddenEvent );
 
                             return this.CreateSuccessResult( AdviceOutcome.Override, builder );

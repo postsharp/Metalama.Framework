@@ -23,14 +23,11 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
         OverrideStrategy overrideStrategy,
         Action<IFieldBuilder>? buildAction,
         IObjectReader tags )
-        : base( parameters, explicitName, fieldTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null ) { }
+        : base( parameters, explicitName, fieldTemplate, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType: null ) { }
 
     protected override FieldBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        return new FieldBuilder( this.AspectLayerInstance, this.TargetDeclaration, this.MemberName, this.Tags )
-        {
-            InitializerTemplate = this.Template.GetInitializerTemplate()
-        };
+        return new FieldBuilder( this.AspectLayerInstance, this.TargetDeclaration, this.MemberName );
     }
 
     protected override void InitializeBuilderCore(
@@ -122,7 +119,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
                     {
                         builder.HasNewKeyword = builder.IsNew = true;
                         builder.Freeze();
-                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
                         return this.CreateSuccessResult( AdviceOutcome.New, builder );
                     }
@@ -137,7 +134,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
         else
         {
             builder.Freeze();
-            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
             OverrideHelper.AddTransformationsForStructField(
                 targetDeclaration,

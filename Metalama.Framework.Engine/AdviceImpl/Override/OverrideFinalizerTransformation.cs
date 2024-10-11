@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
@@ -31,9 +30,8 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
     public OverrideFinalizerTransformation(
         AspectLayerInstance aspectLayerInstance,
         IFullRef<IMethod> targetFinalizer,
-        BoundTemplateMethod boundTemplate,
-        IObjectReader tags )
-        : base( aspectLayerInstance, targetFinalizer, tags )
+        BoundTemplateMethod boundTemplate )
+        : base( aspectLayerInstance, targetFinalizer )
     {
         this._targetFinalizer = targetFinalizer;
         this.BoundTemplate = boundTemplate;
@@ -53,7 +51,6 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
                 this.InitialCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
-                this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,

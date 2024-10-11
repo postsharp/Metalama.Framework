@@ -32,7 +32,7 @@ internal sealed class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INam
 
         if ( existingNamespace == null )
         {
-            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation() );
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }

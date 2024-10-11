@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -16,9 +15,8 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
 
     protected OverridePropertyOrIndexerTransformation(
         AspectLayerInstance aspectLayerInstance,
-        IFullRef<IPropertyOrIndexer> overriddenPropertyOrIndexer,
-        IObjectReader tags )
-        : base( aspectLayerInstance, overriddenPropertyOrIndexer, tags ) { }
+        IFullRef<IPropertyOrIndexer> overriddenPropertyOrIndexer )
+        : base( aspectLayerInstance, overriddenPropertyOrIndexer ) { }
 
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.

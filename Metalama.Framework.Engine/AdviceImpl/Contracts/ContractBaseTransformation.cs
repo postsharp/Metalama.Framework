@@ -74,7 +74,6 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
             this.InitialCompilation,
             context.DiagnosticSink,
             this._template.AsMemberOrNamedType(),
-            this._tags,
             this.AspectLayerId,
             context.SyntaxGenerationContext,
             this.AspectInstance,

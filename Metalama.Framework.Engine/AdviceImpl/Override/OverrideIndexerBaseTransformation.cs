@@ -25,9 +25,8 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
 
     protected OverrideIndexerBaseTransformation(
         AspectLayerInstance aspectLayerInstance,
-        IFullRef<IIndexer> overriddenDeclaration,
-        IObjectReader tags )
-        : base( aspectLayerInstance, overriddenDeclaration, tags )
+        IFullRef<IIndexer> overriddenDeclaration )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
         this._overriddenIndexer = overriddenDeclaration;
     }

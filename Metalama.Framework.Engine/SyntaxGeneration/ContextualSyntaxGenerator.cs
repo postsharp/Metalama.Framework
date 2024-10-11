@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -169,6 +170,10 @@ internal sealed partial class ContextualSyntaxGenerator
     }
 
     public DefaultExpressionSyntax DefaultExpression( IType type )
+        => SyntaxFactory.DefaultExpression( this.Type( type ) )
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
+
+    public DefaultExpressionSyntax DefaultExpression( IFullRef<IType> type )
         => SyntaxFactory.DefaultExpression( this.Type( type ) )
             .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
@@ -412,6 +417,32 @@ internal sealed partial class ContextualSyntaxGenerator
         }
     }
 
+    public ExpressionSyntax TypedConstant( in TypedConstantRef typedConstant, RefFactory refFactory )
+    {
+        var type = typedConstant.Type.ToFullRef( refFactory );
+
+        if ( typedConstant.RawValue == null )
+        {
+            return this.DefaultExpression( type );
+        }
+        else if ( type.Definition is INamedType { TypeKind: TypeKind.Enum } enumType )
+        {
+            return this.EnumValueExpression( enumType, typedConstant.RawValue! );
+        }
+        else if ( typedConstant.RawValue is Array array )
+        {
+            var elementType = type.AssertCast<IArrayType>().ElementType;
+
+            return this.ArrayCreationExpression(
+                this.Type( elementType ),
+                array.AsEnumerable<TypedConstantRef>().Select( item => this.TypedConstant( item, refFactory ) ) );
+        }
+        else
+        {
+            return LiteralExpression( typedConstant.RawValue! );
+        }
+    }
+
     // ReSharper disable once MemberCanBeMadeStatic.Global
 
 #pragma warning disable CA1822
@@ -458,11 +489,11 @@ internal sealed partial class ContextualSyntaxGenerator
         return interpolatedString.WithContents( List( contents ) );
     }
 
-    public TypeSyntax Type( IRef<IType> type, CompilationModel compilation )
+    public TypeSyntax Type( IFullRef<IType> type )
         => type switch
         {
             ISymbolRef symbolRef => this.Type( (ITypeSymbol) symbolRef.Symbol ),
-            _ => this.Type( type.GetTarget( compilation ) )
+            _ => this.Type( type.ConstructedDeclaration )
         };
 
     public TypeSyntax Type( IType type, bool bypassSymbols = false )

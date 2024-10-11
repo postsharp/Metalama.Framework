@@ -26,9 +26,8 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         AspectLayerInstance aspectLayerInstance,
         IFullRef<IIndexer> overriddenDeclaration,
         BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
-        IObjectReader tags )
-        : base( aspectLayerInstance, overriddenDeclaration, tags )
+        BoundTemplateMethod? setTemplate )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
         this.GetTemplate = getTemplate;
         this.SetTemplate = setTemplate;
@@ -112,7 +111,6 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
                 this.InitialCompilation,
                 context.DiagnosticSink,
                 accessorTemplate.TemplateMember.AsMemberOrNamedType(),
-                this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,

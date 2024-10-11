@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -29,7 +28,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
         AspectLayerInstance aspectLayerInstance,
         IFullRef<IProperty> overriddenDeclaration,
         IFullRef<IProperty> targetProperty )
-        : base( aspectLayerInstance, overriddenDeclaration, ObjectReader.Empty )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
         this._targetProperty = targetProperty;
         this._overriddenProperty = overriddenDeclaration;

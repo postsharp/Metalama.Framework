@@ -38,7 +38,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         Action<IPropertyBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName, propertyTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
+        : base( parameters, explicitName, propertyTemplate, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {
         this._explicitType = explicitType;
         this._getTemplate = getTemplate;
@@ -66,15 +66,12 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             this._isProgrammaticAutoProperty || templatePropertyDeclaration is { IsAutoPropertyOrField: true },
             templatePropertyDeclaration is { Writeability: Writeability.InitOnly },
             false,
-            templatePropertyDeclaration is { Writeability: Writeability.ConstructorOnly, IsAutoPropertyOrField: true },
-            this.Tags );
+            templatePropertyDeclaration is { Writeability: Writeability.ConstructorOnly, IsAutoPropertyOrField: true } );
 
         if ( this._explicitType != null )
         {
             builder.Type = this._explicitType;
         }
-
-        builder.InitializerTemplate = this.Template?.GetInitializerTemplate();
 
         return builder;
     }
@@ -227,7 +224,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             if ( isAutoProperty )
             {
                 // Introduced auto property.
-                context.AddTransformation( builder.ToTransformation() );
+                context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
                 OverrideHelper.AddTransformationsForStructField( targetDeclaration, this.AspectLayerInstance, context.AddTransformation );
             }
@@ -238,10 +235,9 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     this.AspectLayerInstance,
                     builder.ToRef(),
                     this._getTemplate?.ForIntroduction( builder.GetMethod ),
-                    this._setTemplate?.ForIntroduction( builder.SetMethod ),
-                    this.Tags );
+                    this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-                context.AddTransformation( builder.ToTransformation() );
+                context.AddTransformation( builder.CreateTransformation( this.Template ) );
                 context.AddTransformation( overriddenProperty );
             }
 
@@ -316,10 +312,9 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             this.AspectLayerInstance,
                             builder.ToRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
-                            this._setTemplate?.ForIntroduction( builder.SetMethod ),
-                            this.Tags );
+                            this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( builder.CreateTransformation( this.Template ) );
                         context.AddTransformation( overriddenProperty );
 
                         return this.CreateSuccessResult( AdviceOutcome.New, builder );
@@ -332,8 +327,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             this.AspectLayerInstance,
                             existingProperty.ToFullRef(),
                             this._getTemplate?.ForIntroduction( existingProperty.GetMethod ),
-                            this._setTemplate?.ForIntroduction( existingProperty.SetMethod ),
-                            this.Tags );
+                            this._setTemplate?.ForIntroduction( existingProperty.SetMethod ) );
 
                         context.AddTransformation( overriddenMethod );
 
@@ -355,7 +349,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                         builder.OverriddenProperty = existingProperty;
                         builder.Freeze();
 
-                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
                         OverrideHelper.OverrideProperty(
                             serviceProvider,
@@ -363,7 +357,6 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                             builder,
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
                             this._setTemplate?.ForIntroduction( builder.SetMethod ),
-                            this.Tags,
                             context.AddTransformation );
 
                         return this.CreateSuccessResult( AdviceOutcome.Override, builder );

@@ -69,8 +69,7 @@ internal sealed partial class LinkerInjectionStep
                  && memberTransformations.Parameters.Length > 0 )
             {
                 parameters =
-                    parameters.AddParameters(
-                        memberTransformations.Parameters.SelectAsArray( p => p.ToSyntax( syntaxGenerationContext, this._finalCompilationModel ) ) );
+                    parameters.AddParameters( memberTransformations.Parameters.SelectAsArray( p => p.ToSyntax( syntaxGenerationContext ) ) );
             }
 
             parameters =

@@ -71,11 +71,10 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
         if ( declaration.IsStatic )
         {
-            this.Append( ".cctor" );
+            this.Append( "cctor" );
         }
         else
         {
-            this.Append( "." );
             this.Append( declaration.DeclaringType.Name );
         }
 
@@ -98,7 +97,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
             this.Visit( declaration.DeclaringMember );
             this.Append( "@" );
         }
-        
+
         if ( declaration.IsReturnParameter )
         {
             this.Append( "<return>" );
@@ -116,7 +115,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
             this.Visit( declaration.DeclaringType );
             this.Append( "." );
         }
-        
+
         this.Append( "this[" );
         this.VisitParameterList( declaration.Parameters );
         this.Append( "]" );

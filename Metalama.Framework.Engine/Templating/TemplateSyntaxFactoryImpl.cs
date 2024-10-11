@@ -532,7 +532,8 @@ namespace Metalama.Framework.Engine.Templating
             var templateMember = templateMemberRef.GetTemplateMember<IMethod>(
                 this.Compilation.GetCompilationModel(),
                 this._templateExpansionContext.ServiceProvider,
-                templateProvider );
+                templateProvider,
+                this._templateExpansionContext.MetaApi.Tags );
 
             return (templateClass, templateMember);
         }

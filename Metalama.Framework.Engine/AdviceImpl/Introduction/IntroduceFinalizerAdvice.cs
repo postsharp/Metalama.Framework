@@ -28,7 +28,6 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
             IntroductionScope.Instance,
             overrideStrategy,
             _ => { },
-            tags,
             explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
@@ -94,8 +93,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
             var overriddenMethod = new OverrideFinalizerTransformation(
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
-                this._template.ForIntroduction( builder ),
-                this.Tags );
+                this._template.ForIntroduction( builder ) );
 
             context.AddTransformation( builder.ToTransformation() );
             context.AddTransformation( overriddenMethod );
@@ -126,8 +124,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                         var overriddenMethod = new OverrideFinalizerTransformation(
                             this.AspectLayerInstance,
                             existingFinalizer.ToFullRef(),
-                            this._template.ForIntroduction( existingFinalizer ),
-                            this.Tags );
+                            this._template.ForIntroduction( existingFinalizer ) );
 
                         context.AddTransformation( overriddenMethod );
 
@@ -144,8 +141,7 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
                         var overriddenMethod = new OverrideFinalizerTransformation(
                             this.AspectLayerInstance,
                             builder.ToFullRef(),
-                            this._template.ForIntroduction( builder ),
-                            this.Tags );
+                            this._template.ForIntroduction( builder ) );
 
                         context.AddTransformation( builder.ToTransformation() );
                         context.AddTransformation( overriddenMethod );

@@ -23,9 +23,8 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
     public OverrideMethodTransformation(
         AspectLayerInstance aspectLayerInstance,
         IFullRef<IMethod> targetMethod,
-        BoundTemplateMethod boundTemplate,
-        IObjectReader tags )
-        : base( aspectLayerInstance, targetMethod, tags )
+        BoundTemplateMethod boundTemplate )
+        : base( aspectLayerInstance, targetMethod )
     {
         this.BoundTemplate = boundTemplate;
     }
@@ -45,7 +44,6 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
                 this.InitialCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
-                this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,

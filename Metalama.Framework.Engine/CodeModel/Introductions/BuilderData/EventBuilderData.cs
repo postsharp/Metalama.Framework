@@ -19,8 +19,6 @@ internal class EventBuilderData : MemberBuilderData
 
     public IRef<INamedType> Type { get; }
 
-    public IObjectReader InitializerTags { get; }
-
     public bool IsEventField { get; }
 
     public RefKind RefKind { get; }
@@ -35,15 +33,12 @@ internal class EventBuilderData : MemberBuilderData
 
     public IExpression? InitializerExpression { get; }
 
-    public TemplateMember<IEvent>? InitializerTemplate { get; }
-
     public EventBuilderData( EventBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
         this._ref = new IntroducedRef<IEvent>( this, containingDeclaration.RefFactory );
 
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.Type = builder.Type.ToRef();
-        this.InitializerTags = builder.InitializerTags;
         this.RefKind = builder.RefKind;
         this.AddMethod = new MethodBuilderData( builder.AddMethod, this._ref );
         this.RemoveMethod = new MethodBuilderData( builder.RemoveMethod, this._ref );
@@ -51,7 +46,6 @@ internal class EventBuilderData : MemberBuilderData
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
         this.IsEventField = builder.IsEventField;
         this.InitializerExpression = builder.InitializerExpression;
-        this.InitializerTemplate = builder.InitializerTemplate;
         this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }
 

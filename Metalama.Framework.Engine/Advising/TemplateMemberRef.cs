@@ -37,7 +37,8 @@ internal readonly struct TemplateMemberRef
     public TemplateMember<T> GetTemplateMember<T>(
         CompilationModel compilation,
         in ProjectServiceProvider serviceProvider,
-        in TemplateProvider templateProvider )
+        in TemplateProvider templateProvider,
+        IObjectReader tags )
         where T : class, IMemberOrNamedType
     {
         if ( this.IsNull )
@@ -85,6 +86,7 @@ internal readonly struct TemplateMemberRef
                 this._templateMember,
                 templateProvider,
                 templateAttribute,
+                tags,
                 this._selectedKind,
                 this._interpretedKind );
         }

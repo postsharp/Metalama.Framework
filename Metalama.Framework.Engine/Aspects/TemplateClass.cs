@@ -360,7 +360,8 @@ public abstract class TemplateClass : IDiagnosticSource
     internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice(
         in ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
-        TemplateProvider templateProvider )
+        TemplateProvider templateProvider,
+        IObjectReader tags )
     {
         var compilationModelForTemplateReflection = this._templateReflectionContext?.GetCompilationModel( compilation ) ?? compilation;
 
@@ -372,7 +373,8 @@ public abstract class TemplateClass : IDiagnosticSource
                             .AssertNotNull() ),
                     x.TemplateClassMember,
                     templateProvider,
-                    x.Attribute ) );
+                    x.Attribute,
+                    tags ) );
     }
 
     private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, Compilation SymbolCompilation, DeclarativeAdviceAttribute Attribute)>

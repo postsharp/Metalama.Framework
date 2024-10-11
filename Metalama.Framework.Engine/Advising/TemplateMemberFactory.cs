@@ -16,16 +16,25 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
             IAdviceAttribute adviceAttribute,
+            IObjectReader tags,
             TemplateKind selectedKind,
             TemplateKind interpretedKind )
             where T : class, IMemberOrNamedType
-            => new( (ISymbolRef<T>) implementation.ToRef().As<T>(), templateClassMember, templateProvider, adviceAttribute, selectedKind, interpretedKind );
+            => new(
+                (ISymbolRef<T>) implementation.ToRef().As<T>(),
+                templateClassMember,
+                templateProvider,
+                adviceAttribute,
+                tags,
+                selectedKind,
+                interpretedKind );
 
         public static TemplateMember<T> Create<T>(
             ISymbol symbol,
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
             IAdviceAttribute adviceAttribute,
+            IObjectReader tags,
             RefFactory refFactory,
             TemplateKind selectedKind,
             TemplateKind interpretedKind )
@@ -35,6 +44,7 @@ namespace Metalama.Framework.Engine.Advising
                 templateClassMember,
                 templateProvider,
                 adviceAttribute,
+                tags,
                 selectedKind,
                 interpretedKind );
 
@@ -43,9 +53,10 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
             IAdviceAttribute adviceAttribute,
+            IObjectReader tags,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
-            => new( (ISymbolRef<T>) implementation.ToRef().As<T>(), templateClassMember, templateProvider, adviceAttribute, selectedKind );
+            => new( (ISymbolRef<T>) implementation.ToRef().As<T>(), templateClassMember, templateProvider, adviceAttribute, tags, selectedKind );
 
         public static TemplateMember<T> Create<T>(
             ISymbol symbol,
@@ -53,14 +64,16 @@ namespace Metalama.Framework.Engine.Advising
             TemplateProvider templateProvider,
             IAdviceAttribute adviceAttribute,
             RefFactory refFactory,
+            IObjectReader tags,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
-            => new( refFactory.FromSymbol<T>( symbol ), templateClassMember, templateProvider, adviceAttribute, selectedKind );
+            => new( refFactory.FromSymbol<T>( symbol ), templateClassMember, templateProvider, adviceAttribute, tags, selectedKind );
 
         public static TemplateMember<T> Create<T>(
             T implementation,
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
+            IObjectReader tags,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
             => new(
@@ -68,6 +81,7 @@ namespace Metalama.Framework.Engine.Advising
                 templateClassMember,
                 templateProvider,
                 (ITemplateAttribute) templateClassMember.Attribute.AssertNotNull(),
+                tags,
                 selectedKind );
 
         public static TemplateMember<T> Create<T>(
@@ -75,6 +89,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassMember templateClassMember,
             TemplateProvider templateProvider,
             RefFactory refFactory,
+            IObjectReader tags,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
             => new(
@@ -82,6 +97,7 @@ namespace Metalama.Framework.Engine.Advising
                 templateClassMember,
                 templateProvider,
                 (ITemplateAttribute) templateClassMember.Attribute.AssertNotNull(),
+                tags,
                 selectedKind );
     }
 }

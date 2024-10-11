@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
@@ -32,9 +31,8 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
     public OverrideOperatorTransformation(
         AspectLayerInstance aspectLayerInstance,
         IFullRef<IMethod> targetOperator,
-        BoundTemplateMethod boundTemplate,
-        IObjectReader tags )
-        : base( aspectLayerInstance, targetOperator, tags )
+        BoundTemplateMethod boundTemplate )
+        : base( aspectLayerInstance, targetOperator )
     {
         this._targetOperator = targetOperator;
         this.BoundTemplate = boundTemplate;
@@ -53,7 +51,6 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
                 this.InitialCompilation,
                 context.DiagnosticSink,
                 this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
-                this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,

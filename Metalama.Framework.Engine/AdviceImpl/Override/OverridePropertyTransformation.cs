@@ -26,9 +26,8 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         AspectLayerInstance aspectLayerInstance,
         IFullRef<IProperty> overriddenProperty,
         BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
-        IObjectReader tags )
-        : base( aspectLayerInstance, overriddenProperty, tags )
+        BoundTemplateMethod? setTemplate )
+        : base( aspectLayerInstance, overriddenProperty )
     {
         // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
         // The caller is responsible for verifying the compatibility of the template with the target.
@@ -119,7 +118,6 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
                 this.InitialCompilation,
                 context.DiagnosticSink,
                 accessorTemplate.TemplateMember.AsMemberOrNamedType(),
-                this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,

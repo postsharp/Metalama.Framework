@@ -41,6 +41,8 @@ internal abstract class TemplateMember
 
     public Accessibility SetAccessorAccessibility { get; }
 
+    public IObjectReader Tags { get; }
+
     /// <summary>
     /// Gets a value indicating whether the method is a <c>yield</c>-based iterator method. If the template is a property, the value applies to the getter.
     /// </summary>
@@ -110,6 +112,7 @@ internal abstract class TemplateMember
         this.SetAccessorAccessibility = prototype.SetAccessorAccessibility;
         this.TemplateClassMember = prototype.TemplateClassMember;
         this.TemplateProvider = prototype.TemplateProvider;
+        this.Tags = prototype.Tags;
     }
 
     protected TemplateMember(
@@ -117,11 +120,13 @@ internal abstract class TemplateMember
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
+        IObjectReader tags,
         TemplateKind selectedTemplateKind = TemplateKind.Default ) : this(
         implementation,
         templateClassMember,
         templateProvider,
         adviceAttribute,
+        tags,
         selectedTemplateKind,
         selectedTemplateKind ) { }
 
@@ -130,6 +135,7 @@ internal abstract class TemplateMember
         TemplateClassMember templateClassMember,
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
+        IObjectReader tags,
         TemplateKind selectedTemplateKind,
         TemplateKind interpretedTemplateKind )
     {
@@ -138,6 +144,7 @@ internal abstract class TemplateMember
         this.TemplateClassMember = templateClassMember;
         this.TemplateProvider = templateProvider;
         this.AdviceAttribute = adviceAttribute.AssertNotNull();
+        this.Tags = tags;
 
         if ( symbol is IMethodSymbol { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
              && templateClassMember.Parameters.Length != 1 )

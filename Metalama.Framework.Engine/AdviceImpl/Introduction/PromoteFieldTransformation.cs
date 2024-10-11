@@ -24,8 +24,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
     public static PromoteFieldTransformation Create(
         ProjectServiceProvider serviceProvider,
         IField replacedField,
-        AspectLayerInstance aspectLayerInstance,
-        IObjectReader? initializerTags = null )
+        AspectLayerInstance aspectLayerInstance )
     {
         var replacedFieldImpl = (IFieldImpl) replacedField;
 
@@ -38,8 +37,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
             true,
             replacedField is { IsStatic: false, Writeability: Writeability.ConstructorOnly },
             false,
-            replacedField.Writeability == Writeability.ConstructorOnly,
-            initializerTags ?? ObjectReader.Empty )
+            replacedField.Writeability == Writeability.ConstructorOnly )
         {
             Type = replacedField.Type,
             Accessibility = replacedField.Accessibility,
@@ -92,7 +90,8 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 
     private PromoteFieldTransformation( AspectLayerInstance aspectLayerInstance, IField replacedField, PropertyBuilder overridingProperty ) : base(
         aspectLayerInstance,
-        overridingProperty.Immutable )
+        overridingProperty.Immutable,
+        null )
     {
         this.OverridingProperty = overridingProperty;
         this._replacedField = replacedField.ToFullRef();

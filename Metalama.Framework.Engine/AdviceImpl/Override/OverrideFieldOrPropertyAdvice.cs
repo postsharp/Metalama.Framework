@@ -17,7 +17,7 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
         IObjectReader tags )
-        : base( parameters, tags )
+        : base( parameters )
     {
         this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
         this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
@@ -37,7 +37,6 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
             targetDeclaration,
             this._getTemplate,
             this._setTemplate,
-            this.Tags,
             context.AddTransformation );
 
         return this.CreateSuccessResult( promotedField );

@@ -32,7 +32,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         Action<IIndexerBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
+        : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {
         this._indices = indices;
         this._getTemplate = getTemplate;
@@ -196,10 +196,9 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
                 this._getTemplate?.ForIntroduction( builder.GetMethod ),
-                this._setTemplate?.ForIntroduction( builder.SetMethod ),
-                this.Tags );
+                this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation() );
             context.AddTransformation( overrideIndexerTransformation );
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );
@@ -263,10 +262,9 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                             this.AspectLayerInstance,
                             builder.ToFullRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
-                            this._setTemplate?.ForIntroduction( builder.SetMethod ),
-                            this.Tags );
+                            this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( builder.CreateTransformation() );
                         context.AddTransformation( overrideIndexerTransformation );
 
                         return this.CreateSuccessResult( AdviceOutcome.New, builder );
@@ -279,8 +277,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                             this.AspectLayerInstance,
                             existingIndexer.ToFullRef(),
                             this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
-                            this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
-                            this.Tags );
+                            this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ) );
 
                         context.AddTransformation( overrideIndexerTransformation );
 
@@ -307,10 +304,9 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                             this.AspectLayerInstance,
                             builder.ToFullRef(),
                             this._getTemplate?.ForIntroduction( builder.GetMethod ),
-                            this._setTemplate?.ForIntroduction( builder.SetMethod ),
-                            this.Tags );
+                            this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-                        context.AddTransformation( builder.ToTransformation() );
+                        context.AddTransformation( builder.CreateTransformation() );
                         context.AddTransformation( overriddenIndexer );
 
                         return this.CreateSuccessResult( AdviceOutcome.Override, builder );

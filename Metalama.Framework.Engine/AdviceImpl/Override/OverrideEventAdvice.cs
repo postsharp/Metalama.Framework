@@ -18,7 +18,7 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
         BoundTemplateMethod? addTemplate,
         BoundTemplateMethod? removeTemplate,
         IObjectReader tags )
-        : base( parameters, tags )
+        : base( parameters )
     {
         Invariant.Assert( addTemplate != null || removeTemplate != null );
 
@@ -36,8 +36,7 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
                 this.AspectLayerInstance,
                 this.TargetDeclaration.ToFullRef(),
                 this._addTemplate,
-                this._removeTemplate,
-                this.Tags ) );
+                this._removeTemplate ) );
 
         return this.CreateSuccessResult();
     }

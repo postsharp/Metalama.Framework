@@ -51,7 +51,7 @@ internal sealed class AspectDriver : IAspectDriver
         // Introductions must have a deterministic order because of testing.
         // We can pass a null TemplateProvider here because the templates will not be executed, but only used to discover eligibility.
         var declarativeAdviceAttributes = aspectClass
-            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation, default ) )
+            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation, default, ObjectReader.Empty ) )
             .ToReadOnlyList();
 
         if ( declarativeAdviceAttributes.Count > 0 )
@@ -230,12 +230,6 @@ internal sealed class AspectDriver : IAspectDriver
                 layer,
                 explicitlyImplementedInterfaceType: null );
 
-            // Prepare declarative advice.
-            var declarativeAdvice = this._aspectClass.TemplateClasses
-                .SelectMany(
-                    c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision, TemplateProvider.FromInstance( aspectInstance.Aspect ) ) )
-                .ToReadOnlyList();
-
             // Create the AspectBuilder.
             var aspectBuilderState = new AspectBuilderState(
                 serviceProvider,
@@ -249,6 +243,16 @@ internal sealed class AspectDriver : IAspectDriver
             var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
 
             adviceFactoryState.AspectBuilderState = aspectBuilderState;
+
+            // Prepare declarative advice.
+            var declarativeAdvice = this._aspectClass.TemplateClasses
+                .SelectMany(
+                    c => c.GetDeclarativeAdvice(
+                        serviceProvider,
+                        initialCompilationRevision,
+                        TemplateProvider.FromInstance( aspectInstance.Aspect ),
+                        adviceFactoryState.AspectBuilderState.GetTagsReader( null ) ) )
+                .ToReadOnlyList();
 
             if ( !userCodeInvoker
                     .TryInvoke(

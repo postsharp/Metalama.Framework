@@ -254,7 +254,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );
 
                 var templateMethodDeclaration = compilationModel.Factory.GetMethod( templateMethod );
-                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember, templateProvider );
+                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember, templateProvider, ObjectReader.Empty );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
                     serviceProvider,
@@ -337,7 +337,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     compilation,
                     diagnostics,
                     template.TemplateMember.AsMemberOrNamedType(),
-                    serviceProvider.GetRequiredService<ObjectReaderFactory>().GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,
                     null!,

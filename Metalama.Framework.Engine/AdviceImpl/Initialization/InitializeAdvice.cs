@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
@@ -51,7 +52,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
 
                 staticConstructorBuilder.Freeze();
                 staticConstructor = staticConstructorBuilder;
-                context.AddTransformation( staticConstructorBuilder.ToTransformation() );
+                context.AddTransformation( staticConstructorBuilder.CreateTransformation() );
             }
         }
         else
@@ -89,7 +90,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
                     };
 
                 builder.Freeze();
-                context.AddTransformation( builder.ToTransformation() );
+                context.AddTransformation( builder.CreateTransformation() );
                 targetCtor = builder;
             }
             else

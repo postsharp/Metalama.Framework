@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
@@ -83,12 +84,12 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
                         {
                             ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
                         }
-                        .ToTransformation() );
+                        .CreateTransformation() );
             }
 
             var attributeBuilder = new AttributeBuilder( this.AspectLayerInstance, targetDeclaration, this._attribute );
             attributeBuilder.Freeze();
-            contextCopy.AddTransformation( attributeBuilder.ToTransformation() );
+            contextCopy.AddTransformation( attributeBuilder.CreateTransformation() );
 
             return new AddAttributeAdviceResult( outcome, attributeBuilder.ToRef() );
         }

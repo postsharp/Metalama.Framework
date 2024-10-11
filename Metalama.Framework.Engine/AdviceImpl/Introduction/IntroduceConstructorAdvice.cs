@@ -32,7 +32,6 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             IntroductionScope.Instance,
             overrideStrategy,
             buildAction,
-            tags,
             explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
@@ -105,10 +104,9 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             var overriddenConstructor = new OverrideConstructorTransformation(
                 this.AspectLayerInstance,
                 builder.ToFullRef(),
-                this._template.ForIntroduction( builder ),
-                this.Tags );
+                this._template.ForIntroduction( builder ) );
 
-            context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation() );
             context.AddTransformation( overriddenConstructor );
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );
@@ -135,8 +133,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
                     var overriddenMethod = new OverrideConstructorTransformation(
                         this.AspectLayerInstance,
                         existingConstructor.ToFullRef(),
-                        this._template.ForIntroduction( existingConstructor ),
-                        this.Tags );
+                        this._template.ForIntroduction( existingConstructor ) );
 
                     context.AddTransformation( overriddenMethod );
 

@@ -29,8 +29,6 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     private readonly List<IAttributeData> _fieldAttributes;
     private INamedType _type;
 
-    public IObjectReader InitializerTags { get; }
-
     public bool IsEventField { get; }
 
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
@@ -39,11 +37,9 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         AspectLayerInstance aspectLayerInstance,
         INamedType targetType,
         string name,
-        bool isEventField,
-        IObjectReader initializerTags )
+        bool isEventField )
         : base( targetType, name, aspectLayerInstance )
     {
-        this.InitializerTags = initializerTags;
         this.IsEventField = isEventField;
         this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         this._fieldAttributes = [];
@@ -117,7 +113,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public IExpression? InitializerExpression { get; set; }
 
-    public TemplateMember<IEvent>? InitializerTemplate { get; set; }
+    // public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
     public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
@@ -142,11 +138,6 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
-
-    public IInjectMemberTransformation ToTransformation()
-    {
-        return new IntroduceEventTransformation( this.AspectLayerInstance, this.Immutable );
-    }
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

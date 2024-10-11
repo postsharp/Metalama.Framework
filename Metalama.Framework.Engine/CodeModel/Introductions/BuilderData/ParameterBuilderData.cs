@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 
@@ -12,13 +13,13 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     public string Name { get; }
 
-    public IRef<IType> Type { get; }
+    public IFullRef<IType> Type { get; }
 
     public RefKind RefKind { get; }
 
     public int Index { get; }
 
-    public TypedConstant? DefaultValue { get; }
+    public TypedConstantRef? DefaultValue { get; }
 
     public bool IsParams { get; }
 
@@ -27,11 +28,11 @@ internal class ParameterBuilderData : DeclarationBuilderData
         this._ref = new IntroducedRef<IParameter>( this, containingDeclaration.RefFactory );
 
         this.Name = !builder.IsReturnParameter ? builder.Name : "<return>";
-        
-        this.Type = builder.Type.ToRef();
+
+        this.Type = builder.Type.ToFullRef();
         this.RefKind = builder.RefKind;
         this.Index = builder.Index;
-        this.DefaultValue = builder.DefaultValue;
+        this.DefaultValue = builder.DefaultValue.ToRef();
         this.IsParams = builder.IsParams;
         this.Attributes = builder.Attributes.ToImmutable( this._ref );
     }

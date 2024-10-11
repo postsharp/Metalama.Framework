@@ -26,7 +26,7 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
     public IFullRef<IMethod> OverriddenMethod { get; }
 
     public RedirectMethodTransformation( Advice advice, IFullRef<IMethod> overriddenDeclaration, IFullRef<IMethod> targetMethod )
-        : base( advice.AspectLayerInstance, overriddenDeclaration, ObjectReader.Empty )
+        : base( advice.AspectLayerInstance, overriddenDeclaration )
     {
         this._targetMethod = targetMethod;
         this.OverriddenMethod = overriddenDeclaration;

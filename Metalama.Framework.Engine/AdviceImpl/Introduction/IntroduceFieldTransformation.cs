@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
@@ -14,9 +16,17 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilderData>
 {
-    public IntroduceFieldTransformation( AspectLayerInstance aspectLayerInstance, FieldBuilderData introducedDeclaration ) : base(
+    private readonly TemplateMember<IField>? _template;
+
+    public IntroduceFieldTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        FieldBuilderData introducedDeclaration,
+        TemplateMember<IField>? template ) : base(
         aspectLayerInstance,
-        introducedDeclaration ) { }
+        introducedDeclaration )
+    {
+        this._template = template;
+    }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
@@ -30,8 +40,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
             context,
             fieldBuilder.Type,
             fieldBuilder.InitializerExpression,
-            this.BuilderData.InitializerTemplate,
-            this.BuilderData.InitializerTags,
+            this._template?.GetInitializerTemplate(),
             out var initializerExpression,
             out var initializerMethod );
 

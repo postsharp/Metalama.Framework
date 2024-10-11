@@ -49,7 +49,6 @@ internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTree
                 this.InitialCompilation,
                 context.DiagnosticSink,
                 this._boundTemplate.TemplateMember.AsMemberOrNamedType(),
-                this.Tags,
                 this.AspectLayerId,
                 context.SyntaxGenerationContext,
                 this.AspectInstance,

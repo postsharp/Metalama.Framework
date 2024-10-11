@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
@@ -23,22 +22,21 @@ internal static class OverrideHelper
         IFieldOrPropertyOrIndexer targetDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
-        IObjectReader tags,
         Action<ITransformation> addTransformation )
     {
         switch ( targetDeclaration )
         {
             case IField { OverridingProperty: { } overridingProperty }:
-                return OverrideProperty( serviceProvider, aspectLayerInstance, overridingProperty, getTemplate, setTemplate, tags, addTransformation );
+                return OverrideProperty( serviceProvider, aspectLayerInstance, overridingProperty, getTemplate, setTemplate, addTransformation );
 
             case IField field:
                 {
-                    var transformation = PromoteFieldTransformation.Create( serviceProvider, field, aspectLayerInstance, tags );
+                    var transformation = PromoteFieldTransformation.Create( serviceProvider, field, aspectLayerInstance );
 
                     addTransformation( transformation );
 
                     addTransformation(
-                        new OverridePropertyTransformation( aspectLayerInstance, transformation.OverridingProperty.ToRef(), getTemplate, setTemplate, tags ) );
+                        new OverridePropertyTransformation( aspectLayerInstance, transformation.OverridingProperty.ToRef(), getTemplate, setTemplate ) );
 
                     AddTransformationsForStructField( targetDeclaration.DeclaringType, aspectLayerInstance, addTransformation );
 
@@ -47,7 +45,7 @@ internal static class OverrideHelper
 
             case IProperty property:
                 {
-                    addTransformation( new OverridePropertyTransformation( aspectLayerInstance, property.ToFullRef(), getTemplate, setTemplate, tags ) );
+                    addTransformation( new OverridePropertyTransformation( aspectLayerInstance, property.ToFullRef(), getTemplate, setTemplate ) );
 
                     if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
                     {
@@ -76,7 +74,7 @@ internal static class OverrideHelper
 
                 constructorBuilder.Freeze();
 
-                addTransformation( constructorBuilder.ToTransformation() );
+                addTransformation( constructorBuilder.CreateTransformation() );
             }
         }
     }
