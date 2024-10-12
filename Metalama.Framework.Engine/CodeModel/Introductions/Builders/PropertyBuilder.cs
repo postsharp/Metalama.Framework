@@ -20,7 +20,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPropertyImpl
+internal sealed class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPropertyImpl
 {
     private readonly List<IAttributeData> _fieldAttributes;
     private IExpression? _initializerExpression;
@@ -58,7 +58,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public IProperty Definition => this;
 
-    public IField? OriginalField { get; set; }
+    public IField? OriginalField { get; init; }
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
@@ -139,7 +139,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     [Memo]
     public PropertyBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
 
-    public bool? IsDesignTimeObservableOverride { get; set; }
+    public bool? IsDesignTimeObservableOverride { get; init; }
 
     public override bool IsDesignTimeObservable => this.IsDesignTimeObservableOverride ?? base.IsDesignTimeObservable;
 
