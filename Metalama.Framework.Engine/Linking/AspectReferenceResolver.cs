@@ -195,8 +195,10 @@ internal sealed class AspectReferenceResolver
 
             if ( targetIntroductionInjectedMember == null
                  || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                     && !replacedMember.HasSymbol()) )
+                     && replacedMember.HasSymbol()) )
             {
+                // Historical note: the incorrect "!" symbol removed from the above line cost me at least 8 hours of debugging.
+                
                 // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
                 var declaredInCurrentType = this._comparer.Equals( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType );
 

@@ -28,7 +28,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Simple
         [Test]
         public int Field;
 
-//        [Test]
-//        public static int StaticField;
+        [Test]
+        public static int StaticField;
     }
 }
