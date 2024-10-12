@@ -26,15 +26,13 @@ internal sealed class Method : MethodBase, IMethodImpl
 {
     public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
     {
-        if ( symbol.MethodKind is RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor )
-        {
-            throw new ArgumentException( "Cannot use the Method class with constructors.", nameof(symbol) );
-        }
+        Invariant.Assert(
+            symbol.MethodKind is not (RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor ),
+            "Cannot use the Method class for constructors or accessors." );
 
-        if ( symbol.PartialDefinitionPart != null )
-        {
-            throw new ArgumentException( "Cannot use partial implementation to instantiate the Method class.", nameof(symbol) );
-        }
+        Invariant.Assert(
+            symbol.PartialDefinitionPart == null,
+            "Cannot use partial implementation to instantiate the Method class." );
     }
 
     [Memo]

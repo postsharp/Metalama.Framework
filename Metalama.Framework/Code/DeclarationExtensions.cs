@@ -23,11 +23,14 @@ namespace Metalama.Framework.Code
         /// </summary>
         public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
         {
-            var comparer = declaration.Compilation.Comparers.Default;
-
-            if ( comparer.Equals( declaration.GetDefinition(), containingDeclaration.GetDefinition() ) )
+            if ( declaration.GetDefinition().Equals( containingDeclaration.GetDefinition() ) )
             {
                 return true;
+            }
+
+            if ( !containingDeclaration.DeclarationKind.CanContain( declaration.DeclarationKind ) )
+            {
+                return false;
             }
 
             if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
@@ -37,6 +40,53 @@ namespace Metalama.Framework.Code
 
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
         }
+
+        private static bool CanContain( this DeclarationKind containingDeclarationKind, DeclarationKind containedDeclarationKind )
+        {
+            switch ( containingDeclarationKind )
+            {
+                case DeclarationKind.None:
+                case DeclarationKind.Attribute:
+                case DeclarationKind.AssemblyReference:
+                    return false;
+
+                case DeclarationKind.Compilation:
+                    return true;
+
+                case DeclarationKind.Namespace:
+                    return containedDeclarationKind != DeclarationKind.Compilation;
+
+                case DeclarationKind.NamedType:
+                    return containedDeclarationKind is not (DeclarationKind.Compilation or DeclarationKind.Namespace);
+
+                case DeclarationKind.Parameter:
+                case DeclarationKind.TypeParameter:
+                case DeclarationKind.Field:
+                    return containedDeclarationKind == DeclarationKind.Attribute;
+
+                case DeclarationKind.Operator:
+                case DeclarationKind.Constructor:
+                case DeclarationKind.Finalizer:
+                    return containedDeclarationKind is DeclarationKind.Parameter or DeclarationKind.Attribute;
+
+                case DeclarationKind.Method:
+                    return containedDeclarationKind is DeclarationKind.Parameter or DeclarationKind.Attribute or DeclarationKind.TypeParameter;
+
+                case DeclarationKind.Property:
+                case DeclarationKind.Event:
+                case DeclarationKind.Indexer:
+                    return containedDeclarationKind is DeclarationKind.Parameter or DeclarationKind.Attribute or DeclarationKind.TypeParameter
+                        or DeclarationKind.Method;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof(containingDeclarationKind), $"Unexpected value: '{containingDeclarationKind}'." );
+            }
+        }
+
+        public static bool IsMemberKind( this DeclarationKind declarationKind )
+            => declarationKind is DeclarationKind.Event or DeclarationKind.Field or DeclarationKind.Finalizer or DeclarationKind.Property
+                or DeclarationKind.Indexer
+                or DeclarationKind.Constructor or DeclarationKind.Operator or DeclarationKind.Method;
 
         /// <summary>
         /// Gets all containing ancestors, i.e. <c>declaration.ContainingDeclaration</c>, <c>declaration.ContainingDeclaration.ContainingDeclaration</c>,

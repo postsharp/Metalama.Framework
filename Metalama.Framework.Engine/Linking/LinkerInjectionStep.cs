@@ -627,6 +627,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             case IPropertyOrIndexer propertyOrIndexer:
                 {
                     var insertedStatements = GetInsertedStatements();
+                    
+                    // Note that we are doing cross-compilation comparisons here below.
 
                     if ( propertyOrIndexer.GetMethod != null )
                     {
@@ -637,7 +639,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                     s =>
                                         s.ContextDeclaration.IsContainedIn( propertyOrIndexer.GetMethod )
                                         || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter
-                                                                                  && ReferenceEquals( parameter.ContainingDeclaration, indexer )) )
+                                                                                  && parameter.ContainingDeclaration!.Equals( indexer )) )
                                 .ToReadOnlyList() );
                     }
 
@@ -650,7 +652,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                     s =>
                                         s.ContextDeclaration.IsContainedIn( propertyOrIndexer.SetMethod )
                                         || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter
-                                                                                  && ReferenceEquals( parameter.ContainingDeclaration, indexer )) )
+                                                                                  && parameter.ContainingDeclaration!.Equals( indexer )) )
                                 .ToReadOnlyList() );
                     }
 
