@@ -120,8 +120,8 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
                 builder.ToFullRef(),
                 this._template.ForIntroduction( builder ) );
 
-            context.AddTransformation( overriddenOperator );
             context.AddTransformation( builder.ToTransformation() );
+            context.AddTransformation( overriddenOperator );
 
             return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
