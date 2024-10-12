@@ -87,6 +87,13 @@ namespace Metalama.Framework.Engine.CodeModel
         // to be tolerance to non-identical but equal instances.
         public static bool IsDefinitionSafe( this ISymbol symbol ) => symbol.Equals( symbol.OriginalDefinition );
 
+        public static string ToDebugString( this ISymbol symbol )
+            => symbol switch
+            {
+                IParameterSymbol parameter => parameter.ContainingSymbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ) + "/" + parameter.Name,
+                _ => symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )
+            };
+
         private sealed class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
         {
             public static ExpressionTypeVisitor Instance { get; } = new();

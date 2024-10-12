@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         {
             this.OnUsingDeclaration();
 
-            return this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+            return this.Symbol.ToDebugString();
         }
     }
 }

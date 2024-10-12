@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
-        public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+        public override string ToString() => this.Symbol.ToDebugString();
 
         public abstract IType Accept( TypeRewriter visitor );
 

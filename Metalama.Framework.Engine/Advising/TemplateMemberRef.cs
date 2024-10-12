@@ -76,7 +76,7 @@ internal readonly struct TemplateMemberRef
                     ThrowingDiagnosticAdder.Instance,
                     out var attribute ) )
         {
-            throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
+            throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDebugString()}'" );
         }
 
         if ( attribute is ITemplateAttribute templateAttribute )

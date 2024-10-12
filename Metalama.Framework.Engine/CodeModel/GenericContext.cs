@@ -212,8 +212,8 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
         return (this.NamedTypeSymbol, this.MethodSymbol) switch
         {
             (null, null) => "GenericContext (Empty)",
-            (_, not null) => $"GenericContext Method={{{this.MethodSymbol.ToDisplayString()}}}",
-            _ => $"GenericContext Type={{{this.NamedTypeSymbol.ToDisplayString()}}}"
+            (_, not null) => $"GenericContext Method={{{this.MethodSymbol.ToDebugString()}}}",
+            _ => $"GenericContext Type={{{this.NamedTypeSymbol.ToDebugString()}}}"
         };
     }
 }

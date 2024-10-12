@@ -22,8 +22,7 @@ public class TestClass
   [InvokeBefore]
   [InvokeAfter]
   public TestClass()
-  {
-    // --- Before ---
+  { // --- Before ---
     // Base
     this.Field = 42;
     this.IntroducedField = 42;

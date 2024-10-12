@@ -99,8 +99,8 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
     public override string ToString()
         => this.TargetKind switch
         {
-            RefTargetKind.Default => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ),
-            _ => $"{this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}:{this.TargetKind}"
+            RefTargetKind.Default => this.Symbol.ToDebugString(),
+            _ => $"{this.Symbol.ToDebugString()}:{this.TargetKind}"
         };
 
     protected override IFullRef<TOut> CastAsFullRef<TOut>() => (IFullRef<TOut>) (object) this;

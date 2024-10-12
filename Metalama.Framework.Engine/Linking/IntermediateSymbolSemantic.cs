@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
@@ -39,7 +40,7 @@ internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSym
         => new( symbol, this.Kind );
 
     // Coverage: ignore (useful for debugging)
-    public override string ToString() => $"{{{this.Kind}, {this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}}}";
+    public override string ToString() => $"{{{this.Kind}, {this.Symbol.ToDebugString()}}}";
 }
 
 internal readonly struct IntermediateSymbolSemantic<TSymbol> : IEquatable<IntermediateSymbolSemantic<TSymbol>>
@@ -68,5 +69,5 @@ internal readonly struct IntermediateSymbolSemantic<TSymbol> : IEquatable<Interm
     public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value ) => new( value.Symbol, value.Kind );
 
     // Coverage: ignore (useful for debugging)
-    public override string ToString() => $"{{{this.Kind}, {this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}}}";
+    public override string ToString() => $"{{{this.Kind}, {this.Symbol.ToDebugString()}}}";
 }

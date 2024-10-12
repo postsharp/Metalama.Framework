@@ -98,4 +98,6 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
+
+    public override string ToString() => $"{this.GetType().Name} ContractTarget={{{this.ContractTarget}}}";
 }
