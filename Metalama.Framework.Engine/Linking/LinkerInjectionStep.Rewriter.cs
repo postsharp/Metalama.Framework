@@ -1295,7 +1295,7 @@ internal sealed partial class LinkerInjectionStep
                 if ( symbol.SetMethod != null )
                 {
                     var setter = this._compilation.RefFactory.FromSymbol<IMethod>( symbol.SetMethod );
-                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( setter );
+                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( setter, indexer );
 
                     node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
                         setter,
