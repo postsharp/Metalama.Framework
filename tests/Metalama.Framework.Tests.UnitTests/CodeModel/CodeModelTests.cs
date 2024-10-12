@@ -7,11 +7,13 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1519,7 +1521,7 @@ class C {}
         }
 
         [Fact]
-        public void IsPartialMethod()
+        public void PartialMethods()
         {
             using var testContext = this.CreateTestContext();
 
@@ -1549,6 +1551,19 @@ public partial class C
             Assert.True( partialVoidNoImpl.IsPartial );
             Assert.True( partialVoidImpl.IsPartial );
             Assert.True( partialNonVoid.IsPartial );
+
+            var partialDefinition = (IMethodSymbol) compilation.Types.Single().GetSymbol().AssertSymbolNotNull().GetMembers( "PartialVoid_Impl" ).Single();
+            var partialImplementation = partialDefinition.PartialImplementationPart;
+
+            Assert.NotSame( partialDefinition, partialImplementation );
+
+            // Ensure references of both parts are the same.
+            var partialImplementationRef = partialDefinition.ToRef( compilation.RefFactory );
+            var partialDefinitionRef = partialImplementation.ToRef( compilation.RefFactory );
+            Assert.Same( partialImplementationRef, partialDefinitionRef );
+
+            // Ensure declarations of both parts are the same.
+            Assert.Same( compilation.Factory.GetMethod( partialDefinition ), compilation.Factory.GetMethod( partialImplementation ) );
         }
 
         [Fact]

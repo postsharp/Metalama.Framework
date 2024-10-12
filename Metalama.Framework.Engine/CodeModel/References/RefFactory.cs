@@ -55,9 +55,17 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public ISymbolRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (ISymbolRef<IDeclaration>) this.FromAnySymbol( symbol );
 
+        // Must be called _before_ cache lookup to make sure we have unique ref instances.
+        private static ISymbol GetCanonicalSymbol( ISymbol symbol )
+            => symbol.Kind switch
+            {
+                SymbolKind.Method => ((IMethodSymbol) symbol).PartialImplementationPart ?? symbol,
+                _ => symbol
+            };
+
         public ISymbolRef<ICompilationElement> FromAnySymbol( ISymbol symbol )
             => this._symbolCache.GetOrAdd(
-                new SymbolCacheKey( symbol, RefTargetKind.Default ),
+                new SymbolCacheKey( GetCanonicalSymbol( symbol ), RefTargetKind.Default ),
                 static ( key, me ) => key.Symbol.GetDeclarationKind( me.CompilationContext ) switch
                 {
                     DeclarationKind.Compilation => new SymbolRef<ICompilation>( key.Symbol, me ),
@@ -134,7 +142,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             where T : class, ICompilationElement
             => (SymbolRef<T>)
                 this._symbolCache.GetOrAdd(
-                    new SymbolCacheKey( symbol, targetKind ),
+                    new SymbolCacheKey( GetCanonicalSymbol( symbol ), targetKind ),
                     static ( key, me ) => new SymbolRef<T>( key.Symbol, me, key.TargetKind ),
                     this );
 
