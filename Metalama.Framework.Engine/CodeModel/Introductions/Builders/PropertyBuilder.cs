@@ -7,12 +7,14 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
@@ -140,4 +142,6 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     public bool? IsDesignTimeObservableOverride { get; set; }
 
     public override bool IsDesignTimeObservable => this.IsDesignTimeObservableOverride ?? base.IsDesignTimeObservable;
+
+    public override SyntaxTree? PrimarySyntaxTree => this.OriginalField?.GetPrimarySyntaxTree() ?? base.PrimarySyntaxTree;
 }

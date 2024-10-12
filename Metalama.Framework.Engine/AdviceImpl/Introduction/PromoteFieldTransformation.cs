@@ -99,6 +99,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
         this.OverridingProperty = overridingProperty;
         this._replacedField = replacedField.ToFullRef();
     }
+    
 
     public override InsertPosition InsertPosition => this._replacedField.ToInsertPosition();
 
