@@ -23,6 +23,10 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
 
     public IExpression? InitializerExpression { get; }
 
+    // Anomaly: in case of field promotion, this can be set to the initializer template of the field,
+    // bacause InitializerExpression is not available when the field is introduced from a template.
+    public TemplateMember<IFieldOrProperty>? InitializerTemplate { get; }
+
     public bool IsAutoPropertyOrField { get; }
 
     public IRef<IProperty>? OverriddenProperty { get; }
@@ -42,6 +46,7 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
         this._ref = new IntroducedRef<IProperty>( this, containingDeclaration.RefFactory );
         this.FieldAttributes = builder.FieldAttributes.ToImmutableArray();
         this.InitializerExpression = builder.InitializerExpression;
+        this.InitializerTemplate = builder.InitializerTemplate;
         this.IsAutoPropertyOrField = builder.IsAutoPropertyOrField;
         this.OverriddenProperty = builder.OverriddenProperty?.ToRef();
         this.ExplicitInterfaceImplementations = builder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => i.ToRef() );
@@ -75,52 +80,6 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
     public override IRef<IMember>? OverriddenMember => this.OverriddenProperty;
 
     public override IReadOnlyList<IRef<IMember>> ExplicitInterfaceImplementationMembers => this.ExplicitInterfaceImplementations;
-
-    // TODO: It probably does not belong here.
-    public bool GetPropertyInitializerExpressionOrMethod(
-        IProperty property,
-        PropertyBuilderData builderData,
-        AspectLayerInstance aspectLayerInstance,
-        MemberInjectionContext context,
-        TemplateMember<IProperty>? initializerTemplate,
-        out ExpressionSyntax? initializerExpression,
-        out MethodDeclarationSyntax? initializerMethod )
-    {
-        switch ( this.OriginalField )
-        {
-            case null:
-                return AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
-                    property,
-                    aspectLayerInstance,
-                    context,
-                    property.Type,
-                    property.InitializerExpression,
-                    initializerTemplate,
-                    out initializerExpression,
-                    out initializerMethod );
-
-            case IIntroducedRef { BuilderData: FieldBuilderData fieldBuilderData }:
-                return AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
-                    property.OriginalField.AssertNotNull(),
-                    aspectLayerInstance,
-                    context,
-                    property.Type,
-                    fieldBuilderData.InitializerExpression,
-                    initializerTemplate?.As<IField>(),
-                    out initializerExpression,
-                    out initializerMethod );
-
-            case ISymbolRef:
-                // TODO: Not sure what we should do here.
-                initializerExpression = null;
-                initializerMethod = null;
-
-                return false;
-
-            default:
-                throw new AssertionFailedException();
-        }
-    }
 
     protected override InsertPosition GetInsertPosition()
     {

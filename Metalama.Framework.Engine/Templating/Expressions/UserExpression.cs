@@ -2,9 +2,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RefKind = Metalama.Framework.Code.RefKind;

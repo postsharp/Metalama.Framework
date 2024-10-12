@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -51,7 +52,11 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
             IsNew = replacedField.IsNew,
             HasNewKeyword = replacedFieldImpl.HasNewKeyword.AssertNotNull(),
             IsDesignTimeObservableOverride = false,
-            OriginalField = replacedField
+            OriginalField = replacedField,
+            InitializerExpression = replacedField.InitializerExpression,
+
+            // Hack: we pull the initializer template. A nicer strategy would be to wrap the template inside the InitializerExpression.
+            InitializerTemplate = (replacedField as IntroducedField)?.FieldBuilderData.InitializerTemplate?.As<IFieldOrProperty>()
         };
 
         propertyBuilder.GetMethod.AssertNotNull().Accessibility = replacedField.Accessibility;

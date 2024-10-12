@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -22,6 +23,9 @@ internal class FieldBuilderData : MemberBuilderData
 
     public IExpression? InitializerExpression { get; }
 
+    // Anomaly: we need the InitializerTemplate here because we need it when overriding the property.
+    public TemplateMember<IField>? InitializerTemplate { get; }
+
     public TypedConstantRef? ConstantValue { get; }
 
     public MethodBuilderData GetMethod { get; }
@@ -39,6 +43,7 @@ internal class FieldBuilderData : MemberBuilderData
         this.RefKind = builder.RefKind;
         this.IsRequired = builder.IsRequired;
         this.InitializerExpression = builder.InitializerExpression;
+        this.InitializerTemplate = builder.InitializerTemplate;
         this.ConstantValue = builder.ConstantValue.ToRef();
         this.GetMethod = new MethodBuilderData( builder.GetMethod, this._ref );
         this.SetMethod = new MethodBuilderData( builder.SetMethod, this._ref );

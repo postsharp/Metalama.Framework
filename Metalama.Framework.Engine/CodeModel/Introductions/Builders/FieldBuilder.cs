@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
@@ -89,6 +90,9 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     public bool? IsAutoPropertyOrField => true;
 
     public IExpression? InitializerExpression { get; set; }
+
+    // Anomaly: we need the InitializerTemplate here because we need it when overriding the property.
+    public TemplateMember<IField>? InitializerTemplate { get; set; }
 
     public IFieldOrPropertyInvoker With( InvokerOptions options ) => new FieldOrPropertyInvoker( this, options );
 

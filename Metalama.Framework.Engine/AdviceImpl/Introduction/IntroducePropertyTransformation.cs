@@ -41,12 +41,14 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
         // TODO: What if non-auto property has the initializer template?
 
         // If template fails to expand, we will still generate the field, albeit without the initializer.
-        _ = this.BuilderData.GetPropertyInitializerExpressionOrMethod(
+
+        _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
             propertyBuilder,
-            this.BuilderData,
             this.AspectLayerInstance,
             context,
-            this._template?.GetInitializerTemplate(),
+            propertyBuilder.Type,
+            this.BuilderData.InitializerExpression,
+            this._template?.GetInitializerTemplate()?.As<IFieldOrProperty>() ?? this.BuilderData.InitializerTemplate,
             out var initializerExpression,
             out var initializerMethod );
 

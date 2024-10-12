@@ -198,6 +198,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         }
 
         // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
+
+        builder.InitializerTemplate = this.Template?.GetInitializerTemplate()?.As<IFieldOrProperty>();
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceProperty;

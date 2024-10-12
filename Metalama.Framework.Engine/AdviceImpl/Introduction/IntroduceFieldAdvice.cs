@@ -43,6 +43,10 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
         {
             builder.Type = templateDeclaration.AssertNotNull().Type;
             builder.Writeability = templateDeclaration.Writeability;
+
+            // The InitializerExpression of template cannot be copied because it's an initializer template.
+            // However, we need to store the template because we will need it when the field is overwritten.
+            builder.InitializerTemplate = this.Template.GetInitializerTemplate();
         }
         else
         {
