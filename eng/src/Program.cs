@@ -45,7 +45,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         // {
         //     IsTestOnly = true, TestMethod = BuildMethod.Build
         // },
-        new ManyDotNetSolutions( "Tests\\Standalone\\Licensing\\TestBuildFails" )
+        new ManyDotNetSolutions( "Tests\\Standalone" )
         {
             IsTestOnly = true
         }
