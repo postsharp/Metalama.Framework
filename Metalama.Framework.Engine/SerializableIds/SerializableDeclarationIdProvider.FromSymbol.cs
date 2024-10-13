@@ -94,6 +94,13 @@ public static partial class SerializableDeclarationIdProvider
                     case SymbolKind.TypeParameter:
                         {
                             var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
+                            
+                            if ( documentationId == null )
+                            {
+                                id = default;
+
+                                return false;
+                            }
 
                             if ( targetKind == RefTargetKind.Default )
                             {
