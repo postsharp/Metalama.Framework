@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Xunit;
 
-namespace Metalama.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.LinkerTests.Runner
 {
     internal sealed class LinkerInlineAssertionWalker : SafeSyntaxWalker
     {

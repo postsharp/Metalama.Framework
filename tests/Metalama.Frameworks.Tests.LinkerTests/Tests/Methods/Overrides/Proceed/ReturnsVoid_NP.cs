@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Proceed.ReturnsVoid_NP
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Overrides.Proceed.ReturnsVoid_NP
 {
     // <target>
     class Target

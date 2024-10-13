@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.Integration.Runners
+namespace Metalama.Framework.Tests.LinkerTests.Runner
 {
     [UsedImplicitly]
     internal class LinkerTestRunnerFactory : ITestRunnerFactory

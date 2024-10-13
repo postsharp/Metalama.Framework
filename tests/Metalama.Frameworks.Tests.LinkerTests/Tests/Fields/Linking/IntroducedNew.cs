@@ -1,8 +1,8 @@
-﻿using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+﻿using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
 #pragma warning disable CS0109
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.IntroducedNew
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Fields.Linking.IntroducedNew
 {
     class Base
     {

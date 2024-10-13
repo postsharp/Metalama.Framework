@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.SetterAssignment
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Properties.Inliners.SetterAssignment
 {
     // <target>
     class Target

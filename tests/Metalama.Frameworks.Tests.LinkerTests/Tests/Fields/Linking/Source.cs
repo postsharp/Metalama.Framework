@@ -1,6 +1,6 @@
-﻿using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+﻿using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Source
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Fields.Linking.Source
 {
     [PseudoLayerOrder("A0")]
     [PseudoLayerOrder("A2")]

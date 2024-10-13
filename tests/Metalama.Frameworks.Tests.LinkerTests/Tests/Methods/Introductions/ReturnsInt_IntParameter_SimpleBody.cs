@@ -1,4 +1,4 @@
-﻿namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Introductions.ReturnsInt_IntParameter_SimpleBody
+﻿namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Introductions.ReturnsInt_IntParameter_SimpleBody
 {
     // <target>
     class Target

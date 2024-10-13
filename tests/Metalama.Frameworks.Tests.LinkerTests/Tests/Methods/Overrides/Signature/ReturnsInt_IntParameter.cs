@@ -1,6 +1,6 @@
-﻿using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+﻿using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Signature.ReturnsInt_IntParameter
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Overrides.Signature.ReturnsInt_IntParameter
 {
     // <target>
     class Target

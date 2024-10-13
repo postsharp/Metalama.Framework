@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker
+namespace Metalama.Framework.Tests.LinkerTests.Tests
 {
     [AttributeUsage(AttributeTargets.All)]
     public class PseudoOverride : Attribute

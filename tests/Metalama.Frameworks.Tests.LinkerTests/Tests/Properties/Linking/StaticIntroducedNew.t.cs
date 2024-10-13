@@ -27,9 +27,9 @@ class Target : Base
     get
     {
       // Should invoke empty code.
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar;
+      _ = global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar;
       // Should invoke empty code.
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar;
+      _ = global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar;
       // Should invoke override 1_2.
       _ = Target.Bar_Override1_2;
       // Should invoke the final declaration.
@@ -39,9 +39,9 @@ class Target : Base
     set
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
       // Should invoke override 1_2.
       Target.Bar_Override1_2 = value;
       // Should invoke the final declaration.
@@ -53,7 +53,7 @@ class Target : Base
     get
     {
       // Should invoke empty code.
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar;
+      _ = global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar;
       // Should invoke override 1_1.
       _ = Target.Bar_Override1_1;
       // Should invoke override 1_2.
@@ -65,7 +65,7 @@ class Target : Base
     set
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
       // Should invoke override 1_1.
       Target.Bar_Override1_1 = value;
       // Should invoke override 1_2.
@@ -183,11 +183,11 @@ class Target : Base
     get
     {
       // Should invoke empty code.
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar;
+      _ = global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar;
       // Should invoke empty code.
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar;
+      _ = global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar;
       // Should invoke empty code.
-      _ = global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar;
+      _ = global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar;
       // Should invoke the final declaration.
       _ = Target.Bar;
       return 42;
@@ -195,11 +195,11 @@ class Target : Base
     set
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Properties.Linking.StaticIntroducedNew.Base.Bar = value;
       // Should invoke the final declaration.
       Target.Bar = value;
     }

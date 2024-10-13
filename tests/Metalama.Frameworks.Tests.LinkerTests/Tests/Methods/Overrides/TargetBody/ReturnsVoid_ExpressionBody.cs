@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TargetBody.ReturnsVoid_ExpressionBody
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Overrides.TargetBody.ReturnsVoid_ExpressionBody
 {
     // <target>
     class Target

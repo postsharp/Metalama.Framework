@@ -1,6 +1,6 @@
-﻿using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+﻿using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew
 {
     public class Base
     {

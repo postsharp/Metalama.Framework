@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterCastReturn_NotReturnStatement
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Properties.Inliners.GetterCastReturn_NotReturnStatement
 {
     // <target>
     class Target

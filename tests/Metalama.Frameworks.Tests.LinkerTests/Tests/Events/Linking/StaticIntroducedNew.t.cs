@@ -27,9 +27,9 @@ class Target : Base
     add
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar += value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar += value;
       // Should invoke override 1_2.
       Target.Bar_Override1_2 += value;
       // Should invoke the final declaration.
@@ -38,9 +38,9 @@ class Target : Base
     remove
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
       // Should invoke override 1_2.
       Target.Bar_Override1_2 -= value;
       // Should invoke the final declaration.
@@ -52,7 +52,7 @@ class Target : Base
     add
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar += value;
       // Should invoke override 1_1.
       Target.Bar_Override1_1 += value;
       // Should invoke override 1_2.
@@ -63,7 +63,7 @@ class Target : Base
     remove
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
       // Should invoke override 1_1.
       Target.Bar_Override1_1 -= value;
       // Should invoke override 1_2.
@@ -177,22 +177,22 @@ class Target : Base
     add
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar += value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar += value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar += value;
       // Should invoke the final declaration.
       Target.Bar += value;
     }
     remove
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroducedNew.Base.Bar -= value;
       // Should invoke the final declaration.
       Target.Bar -= value;
     }

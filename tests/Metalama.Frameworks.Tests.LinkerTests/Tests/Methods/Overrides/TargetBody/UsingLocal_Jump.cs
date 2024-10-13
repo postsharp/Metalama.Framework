@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TargetBody.UsingLocal_Jump
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Overrides.TargetBody.UsingLocal_Jump
 {
     class Disposable : IDisposable
     {

@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.LinkerTests.Runner
 {
     internal partial class LinkerTestInputBuilder
     {

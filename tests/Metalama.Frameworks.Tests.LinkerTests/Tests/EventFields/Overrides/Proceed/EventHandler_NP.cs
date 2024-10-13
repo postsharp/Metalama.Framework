@@ -2,7 +2,7 @@
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Proceed.EventHandler_NP
+namespace Metalama.Framework.Tests.LinkerTests.Tests.EventFields.Overrides.Proceed.EventHandler_NP
 {
     // <target>
     class Target

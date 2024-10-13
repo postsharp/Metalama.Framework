@@ -38,9 +38,9 @@ class Target
     add
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
       // Should invoke override 1_2.
       Target.Bar_Override1_2 += value;
       // Should invoke the final declaration.
@@ -49,9 +49,9 @@ class Target
     remove
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
       // Should invoke override 1_2.
       Target.Bar_Override1_2 -= value;
       // Should invoke the final declaration.
@@ -63,7 +63,7 @@ class Target
     add
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
       // Should invoke override 1_1.
       Target.Bar_Override1_1 += value;
       // Should invoke override 1_2.
@@ -74,7 +74,7 @@ class Target
     remove
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
       // Should invoke override 1_1.
       Target.Bar_Override1_1 -= value;
       // Should invoke override 1_2.
@@ -188,22 +188,22 @@ class Target
     add
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty += value;
       // Should invoke the final declaration.
       Target.Bar += value;
     }
     remove
     {
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
       // Should invoke empty code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticIntroduced.Target.Bar_Empty -= value;
       // Should invoke the final declaration.
       Target.Bar -= value;
     }

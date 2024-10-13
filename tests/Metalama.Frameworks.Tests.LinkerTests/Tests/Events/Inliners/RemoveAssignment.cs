@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.RemoveAssignment
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Events.Inliners.RemoveAssignment
 {
     // <target>
     public class Target

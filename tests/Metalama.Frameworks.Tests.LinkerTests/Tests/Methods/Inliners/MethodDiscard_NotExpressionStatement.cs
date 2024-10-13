@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Inliners.MethodDiscard_NotExpressionStatement
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Inliners.MethodDiscard_NotExpressionStatement
 {
     // <target>
     class Target

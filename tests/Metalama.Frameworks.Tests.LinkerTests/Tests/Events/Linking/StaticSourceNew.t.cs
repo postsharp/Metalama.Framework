@@ -38,9 +38,9 @@ class Target : Base
     add
     {
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
       // Should invoke override 1_2.
       Target.Bar_Override1_2 += value;
       // Should invoke the final declaration.
@@ -49,9 +49,9 @@ class Target : Base
     remove
     {
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
       // Should invoke override 1_2.
       Target.Bar_Override1_2 -= value;
       // Should invoke the final declaration.
@@ -63,7 +63,7 @@ class Target : Base
     add
     {
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
       // Should invoke override 1_1.
       Target.Bar_Override1_1 += value;
       // Should invoke override 1_2.
@@ -74,7 +74,7 @@ class Target : Base
     remove
     {
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
       // Should invoke override 1_1.
       Target.Bar_Override1_1 -= value;
       // Should invoke override 1_2.
@@ -188,22 +188,22 @@ class Target : Base
     add
     {
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source += value;
       // Should invoke the final declaration.
       Target.Bar += value;
     }
     remove
     {
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
       // Should invoke source code.
-      global::Metalama.Framework.Tests.Integration.Tests.Linker.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
+      global::Metalama.Framework.Tests.LinkerTests.Tests.Events.Linking.StaticSourceNew.Target.Bar_Source -= value;
       // Should invoke the final declaration.
       Target.Bar -= value;
     }

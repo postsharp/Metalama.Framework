@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.Transformations;
 
-namespace Metalama.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.LinkerTests.Runner
 {
     internal partial class LinkerTestInputBuilder
     {

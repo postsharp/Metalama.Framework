@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterLocalDeclaration_Var
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Properties.Inliners.GetterLocalDeclaration_Var
 {
     // <target>
     class Target

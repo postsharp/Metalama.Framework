@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Tests.Integration.Tests.Linker;
+using Metalama.Framework.Tests.LinkerTests.Tests;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -16,7 +16,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #pragma warning disable CA1305 // Specify IFormatProvider
 
-namespace Metalama.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.LinkerTests.Runner
 {
     internal partial class LinkerTestInputBuilder
     {

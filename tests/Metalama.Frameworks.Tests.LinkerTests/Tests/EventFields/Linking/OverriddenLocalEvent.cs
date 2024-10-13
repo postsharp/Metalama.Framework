@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Linking.OverriddenLocalEvent
+namespace Metalama.Framework.Tests.LinkerTests.Tests.EventFields.Linking.OverriddenLocalEvent
 {
     [PseudoLayerOrder( "TestAspect0" )]
     [PseudoLayerOrder( "TestAspect1" )]

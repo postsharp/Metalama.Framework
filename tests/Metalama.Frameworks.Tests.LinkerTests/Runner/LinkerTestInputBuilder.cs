@@ -25,7 +25,7 @@ using System.Linq;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
-namespace Metalama.Framework.Tests.Integration.Runners.Linker
+namespace Metalama.Framework.Tests.LinkerTests.Runner
 {
     // Aspect linker tests' source use [PseudoIntroduction] and [PseudoOverride] attributes, that cause the marked declaration to be removed
     // and transformed into a pseudo-transformation that serves as a linker input. This is mainly to avoid jumping through hoops to reproduce

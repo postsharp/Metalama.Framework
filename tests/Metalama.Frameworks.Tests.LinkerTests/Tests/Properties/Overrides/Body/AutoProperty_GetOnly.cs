@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.Body.AutoProperty_GetOnly
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Properties.Overrides.Body.AutoProperty_GetOnly
 {
     // <target>
     class Target

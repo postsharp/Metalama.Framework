@@ -1,9 +1,9 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Inlining.EventHandler_NI_I
+namespace Metalama.Framework.Tests.LinkerTests.Tests.EventFields.Overrides.Inlining.EventHandler_NI_I
 {
     // <target>
     class Target

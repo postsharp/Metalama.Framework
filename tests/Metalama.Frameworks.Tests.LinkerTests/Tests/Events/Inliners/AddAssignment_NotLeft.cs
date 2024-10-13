@@ -1,9 +1,9 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
 #pragma warning disable CS0067,CS0649
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.AddAssignment_NotLeft
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Events.Inliners.AddAssignment_NotLeft
 {
     // <target>
     public class Target

@@ -1,9 +1,9 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
 #pragma warning disable CS0219
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Inliners.MethodLocalDeclaration_NotSingleVariable
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Inliners.MethodLocalDeclaration_NotSingleVariable
 {
     // <target>
     class Target

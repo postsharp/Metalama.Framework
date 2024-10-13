@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Inliners.GetterLocalDeclaration_NotEqualsValueClause
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Properties.Inliners.GetterLocalDeclaration_NotEqualsValueClause
 {
     // <target>
     class Target

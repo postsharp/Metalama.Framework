@@ -1,10 +1,10 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
 #pragma warning disable CS0067
 #pragma warning disable CS0649
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Naming.Conflicts
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Naming.Conflicts
 {    
     // <target>
     class Target

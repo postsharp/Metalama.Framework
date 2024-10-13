@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.Source
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Linking.Source
 {
     [PseudoLayerOrder("A1")]
     [PseudoLayerOrder("A2")]

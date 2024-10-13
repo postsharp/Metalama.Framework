@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.Jump.NoJumps
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Properties.Overrides.Jump.NoJumps
 {
     // <target>
     class Target

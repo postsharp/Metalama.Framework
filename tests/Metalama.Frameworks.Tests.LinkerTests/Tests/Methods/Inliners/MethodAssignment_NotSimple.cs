@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Inliners.MethodAssignment_NotSimple
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Inliners.MethodAssignment_NotSimple
 {
     // <target>
     class Target

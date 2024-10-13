@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -17,7 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.Integration.Runners
+namespace Metalama.Framework.Tests.LinkerTests.Runner
 {
     internal sealed class LinkerTestRunner : BaseTestRunner
     {

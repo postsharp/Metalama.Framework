@@ -1,7 +1,7 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TargetBody.SwitchInt_EndFlow
+namespace Metalama.Framework.Tests.LinkerTests.Tests.Methods.Overrides.TargetBody.SwitchInt_EndFlow
 {
     // <target>
     class Target

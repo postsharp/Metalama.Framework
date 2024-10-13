@@ -15,9 +15,9 @@ class Target
   static void Bar_Override1_1()
   {
     // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    global::Metalama.Framework.Tests.LinkerTests.Tests.Methods.Linking.StaticSource.Target.Bar_Source();
     // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    global::Metalama.Framework.Tests.LinkerTests.Tests.Methods.Linking.StaticSource.Target.Bar_Source();
     // Should invoke override 1_2.
     Target.Bar_Override1_2();
     // Should invoke the final declaration.
@@ -26,7 +26,7 @@ class Target
   static void Bar_Override1_2()
   {
     // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    global::Metalama.Framework.Tests.LinkerTests.Tests.Methods.Linking.StaticSource.Target.Bar_Source();
     // Should invoke override 1_1.
     Target.Bar_Override1_1();
     // Should invoke override 1_2.
@@ -81,11 +81,11 @@ class Target
   public static void Foo_Override0()
   {
     // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    global::Metalama.Framework.Tests.LinkerTests.Tests.Methods.Linking.StaticSource.Target.Bar_Source();
     // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    global::Metalama.Framework.Tests.LinkerTests.Tests.Methods.Linking.StaticSource.Target.Bar_Source();
     // Should invoke source code.
-    global::Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Linking.StaticSource.Target.Bar_Source();
+    global::Metalama.Framework.Tests.LinkerTests.Tests.Methods.Linking.StaticSource.Target.Bar_Source();
     // Should invoke the final declaration.
     Target.Bar();
   }

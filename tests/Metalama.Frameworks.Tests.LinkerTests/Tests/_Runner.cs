@@ -3,7 +3,7 @@ using Metalama.Testing.AspectTesting;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker
+namespace Metalama.Framework.Tests.LinkerTests.Tests
 {
     public class _Runner : AspectTestClass
     {

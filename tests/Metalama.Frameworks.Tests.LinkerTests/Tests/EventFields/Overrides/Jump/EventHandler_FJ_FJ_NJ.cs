@@ -1,9 +1,9 @@
 ﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
+using static Metalama.Framework.Tests.LinkerTests.Tests.Api;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Overrides.Jump.EventHandler_FJ_FJ_NJ
+namespace Metalama.Framework.Tests.LinkerTests.Tests.EventFields.Overrides.Jump.EventHandler_FJ_FJ_NJ
 {
     // <target>
     class Target

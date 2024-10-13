@@ -1,4 +1,4 @@
-﻿namespace Metalama.Framework.Tests.Integration.Tests.Linker
+﻿namespace Metalama.Framework.Tests.LinkerTests.Tests
 {
     public static class Api
     {
