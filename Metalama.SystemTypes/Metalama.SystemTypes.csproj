@@ -34,6 +34,7 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.8.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.12.0" />
 
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.0.1" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.12.0" />
@@ -48,7 +49,7 @@
 
         <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.8.0" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.12.0" />
 
     </ItemGroup>
     

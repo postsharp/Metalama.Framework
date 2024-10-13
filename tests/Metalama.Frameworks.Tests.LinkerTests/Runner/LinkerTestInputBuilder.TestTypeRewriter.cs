@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
@@ -929,19 +930,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         this._owner.CompilationContext );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), aspectClass );
+                var aspectLayerInstance = new AspectLayerInstance( fakeAspectInstance, aspectLayer.LayerName, null! /* TODO */ );
 
-                return A.Fake<Advice>(
-                    i => i
-                        .Named( $"Advice({aspectLayer.AspectName})" )
-                        .WithArgumentsForConstructor(
-                        [
-                            new Advice.AdviceConstructorParameters(
-                                fakeAspectInstance,
-                                fakeAspectInstance.TemplateInstances.Values.Single(),
-                                A.Fake<IDeclarationImpl>( p => p.Named( $"Advice({aspectLayer.AspectName}).P1" ) ),
-                                A.Fake<ICompilation>( p => p.Named( $"Advice({aspectLayer.AspectName}).P2" ) ),
-                                aspectLayer.LayerName )
-                        ] ) );
+                return aspectLayerInstance;
+
             }
         }
     }

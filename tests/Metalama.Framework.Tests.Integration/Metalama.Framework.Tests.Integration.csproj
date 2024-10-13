@@ -65,9 +65,5 @@
             <_Parameter2>$(PostSharpEngineeringDataDirectory)</_Parameter2>
         </AssemblyAttribute>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Tests\Linker\" />
-    </ItemGroup>
-
+    
 </Project>
