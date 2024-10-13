@@ -3,6 +3,8 @@ using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.Body.ExpressionBody
 {
+#pragma warning disable CA1805
+
     // <target>
     class Target
     {

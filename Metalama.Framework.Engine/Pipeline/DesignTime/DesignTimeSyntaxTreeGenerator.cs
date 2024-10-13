@@ -299,6 +299,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             }
         }
 
+        // The following code has become redundant because introduced constructors are generated based on their final model. Consider removing.
+        
+        /*
         private static IEnumerable<MemberDeclarationSyntax> AddIntroducedConstructorParameters(
             IEnumerable<MemberDeclarationSyntax> injectedMembers,
             ConstructorBuilderData constructorBuilder,
@@ -329,6 +332,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 yield return constructorDeclaration;
             }
         }
+        */
 
         private static IEnumerable<MemberDeclarationSyntax> AddPartialModifierToTypes( IEnumerable<MemberDeclarationSyntax> injectedMembers )
         {
