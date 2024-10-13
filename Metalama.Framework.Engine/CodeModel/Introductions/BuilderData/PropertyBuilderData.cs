@@ -95,6 +95,4 @@ internal class PropertyBuilderData : PropertyOrIndexerBuilderData
                 throw new AssertionFailedException();
         }
     }
-    
-    
 }

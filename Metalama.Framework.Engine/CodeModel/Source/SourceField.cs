@@ -25,7 +25,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal sealed class Field : Member, IFieldImpl
+    internal sealed class SourceField : SourceMember, IFieldImpl
     {
         private readonly IFieldSymbol _symbol;
 
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public override ISymbol Symbol => this._symbol;
 
-        public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public SourceField( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }

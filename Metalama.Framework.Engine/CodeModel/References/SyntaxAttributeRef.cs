@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Attribute = Metalama.Framework.Engine.CodeModel.Source.Attribute;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -98,7 +98,7 @@ internal sealed class SyntaxAttributeRef : AttributeRef
             return false;
         }
 
-        attribute = new Attribute(
+        attribute = new SourceAttribute(
             resolved.Attributes[0],
             compilation,
             compilation.Factory.GetDeclaration( resolved.ParentSymbol, resolved.ParentRefTargetKind ) );

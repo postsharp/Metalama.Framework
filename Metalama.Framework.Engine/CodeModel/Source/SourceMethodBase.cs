@@ -14,7 +14,7 @@ using SymbolMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal abstract class MethodBase : Member, IMethodBase
+    internal abstract class SourceMethodBase : SourceMember, IMethodBase
     {
         public override ISymbol Symbol => this.MethodSymbol;
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 _ => base.ContainingDeclaration
             };
 
-        protected MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
+        protected SourceMethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this.MethodSymbol = symbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
         }
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public MethodKind MethodKind => this.MethodSymbol.MethodKind.ToOurMethodKind();
 
-        public abstract System.Reflection.MethodBase ToMethodBase();
+        public abstract MethodBase ToMethodBase();
 
         public IRef<IMethodBase> ToRef() => this.GetMethodBaseRef();
 

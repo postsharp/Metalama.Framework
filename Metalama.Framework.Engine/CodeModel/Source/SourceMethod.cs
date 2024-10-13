@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -21,12 +22,12 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal sealed class Method : MethodBase, IMethodImpl
+internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
 {
-    public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
+    public SourceMethod( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
     {
         Invariant.Assert(
-            symbol.MethodKind is not (RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor ),
+            symbol.MethodKind is not (RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor),
             "Cannot use the Method class for constructors or accessors." );
 
         Invariant.Assert(
@@ -35,7 +36,7 @@ internal sealed class Method : MethodBase, IMethodImpl
     }
 
     [Memo]
-    public IParameter ReturnParameter => new MethodReturnParameter( this );
+    public IParameter ReturnParameter => new PseudoMethodReturnParameter( this );
 
     [Memo]
     public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
@@ -85,7 +86,7 @@ internal sealed class Method : MethodBase, IMethodImpl
         var symbolWithGenericArguments = this.MethodSymbol.Construct(
             typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
 
-        return new Method( symbolWithGenericArguments, this.Compilation );
+        return new SourceMethod( symbolWithGenericArguments, this.Compilation );
     }
 
     public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
@@ -130,7 +131,7 @@ internal sealed class Method : MethodBase, IMethodImpl
             ? this.Compilation.Factory.GetDeclaration( this.MethodSymbol.AssociatedSymbol ) as IHasAccessors
             : null;
 
-    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
+    public override MethodBase ToMethodBase() => this.ToMethodInfo();
 
     public IMember? OverriddenMember => this.OverriddenMethod;
 

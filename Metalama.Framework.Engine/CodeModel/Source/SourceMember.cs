@@ -8,9 +8,9 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal abstract class Member : MemberOrNamedType, IMember
+    internal abstract class SourceMember : SourceMemberOrNamedType, IMember
     {
-        protected Member( CompilationModel compilation ) : base( compilation ) { }
+        protected SourceMember( CompilationModel compilation ) : base( compilation ) { }
 
         public abstract bool IsExplicitInterfaceImplementation { get; }
 

@@ -45,7 +45,7 @@ class C
 
         // Assertions on declarations.
         var fieldAfter = field.ForCompilation( compilation );
-        Assert.IsType<Field>( fieldAfter );
+        Assert.IsType<SourceField>( fieldAfter );
         Assert.NotNull( fieldAfter.OverridingProperty );
         Assert.NotNull( fieldAfter.OverridingProperty.OriginalField );
         Assert.Same( fieldAfter, fieldAfter.OverridingProperty.OriginalField );
@@ -97,7 +97,7 @@ class C<T>
 
             // Assertions on declarations.
             var genericFieldAfter = genericField.ForCompilation( compilation );
-            Assert.IsType<Field>( genericFieldAfter );
+            Assert.IsType<SourceField>( genericFieldAfter );
             Assert.Equal( SpecialType.Int32, genericFieldAfter.Type.SpecialType );
             Assert.NotNull( genericFieldAfter.OverridingProperty );
             Assert.Equal( SpecialType.Int32, genericFieldAfter.OverridingProperty.Type.SpecialType );

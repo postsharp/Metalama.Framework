@@ -8,11 +8,11 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source
+namespace Metalama.Framework.Engine.CodeModel.Source.Types
 {
-    internal sealed class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType
+    internal sealed class SymbolArrayType : SymbolType<IArrayTypeSymbol>, IArrayType
     {
-        internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation )
+        internal SymbolArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation )
         {
             // Array types with lower bounds or sizes specified are not supported.
             Invariant.Assert( typeSymbol.LowerBounds.IsDefault );

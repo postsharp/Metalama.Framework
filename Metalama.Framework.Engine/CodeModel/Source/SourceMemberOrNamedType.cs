@@ -15,7 +15,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal abstract class MemberOrNamedType : Declaration, IMemberOrNamedTypeImpl
+    internal abstract class SourceMemberOrNamedType : SourceDeclaration, IMemberOrNamedTypeImpl
     {
         public bool IsSealed => this.Symbol.IsSealed;
 
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public abstract MemberInfo ToMemberInfo();
 
-        protected MemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
+        protected SourceMemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
 
         public Accessibility Accessibility
         {

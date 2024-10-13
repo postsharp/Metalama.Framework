@@ -21,9 +21,9 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal sealed class Attribute : IAttributeImpl
+internal sealed class SourceAttribute : IAttributeImpl
 {
-    public Attribute( AttributeData data, CompilationModel compilation, IDeclaration containingDeclaration )
+    public SourceAttribute( AttributeData data, CompilationModel compilation, IDeclaration containingDeclaration )
     {
         // Note that Roslyn can return an AttributeData that does not belong to the same compilation
         // as the parent symbol, probably because of some bug or optimisation.
@@ -131,9 +131,11 @@ internal sealed class Attribute : IAttributeImpl
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => [];
 
-    public bool Equals( IDeclaration? other ) => other is Attribute attribute && this.AttributeData == attribute.AttributeData;
+    DeclarationImplementationKind IDeclarationImpl.ImplementationKind => DeclarationImplementationKind.Symbol;
 
-    public override bool Equals( object? obj ) => obj is Attribute attribute && this.Equals( attribute );
+    public bool Equals( IDeclaration? other ) => other is SourceAttribute attribute && this.AttributeData == attribute.AttributeData;
+
+    public override bool Equals( object? obj ) => obj is SourceAttribute attribute && this.Equals( attribute );
 
     public override int GetHashCode() => this.AttributeData.GetHashCode();
 

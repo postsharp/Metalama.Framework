@@ -13,9 +13,9 @@ using System;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source
+namespace Metalama.Framework.Engine.CodeModel.Source.Types
 {
-    internal abstract class RoslynType<T> : ITypeImpl, ISymbolBasedCompilationElement
+    internal abstract class SymbolType<T> : ITypeImpl, ISymbolBasedCompilationElement
         where T : ITypeSymbol
     {
         public CompilationModel Compilation { get; }
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         protected T Symbol { get; }
 
-        protected RoslynType( T symbol, CompilationModel compilation )
+        protected SymbolType( T symbol, CompilationModel compilation )
         {
             this.Compilation = compilation;
             this.Symbol = symbol;

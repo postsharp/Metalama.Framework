@@ -28,9 +28,9 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
+internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeImpl
 {
-    private readonly NamedType _facade;
+    private readonly SourceNamedType _facade;
 
     ITypeSymbol ISdkType.TypeSymbol => this.NamedTypeSymbol;
 
@@ -41,7 +41,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
         => this.Compilation.GetDerivedTypes( this, options );
 
-    internal NamedTypeImpl( NamedType facade, INamedTypeSymbol namedTypeSymbol, CompilationModel compilation ) : base( compilation )
+    internal SourceNamedTypeImpl( SourceNamedType facade, INamedTypeSymbol namedTypeSymbol, CompilationModel compilation ) : base( compilation )
     {
         this._facade = facade;
         this.NamedTypeSymbol = namedTypeSymbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
@@ -650,7 +650,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         if ( this.NamedTypeSymbol.BaseType != null )
         {
             var newGenericMap = genericMap.SubstituteSymbols( this.NamedTypeSymbol.BaseType.TypeArguments, compilation );
-            ((NamedType) this.BaseType!).Implementation.PopulateAllInterfaces( builder, newGenericMap );
+            ((SourceNamedType) this.BaseType!).Implementation.PopulateAllInterfaces( builder, newGenericMap );
         }
 
         // TODO: process introductions.

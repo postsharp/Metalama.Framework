@@ -22,7 +22,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 {
-    internal sealed class PseudoParameter : BaseDeclaration, IParameter, IPseudoDeclaration, IUserExpression
+    internal sealed class PseudoParameter : BaseDeclaration, IParameter, IUserExpression
     {
         private readonly string? _name;
 
@@ -33,9 +33,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
         public RefKind RefKind
             => this.DeclaringAccessor.ContainingDeclaration switch
             {
-                Property property => property.RefKind,
-                Field _ => RefKind.None,
-                Event _ => RefKind.None,
+                SourceProperty property => property.RefKind,
+                SourceField _ => RefKind.None,
+                SourceEvent _ => RefKind.None,
                 _ => throw new AssertionFailedException( $"Unexpected member: '{this.DeclaringAccessor.ContainingDeclaration}'." )
             };
 
@@ -83,6 +83,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
         public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
+
+        internal override DeclarationImplementationKind ImplementationKind => DeclarationImplementationKind.Pseudo;
 
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 

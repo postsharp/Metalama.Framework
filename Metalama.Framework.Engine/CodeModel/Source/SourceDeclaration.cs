@@ -8,9 +8,9 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal abstract class Declaration : SymbolBasedDeclaration
+    internal abstract class SourceDeclaration : SymbolBasedDeclaration
     {
-        protected Declaration( CompilationModel compilation )
+        protected SourceDeclaration( CompilationModel compilation )
         {
             this.Compilation = compilation;
         }

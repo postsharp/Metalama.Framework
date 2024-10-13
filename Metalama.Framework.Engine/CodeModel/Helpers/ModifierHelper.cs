@@ -13,7 +13,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Helpers;
 
-internal static class DeclarationModifiersHelper
+internal static class ModifierHelper
 {
     public static SyntaxTokenList GetSyntaxModifierList( this IDeclaration declaration, ModifierCategories categories = ModifierCategories.All )
     {

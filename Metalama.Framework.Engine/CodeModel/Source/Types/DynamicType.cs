@@ -6,9 +6,9 @@ using Metalama.Framework.Engine.CodeModel.Visitors;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source
+namespace Metalama.Framework.Engine.CodeModel.Source.Types
 {
-    internal sealed class DynamicType : RoslynType<IDynamicTypeSymbol>, IDynamicType
+    internal sealed class DynamicType : SymbolType<IDynamicTypeSymbol>, IDynamicType
     {
         internal DynamicType( IDynamicTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 

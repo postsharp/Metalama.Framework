@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.CodeModel.Source.Types;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Testing.UnitTesting;
@@ -82,7 +83,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
                     ImmutableArray.Create( (ITypeSymbol) compilation.Factory.GetSpecialType( SpecialType.Int32 ).GetSymbol() ),
                     ImmutableArray.Create( RefKind.None ) );
 
-            var functionPointerType = new FunctionPointerType( functionPointerTypeSymbol, compilation );
+            var functionPointerType = new SymbolFunctionPointerType( functionPointerTypeSymbol, compilation );
 
             Assert.Equal( "typeof(delegate*<global::System.Int32,global::System.Int32>)", GetSyntaxString( syntaxSerializationContext, functionPointerType ) );
         }

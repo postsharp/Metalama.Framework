@@ -14,7 +14,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
-using Attribute = Metalama.Framework.Engine.CodeModel.Source.Attribute;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Helpers;
@@ -38,7 +37,7 @@ internal static class CodeModelInternalExtensions
 
     public static AttributeData GetAttributeData( this IAttribute attribute )
     {
-        if ( attribute is Attribute attributeModel )
+        if ( attribute is SourceAttribute attributeModel )
         {
             return attributeModel.AttributeData;
         }

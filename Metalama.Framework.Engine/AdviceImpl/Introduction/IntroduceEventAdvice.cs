@@ -11,11 +11,11 @@ using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
-using Attribute = Metalama.Framework.Engine.CodeModel.Source.Attribute;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -106,7 +106,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
                 {
                     if ( classificationService.MustCopyTemplateAttribute( attribute ) )
                     {
-                        builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation, builder ) );
+                        builder.AddFieldAttribute( new SourceAttribute( attribute, this.SourceCompilation, builder ) );
                     }
                 }
             }

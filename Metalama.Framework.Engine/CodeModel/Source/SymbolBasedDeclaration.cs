@@ -130,5 +130,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 return newCompilation.Factory.GetCompilationElement( translatedSymbol, genericContext: genericContext );
             }
         }
+
+        internal sealed override DeclarationImplementationKind ImplementationKind => DeclarationImplementationKind.Symbol;
     }
 }

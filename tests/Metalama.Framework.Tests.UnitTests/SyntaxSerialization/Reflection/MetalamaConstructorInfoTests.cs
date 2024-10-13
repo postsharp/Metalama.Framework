@@ -83,7 +83,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var type = namedTypes.Single( t => t.Name == "Target" );
             var methods = type.Constructors;
             var single = methods.Single();
-            var p = (single as Constructor)!;
+            var p = (single as SourceConstructor)!;
             var actual = testContext.Serialize( CompileTimeConstructorInfo.Create( p ) ).ToString();
 
             return actual;

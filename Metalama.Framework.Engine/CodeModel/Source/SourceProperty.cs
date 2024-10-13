@@ -20,9 +20,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal sealed class Property : PropertyOrIndexer, IPropertyImpl
+    internal sealed class SourceProperty : SourcePropertyOrIndexer, IPropertyImpl
     {
-        public Property( IPropertySymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
+        public SourceProperty( IPropertySymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 

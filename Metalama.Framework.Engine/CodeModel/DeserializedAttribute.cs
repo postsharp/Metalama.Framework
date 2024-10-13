@@ -49,6 +49,8 @@ internal class DeserializedAttribute : IAttributeImpl
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => [];
 
+    DeclarationImplementationKind IDeclarationImpl.ImplementationKind => DeclarationImplementationKind.DeserializedAttribute;
+
     bool IEquatable<IDeclaration>.Equals( IDeclaration? other ) => throw new NotImplementedException();
 
     [Memo]

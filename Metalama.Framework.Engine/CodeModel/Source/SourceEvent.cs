@@ -20,13 +20,13 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal sealed class Event : Member, IEventImpl
+    internal sealed class SourceEvent : SourceMember, IEventImpl
     {
         private readonly IEventSymbol _symbol;
 
         public override ISymbol Symbol => this._symbol;
 
-        public Event( IEventSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public SourceEvent( IEventSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }

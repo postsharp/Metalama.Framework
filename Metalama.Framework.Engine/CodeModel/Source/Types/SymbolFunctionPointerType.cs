@@ -6,11 +6,11 @@ using Metalama.Framework.Engine.CodeModel.Visitors;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source;
+namespace Metalama.Framework.Engine.CodeModel.Source.Types;
 
-internal sealed class FunctionPointerType : RoslynType<IFunctionPointerTypeSymbol>, IFunctionPointerType
+internal sealed class SymbolFunctionPointerType : SymbolType<IFunctionPointerTypeSymbol>, IFunctionPointerType
 {
-    public FunctionPointerType( IFunctionPointerTypeSymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
+    public SymbolFunctionPointerType( IFunctionPointerTypeSymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
 
     public override TypeKind TypeKind => TypeKind.FunctionPointer;
 

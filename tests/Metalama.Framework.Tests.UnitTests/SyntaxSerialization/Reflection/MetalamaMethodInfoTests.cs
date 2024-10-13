@@ -80,7 +80,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" );
-            var method = (Method) single;
+            var method = (SourceMethod) single;
             var actual = testContext.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString();
 
             return actual;

@@ -8,11 +8,11 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source
+namespace Metalama.Framework.Engine.CodeModel.Source.Types
 {
-    internal sealed class PointerType : RoslynType<IPointerTypeSymbol>, IPointerType
+    internal sealed class SymbolPointerType : SymbolType<IPointerTypeSymbol>, IPointerType
     {
-        internal PointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
+        internal SymbolPointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 
         public override TypeKind TypeKind => TypeKind.Pointer;
 

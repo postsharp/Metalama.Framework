@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     description,
                     granularity ) );
 
-            if ( validatedDeclaration is Method validatedMethod )
+            if ( validatedDeclaration is SourceMethod validatedMethod )
             {
                 switch ( validatedMethod.MethodKind )
                 {

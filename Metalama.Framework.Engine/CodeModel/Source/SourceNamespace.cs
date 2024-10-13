@@ -13,11 +13,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal sealed class Namespace : Declaration, INamespace
+internal sealed class SourceNamespace : SourceDeclaration, INamespace
 {
     private readonly INamespaceSymbol _symbol;
 
-    internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation )
+    internal SourceNamespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation )
     {
         this._symbol = symbol;
     }

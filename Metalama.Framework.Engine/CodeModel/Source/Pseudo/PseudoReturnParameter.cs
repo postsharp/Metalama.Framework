@@ -15,9 +15,9 @@ using RefKind = Microsoft.CodeAnalysis.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Metalama.Framework.Engine.CodeModel.Source;
+namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 
-internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
+internal abstract class PseudoReturnParameter : BaseDeclaration, IParameterImpl
 {
     protected abstract RefKind SymbolRefKind { get; }
 
@@ -50,7 +50,7 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
     public override CompilationModel Compilation => this.ContainingDeclaration.AssertNotNull().GetCompilationModel();
 
     public override bool Equals( IDeclaration? other )
-        => other is ReturnParameter returnParameter && this.DeclaringMember.Equals( returnParameter.DeclaringMember );
+        => other is PseudoReturnParameter returnParameter && this.DeclaringMember.Equals( returnParameter.DeclaringMember );
 
     public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
@@ -89,4 +89,6 @@ internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
     IRef<IParameter> IParameter.ToRef() => this.Ref;
 
     internal override GenericContext GenericContext => (GenericContext) this.ContainingDeclaration.GenericContext;
+
+    internal override DeclarationImplementationKind ImplementationKind => DeclarationImplementationKind.Pseudo;
 }

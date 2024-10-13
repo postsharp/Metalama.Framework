@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel.Source;
+namespace Metalama.Framework.Engine.CodeModel.Helpers;
 
 internal sealed class SymbolValidator : SymbolVisitor<bool>
 {

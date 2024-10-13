@@ -141,6 +141,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
 
     public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
+    DeclarationImplementationKind IDeclarationImpl.ImplementationKind => DeclarationImplementationKind.Builder;
+
     public sealed override string ToString() => this.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage );
 
     public IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;

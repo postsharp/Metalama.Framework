@@ -29,7 +29,7 @@ public class GenericContextTests : UnitTestClass
 
         var classC = compilation.Types.OfName( "C" ).Single();
         var classD = classC.Types.Single();
-        var genericTypeInstance = (NamedType) classC.Fields.Single().Type;
+        var genericTypeInstance = (SourceNamedType) classC.Fields.Single().Type;
 
         // Map through IType.
         var mappedClassD = genericTypeInstance.GenericContext.Map( classD );
@@ -59,7 +59,7 @@ public class GenericContextTests : UnitTestClass
 
         var classC = compilation.Types.OfName( "C" ).Single();
         var classD = classC.Types.Single();
-        var genericTypeInstance = (NamedType) classC.Fields.Single().Type;
+        var genericTypeInstance = (SourceNamedType) classC.Fields.Single().Type;
 
         // Map through IType.
         var mappedClassD = genericTypeInstance.GenericContext.Map( classD );

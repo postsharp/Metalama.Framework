@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.CodeModel.Source.Types;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -105,7 +106,7 @@ public partial class DeclarationFactory
     internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
         => this.GetDeclarationFromSymbol<INamespace, INamespaceSymbol>(
             namespaceSymbol,
-            static ( in CreateFromSymbolArgs<INamespaceSymbol> args ) => new Namespace( args.Symbol, args.Compilation ) );
+            static ( in CreateFromSymbolArgs<INamespaceSymbol> args ) => new SourceNamespace( args.Symbol, args.Compilation ) );
 
     internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
         => this.GetDeclarationFromSymbol<IAssembly, IAssemblySymbol>(
@@ -131,7 +132,7 @@ public partial class DeclarationFactory
     private IArrayType GetArrayType( IArrayTypeSymbol typeSymbol )
         => this.GetTypeFromSymbol<IArrayType, IArrayTypeSymbol>(
             typeSymbol,
-            static ( in CreateFromSymbolArgs<IArrayTypeSymbol> args ) => new ArrayType( args.Symbol, args.Compilation ) );
+            static ( in CreateFromSymbolArgs<IArrayTypeSymbol> args ) => new SymbolArrayType( args.Symbol, args.Compilation ) );
 
     private IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
         => this.GetTypeFromSymbol<IDynamicType, IDynamicTypeSymbol>(
@@ -141,12 +142,12 @@ public partial class DeclarationFactory
     private IPointerType GetPointerType( IPointerTypeSymbol typeSymbol )
         => this.GetTypeFromSymbol<IPointerType, IPointerTypeSymbol>(
             typeSymbol,
-            static ( in CreateFromSymbolArgs<IPointerTypeSymbol> args ) => new PointerType( args.Symbol, args.Compilation ) );
+            static ( in CreateFromSymbolArgs<IPointerTypeSymbol> args ) => new SymbolPointerType( args.Symbol, args.Compilation ) );
 
     private IFunctionPointerType GetFunctionPointerType( IFunctionPointerTypeSymbol typeSymbol )
         => this.GetTypeFromSymbol<IFunctionPointerType, IFunctionPointerTypeSymbol>(
             typeSymbol,
-            static ( in CreateFromSymbolArgs<IFunctionPointerTypeSymbol> args ) => new FunctionPointerType( args.Symbol, args.Compilation ) );
+            static ( in CreateFromSymbolArgs<IFunctionPointerTypeSymbol> args ) => new SymbolFunctionPointerType( args.Symbol, args.Compilation ) );
 
     public INamedType GetNamedType( INamedTypeSymbol typeSymbol, IGenericContext? genericContext = null )
     {
@@ -165,7 +166,7 @@ public partial class DeclarationFactory
         return this.GetTypeFromSymbol<INamedType, INamedTypeSymbol>(
             typeSymbol,
             static ( in CreateFromSymbolArgs<INamedTypeSymbol> args ) =>
-                new NamedType( args.Symbol, args.Compilation ) );
+                new SourceNamedType( args.Symbol, args.Compilation ) );
     }
 
     // We must use GetTypeFromSymbol and not GetDeclarationFromSymbol because of nullability.
@@ -173,14 +174,14 @@ public partial class DeclarationFactory
         => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
             typeParameterSymbol,
             static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
-                new TypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
+                new SourceTypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
 
     private ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol, GenericContext genericContext )
         => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
             typeParameterSymbol,
             genericContext,
             static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
-                new TypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
+                new SourceTypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
     {
@@ -190,27 +191,27 @@ public partial class DeclarationFactory
         return this.GetDeclarationFromSymbol<IMethod, IMethodSymbol>(
             methodSymbol,
             static ( in CreateFromSymbolArgs<IMethodSymbol> args ) =>
-                new Method( args.Symbol, args.Compilation ) );
+                new SourceMethod( args.Symbol, args.Compilation ) );
     }
 
     public IProperty GetProperty( IPropertySymbol propertySymbol )
         => this.GetDeclarationFromSymbol<IProperty, IPropertySymbol>(
             propertySymbol,
             static ( in CreateFromSymbolArgs<IPropertySymbol> args ) =>
-                new Property( args.Symbol, args.Compilation ) );
+                new SourceProperty( args.Symbol, args.Compilation ) );
 
     public IIndexer GetIndexer( IPropertySymbol propertySymbol )
         => this.GetDeclarationFromSymbol<IIndexer, IPropertySymbol>(
             propertySymbol,
             static ( in CreateFromSymbolArgs<IPropertySymbol> args ) =>
-                new Indexer( args.Symbol, args.Compilation ) );
+                new SourceIndexer( args.Symbol, args.Compilation ) );
 
     // Fields support redirections, but fields redirect to properties, so it is not handled at this level.
     public IField GetField( IFieldSymbol fieldSymbol )
         => this.GetDeclarationFromSymbol<IField, IFieldSymbol>(
             fieldSymbol,
             static ( in CreateFromSymbolArgs<IFieldSymbol> args ) =>
-                new Field( args.Symbol, args.Compilation ) );
+                new SourceField( args.Symbol, args.Compilation ) );
 
     internal IField GetField( IFieldSymbol fieldSymbol, GenericContext genericContext )
     {
@@ -221,20 +222,20 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromSymbol<IConstructor, IMethodSymbol>(
             methodSymbol,
             static ( in CreateFromSymbolArgs<IMethodSymbol> args ) =>
-                new Constructor( args.Symbol, args.Compilation ),
+                new SourceConstructor( args.Symbol, args.Compilation ),
             true );
 
     public IParameter GetParameter( IParameterSymbol parameterSymbol )
         => this.GetDeclarationFromSymbol<IParameter, IParameterSymbol>(
             parameterSymbol,
             static ( in CreateFromSymbolArgs<IParameterSymbol> args ) =>
-                new Parameter( args.Symbol, args.Compilation ) );
+                new SourceParameter( args.Symbol, args.Compilation ) );
 
     public IEvent GetEvent( IEventSymbol eventSymbol )
         => this.GetDeclarationFromSymbol<IEvent, IEventSymbol>(
             eventSymbol,
             static ( in CreateFromSymbolArgs<IEventSymbol> args ) =>
-                new Event( args.Symbol, args.Compilation ) );
+                new SourceEvent( args.Symbol, args.Compilation ) );
 
     public bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
     {

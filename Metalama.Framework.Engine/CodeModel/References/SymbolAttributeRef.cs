@@ -2,13 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Attribute = Metalama.Framework.Engine.CodeModel.Source.Attribute;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -45,7 +45,7 @@ internal sealed class SymbolAttributeRef : AttributeRef
             return false;
         }
 
-        attribute = new Attribute( this._attributeData, compilation, this.ContainingDeclaration.GetTarget( compilation ) );
+        attribute = new SourceAttribute( this._attributeData, compilation, this.ContainingDeclaration.GetTarget( compilation ) );
 
         return true;
     }

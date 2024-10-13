@@ -136,7 +136,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
             return typeParameter;
         }
 
-        var mappedSymbol = this.Map( ((TypeParameter) typeParameter).TypeParameterSymbol );
+        var mappedSymbol = this.Map( ((SourceTypeParameter) typeParameter).TypeParameterSymbol );
 
         return typeParameter.GetCompilationModel().Factory.GetIType( mappedSymbol );
     }

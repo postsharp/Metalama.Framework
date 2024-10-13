@@ -13,15 +13,15 @@ using System.Collections.Immutable;
 using System.Linq;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source
+namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 {
-    internal sealed class MethodReturnParameter : ReturnParameter
+    internal sealed class PseudoMethodReturnParameter : PseudoReturnParameter
     {
-        private Method DeclaringMethod { get; }
+        private SourceMethod DeclaringMethod { get; }
 
         public override IHasParameters DeclaringMember => this.DeclaringMethod;
 
-        public MethodReturnParameter( Method declaringMethod )
+        public PseudoMethodReturnParameter( SourceMethod declaringMethod )
         {
             this.DeclaringMethod = declaringMethod;
         }
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public override IType Type => this.DeclaringMethod.ReturnType;
 
         public override bool Equals( IDeclaration? other )
-            => other is MethodReturnParameter methodReturnParameter &&
+            => other is PseudoMethodReturnParameter methodReturnParameter &&
                this.Compilation.CompilationContext.SymbolComparer.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
 
         public override bool IsImplicitlyDeclared => this.DeclaringMethod.IsImplicitlyDeclared;

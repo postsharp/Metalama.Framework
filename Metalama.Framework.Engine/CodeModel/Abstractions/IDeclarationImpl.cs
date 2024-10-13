@@ -28,4 +28,6 @@ internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, ICo
     SyntaxTree? PrimarySyntaxTree { get; }
 
     IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default );
+    
+    DeclarationImplementationKind ImplementationKind { get; }
 }

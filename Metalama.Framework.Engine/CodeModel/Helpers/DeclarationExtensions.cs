@@ -451,7 +451,7 @@ public static class DeclarationExtensions
     {
         switch ( @event )
         {
-            case Event codeEvent:
+            case SourceEvent codeEvent:
                 var eventSymbol = codeEvent.GetSymbol().AssertSymbolNotNull();
 
                 return eventSymbol.IsEventField();

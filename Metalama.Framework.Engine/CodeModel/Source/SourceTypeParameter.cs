@@ -19,7 +19,7 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal sealed class TypeParameter : Declaration, ITypeParameter, ITypeImpl
+    internal sealed class SourceTypeParameter : SourceDeclaration, ITypeParameter, ITypeImpl
     {
         private readonly GenericContext _genericContext;
 
@@ -27,7 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         ITypeSymbol ISdkType.TypeSymbol => this.TypeParameterSymbol;
 
-        internal TypeParameter( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation, GenericContext? genericContext ) : base( compilation )
+        internal SourceTypeParameter( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation, GenericContext? genericContext ) : base(
+            compilation )
         {
             this._genericContext = genericContext ?? GenericContext.Empty;
             this.TypeParameterSymbol = typeParameterSymbol;

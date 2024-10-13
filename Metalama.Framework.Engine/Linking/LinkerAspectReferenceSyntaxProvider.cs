@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -59,8 +59,8 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
     {
         switch (targetKind, targetProperty)
         {
-            case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: IPseudoDeclaration }):
-            case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: IPseudoDeclaration }):
+            case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: IDeclarationImpl { ImplementationKind: DeclarationImplementationKind.Pseudo } }):
+            case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: IDeclarationImpl { ImplementationKind: DeclarationImplementationKind.Pseudo } }):
                 // For pseudo source: __LinkerInjectionHelpers__.__Property(<property_expression>)
                 // It is important to track the <property_expression>.
                 var symbolSourceExpression = CreateMemberAccessExpression( targetProperty, syntaxGenerator );

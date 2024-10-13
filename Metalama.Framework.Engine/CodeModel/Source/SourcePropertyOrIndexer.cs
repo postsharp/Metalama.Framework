@@ -17,11 +17,11 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
+internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndexer
 {
     protected IPropertySymbol PropertySymbol { get; }
 
-    protected PropertyOrIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( compilation )
+    protected SourcePropertyOrIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( compilation )
     {
         this.PropertySymbol = symbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
     }

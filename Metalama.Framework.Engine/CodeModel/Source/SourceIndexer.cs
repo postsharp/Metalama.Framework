@@ -14,9 +14,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
+internal sealed class SourceIndexer : SourcePropertyOrIndexer, IIndexerImpl
 {
-    public Indexer( IPropertySymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
+    public SourceIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
 
     [Memo]
     public IParameterList Parameters

@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal static class MemberWithAccessorsImpl
+    internal static class AccessorHelper
     {
         public static IMethod? GetAccessorImpl( this IEvent @event, MethodKind kind )
             => kind switch

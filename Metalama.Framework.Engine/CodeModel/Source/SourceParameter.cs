@@ -19,12 +19,12 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal sealed class Parameter : Declaration, IParameterImpl
+    internal sealed class SourceParameter : SourceDeclaration, IParameterImpl
     {
         private readonly IParameterSymbol _parameterSymbol;
 
         [Memo]
-        private Member DeclaringMember => (Member) this.Compilation.Factory.GetDeclaration( this._parameterSymbol.ContainingSymbol );
+        private SourceMember DeclaringMember => (SourceMember) this.Compilation.Factory.GetDeclaration( this._parameterSymbol.ContainingSymbol );
 
         public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this );
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         IHasParameters IParameter.DeclaringMember => (IHasParameters) this.DeclaringMember;
 
-        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public SourceParameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._parameterSymbol = symbol;
         }

@@ -25,7 +25,9 @@ internal sealed class IntroducedAccessor : IntroducedDeclaration, IMethodImpl
     private readonly IntroducedMember _introducedMember;
     private readonly MethodBuilderData _builderDataData;
 
-    public IntroducedAccessor( IntroducedMember introducedMember, MethodBuilderData builder ) : base( introducedMember.Compilation, introducedMember.GenericContext )
+    public IntroducedAccessor( IntroducedMember introducedMember, MethodBuilderData builder ) : base(
+        introducedMember.Compilation,
+        introducedMember.GenericContext )
     {
         this._introducedMember = introducedMember;
         this._builderDataData = builder;
@@ -160,7 +162,7 @@ internal sealed class IntroducedAccessor : IntroducedDeclaration, IMethodImpl
         }
         else
         {
-            return Member.GetDerivedDeclarationsCore( this, options );
+            return SourceMember.GetDerivedDeclarationsCore( this, options );
         }
     }
 }

@@ -29,7 +29,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
             // We intentionally don't store a reference to the replaced constructor, but the constructor itself,
             // because references are always resolved to the _replacement_.
 
-            Invariant.Assert( value is null or Constructor or ConstructorBuilder );
+            Invariant.Assert( value is null or SourceConstructor or ConstructorBuilder );
             this.CheckNotFrozen();
             this._replacedImplicitConstructor = value;
         }

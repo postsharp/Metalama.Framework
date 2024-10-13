@@ -128,8 +128,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             var nodeIdToCodeElement = new Dictionary<string, IDeclaration>();
 
             var symbolToCodeElement = initialCompilationModel.GetContainedDeclarations()
-                .Where( x => x is Declaration )
-                .ToDictionary( x => ((Declaration) x).Symbol, x => x );
+                .Where( x => x is SourceDeclaration )
+                .ToDictionary( x => ((SourceDeclaration) x).Symbol, x => x );
 
             var nodeIdToSyntaxNode = new Dictionary<string, SyntaxNode>();
             var syntaxNodeToSymbol = new Dictionary<SyntaxNode, ISymbol>();

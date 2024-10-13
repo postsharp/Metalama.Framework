@@ -87,7 +87,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Events.Single( m => m.Name == "Activated" );
-            var e = (single as Event)!;
+            var e = (single as SourceEvent)!;
 
             var actual = testContext
                 .Serialize( CompileTimeEventInfo.Create( e ) )

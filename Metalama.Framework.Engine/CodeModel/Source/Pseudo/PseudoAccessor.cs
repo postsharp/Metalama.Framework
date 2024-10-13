@@ -22,7 +22,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 
-internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
+internal abstract class PseudoAccessor<T> : IMethodImpl
     where T : class, IHasAccessorsImpl
 {
     protected T DeclaringMember { get; }
@@ -152,7 +152,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public ExecutionScope ExecutionScope => this.DeclaringMember.ExecutionScope;
 
-    System.Reflection.MethodBase IMethodBase.ToMethodBase()
+    MethodBase IMethodBase.ToMethodBase()
         => throw new NotSupportedException( $"'{this}' is implicitly defined  declaration and cannot be represented as a System.Reflection object." );
 
     MethodInfo IMethod.ToMethodInfo()
@@ -167,6 +167,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
     bool IDeclarationImpl.CanBeInherited => false;
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => throw new NotSupportedException();
+
+    DeclarationImplementationKind IDeclarationImpl.ImplementationKind => DeclarationImplementationKind.Pseudo;
 
     public ICompilationElement? Translate(
         CompilationModel newCompilation,

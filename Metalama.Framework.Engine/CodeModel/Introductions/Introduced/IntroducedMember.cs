@@ -41,7 +41,7 @@ internal abstract class IntroducedMember : IntroducedMemberOrNamedType, IMemberI
         }
         else
         {
-            return Member.GetDerivedDeclarationsCore( this, options );
+            return SourceMember.GetDerivedDeclarationsCore( this, options );
         }
     }
 

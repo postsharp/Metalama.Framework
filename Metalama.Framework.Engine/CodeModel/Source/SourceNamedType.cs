@@ -19,17 +19,17 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
     /// <summary>
-    /// The public object that represents an <see cref="INamedType"/>. The implementation is in <see cref="NamedTypeImpl"/>.
+    /// The public object that represents an <see cref="INamedType"/>. The implementation is in <see cref="SourceNamedTypeImpl"/>.
     /// This class exists because it needs to add a dependency context check before each member access, which makes
     /// it hard to use [Memo].
     /// </summary>
-    internal sealed class NamedType : MemberOrNamedType, INamedTypeImpl
+    internal sealed class SourceNamedType : SourceMemberOrNamedType, INamedTypeImpl
     {
-        public NamedTypeImpl Implementation { get; }
+        public SourceNamedTypeImpl Implementation { get; }
 
-        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal SourceNamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
-            this.Implementation = new NamedTypeImpl( this, typeSymbol, compilation );
+            this.Implementation = new SourceNamedTypeImpl( this, typeSymbol, compilation );
         }
 
         protected override void OnUsingDeclaration() => UserCodeExecutionContext.CurrentOrNull?.AddDependencyFrom( this );

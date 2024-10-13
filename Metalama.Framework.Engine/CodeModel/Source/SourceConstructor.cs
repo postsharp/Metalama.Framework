@@ -19,9 +19,9 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source
 {
-    internal sealed class Constructor : MethodBase, IConstructorImpl
+    internal sealed class SourceConstructor : SourceMethodBase, IConstructorImpl
     {
-        public Constructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
+        public SourceConstructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
             if ( symbol.MethodKind != RoslynMethodKind.Constructor && symbol.MethodKind != RoslynMethodKind.StaticConstructor )
             {
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
-        public override System.Reflection.MethodBase ToMethodBase() => CompileTimeConstructorInfo.Create( this );
+        public override MethodBase ToMethodBase() => CompileTimeConstructorInfo.Create( this );
 
         public object Invoke( params object?[] args ) => new ConstructorInvoker( this ).Invoke( args );
 
