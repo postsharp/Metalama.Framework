@@ -106,7 +106,7 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
                     sp => ProjectLicenseConsumer.Create(
                         sp.GetRequiredBackstageService<ILicenseConsumptionService>(),
                         projectOptions.License,
-                        projectOptions.IgnoreUserProfileLicense ? LicenseSourceKind.UserProfile : LicenseSourceKind.None,
+                        projectOptions.IgnoreUserProfileLicense ? LicenseSourceKind.All : LicenseSourceKind.None,
                         context.ReportDiagnostic ) );
 
             using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );

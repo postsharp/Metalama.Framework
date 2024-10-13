@@ -1,5 +1,3 @@
-// Warning CS8618 on `PropertyWithExisting`: `Non-nullable property 'PropertyWithExisting' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.`
-// Warning CS8618 on `PropertyWithIntroduced`: `Non-nullable property 'PropertyWithIntroduced' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.`
 [IntroductionAttribute]
 public class TargetType
 {

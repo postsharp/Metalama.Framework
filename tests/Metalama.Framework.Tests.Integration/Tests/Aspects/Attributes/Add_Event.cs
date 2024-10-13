@@ -6,7 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Event;
 
-#pragma warning disable CS8618, CS0169, CS0067
+#pragma warning disable CS0169, CS0067
 
 public class MyAttribute : Attribute { }
 
@@ -27,6 +27,8 @@ public class MyAspect : EventAspect
         }
     }
 }
+
+#pragma warning disable CS8618
 
 // <target>
 internal class C

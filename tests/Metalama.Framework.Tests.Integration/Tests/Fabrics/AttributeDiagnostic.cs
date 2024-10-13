@@ -27,4 +27,4 @@ public class ErrorAttribute : Attribute
 }
 
 [Error]
-class C;
+class C { }

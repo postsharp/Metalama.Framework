@@ -930,10 +930,18 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), aspectClass );
 
-                return new AspectLayerInstance(
-                    fakeAspectInstance,
-                    aspectLayer.LayerName,
-                    A.Fake<CompilationModel>( p => p.Named( $"Advice({aspectLayer.AspectName}).P2" ) ) );
+                return A.Fake<Advice>(
+                    i => i
+                        .Named( $"Advice({aspectLayer.AspectName})" )
+                        .WithArgumentsForConstructor(
+                        [
+                            new Advice.AdviceConstructorParameters(
+                                fakeAspectInstance,
+                                fakeAspectInstance.TemplateInstances.Values.Single(),
+                                A.Fake<IDeclarationImpl>( p => p.Named( $"Advice({aspectLayer.AspectName}).P1" ) ),
+                                A.Fake<ICompilation>( p => p.Named( $"Advice({aspectLayer.AspectName}).P2" ) ),
+                                aspectLayer.LayerName )
+                        ] ) );
             }
         }
     }

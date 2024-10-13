@@ -1,4 +1,3 @@
-// Warning CS8618 on `PropertyChanged`: `Non-nullable event 'PropertyChanged' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
 [NotifyPropertyChanged]
 internal class Car : INotifyPropertyChanged
 {

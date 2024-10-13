@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Threading;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -237,7 +238,7 @@ public static class ResourceExtractor
 
         // We cannot use MutexHelper because of dependencies on an embedded assembly.
 
-        using var extractMutex = new Mutex( false, mutexName );
+        using var extractMutex = MutexAcl.Create( false, mutexName, out _, MutexAcl.AllowUsingMutexToEveryone );
 
         try
         {
@@ -536,17 +537,17 @@ public static class ResourceExtractor
             }
         }
 
-        if ( version >= new Version( 4, 8 ) )
+        if ( version >= new Version( 4, 12 ) )
+        {
+            return "4.12.0";
+        }
+        else if ( version >= new Version( 4, 8 ) )
         {
             return "4.8.0";
         }
-        else if ( version >= new Version( 4, 4 ) )
-        {
-            return "4.4.0";
-        }
         else
         {
-            return "4.0.1";
+            return "4.4.0";
         }
     }
 }

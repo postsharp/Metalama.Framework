@@ -1,5 +1,5 @@
 ﻿#if TEST_OPTIONS
-// @ForbiddenConstant(ROSLYN_4_4_0_OR_GREATER)
+// @LanguageVersion(10)
 #endif
 
 using System;

@@ -64,8 +64,6 @@ internal abstract class TemplateClassFactory<T>
 
                         if ( typeSymbol == null )
                         {
-#if ROSLYN_4_4_0_OR_GREATER
-
                             // Two conflicting aspect types may be in aliased references.
                             // This is an edge case, but is used in tests to reproduce design-time problems, see below.
                             typeSymbol =
@@ -81,10 +79,6 @@ internal abstract class TemplateClassFactory<T>
 
                                 return null;
                             }
-#else
-                            // There is no GetTypesByMetadataName in Roslyn 4.0.1, so just ignore the edge case.
-                            return null;
-#endif
                         }
 
                         var typeName = typeSymbol.GetReflectionFullName();

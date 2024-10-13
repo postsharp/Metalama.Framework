@@ -38,6 +38,8 @@ public class OverrideAttribute : TypeAspect
     }
 }
 
+#pragma warning disable CS8618
+
 // <target>
 [Override]
 public struct TargetStruct( int x, int y, EventHandler z )

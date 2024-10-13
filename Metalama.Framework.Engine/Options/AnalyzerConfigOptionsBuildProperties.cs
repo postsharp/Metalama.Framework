@@ -22,22 +22,6 @@ internal static class AnalyzerConfigOptionsBuildProperties
 
     public static IEnumerable<string> GetBuildProperties( this AnalyzerConfigOptions options )
     {
-#if ROSLYN_4_4_0_OR_GREATER
         return options.Keys.Where( name => name.StartsWith( _prefix, StringComparison.Ordinal ) );
-#else
-        IEnumerable<string> msBuildProperties;
-
-        if ( options.TryGetValue( ToAnalyzerConfigName( MSBuildPropertyNames.MetalamaCompilerVisiblePropertiesList ), out var propertiesList ) )
-        {
-            msBuildProperties = propertiesList.Split( ',' );
-        }
-        else
-        {
-            // This shouldn't happen, but if it somehow does, I think it's better to have worse desing-time experience for custom compile-time properties, rather than failing.
-            msBuildProperties = MSBuildPropertyNames.All;
-        }
-
-        return msBuildProperties.Select( ToAnalyzerConfigName );
-#endif
     }
 }

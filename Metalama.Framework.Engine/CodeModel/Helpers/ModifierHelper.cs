@@ -85,12 +85,10 @@ internal static class ModifierHelper
             AddAccessibilityTokens( member, tokens );
         }
 
-#if ROSLYN_4_4_0_OR_GREATER
         if ( (categories & ModifierCategories.Required) != 0 && member is IFieldOrProperty { IsRequired: true } )
         {
             AddToken( SyntaxKind.RequiredKeyword );
         }
-#endif
 
         if ( member.IsStatic && (categories & ModifierCategories.Static) != 0 )
         {

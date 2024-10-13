@@ -287,7 +287,6 @@ public abstract class TemplateClass : IDiagnosticSource
                 // ReSharper disable once UnusedVariable
                 case IFieldSymbol field:
                     // Forbid ref fields.
-#if ROSLYN_4_4_0_OR_GREATER
                     if ( field.RefKind != RefKind.None )
                     {
                         diagnosticAdder.Report(
@@ -295,7 +294,6 @@ public abstract class TemplateClass : IDiagnosticSource
 
                         this.HasError = true;
                     }
-#endif
 
                     break;
 

@@ -1,5 +1,3 @@
-// Warning CS8618 on `FieldWithExisting`: `Non-nullable field 'FieldWithExisting' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.`
-// Warning CS8618 on `FieldWithIntroduced`: `Non-nullable field 'FieldWithIntroduced' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.`
 [IntroductionAttribute]
 public class TargetType
 {

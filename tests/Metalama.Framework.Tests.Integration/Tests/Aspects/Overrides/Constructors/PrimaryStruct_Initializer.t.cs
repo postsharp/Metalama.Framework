@@ -1,4 +1,3 @@
-// Warning CS8618 on `TargetStruct`: `Non-nullable event 'C' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
 [Override]
 public struct TargetStruct
 {

@@ -77,19 +77,26 @@ namespace Metalama.Framework.Engine
             return (T?) obj;
         }
 
-#if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
-#endif
+#if DEBUG
+        [DebuggerStepThrough]
+        public static void Implies(
+            bool premise,
+            bool conclusion,
+            [CallerArgumentExpression( nameof(premise) )] string? premiseExpression = null,
+            [CallerArgumentExpression( nameof(conclusion) )] string? conclusionExpression = null )
+        {
+            if ( premise && !conclusion )
+            {
+                throw new AssertionFailedException( $"Implies({premiseExpression}, {conclusionExpression})" );
+            }
+        }
+#else
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
         [DebuggerStepThrough]
         public static void Implies( bool premise, bool conclusion )
         {
-#if DEBUG
-            if ( premise && !conclusion )
-            {
-                throw new AssertionFailedException();
-            }
-#endif
         }
+#endif
 
 #if !DEBUG
             [MethodImpl( MethodImplOptions.AggressiveInlining )]

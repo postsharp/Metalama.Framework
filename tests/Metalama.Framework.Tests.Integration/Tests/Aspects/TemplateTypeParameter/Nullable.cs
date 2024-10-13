@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.Nullable;
 
-#pragma warning disable CS0219, CS8618
+#pragma warning disable CS0219
 
 public class GenerateMethodsAttribute : TypeAspect
 {
@@ -30,6 +30,8 @@ public class GenerateMethodsAttribute : TypeAspect
         T? value = default;
     }
 }
+
+#pragma warning disable CS8618
 
 // <target>
 [GenerateMethods]
