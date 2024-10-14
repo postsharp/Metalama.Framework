@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
@@ -28,7 +29,7 @@ public class GenericContextTests : UnitTestClass
 
         var classC = compilation.Types.OfName( "C" ).Single();
         var classD = classC.Types.Single();
-        var genericTypeInstance = (NamedType) classC.Fields.Single().Type;
+        var genericTypeInstance = (SourceNamedType) classC.Fields.Single().Type;
 
         // Map through IType.
         var mappedClassD = genericTypeInstance.GenericContext.Map( classD );
@@ -58,7 +59,7 @@ public class GenericContextTests : UnitTestClass
 
         var classC = compilation.Types.OfName( "C" ).Single();
         var classD = classC.Types.Single();
-        var genericTypeInstance = (NamedType) classC.Fields.Single().Type;
+        var genericTypeInstance = (SourceNamedType) classC.Fields.Single().Type;
 
         // Map through IType.
         var mappedClassD = genericTypeInstance.GenericContext.Map( classD );

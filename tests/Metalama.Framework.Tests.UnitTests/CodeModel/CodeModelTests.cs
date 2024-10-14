@@ -6,13 +6,14 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,6 @@ using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
@@ -579,7 +579,7 @@ class C<T>
 
             var type = Assert.Single( compilation.Types );
 
-            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeKind.TypeParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Fields.SelectAsImmutableArray( p => p.Type.TypeKind ) );
         }
@@ -1521,7 +1521,7 @@ class C {}
         }
 
         [Fact]
-        public void IsPartialMethod()
+        public void PartialMethods()
         {
             using var testContext = this.CreateTestContext();
 
@@ -1551,6 +1551,19 @@ public partial class C
             Assert.True( partialVoidNoImpl.IsPartial );
             Assert.True( partialVoidImpl.IsPartial );
             Assert.True( partialNonVoid.IsPartial );
+
+            var partialDefinition = (IMethodSymbol) compilation.Types.Single().GetSymbol().AssertSymbolNotNull().GetMembers( "PartialVoid_Impl" ).Single();
+            var partialImplementation = partialDefinition.PartialImplementationPart;
+
+            Assert.NotSame( partialDefinition, partialImplementation );
+
+            // Ensure references of both parts are the same.
+            var partialImplementationRef = partialDefinition.ToRef( compilation.RefFactory );
+            var partialDefinitionRef = partialImplementation.ToRef( compilation.RefFactory );
+            Assert.Same( partialImplementationRef, partialDefinitionRef );
+
+            // Ensure declarations of both parts are the same.
+            Assert.Same( compilation.Factory.GetMethod( partialDefinition ), compilation.Factory.GetMethod( partialImplementation ) );
         }
 
         [Fact]
@@ -1924,17 +1937,15 @@ public partial class C
                                 """;
 
             var compilation = testContext.CreateCompilationModel( code );
-            
+
             var interfaceType = (INamedType) compilation.Types.Single().Fields.OfName( "f1" ).Single().Type;
             var interfaceMethod = interfaceType.Properties.OfName( "Count" ).Single().GetMethod;
 
             Assert.True( interfaceType.TryFindImplementationForInterfaceMember( interfaceMethod, out var roundtrip ) );
             Assert.Same( interfaceMethod, roundtrip );
-            
-            var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
-            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out var memberImplementation ) );
-            
 
+            var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
+            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out _ ) );
         }
 
         private sealed class TestClassificationService : ISymbolClassificationService

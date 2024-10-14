@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,13 +11,12 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverridePropertyOrIndexerTransformation : OverrideMemberTransformation
 {
-    protected new IPropertyOrIndexer OverriddenDeclaration => (IPropertyOrIndexer) base.OverriddenDeclaration;
+    protected abstract IFullRef<IPropertyOrIndexer> OverriddenPropertyOrIndexer { get; }
 
     protected OverridePropertyOrIndexerTransformation(
-        Advice advice,
-        IPropertyOrIndexer overriddenDeclaration,
-        IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags ) { }
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IPropertyOrIndexer> overriddenPropertyOrIndexer )
+        : base( aspectLayerInstance, overriddenPropertyOrIndexer ) { }
 
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.

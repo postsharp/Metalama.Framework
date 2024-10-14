@@ -32,7 +32,7 @@ internal sealed class LinkerAnalysisRegistry
         this._substitutions =
             substitutions.ToDictionary(
                 x => x.Key,
-                x => (IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>) x.Value.ToDictionary( y => y.TargetNode, y => y ),
+                x => (IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>) x.Value.ToDictionary( y => y.ReplacedNode, y => y ),
                 InliningContextIdentifierEqualityComparer.ForCompilation( intermediateCompilation ) );
     }
 

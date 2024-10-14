@@ -19,9 +19,7 @@ public abstract class CompilationServiceProvider<T> : IProjectService, IDisposab
     }
 
     public T Get( CompilationContext compilationContext )
-        => this._cache.GetOrAdd(
-            compilationContext,
-            c => this.Create( compilationContext ) );
+        => this._cache.GetOrAdd( compilationContext, this.Create );
 
     protected abstract T Create( CompilationContext compilationContext );
 

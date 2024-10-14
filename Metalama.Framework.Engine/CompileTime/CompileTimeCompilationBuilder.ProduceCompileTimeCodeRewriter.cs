@@ -439,7 +439,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var transformedNode = this.TransformCompileTimeType( node, symbol, scope );
 
-                    return new[] { transformedNode };
+                    return [transformedNode];
                 }
             }
 
@@ -590,7 +590,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Add serialization logic if the type is serializable and does not have existing serializer and this is the primary declaration.
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType )
-                     && symbol.GetPrimaryDeclaration() == node )
+                     && symbol.GetPrimaryDeclarationSyntax() == node )
                 {
                     if ( !SerializerGeneratorHelper.TryGetSerializer(
                             this._runtimeCompilationContext,

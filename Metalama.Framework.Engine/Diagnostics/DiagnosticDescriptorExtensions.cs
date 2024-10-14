@@ -81,7 +81,7 @@ public static class DiagnosticDescriptorExtensions
 
         if ( arguments == null )
         {
-            return Array.Empty<object?>();
+            return [];
         }
 
         if ( arguments.GetType().Name.StartsWith( nameof(ValueTuple), StringComparison.OrdinalIgnoreCase ) )
@@ -94,7 +94,7 @@ public static class DiagnosticDescriptorExtensions
         }
         else
         {
-            argumentArray = new[] { arguments };
+            argumentArray = [arguments];
         }
 
         return argumentArray;

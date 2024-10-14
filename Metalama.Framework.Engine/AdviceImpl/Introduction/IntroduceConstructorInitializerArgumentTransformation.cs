@@ -1,7 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
@@ -16,30 +17,33 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 /// </summary>
 internal sealed class IntroduceConstructorInitializerArgumentTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
-    private IConstructor Constructor { get; }
+    private readonly IFullRef<IConstructor> _constructor;
 
-    IMember IMemberLevelTransformation.TargetMember => this.Constructor;
+    IFullRef<IMember> IMemberLevelTransformation.TargetMember => this._constructor;
 
     public int ParameterIndex { get; }
 
     private ExpressionSyntax Value { get; }
 
-    public IntroduceConstructorInitializerArgumentTransformation( Advice advice, IConstructor constructor, int parameterIndex, ExpressionSyntax value ) : base(
-        advice )
+    public IntroduceConstructorInitializerArgumentTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IConstructor> constructor,
+        int parameterIndex,
+        ExpressionSyntax value ) : base( aspectLayerInstance, constructor )
     {
-        this.Constructor = constructor;
+        this._constructor = constructor;
         this.ParameterIndex = parameterIndex;
         this.Value = value;
     }
 
     public ArgumentSyntax ToSyntax()
-        => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation );
+        => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.AspectInstance.AspectClass.GeneratedCodeAnnotation );
 
-    public override IDeclaration TargetDeclaration => this.Constructor;
+    public override IFullRef<IDeclaration> TargetDeclaration => this._constructor;
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertConstructorInitializerArgument;
 
-    public override FormattableString ToDisplayString() => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
+    public override FormattableString ToDisplayString() => $"Introduce an argument to the initializer of constructor '{this._constructor}'.";
 }

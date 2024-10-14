@@ -16,7 +16,7 @@ public class MyAspect : Aspect, IAspect<IDeclaration>
     }
 }
 
-#pragma warning disable CS0414, CS8618
+#pragma warning disable CS0414, CS8618, CS0067
 
 internal class KeepItAttribute : Attribute { }
 

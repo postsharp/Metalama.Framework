@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating.Statements;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -23,6 +24,10 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
     {
         // TODO: The statement can now be more complex, including invoking a template. For this we need to pass a TemplateSyntaxFactoryImpl.
         addTransformation(
-            new SyntaxBasedInitializationTransformation( this, targetDeclaration, targetCtor, _ => ((IStatementImpl) this._statement).GetSyntax( null ) ) );
+            new SyntaxBasedInitializationTransformation(
+                this.AspectLayerInstance,
+                targetDeclaration.ToRef(),
+                targetCtor.ToFullRef(),
+                _ => ((IStatementImpl) this._statement).GetSyntax( null ) ) );
     }
 }

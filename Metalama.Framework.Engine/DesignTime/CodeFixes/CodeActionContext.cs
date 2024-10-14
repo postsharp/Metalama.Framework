@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
     /// </summary>
     internal sealed class CodeActionContext : ISdkCodeActionContext
     {
-        private readonly HashSet<string> _changedSyntaxTrees = new();
+        private readonly HashSet<string> _changedSyntaxTrees = [];
 
         public PartialCompilation Compilation { get; private set; }
 
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
         public void UpdateTree( SyntaxTree transformedTree, SyntaxTree originalTree )
         {
-            this.Compilation = this.Compilation.Update( new[] { SyntaxTreeTransformation.ReplaceTree( originalTree, transformedTree ) } );
+            this.Compilation = this.Compilation.Update( [SyntaxTreeTransformation.ReplaceTree( originalTree, transformedTree )] );
             this._changedSyntaxTrees.Add( originalTree.FilePath );
         }
 

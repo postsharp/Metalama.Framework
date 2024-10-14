@@ -135,7 +135,7 @@ internal sealed class FabricManager
         {
             diagnostics.Report( GeneralDiagnosticDescriptors.TypeMustHavePublicDefaultConstructor.CreateRoslynDiagnostic( null, fabricType ) );
 
-            return Enumerable.Empty<FabricDriver>();
+            return [];
         }
 
         var executionContext = new UserCodeExecutionContext(
@@ -146,7 +146,7 @@ internal sealed class FabricManager
 
         if ( !this.UserCodeInvoker.TryInvoke( () => Activator.CreateInstance( fabricType ), executionContext, out var fabric ) )
         {
-            return Enumerable.Empty<FabricDriver>();
+            return [];
         }
 
         switch ( fabric )
@@ -155,13 +155,13 @@ internal sealed class FabricManager
                 return TypeFabricDriver.Create( this, compileTimeProject, typeFabric, compilation );
 
             case TransitiveProjectFabric transitiveCompilationFabric:
-                return new[] { ProjectFabricDriver.Create( this, compileTimeProject, transitiveCompilationFabric, compilation.RoslynCompilation ) };
+                return [ProjectFabricDriver.Create( this, compileTimeProject, transitiveCompilationFabric, compilation.RoslynCompilation )];
 
             case ProjectFabric compilationFabric:
-                return new[] { ProjectFabricDriver.Create( this, compileTimeProject, compilationFabric, compilation.RoslynCompilation ) };
+                return [ProjectFabricDriver.Create( this, compileTimeProject, compilationFabric, compilation.RoslynCompilation )];
 
             case NamespaceFabric namespaceFabric:
-                return new[] { NamespaceFabricDriver.Create( this, compileTimeProject, namespaceFabric, compilation.RoslynCompilation ) };
+                return [NamespaceFabricDriver.Create( this, compileTimeProject, namespaceFabric, compilation.RoslynCompilation )];
 
             default:
                 throw new AssertionFailedException( $"Unexpected fabric type: '{fabricType.FullName}." );

@@ -9,7 +9,7 @@ internal sealed partial class ImplementInterfaceAdvice
 {
     private sealed class InterfaceSpecification
     {
-        public INamedType InterfaceType { get; }
+        public IRef<INamedType> InterfaceType { get; }
 
         /// <summary>
         /// Gets specifications of interface members using the <see cref="Framework.Aspects.InterfaceMemberAttribute"/>.
@@ -17,7 +17,7 @@ internal sealed partial class ImplementInterfaceAdvice
         public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
 
         public InterfaceSpecification(
-            INamedType interfaceType,
+            IRef<INamedType> interfaceType,
             IReadOnlyList<MemberSpecification> memberSpecification )
         {
             this.InterfaceType = interfaceType;

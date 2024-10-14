@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Validation;
@@ -52,7 +52,7 @@ internal sealed class ReferenceValidationContextImpl : ReferenceValidationContex
     [Obsolete]
     public override ReferenceKinds ReferenceKinds => this.Details.First().ReferenceKind;
 
-    internal override ISourceReferenceImpl SourceReferenceImpl => CodeModel.SourceReferenceImpl.Instance;
+    internal override ISourceReferenceImpl SourceReferenceImpl => CodeModel.Source.SourceReferenceImpl.Instance;
 
     internal override IDeclaration ResolveOriginDeclaration( ReferenceDetail referenceDetail )
         => this.Compilation.GetCompilationModel().Factory.GetDeclaration( (ISymbol) referenceDetail.OriginSymbol );

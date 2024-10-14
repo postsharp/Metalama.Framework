@@ -1,13 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -19,9 +15,8 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
     public OverrideEventAdvice(
         AdviceConstructorParameters<IEvent> parameters,
         BoundTemplateMethod? addTemplate,
-        BoundTemplateMethod? removeTemplate,
-        IObjectReader tags )
-        : base( parameters, tags )
+        BoundTemplateMethod? removeTemplate )
+        : base( parameters )
     {
         Invariant.Assert( addTemplate != null || removeTemplate != null );
 
@@ -31,19 +26,15 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideEvent;
 
-    protected override OverrideMemberAdviceResult<IEvent> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IEvent> Implement( in AdviceImplementationContext context )
     {
         // TODO: order should be self if the target is introduced on the same layer.
-        addTransformation(
+        context.AddTransformation(
             new OverrideEventTransformation(
-                this,
-                this.TargetDeclaration.GetTarget( compilation ),
+                this.AspectLayerInstance,
+                this.TargetDeclaration.ToFullRef(),
                 this._addTemplate,
-                this._removeTemplate,
-                this.Tags ) );
+                this._removeTemplate ) );
 
         return this.CreateSuccessResult();
     }

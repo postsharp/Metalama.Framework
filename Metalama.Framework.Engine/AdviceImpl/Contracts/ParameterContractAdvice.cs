@@ -3,10 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
@@ -20,37 +17,48 @@ internal sealed class ParameterContractAdvice : ContractAdvice<IParameter>
         IObjectReader templateArguments )
         : base( parameters, template, direction, tags, templateArguments ) { }
 
-    protected override AddContractAdviceResult<IParameter> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddContractAdviceResult<IParameter> Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
         switch ( targetDeclaration )
         {
             case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
-                addTransformation(
-                    new ContractIndexerTransformation( this, indexer, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                context.AddTransformation(
+                    new ContractIndexerTransformation(
+                        this.AspectLayerInstance,
+                        indexer.ToFullRef(),
+                        parameter.ToFullRef(),
+                        this.Direction,
+                        this.Template,
+                        this.TemplateArguments,
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
 
             case IParameter { ContainingDeclaration: IMethod method } parameter:
-                addTransformation(
-                    new ContractMethodTransformation( this, method, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                context.AddTransformation(
+                    new ContractMethodTransformation(
+                        this.AspectLayerInstance,
+                        method.ToFullRef(),
+                        parameter.ToFullRef(),
+                        this.Direction,
+                        this.Template,
+                        this.TemplateArguments,
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
 
             case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
-                addTransformation(
+                context.AddTransformation(
                     new ContractConstructorTransformation(
-                        this,
-                        constructor,
-                        parameter,
+                        this.AspectLayerInstance,
+                        constructor.ToFullRef(),
+                        parameter.ToFullRef(),
                         this.Direction,
                         this.Template,
                         this.TemplateArguments,
-                        this.Tags ) );
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( parameter );
 

@@ -33,7 +33,7 @@ internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
         var attributes =
             roslynCompilation.Assembly.Modules
                 .SelectMany( m => m.ReferencedAssemblySymbols )
-                .Concat( new[] { roslynCompilation.Assembly } )
+                .Concat( [roslynCompilation.Assembly] )
                 .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
                 .Where( a => a.attribute.AttributeClass?.GetReflectionFullName() == orderAttributeName );
 

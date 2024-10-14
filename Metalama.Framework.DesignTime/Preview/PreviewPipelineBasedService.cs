@@ -74,8 +74,7 @@ public abstract class PreviewPipelineBasedService
         // Get all syntax trees that the given syntax tree depends on.
         var dependenciesByDependentFilePath = pipeline.Dependencies.DependenciesByMasterProject.GetValueOrDefault( projectKey ).DependenciesByDependentFilePath;
 
-        var syntaxTreeNames = EnumerableExtensions.SelectManyRecursive(
-            [syntaxTreeName],
+        var syntaxTreeNames = syntaxTreeName.SelectManyRecursiveDistinct(
             treeName => dependenciesByDependentFilePath?.GetValueOrDefault( treeName )?.MasterFilePathsAndHashes.Keys ?? [],
             includeRoot: true );
 

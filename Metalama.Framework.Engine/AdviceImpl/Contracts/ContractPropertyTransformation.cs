@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,19 +15,33 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractPropertyTransformation : ContractBaseTransformation
 {
-    private new IProperty TargetMember => (IProperty) base.TargetMember;
+    private readonly IFullRef<IProperty> _targetProperty;
 
     public ContractPropertyTransformation(
-        Advice advice,
-        IProperty targetProperty,
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IProperty> targetProperty,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetProperty, targetProperty, contractDirection, template, templateArguments, tags ) { }
+        TemplateProvider templateProvider ) : base(
+        aspectLayerInstance,
+        targetProperty,
+        contractDirection,
+        template,
+        templateProvider,
+        templateArguments )
+    {
+        this._targetProperty = targetProperty;
+    }
+
+    public override IFullRef<IMember> TargetMember => this._targetProperty;
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        Invariant.Assert( ReferenceEquals( this.ContractTarget, this.TargetMember ) );
+        Invariant.Assert( this.ContractTarget.Equals( this.TargetMember ) );
+
+        var targetMember = this._targetProperty.GetTarget( context.FinalCompilation );
+
         Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
         bool? inputResult, outputResult;
@@ -33,9 +49,9 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
 
         if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
         {
-            Invariant.Assert( this.TargetMember.SetMethod is not null );
+            Invariant.Assert( targetMember.SetMethod is not null );
 
-            inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), this.TargetMember.Type, out inputContractBlock );
+            inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), targetMember.Type, out inputContractBlock );
         }
         else
         {
@@ -45,10 +61,10 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
 
         if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
         {
-            Invariant.Assert( this.TargetMember.GetMethod is not null );
+            Invariant.Assert( targetMember.GetMethod is not null );
 
             var returnVariableName = context.GetReturnValueVariableName();
-            outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), this.TargetMember.Type, out outputContractBlock );
+            outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), targetMember.Type, out outputContractBlock );
         }
         else
         {
@@ -68,7 +84,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
             statements.Add(
                 new InsertedStatement(
                     inputContractBlock,
-                    this.TargetMember.SetMethod.AssertNotNull().Parameters[0],
+                    targetMember.SetMethod.AssertNotNull().Parameters[0],
                     this,
                     InsertedStatementKind.InputContract ) );
         }
@@ -78,7 +94,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
             statements.Add(
                 new InsertedStatement(
                     outputContractBlock,
-                    this.TargetMember.GetMethod.AssertNotNull().ReturnParameter,
+                    targetMember.GetMethod.AssertNotNull().ReturnParameter,
                     this,
                     InsertedStatementKind.OutputContract ) );
         }
@@ -87,5 +103,5 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
     }
 
     public override FormattableString ToDisplayString()
-        => $"Add contract to property '{this.TargetMember.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+        => $"Add contract to property '{this.TargetMember.Definition.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

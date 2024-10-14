@@ -1,9 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,44 +14,43 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal sealed class IntroduceStaticConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation
+internal sealed class IntroduceStaticConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilderData>, IReplaceMemberTransformation
 {
-    public IntroduceStaticConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
+    public IntroduceStaticConstructorTransformation( AspectLayerInstance aspectLayerInstance, ConstructorBuilderData introducedDeclaration ) : base(
+        aspectLayerInstance,
+        introducedDeclaration )
     {
         Invariant.Assert( introducedDeclaration.IsStatic );
-
-        var targetType = introducedDeclaration.DeclaringType;
-        this.ReplacedMember = targetType.StaticConstructor;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var constructorBuilder = this.IntroducedDeclaration;
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         var syntax =
             ConstructorDeclaration(
-                constructorBuilder.GetAttributeLists( context ),
+                AdviceSyntaxGenerator.GetAttributeLists( constructorBuilder, context ),
                 TokenList( Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( Space ) ) ),
                 Identifier( constructorBuilder.DeclaringType.Name ),
                 ParameterList(),
                 null,
-                context.SyntaxGenerator.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
+                context.SyntaxGenerator.FormattedBlock().WithGeneratedCodeAnnotation( this.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
                 null );
 
-        return new[]
-        {
+        return
+        [
             new InjectedMember(
                 this,
                 syntax,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Introduction,
-                constructorBuilder )
-        };
+                this.BuilderData.ToRef() )
+        ];
     }
 
-    public IMember? ReplacedMember { get; }
+    public IFullRef<IMember>? ReplacedMember => this.BuilderData.ReplacedImplicitConstructor;
 
-    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.IntroducedDeclaration.ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.InsertPosition;
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 

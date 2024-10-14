@@ -6,6 +6,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -226,6 +227,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
                 var compiledAspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
 
+                var aspectInstance = Activator.CreateInstance( compiledAspectType );
+
+                // In templating tests, test classes do not implement ITemplateProvider so we use FromInstanceUnsafe.
+                var templateProvider = TemplateProvider.FromInstanceUnsafe( aspectInstance );
+
                 var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( templateMethod );
                 var compiledTemplateMethod = compiledAspectType.GetAnyMethod( compiledTemplateMethodName );
 
@@ -248,7 +254,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );
 
                 var templateMethodDeclaration = compilationModel.Factory.GetMethod( templateMethod );
-                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember );
+                var template = TemplateMemberFactory.Create( templateMethodDeclaration, fakeTemplateClassMember, templateProvider, ObjectReader.Empty );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
                     serviceProvider,
@@ -290,11 +296,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var roslynCompilation = compilation.RoslynCompilation;
             var compilationServices = roslynCompilation.GetCompilationContext();
 
-            var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-
-            // In templating tests, test classes do not implement ITemplateProvider so we use FromInstanceUnsafe.
-            var templateProvider = TemplateProvider.FromInstanceUnsafe( Activator.CreateInstance( templateType )! );
-
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetMetalamaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! );
             var targetMethod = targetMetalamaType.Methods.Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) );
@@ -318,7 +319,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScopeFactory = new LexicalScopeFactory( compilation );
-            var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod );
+            var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod.ToFullRef() );
             var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
 
             var proceedExpression =
@@ -335,8 +336,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new MetaApiProperties(
                     compilation,
                     diagnostics,
-                    template.TemplateMember.Cast(),
-                    serviceProvider.GetRequiredService<ObjectReaderFactory>().GetReader( new { TestKey = "TestValue" } ),
+                    template.TemplateMember.AsMemberOrNamedType(),
                     default,
                     syntaxGenerationContext,
                     null!,
@@ -345,11 +345,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             return (new TemplateExpansionContext(
                         serviceProvider,
-                        templateProvider,
                         metaApi,
                         lexicalScope,
                         syntaxGenerationContext,
                         template,
+                        template.TemplateProvider,
                         _ => proceedExpression,
                         default ),
                     roslynTargetMethod);

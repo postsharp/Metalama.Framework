@@ -48,7 +48,7 @@ internal sealed class FabricAspectSource : IAspectSource
         // Process target declarations.
         void ProcessDriver( IGrouping<IDeclaration, TypeFabricDriver> driverGroup )
         {
-            var target = driverGroup.Key!;
+            var target = driverGroup.Key;
 
             // Create template classes for all fabrics.
             var compileTimeProject = this._fabricManager.CompileTimeProject;

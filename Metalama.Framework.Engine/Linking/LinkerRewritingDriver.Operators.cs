@@ -54,11 +54,11 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )];
             }
             else
             {
-                return new[] { operatorDeclaration };
+                return [operatorDeclaration];
             }
 
             OperatorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

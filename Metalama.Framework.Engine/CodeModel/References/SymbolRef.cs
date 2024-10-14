@@ -1,38 +1,43 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
+internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
     where T : class, ICompilationElement
 {
     public ISymbol Symbol { get; }
 
-    public override CompilationContext CompilationContext { get; }
-
     public override bool IsDefinition => this.Symbol.IsDefinitionSafe();
 
     [Memo]
-    public override IRef Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
+    public override IFullRef<T> DefinitionRef => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.RefFactory, this.TargetKind );
 
     public override RefTargetKind TargetKind { get; }
+
+    [Memo]
+    public override IFullRef ContainingDeclaration => this.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
+
+    [Memo]
+    public override IFullRef<INamedType> DeclaringType => this.RefFactory.FromSymbol<INamedType>( this.Symbol.ContainingType );
 
     public override string Name => this.Symbol.Name;
 
     public override SerializableDeclarationId ToSerializableId() => this.Symbol.GetSerializableId();
 
-    public SymbolRef( ISymbol symbol, CompilationContext compilationContext, RefTargetKind targetKind = RefTargetKind.Default )
+    public SymbolRef( ISymbol symbol, RefFactory refFactory, RefTargetKind targetKind = RefTargetKind.Default ) : base( refFactory )
     {
         Invariant.Assert(
-            symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
-            $"The interface type was expected to be of type {symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind )} but was {typeof(T)}." );
+            symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
+            $"The interface type was expected to be of type {symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind )} but was {typeof(T)}." );
 
         // Verify that RefTargetKind is used only in reference to declarations that don't have a symbol, i.e. the reference must be normalized
         // before calling the constructor.
@@ -49,10 +54,9 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
 
         this.Symbol = symbol;
         this.TargetKind = targetKind;
-        this.CompilationContext = compilationContext;
     }
 
-    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext )
+    public override FullRef<T> WithGenericContext( GenericContext genericContext )
     {
         if ( genericContext.IsEmptyOrIdentity )
         {
@@ -64,19 +68,20 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
             var mappedSymbol =
                 genericContext.NamedTypeSymbol!.GetMembers( this.Symbol.Name ).Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
 
-            return new SymbolRef<T>( mappedSymbol, this.CompilationContext, this.TargetKind );
+            return new SymbolRef<T>( mappedSymbol, this.RefFactory, this.TargetKind );
         }
     }
-
-    public override IRefStrategy Strategy => this.CompilationContext.SymbolRefStrategy;
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
 
-    protected override T? Resolve(
+    public override SyntaxTree? PrimarySyntaxTree => this.Symbol.GetClosestPrimaryDeclarationSyntax()?.SyntaxTree;
+
+    protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext )
+        IGenericContext? genericContext,
+        Type interfaceType )
     {
         var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( this.Symbol, this.CompilationContext.Compilation );
 
@@ -86,19 +91,19 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         }
 
         return ConvertDeclarationOrThrow(
-            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, genericContext ).AssertNotNull(),
-            compilation );
+            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, genericContext, interfaceType ).AssertNotNull(),
+            compilation,
+            interfaceType );
     }
 
     public override string ToString()
         => this.TargetKind switch
         {
-            RefTargetKind.Default => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ),
-            _ => $"{this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}:{this.TargetKind}"
+            RefTargetKind.Default => this.Symbol.ToDebugString(),
+            _ => $"{this.Symbol.ToDebugString()}:{this.TargetKind}"
         };
 
-    public override IRefImpl<TOut> As<TOut>()
-        => (IRefImpl<TOut>) (object) this; // There should be no reason to upcast since we always create instances of the right type.
+    protected override IFullRef<TOut> CastAsFullRef<TOut>() => (IFullRef<TOut>) (object) this;
 
     public override int GetHashCode( RefComparison comparison )
         => HashCode.Combine( comparison.GetSymbolComparer().GetHashCode( this.Symbol ), this.TargetKind );

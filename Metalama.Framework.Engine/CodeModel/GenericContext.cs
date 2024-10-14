@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -134,7 +136,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
             return typeParameter;
         }
 
-        var mappedSymbol = this.Map( ((TypeParameter) typeParameter).TypeParameterSymbol );
+        var mappedSymbol = this.Map( ((SourceTypeParameter) typeParameter).TypeParameterSymbol );
 
         return typeParameter.GetCompilationModel().Factory.GetIType( mappedSymbol );
     }
@@ -210,8 +212,8 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
         return (this.NamedTypeSymbol, this.MethodSymbol) switch
         {
             (null, null) => "GenericContext (Empty)",
-            (_, not null) => $"GenericContext Method={{{this.MethodSymbol.ToDisplayString()}}}",
-            _ => $"GenericContext Type={{{this.NamedTypeSymbol.ToDisplayString()}}}"
+            (_, not null) => $"GenericContext Method={{{this.MethodSymbol.ToDebugString()}}}",
+            _ => $"GenericContext Type={{{this.NamedTypeSymbol.ToDebugString()}}}"
         };
     }
 }

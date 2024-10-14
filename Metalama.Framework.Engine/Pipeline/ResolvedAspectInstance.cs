@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 
 namespace Metalama.Framework.Engine.Pipeline
 {

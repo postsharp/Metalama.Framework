@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -20,66 +20,73 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// </summary>
 internal sealed class RedirectPropertyTransformation : OverrideMemberTransformation
 {
-    private readonly IProperty _targetProperty;
+    private readonly IFullRef<IProperty> _targetProperty;
 
-    private new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
+    private readonly IFullRef<IProperty> _overriddenProperty;
 
-    public RedirectPropertyTransformation( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty )
-        : base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public RedirectPropertyTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IProperty> overriddenDeclaration,
+        IFullRef<IProperty> targetProperty )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
         this._targetProperty = targetProperty;
+        this._overriddenProperty = overriddenDeclaration;
     }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenProperty;
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        return new[]
-        {
+        var overriddenDeclaration = this._overriddenProperty.GetTarget( this.InitialCompilation );
+
+        return
+        [
             new InjectedMember(
                 this,
                 PropertyDeclaration(
                     List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
+                    overriddenDeclaration.GetSyntaxModifierList(),
+                    context.SyntaxGenerator.PropertyType( overriddenDeclaration )
                         .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(
-                            this.OverriddenDeclaration.DeclaringType,
-                            this.ParentAdvice.AspectLayerId,
-                            this.OverriddenDeclaration ) ),
+                            overriddenDeclaration.DeclaringType,
+                            this.AspectLayerId,
+                            overriddenDeclaration ) ),
                     AccessorList( List( GetAccessors() ) ),
                     null,
                     null ),
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
-        };
+                overriddenDeclaration.ToFullRef() )
+        ];
 
-        IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
+        IEnumerable<AccessorDeclarationSyntax> GetAccessors()
         {
             return new[]
                 {
-                    this.OverriddenDeclaration.GetMethod != null
+                    overriddenDeclaration.GetMethod != null
                         ? AccessorDeclaration(
                             SyntaxKind.GetAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.GetMethod.GetSyntaxModifierList(),
+                            overriddenDeclaration.GetMethod.GetSyntaxModifierList(),
                             CreateGetterBody(),
                             null )
                         : null,
-                    this.OverriddenDeclaration.SetMethod != null
+                    overriddenDeclaration.SetMethod != null
                         ? AccessorDeclaration(
-                            this.OverriddenDeclaration.Writeability != Writeability.InitOnly
+                            overriddenDeclaration.Writeability != Writeability.InitOnly
                                 ? SyntaxKind.SetAccessorDeclaration
                                 : SyntaxKind.InitAccessorDeclaration,
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.SetMethod.GetSyntaxModifierList(),
+                            overriddenDeclaration.SetMethod.GetSyntaxModifierList(),
                             CreateSetterBody(),
                             null )
                         : null
                 }.Where( a => a != null )
-                .AssertNoneNull()
-                .ToArray();
+                .AssertNoneNull();
         }
 
         BlockSyntax CreateGetterBody()
@@ -106,10 +113,13 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
         ExpressionSyntax CreateAccessTargetExpression()
         {
             return
-                this._targetProperty.IsStatic
-                    ? IdentifierName( this._targetProperty.Name )
-                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetProperty.Name ) )
-                        .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+                this._targetProperty.GetTarget( context.FinalCompilation ).IsStatic
+                    ? IdentifierName( this._targetProperty.Name.AssertNotNull() )
+                    : MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( this._targetProperty.Name.AssertNotNull() ) )
+                        .WithAspectReferenceAnnotation( this.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

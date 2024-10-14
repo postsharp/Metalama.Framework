@@ -42,5 +42,11 @@ namespace Metalama.Framework.Code
         bool HasDefaultConstructorConstraint { get; }
 
         new IRef<ITypeParameter> ToRef();
+
+        /// <summary>
+        /// Gets the concrete <see cref="IType"/> to which the type parameter is resolved, if the parent type or method
+        /// is a generic instance. If it is a generic definition, returns the current instance.
+        /// </summary>
+        IType ResolvedType { get; }
     }
 }

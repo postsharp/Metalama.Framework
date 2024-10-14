@@ -7,13 +7,12 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Aspects;
 
 internal sealed class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateClass>
 {
-    protected override IEnumerable<TemplateClassData> GetFrameworkClasses() => Enumerable.Empty<TemplateClassData>();
+    protected override IEnumerable<TemplateClassData> GetFrameworkClasses() => [];
 
     protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.OtherTemplateTypes;
 

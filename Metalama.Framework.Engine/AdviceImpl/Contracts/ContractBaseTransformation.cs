@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
@@ -17,43 +19,42 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
 {
     private readonly TemplateMember<IMethod> _template;
     private readonly IObjectReader _templateArguments;
-    private readonly IObjectReader _tags;
-
+    
     /// <summary>
     /// Gets the target member of the contract into which contract statements will be inserted.
     /// </summary>
-    public IMember TargetMember { get; }
+    public abstract IFullRef<IMember> TargetMember { get; }
 
     /// <summary>
     /// Gets the declaration on which the contract was applied on.
     /// </summary>
-    protected IDeclaration ContractTarget { get; }
+    protected IRef<IDeclaration> ContractTarget { get; }
 
     /// <summary>
     /// Gets the contract direction of inserted statements.
     /// </summary>
     protected ContractDirection ContractDirection { get; }
 
+    public TemplateProvider TemplateProvider { get; }
+
     protected ContractBaseTransformation(
-        Advice advice,
-        IMember targetMember,
-        IDeclaration contractTarget,
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IDeclaration> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
-        IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice )
+        TemplateProvider templateProvider,
+        IObjectReader templateArguments ) : base( aspectLayerInstance, contractTarget )
     {
         Invariant.Assert( contractDirection is not ContractDirection.None );
 
-        this.TargetMember = targetMember;
         this.ContractTarget = contractTarget;
         this.ContractDirection = contractDirection;
+        this.TemplateProvider = templateProvider;
         this._template = template;
         this._templateArguments = templateArguments;
-        this._tags = tags;
     }
 
-    public override IDeclaration TargetDeclaration => this.TargetMember;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public abstract IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 
@@ -67,31 +68,29 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
         var boundTemplate = this._template.ForContract( annotatedValueExpression, this._templateArguments );
 
         var metaApiProperties = new MetaApiProperties(
-            this.ParentAdvice.SourceCompilation,
+            this.InitialCompilation,
             context.DiagnosticSink,
-            this._template.Cast(),
-            this._tags,
-            this.ParentAdvice.AspectLayerId,
+            this._template.AsMemberOrNamedType(),
+            this.AspectLayerId,
             context.SyntaxGenerationContext,
-            this.ParentAdvice.AspectInstance,
+            this.AspectInstance,
             context.ServiceProvider,
             MetaApiStaticity.Default );
 
         var metaApi = MetaApi.ForDeclaration(
-            this.ContractTarget,
+            this.ContractTarget.GetTarget( context.FinalCompilation ),
             metaApiProperties,
             this.ContractDirection );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.TargetMember,
+            this.TargetMember.GetTarget( context.FinalCompilation ),
             boundTemplate,
             null,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this._template.Declaration );
+        var templateDriver = this._template.Driver;
 
         return templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out contractBlock );
     }
@@ -99,4 +98,6 @@ internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformatio
     public override TransformationObservability Observability => TransformationObservability.None;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.InsertStatement;
+
+    public override string ToString() => $"{this.GetType().Name} ContractTarget={{{this.ContractTarget}}}";
 }

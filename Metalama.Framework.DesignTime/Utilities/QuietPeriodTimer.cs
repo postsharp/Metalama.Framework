@@ -169,7 +169,7 @@ internal sealed class QuietPeriodTimer : IDisposable
 
     public event EventHandler? Tick;
 
-    public readonly struct PauseCookie : IDisposable
+    public readonly struct PauseCookie : IDisposable, IEquatable<PauseCookie>
     {
         private readonly QuietPeriodTimer _parent;
 
@@ -179,5 +179,11 @@ internal sealed class QuietPeriodTimer : IDisposable
         }
 
         public void Dispose() => this._parent.Resume( this );
+
+        public bool Equals( PauseCookie other ) => this._parent.Equals( other._parent );
+
+        public override bool Equals( object? obj ) => obj is PauseCookie other && this.Equals( other );
+
+        public override int GetHashCode() => this._parent.GetHashCode();
     }
 }

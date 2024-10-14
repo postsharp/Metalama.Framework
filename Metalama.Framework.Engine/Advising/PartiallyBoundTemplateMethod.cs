@@ -20,7 +20,7 @@ internal sealed class PartiallyBoundTemplateMethod
     /// <summary>
     /// Gets the template declaration.
     /// </summary>
-    public IMethod Declaration => this.TemplateMember.Declaration;
+    public IRef<IMethod> Declaration => this.TemplateMember.DeclarationRef;
 
     /// <summary>
     /// Gets arguments of the template.
@@ -32,7 +32,12 @@ internal sealed class PartiallyBoundTemplateMethod
     /// </summary>
     public object?[] TypeArguments { get; }
 
-    public PartiallyBoundTemplateMethod( TemplateMember<IMethod> template, object?[] typeArguments, IObjectReader? argumentReader )
+    public TemplateProvider TemplateProvider => this.TemplateMember.TemplateProvider;
+
+    public PartiallyBoundTemplateMethod(
+        TemplateMember<IMethod> template,
+        object?[] typeArguments,
+        IObjectReader? argumentReader )
     {
         this.TemplateMember = template;
         this.TemplateArguments = argumentReader;

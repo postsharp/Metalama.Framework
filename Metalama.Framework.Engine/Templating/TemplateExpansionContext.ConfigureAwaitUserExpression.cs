@@ -32,7 +32,7 @@ internal sealed partial class TemplateExpansionContext
             {
                 var expressionType = (INamedType) this._expression.Type;
 
-                return expressionType.Methods.OfExactSignature( nameof(Task.ConfigureAwait), new[] { TypeFactory.GetType( SpecialType.Boolean ) } )!.ReturnType;
+                return expressionType.Methods.OfExactSignature( nameof(Task.ConfigureAwait), [TypeFactory.GetType( SpecialType.Boolean )] )!.ReturnType;
             }
         }
 

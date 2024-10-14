@@ -1,13 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -19,9 +14,8 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
     public OverrideFieldOrPropertyAdvice(
         AdviceConstructorParameters<IFieldOrProperty> parameters,
         BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
-        IObjectReader tags )
-        : base( parameters, tags )
+        BoundTemplateMethod? setTemplate )
+        : base( parameters )
     {
         this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
         this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
@@ -29,23 +23,19 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
-    protected override OverrideMemberAdviceResult<IProperty> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IProperty> Implement( in AdviceImplementationContext context )
     {
         // TODO: Translate templates to this compilation.
         // TODO: order should be self if the target is introduced on the same layer.
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var promotedField = OverrideHelper.OverrideProperty(
-            serviceProvider,
-            this,
-            targetDeclaration.ForCompilation( compilation ).AssertNotNull(),
+            context.ServiceProvider,
+            this.AspectLayerInstance,
+            targetDeclaration,
             this._getTemplate,
             this._setTemplate,
-            this.Tags,
-            addTransformation );
+            context.AddTransformation );
 
         return this.CreateSuccessResult( promotedField );
     }

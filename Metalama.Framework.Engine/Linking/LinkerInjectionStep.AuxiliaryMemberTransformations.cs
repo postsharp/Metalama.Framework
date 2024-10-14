@@ -29,7 +29,7 @@ internal sealed partial class LinkerInjectionStep
 
         public void InjectAuxiliaryContractMember( IInsertStatementTransformation originTransformation, string? returnVariableName )
         {
-            this._auxiliaryContractMembers ??= new List<(IInsertStatementTransformation, string?)>();
+            this._auxiliaryContractMembers ??= [];
             this._auxiliaryContractMembers.Add( (originTransformation, returnVariableName) );
         }
     }

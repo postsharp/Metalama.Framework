@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;
 
         public static ISymbol? GetSymbol( this IRef declaration, Compilation compilation, bool ignoreAssemblyKey = false )
-            => ((ISdkRef<ICompilationElement>) declaration).GetSymbol( compilation, ignoreAssemblyKey );
+            => ((ISdkRef) declaration).GetSymbol( compilation, ignoreAssemblyKey );
 
         private static T? GetSymbol<T>( this IDeclaration declaration )
             where T : ISymbol
@@ -82,11 +82,17 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return declaration;
         }
-        
+
         // We don't use ISymbol.IsDefinition because it uses identity comparison to give its result, while we want
         // to be tolerance to non-identical but equal instances.
-        public static bool IsDefinitionSafe( this ISymbol symbol )
-            => symbol.Equals( symbol.OriginalDefinition );
+        public static bool IsDefinitionSafe( this ISymbol symbol ) => symbol.Equals( symbol.OriginalDefinition );
+
+        public static string ToDebugString( this ISymbol symbol )
+            => symbol switch
+            {
+                IParameterSymbol parameter => parameter.ContainingSymbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ) + "/" + parameter.Name,
+                _ => symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )
+            };
 
         private sealed class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
         {

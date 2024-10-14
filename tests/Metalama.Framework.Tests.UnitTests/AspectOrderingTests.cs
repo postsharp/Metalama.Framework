@@ -346,10 +346,11 @@ class Aspect3 : TypeAspect { }
 
             var random = new Random( 45 );
 
-            var stringBuilder = new StringBuilder( """
-                                                   using Metalama.Framework.Aspects;
+            var stringBuilder = new StringBuilder(
+                """
+                using Metalama.Framework.Aspects;
 
-                                                   """ );
+                """ );
 
             const int n = 17;
 

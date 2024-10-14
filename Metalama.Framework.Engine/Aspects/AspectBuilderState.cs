@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
@@ -16,7 +17,9 @@ namespace Metalama.Framework.Engine.Aspects;
 internal sealed class AspectBuilderState
 {
     private readonly AdviceFactoryState _adviceFactoryState;
-    
+    private readonly ObjectReaderFactory _objectReaderFactory;
+    private readonly IObjectReader _defaultTagReader;
+
     public ProjectServiceProvider ServiceProvider { get; }
 
     public UserDiagnosticSink Diagnostics { get; }
@@ -34,7 +37,7 @@ internal sealed class AspectBuilderState
     public IAspectInstanceInternal AspectInstance { get; }
 
     public string? Layer { get; }
-    
+
     public object? Tags { get; set; }
 
     public AspectBuilderState(
@@ -54,6 +57,20 @@ internal sealed class AspectBuilderState
         this.CancellationToken = cancellationToken;
         this._adviceFactoryState = adviceFactoryState;
         this.Layer = layer;
+        this._objectReaderFactory = serviceProvider.GetRequiredService<ObjectReaderFactory>();
+        this._defaultTagReader = this._objectReaderFactory.GetLazyReader( null, () => this.Tags );
+    }
+
+    internal IObjectReader GetTagsReader( object? tags )
+    {
+        if ( tags == null )
+        {
+            return this._defaultTagReader;
+        }
+        else
+        {
+            return this._objectReaderFactory.GetLazyReader( tags, () => this.Tags );
+        }
     }
 
     internal AspectInstanceResult ToResult()

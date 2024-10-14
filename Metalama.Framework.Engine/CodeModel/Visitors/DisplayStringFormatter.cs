@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,13 +10,17 @@ namespace Metalama.Framework.Engine.CodeModel.Visitors;
 
 internal class DisplayStringFormatter : CompilationElementVisitor
 {
+    private readonly CodeDisplayFormat _format;
     private readonly StringBuilder _stringBuilder = new();
 
-    private DisplayStringFormatter() { }
-
-    public static string Format( ICompilationElement element )
+    private DisplayStringFormatter( CodeDisplayFormat? format )
     {
-        var formatter = new DisplayStringFormatter();
+        this._format = format ?? CodeDisplayFormat.ShortDiagnosticMessage;
+    }
+
+    public static string Format( ICompilationElement element, CodeDisplayFormat? format, CodeDisplayContext? context )
+    {
+        var formatter = new DisplayStringFormatter( format );
         formatter.Visit( element );
 
         return formatter.ToString();
@@ -59,15 +64,18 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
     public override void VisitConstructor( IConstructor declaration )
     {
-        this.VisitNamedType( declaration.DeclaringType );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
 
         if ( declaration.IsStatic )
         {
-            this.Append( "..cctor" );
+            this.Append( "cctor" );
         }
         else
         {
-            this.Append( "." );
             this.Append( declaration.DeclaringType.Name );
         }
 
@@ -83,10 +91,28 @@ internal class DisplayStringFormatter : CompilationElementVisitor
         this.Append( "]" );
     }
 
+    private void PrintDeclarationName( IMember member )
+    {
+        if ( member.IsExplicitInterfaceImplementation )
+        {
+            var interfaceMember = member.GetExplicitInterfaceImplementation();
+            this.Append( interfaceMember.DeclaringType.Name );
+            this.Append( "." );
+            this.Append( interfaceMember.Name );
+        }
+        else
+        {
+            this.Append( member.Name );
+        }
+    }
+
     public override void VisitParameter( IParameter declaration )
     {
-        this.Visit( declaration.DeclaringMember );
-        this.Append( "@" );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringMember );
+            this.Append( "@" );
+        }
 
         if ( declaration.IsReturnParameter )
         {
@@ -100,66 +126,86 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
     public override void VisitIndexer( IIndexer declaration )
     {
-        this.VisitNamedType( declaration.DeclaringType );
-        this.Append( ".this[" );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+
+        this.Append( "this[" );
         this.VisitParameterList( declaration.Parameters );
         this.Append( "]" );
     }
 
     public override void VisitEvent( IEvent declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
-        this.Append( declaration.Name );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+
+        this.PrintDeclarationName( declaration );
     }
 
     public override void VisitField( IField declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+
         this.Append( declaration.Name );
     }
 
     public override void VisitProperty( IProperty declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
-        this.Append( declaration.Name );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
+
+        this.PrintDeclarationName( declaration );
     }
 
     public override void VisitMethod( IMethod declaration )
     {
-        this.Visit( declaration.DeclaringType );
-        this.Append( "." );
+        if ( this._format.IncludeParent )
+        {
+            this.Visit( declaration.DeclaringType );
+            this.Append( "." );
+        }
 
         switch ( declaration.MethodKind )
         {
             case MethodKind.PropertyGet:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".get" );
 
                 break;
 
             case MethodKind.PropertySet:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".set" );
 
                 break;
 
             case MethodKind.EventAdd:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".add" );
 
                 break;
 
             case MethodKind.EventRemove:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".remove" );
 
                 break;
 
             case MethodKind.EventRaise:
-                this.Append( declaration.DeclaringMember!.Name );
+                this.PrintDeclarationName( declaration.DeclaringMember! );
                 this.Append( ".raise" );
 
                 break;
@@ -171,7 +217,7 @@ internal class DisplayStringFormatter : CompilationElementVisitor
                 break;
 
             default:
-                this.Append( declaration.Name );
+                this.PrintDeclarationName( declaration );
 
                 break;
         }

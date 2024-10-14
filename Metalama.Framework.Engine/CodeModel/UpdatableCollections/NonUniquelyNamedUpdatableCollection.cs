@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,7 +20,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : MemberUpdatable
     private ImmutableDictionary<string, MemberRefUpdatableArray<T>> GetInitializedByNameDictionary()
         => this._byNameDictionary ??= ImmutableDictionary<string, MemberRefUpdatableArray<T>>.Empty.WithComparers( StringComparer.Ordinal );
 
-    public override ImmutableArray<IRef<T>> OfName( string name )
+    public override ImmutableArray<IFullRef<T>> OfName( string name )
     {
         var byName = this.GetInitializedByNameDictionary();
 
@@ -39,11 +40,11 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : MemberUpdatable
         }
         else
         {
-            return ImmutableArray<IRef<T>>.Empty;
+            return ImmutableArray<IFullRef<T>>.Empty;
         }
     }
 
-    protected override void PopulateAllItems( Action<IRef<T>> action )
+    protected override void PopulateAllItems( Action<IFullRef<T>> action )
     {
         var byNameDictionary = this.GetInitializedByNameDictionary();
         var byNameDictionaryBuilder = byNameDictionary.ToBuilder();
@@ -86,7 +87,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : MemberUpdatable
         this._byNameDictionary = byNameDictionaryBuilder.ToImmutable();
     }
 
-    public void Add( IRef<T> member )
+    public void Add( IFullRef<T> member )
     {
         var name = member.Name.AssertNotNull();
 
@@ -132,7 +133,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : MemberUpdatable
     // TODO: Verify why Remove is never called.
     // Resharper disable UnusedMember.Global
 
-    public void Remove( IRef<T> member )
+    public void Remove( IFullRef<T> member )
     {
         var byNameDictionary = this.GetInitializedByNameDictionary();
 

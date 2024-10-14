@@ -12,8 +12,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining;
 internal sealed class InlinerProvider
 {
     // TODO: Expression body inliners are disabled because substitution generator does not handle them well.
-    private readonly Inliner[] _inliners = new Inliner[]
-    {
+    private readonly Inliner[] _inliners =
+    [
         new MethodAssignmentInliner(),
         new MethodLocalDeclarationInliner(),
         new MethodReturnStatementInliner(),
@@ -32,7 +32,7 @@ internal sealed class InlinerProvider
         new EventAddAssignmentInliner(),
         new EventRemoveAssignmentInliner(),
         new ConstructorInliner()
-    };
+    ];
 
     public bool TryGetInliner( ResolvedAspectReference aspectReference, SemanticModel semanticModel, out Inliner? inliner )
     {

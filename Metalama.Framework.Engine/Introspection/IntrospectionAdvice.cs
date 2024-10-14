@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
@@ -32,7 +33,7 @@ internal sealed class IntrospectionAdvice : IIntrospectionAdvice
 
     public AdviceKind AdviceKind => this._advice.AdviceKind;
 
-    public IDeclaration TargetDeclaration => this._advice.TargetDeclaration.GetTarget( this._compilation );
+    public IDeclaration TargetDeclaration => this._advice.TargetDeclaration.Translate( this._compilation );
 
     public string AspectLayerId => this._advice.AspectLayerId.ToString();
 

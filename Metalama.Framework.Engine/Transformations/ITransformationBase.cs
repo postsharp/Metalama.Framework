@@ -11,9 +11,12 @@ public interface ITransformationBase
 {
     IAspectClass AspectClass { get; }
 
-    IDeclaration TargetDeclaration { get; }
+    IRef<IDeclaration> TargetDeclaration { get; }
 
     IntrospectionTransformationKind TransformationKind { get; }
 
-    FormattableString ToDisplayString();
+    /// <summary>
+    /// Gets a human-readable description of the transformation, to be displayed in the UI.
+    /// </summary>
+    FormattableString? ToDisplayString();
 }

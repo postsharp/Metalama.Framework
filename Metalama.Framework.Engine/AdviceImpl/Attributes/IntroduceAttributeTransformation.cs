@@ -1,37 +1,33 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransformation, IIntroduceDeclarationTransformation
 {
-    public AttributeBuilder AttributeBuilder { get; }
+    public AttributeBuilderData BuilderData { get; }
 
-    public IntroduceAttributeTransformation( Advice advice, AttributeBuilder attributeBuilder ) : base( advice )
+    public IntroduceAttributeTransformation( AspectLayerInstance aspectLayerInstance, AttributeBuilderData builderData ) : base(
+        aspectLayerInstance,
+        builderData.ContainingDeclaration )
     {
-        this.AttributeBuilder = attributeBuilder;
+        this.BuilderData = builderData;
     }
 
-    public override IDeclaration TargetDeclaration => this.AttributeBuilder.ContainingDeclaration;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.BuilderData.ContainingDeclaration;
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceAttribute;
 
-    public IDeclarationBuilder DeclarationBuilder => this.AttributeBuilder;
+    public DeclarationBuilderData DeclarationBuilderData => this.BuilderData;
 
-    public override SyntaxTree TransformedSyntaxTree
-        => this.DeclarationBuilder.ContainingDeclaration.AssertNotNull().GetPrimarySyntaxTree()
-           ?? ((CompilationModel) this.DeclarationBuilder.Compilation).PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
-
-    public override FormattableString ToDisplayString() => $"Introduce attribute of type '{this.AttributeBuilder.Type}' into '{this.TargetDeclaration}'";
+    public override FormattableString ToDisplayString() => $"Introduce attribute of type '{this.BuilderData.Type}' into '{this.TargetDeclaration.Definition.ToDisplayString()}'";
 }

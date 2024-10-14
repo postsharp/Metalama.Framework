@@ -59,5 +59,12 @@ namespace Metalama.Framework.Code
         EventInfo ToEventInfo();
 
         new IRef<IEvent> ToRef();
+
+        /// <summary>
+        /// Gets the initializer expression (i.e. the expression at the right hand of the equal sign) of the field-like event, if any.
+        /// When the event is defined in source code, this property returns an <see cref="ISourceExpression"/>, which
+        /// exposes a <see cref="TypedConstant"/> when possible.
+        /// </summary>
+        IExpression? InitializerExpression { get; }
     }
 }

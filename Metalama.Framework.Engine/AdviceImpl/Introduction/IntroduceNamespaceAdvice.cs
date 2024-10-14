@@ -2,38 +2,39 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INamespace, NamespaceBuilder>
 {
+    private readonly string _name;
+
     public override AdviceKind AdviceKind => AdviceKind.IntroduceNamespace;
 
     public IntroduceNamespaceAdvice(
         AdviceConstructorParameters<INamespace> parameters,
         string name ) : base( parameters, null )
     {
-        this.Builder = new NamespaceBuilder( this, parameters.TargetDeclaration.AssertNotNull(), name );
+        this._name = name;
     }
 
-    protected override IntroductionAdviceResult<INamespace> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override NamespaceBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.As<INamespace>().GetTarget( compilation );
-        var existingNamespace = targetDeclaration.Namespaces.OfName( this.Builder.Name );
+        return new NamespaceBuilder( this.AspectLayerInstance, (INamespace) this.TargetDeclaration.AssertNotNull(), this._name );
+    }
+
+    protected override IntroductionAdviceResult<INamespace> ImplementCore( NamespaceBuilder builder, in AdviceImplementationContext context )
+    {
+        builder.Freeze();
+        var targetDeclaration = (INamespace) this.TargetDeclaration.ForCompilation( context.MutableCompilation );
+        var existingNamespace = targetDeclaration.Namespaces.OfName( builder.Name );
 
         if ( existingNamespace == null )
         {
-            addTransformation( this.Builder.ToTransformation() );
+            context.AddTransformation( builder.CreateTransformation() );
 
-            return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {

@@ -3,6 +3,7 @@
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;

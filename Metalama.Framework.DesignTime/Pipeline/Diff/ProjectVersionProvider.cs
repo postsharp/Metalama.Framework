@@ -91,7 +91,7 @@ internal sealed partial class ProjectVersionProvider : IGlobalService, IDisposab
                 if ( !dependencyGraph.DependenciesByMasterProject.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
                 {
                     // There is no dependency on this compilation, but we still process it in case there are global attributes.
-                    dependenciesOfCompilation = new( currentCompilationChanges.ProjectKey );
+                    dependenciesOfCompilation = new DependencyGraphByDependentProject( currentCompilationChanges.ProjectKey );
                 }
 
                 var invalidatedAllTrees = false;
@@ -122,6 +122,7 @@ internal sealed partial class ProjectVersionProvider : IGlobalService, IDisposab
                         }
 
                         invalidatedAllTrees = true;
+
                         continue;
                     }
 

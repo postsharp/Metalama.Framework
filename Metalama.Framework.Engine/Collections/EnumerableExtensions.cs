@@ -70,5 +70,13 @@ namespace Metalama.Framework.Engine.Collections
         public static IEnumerable<T> ConcatNotNull<T>( this IEnumerable<T> a, T? b )
             where T : class
             => b == null ? a : a.Concat( b );
+
+        public static IEnumerable<T> AsEnumerable<T>( this Array array )
+        {
+            for ( var i = 0; i < array.Length; i++ )
+            {
+                yield return (T) array.GetValue( i )!;
+            }
+        }
     }
 }

@@ -4,14 +4,15 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class PipelineResultBasedAspectRepository : AspectRepository
 {
-    private readonly AspectPipelineResult _result;
+    private readonly DesignTimeAspectPipelineResult _result;
 
-    public PipelineResultBasedAspectRepository( AspectPipelineResult result )
+    public PipelineResultBasedAspectRepository( DesignTimeAspectPipelineResult result )
     {
         this._result = result;
     }

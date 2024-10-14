@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,20 +15,25 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal sealed class SymbolAttributeRef : AttributeRef
 {
     private readonly AttributeData _attributeData;
+    private readonly IFullRef<IDeclaration> _containingDeclaration;
+    private readonly RefFactory _refFactory;
 
-    public SymbolAttributeRef( AttributeData attributeData, IRef<IDeclaration> containingDeclaration, CompilationContext compilationContext )
-        : base(
-            containingDeclaration,
-            compilationContext.RefFactory.FromSymbol<INamedType>(
-                attributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes )
-                    .TranslateIfNecessary( compilationContext ) ),
-            compilationContext )
+    public SymbolAttributeRef( AttributeData attributeData, IFullRef<IDeclaration> containingDeclaration, RefFactory refFactory )
     {
         // Note that Roslyn can return an AttributeData that does not belong to the same compilation
         // as the parent symbol, probably because of some bug or optimisation.
 
         this._attributeData = attributeData;
+        this._containingDeclaration = containingDeclaration;
+        this._refFactory = refFactory;
     }
+
+    public override IRef<IDeclaration> ContainingDeclaration => this._containingDeclaration;
+
+    public override IRef<INamedType> AttributeType
+        => this._refFactory.FromSymbol<INamedType>(
+            this._attributeData.AttributeClass.AssertSymbolNotNull()
+                .TranslateIfNecessary( this._refFactory.CompilationContext ) );
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {
@@ -40,7 +45,7 @@ internal sealed class SymbolAttributeRef : AttributeRef
             return false;
         }
 
-        attribute = new Attribute( this._attributeData, compilation, this.ContainingDeclaration.GetTarget( compilation ) );
+        attribute = new SourceAttribute( this._attributeData, compilation, this.ContainingDeclaration.GetTarget( compilation ) );
 
         return true;
     }
@@ -63,9 +68,9 @@ internal sealed class SymbolAttributeRef : AttributeRef
         }
 
         serializationData = new AttributeSerializationData(
-            this.ContainingDeclaration.GetSymbol( this.CompilationContext.Compilation ).AssertSymbolNotNull(),
+            this.ContainingDeclaration.GetSymbol( this._refFactory.CompilationContext.Compilation ).AssertSymbolNotNull(),
             this._attributeData,
-            this.CompilationContext );
+            this._refFactory );
 
         return true;
     }

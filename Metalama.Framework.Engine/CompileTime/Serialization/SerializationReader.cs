@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -27,7 +28,6 @@ internal sealed class SerializationReader
     private readonly InstanceFields _emptyInstanceFields;
 
     internal SerializationReader(
-        in ProjectServiceProvider serviceProvider,
         Stream stream,
         CompileTimeSerializer formatter,
         bool shouldReportExceptionCause,

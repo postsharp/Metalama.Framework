@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -12,23 +14,33 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilder>
+internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilderData>
 {
-    public IntroduceFieldTransformation( Advice advice, FieldBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    private readonly TemplateMember<IField>? _template;
+
+    public IntroduceFieldTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        FieldBuilderData introducedDeclaration,
+        TemplateMember<IField>? template ) : base(
+        aspectLayerInstance,
+        introducedDeclaration )
+    {
+        this._template = template;
+    }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-        var fieldBuilder = this.IntroducedDeclaration;
+        var fieldBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
 
         // If template fails to expand, we will still generate the field, albeit without the initializer.
-        _ = fieldBuilder.GetInitializerExpressionOrMethod(
-            this.ParentAdvice,
+        _ = AdviceSyntaxGenerator.GetInitializerExpressionOrMethod(
+            fieldBuilder,
+            this.AspectLayerInstance,
             context,
             fieldBuilder.Type,
             fieldBuilder.InitializerExpression,
-            fieldBuilder.InitializerTemplate,
-            fieldBuilder.InitializerTags,
+            this._template?.GetInitializerTemplate(),
             out var initializerExpression,
             out var initializerMethod );
 
@@ -42,7 +54,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
 
         var field =
             FieldDeclaration(
-                fieldBuilder.GetAttributeLists( context ),
+                AdviceSyntaxGenerator.GetAttributeLists( fieldBuilder, context ),
                 fieldBuilder.GetSyntaxModifierList(),
                 VariableDeclaration(
                     syntaxGenerator.Type( fieldBuilder.Type )
@@ -57,20 +69,20 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
 
         if ( initializerMethod != null )
         {
-            return new[]
-            {
-                new InjectedMember( this, field, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, fieldBuilder ),
+            return
+            [
+                new InjectedMember( this, field, this.AspectLayerId, InjectedMemberSemantic.Introduction, this.BuilderData.ToRef() ),
                 new InjectedMember(
                     this,
                     initializerMethod,
-                    this.ParentAdvice.AspectLayerId,
+                    this.AspectLayerId,
                     InjectedMemberSemantic.InitializerMethod,
-                    fieldBuilder )
-            };
+                    this.BuilderData.ToRef() )
+            ];
         }
         else
         {
-            return new[] { new InjectedMember( this, field, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, fieldBuilder ) };
+            return [new InjectedMember( this, field, this.AspectLayerId, InjectedMemberSemantic.Introduction, this.BuilderData.ToRef() )];
         }
     }
 }

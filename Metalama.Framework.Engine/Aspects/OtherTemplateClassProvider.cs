@@ -15,5 +15,5 @@ internal sealed class OtherTemplateClassProvider : IProjectService
         this._otherTemplateClasses = otherTemplateClasses;
     }
 
-    public TemplateClass Get( TemplateProvider templateProvider ) => this._otherTemplateClasses[templateProvider.Type.FullName.AssertNotNull()];
+    public TemplateClass Get( TemplateProvider templateProvider ) => this._otherTemplateClasses[templateProvider.Type.AssertNotNull().FullName.AssertNotNull()];
 }

@@ -9,13 +9,13 @@ internal static class TypeParameterSymbolDetector
 {
     public static ISymbol? GetTypeContext( ITypeSymbol type ) => Visitor.Instance.Visit( type )?.ContainingSymbol;
 
-    private class Visitor : SymbolVisitor<ITypeParameterSymbol?>
+    private sealed class Visitor : SymbolVisitor<ITypeParameterSymbol?>
     {
         public static Visitor Instance { get; } = new();
 
         private Visitor() { }
 
-        public override ITypeParameterSymbol? DefaultVisit( ISymbol symbol ) => throw new NotImplementedException();
+        public override ITypeParameterSymbol DefaultVisit( ISymbol symbol ) => throw new NotImplementedException();
 
         public override ITypeParameterSymbol? VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType );
 
@@ -49,6 +49,6 @@ internal static class TypeParameterSymbolDetector
 
         public override ITypeParameterSymbol? VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => null;
 
-        public override ITypeParameterSymbol? VisitTypeParameter( ITypeParameterSymbol symbol ) => symbol;
+        public override ITypeParameterSymbol VisitTypeParameter( ITypeParameterSymbol symbol ) => symbol;
     }
 }

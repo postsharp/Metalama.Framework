@@ -3,12 +3,13 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -19,8 +20,11 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
 {
     private BoundTemplateMethod BoundTemplate { get; }
 
-    public OverrideMethodTransformation( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, targetMethod, tags )
+    public OverrideMethodTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IMethod> targetMethod,
+        BoundTemplateMethod boundTemplate )
+        : base( aspectLayerInstance, targetMethod )
     {
         this.BoundTemplate = boundTemplate;
     }
@@ -32,34 +36,34 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
             return this.CreateProceedExpression( context, kind );
         }
 
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( this.InitialCompilation );
+
         var metaApi = MetaApi.ForMethod(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
-                this.BoundTemplate.TemplateMember.Cast(),
-                this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             this.BoundTemplate,
             ProceedExpressionProvider,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
+        var templateDriver = this.BoundTemplate.TemplateMember.Driver;
 
         if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
         return this.GetInjectedMembersImpl( context, newMethodBody, this.BoundTemplate.TemplateMember.MustInterpretAsAsyncTemplate() );

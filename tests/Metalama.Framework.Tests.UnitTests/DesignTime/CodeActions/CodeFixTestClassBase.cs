@@ -9,16 +9,14 @@ using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using Metalama.Framework.DesignTime.Utilities;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.CodeActions;
 
-public abstract class CodeFixTestClassBase : FrameworkBaseTestClass, IDisposable
+public abstract class CodeFixTestClassBase : FrameworkBaseTestClass
 {
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
@@ -28,7 +26,9 @@ public abstract class CodeFixTestClassBase : FrameworkBaseTestClass, IDisposable
     }
 
     private protected static async Task<(ImmutableArray<Diagnostic> diagnostics, GlobalServiceProvider serviceProvider)> ExecutePipelineAsync(
-        TestContext testContext, TestWorkspaceProvider workspace, TestDesignTimeAspectPipelineFactory pipelineFactory )
+        TestContext testContext,
+        TestWorkspaceProvider workspace,
+        TestDesignTimeAspectPipelineFactory pipelineFactory )
     {
         var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
 
@@ -46,7 +46,10 @@ public abstract class CodeFixTestClassBase : FrameworkBaseTestClass, IDisposable
     }
 
     private protected static async Task<(TestCodeFixContext codeFixContext, TestCodeRefactoringContext riderRefactoringContext)> QueryCodeFixesAsync(
-        TestWorkspaceProvider workspace, GlobalServiceProvider serviceProvider, ImmutableArray<Diagnostic> diagnostics, string targetTokenText )
+        TestWorkspaceProvider workspace,
+        GlobalServiceProvider serviceProvider,
+        ImmutableArray<Diagnostic> diagnostics,
+        string targetTokenText )
     {
         var document = workspace.GetDocument( "target", "code.cs" );
         var syntaxRoot = await document.GetSyntaxRootAsync();
@@ -56,7 +59,10 @@ public abstract class CodeFixTestClassBase : FrameworkBaseTestClass, IDisposable
     }
 
     private protected static async Task<(TestCodeFixContext codeFixContext, TestCodeRefactoringContext riderRefactoringContext)> QueryCodeFixesAsync(
-        TestWorkspaceProvider workspace, GlobalServiceProvider serviceProvider, ImmutableArray<Diagnostic> diagnostics, TextSpan span)
+        TestWorkspaceProvider workspace,
+        GlobalServiceProvider serviceProvider,
+        ImmutableArray<Diagnostic> diagnostics,
+        TextSpan span )
     {
         var document = workspace.GetDocument( "target", "code.cs" );
 

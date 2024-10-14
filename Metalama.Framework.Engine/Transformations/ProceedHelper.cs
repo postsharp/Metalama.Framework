@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -27,8 +27,8 @@ internal static class ProceedHelper
         TemplateKind selectedTemplateKind,
         IMethod overriddenMethod )
     {
-        var runtimeAspectHelperType =
-            generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
+        TypeSyntax GetRuntimeAspectHelperTypeSyntax()
+            => generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
         switch ( selectedTemplateKind )
         {
@@ -47,7 +47,7 @@ internal static class ProceedHelper
                             InvocationExpression(
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
-                                        runtimeAspectHelperType,
+                                        GetRuntimeAspectHelperTypeSyntax(),
                                         IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
                                 .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
                                 .WithSimplifierAnnotationIfNecessary( generationContext );
@@ -127,7 +127,7 @@ internal static class ProceedHelper
                 InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            runtimeAspectHelperType,
+                            GetRuntimeAspectHelperTypeSyntax(),
                             IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                     .WithArgumentList( arguments )
                     .WithSimplifierAnnotationIfNecessary( generationContext );

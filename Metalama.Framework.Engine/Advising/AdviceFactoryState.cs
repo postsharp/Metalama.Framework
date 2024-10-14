@@ -18,13 +18,15 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
     private readonly ProjectServiceProvider _serviceProvider;
     private int _nextTransformationOrder;
 
-    public CompilationModel CurrentCompilation { get; }
+    public CompilationModel MutableCompilation { get; }
 
-    public IAspectInstanceInternal AspectInstance { get; }
+    public IAspectInstanceInternal AspectInstance => this.AspectLayerInstance.AspectInstance;
+
+    public AspectLayerInstance AspectLayerInstance { get; }
 
     public ref readonly ProjectServiceProvider ServiceProvider => ref this._serviceProvider;
 
-    public CompilationModel InitialCompilation { get; }
+    public CompilationModel InitialCompilation => this.AspectLayerInstance.InitialCompilation;
 
     public IDiagnosticAdder Diagnostics { get; }
 
@@ -38,9 +40,8 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
 
     public AdviceFactoryState(
         in ProjectServiceProvider serviceProvider,
-        CompilationModel initialCompilation,
+        AspectLayerInstance aspectLayerInstance,
         CompilationModel currentCompilation,
-        IAspectInstanceInternal aspectInstance,
         IDiagnosticAdder diagnostics,
         UserCodeExecutionContext executionContext,
         int pipelineStepIndex,
@@ -48,9 +49,8 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
     {
         this._pipelineStepIndex = pipelineStepIndex;
         this._orderWithinType = orderWithinType;
-        this.InitialCompilation = initialCompilation;
-        this.CurrentCompilation = currentCompilation;
-        this.AspectInstance = aspectInstance;
+        this.AspectLayerInstance = aspectLayerInstance;
+        this.MutableCompilation = currentCompilation;
         this._serviceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
@@ -65,7 +65,7 @@ internal sealed class AdviceFactoryState : IAdviceExecutionContext
         {
             if ( transformation.Observability != TransformationObservability.None )
             {
-                this.CurrentCompilation.AddTransformation( transformation );
+                this.MutableCompilation.AddTransformation( transformation );
 
                 if ( transformation is ISyntaxTreeTransformation syntaxTreeTransformation )
                 {

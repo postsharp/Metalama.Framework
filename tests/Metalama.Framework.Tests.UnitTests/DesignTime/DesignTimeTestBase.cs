@@ -4,12 +4,11 @@ using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using System;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public abstract class DesignTimeTestBase : FrameworkBaseTestClass, IDisposable
+public abstract class DesignTimeTestBase : FrameworkBaseTestClass
 {
     protected DesignTimeTestBase( ITestOutputHelper? logger = null ) : base( logger ) { }
 

@@ -27,6 +27,6 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         new IMethodBuilder? RaiseMethod { get; }
 
-        IExpression? InitializerExpression { get; set; }
+        new IExpression? InitializerExpression { get; set; }
     }
 }

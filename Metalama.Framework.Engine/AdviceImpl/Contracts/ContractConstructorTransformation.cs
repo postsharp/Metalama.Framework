@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,20 +15,29 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractConstructorTransformation : ContractBaseTransformation
 {
-    private new IConstructor TargetMember => (IConstructor) base.TargetMember;
+    private readonly IFullRef<IConstructor> _targetConstructor;
 
     public ContractConstructorTransformation(
-        Advice advice,
-        IConstructor targetConstructor,
-        IParameter contractTarget,
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IConstructor> targetConstructor,
+        IFullRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetConstructor, contractTarget, contractDirection, template, templateArguments, tags ) { }
+        TemplateProvider templateProvider ) : base(
+        aspectLayerInstance,
+        contractTarget,
+        contractDirection,
+        template,
+        templateProvider,
+        templateArguments )
+    {
+        this._targetConstructor = targetConstructor;
+    }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget )
+        switch ( this.ContractTarget.GetTarget( context.FinalCompilation ) )
         {
             case IParameter param:
                 {
@@ -82,6 +93,8 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
                 throw new AssertionFailedException( $"Unsupported contract target: {this.ContractTarget}" );
         }
     }
+
+    public override IFullRef<IMember> TargetMember => this._targetConstructor;
 
     public override FormattableString ToDisplayString() => $"Add default contract to constructor '{this.TargetMember}'";
 }

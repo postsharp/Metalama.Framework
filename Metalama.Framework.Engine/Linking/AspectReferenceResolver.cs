@@ -3,8 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Comparers;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
@@ -182,7 +183,7 @@ internal sealed class AspectReferenceResolver
             || overrideIndices.Any( x => x.Index == resolvedIndex )
             || resolvedIndex == targetIntroductionIndex );
 
-        if ( overrideIndices.Count > 0 && resolvedIndex == overrideIndices[overrideIndices.Count - 1].Index )
+        if ( overrideIndices.Count > 0 && resolvedIndex == overrideIndices[^1].Index )
         {
             // If we have resolved to the last override, transition to the final declaration index.
             resolvedIndex = new MemberLayerIndex( this._orderedLayers.Count, 0, 0 );
@@ -194,8 +195,10 @@ internal sealed class AspectReferenceResolver
 
             if ( targetIntroductionInjectedMember == null
                  || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                     && replacedMember.GetSymbol() != null) )
+                     && replacedMember.HasSymbol()) )
             {
+                // Historical note: the incorrect "!" symbol removed from the above line cost me at least 8 hours of debugging.
+                
                 // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
                 var declaredInCurrentType = this._comparer.Equals( containingSemantic.Symbol.ContainingType, resolvedReferencedSymbol.ContainingType );
 
@@ -219,7 +222,7 @@ internal sealed class AspectReferenceResolver
             // Resolved to a version before the symbol was introduced.
             // The only valid case are introduced promoted fields.
             if ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                 && replacedMember.GetSymbol() == null )
+                 && !replacedMember.HasSymbol() )
             {
                 // This is the same as targeting the property.
                 return CreateResolved( resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
@@ -413,23 +416,17 @@ internal sealed class AspectReferenceResolver
 
         if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
         {
-            IDeclaration canonicalReplacedMember = replacedMember switch
-            {
-                BuiltDeclaration builtDeclaration => builtDeclaration.Builder,
-                _ => replacedMember
-            };
-
-            if ( canonicalReplacedMember is IDeclarationBuilderImpl replacedBuilder )
+            if ( replacedMember is IIntroducedRef { BuilderData: { } builderData } )
             {
                 // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
                 var fieldInjectionTransformation =
-                    this._injectionRegistry.GetTransformationForBuilder( replacedBuilder )
-                    ?? throw new AssertionFailedException( $"Could not find transformation for {replacedBuilder}" );
+                    this._injectionRegistry.GetTransformationForBuilder( builderData )
+                    ?? throw new AssertionFailedException( $"Could not find transformation for {builderData}" );
 
                 // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
                 return
                     new MemberLayerIndex(
-                        this._layerIndex[replacedBuilder.ParentAdvice.AspectLayerId],
+                        this._layerIndex[builderData.ParentAdvice.AspectLayerId],
                         fieldInjectionTransformation.OrderWithinPipelineStepAndType + 1,
                         fieldInjectionTransformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
             }

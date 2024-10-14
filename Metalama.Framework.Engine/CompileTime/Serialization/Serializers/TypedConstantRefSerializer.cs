@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Serialization;
 
@@ -18,7 +17,7 @@ internal class TypedConstantRefSerializer : ValueTypeSerializer<TypedConstantRef
     public override TypedConstantRef DeserializeObject( IArgumentsReader constructorArguments )
     {
         var value = constructorArguments.GetValue<object?>( "value" );
-        var type = constructorArguments.GetValue<IRefImpl<IType>>( "type" );
+        var type = constructorArguments.GetValue<IRef<IType>>( "type" );
 
         return new TypedConstantRef( value, type );
     }

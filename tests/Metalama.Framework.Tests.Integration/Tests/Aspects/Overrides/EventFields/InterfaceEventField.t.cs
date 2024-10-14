@@ -6,7 +6,7 @@ internal partial class TargetClass : global::Metalama.Framework.Tests.Integratio
   public static void Foo(global::System.Object? sender, global::System.EventArgs args)
   {
   }
-  private event global::System.EventHandler? _eventField = (global::System.EventHandler? )Foo;
+  private event global::System.EventHandler? _eventField = Foo;
   event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface.EventField
   {
     add

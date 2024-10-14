@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -15,23 +18,29 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
-    public IMember TargetMember => this.Parameter.DeclaringMember;
+    public IFullRef<IMember> TargetMember => this.Parameter.ContainingDeclaration.As<IMember>();
 
-    public IParameter Parameter { get; }
+    public ParameterBuilderData Parameter { get; }
 
-    public IntroduceParameterTransformation( Advice advice, IParameter parameter ) : base( advice )
+    public IntroduceParameterTransformation( AspectLayerInstance aspectLayerInstance, ParameterBuilderData parameter ) : base(
+        aspectLayerInstance,
+        parameter.ContainingDeclaration )
     {
         this.Parameter = parameter;
     }
 
     public ParameterSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
     {
+        // We only add parameters to source declarations. For introduced declarations, the IntroductionTransformation already adds
+        // the parameters.
+        Invariant.Assert( this.TargetMember is not IIntroducedRef );
+
         var syntax = SyntaxFactory.Parameter(
             default,
             default,
             syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type )
                 .WithOptionalTrailingTrivia( SyntaxFactory.ElasticSpace, syntaxGenerationContext.Options ),
-            SyntaxFactory.Identifier( this.Parameter.Name ),
+            SyntaxFactory.Identifier( this.Parameter.Name.AssertNotNull() ),
             null );
 
         if ( this.Parameter.DefaultValue != null )
@@ -42,17 +51,23 @@ internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransform
                         new SyntaxTriviaList( SyntaxFactory.ElasticSpace ),
                         SyntaxKind.EqualsToken,
                         new SyntaxTriviaList( SyntaxFactory.ElasticSpace ) ),
-                    syntaxGenerationContext.SyntaxGenerator.TypedConstant( this.Parameter.DefaultValue.Value ) ) );
+                    syntaxGenerationContext.SyntaxGenerator.TypedConstant( this.Parameter.DefaultValue.Value, this.TargetMember.RefFactory ) ) );
         }
 
         return syntax;
     }
 
-    public override IDeclaration TargetDeclaration => this.TargetMember;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
     public override IntrospectionTransformationKind TransformationKind => IntrospectionTransformationKind.IntroduceParameter;
 
-    public override FormattableString ToDisplayString() => $"Introduce parameter '{this.Parameter.Name}' into '{this.Parameter.DeclaringMember}'.";
+    public override FormattableString ToDisplayString()
+    {
+        var containingDeclarationDefinition = this.Parameter.ContainingDeclaration.Definition;
+
+        return
+            $"Introduce parameter '{this.Parameter.Name}' into {containingDeclarationDefinition.DeclarationKind.ToDisplayString()} '{containingDeclarationDefinition}'.";
+    }
 }

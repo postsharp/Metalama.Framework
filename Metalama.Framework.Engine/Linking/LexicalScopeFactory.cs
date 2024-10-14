@@ -1,8 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
@@ -26,7 +29,7 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
      */
 
     private readonly CompilationModel _compilationModel;
-    private readonly ConcurrentDictionary<IDeclaration, TemplateLexicalScope> _scopes;
+    private readonly ConcurrentDictionary<IFullRef<IDeclaration>, TemplateLexicalScope> _scopes;
     private readonly ConcurrentDictionary<TypeDeclarationSyntax, ImmutableHashSet<string>> _identifiersInTypeDeclaration = new();
     private readonly SemanticModelProvider _semanticModelProvider;
 
@@ -34,13 +37,13 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
     {
         this._compilationModel = compilation;
         this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
-        this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.Comparers.Default );
+        this._scopes = new ConcurrentDictionary<IFullRef<IDeclaration>, TemplateLexicalScope>( RefEqualityComparer<IDeclaration>.Default );
     }
 
     /// <summary>
     /// Gets a shared lexical code where consumers can add their own symbols.
     /// </summary>
-    public TemplateLexicalScope GetLexicalScope( IDeclaration declaration ) => this._scopes.GetOrAdd( declaration, this.CreateLexicalScope );
+    public TemplateLexicalScope GetLexicalScope( IFullRef<IDeclaration> declaration ) => this._scopes.GetOrAdd( declaration, this.CreateLexicalScope );
 
     private ImmutableHashSet<string> GetIdentifiersInTypeScope( TypeDeclarationSyntax type )
         => this._identifiersInTypeDeclaration.GetOrAdd( type, this.GetIdentifiersInTypeScopeCore );
@@ -73,7 +76,7 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
         static void CollectIntroducedRecursive( INamedType type, ImmutableHashSet<string>.Builder builder )
         {
             // TODO: It may be worthwhile to cache this for better performance on large hierarchies.
-            foreach ( var builtMember in type.Members().OfType<BuiltMember>() )
+            foreach ( var builtMember in type.Members().OfType<IntroducedMember>() )
             {
                 builder.Add( builtMember.Name );
             }
@@ -90,110 +93,119 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
         }
     }
 
-    private TemplateLexicalScope CreateLexicalScope( IDeclaration declaration )
+    private TemplateLexicalScope CreateLexicalScope( IFullRef<IDeclaration> declarationRef )
     {
-        var symbol = declaration.GetSymbol();
-
-        var contextType = declaration switch
+        switch ( declarationRef )
         {
-            IMemberOrNamedType { DeclaringType: { } declaringType } => declaringType,
-            INamedType type => type,
-            _ => throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." )
-        };
-
-        if ( symbol == null )
-        {
-            // Builder-based source.
-            if ( contextType.GetPrimaryDeclarationSyntax() == null )
-            {
-                // TODO: Temp hack.
-                return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
-            }
-
-            var typeDeclaration = contextType.GetPrimaryDeclarationSyntax().AssertNotNull().GetDeclaringType().AssertNotNull();
-
-            var identifiers = this.GetIdentifiersInTypeScope( typeDeclaration ).ToBuilder();
-
-            if ( declaration is IMethod method )
-            {
-                identifiers.AddRange( method.Parameters.SelectAsReadOnlyList( p => p.Name ) );
-                identifiers.AddRange( method.TypeParameters.SelectAsReadOnlyList( p => p.Name ) );
-            }
-
-            // Accessors have implicit "value" parameter.
-            if ( declaration is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove } )
-            {
-                identifiers.Add( "value" );
-            }
-
-            return new TemplateLexicalScope( identifiers.ToImmutable() );
-        }
-        else
-        {
-            // Symbol-based scope.
-            var syntaxReference = symbol.GetPrimarySyntaxReference();
-
-            // For implicitly defined symbols, we need to try harder.
-            if ( syntaxReference == null )
-            {
-                switch ( symbol )
+            case IIntroducedRef:
                 {
-                    // For accessors, look at the associated symbol.
-                    case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
-                        syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+                    var declaration = declarationRef.Definition;
 
-                        if ( syntaxReference == null )
-                        {
-                            throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
-                        }
+                    var contextType = declaration switch
+                    {
+                        IMemberOrNamedType { DeclaringType: { } declaringType } => declaringType,
+                        INamedType type => type,
+                        _ => throw new AssertionFailedException( $"Declarations without declaring type are not supported {declaration}." )
+                    };
 
-                        break;
+                    // Builder-based source.
+                    if ( contextType.GetPrimaryDeclarationSyntax() == null )
+                    {
+                        // TODO: Temp hack.
+                        return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
+                    }
 
-                    // Otherwise (e.g. for implicit constructors), take the containing type.
-                    case { ContainingType: { } containingType }:
-                        syntaxReference = containingType.GetPrimarySyntaxReference();
+                    var typeDeclaration = contextType.GetPrimaryDeclarationSyntax().AssertNotNull().GetDeclaringType().AssertNotNull();
 
-                        if ( syntaxReference == null )
-                        {
-                            throw new AssertionFailedException( $"No syntax for '{containingType}'." );
-                        }
+                    var identifiers = this.GetIdentifiersInTypeScope( typeDeclaration ).ToBuilder();
 
-                        break;
+                    if ( declaration is IMethod method )
+                    {
+                        identifiers.AddRange( method.Parameters.SelectAsReadOnlyList( p => p.Name ) );
+                        identifiers.AddRange( method.TypeParameters.SelectAsReadOnlyList( p => p.Name ) );
+                    }
 
-                    default:
-                        throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
+                    // Accessors have implicit "value" parameter.
+                    if ( declaration is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove } )
+                    {
+                        identifiers.Add( "value" );
+                    }
+
+                    return new TemplateLexicalScope( identifiers.ToImmutable() );
                 }
-            }
 
-            var syntaxNode = syntaxReference.GetSyntax();
-            var typeDeclarationSyntax = syntaxNode.GetDeclaringType();
-
-            if ( syntaxNode is LocalFunctionStatementSyntax && typeDeclarationSyntax == null )
-            {
-                throw new AssertionFailedException( "Top-level local functions are not supported: {syntaxNode}" );
-            }
-
-            var builder = this.GetIdentifiersInTypeScope( typeDeclarationSyntax.AssertNotNull() ).ToBuilder();
-
-            // Accessors have implicit "value" parameter.
-            if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
-            {
-                builder.Add( "value" );
-            }
-
-            // Get the symbols defined in the declaration.
-            var visitor = new Visitor( builder );
-
-            var declarationSyntax =
-                syntaxReference.GetSyntax() switch
+            case ISymbolRef symbolRef:
                 {
-                    { Parent: AccessorListSyntax { Parent: IndexerDeclarationSyntax indexer } } => indexer,
-                    { } anything => anything
-                };
+                    var symbol = symbolRef.Symbol;
 
-            visitor.Visit( declarationSyntax );
+                    // Symbol-based scope.
+                    var syntaxReference = symbol.GetPrimarySyntaxReference();
 
-            return new TemplateLexicalScope( builder.ToImmutable() );
+                    // For implicitly defined symbols, we need to try harder.
+                    if ( syntaxReference == null )
+                    {
+                        switch ( symbol )
+                        {
+                            // For accessors, look at the associated symbol.
+                            case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
+                                syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+
+                                if ( syntaxReference == null )
+                                {
+                                    throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
+                                }
+
+                                break;
+
+                            // Otherwise (e.g. for implicit constructors), take the containing type.
+                            case { ContainingType: { } containingType }:
+                                syntaxReference = containingType.GetPrimarySyntaxReference();
+
+                                if ( syntaxReference == null )
+                                {
+                                    throw new AssertionFailedException( $"No syntax for '{containingType}'." );
+                                }
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
+                        }
+                    }
+
+                    var syntaxNode = syntaxReference.GetSyntax();
+                    var typeDeclarationSyntax = syntaxNode.GetDeclaringType();
+
+                    if ( syntaxNode is LocalFunctionStatementSyntax && typeDeclarationSyntax == null )
+                    {
+                        throw new AssertionFailedException( "Top-level local functions are not supported: {syntaxNode}" );
+                    }
+
+                    var builder = this.GetIdentifiersInTypeScope( typeDeclarationSyntax.AssertNotNull() ).ToBuilder();
+
+                    // Accessors have implicit "value" parameter.
+                    if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
+                    {
+                        builder.Add( "value" );
+                    }
+
+                    // Get the symbols defined in the declaration.
+                    var visitor = new Visitor( builder );
+
+                    var declarationSyntax =
+                        syntaxReference.GetSyntax() switch
+                        {
+                            { Parent: AccessorListSyntax { Parent: IndexerDeclarationSyntax indexer } } => indexer,
+                            { } anything => anything
+                        };
+
+                    visitor.Visit( declarationSyntax );
+
+                    return new TemplateLexicalScope( builder.ToImmutable() );
+                }
+
+            default:
+                throw new AssertionFailedException();
         }
     }
 }

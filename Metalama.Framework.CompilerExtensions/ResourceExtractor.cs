@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
+// ReSharper disable NullableWarningSuppressionIsUsed
 // Resharper disable EmptyGeneralCatchClause
 
 namespace Metalama.Framework.CompilerExtensions;
@@ -282,8 +283,6 @@ public static class ResourceExtractor
                 log.WriteLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
                 log.WriteLine( $"Mutex name: '{mutexName}'" );
                 log.WriteLine( "----" );
-
-                var prefix = $"Metalama.Framework.CompilerExtensions.Resources.{(_isNetFramework ? "Desktop" : "Core")}.";
 
                 foreach ( var (resourceName, filePath) in GetEmbeddedAssemblies( currentAssembly, log ) )
                 {

@@ -1,11 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Utilities;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Services;
-using Metalama.Framework.Tests.UnitTests.TestFramework;
 using System.Threading.Tasks;
 using Xunit;
 

@@ -17,7 +17,7 @@ internal static class TypeParameterDetector
 
         private Visitor() { }
 
-        protected override ITypeParameter? DefaultVisit( IType type ) => throw new NotImplementedException();
+        protected override ITypeParameter DefaultVisit( IType type ) => throw new NotImplementedException();
 
         protected override ITypeParameter? VisitArrayType( IArrayType arrayType ) => this.Visit( arrayType.ElementType );
 
@@ -51,6 +51,6 @@ internal static class TypeParameterDetector
 
         protected override ITypeParameter? VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => null;
 
-        protected override ITypeParameter? VisitTypeParameter( ITypeParameter typeParameter ) => typeParameter;
+        protected override ITypeParameter VisitTypeParameter( ITypeParameter typeParameter ) => typeParameter;
     }
 }

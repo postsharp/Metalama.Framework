@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -62,7 +63,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a value indicating whether the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
         /// </summary>
         public abstract bool IsPartial { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether <see cref="IsSyntaxTreeObserved"/> may return a different value than <c>true</c>.
         /// </summary>
@@ -263,11 +264,12 @@ namespace Metalama.Framework.Engine.CodeModel
             IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
             ImmutableArray<ManagedResource> resources = default );
 
+        private sealed record Closure( ImmutableHashSet<INamedTypeSymbol> DeclaredTypes, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypeIndex );
+
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
-        private static (ImmutableHashSet<INamedTypeSymbol> DeclaredTypes, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypeIndex)
-            GetClosure( CompilationContext compilationContext, IReadOnlyList<SyntaxTree> syntaxTrees )
+        private static Closure GetClosure( CompilationContext compilationContext, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilationContext.Compilation.Assembly;
 
@@ -350,7 +352,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     AddTypeRecursive );
             }
 
-            return (topLevelTypes.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());
+            return new Closure( topLevelTypes.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable() );
         }
 
         private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )

@@ -160,6 +160,23 @@ namespace Metalama.Framework.Code
 
         private static IMemberOrNamedType ForTypeInstanceImpl( this IMemberOrNamedType declaration, INamedType typeInstance )
         {
+            if ( declaration.DeclarationKind == DeclarationKind.Field )
+            {
+                var field = (IField) declaration;
+
+                if ( field.OverridingProperty != null )
+                {
+                    var propertyImpl = (IProperty) ForTypeInstanceCanonical( field.OverridingProperty, typeInstance );
+
+                    return propertyImpl.OriginalField!;
+                }
+            }
+
+            return ForTypeInstanceCanonical( declaration, typeInstance );
+        }
+
+        private static IMemberOrNamedType ForTypeInstanceCanonical( IMemberOrNamedType declaration, INamedType typeInstance )
+        {
             if ( declaration.DeclaringType == null )
             {
                 throw new InvalidOperationException( $"The type '{declaration.ToDisplayString()}' is not a type member or nested type." );
@@ -167,7 +184,7 @@ namespace Metalama.Framework.Code
 
             var thisOriginalDeclaration = declaration.Definition;
 
-            if ( !declaration.Compilation.Comparers.Default.Equals( typeInstance.Definition, thisOriginalDeclaration.DeclaringType! ) )
+            if ( !typeInstance.Definition.Equals( thisOriginalDeclaration.DeclaringType! ) )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(typeInstance),
@@ -183,11 +200,11 @@ namespace Metalama.Framework.Code
             {
                 return declaration;
             }
-            
+
             IEnumerable<IMemberOrNamedType> candidates;
-            
+
             // TODO PERF: Implement the switch based on DeclarationKind. 
-            
+
             switch ( declaration )
             {
                 case INamedType namedType:
@@ -200,7 +217,7 @@ namespace Metalama.Framework.Code
 
                     break;
 
-                case IField field:
+                case IField { OverridingProperty: null } field:
                     candidates = typeInstance.Fields.OfName( field.Name );
 
                     break;
@@ -229,7 +246,7 @@ namespace Metalama.Framework.Code
                     throw new ArgumentOutOfRangeException( nameof(declaration) );
             }
 
-            return candidates.Single( c => declaration.Compilation.Comparers.Default.Equals( c.Definition, thisOriginalDeclaration ) );
+            return candidates.Single( c => c.Definition.Equals( thisOriginalDeclaration ) );
         }
     }
 }

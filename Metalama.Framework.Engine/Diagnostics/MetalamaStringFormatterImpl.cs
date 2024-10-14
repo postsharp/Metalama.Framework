@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -106,7 +107,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 #endif
 
                     case ISymbol symbol:
-                        return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+                        return symbol.ToDebugString();
 
                     case ReferenceKinds referenceKinds:
                         return referenceKinds.ToDisplayString();

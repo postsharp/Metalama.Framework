@@ -15,7 +15,7 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
 {
     protected ResolvedAspectReference AspectReference { get; }
 
-    public override SyntaxNode TargetNode => this.AspectReference.RootNode;
+    public override SyntaxNode ReplacedNode => this.AspectReference.RootNode;
 
     protected AspectReferenceRenamingSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext )
     {

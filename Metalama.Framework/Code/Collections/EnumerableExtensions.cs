@@ -98,7 +98,7 @@ namespace Metalama.Framework.Code.Collections
             return results;
         }
 
-        internal static HashSet<T> SelectManyRecursiveDistinct<T>(
+        public static HashSet<T> SelectManyRecursiveDistinct<T>(
             this T root,
             Func<T, IEnumerable<T>?> getChildren,
             bool includeRoot = true )

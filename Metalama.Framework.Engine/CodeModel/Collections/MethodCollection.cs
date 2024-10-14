@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class MethodCollection : MethodBaseCollection<IMethod>, IMethodCollection
     {
-        public MethodCollection( INamedType declaringType, IUpdatableCollection<IMethod> sourceItems ) : base(
+        public MethodCollection( INamedType declaringType, IUpdatableCollection<IFullRef<IMethod>> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
 

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization;
 
 internal sealed class EnumSerializer : ObjectSerializer
 {
-    private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
+    private static readonly Type[] _unsignedTypes = [typeof(ushort), typeof(uint), typeof(ulong), typeof(byte)];
 
     public override ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext )
     {

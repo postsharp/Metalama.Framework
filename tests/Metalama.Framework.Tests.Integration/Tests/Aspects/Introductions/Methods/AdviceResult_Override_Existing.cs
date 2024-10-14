@@ -24,9 +24,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
                 throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceMethod." );
             }
 
-            if (!builder.Target.Compilation.Comparers.Default.Equals(
-                    result.Declaration.ForCompilation( builder.Advice.MutableCompilation ),
-                    builder.Target.Methods.OfName( "Method" ).Single() ))
+            if (!result.Declaration.ForCompilation( builder.Advice.MutableCompilation )
+                    .Equals( builder.Target.Methods.OfName( "Method" ).Single() ))
             {
                 throw new InvalidOperationException( $"Declaration was not correct." );
             }

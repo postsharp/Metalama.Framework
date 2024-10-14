@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
@@ -40,8 +41,8 @@ public sealed class ProjectModel : IProject
         IEnumerable<AssemblyIdentity>? references = null,
         IEnumerable<string>? preprocessorSymbolNames = null )
     {
-        references ??= Enumerable.Empty<AssemblyIdentity>();
-        preprocessorSymbolNames ??= Enumerable.Empty<string>();
+        references ??= [];
+        preprocessorSymbolNames ??= [];
 
         this.ClassificationService = serviceProvider.GetService<ISymbolClassificationService>();
         this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();

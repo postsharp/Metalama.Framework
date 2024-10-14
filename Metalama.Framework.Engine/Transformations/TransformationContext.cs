@@ -20,7 +20,7 @@ internal abstract class TransformationContext
     /// <summary>
     /// Gets the last compilation model of the linker input.
     /// </summary>
-    public CompilationModel Compilation { get; }
+    public CompilationModel FinalCompilation { get; }
 
     public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
 
@@ -34,7 +34,7 @@ internal abstract class TransformationContext
         this.ServiceProvider = serviceProvider;
         this.DiagnosticSink = diagnosticSink;
         this.SyntaxGenerationContext = syntaxGenerationContext;
-        this.Compilation = compilation;
+        this.FinalCompilation = compilation;
         this.LexicalScopeProvider = lexicalScopeProvider;
     }
 }

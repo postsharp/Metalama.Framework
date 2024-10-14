@@ -26,7 +26,8 @@
       "tests\\Metalama.Framework.Tests.Benchmarks\\Metalama.Framework.Tests.Benchmarks.csproj",
       "tests\\Metalama.Framework.Tests.Integration\\Metalama.Framework.Tests.Integration.csproj",
       "tests\\Metalama.Framework.Tests.UnitTests\\Metalama.Framework.Tests.UnitTests.csproj",
-      "tests\\Metalama.Framework.Tests.Workspaces\\Metalama.Framework.Tests.Workspaces.csproj"
+      "tests\\Metalama.Framework.Tests.Workspaces\\Metalama.Framework.Tests.Workspaces.csproj",
+      "tests\\Metalama.Frameworks.Tests.LinkerTests\\Metalama.Framework.Tests.LinkerTests.csproj"
     ]
   }
 }

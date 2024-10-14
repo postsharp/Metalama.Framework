@@ -53,7 +53,9 @@ internal class RecursiveFileSystemWatcher : IDisposable
         else
         {
             var parentDirectory = System.IO.Path.GetDirectoryName( path )
-                ?? throw new ArgumentException( $"Couldn't start watching for the parent directory to be created: it seems the directory '{path}' doesn't exist, but it's a root directory.", nameof(path) );
+                                  ?? throw new ArgumentException(
+                                      $"Couldn't start watching for the parent directory to be created: it seems the directory '{path}' doesn't exist, but it's a root directory.",
+                                      nameof(path) );
 
             this._parentDirectoryWatcher = new RecursiveFileSystemWatcher( parentDirectory, System.IO.Path.GetFileName( path ) );
 
@@ -89,8 +91,8 @@ internal class RecursiveFileSystemWatcher : IDisposable
     {
         var watcher = new FileSystemWatcher( this.Path, this.Filter );
 
-        watcher.Changed += ( s, e ) => this.Changed?.Invoke( this, e );
-        watcher.Created += ( s, e ) => this.Created?.Invoke( this, e );
+        watcher.Changed += ( _, e ) => this.Changed?.Invoke( this, e );
+        watcher.Created += ( _, e ) => this.Created?.Invoke( this, e );
 
         lock ( this._lock )
         {

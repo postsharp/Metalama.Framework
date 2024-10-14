@@ -176,7 +176,7 @@ internal sealed partial class CompileTimeProjectRepository
                 return true;
             }
 
-            List<CompileTimeProject> referencedProjects = new() { this._frameworkProject };
+            List<CompileTimeProject> referencedProjects = [this._frameworkProject];
 
             foreach ( var reference in runTimeCompilation.References )
             {
@@ -395,7 +395,7 @@ internal sealed partial class CompileTimeProjectRepository
             // Read source files.
             var parseOptions = SupportedCSharpVersions.DefaultParseOptions;
 
-            List<SyntaxTree> syntaxTrees = new();
+            List<SyntaxTree> syntaxTrees = [];
 
             foreach ( var entry in archive.Entries.Where( e => string.Equals( Path.GetExtension( e.Name ), ".cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
@@ -406,7 +406,7 @@ internal sealed partial class CompileTimeProjectRepository
             }
 
             // Resolve references.
-            List<CompileTimeProject> referenceProjects = new();
+            List<CompileTimeProject> referenceProjects = [];
 
             if ( manifest.References != null )
             {

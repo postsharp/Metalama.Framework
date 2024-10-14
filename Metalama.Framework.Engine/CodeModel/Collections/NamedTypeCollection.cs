@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using System.Collections.Generic;
 
@@ -9,20 +10,17 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed partial class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
-        public NamedTypeCollection( INamespaceOrNamedType declaringType, IReadOnlyList<IRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
+        public NamedTypeCollection( INamespaceOrNamedType declaringType, IReadOnlyList<IFullRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
             base( declaringType, IncludeNestedTypes( declaringType.Compilation, sourceItems, includeNestedTypes ) ) { }
 
-        public NamedTypeCollection( ICompilation declaringCompilation, IReadOnlyList<IRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
+        public NamedTypeCollection( ICompilation declaringCompilation, IReadOnlyList<IFullRef<INamedType>> sourceItems, bool includeNestedTypes = false ) :
             base( declaringCompilation, IncludeNestedTypes( declaringCompilation, sourceItems, includeNestedTypes ) ) { }
 
         public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
         {
-            var typeDefinitionRef = typeDefinition.ToRef();
-
-            // Enumerate the source without causing a resolution of the reference.
             foreach ( var reference in this.Source )
             {
-                if ( reference.IsConvertibleTo( typeDefinitionRef, ConversionKind.TypeDefinition ) )
+                if ( reference.IsConvertibleTo( typeDefinition, ConversionKind.TypeDefinition ) )
                 {
                     // Resolve the reference and store the declaration.
                     var member = this.GetItem( reference );
@@ -33,9 +31,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             }
         }
 
-        private static IReadOnlyList<IRef<INamedType>> IncludeNestedTypes(
+        private static IReadOnlyList<IFullRef<INamedType>> IncludeNestedTypes(
             ICompilation compilation,
-            IReadOnlyList<IRef<INamedType>> sourceItems,
+            IReadOnlyList<IFullRef<INamedType>> sourceItems,
             bool includeNestedTypes )
         {
             if ( !includeNestedTypes )

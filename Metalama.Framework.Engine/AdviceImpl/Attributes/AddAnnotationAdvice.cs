@@ -3,9 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
@@ -21,12 +19,9 @@ internal sealed class AddAnnotationAdvice : Advice<AddAnnotationAdviceResult>
 
     public override AdviceKind AdviceKind => AdviceKind.AddAnnotation;
 
-    protected override AddAnnotationAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddAnnotationAdviceResult Implement( in AdviceImplementationContext context )
     {
-        addTransformation( new AddAnnotationTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._annotationInstance ) );
+        context.AddTransformation( new AddAnnotationTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._annotationInstance ) );
 
         return new AddAnnotationAdviceResult();
     }

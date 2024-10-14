@@ -3,10 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
@@ -22,20 +19,17 @@ internal sealed class RemoveAttributesAdvice : Advice<RemoveAttributesAdviceResu
 
     public override AdviceKind AdviceKind => AdviceKind.RemoveAttributes;
 
-    protected override RemoveAttributesAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override RemoveAttributesAdviceResult Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
         if ( targetDeclaration.Attributes.OfAttributeType( this._attributeType ).Any() )
         {
-            addTransformation(
+            context.AddTransformation(
                 new RemoveAttributesTransformation(
-                    this,
-                    targetDeclaration,
-                    this._attributeType ) );
+                    this.AspectLayerInstance,
+                    targetDeclaration.ToFullRef(),
+                    this._attributeType.ToFullRef() ) );
         }
 
         return new RemoveAttributesAdviceResult();

@@ -2,8 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Pseudo;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -136,8 +137,9 @@ class C<T>
         }
 
         // Also test a Ref roundtrip.
-        var symbolRoundtripFromRef = compilation.GetCompilationContext()
-            .RefFactory.FromAnySymbol( symbol )
+        var symbolRoundtripFromRef = compilation
+            .GetRefFactory()
+            .FromAnySymbol( symbol )
             .GetSymbol( compilation.GetRoslynCompilation() );
 
         if ( requireSameInstance )

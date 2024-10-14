@@ -42,7 +42,7 @@ internal sealed class ApplyAspectCodeAction<TTarget> : ICodeAction
             context.PipelineConfiguration.Domain,
             context.PipelineConfiguration,
             _ => aspectClass,
-            PartialCompilation.CreatePartial( compilation.Compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ),
+            PartialCompilation.CreatePartial( compilation.Compilation, targetSymbol.GetPrimaryDeclarationSyntax()!.SyntaxTree ),
             targetSymbol,
             NullDiagnosticAdder.Instance,
             context.IsComputingPreview,

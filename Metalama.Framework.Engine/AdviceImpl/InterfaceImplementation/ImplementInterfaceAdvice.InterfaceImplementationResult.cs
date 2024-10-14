@@ -11,13 +11,13 @@ internal sealed partial class ImplementInterfaceAdvice
 {
     public sealed record ImplementationResult : IInterfaceImplementationResult, IAdviserInternal, IInterfaceImplementationAdviser
     {
-        private readonly IRef<INamedType>? _targetDeclaration;
+        private readonly INamedType? _targetDeclaration;
         private readonly IAdviceFactory? _adviceFactory;
 
         public ImplementationResult(
             INamedType interfaceType,
             InterfaceImplementationOutcome outcome,
-            IRef<INamedType>? targetDeclaration = default,
+            INamedType? targetDeclaration = default,
             IAdviceFactoryImpl? originalAdviceFactory = null )
         {
             Invariant.Implies( targetDeclaration == null || originalAdviceFactory == null, outcome == InterfaceImplementationOutcome.Ignore );
@@ -43,7 +43,7 @@ internal sealed partial class ImplementInterfaceAdvice
                     throw new InvalidOperationException();
                 }
 
-                return this._targetDeclaration.GetTarget();
+                return this._targetDeclaration;
             }
         }
 

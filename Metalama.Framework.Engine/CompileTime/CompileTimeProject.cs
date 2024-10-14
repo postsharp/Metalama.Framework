@@ -94,8 +94,7 @@ internal sealed class CompileTimeProject : IProjectService
     public IReadOnlyList<CompileTimeProject> ClosureProjects { get; }
 
     [Memo]
-    private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByRunTimeAssemblyName
-        => this.CreateClosureProjectsByRuntimeAssemblyName();
+    private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByRunTimeAssemblyName => this.CreateClosureProjectsByRuntimeAssemblyName();
 
     [Memo]
     private IReadOnlyDictionary<string, CompileTimeProject> ClosureProjectsByCompileTimeAssemblyName
@@ -499,7 +498,7 @@ internal sealed class CompileTimeProject : IProjectService
             // When two versions of the same assembly are referenced, we get two references with the same assembly name.
             // This selects the higher version, which would be the one that should be used in this scenario.
             if ( !result.TryGetValue( project.RunTimeIdentity.Name, out var existing )
-                || existing.RunTimeIdentity.Version < project.RunTimeIdentity.Version )
+                 || existing.RunTimeIdentity.Version < project.RunTimeIdentity.Version )
             {
                 result[project.RunTimeIdentity.Name] = project;
             }

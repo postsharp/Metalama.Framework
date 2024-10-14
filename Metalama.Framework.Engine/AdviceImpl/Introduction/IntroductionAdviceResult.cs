@@ -10,13 +10,13 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 internal sealed class IntroductionAdviceResult<T> : AdviceResult, IIntroductionAdviceResult<T>
     where T : class, IDeclaration
 {
-    private readonly IRef? _declaration; // Intentionally weakly typed to support the IRef<IFieldOrProperty> for fields.
+    private readonly IRef<T>? _declaration;
     private readonly IRef<IDeclaration>? _conflictingDeclaration;
 
     public IntroductionAdviceResult(
         AdviceKind adviceKind,
         AdviceOutcome outcome,
-        IRef? declaration,
+        IRef<T>? declaration,
         IRef<IDeclaration>? conflictingDeclaration )
     {
         this.Outcome = outcome;
@@ -28,7 +28,7 @@ internal sealed class IntroductionAdviceResult<T> : AdviceResult, IIntroductionA
     public IntroductionAdviceResult() { }
 
     [Memo]
-    public T Declaration => (T) this.Resolve( this._declaration );
+    public T Declaration => this.Resolve( this._declaration );
 
     [Memo]
     public IDeclaration ConflictingDeclaration => this.Resolve( this._conflictingDeclaration );

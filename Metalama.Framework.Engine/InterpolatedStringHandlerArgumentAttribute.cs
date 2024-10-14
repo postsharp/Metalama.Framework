@@ -12,7 +12,7 @@ public sealed class InterpolatedStringHandlerArgumentAttribute : Attribute
 {
     public InterpolatedStringHandlerArgumentAttribute( string argument )
     {
-        this.Arguments = new[] { argument };
+        this.Arguments = [argument];
     }
 
     public InterpolatedStringHandlerArgumentAttribute( params string[] arguments )

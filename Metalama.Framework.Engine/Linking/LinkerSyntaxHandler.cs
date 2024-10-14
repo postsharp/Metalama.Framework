@@ -17,7 +17,7 @@ internal sealed class LinkerSyntaxHandler
 
     public SyntaxNode GetCanonicalRootNode( IMethodSymbol symbol )
     {
-        var declaration = symbol.GetPrimaryDeclaration();
+        var declaration = symbol.GetPrimaryDeclarationSyntax();
 
         if ( this._injectionRegistry.IsOverrideTarget( symbol ) )
         {

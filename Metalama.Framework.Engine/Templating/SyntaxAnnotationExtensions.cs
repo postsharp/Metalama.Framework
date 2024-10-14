@@ -59,8 +59,7 @@ namespace Metalama.Framework.Engine.Templating
             _typeOfGenericTemplateTypeParameterAnnotationData );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
-            SyntaxTreeAnnotationMap.AnnotationKinds.AddRange(
-                new[] { _scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
+            SyntaxTreeAnnotationMap.AnnotationKinds.AddRange( [_scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind] );
 
         public static bool HasScopeAnnotation( this SyntaxNode node ) => node.HasAnnotations( _scopeAnnotationKind );
 

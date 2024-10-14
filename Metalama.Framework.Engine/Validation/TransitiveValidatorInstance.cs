@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Validation;
 using System;
@@ -112,7 +111,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         public override void DeserializeFields( object obj, IArgumentsReader initializationArguments )
         {
             var instance = (TransitiveValidatorInstance) obj;
-            instance.ValidatedDeclaration = initializationArguments.GetValue<IRefImpl<IDeclaration>>( nameof(instance.ValidatedDeclaration) )!;
+            instance.ValidatedDeclaration = initializationArguments.GetValue<IRef<IDeclaration>>( nameof(instance.ValidatedDeclaration) )!;
             instance.ReferenceKinds = initializationArguments.GetValue<ReferenceKinds>( nameof(instance.ReferenceKinds) );
             instance.Object = initializationArguments.GetValue<object>( nameof(instance.Object) )!;
             instance.State = initializationArguments.GetValue<IAspectState>( nameof(instance.State) );

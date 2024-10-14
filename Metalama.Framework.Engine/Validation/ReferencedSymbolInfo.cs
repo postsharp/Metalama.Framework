@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -64,5 +65,5 @@ internal sealed class ReferencedSymbolInfo
     // ReSharper disable once MemberCanBeInternal
     public IEnumerable<ReferencingSymbolInfo> GetAllReferences( ChildKinds kinds ) => this.DescendantsAndSelf( kinds ).SelectMany( x => x.References );
 
-    public override string ToString() => $"{{Symbol={this.ReferencedSymbol.ToDisplayString()}, References.Count={this.References.Count()}}}";
+    public override string ToString() => $"{{Symbol={this.ReferencedSymbol.ToDebugString()}, References.Count={this.References.Count()}}}";
 }

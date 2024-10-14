@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
@@ -195,7 +195,7 @@ internal sealed partial class LinkerRewritingDriver
     /// </summary>
     private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
     {
-        var declaration = symbol.GetPrimaryDeclaration();
+        var declaration = symbol.GetPrimaryDeclarationSyntax();
 
         if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
         {
@@ -486,13 +486,13 @@ internal sealed partial class LinkerRewritingDriver
         if ( LinkerSyntaxHelper.IsUnsupportedMemberSyntax( syntax) )
         {
             // If there is unsupported symbol, we will not rewrite the member.
-            return new[] { syntax };
+            return [syntax];
         }
 
         if ( this.AnalysisRegistry.HasAnyUnsupportedOverride( symbol ) )
         {
             // If there is unsupported code in overrides, we will not rewrite the member.
-            return new[] { syntax };
+            return [syntax];
         }
 
         if ( this.InjectionRegistry.IsOverride( symbol )
@@ -585,7 +585,7 @@ internal sealed partial class LinkerRewritingDriver
             throw new AssertionFailedException( $"{semantic} is not expected for trivia source resolution." );
         }
 
-        return symbol?.GetPrimaryDeclaration() switch
+        return symbol?.GetPrimaryDeclarationSyntax() switch
         {
             null => null,
             MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,

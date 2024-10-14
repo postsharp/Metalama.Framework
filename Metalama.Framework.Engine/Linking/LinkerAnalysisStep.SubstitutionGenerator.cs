@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
@@ -126,7 +126,7 @@ internal sealed partial class LinkerAnalysisStep
         public async Task<IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>>> RunAsync( CancellationToken cancellationToken )
         {
             var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
-            var inliningTargetNodes = this._inliningSpecifications.SelectAsReadOnlyList( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
+            var inliningTargetNodes = this._inliningSpecifications.SelectAsReadOnlyList( x => (x.ParentContextIdentifier, ReplacedRootNode: x.ReplacedNode) ).ToHashSet();
 
             // Add substitutions to non-inlined semantics (these are always roots of inlining).
             void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )
@@ -201,6 +201,8 @@ internal sealed partial class LinkerAnalysisStep
             // Add substitutions for all inlining specifications.
             void ProcessInliningSpecification( InliningSpecification inliningSpecification )
             {
+                // TODO: It's weird because here we to substitute a property getter into a syntax block.
+                
                 // Add the inlining substitution itself.
                 AddSubstitution(
                     inliningSpecification.ParentContextIdentifier,
@@ -338,7 +340,7 @@ internal sealed partial class LinkerAnalysisStep
                 {
                     var context = new InliningContextIdentifier( constructor );
 
-                    var declaration = (ConstructorDeclarationSyntax?) constructor.Symbol.GetPrimaryDeclaration();
+                    var declaration = (ConstructorDeclarationSyntax?) constructor.Symbol.GetPrimaryDeclarationSyntax();
 
                     if ( declaration == null )
                     {
@@ -458,10 +460,10 @@ internal sealed partial class LinkerAnalysisStep
             {
                 var dictionary = substitutions.GetOrAddNew( inliningContextId );
 
-                if ( !dictionary.TryAdd( substitution.TargetNode, substitution ) )
+                if ( !dictionary.TryAdd( substitution.ReplacedNode, substitution ) )
                 {
                     // TODO: The item was already added, but there is no logic to cover this situation.
-                    throw new AssertionFailedException( $"The substitution was already added for node {substitution.TargetNode}." );
+                    throw new AssertionFailedException( $"The substitution was already added for node {substitution.ReplacedNode}." );
                 }
             }
         }

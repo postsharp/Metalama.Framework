@@ -6,9 +6,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -84,9 +86,9 @@ public abstract class TemplateClass : IDiagnosticSource
     /// </summary>
     internal abstract Type Type { get; }
 
-    internal TemplateDriver GetTemplateDriver( IMember sourceTemplate )
+    internal TemplateDriver GetTemplateDriver( IRef sourceTemplate )
     {
-        var templateSymbol = sourceTemplate.GetSymbol().AssertNotNull();
+        var templateSymbol = ((ISymbolRef) sourceTemplate).Symbol;
         var id = templateSymbol.GetDocumentationCommentId()!;
 
         if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
@@ -353,7 +355,11 @@ public abstract class TemplateClass : IDiagnosticSource
         return members.ToImmutable();
     }
 
-    internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( in ProjectServiceProvider serviceProvider, CompilationModel compilation )
+    internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice(
+        in ProjectServiceProvider serviceProvider,
+        CompilationModel compilation,
+        TemplateProvider templateProvider,
+        IObjectReader tags )
     {
         var compilationModelForTemplateReflection = this._templateReflectionContext?.GetCompilationModel( compilation ) ?? compilation;
 
@@ -364,7 +370,9 @@ public abstract class TemplateClass : IDiagnosticSource
                         compilationModelForTemplateReflection.CompilationContext.SymbolTranslator.Translate( x.Symbol, x.SymbolCompilation )
                             .AssertNotNull() ),
                     x.TemplateClassMember,
-                    x.Attribute ) );
+                    templateProvider,
+                    x.Attribute,
+                    tags ) );
     }
 
     private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, Compilation SymbolCompilation, DeclarativeAdviceAttribute Attribute)>

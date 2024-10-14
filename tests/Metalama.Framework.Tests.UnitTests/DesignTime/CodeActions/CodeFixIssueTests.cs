@@ -14,8 +14,9 @@ public sealed class CodeFixIssueTests : CodeFixTestClassBase
 {
     [Fact]
     public async Task AliasDefinitionDoesNotCauseError()
-    {        
+    {
         using var testContext = this.CreateTestContext();
+
         const string code =
             """
             using myAlias = System;
@@ -31,7 +32,7 @@ public sealed class CodeFixIssueTests : CodeFixTestClassBase
         var (diagnostics, serviceProvider) = await ExecutePipelineAsync( testContext, workspace, factory );
 
         // Query code fixes and refactorings.
-        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixesAsync( workspace, serviceProvider, diagnostics, TextSpan.FromBounds(0, 1) );
+        var (codeFixContext, codeRefactoringContext) = await QueryCodeFixesAsync( workspace, serviceProvider, diagnostics, TextSpan.FromBounds( 0, 1 ) );
 
         Assert.Empty( codeFixContext.RegisteredCodeFixes );
         Assert.Empty( codeRefactoringContext.RegisteredRefactorings );
@@ -41,6 +42,7 @@ public sealed class CodeFixIssueTests : CodeFixTestClassBase
     public async Task OutOfBoundsSpanDoesNotCauseError()
     {
         using var testContext = this.CreateTestContext();
+
         const string code =
             """
             void Foo() {}

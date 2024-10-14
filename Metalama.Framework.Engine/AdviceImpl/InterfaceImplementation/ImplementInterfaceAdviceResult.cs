@@ -32,5 +32,6 @@ internal sealed class ImplementInterfaceAdviceResult : AdviceResult, IImplementI
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; } = Array.Empty<IInterfaceMemberImplementationResult>();
 
     public IInterfaceImplementationAdviser ExplicitMembers
-        => this.Interfaces.FirstOrDefault()?.ExplicitMembers ?? throw new InvalidOperationException( "No interfaces were implemented, so explicit implementation is not possible." );
+        => this.Interfaces.FirstOrDefault()?.ExplicitMembers
+           ?? throw new InvalidOperationException( "No interfaces were implemented, so explicit implementation is not possible." );
 }

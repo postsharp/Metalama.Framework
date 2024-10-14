@@ -10,7 +10,6 @@ namespace Metalama.Framework.Tests.Integration.Templating.Misc.ElementAccess
         [TestTemplate]
         private dynamic Template()
         {
-            Console.WriteLine( (string?)meta.Tags["TestKey"] );
             Console.WriteLine( meta.This[0] );
             Console.WriteLine( meta.Target.Parameters[0].Value );
 

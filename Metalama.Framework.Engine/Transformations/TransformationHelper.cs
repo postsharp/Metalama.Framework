@@ -1,10 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -108,17 +109,12 @@ internal static class TransformationHelper
         switch ( declaration )
         {
             case SymbolBasedDeclaration symbolBasedDeclaration:
-                var primaryDeclaration = symbolBasedDeclaration.GetPrimaryDeclarationSyntax().AssertNotNull();
+                var primaryDeclaration = symbolBasedDeclaration.GetClosestPrimaryDeclarationSyntax().AssertNotNull();
 
                 return compilationContext.GetSyntaxGenerationContext( options, primaryDeclaration );
 
-            case BuiltDeclaration builtDeclaration:
-                return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.Builder );
-
-            case IDeclarationBuilder builder:
-                var insertPosition = builder.ToInsertPosition();
-
-                return GetSyntaxGenerationContext( compilationContext, options, insertPosition );
+            case IntroducedDeclaration builtDeclaration:
+                return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.BuilderData.InsertPosition );
 
             default:
                 throw new AssertionFailedException( $"Unexpected declaration: {declaration}" );
@@ -130,9 +126,9 @@ internal static class TransformationHelper
         SyntaxGenerationOptions options,
         InsertPosition insertPosition )
     {
-        if ( insertPosition is { Relation: InsertPositionRelation.Within, DeclarationBuilder: IDeclarationBuilder containingBuilder } )
+        if ( insertPosition is { Relation: InsertPositionRelation.Within, BuilderData: { } containingBuilder } )
         {
-            return GetSyntaxGenerationContext( compilationContext, options, containingBuilder );
+            return GetSyntaxGenerationContext( compilationContext, options, containingBuilder.InsertPosition );
         }
 
         if ( insertPosition is { Relation: InsertPositionRelation.Root } )
@@ -147,7 +143,7 @@ internal static class TransformationHelper
             { Relation: InsertPositionRelation.Within, SyntaxNode: BaseTypeDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
             { Relation: InsertPositionRelation.Within, SyntaxNode: NamespaceDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
             { Relation: InsertPositionRelation.Within, SyntaxNode: FileScopedNamespaceDeclarationSyntax node } => node.Name.Span.End,
-            _ => throw new AssertionFailedException( $"Unsupported {insertPosition}." ),
+            _ => throw new AssertionFailedException( $"Unsupported {insertPosition}." )
         };
 
         return compilationContext.GetSyntaxGenerationContext( options, insertPosition.SyntaxTree, insertOffset );

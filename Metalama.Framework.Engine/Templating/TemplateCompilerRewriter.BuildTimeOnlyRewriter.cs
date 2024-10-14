@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Templating
                         node.CopyAnnotationsTo(
                             InvocationExpression(
                                     this._parent._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Proceed) ) )
-                                .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
+                                .WithArgumentList( ArgumentList( SeparatedList( [Argument( SyntaxFactoryEx.LiteralExpression( methodName ) )] ) ) ) )!;
 
                     return true;
                 }

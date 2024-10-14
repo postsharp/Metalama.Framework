@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -23,7 +23,7 @@ internal abstract class MethodInliner : Inliner
 
     public override bool IsValidForTargetSymbol( ISymbol symbol )
         => symbol is IMethodSymbol { MethodKind: not MethodKind.Constructor, AssociatedSymbol: null, IsAsync: false } methodSymbol
-           && !IteratorHelper.IsIteratorMethod( methodSymbol );
+           && !methodSymbol.IsIteratorMethod();
 
     public override bool IsValidForContainingSymbol( ISymbol symbol ) => true;
 }

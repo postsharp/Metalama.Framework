@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -18,12 +19,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     {
         private readonly InliningSpecification _specification;
 
-        public override SyntaxNode TargetNode => this._specification.ReplacedRootNode;
+        public override SyntaxNode ReplacedNode => this._specification.ReplacedNode;
 
         public InliningSubstitution( CompilationContext compilationContext, InliningSpecification specification ) : base( compilationContext )
         {
             this._specification = specification;
         }
+
+        public override string ToString() => $"{this.ReplacedNode.Kind()} -> {this._specification}";
 
         public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
         {

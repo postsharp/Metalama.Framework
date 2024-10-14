@@ -13,17 +13,17 @@ public class PreprocessorFixerTests : UnitTestClass
     [Fact]
     public void DisabledText()
     {
-        var code = """
-            static class Program
-            {
-                static void M()
-                {
-            #if DEBUG
-                    Console.WriteLine();
-            #endif
-                }
-            }
-            """;
+        const string code = """
+                            static class Program
+                            {
+                                static void M()
+                                {
+                            #if DEBUG
+                                    Console.WriteLine();
+                            #endif
+                                }
+                            }
+                            """;
 
         var node = SyntaxFactory.ParseCompilationUnit( code );
 
@@ -37,17 +37,17 @@ public class PreprocessorFixerTests : UnitTestClass
     [Fact]
     public void EmptyIfDirective()
     {
-        var code = """
-            class C
-            {
-            	[Foo]
-            #if NET5_0_OR_GREATER
-            #endif
-            	void M()
-            	{
-            	}
-            }
-            """;
+        const string code = """
+                            class C
+                            {
+                            	[Foo]
+                            #if NET5_0_OR_GREATER
+                            #endif
+                            	void M()
+                            	{
+                            	}
+                            }
+                            """;
 
         var node = SyntaxFactory.ParseCompilationUnit( code );
 

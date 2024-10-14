@@ -298,8 +298,6 @@ namespace Metalama.Framework.Code
 
         private static Type FixRuntimeType( Type type ) => type is not ICompileTimeType && typeof(Type).IsAssignableFrom( type ) ? typeof(Type) : type;
 
-        private static object? FixValue( object? value ) => value is Type type ? TypeFactory.GetType( type ) : value;
-
         public static TypedConstant Default( IType type ) => new( null, type );
 
         public static TypedConstant Default( Type type ) => new( null, GetIType( type ) );
@@ -331,11 +329,14 @@ namespace Metalama.Framework.Code
         {
             type ??= GetIType( GetValueType( value ) );
 
-            var fixedValue = FixValue( value );
+            if ( value is Type reflectionType )
+            {
+                value = ((ICompilationInternal) type.Compilation).Factory.GetTypeByReflectionType( reflectionType );
+            }
 
-            CheckAcceptableType( type, fixedValue, true, ((ICompilationInternal) type.Compilation).Factory );
+            CheckAcceptableType( type, value, true, ((ICompilationInternal) type.Compilation).Factory );
 
-            return new TypedConstant( fixedValue, type );
+            return new TypedConstant( value, type );
         }
 
         public static TypedConstant CreateUnchecked( object? value, IType type ) => new( value, type );

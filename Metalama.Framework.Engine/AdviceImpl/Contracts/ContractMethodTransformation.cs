@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,20 +15,29 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal sealed class ContractMethodTransformation : ContractBaseTransformation
 {
-    private new IMethod TargetMember => (IMethod) base.TargetMember;
+    private readonly IFullRef<IMethod> _targetMethod;
 
     public ContractMethodTransformation(
-        Advice advice,
-        IMethod targetMethod,
-        IParameter contractTarget,
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IMethod> targetMethod,
+        IFullRef<IParameter> contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetMethod, contractTarget, contractDirection, template, templateArguments, tags ) { }
+        TemplateProvider templateProvider ) : base(
+        aspectLayerInstance,
+        contractTarget,
+        contractDirection,
+        template,
+        templateProvider,
+        templateArguments )
+    {
+        this._targetMethod = targetMethod;
+    }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        switch ( this.ContractTarget )
+        switch ( this.ContractTarget.GetTarget( this.InitialCompilation ) )
         {
             case IParameter { IsReturnParameter: true } returnValueParam:
                 {
@@ -40,7 +51,7 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
                     }
                     else
                     {
-                        return new[] { new InsertedStatement( contractBlock, returnValueParam, this, InsertedStatementKind.OutputContract ) };
+                        return [new InsertedStatement( contractBlock, returnValueParam, this, InsertedStatementKind.OutputContract )];
                     }
                 }
 
@@ -98,6 +109,8 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
                 throw new AssertionFailedException( $"Unsupported contract target: {this.ContractTarget}" );
         }
     }
+
+    public override IFullRef<IMember> TargetMember => this._targetMethod;
 
     public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetMember}'";
 }

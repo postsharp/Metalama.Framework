@@ -10,6 +10,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -39,7 +40,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
     private sealed record CodePointData(
         string FilePath,
         ISymbol Symbol,
-        AspectPipelineResult PipelineResult );
+        DesignTimeAspectPipelineResult PipelineResult );
 
     private async ValueTask<CodePointData?> GetCodePointDataAsync(
         ProjectKey projectKey,

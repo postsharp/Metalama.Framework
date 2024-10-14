@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal partial class GenericContext
 {
-    private class SymbolMapper : SymbolVisitor<ISymbol>
+    private sealed class SymbolMapper : SymbolVisitor<ISymbol>
     {
         private readonly TypeSymbolMapper _typeSymbolMapper;
 
@@ -46,27 +46,27 @@ internal partial class GenericContext
             return (T) memberInTypeInstance;
         }
 
-        public override ISymbol? DefaultVisit( ISymbol symbol ) => throw new NotSupportedException();
+        public override ISymbol DefaultVisit( ISymbol symbol ) => throw new NotSupportedException();
 
-        public override ISymbol? VisitArrayType( IArrayTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
+        public override ISymbol VisitArrayType( IArrayTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
 
-        public override ISymbol? VisitAssembly( IAssemblySymbol symbol ) => symbol;
+        public override ISymbol VisitAssembly( IAssemblySymbol symbol ) => symbol;
 
-        public override ISymbol? VisitDynamicType( IDynamicTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
+        public override ISymbol VisitDynamicType( IDynamicTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
 
-        public override ISymbol? VisitEvent( IEventSymbol symbol ) => this.MapMember( symbol );
+        public override ISymbol VisitEvent( IEventSymbol symbol ) => this.MapMember( symbol );
 
-        public override ISymbol? VisitField( IFieldSymbol symbol ) => this.MapMember( symbol );
+        public override ISymbol VisitField( IFieldSymbol symbol ) => this.MapMember( symbol );
 
-        public override ISymbol? VisitMethod( IMethodSymbol symbol ) => this.MapMember( symbol );
+        public override ISymbol VisitMethod( IMethodSymbol symbol ) => this.MapMember( symbol );
 
-        public override ISymbol? VisitModule( IModuleSymbol symbol ) => symbol;
+        public override ISymbol VisitModule( IModuleSymbol symbol ) => symbol;
 
-        public override ISymbol? VisitNamedType( INamedTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
+        public override ISymbol VisitNamedType( INamedTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
 
-        public override ISymbol? VisitNamespace( INamespaceSymbol symbol ) => symbol;
+        public override ISymbol VisitNamespace( INamespaceSymbol symbol ) => symbol;
 
-        public override ISymbol? VisitParameter( IParameterSymbol symbol )
+        public override ISymbol VisitParameter( IParameterSymbol symbol )
         {
             var parent = this.Visit( symbol.ContainingSymbol );
 
@@ -78,12 +78,12 @@ internal partial class GenericContext
             };
         }
 
-        public override ISymbol? VisitPointerType( IPointerTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
+        public override ISymbol VisitPointerType( IPointerTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
 
-        public override ISymbol? VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
+        public override ISymbol VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
 
-        public override ISymbol? VisitProperty( IPropertySymbol symbol ) => this.MapMember( symbol );
+        public override ISymbol VisitProperty( IPropertySymbol symbol ) => this.MapMember( symbol );
 
-        public override ISymbol? VisitTypeParameter( ITypeParameterSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
+        public override ISymbol VisitTypeParameter( ITypeParameterSymbol symbol ) => this._typeSymbolMapper.Visit( symbol );
     }
 }

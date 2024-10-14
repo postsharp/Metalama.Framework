@@ -35,7 +35,7 @@ internal abstract class CompileTimeTypeResolver : ICompilationService
         bool fallbackToMock,
         CancellationToken cancellationToken = default )
     {
-        var type = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => this.GetCompileTimeTypeCore( t, cancellationToken ), cancellationToken );
+        var type = this.Cache.GetOrAdd( typeSymbol, this.GetCompileTimeTypeCore, cancellationToken );
 
         if ( type == null && fallbackToMock )
         {
