@@ -1,4 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Win32.SafeHandles;
