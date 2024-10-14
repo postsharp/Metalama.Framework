@@ -252,9 +252,9 @@ public partial class DeclarationFactory
 
     public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, RefTargetKind.Default );
 
-    internal IDeclaration GetDeclaration( ISymbol symbol, RefTargetKind kind )
+    internal IDeclaration GetDeclaration( ISymbol symbol, RefTargetKind kind, GenericContext? genericContext = null )
     {
-        var compilationElement = this.GetCompilationElement( symbol, kind );
+        var compilationElement = this.GetCompilationElement( symbol, kind, genericContext );
 
         if ( compilationElement is not IDeclaration declaration )
         {

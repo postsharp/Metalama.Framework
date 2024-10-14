@@ -91,8 +91,14 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public bool HasDefaultConstructorConstraint => this.TypeParameterSymbol.HasConstructorConstraint;
 
+        // Anomaly: this.TypeParameterSymbol is NOT bound to a generic context in Roslyn. We need to map the generic context ourselves.
+        
         [Memo]
-        public override IDeclaration ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.TypeParameterSymbol.ContainingSymbol );
+        public override IDeclaration ContainingDeclaration
+            => this.Compilation.Factory.GetDeclaration(
+                this.TypeParameterSymbol.ContainingSymbol,
+                RefTargetKind.Default,
+                genericContext: this._genericContext );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
