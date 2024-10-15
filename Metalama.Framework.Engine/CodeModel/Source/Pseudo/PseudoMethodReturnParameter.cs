@@ -17,22 +17,25 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 {
     internal sealed class PseudoMethodReturnParameter : PseudoReturnParameter
     {
+        private readonly IMethodSymbol _methodSymbol;
+
         private SourceMethod DeclaringMethod { get; }
 
         public override IHasParameters DeclaringMember => this.DeclaringMethod;
 
-        public PseudoMethodReturnParameter( SourceMethod declaringMethod )
+        public PseudoMethodReturnParameter( SourceMethod declaringMethod, IMethodSymbol methodSymbol )
         {
+            this._methodSymbol = methodSymbol;
             this.DeclaringMethod = declaringMethod;
         }
 
-        protected override RefKind SymbolRefKind => this.DeclaringMethod.MethodSymbol.RefKind;
+        protected override RefKind SymbolRefKind => this._methodSymbol.RefKind;
 
         public override IType Type => this.DeclaringMethod.ReturnType;
 
         public override bool Equals( IDeclaration? other )
             => other is PseudoMethodReturnParameter methodReturnParameter &&
-               this.Compilation.CompilationContext.SymbolComparer.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
+               this._methodSymbol.Equals( methodReturnParameter._methodSymbol );
 
         public override bool IsImplicitlyDeclared => this.DeclaringMethod.IsImplicitlyDeclared;
 
@@ -53,7 +56,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
+                this._methodSymbol.GetReturnTypeAttributes()
                     .Select( a => new SymbolAttributeRef( a, this.ToFullDeclarationRef(), this.Compilation.RefFactory ) )
                     .ToReadOnlyList() );
 

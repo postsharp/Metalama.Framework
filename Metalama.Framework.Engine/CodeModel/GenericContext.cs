@@ -2,14 +2,15 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Helpers;
-using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
-using SpecialType = Metalama.Framework.Code.SpecialType;
+using OurSpecialType = Metalama.Framework.Code.SpecialType;
+using OurTypeParameterKind = Metalama.Framework.Code.TypeParameterKind;
+using RolsynTypeParameterKind = Microsoft.CodeAnalysis.TypeParameterKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -94,41 +95,38 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
             return typeParameter;
         }
 
-        if ( typeParameter.TypeParameterKind == TypeParameterKind.Type )
+        switch ( typeParameter.TypeParameterKind )
         {
-            // Find which type of the stack of nested types we have to consider.
-            var requestedTypeDefinition = typeParameter.DeclaringType!.OriginalDefinition;
-
-            for ( var type = this.NamedTypeSymbol; type != null; type = type.ContainingType )
-            {
-                if ( type.OriginalDefinition == requestedTypeDefinition )
+            case RolsynTypeParameterKind.Type:
                 {
-                    return type.TypeArguments[typeParameter.Ordinal];
-                }
-            }
+                    // Find which type of the stack of nested types we have to consider.
+                    var requestedTypeDefinition = typeParameter.DeclaringType!.OriginalDefinition;
 
-            // The type parameter cannot be matched. This can happen when we are trying to match a nested type A<T1>.B<T2> in the context of A<string>,
-            // i.e. the top-level type is bound and the nested type is unbound.
-            return typeParameter;
-        }
-        else if ( typeParameter.TypeParameterKind == TypeParameterKind.Method )
-        {
-            if ( this.MethodSymbol == null )
-            {
+                    for ( var type = this.NamedTypeSymbol; type != null; type = type.ContainingType )
+                    {
+                        if ( type.OriginalDefinition == requestedTypeDefinition )
+                        {
+                            return type.TypeArguments[typeParameter.Ordinal];
+                        }
+                    }
+
+                    // The type parameter cannot be matched. This can happen when we are trying to match a nested type A<T1>.B<T2> in the context of A<string>,
+                    // i.e. the top-level type is bound and the nested type is unbound.
+                    return typeParameter;
+                }
+
+            case RolsynTypeParameterKind.Method when this.MethodSymbol == null:
                 // Cannot map it.
                 return typeParameter;
-            }
-            else
-            {
+
+            case RolsynTypeParameterKind.Method:
                 return this.MethodSymbol.TypeArguments[typeParameter.Ordinal];
-            }
-        }
-        else
-        {
-            throw new AssertionFailedException();
+
+            default:
+                throw new AssertionFailedException();
         }
     }
-
+    
     public IType Map( ITypeParameter typeParameter )
     {
         if ( this.IsEmptyOrIdentity )
@@ -136,9 +134,36 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
             return typeParameter;
         }
 
-        var mappedSymbol = this.Map( ((SourceTypeParameter) typeParameter).TypeParameterSymbol );
+        switch ( typeParameter.TypeParameterKind )
+        {
+            case OurTypeParameterKind.Type:
+                {
+                    // Find which type of the stack of nested types we have to consider.
+                    var requestedTypeDefinition = ((INamedType) typeParameter.ContainingDeclaration.AssertNotNull()).Definition.GetSymbol().AssertSymbolNullNotImplemented("Generic context of constructed type.");
 
-        return typeParameter.GetCompilationModel().Factory.GetIType( mappedSymbol );
+                    for ( var type = this.NamedTypeSymbol; type != null; type = type.ContainingType )
+                    {
+                        if ( type.OriginalDefinition == requestedTypeDefinition )
+                        {
+                            return typeParameter.GetCompilationModel().Factory.GetIType( type.TypeArguments[typeParameter.Index] );
+                        }
+                    }
+
+                    // The type parameter cannot be matched. This can happen when we are trying to match a nested type A<T1>.B<T2> in the context of A<string>,
+                    // i.e. the top-level type is bound and the nested type is unbound.
+                    return typeParameter;
+                }
+
+            case OurTypeParameterKind.Method when this.MethodSymbol == null:
+                // Cannot map it.
+                return typeParameter;
+
+            case OurTypeParameterKind.Method:
+                return typeParameter.GetCompilationModel().Factory.GetIType( this.MethodSymbol.TypeArguments[typeParameter.Index] );
+
+            default:
+                throw new AssertionFailedException();
+        }
     }
 
     [return: NotNullIfNotNull( nameof(type) )]
@@ -153,7 +178,7 @@ internal partial class GenericContext : IEquatable<GenericContext?>, IGenericCon
         {
             null => null,
             ITypeParameter typeParameter => this.Map( typeParameter ),
-            _ when type.SpecialType != SpecialType.None || !TypeVisitor.Instance.Visit( type ) => type, // Fast oath
+            _ when type.SpecialType != OurSpecialType.None || !TypeVisitor.Instance.Visit( type ) => type, // Fast oath
             _ => this.TypeMapperInstance.Visit( type )
         };
     }

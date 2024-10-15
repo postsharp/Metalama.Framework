@@ -4,6 +4,11 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Code
 {
+    public enum TypeParameterKind
+    {
+        Type,
+        Method
+    }
     /// <summary>
     /// Represents a generic parameter of a method or type.
     /// </summary>
@@ -48,5 +53,7 @@ namespace Metalama.Framework.Code
         /// is a generic instance. If it is a generic definition, returns the current instance.
         /// </summary>
         IType ResolvedType { get; }
+        
+        TypeParameterKind TypeParameterKind { get; }
     }
 }

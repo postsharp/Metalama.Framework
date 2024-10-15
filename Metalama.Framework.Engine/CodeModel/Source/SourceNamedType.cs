@@ -25,10 +25,13 @@ namespace Metalama.Framework.Engine.CodeModel.Source
     /// </summary>
     internal sealed class SourceNamedType : SourceMemberOrNamedType, INamedTypeImpl
     {
+        private readonly INamedTypeSymbol _typeSymbol;
+
         public SourceNamedTypeImpl Implementation { get; }
 
         internal SourceNamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
+            this._typeSymbol = typeSymbol;
             this.Implementation = new SourceNamedTypeImpl( this, typeSymbol, compilation );
         }
 
@@ -61,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             }
         }
 
-        public override ISymbol Symbol => this.Implementation.Symbol;
+        public override ISymbol Symbol => this._typeSymbol;
 
         public override MemberInfo ToMemberInfo()
         {
@@ -476,9 +479,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         [Memo]
         public INamedType Definition
-            => this.TypeSymbol.Equals( this.TypeSymbol.OriginalDefinition )
+            => this._typeSymbol.Equals( this._typeSymbol.OriginalDefinition )
                 ? this
-                : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
+                : this.Compilation.Factory.GetNamedType( this._typeSymbol.OriginalDefinition );
 
         protected override IRef<IMemberOrNamedType> ToMemberOrNamedTypeRef() => this.UnderlyingType.ToRef();
 
@@ -531,22 +534,14 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 typeArgumentSymbols[index] = t.GetSymbol().AssertSymbolNotNull();
             }
 
-            var symbol = ((INamedTypeSymbol) this.TypeSymbol).ConstructedFrom.Construct( typeArgumentSymbols );
+            var symbol = this._typeSymbol.ConstructedFrom.Construct( typeArgumentSymbols );
 
             return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
         }
 
         public override IDeclaration ContainingDeclaration => this.Implementation.ContainingDeclaration;
 
-        public ITypeSymbol TypeSymbol
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.NamedTypeSymbol;
-            }
-        }
+        ITypeSymbol ISdkType.TypeSymbol => this._typeSymbol;
 
         public bool Equals( IType? other )
         {

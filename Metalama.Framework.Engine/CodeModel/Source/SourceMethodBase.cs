@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
     {
         public override ISymbol Symbol => this.MethodSymbol;
 
-        internal IMethodSymbol MethodSymbol { get; }
+        protected IMethodSymbol MethodSymbol { get; }
 
         [Memo]
         public override IDeclaration? ContainingDeclaration
