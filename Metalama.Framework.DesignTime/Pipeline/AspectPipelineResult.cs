@@ -464,12 +464,10 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         {
             var syntaxTree = validator.ValidatedDeclaration.GetPrimarySyntaxTree();
 
-            if ( syntaxTree == null )
+            if ( syntaxTree == null && !resultBuilders.ContainsKey( string.Empty ) )
             {
-                continue;
+                resultBuilders.Add( string.Empty, new SyntaxTreePipelineResult.Builder( null ) );
             }
-
-            var filePath = syntaxTree.FilePath;
 
             var validatedDeclarationSymbol = validator.ValidatedDeclaration.GetSymbol();
 
@@ -485,6 +483,8 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     validator.Granularity,
                     compilation.CompilationContext );
 
+                var filePath = syntaxTree?.FilePath ?? string.Empty;
+
                 if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                 {
                     builder.Validators ??= ImmutableArray.CreateBuilder<DesignTimeReferenceValidatorInstance>();
@@ -492,7 +492,7 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 }
                 else
                 {
-                    // This happens with cross-project validators i.e. validator
+                    // This happens with cross-project validators
                     externalValidators ??= new List<DesignTimeReferenceValidatorInstance>();
                     externalValidators.Add( designTimeValidator );
                 }
