@@ -43,30 +43,6 @@
         <Compile Remove="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
         <!-- But still show them in solution explorer -->
         <None Include="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
-        <Compile Update="Runners\LinkerTestRunner.cs">
-          <DependentUpon>$([System.String]::Copy('LinkerTestRunner').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Runners\LinkerTestRunnerFactory.cs">
-          <DependentUpon>$([System.String]::Copy('LinkerTestRunnerFactory').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Runner\TemplatingTestRunner.cs">
-          <DependentUpon>$([System.String]::Copy('TemplatingTestRunner').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Runner\TemplatingTestRunnerFactory.cs">
-          <DependentUpon>$([System.String]::Copy('TemplatingTestRunnerFactory').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Runner\TestTemplateCompiler.cs">
-          <DependentUpon>$([System.String]::Copy('TestTemplateCompiler').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Tests\_Runner.cs">
-          <DependentUpon>$([System.String]::Copy('_Runner').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -89,9 +65,5 @@
             <_Parameter2>$(PostSharpEngineeringDataDirectory)</_Parameter2>
         </AssemblyAttribute>
     </ItemGroup>
-
-    <ItemGroup>
-      <EditorConfigFiles Include="Tests\.editorconfig" />
-    </ItemGroup>
-
+    
 </Project>
