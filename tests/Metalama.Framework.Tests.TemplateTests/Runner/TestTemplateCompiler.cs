@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 
-namespace Metalama.Framework.Tests.AspectTests.Runners
+namespace Metalama.Framework.Tests.TemplateTests.Runner
 {
     internal sealed class TestTemplateCompiler
     {

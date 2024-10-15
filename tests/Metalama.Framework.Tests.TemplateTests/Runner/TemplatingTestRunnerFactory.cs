@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.AspectTests.Runners
+namespace Metalama.Framework.Tests.TemplateTests.Runner
 {
     [UsedImplicitly]
     internal sealed class TemplatingTestRunnerFactory : ITestRunnerFactory

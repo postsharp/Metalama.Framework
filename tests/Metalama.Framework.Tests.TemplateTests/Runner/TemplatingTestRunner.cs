@@ -39,7 +39,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 using System.Runtime.Loader;
 #endif
 
-namespace Metalama.Framework.Tests.AspectTests.Runners
+namespace Metalama.Framework.Tests.TemplateTests.Runner
 {
     /// <summary>
     /// Executes template integration tests by compiling and expanding a template method in the input source file.
