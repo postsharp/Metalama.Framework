@@ -271,14 +271,12 @@ internal sealed partial class ContextualSyntaxGenerator
             {
                 case TypeKindConstraint.Class:
                     constraints ??= [];
-                    var constraint = ClassOrStructConstraint( SyntaxKind.ClassConstraint );
 
-                    if ( genericParameter.IsConstraintNullable == true )
-                    {
-                        constraint = constraint.WithQuestionToken( Token( SyntaxKind.QuestionToken ) );
-                    }
+                    var questionToken = genericParameter.IsConstraintNullable == true
+                        ? Token( SyntaxKind.QuestionToken )
+                        : default;
 
-                    constraints.Add( constraint );
+                    constraints.Add( ClassOrStructConstraint( SyntaxKind.ClassConstraint, Token( SyntaxKind.ClassKeyword ), questionToken ) );
 
                     break;
 
@@ -338,6 +336,8 @@ internal sealed partial class ContextualSyntaxGenerator
 
             if ( constraints != null )
             {
+                constraints[^1] = constraints[^1].WithOptionalTrailingLineFeed( this.SyntaxGenerationContext );
+
                 clauses ??= [];
 
                 clauses.Add(
