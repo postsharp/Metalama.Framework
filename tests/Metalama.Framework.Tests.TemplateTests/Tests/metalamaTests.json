@@ -1,0 +1,3 @@
+{
+  "TestRunnerFactoryType": "Metalama.Framework.Tests.AspectTests.Runners.TemplatingTestRunnerFactory"
+}

@@ -4,7 +4,7 @@ using Metalama.AspectWorkbench.Model;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Tests.Integration.Runners;
+using Metalama.Framework.Tests.AspectTests.Runners;
 using Metalama.Testing.UnitTesting;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.AspectTesting.Licensing;
