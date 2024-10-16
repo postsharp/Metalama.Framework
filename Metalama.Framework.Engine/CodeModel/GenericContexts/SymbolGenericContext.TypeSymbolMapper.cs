@@ -5,15 +5,15 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
 
-internal partial class GenericContext
+internal partial class SymbolGenericContext
 {
     private sealed class TypeSymbolMapper : TypeSymbolRewriter
     {
-        public GenericContext GenericContext { get; }
+        public SymbolGenericContext GenericContext { get; }
 
-        public TypeSymbolMapper( GenericContext genericContext ) : base( genericContext.CompilationContext.AssertNotNull().Compilation )
+        public TypeSymbolMapper( SymbolGenericContext genericContext ) : base( genericContext._compilationContext.AssertNotNull().Compilation )
         {
             this.GenericContext = genericContext;
         }

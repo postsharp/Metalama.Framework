@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Engine.CodeModel.Helpers;
+namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
 
 internal static class GenericContextExtensions
 {

@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Visitors;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
 
 internal partial class GenericContext
 {
@@ -19,10 +19,7 @@ internal partial class GenericContext
             this._genericContext = genericContext;
         }
 
-        internal override IType Visit( ITypeParameter typeParameter )
-        {
-            return this._genericContext.Map( typeParameter );
-        }
+        internal override IType Visit( ITypeParameter typeParameter ) => this._genericContext.Map( typeParameter );
     }
 
     /// <summary>
