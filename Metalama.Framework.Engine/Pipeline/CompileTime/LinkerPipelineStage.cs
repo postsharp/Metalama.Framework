@@ -54,8 +54,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var linker = new AspectLinker(
                 pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
-                    pipelineStepsResult.LastCompilation,
                     input.FirstCompilationModel.AssertNotNull(),
+                    pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.Transformations,
                     input.AspectLayers,
                     this._compileTimeProject ) );

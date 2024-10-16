@@ -51,6 +51,9 @@
           <DependentUpon>$([System.String]::Copy('LinkerTestRunnerFactory').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
           <SubType>Code</SubType>
         </Compile>
+        <Compile Update="Runner\TestOverrideDeclarationTransformation.cs">
+          <DependentUpon>$([System.String]::Copy('%(Filename)').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>

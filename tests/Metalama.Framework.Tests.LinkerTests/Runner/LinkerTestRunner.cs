@@ -122,9 +122,6 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             var builder = new LinkerTestInputBuilder( serviceProvider, initialPartialCompilation.CompilationContext );
             ((LinkerTestTextResult) testResult).Builder = builder;
 
-            // Create a clean compilation without any pseudo members.
-            var cleanCompilation = LinkerTestInputBuilder.GetCleanCompilation( initialPartialCompilation );
-
             // Process all syntax trees.
             var cleanPartialCompilation =
                 initialPartialCompilation.UpdateSyntaxTrees(
