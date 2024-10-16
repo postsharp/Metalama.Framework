@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -107,11 +108,15 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             public ProjectServiceProvider ServiceProvider { get; }
 
-            public CompilationContext CompilationContext { get; }
+            public CompilationContext InputCompilation { get; }
 
-            public TestRewriter( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+            public CompilationModel InitialCompilationModel { get; }
+
+            public TestRewriter( in ProjectServiceProvider serviceProvider )
             {
-                this.CompilationContext = compilationContext;
+            //    this.InputCompilation = inputCompilation;
+            //    this.InitialCompilationModel = initialCompilationModel;
+
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<ITransformation>();
                 this._replacedTransformations = new List<ITransformation>();

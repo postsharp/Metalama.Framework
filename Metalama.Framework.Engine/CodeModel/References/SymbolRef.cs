@@ -125,7 +125,7 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
         Invariant.Assert(
             this.CompilationContext == otherRef.CompilationContext ||
             comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
-            "Compilation mistmatch in a non-structural comparison." );
+            "Compilation mismatch in a non-structural comparison." );
 
         return comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext ).Equals( this.Symbol, otherRef.Symbol )
                && this.TargetKind == otherRef.TargetKind;

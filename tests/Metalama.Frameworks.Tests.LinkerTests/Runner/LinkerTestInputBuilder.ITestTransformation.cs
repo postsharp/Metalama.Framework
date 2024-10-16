@@ -45,6 +45,8 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             /// Gets the name of the member replaced by this declaration.
             /// </summary>
             string ReplacedElementName { get; }
+
+            ITransformation ActualTransformation { get; }
         }
     }
 }

@@ -62,11 +62,15 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
+        private readonly CompilationContext _initialCompilationContext;
+        private readonly CompilationModel _initialCompilationModel;
 
-        public LinkerTestInputBuilder( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+        private List<PseudoIntroductionRecord> _pseudoIntroductionRecord = new();
+
+        public LinkerTestInputBuilder( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
-            this._rewriter = new TestRewriter( serviceProvider, compilationContext );
+            this._rewriter = new TestRewriter( serviceProvider );
         }
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )
@@ -74,13 +78,9 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             return this._rewriter.Visit( syntaxRoot )!;
         }
 
-        public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )
+        public AspectLinkerInput ToAspectLinkerInput(CompilationContext inputCompilation)
         {
-            var initialCompilationModel = CompilationModel.CreateInitialInstance(
-                new ProjectModel( inputCompilation.Compilation, this._serviceProvider ),
-                inputCompilation );
-
-            FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, initialCompilationModel );
+            FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, this._initialCompilationModel );
 
             var orderedLayers = this._rewriter.OrderedAspectLayers
                 .Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName.AssertNotNull(), al.LayerName ) )
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
 
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
-            var replacedCompilationModel = initialCompilationModel.WithTransformationsAndAspectInstances(
+            var replacedCompilationModel = this._initialCompilationModel.WithTransformationsAndAspectInstances(
                 this._rewriter.ReplacedTransformations.ToOrderedList( x => layerOrderLookup[x.AspectLayerId] ),
                 null,
                 null );
@@ -489,6 +489,10 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             A.CallTo( () => ((IMember) observableTransformation).IsStatic ).Returns( symbolHelperElement.IsStatic );
             A.CallTo( () => ((IMember) observableTransformation).IsVirtual ).Returns( symbolHelperElement.IsVirtual );
             A.CallTo( () => ((IMember) observableTransformation).Name ).Returns( introducedElementName.AssertNotNull() );
+        }
+
+        private class PseudoIntroductionRecord
+        {
         }
     }
 }
