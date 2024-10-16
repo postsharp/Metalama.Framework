@@ -30,7 +30,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             // Note that there maybe many instances of this class in the AppDomain, so it needs to make sure it uses a shared point of contact.
             // We're using a named AppDomain data slot for this. We have to synchronize access using a named mutex.
 
-            using var mutex = OpenOrCreateMutex( $@"Global\{_appDomainDataName}" );
+            using var mutex = OpenOrCreateMutex( $@"Global\{_appDomainDataName}_{Environment.UserName}" );
 
             try
             {

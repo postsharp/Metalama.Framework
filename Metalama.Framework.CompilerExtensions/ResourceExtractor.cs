@@ -204,7 +204,7 @@ public static class ResourceExtractor
         // Extract managed resources to a snapshot directory.
         var completedFilePath = Path.Combine( _snapshotDirectory, ".completed" );
         var cleanupJsonFilePath = Path.Combine( _snapshotDirectory, "cleanup.json" );
-        var mutexName = "Global\\Metalama_Extract_" + _buildId;
+        var mutexName = $"Global\\Metalama_Extract_{HashUtilities.HashString( _snapshotDirectory )}";
 
         if ( !File.Exists( completedFilePath ) )
         {
