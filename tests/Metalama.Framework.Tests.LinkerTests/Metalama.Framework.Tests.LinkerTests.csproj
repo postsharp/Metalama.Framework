@@ -29,8 +29,6 @@
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="Metalama.Compiler.Sdk" />
-        <PackageReference Include="FakeItEasy" />
-        <PackageReference Include="FakeItEasy.Analyzer.CSharp" />
         <PackageReference Include="System.Text.Json" NoWarn="NU1903" />
         <PackageReference Include="Metalama.Backstage.Testing" />
 

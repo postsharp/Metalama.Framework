@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using FakeItEasy;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
@@ -10,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
@@ -24,7 +22,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
@@ -392,9 +389,9 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
                 TestTransformationBase CreateTransformation( CompilationModel compilationModel )
                 {
-                    var aspectLayerInstance = this.CreateFakeAspectLayerInstance( compilationModel.CompilationContext, aspectLayer );
                     var declaringTypeRef = DurableRefFactory.FromSymbolId<INamedType>( SymbolId.Create( symbol.ContainingType ) );
                     var declaringType = declaringTypeRef.GetTarget( compilationModel );
+                    var aspectLayerInstance = this.CreateTestAspectLayerInstance( compilationModel.CompilationContext, declaringType, aspectLayer );
 
                     MemberBuilder builder;
 
@@ -637,44 +634,29 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
                 TestTransformationBase CreateTransformation( CompilationModel compilationModel )
                 {
-                    var aspectLayerInstance = this.CreateFakeAspectLayerInstance( compilationModel.CompilationContext, aspectLayer );
+                    var overriddenDeclaration = this._owner.Builder.TranslateOriginalSymbol( overriddenDeclarationSymbol ).GetTarget( compilationModel );
+                    var aspectLayerInstance = this.CreateTestAspectLayerInstance( compilationModel.CompilationContext, overriddenDeclaration, aspectLayer );
 
                     return new TestOverrideDeclarationTransformation(
                         aspectLayerInstance,
                         this._owner.Builder.TranslateInsertPosition( compilationModel.CompilationContext, insertPositionRecord ),
-                        this._owner.Builder.TranslateOriginalSymbol( overriddenDeclarationSymbol ),
+                        overriddenDeclaration.ToFullRef(),
                         overrideSyntax );
                 }
 
                 this._owner.Builder.AddTransformationFactory( CreateTransformation );
             }
 
-            private AspectLayerInstance CreateFakeAspectLayerInstance( CompilationContext compilationContext, AspectLayerId aspectLayer )
+            private AspectLayerInstance CreateTestAspectLayerInstance( CompilationContext compilationContext, IDeclaration targetDeclaration, AspectLayerId aspectLayer )
             {
-                var fakeAspectSymbol = A.Fake<INamedTypeSymbol>( s => s.Named( $"INamedTypeSymbol({aspectLayer.AspectName})" ) );
-                var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>( s => s.Named( "INamespaceSymbol(global)" ) );
-                var fakeDiagnosticAdder = A.Fake<IDiagnosticAdder>( s => s.Named( "IDiagnosticAdder" ) );
+                var fakeAspectInstance = 
+                    new AspectInstance( 
+                        new TestAspect(), 
+                        targetDeclaration, 
+                        new TestAspectClass(), 
+                        Enumerable.Empty<TemplateClassInstance>(), 
+                        ImmutableArray<AspectPredecessor>.Empty );
 
-                A.CallTo( () => fakeAspectSymbol.MetadataName ).Returns( aspectLayer.AspectName.AssertNotNull() );
-                A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
-                A.CallTo( () => fakeAspectSymbol.DeclaringSyntaxReferences ).Returns( ImmutableArray<SyntaxReference>.Empty );
-                A.CallTo( () => fakeAspectSymbol.GetAttributes() ).Returns( ImmutableArray<AttributeData>.Empty );
-                A.CallTo( () => fakeAspectSymbol.GetMembers() ).Returns( ImmutableArray<ISymbol>.Empty );
-                A.CallTo( () => fakeGlobalNamespaceSymbol.IsGlobalNamespace ).Returns( true );
-                A.CallTo( () => fakeGlobalNamespaceSymbol.Kind ).Returns( SymbolKind.Namespace );
-
-                var aspectClass =
-                    new AspectClass(
-                        this._owner.ServiceProvider,
-                        fakeAspectSymbol,
-                        null,
-                        null,
-                        typeof( object ),
-                        null,
-                        fakeDiagnosticAdder,
-                        compilationContext );
-
-                var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), aspectClass );
                 var aspectLayerInstance = new AspectLayerInstance( fakeAspectInstance, aspectLayer.LayerName, null! /* TODO */ );
 
                 return aspectLayerInstance;
