@@ -54,7 +54,7 @@ public class AttributeSerializationTests : SerializationTestsBase
 
         Assert.Equal( attribute.Type, roundtrip.Type );
         Assert.Equal( attribute.Constructor, roundtrip.Constructor );
-        Assert.Equal( attribute.ConstructorArguments, roundtrip.ConstructorArguments );
+        Assert.Equal( attribute.ConstructorArguments, roundtrip.ConstructorArguments, ( x, y ) => x.SequenceEqual( y ) );
         Assert.Equal( attribute.NamedArguments, roundtrip.NamedArguments );
 
         // Non-ref serialization must fail.
