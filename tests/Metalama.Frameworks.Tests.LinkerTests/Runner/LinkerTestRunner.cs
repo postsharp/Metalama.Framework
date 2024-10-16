@@ -57,20 +57,6 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             serviceProvider = serviceProvider.WithCompileTimeProjectServices( CompileTimeProjectRepository.CreateTestInstance() );
 
-            //var inputPartialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() );
-
-
-            //// Create the clean compilation that is stripped of all pseudo-members.
-            //var cleanCompilation = LinkerTestInputBuilder.GetCleanCompilation( inputPartialCompilation );
-
-            //// Create a compilation model without any pseudo declaration.
-            //var initialCompilationModel =
-            //    CompilationModel.CreateInitialInstance(
-            //        new ProjectModel( cleanCompilation.Compilation, serviceProvider ),
-            //        cleanCompilation );
-
-            //var builder = new LinkerTestInputBuilder( serviceProvider, inputPartialCompilation.CompilationContext, null );
-
             ((LinkerTestTextResult) testResult).ServiceProvider = serviceProvider;
 
             await base.RunAsync( testInput, testResult, testContext );
@@ -82,8 +68,12 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             var builder = ((LinkerTestTextResult) testResult).Builder;
 
+            CompilationModel initialCompilationModel = CompilationModel.CreateInitialInstance(
+                new ProjectModel( testResult.InputCompilation, serviceProvider ),
+                testResult.InputCompilation );
+
             // Create linker input from the clean compilation and recorded transformations.
-            var linkerInput = builder.ToAspectLinkerInput( testResult.InputCompilation.GetCompilationContext() );
+            var linkerInput = builder.ToAspectLinkerInput( initialCompilationModel );
 
             var linker = new AspectLinker( serviceProvider, linkerInput );
 
@@ -125,28 +115,15 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             base.ExecuteAssertions( testInput, testResult );
         }
 
-        //private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestResult testResult )
-        //{
-        //    var builder = ((LinkerTestTextResult) testResult).Builder!;
-
-        //    return builder.ProcessSyntaxRoot( syntaxRoot );
-        //}
-
         private protected override Compilation PreprocessCompilation( Compilation initialCompilation, TestResult testResult )
         {
             var serviceProvider = ((LinkerTestTextResult) testResult).ServiceProvider.AssertNotNull();
             var initialPartialCompilation = PartialCompilation.CreateComplete( initialCompilation );
-            var builder = new LinkerTestInputBuilder( serviceProvider );
+            var builder = new LinkerTestInputBuilder( serviceProvider, initialPartialCompilation.CompilationContext );
             ((LinkerTestTextResult) testResult).Builder = builder;
 
             // Create a clean compilation without any pseudo members.
             var cleanCompilation = LinkerTestInputBuilder.GetCleanCompilation( initialPartialCompilation );
-
-            // Create an initial compilation model.
-            var initialCompilationModel =
-                CompilationModel.CreateInitialInstance(
-                    new ProjectModel( cleanCompilation.Compilation, serviceProvider ),
-                    cleanCompilation );
 
             // Process all syntax trees.
             var cleanPartialCompilation =

@@ -62,13 +62,13 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
-        private readonly CompilationContext _initialCompilationContext;
-        private readonly CompilationModel _initialCompilationModel;
+        private readonly CompilationContext _inputCompilationContext;
 
         private List<PseudoIntroductionRecord> _pseudoIntroductionRecord = new();
 
-        public LinkerTestInputBuilder( in ProjectServiceProvider serviceProvider )
+        public LinkerTestInputBuilder( in ProjectServiceProvider serviceProvider, CompilationContext inputCompilationContext )
         {
+            this._inputCompilationContext = inputCompilationContext;
             this._serviceProvider = serviceProvider;
             this._rewriter = new TestRewriter( serviceProvider );
         }
@@ -78,9 +78,9 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             return this._rewriter.Visit( syntaxRoot )!;
         }
 
-        public AspectLinkerInput ToAspectLinkerInput(CompilationContext inputCompilation)
+        public AspectLinkerInput ToAspectLinkerInput(CompilationModel initialCompilationModel)
         {
-            FinalizeTransformationFakes( this._rewriter, (CSharpCompilation) inputCompilation.Compilation, this._initialCompilationModel );
+            FinalizeTransformationFakes( this._rewriter, (CSharpCompilation)initialCompilationModel.CompilationContext.Compilation, initialCompilationModel );
 
             var orderedLayers = this._rewriter.OrderedAspectLayers
                 .Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName.AssertNotNull(), al.LayerName ) )
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
 
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
-            var replacedCompilationModel = this._initialCompilationModel.WithTransformationsAndAspectInstances(
+            var replacedCompilationModel = initialCompilationModel.WithTransformationsAndAspectInstances(
                 this._rewriter.ReplacedTransformations.ToOrderedList( x => layerOrderLookup[x.AspectLayerId] ),
                 null,
                 null );
