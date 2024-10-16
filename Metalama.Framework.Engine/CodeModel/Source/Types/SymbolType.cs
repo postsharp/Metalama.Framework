@@ -3,9 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -18,6 +18,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
     internal abstract class SymbolType<T> : ITypeImpl, ISymbolBasedCompilationElement
         where T : ITypeSymbol
     {
+        public GenericContext? GenericContextForSymbolMapping { get; }
+
         public CompilationModel Compilation { get; }
 
         DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.Type;
@@ -32,17 +34,18 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
 
         protected T Symbol { get; }
 
-        protected SymbolType( T symbol, CompilationModel compilation )
+        protected SymbolType( T symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping )
         {
+            this.GenericContextForSymbolMapping = genericContextForSymbolMapping;
             this.Compilation = compilation;
             this.Symbol = symbol;
         }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.Symbol.ToDisplayString( format.ToRoslyn() );
+            => DisplayStringFormatter.Format( this, format, context, this.GenericContextForSymbolMapping );
 
         [Memo]
-        private IRef<IType> Ref => this.Symbol.ToRef( this.Compilation.RefFactory );
+        private IRef<IType> Ref => this.Symbol.ToRef( this.Compilation.RefFactory, this.GenericContextForSymbolMapping );
 
         IRef<IType> IType.ToRef() => this.Ref;
 
@@ -50,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
 
         public SpecialType SpecialType => this.Symbol.SpecialType.ToOurSpecialType();
 
-        public Type ToType() => this.Compilation.Factory.GetReflectionType( this.Symbol );
+        public Type ToType() => this.Compilation.Factory.GetReflectionType( this.Symbol ); // TODO: mapping?
 
         public bool? IsReferenceType => this.Symbol.IsReferenceType;
 
@@ -59,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
         public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
 
         public bool Equals( IType? otherType, TypeComparison typeComparison )
-            => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+            => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType ); // TODO: Mapping
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -67,7 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
 
         public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
-        public override string ToString() => this.Symbol.ToDebugString();
+        public override string ToString() => this.ToDisplayString();
 
         public abstract IType Accept( TypeRewriter visitor );
 

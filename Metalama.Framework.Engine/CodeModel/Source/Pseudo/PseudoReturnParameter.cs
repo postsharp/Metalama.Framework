@@ -61,8 +61,6 @@ internal abstract class PseudoReturnParameter : BaseDeclaration, IParameterImpl
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
-    public override string ToString() => this.DeclaringMember + "/" + this.Name;
-
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
@@ -83,6 +81,7 @@ internal abstract class PseudoReturnParameter : BaseDeclaration, IParameterImpl
     private IFullRef<IParameter> Ref
         => this.RefFactory.FromSymbol<IParameter>(
             (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertSymbolNotNull(),
+            ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping,
             RefTargetKind.Return );
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;

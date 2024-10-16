@@ -5,5 +5,6 @@ namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
 internal enum GenericContextKind
 {
     Null,
-    Symbol
+    Symbol,
+    Introduced
 }

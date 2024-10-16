@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
@@ -16,13 +17,16 @@ namespace Metalama.Framework.Engine.CodeModel.Source;
 
 internal sealed class SourceIndexer : SourcePropertyOrIndexer, IIndexerImpl
 {
-    public SourceIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
+    public SourceIndexer( IPropertySymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+        symbol,
+        compilation,
+        genericContextForSymbolMapping ) { }
 
     [Memo]
     public IParameterList Parameters
         => new ParameterList(
             this,
-            this.PropertySymbol.Parameters.Select( p => this.RefFactory.FromSymbol<IParameter>( p ) ).ToReadOnlyList() );
+            this.PropertySymbol.Parameters.Select( p => this.RefFactory.FromSymbol<IParameter>( p, this.GenericContextForSymbolMapping ) ).ToReadOnlyList() );
 
     public IIndexer? OverriddenIndexer
     {
@@ -32,7 +36,7 @@ internal sealed class SourceIndexer : SourcePropertyOrIndexer, IIndexerImpl
 
             if ( overriddenProperty != null )
             {
-                return this.Compilation.Factory.GetIndexer( overriddenProperty );
+                return this.Compilation.Factory.GetIndexer( overriddenProperty, this.GenericContextForSymbolMapping );
             }
             else
             {
@@ -64,7 +68,7 @@ internal sealed class SourceIndexer : SourcePropertyOrIndexer, IIndexerImpl
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
     [Memo]
-    private IFullRef<IIndexer> Ref => this.RefFactory.FromSymbol<IIndexer>( this.PropertySymbol );
+    private IFullRef<IIndexer> Ref => this.RefFactory.FromSymbol<IIndexer>( this.PropertySymbol, this.GenericContextForSymbolMapping );
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 

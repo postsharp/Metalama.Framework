@@ -63,7 +63,7 @@ class C< [MyAttribute(4)]T>
                     "test:1",
                     "test:2",
                     "C<T>:3",
-                    "T:4",
+                    "C<T>/T:4",
                     "C<T>.M(int):5",
                     "C<T>.M(int)/<return>:6",
                     "C<T>.M(int)/p:7",

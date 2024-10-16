@@ -682,7 +682,7 @@ class C
                 "Dictionary<int, string>",
                 compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) ).ToString() );
 
-            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) ).ToString() );
+            Assert.Equal( "int[][,]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) ).ToString() );
             Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof(void*) ).ToString() );
 
             Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof(int).MakeByRefType() ) );

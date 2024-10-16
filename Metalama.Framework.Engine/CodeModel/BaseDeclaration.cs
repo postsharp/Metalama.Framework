@@ -115,5 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         private protected RefFactory RefFactory => this.Compilation.RefFactory;
+
+        public override string ToString() => this.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage );
     }
 }

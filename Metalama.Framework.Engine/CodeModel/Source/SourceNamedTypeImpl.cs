@@ -44,7 +44,11 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default )
         => this.Compilation.GetDerivedTypes( this, options );
 
-    internal SourceNamedTypeImpl( SourceNamedType facade, INamedTypeSymbol namedTypeSymbol, CompilationModel compilation ) : base( compilation )
+    internal SourceNamedTypeImpl(
+        SourceNamedType facade,
+        INamedTypeSymbol namedTypeSymbol,
+        CompilationModel compilation,
+        GenericContext? genericContextForSymbolMapping ) : base( compilation, genericContextForSymbolMapping )
     {
         this._facade = facade;
         this._namedTypeSymbol = namedTypeSymbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
@@ -322,14 +326,17 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
     public string FullName => this._namedTypeSymbol.GetFullName().AssertNotNull();
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments => this._namedTypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
+    public IReadOnlyList<IType> TypeArguments
+        => this.GenericContextForSymbolMapping == null
+            ? this._namedTypeSymbol.TypeArguments.SelectAsImmutableArray( a => this.Compilation.Factory.GetIType( a, this.GenericContextForSymbolMapping ) )
+            : this.GenericContextForSymbolMapping.TypeArguments.SelectAsImmutableArray( t => t.GetTarget( this.Compilation ) );
 
     [Memo]
     public override IDeclaration ContainingDeclaration
         => this._namedTypeSymbol.ContainingSymbol switch
         {
             INamespaceSymbol => this.Compilation.Factory.GetAssembly( this._namedTypeSymbol.ContainingAssembly ),
-            INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
+            INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType, this.GenericContextForSymbolMapping ),
             null => this.Compilation, // Empty error type symbol goes here. Other error types return a namespace, which we handle above.
             _ => throw new AssertionFailedException( $"Unexpected containing symbol kind: {this._namedTypeSymbol.ContainingSymbol.Kind}." )
         };
@@ -337,7 +344,10 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
     public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
 
     [Memo]
-    public INamedType? BaseType => this._namedTypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this._namedTypeSymbol.BaseType );
+    public INamedType? BaseType
+        => this._namedTypeSymbol.BaseType == null
+            ? null
+            : this.Compilation.Factory.GetNamedType( this._namedTypeSymbol.BaseType, this.GenericContextForSymbolMapping );
 
     [Memo]
     public IImplementedInterfaceCollection AllImplementedInterfaces
@@ -359,13 +369,25 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var typeArgumentSymbols =
-            typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
+        if ( typeArguments.Any( GenericContext.ReferencesAnyIntroducedType ) )
+        {
+            var genericContext = new IntroducedGenericContext(
+                typeArguments.SelectAsImmutableArray( t => t.ToFullRef() ),
+                this.ToFullDeclarationRef(),
+                (IntroducedGenericContext?) this.GenericContextForSymbolMapping );
 
-        var typeSymbol = this._namedTypeSymbol;
-        var constructedTypeSymbol = typeSymbol.ConstructedFrom.Construct( typeArgumentSymbols );
+            return this.Compilation.Factory.GetNamedType( this._namedTypeSymbol.ConstructedFrom, genericContext );
+        }
+        else
+        {
+            var typeArgumentSymbols =
+                typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNotNull() );
 
-        return this.Compilation.Factory.GetNamedType( constructedTypeSymbol );
+            var typeSymbol = this._namedTypeSymbol;
+            var constructedTypeSymbol = typeSymbol.ConstructedFrom.Construct( typeArgumentSymbols );
+
+            return this.Compilation.Factory.GetNamedType( constructedTypeSymbol );
+        }
     }
 
     public IReadOnlyList<IMember> GetOverridingMembers( IMember member )
@@ -451,7 +473,7 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
         {
             foreach ( var candidateSymbol in implementedInterface.GetMembers( interfaceMember.Name ) )
             {
-                var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
+                var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol, this.GenericContextForSymbolMapping );
 
                 if ( (candidateMember.SignatureEquals( interfaceMember )
                       || candidateMember.Definition.SignatureEquals( interfaceMember ))
@@ -467,6 +489,8 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     public bool IsSubclassOf( INamedType type )
     {
+        // TODO: Generic context
+
         // TODO: enum.IsSubclassOf(int) == true etc.
         if ( type.TypeKind is TypeKind.Class or TypeKind.RecordClass )
         {
@@ -516,6 +540,8 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
+        // TODO: Generic context.
+
         // Fastest track: check if we are the required interface itself.
         if ( interfaceMember.DeclaringType.Equals( this ) )
         {

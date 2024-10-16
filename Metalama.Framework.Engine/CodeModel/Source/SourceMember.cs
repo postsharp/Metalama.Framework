@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -10,7 +11,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 {
     internal abstract class SourceMember : SourceMemberOrNamedType, IMember
     {
-        protected SourceMember( CompilationModel compilation ) : base( compilation ) { }
+        protected SourceMember( CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            compilation,
+            genericContextForSymbolMapping ) { }
 
         public abstract bool IsExplicitInterfaceImplementation { get; }
 

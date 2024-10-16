@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -22,15 +23,17 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 {
     internal sealed class SourceProperty : SourcePropertyOrIndexer, IPropertyImpl
     {
-        public SourceProperty( IPropertySymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
+        public SourceProperty( IPropertySymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            symbol,
+            compilation,
+            genericContextForSymbolMapping ) { }
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
-        public bool IsRequired
-            => this.PropertySymbol.IsRequired;
-        
+        public bool IsRequired => this.PropertySymbol.IsRequired;
+
         [Memo]
         public bool? IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();
 
@@ -42,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
                 if ( overriddenProperty != null )
                 {
-                    return this.Compilation.Factory.GetProperty( overriddenProperty );
+                    return this.Compilation.Factory.GetProperty( overriddenProperty, this.GenericContextForSymbolMapping );
                 }
                 else
                 {
@@ -67,7 +70,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
-            => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToReadOnlyList();
+            => this.PropertySymbol.ExplicitInterfaceImplementations
+                .Select( p => this.Compilation.Factory.GetProperty( p, this.GenericContextForSymbolMapping ) )
+                .ToReadOnlyList();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 

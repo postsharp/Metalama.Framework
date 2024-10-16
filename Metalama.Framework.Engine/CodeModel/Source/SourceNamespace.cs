@@ -17,7 +17,7 @@ internal sealed class SourceNamespace : SourceDeclaration, INamespace
 {
     private readonly INamespaceSymbol _symbol;
 
-    internal SourceNamespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation )
+    internal SourceNamespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation, null )
     {
         this._symbol = symbol;
     }

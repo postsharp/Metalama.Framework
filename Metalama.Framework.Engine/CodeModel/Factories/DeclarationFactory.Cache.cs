@@ -21,13 +21,13 @@ public sealed partial class DeclarationFactory
 
         public TValue GetOrAdd<TArg>(
             TKey item,
-            GenericContext genericContext,
+            GenericContext? genericContext,
             Type requiredInterface,
-            Func<TKey, GenericContext, TArg, TValue> factory,
+            Func<TKey, GenericContext?, TArg, TValue> factory,
             TArg arg )
         {
             var bucket = this._items.GetOrAdd( item, _ => new ConcurrentDictionary<ItemKey, TValue>() );
-            var key = new ItemKey( genericContext, requiredInterface );
+            var key = new ItemKey( genericContext ?? GenericContext.Empty, requiredInterface );
 
             if ( bucket.TryGetValue( key, out var value ) )
             {

@@ -84,7 +84,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
     }
 
     public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => DisplayStringFormatter.Format( this, format, context );
+        => DisplayStringFormatter.Format( this, format, context, null );
 
     public void AddAttribute( AttributeConstruction attribute )
     {

@@ -17,7 +17,7 @@ internal sealed class ExternalAssembly : SourceDeclaration, IAssembly
 {
     private readonly IAssemblySymbol _assemblySymbol;
 
-    public ExternalAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation )
+    public ExternalAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation, null )
     {
         this._assemblySymbol = assemblySymbol;
     }

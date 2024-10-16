@@ -15,12 +15,14 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
     where T : class, ICompilationElement
 {
+    private readonly GenericContext? _genericContextForSymbolMapping;
+
     public ISymbol Symbol { get; }
 
-    public override bool IsDefinition => this.Symbol.IsDefinitionSafe();
+    public override bool IsDefinition => this.Symbol.IsDefinitionSafe() && this._genericContextForSymbolMapping == null;
 
     [Memo]
-    public override IFullRef<T> DefinitionRef => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.RefFactory, this.TargetKind );
+    public override IFullRef<T> DefinitionRef => new SymbolRef<T>( this.Symbol.OriginalDefinition, null, this.RefFactory, this.TargetKind );
 
     public override RefTargetKind TargetKind { get; }
 
@@ -34,7 +36,11 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
 
     public override SerializableDeclarationId ToSerializableId() => this.Symbol.GetSerializableId();
 
-    public SymbolRef( ISymbol symbol, RefFactory refFactory, RefTargetKind targetKind = RefTargetKind.Default ) : base( refFactory )
+    public SymbolRef(
+        ISymbol symbol,
+        GenericContext? genericContextForSymbolMapping,
+        RefFactory refFactory,
+        RefTargetKind targetKind = RefTargetKind.Default ) : base( refFactory )
     {
         Invariant.Assert(
             symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
@@ -53,23 +59,39 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
              symbol.Kind == SymbolKind.Event),
             $"Invalid RefTargetKind.{targetKind} for {symbol.Kind}." );
 
+        // If a genericContextForSymbolMapping is supplied, we must have a symbol definition.
+        Invariant.Assert( genericContextForSymbolMapping == null || symbol.IsDefinitionSafe() );
+
         this.Symbol = symbol;
         this.TargetKind = targetKind;
+        this._genericContextForSymbolMapping = genericContextForSymbolMapping;
     }
 
     public override FullRef<T> WithGenericContext( GenericContext genericContext )
     {
+        if ( !this.IsDefinition )
+        {
+            throw new InvalidOperationException(
+                $"{nameof(this.WithGenericContext)} must be called on a generic definition, but the current object is a generic instance." );
+        }
+
         switch ( genericContext.Kind )
         {
             case GenericContextKind.Null:
                 return this;
 
             case GenericContextKind.Symbol:
+
+                Invariant.Assert( this._genericContextForSymbolMapping == null );
+
                 var mappedSymbol =
                     ((SymbolGenericContext) genericContext).NamedTypeSymbol!.GetMembers( this.Symbol.Name )
                     .Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
 
-                return new SymbolRef<T>( mappedSymbol, this.RefFactory, this.TargetKind );
+                return this.RefFactory.FromSymbol<T>( mappedSymbol, targetKind: this.TargetKind );
+
+            case GenericContextKind.Introduced:
+                return this.RefFactory.FromSymbol<T>( this.Symbol, genericContext, targetKind: this.TargetKind );
 
             default:
                 throw new AssertionFailedException();

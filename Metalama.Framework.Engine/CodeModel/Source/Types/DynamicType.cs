@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
 {
     internal sealed class DynamicType : SymbolType<IDynamicTypeSymbol>, IDynamicType
     {
-        internal DynamicType( IDynamicTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
+        internal DynamicType( IDynamicTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation, null ) { }
 
         public override TypeKind TypeKind => TypeKind.Dynamic;
 

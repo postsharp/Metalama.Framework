@@ -10,7 +10,7 @@ public class OrderAsyncResponseProcessor<TCommand> : AsyncResponseProcessor<Resp
   {
     var __metalma_currentThreadId = global::System.Threading.Thread.CurrentThread.ManagedThreadId;
     var __metalama_result = new global::System.Text.StringBuilder();
-    __metalama_result.Append("Metalama.Framework.Tests.AspectTests.Tests.Aspects.Bugs.Bug30840.OrderAsyncResponseProcessor<TCommand>");
+    __metalama_result.Append("OrderAsyncResponseProcessor<TCommand>");
     __metalama_result.Append(".");
     __metalama_result.Append("HandleFailureAsync");
     __metalama_result.Append("(");

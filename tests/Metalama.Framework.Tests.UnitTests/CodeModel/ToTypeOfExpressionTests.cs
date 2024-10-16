@@ -80,10 +80,10 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
                 .CreateFunctionPointerTypeSymbol(
                     compilation.Factory.GetSpecialType( SpecialType.Int32 ).GetSymbol(),
                     RefKind.None,
-                    ImmutableArray.Create( (ITypeSymbol) compilation.Factory.GetSpecialType( SpecialType.Int32 ).GetSymbol() ),
-                    ImmutableArray.Create( RefKind.None ) );
+                    [(ITypeSymbol) compilation.Factory.GetSpecialType( SpecialType.Int32 ).GetSymbol()],
+                    [RefKind.None] );
 
-            var functionPointerType = new SymbolFunctionPointerType( functionPointerTypeSymbol, compilation );
+            var functionPointerType = new SymbolFunctionPointerType( functionPointerTypeSymbol, compilation, null );
 
             Assert.Equal( "typeof(delegate*<global::System.Int32,global::System.Int32>)", GetSyntaxString( syntaxSerializationContext, functionPointerType ) );
         }

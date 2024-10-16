@@ -91,12 +91,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             return;
         }
 
-        if ( !interfaceType.IsFullyBound() )
-        {
-            // Temporary limitation.
-            throw new NotImplementedException( "Overriding unbound generic interfaces is not yet supported." );
-        }
-
         // When initializing, it is not known which types the target type is implementing.
         // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
         // should be reported.

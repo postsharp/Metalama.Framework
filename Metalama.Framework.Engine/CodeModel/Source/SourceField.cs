@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -33,16 +34,17 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public override ISymbol Symbol => this._symbol;
 
-        public SourceField( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public SourceField( IFieldSymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            compilation,
+            genericContextForSymbolMapping )
         {
             this._symbol = symbol;
         }
 
         [Memo]
-        public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type, this.GenericContextForSymbolMapping );
 
-        public RefKind RefKind
-            => this._symbol.RefKind.ToOurRefKind();
+        public RefKind RefKind => this._symbol.RefKind.ToOurRefKind();
 
         [Memo]
         public IMethod GetMethod => new PseudoGetter( this );
@@ -78,8 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
-        public bool IsRequired
-            => this._symbol.IsRequired;
+        public bool IsRequired => this._symbol.IsRequired;
 
         [Memo]
         public IExpression? InitializerExpression => this.GetInitializerExpressionCore();

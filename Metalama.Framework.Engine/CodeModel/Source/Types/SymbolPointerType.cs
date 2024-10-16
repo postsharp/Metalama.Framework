@@ -3,21 +3,26 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source.Types
 {
     internal sealed class SymbolPointerType : SymbolType<IPointerTypeSymbol>, IPointerType
     {
-        internal SymbolPointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
+        internal SymbolPointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation, GenericContext? genericContext ) : base(
+            typeSymbol,
+            compilation,
+            genericContext ) { }
 
         public override TypeKind TypeKind => TypeKind.Pointer;
 
         [Memo]
-        public IType PointedAtType => this.Compilation.Factory.GetIType( this.Symbol.PointedAtType );
+        public IType PointedAtType => this.Compilation.Factory.GetIType( this.Symbol.PointedAtType, this.GenericContextForSymbolMapping );
 
         public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
@@ -27,14 +32,15 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
             {
                 return this;
             }
-            else
+            else if ( pointedAtType is ISymbolBasedCompilationElement { Symbol: ITypeSymbol typeSymbol } )
             {
-                var symbol =
-                    this.Compilation
-                        .RoslynCompilation.CreatePointerTypeSymbol(
-                            pointedAtType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
+                var symbol = this.Compilation.RoslynCompilation.CreatePointerTypeSymbol( typeSymbol );
 
                 return (ITypeImpl) this.Compilation.Factory.GetIType( symbol );
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
         }
     }

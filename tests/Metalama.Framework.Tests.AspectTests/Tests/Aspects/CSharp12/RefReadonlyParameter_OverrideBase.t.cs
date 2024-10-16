@@ -24,16 +24,16 @@ internal class D : B
 {
   protected override global::System.Int32 M(in global::System.Int32 i, ref readonly global::System.Int32 j)
   {
-    global::System.Console.WriteLine($"D.M(int, int)@i: Kind=In, Value={i}");
-    global::System.Console.WriteLine($"D.M(int, int)@j: Kind=RefReadOnly, Value={j}");
+    global::System.Console.WriteLine($"D.M(in int, ref readonly int)@i: Kind=In, Value={i}");
+    global::System.Console.WriteLine($"D.M(in int, ref readonly int)@j: Kind=RefReadOnly, Value={j}");
     return base.M(i, in j);
   }
   protected override global::System.Int32 this[in global::System.Int32 i, ref readonly global::System.Int32 j]
   {
     get
     {
-      global::System.Console.WriteLine($"D.this[].get(int, int)@i: Kind=In, Value={i}");
-      global::System.Console.WriteLine($"D.this[].get(int, int)@j: Kind=RefReadOnly, Value={j}");
+      global::System.Console.WriteLine($"D.this[in int, ref readonly int].get@i: Kind=In, Value={i}");
+      global::System.Console.WriteLine($"D.this[in int, ref readonly int].get@j: Kind=RefReadOnly, Value={j}");
       return base[i, in j];
     }
   }

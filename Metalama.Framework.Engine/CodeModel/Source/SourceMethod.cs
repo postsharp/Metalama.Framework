@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -24,7 +25,10 @@ namespace Metalama.Framework.Engine.CodeModel.Source;
 
 internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
 {
-    public SourceMethod( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
+    public SourceMethod( IMethodSymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+        symbol,
+        compilation,
+        genericContextForSymbolMapping )
     {
         Invariant.Assert(
             symbol.MethodKind is not (RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor),
@@ -39,17 +43,18 @@ internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
     public IParameter ReturnParameter => new PseudoMethodReturnParameter( this, this.MethodSymbol );
 
     [Memo]
-    public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
+    public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType, this.GenericContextForSymbolMapping );
 
     [Memo]
     public ITypeParameterList TypeParameters
         => new TypeParameterList(
             this,
-            this.MethodSymbol.TypeParameters.Select( x => this.RefFactory.FromSymbol<ITypeParameter>( x ) )
+            this.MethodSymbol.TypeParameters.Select( x => this.RefFactory.FromSymbol<ITypeParameter>( x, this.GenericContextForSymbolMapping ) )
                 .ToReadOnlyList() );
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
+    public IReadOnlyList<IType> TypeArguments
+        => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t, this.GenericContextForSymbolMapping ) ).ToImmutableArray();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -83,10 +88,22 @@ internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var symbolWithGenericArguments = this.MethodSymbol.Construct(
-            typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
+        if ( typeArguments.Any( GenericContext.ReferencesAnyIntroducedType ) )
+        {
+            var genericContext = new IntroducedGenericContext(
+                typeArguments.SelectAsImmutableArray( t => t.ToFullRef() ),
+                this.Ref.DefinitionRef,
+                (IntroducedGenericContext?) ((SourceNamedType) this.DeclaringType).GenericContextForSymbolMapping );
 
-        return new SourceMethod( symbolWithGenericArguments, this.Compilation );
+            return this.Compilation.Factory.GetMethod( this.MethodSymbol, genericContext );
+        }
+        else
+        {
+            var mappedMethod = this.MethodSymbol.Construct(
+                typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNotNull() ) );
+
+            return this.Compilation.Factory.GetMethod( mappedMethod );
+        }
     }
 
     public bool IsReadOnly => this.MethodSymbol.IsReadOnly;
@@ -110,7 +127,7 @@ internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
 
             if ( overriddenMethod != null )
             {
-                return this.Compilation.Factory.GetMethod( overriddenMethod );
+                return this.Compilation.Factory.GetMethod( overriddenMethod, this.GenericContextForSymbolMapping );
             }
             else
             {
@@ -121,7 +138,8 @@ internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
 
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( this.Compilation.Factory.GetMethod )
+        => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations
+            .Select( m => this.Compilation.Factory.GetMethod( m, this.GenericContextForSymbolMapping ) )
             .ToReadOnlyList();
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );

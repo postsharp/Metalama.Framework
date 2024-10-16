@@ -1,5 +1,5 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0115 on `TargetCode`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Indexer' in an advice applied to method 'TargetCode.field.get()' because there is no 'IIndexer'.`
+// Error LAMA0115 on `TargetCode`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Indexer' in an advice applied to method 'TargetCode.field.get' because there is no 'IIndexer'.`
 // Error LAMA0115 on `get`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Field' in an advice applied to method 'TargetCode.property.get' because there is no 'IField'. Consider using meta.Target.FieldOrProperty instead.`
 // Error LAMA0115 on `get`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Indexer' in an advice applied to method 'TargetCode.property.get' because there is no 'IIndexer'.`
 // Error LAMA0115 on `=> 42`: `The advice 'AspectBase.Template()' cannot use 'meta.Target.Field' in an advice applied to method 'TargetCode.this[int].get' because there is no 'IField'. Consider using meta.Target.FieldOrPropertyOrIndexer instead.`

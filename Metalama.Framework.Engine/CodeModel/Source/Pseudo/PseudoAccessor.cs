@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -22,12 +23,11 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 
-internal abstract class PseudoAccessor<T> : IMethodImpl
-    where T : class, IHasAccessorsImpl
+internal abstract class PseudoAccessor : IMethodImpl
 {
-    protected T DeclaringMember { get; }
+    protected IHasAccessorsImpl DeclaringMember { get; }
 
-    protected PseudoAccessor( T containingMember, MethodKind semantic )
+    protected PseudoAccessor( IHasAccessorsImpl containingMember, MethodKind semantic )
     {
         this.DeclaringMember = containingMember;
         this.MethodKind = semantic;
@@ -94,7 +94,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl
     public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
     [Memo]
-    private IRef<IMethod> Ref => this.Compilation.RefFactory.PseudoAccessor( this );
+    private IRef<IMethod> Ref => this.Compilation.RefFactory.FromPseudoAccessor( this );
 
     public IRef<IMethod> ToRef() => this.Ref;
 
@@ -199,4 +199,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl
     public ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 
     public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
+
+    public GenericContext? GenericContextForSymbolMapping => ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
 }

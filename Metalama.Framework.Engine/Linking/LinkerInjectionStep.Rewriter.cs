@@ -106,7 +106,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 case IMethodSymbol method:
                     this.RewriteAttributeLists(
-                        this.RefFactory.ReturnParameter( method ),
+                        this.RefFactory.FromReturnParameter( method ),
                         SyntaxKind.ReturnKeyword,
                         originalDeclaringNode,
                         attributeLists,

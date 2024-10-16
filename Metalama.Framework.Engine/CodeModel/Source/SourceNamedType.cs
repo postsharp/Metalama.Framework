@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
@@ -29,10 +30,12 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public SourceNamedTypeImpl Implementation { get; }
 
-        internal SourceNamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal SourceNamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            compilation,
+            genericContextForSymbolMapping )
         {
             this._typeSymbol = typeSymbol;
-            this.Implementation = new SourceNamedTypeImpl( this, typeSymbol, compilation );
+            this.Implementation = new SourceNamedTypeImpl( this, typeSymbol, compilation, genericContextForSymbolMapping );
         }
 
         protected override void OnUsingDeclaration() => UserCodeExecutionContext.CurrentOrNull?.AddDependencyFrom( this );

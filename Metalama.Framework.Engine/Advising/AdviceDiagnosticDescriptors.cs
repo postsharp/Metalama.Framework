@@ -116,8 +116,8 @@ namespace Metalama.Framework.Engine.Advising
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
             CannotImplementCanonicalGenericInstanceOfGenericInterface = new(
                 "LAMA0513",
-                "Cannot implement an canonical generic instance of an interface.",
-                "The aspect '{0}' cannot implement interface type '{1}' in the type '{2}' because it is an canonical generic instance. " +
+                "Cannot implement a canonical generic instance of an interface.",
+                "The aspect '{0}' cannot implement interface type '{1}' in the type '{2}' because it is a canonical generic instance. " +
                 "Specify all type arguments of the generic interface type. If needed, use type parameters of the target type.",
                 _category,
                 Error );

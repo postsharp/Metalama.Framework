@@ -47,7 +47,7 @@ public partial class DeclarationFactory
                         return x.me.GetDeclarationFromBuilder( (TBuilderData) redirected, gc, x.createBuiltDeclaration );
                     }
 
-                    return x.createBuiltDeclaration( new CreateFromBuilderArgs<TBuilderData>( x.builder, gc, x.me ) );
+                    return x.createBuiltDeclaration( new CreateFromBuilderArgs<TBuilderData>( x.builder, gc ?? GenericContext.Empty, x.me ) );
                 },
                 (me: this, builder, createBuiltDeclaration, supportsRedirection) );
         }
