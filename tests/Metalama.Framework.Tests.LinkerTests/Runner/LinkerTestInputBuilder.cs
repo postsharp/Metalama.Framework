@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SerializableIds;
@@ -56,6 +57,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
         private readonly TestRewriter _rewriter;
 
         private readonly List<Func<CompilationModel, TestTransformationBase>> _transformationFactories = new();
+        private readonly Dictionary<ISymbol, DeclarationBuilderData> _symbolToBuilderDataMap = new( SymbolEqualityComparer.Default );
 
         private CompilationModel _initialCompilationModel;
         private Dictionary<string, SyntaxNode> _syntaxNodeMap;
@@ -127,9 +129,19 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
         internal IFullRef<IDeclaration> TranslateOriginalSymbol( ISymbol overriddenDeclarationSymbol )
         {
+            if ( this._symbolToBuilderDataMap.TryGetValue( overriddenDeclarationSymbol, out var builderData ) )
+            {
+                return builderData.ToFullRef();
+            }
+
             var symbolId = SymbolId.Create( overriddenDeclarationSymbol );
             var durableRef = DurableRefFactory.FromSymbolId<IDeclaration>( symbolId );
             return durableRef.ToFullRef<IDeclaration>( this._initialCompilationModel.RefFactory );
+        }
+
+        private void RegisterBuilderDataForSymbol( ISymbol symbol, MemberBuilderData builderData )
+        {
+            this._symbolToBuilderDataMap[symbol] = builderData;
         }
     }
 }

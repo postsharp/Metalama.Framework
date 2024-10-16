@@ -473,6 +473,8 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                     builder.IsNew = node.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
                     builder.HasNewKeyword = node.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
+                    builder.Freeze();
+
                     MemberBuilderData builderData = builder switch
                     {
                         MethodBuilder methodBuilder => new MethodBuilderData( methodBuilder, declaringType.ToFullRef() ),
@@ -481,6 +483,8 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                         FieldBuilder fieldBuilder => new FieldBuilderData( fieldBuilder, declaringType.ToFullRef() ),
                         _ => throw new NotSupportedException()
                     };
+
+                    this._owner.Builder.RegisterBuilderDataForSymbol(symbol, builderData );
 
                     var insertPosition = this._owner.Builder.TranslateInsertPosition( compilationModel.CompilationContext, insertPositionRecord );
 
@@ -654,7 +658,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                     new AspectInstance( 
                         new TestAspect(), 
                         targetDeclaration, 
-                        new TestAspectClass(), 
+                        new TestAspectClass( aspectLayer.AspectName ), 
                         Enumerable.Empty<TemplateClassInstance>(), 
                         ImmutableArray<AspectPredecessor>.Empty );
 
