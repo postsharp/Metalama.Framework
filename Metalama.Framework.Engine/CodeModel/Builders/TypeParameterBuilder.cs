@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
@@ -17,7 +18,20 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
 {
     private readonly List<IType> _typeConstraints = new();
 
-    public string Name { get; set; }
+    private string _name;
+
+    public string Name
+    {
+        get => this._name;
+
+        [MemberNotNull( nameof(_name) )]
+        set
+        {
+            this.CheckNotFrozen();
+
+            this._name = value;
+        }
+    }
 
     public int Index { get; }
 
@@ -25,17 +39,79 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
 
     public IReadOnlyList<IType> ReadOnlyTypeConstraints => this._typeConstraints;
 
-    public TypeKindConstraint TypeKindConstraint { get; set; }
+    private TypeKindConstraint _typeKindConstraint;
 
-    public VarianceKind Variance { get; set; }
+    public TypeKindConstraint TypeKindConstraint
+    {
+        get => this._typeKindConstraint;
+        set
+        {
+            this.CheckNotFrozen();
 
-    public bool? IsConstraintNullable { get; set; }
+            this._typeKindConstraint = value;
+        }
+    }
 
-    public bool HasDefaultConstructorConstraint { get; set; }
+    private bool _allowsRefStruct;
 
-    public void AddTypeConstraint( IType type ) => this._typeConstraints.Add( this.Translate( type ) );
+    public bool AllowsRefStruct
+    {
+        get => this._allowsRefStruct;
+        set
+        {
+            this.CheckNotFrozen();
 
-    public void AddTypeConstraint( Type type ) => this._typeConstraints.Add( this.Compilation.Factory.GetTypeByReflectionType( type ) );
+            this._allowsRefStruct = value;
+        }
+    }
+
+    private VarianceKind _variance;
+
+    public VarianceKind Variance
+    {
+        get => this._variance;
+        set
+        {
+            this.CheckNotFrozen();
+
+            this._variance = value;
+        }
+    }
+
+    private bool? _isConstraintNullable;
+
+    public bool? IsConstraintNullable
+    {
+        get => this._isConstraintNullable;
+        set
+        {
+            this.CheckNotFrozen();
+
+            this._isConstraintNullable = value;
+        }
+    }
+
+    private bool _hasDefaultConstructorConstraint;
+
+    public bool HasDefaultConstructorConstraint
+    {
+        get => this._hasDefaultConstructorConstraint;
+        set
+        {
+            this.CheckNotFrozen();
+
+            this._hasDefaultConstructorConstraint = value;
+        }
+    }
+
+    public void AddTypeConstraint(IType type)
+    {
+        this.CheckNotFrozen();
+
+        this._typeConstraints.Add(this.Translate(type));
+    }
+
+    public void AddTypeConstraint(Type type) => this.AddTypeConstraint(this.Compilation.Factory.GetTypeByReflectionType(type));
 
     TypeKind IType.TypeKind => TypeKind.TypeParameter;
 
@@ -68,7 +144,7 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
         this.Index = index;
         this.Name = name;
     }
-    
+
     bool IType.Equals( SpecialType specialType ) => false;
 
     bool IEquatable<IType>.Equals( IType? other ) => this.Equals( other, TypeComparison.Default );

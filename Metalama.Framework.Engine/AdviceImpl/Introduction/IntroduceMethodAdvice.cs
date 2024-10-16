@@ -90,10 +90,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
         foreach ( var runtimeTypeParameter in runtimeTypeParameters )
         {
             var templateTypeParameter = this.Template.AssertNotNull().Declaration.TypeParameters[runtimeTypeParameter.SourceIndex];
-            var typeParameterBuilder = this.Builder.AddTypeParameter( templateTypeParameter.Name );
-            typeParameterBuilder.Variance = templateTypeParameter.Variance;
-            typeParameterBuilder.HasDefaultConstructorConstraint = templateTypeParameter.HasDefaultConstructorConstraint;
-            typeParameterBuilder.TypeKindConstraint = templateTypeParameter.TypeKindConstraint;
+            var typeParameterBuilder = this.Builder.AddTypeParameter( templateTypeParameter );
 
             foreach ( var templateGenericParameterConstraint in templateTypeParameter.TypeConstraints )
             {

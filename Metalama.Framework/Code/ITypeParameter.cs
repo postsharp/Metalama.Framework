@@ -25,6 +25,11 @@ namespace Metalama.Framework.Code
         TypeKindConstraint TypeKindConstraint { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the generic parameter has the <c>allows ref struct</c> anti-constraint.
+        /// </summary>
+        bool AllowsRefStruct { get; }
+
+        /// <summary>
         /// Gets the kind variance: <see cref="VarianceKind.In"/>, <see cref="VarianceKind.Out"/> or <see cref="VarianceKind.None"/>.
         /// </summary>
         VarianceKind Variance { get; }

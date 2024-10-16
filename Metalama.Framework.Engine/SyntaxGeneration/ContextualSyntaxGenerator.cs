@@ -270,26 +270,24 @@ internal sealed partial class ContextualSyntaxGenerator
             switch ( genericParameter.TypeKindConstraint )
             {
                 case TypeKindConstraint.Class:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
-                    var constraint = ClassOrStructConstraint( SyntaxKind.ClassConstraint );
+                    constraints ??= [];
 
-                    if ( genericParameter.HasDefaultConstructorConstraint )
-                    {
-                        constraint = constraint.WithQuestionToken( Token( SyntaxKind.QuestionToken ) );
-                    }
+                    var questionToken = genericParameter.IsConstraintNullable == true
+                        ? Token( SyntaxKind.QuestionToken )
+                        : default;
 
-                    constraints.Add( constraint );
+                    constraints.Add( ClassOrStructConstraint( SyntaxKind.ClassConstraint, Token( SyntaxKind.ClassKeyword ), questionToken ) );
 
                     break;
 
                 case TypeKindConstraint.Struct:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( ClassOrStructConstraint( SyntaxKind.StructConstraint ) );
 
                     break;
 
                 case TypeKindConstraint.Unmanaged:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
 
                     constraints.Add(
                         TypeConstraint(
@@ -298,13 +296,13 @@ internal sealed partial class ContextualSyntaxGenerator
                     break;
 
                 case TypeKindConstraint.NotNull:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( TypeConstraint( SyntaxFactory.IdentifierName( "notnull" ) ) );
 
                     break;
 
                 case TypeKindConstraint.Default:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( DefaultConstraint() );
 
                     break;
@@ -312,20 +310,35 @@ internal sealed partial class ContextualSyntaxGenerator
 
             foreach ( var typeConstraint in genericParameter.TypeConstraints )
             {
-                constraints ??= new List<TypeParameterConstraintSyntax>();
+                constraints ??= [];
 
                 constraints.Add( TypeConstraint( this.Type( typeConstraint ) ) );
             }
 
             if ( genericParameter.HasDefaultConstructorConstraint )
             {
-                constraints ??= new List<TypeParameterConstraintSyntax>();
+                constraints ??= [];
                 constraints.Add( ConstructorConstraint() );
             }
 
+#if ROSLYN_4_12_0_OR_GREATER
+            if ( genericParameter.AllowsRefStruct )
+            {
+                constraints ??= [];
+
+                constraints.Add(
+                    AllowsConstraintClause(
+                        TokenWithTrailingSpace( SyntaxKind.AllowsKeyword ),
+                        SingletonSeparatedList<AllowsConstraintSyntax>(
+                            RefStructConstraint( TokenWithTrailingSpace( SyntaxKind.RefKeyword ), Token( SyntaxKind.StructKeyword ) ) ) ) );
+            }
+#endif
+
             if ( constraints != null )
             {
-                clauses ??= new List<TypeParameterConstraintClauseSyntax>();
+                constraints[^1] = constraints[^1].WithOptionalTrailingLineFeed( this.SyntaxGenerationContext );
+
+                clauses ??= [];
 
                 clauses.Add(
                     TypeParameterConstraintClause(

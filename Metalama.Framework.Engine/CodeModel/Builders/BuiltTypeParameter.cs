@@ -45,6 +45,8 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 
     public TypeKindConstraint TypeKindConstraint => this._typeParameterBuilder.TypeKindConstraint;
 
+    public bool AllowsRefStruct => this._typeParameterBuilder.AllowsRefStruct;
+
     public VarianceKind Variance => this._typeParameterBuilder.Variance;
 
     public bool? IsConstraintNullable => this._typeParameterBuilder.IsConstraintNullable;
