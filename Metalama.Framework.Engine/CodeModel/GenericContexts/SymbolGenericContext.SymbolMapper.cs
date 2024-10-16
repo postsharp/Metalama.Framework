@@ -4,15 +4,15 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
 
-internal partial class GenericContext
+internal partial class SymbolGenericContext
 {
     private sealed class SymbolMapper : SymbolVisitor<ISymbol>
     {
         private readonly TypeSymbolMapper _typeSymbolMapper;
 
-        public SymbolMapper( GenericContext parent )
+        public SymbolMapper( SymbolGenericContext parent )
         {
             this._typeSymbolMapper = parent.TypeSymbolMapperInstance;
         }

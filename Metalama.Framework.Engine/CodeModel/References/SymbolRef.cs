@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
@@ -58,17 +59,20 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
 
     public override FullRef<T> WithGenericContext( GenericContext genericContext )
     {
-        if ( genericContext.IsEmptyOrIdentity )
+        switch ( genericContext.Kind )
         {
-            return this;
-        }
-        else
-        {
-            // TODO: Test.
-            var mappedSymbol =
-                genericContext.NamedTypeSymbol!.GetMembers( this.Symbol.Name ).Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
+            case GenericContextKind.Null:
+                return this;
 
-            return new SymbolRef<T>( mappedSymbol, this.RefFactory, this.TargetKind );
+            case GenericContextKind.Symbol:
+                var mappedSymbol =
+                    ((SymbolGenericContext) genericContext).NamedTypeSymbol!.GetMembers( this.Symbol.Name )
+                    .Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
+
+                return new SymbolRef<T>( mappedSymbol, this.RefFactory, this.TargetKind );
+
+            default:
+                throw new AssertionFailedException();
         }
     }
 

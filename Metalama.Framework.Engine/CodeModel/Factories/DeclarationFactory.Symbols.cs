@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
@@ -51,7 +52,7 @@ public partial class DeclarationFactory
                             x.me._compilationModel.RefFactory.FromSymbol<TDeclaration>( x.symbol.OriginalDefinition ),
                             out var redirectedDefinition ) )
                     {
-                        var genericContext = GenericContext.Get( x.symbol, x.me.CompilationContext );
+                        var genericContext = SymbolGenericContext.Get( x.symbol, x.me.CompilationContext );
 
                         return x.me.GetDeclaration( redirectedDefinition, genericContext, typeof(TDeclaration) );
                     }
@@ -213,11 +214,6 @@ public partial class DeclarationFactory
             static ( in CreateFromSymbolArgs<IFieldSymbol> args ) =>
                 new SourceField( args.Symbol, args.Compilation ) );
 
-    internal IField GetField( IFieldSymbol fieldSymbol, GenericContext genericContext )
-    {
-        return this.GetField( (IFieldSymbol) genericContext.Map( fieldSymbol ) );
-    }
-
     public IConstructor GetConstructor( IMethodSymbol methodSymbol )
         => this.GetDeclarationFromSymbol<IConstructor, IMethodSymbol>(
             methodSymbol,
@@ -282,7 +278,23 @@ public partial class DeclarationFactory
 
         var typedGenericContext = genericContext.AsGenericContext();
 
-        var mappedSymbol = genericContext.AsGenericContext().Map( symbol );
+        ISymbol mappedSymbol;
+
+        switch ( typedGenericContext.Kind )
+        {
+            case GenericContextKind.Null:
+                mappedSymbol = symbol;
+
+                break;
+
+            case GenericContextKind.Symbol:
+                mappedSymbol = ((SymbolGenericContext) typedGenericContext).Map( symbol );
+
+                break;
+
+            default:
+                throw new AssertionFailedException();
+        }
 
         if ( interfaceType == typeof(ITypeParameter) )
         {

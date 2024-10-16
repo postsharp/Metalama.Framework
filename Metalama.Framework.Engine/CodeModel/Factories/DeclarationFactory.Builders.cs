@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -103,7 +103,8 @@ public partial class DeclarationFactory
         => this.GetDeclarationFromBuilder<IConstructor, ConstructorBuilderData>(
             constructorBuilder,
             genericContext,
-            static ( in CreateFromBuilderArgs<ConstructorBuilderData> args ) => new IntroducedConstructor( args.Builder, args.Compilation, args.GenericContext ),
+            static ( in CreateFromBuilderArgs<ConstructorBuilderData> args )
+                => new IntroducedConstructor( args.Builder, args.Compilation, args.GenericContext ),
             true );
 
     // Fields support redirections, but fields redirect to properties, so it is not handled at this level.

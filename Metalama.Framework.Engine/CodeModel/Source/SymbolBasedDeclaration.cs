@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
     {
         public abstract ISymbol Symbol { get; }
 
-        internal sealed override GenericContext GenericContext => GenericContext.Get( this.Symbol, this.GetCompilationContext() );
+        internal sealed override GenericContext GenericContext => SymbolGenericContext.Get( this.Symbol, this.GetCompilationContext() );
 
         [Memo]
         public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );

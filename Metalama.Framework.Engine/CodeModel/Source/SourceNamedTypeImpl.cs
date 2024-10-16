@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
@@ -545,7 +546,7 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
         while ( true )
         {
-            var currentGenericContext = GenericContext.Get( currentTypeSymbol, this.GetCompilationContext() );
+            var currentGenericContext = SymbolGenericContext.Get( currentTypeSymbol, this.GetCompilationContext() );
 
             var introducedInterface =
                 this.Compilation
