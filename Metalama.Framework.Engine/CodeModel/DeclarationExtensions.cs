@@ -141,9 +141,8 @@ public static class DeclarationExtensions
             var arg = args[i];
 
             ArgumentSyntax argument;
-            var parameter = parameters[i];
 
-            if ( i >= parameters.Count || parameter.IsParams )
+            if ( i >= parameters.Count || parameters[i].IsParams )
             {
                 // params methods can be called as params or directly with an array
                 // so it's probably best to not do any type-checking for them
@@ -152,6 +151,8 @@ public static class DeclarationExtensions
             }
             else
             {
+                var parameter = parameters[i];
+
                 if ( parameter.RefKind is RefKind.Out or RefKind.Ref or RefKind.RefReadOnly )
                 {
                     SyntaxKind refKindKeyword;

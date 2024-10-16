@@ -48,7 +48,15 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                     Argument(
                         ObjectCreationExpression(
                             syntaxGenerator.Type( overriddenConstructor.DeclaringType ),
-                            ArgumentList( SeparatedList( overriddenConstructor.Parameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ),
+                            ArgumentList(
+                                SeparatedList(
+                                    overriddenConstructor.Parameters
+                                    .SelectAsArray( p =>
+                                        Argument(
+                                            NameColon(
+                                                IdentifierName( p.Name ) ),
+                                            p.RefKind.InvocationRefKindToken(),
+                                            IdentifierName( p.Name ) ) ) ) ),
                             null ) ) ) ) );
 
     public override ExpressionSyntax GetPropertyReference(

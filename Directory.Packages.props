@@ -7,7 +7,7 @@
   <PropertyGroup>
     <PostSharpEngineeringVersion Condition="'$(PostSharpEngineeringVersion)'==''">2023.2.135</PostSharpEngineeringVersion>
     <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
-    <PostSharpPackageVersion>2024.1.4</PostSharpPackageVersion>
+    <PostSharpPackageVersion>2024.1.6</PostSharpPackageVersion>
     <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. -->
     <RoslynApiMinVersion>4.4.0</RoslynApiMinVersion>
     <RoslynApiMaxVersion>4.12.0-1.final</RoslynApiMaxVersion>

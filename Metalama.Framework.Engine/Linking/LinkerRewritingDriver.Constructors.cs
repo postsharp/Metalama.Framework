@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.SyntaxGeneration;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -326,7 +327,13 @@ internal sealed partial class LinkerRewritingDriver
                 parameterList:
                 isAuxiliaryForPrimaryConstructor
                     ? constructorDeclaration.ParameterList.WithParameters(
-                        constructorDeclaration.ParameterList.Parameters.RemoveAt( constructorDeclaration.ParameterList.Parameters.Count - 1 ) )
+                        constructorDeclaration.ParameterList.Parameters.RemoveAt(
+                            constructorDeclaration.ParameterList.Parameters switch
+                            {
+                                [ .., { Identifier: { ValueText: AspectReferenceSyntaxProvider.LinkerOverrideParamName } }, _ ] 
+                                    => constructorDeclaration.ParameterList.Parameters.Count - 2,
+                                _ => constructorDeclaration.ParameterList.Parameters.Count - 1,
+                            } ) )
                     : constructorDeclaration.ParameterList,
                 initializer:
                 isAuxiliaryForPrimaryConstructor

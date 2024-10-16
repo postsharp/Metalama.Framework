@@ -3,6 +3,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -24,6 +25,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                             Identifier( TriviaList( ElasticSpace ), p.Name, TriviaList( ElasticSpace ) ),
                             default ) );
 
+            return WithAdditionalParameters( parameterList, additionalParameterSyntax );
+        }
+        public static ParameterListSyntax WithAdditionalParameters(
+            this ParameterListSyntax parameterList,
+            params IReadOnlyList<ParameterSyntax> additionalParameters )
+        {
             if ( parameterList.Parameters.Count > 0 && parameterList.Parameters.Last().Modifiers.Any( m => m.IsKind( SyntaxKind.ParamsKeyword ) ) )
             {
                 // Insert before params.
@@ -32,14 +39,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     .WithParameters(
                         parameterList.Parameters.InsertRange(
                             parameterList.Parameters.Count - 1,
-                            additionalParameterSyntax ) );
+                            additionalParameters ) );
             }
             else
             {
                 // Insert last.
 
                 return parameterList
-                    .WithParameters( parameterList.Parameters.AddRange( additionalParameterSyntax ) );
+                    .WithParameters( parameterList.Parameters.AddRange( additionalParameters ) );
             }
         }
 

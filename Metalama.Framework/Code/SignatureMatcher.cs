@@ -3,6 +3,7 @@
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -170,7 +171,7 @@ namespace Metalama.Framework.Code
                         if ( parameter.IsParams && expandParams && match
                              && !(parameterIndex < argumentCount && argumentPredicate( payload, parameterIndex, parameter.Type, RefKind.Ref )) )
                         {
-                            if ( parameterIndex != sourceItem.Parameters.Count - 1 || parameter.Type.TypeKind != TypeKind.Array )
+                            if ( parameterIndex != sourceItem.Parameters.Count - 1 )
                             {
                                 throw new InvalidOperationException( "Assertion failed." );
                             }
@@ -210,7 +211,14 @@ namespace Metalama.Framework.Code
                 else if ( tryMatchParams )
                 {
                     // Attempt to match C# params - all remaining parameter types should be assignable to the array element type.
-                    var elementType = ((IArrayType) sourceItem.Parameters[sourceItem.Parameters.Count - 1].Type).ElementType;
+                    var parameterType = sourceItem.Parameters[sourceItem.Parameters.Count - 1].Type;
+                    var elementType = GetParamsElementType( parameterType );
+
+                    if ( elementType == null )
+                    {
+                        continue;
+                    }
+
                     var paramsMatch = true;
 
                     for ( var i = sourceItem.Parameters.Count - 1; i < argumentCount; i++ )
@@ -228,6 +236,71 @@ namespace Metalama.Framework.Code
                         yield return sourceItem;
                     }
                 }
+            }
+        }
+
+        private static IType? GetParamsElementType( IType type )
+        {
+            // See https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-13.0/params-collections#method-parameters.
+
+            return type switch
+            {
+                IArrayType { Rank: 1 } arrayType => arrayType.ElementType,
+                INamedType { FullName: "System.Span" or "System.ReadOnlySpan" } namedType
+                    => namedType.TypeArguments[0],
+                INamedType namedType when namedType.Attributes.Any( a => a.Type.FullName == "System.Runtime.CompilerServices.CollectionBuilderAttribute" )
+                    => GetIterationType( namedType ),
+                INamedType { TypeKind: TypeKind.Struct or TypeKind.Class or TypeKind.RecordStruct or TypeKind.RecordClass } namedType when namedType.AllImplementedInterfaces.Any( i => i.FullName == "System.Collections.Generic.IEnumerable" )
+                    => GetIterationType( namedType ),
+                INamedType { TypeKind: TypeKind.Interface, FullName: "System.Collections.Generic.IEnumerable" or "System.Collections.Generic.IReadOnlyCollection" or "System.Collections.Generic.IReadOnlyList" or "System.Collections.Generic.ICollection" or "System.Collections.Generic.IList" } namedType
+                    => namedType.TypeArguments[0],
+                _ => null,
+            };
+        }
+
+        private static IType? GetIterationType( INamedType collectionType )
+        {
+            // This determination of iteration type is specific to collection expressions and params collections.
+            // The iteration type for foreach would also need to consider extension method GetEnumerator.
+
+            // This is based on https://github.com/dotnet/csharpstandard/blob/draft-v9/standard/statements.md#1395-the-foreach-statement,
+            // but see https://github.com/dotnet/csharpstandard/issues/1188 (we follow the compiler, not the spec, where the two disagree).
+
+            var getEnumeratorMethods = collectionType.Methods.OfCompatibleSignature( nameof(IEnumerable.GetEnumerator), argumentTypes: [], isStatic: false )
+                .Where( m => m.Accessibility == Accessibility.Public )
+                .ToArray();
+
+            if ( getEnumeratorMethods is [var getEnumeratorMethod] )
+            {
+                var enumeratorType = getEnumeratorMethod.ReturnType as INamedType;
+
+                return enumeratorType?.Properties.OfName( "Current" ).SingleOrDefault()?.Type;
+            }
+            else
+            {
+                var genericEnumerableInterfaces = collectionType.AllImplementedInterfaces
+                    .Where( i => i.FullName == "System.Collections.Generic.IEnumerable" )
+                    .ToArray();
+
+                switch ( genericEnumerableInterfaces.Length )
+                {
+                    case 0:
+                        break;
+                    case 1:
+                        return genericEnumerableInterfaces[0].TypeArguments[0];
+                    case > 1:
+                        return null;
+                }
+
+                var hasNonGenericEnumerableInterface = collectionType.AllImplementedInterfaces
+                    .Any( i => i.FullName == "System.Collections.IEnumerable" );
+
+                if ( hasNonGenericEnumerableInterface )
+                {
+                    return ((ICompilationInternal) collectionType.Compilation).Factory.GetSpecialType( SpecialType.Object );
+                }
+
+                return null;
             }
         }
     }
