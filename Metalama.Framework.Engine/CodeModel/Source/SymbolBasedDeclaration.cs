@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
     {
         public abstract ISymbol Symbol { get; }
 
+        [Memo]
         internal sealed override GenericContext GenericContext => SymbolGenericContext.Get( this.Symbol, this.GetCompilationContext() );
 
         [Memo]

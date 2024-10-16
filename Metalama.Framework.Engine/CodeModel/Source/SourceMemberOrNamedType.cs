@@ -98,15 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             }
         }
 
-        INamedType? IMemberOrNamedType.DeclaringType
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.DeclaringType;
-            }
-        }
+        INamedType? IMemberOrNamedType.DeclaringType => this.DeclaringType;
 
         public override SyntaxTree? PrimarySyntaxTree
         {
