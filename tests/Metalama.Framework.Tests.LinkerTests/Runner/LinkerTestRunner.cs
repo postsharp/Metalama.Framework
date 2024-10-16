@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             var builder = ((LinkerTestTextResult) testResult).Builder;
 
-            CompilationModel initialCompilationModel = CompilationModel.CreateInitialInstance(
+            var initialCompilationModel = CompilationModel.CreateInitialInstance(
                 new ProjectModel( testResult.InputCompilation, serviceProvider ),
                 testResult.InputCompilation );
 

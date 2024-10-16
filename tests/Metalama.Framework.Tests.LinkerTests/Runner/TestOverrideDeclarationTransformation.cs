@@ -24,7 +24,7 @@ internal class TestOverrideDeclarationTransformation : TestTransformationBase, I
 
     public IFullRef<IDeclaration> OverriddenDeclaration { get; }
 
-    public TestOverrideDeclarationTransformation( 
+    public TestOverrideDeclarationTransformation(
         AspectLayerInstance aspectLayerInstance, 
         InsertPosition insertPosition, 
         IFullRef<IDeclaration> overriddenDeclaration, 

@@ -6,9 +6,11 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,13 +54,14 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
-        private readonly CompilationContext _inputCompilationContext;
 
         private readonly List<Func<CompilationModel, TestTransformationBase>> _transformationFactories = new();
 
+        private CompilationModel _initialCompilationModel;
+        private Dictionary<string, SyntaxNode> _syntaxNodeMap;
+
         public LinkerTestInputBuilder( in ProjectServiceProvider serviceProvider, CompilationContext inputCompilationContext )
         {
-            this._inputCompilationContext = inputCompilationContext;
             this._serviceProvider = serviceProvider;
             this._rewriter = new TestRewriter( serviceProvider, this, inputCompilationContext );
         }
@@ -70,6 +73,12 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
         public AspectLinkerInput ToAspectLinkerInput(CompilationModel initialCompilationModel)
         {
+            this._initialCompilationModel = initialCompilationModel;
+
+            this._syntaxNodeMap =
+                this._initialCompilationModel.CompilationContext.Compilation.SyntaxTrees.SelectMany( GetNodesWithId )
+                .ToDictionary( GetNodeId );
+
             var orderedLayers = this._rewriter.OrderedAspectLayers
                 .Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName.AssertNotNull(), al.LayerName ) )
                 .ToArray();
@@ -104,12 +113,23 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
         internal InsertPosition TranslateInsertPosition( CompilationContext compilationContext, InsertPositionRecord insertPositionRecord )
         {
-            throw new NotImplementedException();
+            switch ( insertPositionRecord )
+            {
+                case { Relation: var relation, NodeId: { } nodeId }:
+                    var node = (MemberDeclarationSyntax) this._syntaxNodeMap[nodeId];
+                    return new InsertPosition( relation, node );
+                case { Relation: var relation, BuilderData: { } builderData }:
+                    return new InsertPosition( relation, builderData );
+                default:
+                    throw new AssertionFailedException( "Unsupported" );
+            }
         }
 
-        internal IFullRef<IDeclaration> TranslateOriginalSymbol( ISymbol? overriddenDeclarationSymbol )
+        internal IFullRef<IDeclaration> TranslateOriginalSymbol( ISymbol overriddenDeclarationSymbol )
         {
-            throw new NotImplementedException();
+            var symbolId = SymbolId.Create( overriddenDeclarationSymbol );
+            var durableRef = DurableRefFactory.FromSymbolId<IDeclaration>( symbolId );
+            return durableRef.ToFullRef<IDeclaration>( this._initialCompilationModel.RefFactory );
         }
     }
 }

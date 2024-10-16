@@ -20,7 +20,7 @@ internal abstract class TestTransformationBase : IInjectMemberTransformation
 
     public AspectLayerInstance AspectLayerInstance { get; }
     public AspectLayerId AspectLayerId => this.AspectLayerInstance.AspectLayerId;
-    public IAspectInstanceInternal AspectInstance => throw new NotSupportedException();
+    public IAspectInstanceInternal AspectInstance => this.AspectLayerInstance.AspectInstance;
 
     public int OrderWithinPipeline { get; set; }
     public int OrderWithinPipelineStepAndType { get; set; }

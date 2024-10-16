@@ -25,7 +25,7 @@ internal class TestIntroduceDeclarationTransformation : TestTransformationBase, 
 
     public DeclarationBuilderData DeclarationBuilderData { get; }
 
-    public TestIntroduceDeclarationTransformation( 
+    public TestIntroduceDeclarationTransformation(
         AspectLayerInstance aspectLayerInstance, 
         InsertPosition insertPosition, 
         DeclarationBuilderData declarationBuilderData,

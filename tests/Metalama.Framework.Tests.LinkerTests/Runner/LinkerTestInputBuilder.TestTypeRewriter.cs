@@ -262,17 +262,17 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 if ( pseudoIntroductionAttribute != null )
                 {
                     // Introduction will create a temporary declaration, that will help us to provide values for IMethod member.
-                    return new[]
-                    {
-                        (this.ProcessPseudoIntroduction( semanticModel, node, newAttributeLists, pseudoIntroductionAttribute, notInlineable, notDiscardable, pseudoReplacedAttribute, pseudoReplacementAttribute ),
-                         true)
-                    };
+                    this.ProcessPseudoIntroduction( semanticModel, node, newAttributeLists, pseudoIntroductionAttribute, notInlineable, notDiscardable, pseudoReplacedAttribute, pseudoReplacementAttribute );
+
+                    return [];
                 }
                 else if ( pseudoOverrideAttribute != null )
                 {
                     Invariant.Assert( pseudoReplacedAttribute == null && pseudoReplacementAttribute == null );
 
-                    return new[] { (this.ProcessPseudoOverride( semanticModel, node, newAttributeLists, pseudoOverrideAttribute, notInlineable, notDiscardable ), true) };
+                    this.ProcessPseudoOverride( semanticModel, node, newAttributeLists, pseudoOverrideAttribute, notInlineable, notDiscardable );
+
+                    return [];
                 }
                 else if ( pseudoReplacedAttribute != null )
                 {
@@ -310,11 +310,11 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                         transformedNode = transformedNode.WithLinkerDeclarationFlags( flags );
                     }
 
-                    return new[] { (transformedNode, false) };
+                    return [ (transformedNode, false) ];
                 }
             }
 
-            private MemberDeclarationSyntax ProcessPseudoIntroduction(
+            private void ProcessPseudoIntroduction(
                 SemanticModel semanticModel,
                 MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
@@ -495,8 +495,6 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 }
 
                 this._owner.Builder.AddTransformationFactory( CreateTransformation );
-
-                return null;
             }
 
             private static MemberDeclarationSyntax GetFinalIntroductionSyntax( MemberDeclarationSyntax introductionSyntax, string? memberNameOverride )
@@ -522,7 +520,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 }
             }
 
-            private MemberDeclarationSyntax ProcessPseudoOverride(
+            private void ProcessPseudoOverride(
                 SemanticModel semanticModel,
                 MemberDeclarationSyntax node,
                 List<AttributeListSyntax> newAttributeLists,
@@ -536,10 +534,16 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                         "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );
                 }
 
-                var overriddenDeclarationName =
-                    ((InvocationExpressionSyntax) overrideAttribute.ArgumentList.Arguments[0].Expression).ArgumentList.Arguments[0];
-
-                var overriddenDeclarationSymbol = semanticModel.GetSymbolInfo( overriddenDeclarationName ).Symbol;
+                var argument = (InvocationExpressionSyntax) overrideAttribute.ArgumentList.Arguments[0].Expression;
+                var nameofArgument = argument.ArgumentList.Arguments[0];
+                var nameofArgumentInfo = semanticModel.GetSymbolInfo( nameofArgument.Expression );
+                var overriddenDeclarationSymbol =
+                    nameofArgumentInfo switch
+                    {
+                        { Symbol: { } symbol } => symbol,
+                        { CandidateReason: CandidateReason.MemberGroup, CandidateSymbols: [{ } symbol] } => symbol,
+                        _ => throw new AssertionFailedException("Unsupported"),
+                    };
 
                 var aspectName = overrideAttribute.ArgumentList.Arguments[1].ToString().Trim( '\"' );
 
@@ -643,8 +647,6 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 }
 
                 this._owner.Builder.AddTransformationFactory( CreateTransformation );
-
-                return null;
             }
 
             private AspectLayerInstance CreateFakeAspectLayerInstance( CompilationContext compilationContext, AspectLayerId aspectLayer )
