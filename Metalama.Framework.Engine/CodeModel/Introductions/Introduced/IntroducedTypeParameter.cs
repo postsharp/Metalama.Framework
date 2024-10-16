@@ -63,6 +63,14 @@ internal sealed class IntroducedTypeParameter : IntroducedDeclaration, ITypePara
     [Memo]
     public IType ResolvedType => this.MapType( this.Ref );
 
+    public TypeParameterKind TypeParameterKind
+        => this.ContainingDeclaration.DeclarationKind switch
+        {
+            DeclarationKind.NamedType => TypeParameterKind.Type,
+            DeclarationKind.Method => TypeParameterKind.Method,
+            _ => throw new AssertionFailedException()
+        };
+
     IRef<IType> IType.ToRef() => this.Ref;
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;

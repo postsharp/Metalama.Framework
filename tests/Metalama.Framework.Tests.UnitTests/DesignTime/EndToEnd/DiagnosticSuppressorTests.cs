@@ -54,7 +54,7 @@ public sealed class DiagnosticSuppressorTests : FrameworkBaseTestClass
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
-                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            namespace Metalama.Framework.Tests.AspectTests.Aspects.Suppressions.Methods
                             {
                                 public class SuppressWarningAttribute : MethodAspect
                                 {
@@ -99,7 +99,7 @@ public sealed class DiagnosticSuppressorTests : FrameworkBaseTestClass
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
-                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            namespace Metalama.Framework.Tests.AspectTests.Aspects.Suppressions.Methods
                             {
                                 public class SuppressWarningAttribute : FieldAspect
                                 {

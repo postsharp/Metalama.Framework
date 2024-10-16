@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
+using TypeParameterKind = Metalama.Framework.Code.TypeParameterKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
@@ -84,6 +85,14 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     public IType ResolvedType => this;
 
+    public TypeParameterKind TypeParameterKind
+        => this.ContainingDeclaration.DeclarationKind switch
+        {
+            DeclarationKind.NamedType => TypeParameterKind.Type,
+            DeclarationKind.Method => TypeParameterKind.Method,
+            _ => throw new AssertionFailedException()
+        };
+    
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
     IRef<IType> IType.ToRef() => this.Immutable.ToRef();
