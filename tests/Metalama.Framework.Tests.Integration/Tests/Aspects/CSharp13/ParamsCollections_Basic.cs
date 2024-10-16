@@ -10,7 +10,7 @@ using Metalama.Framework.Code;
 using System;
 using System.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp13.ParamsCollections;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp13.ParamsCollections_Basic;
 
 public class TheAspect : TypeAspect
 {
