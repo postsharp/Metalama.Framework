@@ -18,6 +18,7 @@
      
     <ItemGroup>
       <Compile Include="../Metalama.Framework.Engine/Utilities/AssemblyLoader.cs" Link="AssemblyLoader.cs" />
+      <Compile Include="..\Metalama.Framework.Engine\Utilities\HashUtilities.cs" Link="HashUtilities.cs" />
     </ItemGroup>
 
     <Target Name="SelectAssembliesToEmbed">
