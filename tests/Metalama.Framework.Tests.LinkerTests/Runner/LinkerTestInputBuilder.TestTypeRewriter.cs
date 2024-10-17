@@ -544,6 +544,12 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                     {
                         { Symbol: { } symbol } => symbol,
                         { CandidateReason: CandidateReason.MemberGroup, CandidateSymbols: [{ } symbol] } => symbol,
+                        { CandidateReason: CandidateReason.MemberGroup, CandidateSymbols: { Length: > 1 } symbols } 
+                            when
+                                symbols.All( s => s is IMethodSymbol )
+                                && node is MethodDeclarationSyntax { ParameterList.Parameters: { } parameters } 
+                                && symbols.Count(s => ((IMethodSymbol)s).Parameters.Length == parameters.Count) == 1 => 
+                                    symbols.Single( s => ((IMethodSymbol) s).Parameters.Length == parameters.Count ),
                         _ => throw new AssertionFailedException("Unsupported"),
                     };
 
