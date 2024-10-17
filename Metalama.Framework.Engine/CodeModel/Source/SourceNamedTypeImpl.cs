@@ -150,7 +150,7 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     public bool IsGeneric => this._namedTypeSymbol.IsGenericType;
 
-    public bool IsCanonicalGenericInstance => this._namedTypeSymbol.OriginalDefinition == this._namedTypeSymbol;
+    public bool IsCanonicalGenericInstance => this._namedTypeSymbol.OriginalDefinition == this._namedTypeSymbol && this.GenericContextForSymbolMapping.IsEmptyOrIdentity;
 
     [Memo]
     public INamedTypeCollection Types
@@ -336,7 +336,7 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments
-        => this.GenericContextForSymbolMapping == null
+        => this.GenericContextForSymbolMapping.IsEmptyOrIdentity
             ? this._namedTypeSymbol.TypeArguments.SelectAsImmutableArray( a => this.Compilation.Factory.GetIType( a, this.GenericContextForSymbolMapping ) )
             : this.GenericContextForSymbolMapping.TypeArguments.SelectAsImmutableArray( t => t.GetTarget( this.Compilation ) );
 
@@ -383,7 +383,7 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
             var genericContext = new IntroducedGenericContext(
                 typeArguments.SelectAsImmutableArray( t => t.ToFullRef() ),
                 this.ToFullDeclarationRef(),
-                (IntroducedGenericContext?) this.GenericContextForSymbolMapping );
+                this.GenericContextForSymbolMapping as IntroducedGenericContext );
 
             return this.Compilation.Factory.GetNamedType( this._namedTypeSymbol.ConstructedFrom, genericContext );
         }

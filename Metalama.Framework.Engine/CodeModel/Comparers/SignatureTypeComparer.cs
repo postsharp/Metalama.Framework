@@ -1,5 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
@@ -9,15 +12,17 @@ using System.Linq;
 namespace Metalama.Framework.Engine.CodeModel.Comparers
 {
     /// <summary>
-    /// Compares symbols for purposes of method signature comparison.
+    /// Compares symbols for purposes of method signature comparison. This comparer ignores the containing declaration of type parameters,
+    /// allowing to compare interface methods with their implementation. IT IS MOST PROBABLY INCORRECT - a proper way of solving this problem
+    /// is to map the type of interface parameters to the type, then do a normal comparison.
     /// </summary>
-    internal sealed class SignatureTypeSymbolComparer : IEqualityComparer<ISymbol?>
+    internal sealed class SignatureTypeComparer : IEqualityComparer<ISymbol?>, IEqualityComparer<IType>
     {
-        public static SignatureTypeSymbolComparer Instance { get; } = new( StructuralSymbolComparer.Default );
+        public static SignatureTypeComparer Instance { get; } = new( StructuralSymbolComparer.Default );
 
         private readonly StructuralSymbolComparer _inner;
 
-        private SignatureTypeSymbolComparer( StructuralSymbolComparer inner )
+        private SignatureTypeComparer( StructuralSymbolComparer inner )
         {
             this._inner = inner;
         }
@@ -123,6 +128,98 @@ namespace Metalama.Framework.Engine.CodeModel.Comparers
 
                 default:
                     return this._inner.GetHashCode( obj );
+            }
+        }
+
+        public bool Equals( IType? left, IType? right )
+        {
+            if ( ReferenceEquals( left, right ) )
+            {
+                return true;
+            }
+            else if ( left == null || right == null )
+            {
+                return false;
+            }
+            else if ( left is ISymbolBasedCompilationElement { SymbolMustBeMapped: false, Symbol: { } xSymbol } &&
+                      right is ISymbolBasedCompilationElement { SymbolMustBeMapped: false, Symbol: { } ySymbol } )
+            {
+                // Fast path.
+                return this.Equals( xSymbol, ySymbol );
+            }
+            else
+            {
+                switch (left, right)
+                {
+                    case (INamedType leftNamedType, INamedType rightNamedType):
+                        return
+                            leftNamedType.Definition.Equals( rightNamedType.Definition )
+                            && leftNamedType.TypeArguments.SequenceEqual(
+                                rightNamedType.TypeArguments,
+                                this );
+
+                    case (IArrayType leftArray, IArrayType rightArray):
+                        return leftArray.Rank == rightArray.Rank
+                               && this.Equals( leftArray.ElementType, rightArray.ElementType );
+
+                    case (IDynamicType, IDynamicType):
+                        return true;
+
+                    case (ITypeParameter leftTypeParameter, ITypeParameter rightTypeParameter):
+                        // TODO: Interpret compile-time parameters for generic interfaces.
+                        return
+                            leftTypeParameter.TypeParameterKind == rightTypeParameter.TypeParameterKind
+                            && leftTypeParameter.Index == rightTypeParameter.Index;
+
+                    case (IPointerType leftPointerType, IPointerType rightPointerType):
+                        // TODO: Constraints.
+                        return this.Equals( leftPointerType.PointedAtType, rightPointerType.PointedAtType );
+
+                    case (IFunctionPointerType, IFunctionPointerType):
+                        throw new NotImplementedException( UnsupportedFeatures.IntroducedFunctionPointerComparison );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+        }
+
+        public int GetHashCode( IType obj )
+        {
+            if ( obj is ISymbolBasedCompilationElement { SymbolMustBeMapped: false } symbolType )
+            {
+                // Fast path.
+                return this.GetHashCode( symbolType.Symbol );
+            }
+            else
+            {
+                switch ( obj )
+                {
+                    case null:
+                        return 0;
+
+                    case IArrayType array:
+                        return HashCode.Combine( this.GetHashCode( array ) );
+
+                    case IDynamicType:
+                        return HashCode.Combine( 0x57446317 );
+
+                    case ITypeParameter typeParameter:
+                        return HashCode.Combine( typeParameter.TypeParameterKind, typeParameter.Index );
+
+                    case IPointerType pointerType:
+                        return HashCode.Combine( this.GetHashCode( pointerType.PointedAtType ) );
+
+                    case IFunctionPointerType:
+                        throw new NotImplementedException( UnsupportedFeatures.IntroducedFunctionPointerComparison );
+
+                    case INamedType namedType:
+                        return
+                            HashCode.Combine( namedType.FullName, namedType.TypeParameters.Count );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
         }
     }

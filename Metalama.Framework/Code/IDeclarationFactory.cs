@@ -33,6 +33,8 @@ namespace Metalama.Framework.Code
         /// </summary>
         IType GetTypeByReflectionType( Type type );
 
+        INamedType GetNamedTypeByReflectionType( Type type );
+
         /// <summary>
         /// Gets a <see cref="INamedType"/> representing a given <see cref="SpecialType"/>.
         /// </summary>

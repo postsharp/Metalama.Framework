@@ -123,7 +123,7 @@ internal static class SymbolExtensions
                     goto default;
 
                 default:
-                    return SignatureTypeSymbolComparer.Instance.Equals( localMember, baseMember );
+                    return SignatureTypeComparer.Instance.Equals( localMember, baseMember );
             }
         }
     }

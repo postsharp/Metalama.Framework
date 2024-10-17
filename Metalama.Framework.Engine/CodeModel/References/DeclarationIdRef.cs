@@ -26,9 +26,11 @@ internal class DeclarationIdRef<T> : DurableRef<T>
     protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext,
+        IGenericContext genericContext,
         Type interfaceType )
     {
+        Invariant.Assert( genericContext.IsEmptyOrIdentity );
+        
         var declaration = new SerializableDeclarationId( this.Id ).ResolveToDeclaration( compilation );
 
         if ( declaration == null )

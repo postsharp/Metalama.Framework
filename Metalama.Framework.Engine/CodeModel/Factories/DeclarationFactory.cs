@@ -76,6 +76,8 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
 
     public IType GetTypeByReflectionType( Type type ) => this.GetIType( this._compilationModel.CompilationContext.ReflectionMapper.GetTypeSymbol( type ) );
 
+    public INamedType GetNamedTypeByReflectionType( Type type ) => (INamedType) this.GetTypeByReflectionType( type );
+
     public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
 
     internal INamedType GetSpecialType( InternalSpecialType specialType )

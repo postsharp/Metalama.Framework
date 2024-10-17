@@ -22,27 +22,22 @@ namespace Metalama.Framework.Engine.CodeModel.Source
     {
         private protected SymbolBasedDeclaration( GenericContext? genericContextForSymbolMapping )
         {
-            if ( genericContextForSymbolMapping != null )
-            {
-                this.GenericContextForSymbolMapping = genericContextForSymbolMapping.IsEmptyOrIdentity ? null : genericContextForSymbolMapping;
-            }
+            this.GenericContextForSymbolMapping = genericContextForSymbolMapping ?? GenericContext.Empty;
         }
 
         public abstract ISymbol Symbol { get; }
 
-        public GenericContext? GenericContextForSymbolMapping { get; }
+        public GenericContext GenericContextForSymbolMapping { get; }
 
-        IGenericContext? ISymbolBasedCompilationElement.GenericContextForSymbolMapping => this.GenericContextForSymbolMapping;
+        public bool SymbolMustBeMapped => !this.GenericContextForSymbolMapping.IsEmptyOrIdentity;
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="Symbol"/> property must be mapped with the <see cref="GenericContext"/>.
-        /// Returns <c>false</c> is the symbol is already mapped.
-        /// </summary>
-        public bool SymbolRequiresMapping => this.GenericContextForSymbolMapping != null;
+        IGenericContext ISymbolBasedCompilationElement.GenericContextForSymbolMapping => this.GenericContextForSymbolMapping;
 
         [Memo]
         internal sealed override GenericContext GenericContext
-            => this.GenericContextForSymbolMapping ?? SymbolGenericContext.Get( this.Symbol, this.GetCompilationContext() );
+            => this.GenericContextForSymbolMapping.IsEmptyOrIdentity
+                ? SymbolGenericContext.Get( this.Symbol, this.GetCompilationContext() )
+                : this.GenericContextForSymbolMapping;
 
         [Memo]
         public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
@@ -145,6 +140,16 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 if ( translatedSymbol == null )
                 {
                     return null;
+                }
+
+                if ( genericContext is not { IsEmptyOrIdentity: true } )
+                {
+                    genericContext = this.GenericContextForSymbolMapping;
+                }
+                else
+                {
+                    // We can't combine two contexts at the moment.
+                    Invariant.Assert( this.GenericContextForSymbolMapping.IsEmptyOrIdentity );
                 }
 
                 return newCompilation.Factory.GetCompilationElement( translatedSymbol, genericContext: genericContext );

@@ -96,7 +96,7 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
     public override FullRef<T> WithGenericContext( GenericContext genericContext )
         => genericContext.IsEmptyOrIdentity ? this : new IntroducedRef<T>( this, genericContext );
 
-    public override IFullRef? ContainingDeclaration => this.BuilderData.ContainingDeclaration;
+    public override IFullRef ContainingDeclaration => this.BuilderData.ContainingDeclaration;
 
     public override IFullRef<INamedType> DeclaringType => this.BuilderData.DeclaringType.AssertNotNull();
 
@@ -128,13 +128,13 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
 
     public override SyntaxTree? PrimarySyntaxTree => this.BuilderData.PrimarySyntaxTree;
 
-    private GenericContext SelectGenericContext( IGenericContext? genericContext )
+    private GenericContext SelectGenericContext( IGenericContext genericContext )
     {
         if ( this._genericContext.IsEmptyOrIdentity )
         {
-            return (GenericContext?) genericContext ?? GenericContext.Empty;
+            return (GenericContext) genericContext;
         }
-        else if ( genericContext is null or { IsEmptyOrIdentity: true } )
+        else if ( genericContext is { IsEmptyOrIdentity: true } )
         {
             return this._genericContext;
         }
@@ -147,7 +147,7 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
     protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext,
+        IGenericContext genericContext,
         Type interfaceType )
         => ConvertDeclarationOrThrow(
             compilation.Factory.GetDeclaration( this.BuilderData, this.SelectGenericContext( genericContext ), interfaceType ),

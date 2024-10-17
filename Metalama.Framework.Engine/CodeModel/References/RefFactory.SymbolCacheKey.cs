@@ -7,5 +7,5 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal sealed partial class RefFactory
 {
-    private readonly record struct SymbolCacheKey( ISymbol Symbol, RefTargetKind TargetKind, GenericContext? GenericContext );
+    private readonly record struct SymbolCacheKey( ISymbol Symbol, RefTargetKind TargetKind, GenericContext GenericContext );
 }

@@ -79,7 +79,7 @@ internal class ConstructedArrayType : ConstructedType, IArrayType
     public new IArrayType ToNullable() => this.IsNullable == true ? this : new ConstructedArrayType( this.Compilation, this._elementType, this.Rank, true );
 
     public new IArrayType ToNonNullable()
-        => this.IsNullable == false ? this : new ConstructedArrayType( this.Compilation, this._elementType, this.Rank, false );
+        => this.IsNullable == false ? this : new ConstructedArrayType( this.Compilation, this._elementType, this.Rank );
 
     protected override IType ToNullableCore() => this.ToNullable();
 

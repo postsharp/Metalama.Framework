@@ -73,7 +73,6 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         else
         {
             this._ref = new IntroducedRef<IConstructor>( this.Compilation.RefFactory );
-            ;
         }
     }
 

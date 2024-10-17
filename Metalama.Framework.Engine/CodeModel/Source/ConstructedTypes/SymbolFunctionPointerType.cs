@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes;
 
 internal sealed class SymbolFunctionPointerType : SymbolConstructedType<IFunctionPointerTypeSymbol>, IFunctionPointerType
 {
-    public SymbolFunctionPointerType( IFunctionPointerTypeSymbol symbol, CompilationModel compilation, GenericContext? genericContext ) : base(
+    public SymbolFunctionPointerType( IFunctionPointerTypeSymbol symbol, CompilationModel compilation, GenericContext genericContext ) : base(
         symbol,
         compilation,
         genericContext ) { }

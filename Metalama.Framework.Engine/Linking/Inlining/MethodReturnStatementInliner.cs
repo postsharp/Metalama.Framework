@@ -30,7 +30,7 @@ internal sealed class MethodReturnStatementInliner : MethodInliner
             return false;
         }
 
-        if ( !SignatureTypeSymbolComparer.Instance.Equals(
+        if ( !SignatureTypeComparer.Instance.Equals(
                 methodSymbol.ReturnType,
                 aspectReference.ContainingSemantic.Symbol.ReturnType ) )
         {

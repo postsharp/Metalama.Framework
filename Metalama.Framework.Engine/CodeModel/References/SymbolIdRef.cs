@@ -27,7 +27,7 @@ internal sealed class SymbolIdRef<T> : DurableRef<T>
     protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext,
+        IGenericContext genericContext,
         Type interfaceType )
     {
         var symbol = new SymbolId( this.Id ).Resolve( compilation.RoslynCompilation );
@@ -37,7 +37,7 @@ internal sealed class SymbolIdRef<T> : DurableRef<T>
             return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
         }
 
-        return ConvertDeclarationOrThrow( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull(), compilation, interfaceType );
+        return ConvertDeclarationOrThrow( compilation.Factory.GetCompilationElement( symbol, genericContext: genericContext ).AssertNotNull(), compilation, interfaceType );
     }
 
     protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new SymbolIdRef<TOut>( this.Id );

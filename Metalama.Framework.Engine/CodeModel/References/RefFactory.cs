@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public ISymbolRef<ICompilationElement> FromAnySymbol( ISymbol symbol, GenericContext? genericContextForSymbolMapping = null )
             => this._symbolCache.GetOrAdd(
-                new SymbolCacheKey( SymbolNormalizer.GetCanonicalSymbol( symbol ), RefTargetKind.Default, genericContextForSymbolMapping ),
+                new SymbolCacheKey( SymbolNormalizer.GetCanonicalSymbol( symbol ), RefTargetKind.Default, genericContextForSymbolMapping ?? GenericContext.Empty ),
                 static ( key, me ) => key.Symbol.GetDeclarationKind( me.CompilationContext ) switch
                 {
                     DeclarationKind.Compilation => new SymbolRef<ICompilation>( key.Symbol, key.GenericContext, me ),
@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             where T : class, ICompilationElement
             => (SymbolRef<T>)
                 this._symbolCache.GetOrAdd(
-                    new SymbolCacheKey( SymbolNormalizer.GetCanonicalSymbol( symbol ), targetKind, genericContext ),
+                    new SymbolCacheKey( SymbolNormalizer.GetCanonicalSymbol( symbol ), targetKind, genericContext ?? GenericContext.Empty ),
                     static ( key, me ) => new SymbolRef<T>( key.Symbol, key.GenericContext, me, key.TargetKind ),
                     this );
 
@@ -159,7 +159,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             Invariant.Assert( declaration.GetRefFactory() == this );
 
-            return this.FromSymbol<T>( declaration.Symbol, declaration.GenericContextForSymbolMapping );
+            var reference = this.FromSymbol<T>( declaration.Symbol, declaration.GenericContextForSymbolMapping );
+
+            Invariant.Assert( reference.SymbolMustBeMapped == declaration.SymbolMustBeMapped );
+            
+            return reference;
         }
     }
 }

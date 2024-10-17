@@ -2,8 +2,8 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CodeModel.Source;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;

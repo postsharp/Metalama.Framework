@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
 {
     internal sealed class SymbolPointerType : SymbolConstructedType<IPointerTypeSymbol>, IPointerType
     {
-        internal SymbolPointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation, GenericContext? genericContext ) : base(
+        internal SymbolPointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation, GenericContext genericContext ) : base(
             typeSymbol,
             compilation,
             genericContext ) { }

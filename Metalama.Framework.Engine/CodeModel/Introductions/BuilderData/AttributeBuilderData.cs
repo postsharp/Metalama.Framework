@@ -40,7 +40,7 @@ internal class AttributeBuilderData : DeclarationBuilderData
 
     protected override IRef<IDeclaration> ToDeclarationRef() => this._ref;
 
-    public override IFullRef<INamedType>? DeclaringType => throw new NotImplementedException();
+    public override IFullRef<INamedType> DeclaringType => throw new NotImplementedException();
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 

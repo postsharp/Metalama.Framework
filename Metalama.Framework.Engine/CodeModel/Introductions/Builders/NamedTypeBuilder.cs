@@ -194,9 +194,9 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     [Memo]
     public IReadOnlyList<IType> TypeArguments => Array.Empty<IType>();
 
-    public bool IsGeneric => false;
+    public bool IsGeneric => this.TypeParameters.Count > 0;
 
-    public bool IsCanonicalGenericInstance => false;
+    public bool IsCanonicalGenericInstance => true;
 
     Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 

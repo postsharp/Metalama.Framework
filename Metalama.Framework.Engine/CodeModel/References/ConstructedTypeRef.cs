@@ -23,8 +23,13 @@ internal sealed class ConstructedTypeRef<T> : FullRef<T>
         this._constructedType = constructedType;
     }
 
-    protected override ICompilationElement? Resolve( CompilationModel compilation, bool throwIfMissing, IGenericContext? genericContext, Type interfaceType )
-        => this._constructedType.ForCompilation( compilation ); // TODO: GenericContext?
+    protected override ICompilationElement Resolve( CompilationModel compilation, bool throwIfMissing, IGenericContext genericContext, Type interfaceType )
+    {
+        // TODO: Non-identity GenericContext?
+        Invariant.Assert( genericContext.IsEmptyOrIdentity );
+        
+        return this._constructedType.ForCompilation( compilation );
+    }
 
     public override bool Equals( IRef? other, RefComparison comparison ) => throw new NotImplementedException();
 

@@ -198,5 +198,5 @@ internal abstract class PseudoAccessor : IMethodImpl
 
     public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
 
-    public GenericContext? GenericContextForSymbolMapping => (GenericContext?) ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
+    public GenericContext GenericContextForSymbolMapping => (GenericContext) ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
 }

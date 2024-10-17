@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
 {
     internal sealed class SymbolArrayType : SymbolConstructedType<IArrayTypeSymbol>, IArrayType
     {
-        internal SymbolArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation, GenericContext? genericContext ) : base(
+        internal SymbolArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation, GenericContext genericContext ) : base(
             typeSymbol,
             compilation,
             genericContext )

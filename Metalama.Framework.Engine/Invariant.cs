@@ -82,8 +82,10 @@ namespace Metalama.Framework.Engine
         public static void Implies(
             bool premise,
             bool conclusion,
-            [CallerArgumentExpression( nameof(premise) )] string? premiseExpression = null,
-            [CallerArgumentExpression( nameof(conclusion) )] string? conclusionExpression = null )
+            [CallerArgumentExpression( nameof(premise) )]
+            string? premiseExpression = null,
+            [CallerArgumentExpression( nameof(conclusion) )]
+            string? conclusionExpression = null )
         {
             if ( premise && !conclusion )
             {

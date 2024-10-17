@@ -92,7 +92,7 @@ internal class IntroducedGenericContext : GenericContext
 
         if ( this._parentContext != null )
         {
-            s = this._parentContext.ToString() + ",";
+            s = this._parentContext + ",";
         }
         else
         {

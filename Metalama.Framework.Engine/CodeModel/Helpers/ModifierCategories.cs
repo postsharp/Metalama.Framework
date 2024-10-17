@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel.Helpers
 {
     [Flags]
     internal enum ModifierCategories

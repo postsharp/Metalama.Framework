@@ -181,11 +181,9 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     {
                         var templateMethod = templateMethodRef.GetTarget( this.SourceCompilation );
 
-                        return SignatureTypeSymbolComparer.Instance.Equals(
-                                   interfaceMethod.ReturnParameter.Type.GetSymbol()
-                                       .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
-                                   templateMethod.ReturnParameter.Type.GetSymbol()
-                                       .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ) )
+                        return SignatureTypeComparer.Instance.Equals(
+                                   interfaceMethod.ReturnParameter.Type,
+                                   templateMethod.ReturnParameter.Type)
                                && interfaceMethod.ReturnParameter.RefKind == templateMethod.ReturnParameter.RefKind;
                     } );
             }
