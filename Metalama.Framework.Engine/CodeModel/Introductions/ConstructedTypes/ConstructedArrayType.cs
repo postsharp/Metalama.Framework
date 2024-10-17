@@ -16,11 +16,21 @@ internal class ConstructedArrayType : ConstructedType, IArrayType
 
     public ConstructedArrayType( CompilationModel compilation, IFullRef<IType> elementType, int rank, bool? isNullable = false ) : base( compilation )
     {
-        Invariant.Assert( isNullable is not false );
-
         this._elementType = elementType;
         this.Rank = rank;
         this.IsNullable = isNullable;
+    }
+
+    public override ICompilationElement Translate( CompilationModel newCompilation, IGenericContext? genericContext = null, Type? interfaceType = null )
+    {
+        if ( ReferenceEquals( newCompilation, this.Compilation ) )
+        {
+            return this;
+        }
+        else
+        {
+            return new ConstructedArrayType( newCompilation, this._elementType, this.Rank, this.IsNullable );
+        }
     }
 
     public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
@@ -78,8 +88,7 @@ internal class ConstructedArrayType : ConstructedType, IArrayType
 
     public new IArrayType ToNullable() => this.IsNullable == true ? this : new ConstructedArrayType( this.Compilation, this._elementType, this.Rank, true );
 
-    public new IArrayType ToNonNullable()
-        => this.IsNullable == false ? this : new ConstructedArrayType( this.Compilation, this._elementType, this.Rank );
+    public new IArrayType ToNonNullable() => this.IsNullable == false ? this : new ConstructedArrayType( this.Compilation, this._elementType, this.Rank );
 
     protected override IType ToNullableCore() => this.ToNullable();
 

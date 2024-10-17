@@ -21,8 +21,7 @@ internal abstract class ConstructedType : ITypeImpl
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    public ICompilationElement Translate( CompilationModel newCompilation, IGenericContext? genericContext = null, Type? interfaceType = null )
-        => throw new NotImplementedException();
+    public abstract ICompilationElement Translate( CompilationModel newCompilation, IGenericContext? genericContext = null, Type? interfaceType = null );
 
     public abstract IType Accept( TypeRewriter visitor );
 

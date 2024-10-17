@@ -16,44 +16,53 @@ namespace Metalama.Framework.Engine.CodeModel
     [PublicAPI]
     public static class SymbolExtensions
     {
-        private static ISymbol? GetSymbolImpl( ICompilationElement declaration )
+        private static ISymbol? GetSymbolImpl( ICompilationElement declaration, bool returnNullIfMappingRequired )
             => declaration switch
             {
                 ISymbolBasedCompilationElement { SymbolMustBeMapped: false, Symbol: { } symbol } => symbol,
-                ISymbolBasedCompilationElement => throw new ArgumentOutOfRangeException(
+                ISymbolBasedCompilationElement when returnNullIfMappingRequired => throw new ArgumentOutOfRangeException(
                     nameof(declaration),
                     $"The symbol of '{declaration}' is available, but it must be mapped with the generic context" ),
                 _ => null // not symbol-backed.
             };
 
-        public static ISymbol? GetSymbol( this ICompilationElement declaration ) => GetSymbolImpl( declaration );
+        public static ISymbol? GetSymbol( this ICompilationElement declaration, bool returnNullIfMappingRequired = true )
+            => GetSymbolImpl( declaration, returnNullIfMappingRequired );
 
         public static ISymbol? GetSymbol( this IRef declaration, Compilation compilation, bool ignoreAssemblyKey = false )
             => ((ISdkRef) declaration).GetSymbol( compilation, ignoreAssemblyKey );
 
-        private static T? GetSymbol<T>( this ICompilationElement declaration )
+        private static T? GetSymbol<T>( this ICompilationElement declaration, bool returnNullIfMappingRequired = true )
             where T : class, ISymbol
-            => (T?) GetSymbolImpl( declaration );
+            => (T?) GetSymbolImpl( declaration, returnNullIfMappingRequired );
 
-        public static ITypeSymbol? GetSymbol( this IType type ) => type.GetSymbol<ITypeSymbol>();
+        public static ITypeSymbol? GetSymbol( this IType type, bool returnNullIfMappingRequired = true ) => type.GetSymbol<ITypeSymbol>( returnNullIfMappingRequired );
 
-        public static INamedTypeSymbol? GetSymbol( this INamedType namedType ) => namedType.GetSymbol<INamedTypeSymbol>();
+        public static INamedTypeSymbol? GetSymbol( this INamedType namedType, bool returnNullIfMappingRequired = true )
+            => namedType.GetSymbol<INamedTypeSymbol>( returnNullIfMappingRequired );
 
-        public static ITypeParameterSymbol? GetSymbol( this ITypeParameter typeParameter ) => typeParameter.GetSymbol<ITypeParameterSymbol>();
+        public static ITypeParameterSymbol? GetSymbol( this ITypeParameter typeParameter, bool returnNullIfMappingRequired = true )
+            => typeParameter.GetSymbol<ITypeParameterSymbol>( returnNullIfMappingRequired );
 
-        public static IMethodSymbol? GetSymbol( this IMethodBase method ) => method.GetSymbol<IMethodSymbol>();
+        public static IMethodSymbol? GetSymbol( this IMethodBase method, bool returnNullIfMappingRequired = true )
+            => method.GetSymbol<IMethodSymbol>( returnNullIfMappingRequired );
 
-        public static IPropertySymbol? GetSymbol( this IProperty property ) => property.GetSymbol<IPropertySymbol>();
+        public static IPropertySymbol? GetSymbol( this IProperty property, bool returnNullIfMappingRequired = true )
+            => property.GetSymbol<IPropertySymbol>( returnNullIfMappingRequired );
 
-        public static IEventSymbol? GetSymbol( this IEvent @event ) => @event.GetSymbol<IEventSymbol>();
+        public static IEventSymbol? GetSymbol( this IEvent @event, bool returnNullIfMappingRequired = true )
+            => @event.GetSymbol<IEventSymbol>( returnNullIfMappingRequired );
 
-        public static IFieldSymbol? GetSymbol( this IField field ) => field.GetSymbol<IFieldSymbol>();
+        public static IFieldSymbol? GetSymbol( this IField field, bool returnNullIfMappingRequired = true )
+            => field.GetSymbol<IFieldSymbol>( returnNullIfMappingRequired );
 
-        public static IParameterSymbol? GetSymbol( this IParameter parameter ) => parameter.GetSymbol<IParameterSymbol>();
+        public static IParameterSymbol? GetSymbol( this IParameter parameter, bool returnNullIfMappingRequired = true )
+            => parameter.GetSymbol<IParameterSymbol>( returnNullIfMappingRequired );
 
-        public static IAssemblySymbol GetSymbol( this IAssembly assembly ) => assembly.GetSymbol<IAssemblySymbol>();
+        public static IAssemblySymbol GetSymbol( this IAssembly assembly, bool returnNullIfMappingRequired = true )
+            => assembly.GetSymbol<IAssemblySymbol>( returnNullIfMappingRequired );
 
-        public static ISymbol? GetOverriddenMember( this ISymbol? symbol )
+        public static ISymbol? GetOverriddenMember( this ISymbol? symbol, bool returnNullIfMappingRequired = true )
             => symbol switch
             {
                 IMethodSymbol method => method.OverriddenMethod,

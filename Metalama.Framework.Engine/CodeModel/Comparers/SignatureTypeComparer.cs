@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.CodeModel.Comparers
                         throw new NotImplementedException( UnsupportedFeatures.IntroducedFunctionPointerComparison );
 
                     default:
-                        throw new AssertionFailedException();
+                        return false;
                 }
             }
         }

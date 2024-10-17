@@ -27,11 +27,21 @@ internal sealed class ConstructedTypeRef<T> : FullRef<T>
     {
         // TODO: Non-identity GenericContext?
         Invariant.Assert( genericContext.IsEmptyOrIdentity );
-        
+
         return this._constructedType.ForCompilation( compilation );
     }
 
-    public override bool Equals( IRef? other, RefComparison comparison ) => throw new NotImplementedException();
+    public override bool Equals( IRef? other, RefComparison comparison )
+    {
+        if ( other is ConstructedTypeRef<T> otherConstructedType )
+        {
+            return this._constructedType.Equals( otherConstructedType._constructedType, comparison.ToTypeComparison() );
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     public override int GetHashCode( RefComparison comparison ) => this._constructedType.GetHashCode( comparison.ToTypeComparison() );
 

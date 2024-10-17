@@ -18,6 +18,18 @@ internal class ConstructedPointerType : ConstructedType, IPointerType
         this._pointedAtType = pointedAtType;
     }
 
+    public override ICompilationElement Translate( CompilationModel newCompilation, IGenericContext? genericContext = null, Type? interfaceType = null )
+    {
+        if ( ReferenceEquals( newCompilation, this.Compilation ) )
+        {
+            return this;
+        }
+        else
+        {
+            return new ConstructedPointerType( newCompilation, this._pointedAtType );
+        }
+    }
+
     public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
     protected override IFullRef<IType> ToTypeFullRef() => this.Compilation.RefFactory.FromConstructedType<IArrayType>( this );
