@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Metalama.Framework.Code.Comparers;
 
 // ReSharper disable SuspiciousTypeConversion.Global
 
@@ -35,11 +36,13 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPositionRecord? _currentInsertPosition;
+            private Dictionary<IFullRef<IField>, IFullRef<IProperty>> _promotions;
 
             public TestTypeRewriter( TestRewriter owner )
             {
                 this._owner = owner;
                 this._currentTypeStack = new Stack<(TypeDeclarationSyntax, List<MemberDeclarationSyntax>)>();
+                this._promotions = new Dictionary<IFullRef<IField>, IFullRef<IProperty>>(RefEqualityComparer.Default);
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -274,18 +277,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 }
                 else if ( pseudoReplacedAttribute != null )
                 {
-                    throw new NotImplementedException( "TODO" );
-                    var replacedMemberName = node switch
-                    {
-                        MethodDeclarationSyntax method => method.Identifier.ValueText,
-                        PropertyDeclarationSyntax property => property.Identifier.ValueText,
-                        EventDeclarationSyntax @event => @event.Identifier.ValueText,
-                        EventFieldDeclarationSyntax eventField => eventField.Declaration.Variables.Single().Identifier.ValueText,
-                        FieldDeclarationSyntax field => field.Declaration.Variables.Single().Identifier.ValueText,
-                        _ => throw new NotSupportedException()
-                    };
-
-                    return new[] { (node.WithAttributeLists( List( newAttributeLists ) ), false) };
+                    return [(node.WithAttributeLists( List( newAttributeLists ) ), false)];
                 }
                 else
                 {
@@ -395,6 +387,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                     var aspectLayerInstance = this.CreateTestAspectLayerInstance( compilationModel.CompilationContext, declaringType, aspectLayer );
 
                     MemberBuilder builder;
+                    IField? replacedField = null;
 
                     switch ( introductionSyntax )
                     {
@@ -423,6 +416,16 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
                         case PropertyDeclarationSyntax propertyDeclaration:
                             var propertySymbol = (IPropertySymbol) symbol;
+
+                            if ( replacementAttribute != null )
+                            {
+                                var argument = (InvocationExpressionSyntax) replacementAttribute.ArgumentList.Arguments[0].Expression;
+                                var nameofArgument = argument.ArgumentList.Arguments[0];
+                                var nameofArgumentInfo = semanticModel.GetSymbolInfo( nameofArgument.Expression );
+                                var replacedFieldSymbol = nameofArgumentInfo.Symbol.AssertNotNull();
+                                replacedField = (IField)this._owner.Builder.TranslateOriginalSymbol( replacedFieldSymbol ).GetTarget( compilationModel );
+                            }
+
                             var propertyBuilder =
                                 new PropertyBuilder(
                                     aspectLayerInstance,
@@ -433,7 +436,10 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                                     propertySymbol.IsAutoProperty()!.Value,
                                     propertySymbol.SetMethod is { IsInitOnly: true },
                                     propertySymbol.GetMethod is { IsImplicitlyDeclared: true },
-                                    propertySymbol.SetMethod is { IsImplicitlyDeclared: true } );
+                                    propertySymbol.SetMethod is { IsImplicitlyDeclared: true } )
+                                {
+                                    OriginalField = replacedField
+                                };
 
                             builder = propertyBuilder;
 
@@ -463,6 +469,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                             throw new NotSupportedException();
                     }
 
+
                     builder.Name = introducedElementName;
                     builder.Accessibility = symbol.DeclaredAccessibility.ToOurAccessibility();
                     builder.IsStatic = symbol.IsStatic;
@@ -484,16 +491,34 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                         _ => throw new NotSupportedException()
                     };
 
-                    this._owner.Builder.RegisterBuilderDataForSymbol(symbol, builderData );
+                    if (replacedField != null)
+                    {
+                        this._promotions[replacedField.ToFullRef()] = builderData.ToFullRef().As<IProperty>();
+                    }
+
+                    this._owner.Builder.RegisterBuilderDataForSymbol( symbol, builderData );
 
                     var insertPosition = this._owner.Builder.TranslateInsertPosition( compilationModel.CompilationContext, insertPositionRecord );
 
-                    return
-                        new TestIntroduceDeclarationTransformation(
-                            aspectLayerInstance,
-                            insertPosition,
-                            builderData,
-                            introductionSyntax );
+                    if ( replacementAttribute != null )
+                    {
+                        return
+                            new TestPromoteFieldTransformation(
+                                aspectLayerInstance,
+                                insertPosition,
+                                ((PropertyBuilderData) builderData).OriginalField,
+                                (PropertyBuilderData) builderData,
+                                introductionSyntax );
+                    }
+                    else
+                    {
+                        return
+                            new TestIntroduceDeclarationTransformation(
+                                aspectLayerInstance,
+                                insertPosition,
+                                builderData,
+                                introductionSyntax );
+                    }
                 }
 
                 this._owner.Builder.AddTransformationFactory( CreateTransformation );
@@ -646,6 +671,12 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 TestTransformationBase CreateTransformation( CompilationModel compilationModel )
                 {
                     var overriddenDeclaration = this._owner.Builder.TranslateOriginalSymbol( overriddenDeclarationSymbol ).GetTarget( compilationModel );
+
+                    if ( overriddenDeclaration is IField overriddenField && this._promotions.TryGetValue( overriddenField.ToFullRef(), out var promotedField))
+                    {
+                        overriddenDeclaration = promotedField.GetTarget( compilationModel );
+                    }
+
                     var aspectLayerInstance = this.CreateTestAspectLayerInstance( compilationModel.CompilationContext, overriddenDeclaration, aspectLayer );
                     var insertPosition = this._owner.Builder.TranslateInsertPosition( compilationModel.CompilationContext, insertPositionRecord );
 

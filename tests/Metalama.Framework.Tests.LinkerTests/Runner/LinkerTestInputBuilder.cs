@@ -128,7 +128,13 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             switch ( insertPositionRecord )
             {
                 case { Relation: var relation, NodeId: { } nodeId }:
-                    var node = (MemberDeclarationSyntax) this._syntaxNodeMap[nodeId];
+                    var node = this._syntaxNodeMap[nodeId] switch
+                    {
+                        MemberDeclarationSyntax memberDeclaration => memberDeclaration,
+                        VariableDeclaratorSyntax variableDeclaration => (MemberDeclarationSyntax)variableDeclaration.Parent.Parent,
+                        _ => throw new AssertionFailedException( $"Unsupported." ),
+                    };
+
                     return new InsertPosition( relation, node );
                 case { Relation: var relation, BuilderData: { } builderData }:
                     return new InsertPosition( relation, builderData );
