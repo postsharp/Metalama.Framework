@@ -29,7 +29,7 @@ internal sealed class SyntaxProcessingException : Exception
         if ( node != null )
         {
             // Get the node text. We need to remove CR and LF otherwise it is not well parsed by MSBuild.
-            var nodeText = node.NormalizeWhitespace().ToString().Replace( "\r\n", " " ).Replace( "\n", " " ).Replace( "\n", " " );
+            var nodeText = node/*.NormalizeWhitespace()*/.ToString().Replace( "\r\n", " " ).Replace( "\n", " " ).Replace( "\n", " " );
 
             if ( nodeText.Length > 40 )
             {
@@ -37,26 +37,26 @@ internal sealed class SyntaxProcessingException : Exception
             }
 
             // Get the node path.
-            var nodePath = "";
+            var nodePath = " TESTTESTTEST";
 
-            for ( var n = node; n != null; n = n.Parent )
-            {
-                if ( nodePath != "" )
-                {
-                    nodePath = "/" + nodePath;
-                }
-
-                var identifier = n.GetType().GetProperty( "Identifier" )?.GetValue( n )?.ToString();
-
-                if ( identifier != null )
-                {
-                    nodePath = $"{n.Kind()}[{identifier}]" + nodePath;
-                }
-                else
-                {
-                    nodePath = $"{n.Kind()}" + nodePath;
-                }
-            }
+            // for ( var n = node; n != null; n = n.Parent )
+            // {
+            //     if ( nodePath != "" )
+            //     {
+            //         nodePath = "/" + nodePath;
+            //     }
+            //
+            //     var identifier = n.GetType().GetProperty( "Identifier" )?.GetValue( n )?.ToString();
+            //
+            //     if ( identifier != null )
+            //     {
+            //         nodePath = $"{n.Kind()}[{identifier}]" + nodePath;
+            //     }
+            //     else
+            //     {
+            //         nodePath = $"{n.Kind()}" + nodePath;
+            //     }
+            // }
 
             var location = node.GetLocation();
 
