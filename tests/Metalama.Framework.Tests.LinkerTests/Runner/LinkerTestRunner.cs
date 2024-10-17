@@ -57,15 +57,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             serviceProvider = serviceProvider.WithCompileTimeProjectServices( CompileTimeProjectRepository.CreateTestInstance() );
 
-            var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
-                testInput.TestName,
-                TestCompilationFactory.GetMetadataReferences() );
-
-            var preliminaryCompilationContext = preliminaryCompilation.GetCompilationContext();
-
-            var builder = new LinkerTestInputBuilder( serviceProvider, preliminaryCompilationContext );
-
-            ((LinkerTestTextResult) testResult).Builder = builder;
+            ((LinkerTestTextResult) testResult).ServiceProvider = serviceProvider;
 
             await base.RunAsync( testInput, testResult, testContext );
 
@@ -74,8 +66,14 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 return;
             }
 
-            // Create the linker input.
-            var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
+            var builder = ((LinkerTestTextResult) testResult).Builder;
+
+            var initialCompilationModel = CompilationModel.CreateInitialInstance(
+                new ProjectModel( testResult.InputCompilation, serviceProvider ),
+                testResult.InputCompilation );
+
+            // Create linker input from the clean compilation and recorded transformations.
+            var linkerInput = builder.ToAspectLinkerInput( initialCompilationModel );
 
             var linker = new AspectLinker( serviceProvider, linkerInput );
 
@@ -83,17 +81,13 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             var linkedCompilation = result.Compilation;
 
-            var cleanCompilation =
-                LinkerTestInputBuilder.GetCleanCompilation( linkedCompilation )
-                    .Compilation.AssertNotNull();
-
-            testResult.OutputCompilation = cleanCompilation;
+            testResult.OutputCompilation = linkedCompilation.Compilation;
             testResult.HasOutputCode = true;
 
-            await testResult.SetOutputCompilationAsync( cleanCompilation );
+            await testResult.SetOutputCompilationAsync( linkedCompilation.Compilation );
 
             // Attempt to Emit the result.
-            var emitResult = cleanCompilation.Emit( Stream.Null );
+            var emitResult = linkedCompilation.Compilation.Emit( Stream.Null );
 
             testResult.PipelineDiagnostics.Report( emitResult.Diagnostics );
 
@@ -102,7 +96,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 testResult.SetFailed( "Final Compilation.Emit failed." );
             }
 
-            if ( !SyntaxTreeStructureVerifier.Verify( cleanCompilation, out var diagnostics ) )
+            if ( !SyntaxTreeStructureVerifier.Verify( linkedCompilation.Compilation, out var diagnostics ) )
             {
                 testResult.SetFailed( "Syntax tree verification failed." );
                 testResult.OutputCompilationDiagnostics.Report( diagnostics );
@@ -121,11 +115,24 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             base.ExecuteAssertions( testInput, testResult );
         }
 
-        private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestResult testResult )
+        private protected override Compilation PreprocessCompilation( Compilation initialCompilation, TestResult testResult )
         {
-            var builder = ((LinkerTestTextResult) testResult).Builder!;
+            var serviceProvider = ((LinkerTestTextResult) testResult).ServiceProvider.AssertNotNull();
+            var initialPartialCompilation = PartialCompilation.CreateComplete( initialCompilation );
+            var builder = new LinkerTestInputBuilder( serviceProvider, initialPartialCompilation.CompilationContext );
+            ((LinkerTestTextResult) testResult).Builder = builder;
 
-            return builder.ProcessSyntaxRoot( syntaxRoot );
+            // Process all syntax trees.
+            var cleanPartialCompilation =
+                initialPartialCompilation.UpdateSyntaxTrees(
+                    syntaxTree =>
+                        syntaxTree.WithRootAndOptions(
+                            builder.ProcessSyntaxRoot( syntaxTree.GetRoot() ),
+                            syntaxTree.Options ) );
+
+            // It's important to return a compilation that does not contain any pseudo members and will be used as the initial compilation for the test.
+            // It does, however, contain annotations that are used to create transformations.
+            return cleanPartialCompilation.Compilation;
         }
 
         protected override TestResult CreateTestResult() => new LinkerTestTextResult();
@@ -133,6 +140,8 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
         private sealed class LinkerTestTextResult : TestResult
         {
             public LinkerTestInputBuilder? Builder { get; set; }
+
+            public ProjectServiceProvider? ServiceProvider { get; set; }
         }
     }
 }

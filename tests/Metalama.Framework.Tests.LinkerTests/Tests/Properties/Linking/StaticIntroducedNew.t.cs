@@ -11,17 +11,6 @@ class Target : Base
       Foo_Override6 = value;
     }
   }
-  public static new int Bar
-  {
-    get
-    {
-      return Bar_Override5_2;
-    }
-    set
-    {
-      Bar_Override5_2 = value;
-    }
-  }
   private static int Bar_Override1_1
   {
     get
@@ -280,6 +269,17 @@ class Target : Base
       Target.Bar = value;
       // Should invoke the final declaration.
       Target.Bar = value;
+    }
+  }
+  public static new int Bar
+  {
+    get
+    {
+      return Bar_Override5_2;
+    }
+    set
+    {
+      Bar_Override5_2 = value;
     }
   }
 }

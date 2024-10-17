@@ -29,8 +29,6 @@
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="Metalama.Compiler.Sdk" />
-        <PackageReference Include="FakeItEasy" />
-        <PackageReference Include="FakeItEasy.Analyzer.CSharp" />
         <PackageReference Include="System.Text.Json" NoWarn="NU1903" />
         <PackageReference Include="Metalama.Backstage.Testing" />
 
@@ -51,6 +49,12 @@
           <DependentUpon>$([System.String]::Copy('LinkerTestRunnerFactory').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
           <SubType>Code</SubType>
         </Compile>
+        <Compile Update="Runner\TestPromoteFieldTransformation.cs">
+          <DependentUpon>$([System.String]::Copy('%(Filename)').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+        </Compile>
+        <Compile Update="Runner\TestOverrideDeclarationTransformation.cs">
+          <DependentUpon>$([System.String]::Copy('%(Filename)').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -61,7 +65,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <Import Project="../../Metalama.Testing.AspectTesting/Metalama.Testing.AspectTesting.targets" />

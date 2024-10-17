@@ -1,4 +1,4 @@
-class Target : Base
+    class Target : Base
 {
   public int Foo
   {
@@ -9,18 +9,6 @@ class Target : Base
     set
     {
       this.Foo_Override8 = value;
-    }
-  }
-  private int _bar;
-  public new int Bar
-  {
-    get
-    {
-      return this.Bar_Override7_2;
-    }
-    set
-    {
-      this.Bar_Override7_2 = value;
     }
   }
   private int Bar_Override3_1
@@ -307,6 +295,18 @@ class Target : Base
       this.Bar = value;
       // Should invoke the final declaration.
       this.Bar = value;
+    }
+  }
+  private int _bar;
+  public new int Bar
+  {
+    get
+    {
+      return this.Bar_Override7_2;
+    }
+    set
+    {
+      this.Bar_Override7_2 = value;
     }
   }
 }

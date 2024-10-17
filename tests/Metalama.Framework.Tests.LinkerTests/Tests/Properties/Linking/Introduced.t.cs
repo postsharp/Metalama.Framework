@@ -11,24 +11,6 @@ class Target
       this.Foo_Override6 = value;
     }
   }
-  public int Bar
-  {
-    get
-    {
-      return this.Bar_Override5_2;
-    }
-    set
-    {
-      this.Bar_Override5_2 = value;
-    }
-  }
-  private int Bar_Empty
-  {
-    get => default(int);
-    set
-    {
-    }
-  }
   private int Bar_Override1_1
   {
     get
@@ -287,6 +269,24 @@ class Target
       this.Bar = value;
       // Should invoke the final declaration.
       this.Bar = value;
+    }
+  }
+  public int Bar
+  {
+    get
+    {
+      return this.Bar_Override5_2;
+    }
+    set
+    {
+      this.Bar_Override5_2 = value;
+    }
+  }
+  private int Bar_Empty
+  {
+    get => default(int);
+    set
+    {
     }
   }
 }

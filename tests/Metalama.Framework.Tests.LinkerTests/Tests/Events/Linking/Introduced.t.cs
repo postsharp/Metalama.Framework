@@ -11,28 +11,6 @@ class Target
       this.Foo_Override6 -= value;
     }
   }
-  public event System.EventHandler Bar
-  {
-    add
-    {
-      this.Bar_Override5_2 += value;
-    }
-    remove
-    {
-      this.Bar_Override5_2 -= value;
-    }
-  }
-  private event System.EventHandler Bar_Empty
-  {
-    add
-    {
-      System.Console.WriteLine("SHOULD BE DISCARDED (this is introduced code).");
-    }
-    remove
-    {
-      System.Console.WriteLine("SHOULD BE DISCARDED (this is introduced code).");
-    }
-  }
   private event System.EventHandler Bar_Override1_1
   {
     add
@@ -281,6 +259,28 @@ class Target
       this.Bar -= value;
       // Should invoke the final declaration.
       this.Bar -= value;
+    }
+  }
+  public event System.EventHandler Bar
+  {
+    add
+    {
+      this.Bar_Override5_2 += value;
+    }
+    remove
+    {
+      this.Bar_Override5_2 -= value;
+    }
+  }
+  private event System.EventHandler Bar_Empty
+  {
+    add
+    {
+      System.Console.WriteLine("SHOULD BE DISCARDED (this is introduced code).");
+    }
+    remove
+    {
+      System.Console.WriteLine("SHOULD BE DISCARDED (this is introduced code).");
     }
   }
 }

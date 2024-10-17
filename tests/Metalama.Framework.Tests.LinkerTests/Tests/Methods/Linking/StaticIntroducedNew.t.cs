@@ -4,10 +4,6 @@ class Target : Base
   {
     Foo_Override6();
   }
-  public static new void Bar()
-  {
-    Bar_Override5_2();
-  }
   private static void Bar_Override1_1()
   {
     // Should invoke empty code.
@@ -117,5 +113,9 @@ class Target : Base
     Target.Bar();
     // Should invoke the final declaration.
     Target.Bar();
+  }
+  public static new void Bar()
+  {
+    Bar_Override5_2();
   }
 }

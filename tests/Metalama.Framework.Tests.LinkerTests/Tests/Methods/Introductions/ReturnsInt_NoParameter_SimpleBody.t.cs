@@ -1,10 +1,10 @@
 class Target
 {
-  public static int Bar()
+  public int Foo()
   {
     return 42;
   }
-  public int Foo()
+  public static int Bar()
   {
     return 42;
   }

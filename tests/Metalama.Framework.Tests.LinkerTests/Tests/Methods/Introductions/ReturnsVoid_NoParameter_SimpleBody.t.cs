@@ -1,9 +1,9 @@
 class Target
 {
-  public static void Bar()
+  public void Foo()
   {
   }
-  public void Foo()
+  public static void Bar()
   {
   }
 }

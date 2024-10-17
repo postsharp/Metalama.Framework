@@ -11,17 +11,6 @@ class Target : Base
       this.Foo_Override6 -= value;
     }
   }
-  public override event System.EventHandler Bar
-  {
-    add
-    {
-      this.Bar_Override5_2 += value;
-    }
-    remove
-    {
-      this.Bar_Override5_2 -= value;
-    }
-  }
   private event System.EventHandler Bar_Override1_1
   {
     add
@@ -270,6 +259,17 @@ class Target : Base
       this.Bar -= value;
       // Should invoke the final declaration.
       this.Bar -= value;
+    }
+  }
+  public override event System.EventHandler Bar
+  {
+    add
+    {
+      this.Bar_Override5_2 += value;
+    }
+    remove
+    {
+      this.Bar_Override5_2 -= value;
     }
   }
 }

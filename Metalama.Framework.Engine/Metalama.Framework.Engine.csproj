@@ -55,7 +55,6 @@ added because the package already contains file 'analyzers/dotnet/cs/Metalama.Fr
         <InternalsVisibleTo Include="Metalama.Framework.Tests.AspectTests.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.TemplateTests.$(ThisRoslynVersionNoPreview)" />
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <ItemGroup>

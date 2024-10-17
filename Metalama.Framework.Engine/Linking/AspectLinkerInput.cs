@@ -16,9 +16,9 @@ internal readonly struct AspectLinkerInput
     /// <summary>
     /// Gets the input compilation model, modified by all aspects.
     /// </summary>
-    public CompilationModel CompilationModel { get; }
+    public CompilationModel FinalCompilationModel { get; }
 
-    public CompilationModel SourceCompilationModel { get; }
+    public CompilationModel InitialCompilationModel { get; }
 
     /// <summary>
     /// Gets a list of non-observable transformations.
@@ -33,14 +33,14 @@ internal readonly struct AspectLinkerInput
     public CompileTimeProject CompileTimeProject { get; }
 
     public AspectLinkerInput(
-        CompilationModel compilationModel,
-        CompilationModel sourceCompilationModel,
+        CompilationModel initialCompilationModel,
+        CompilationModel finalCompilationModel,
         IReadOnlyCollection<ITransformation> transformations,
         IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
         CompileTimeProject compileTimeProject )
     {
-        this.CompilationModel = compilationModel;
-        this.SourceCompilationModel = sourceCompilationModel;
+        this.InitialCompilationModel = initialCompilationModel;
+        this.FinalCompilationModel = finalCompilationModel;
         this.Transformations = transformations;
         this.OrderedAspectLayers = orderedAspectLayers;
         this.CompileTimeProject = compileTimeProject;

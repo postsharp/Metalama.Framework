@@ -60,13 +60,13 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
         var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
-        var supportsNullability = input.CompilationModel.RoslynCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
+        var supportsNullability = input.FinalCompilationModel.RoslynCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
         var transformationComparer = TransformationLinkerOrderComparer.Instance;
-        var injectionHelperProvider = new LinkerInjectionHelperProvider( input.CompilationModel, supportsNullability );
-        var injectionNameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider );
-        var transformationCollection = new TransformationCollection( input.CompilationModel, transformationComparer );
-        var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
+        var injectionHelperProvider = new LinkerInjectionHelperProvider( input.FinalCompilationModel, supportsNullability );
+        var injectionNameProvider = new LinkerInjectionNameProvider( input.FinalCompilationModel, injectionHelperProvider );
+        var transformationCollection = new TransformationCollection( input.FinalCompilationModel, transformationComparer );
+        var lexicalScopeFactory = new LexicalScopeFactory( input.FinalCompilationModel );
         var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = [];
@@ -76,7 +76,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         ConcurrentDictionary<IFullRef<IMember>, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new( RefEqualityComparer<IMember>.Default );
 
-        var existingSyntaxTrees = input.CompilationModel.PartialCompilation.SyntaxTrees;
+        var existingSyntaxTrees = input.FinalCompilationModel.PartialCompilation.SyntaxTrees;
 
         void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ISyntaxTreeTransformation> transformationGroup )
         {
@@ -124,7 +124,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 IndexMemberLevelTransformation(
                     transformation,
                     transformationCollection,
-                    input.CompilationModel );
+                    input.FinalCompilationModel );
 
                 this.IndexInsertStatementTransformation(
                     input,
@@ -141,7 +141,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         IEnumerable<ISyntaxTreeTransformation> syntaxTreeTransformations;
 
-        if ( !input.CompilationModel.PartialCompilation.HasObservabilityFilter )
+        if ( !input.FinalCompilationModel.PartialCompilation.HasObservabilityFilter )
         {
             syntaxTreeTransformations = input.Transformations.OfType<ISyntaxTreeTransformation>();
         }
@@ -188,7 +188,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             {
                 var transformedSyntaxTree = transformation.TransformedSyntaxTree;
 
-                if ( input.CompilationModel.PartialCompilation.IsSyntaxTreeObserved( transformedSyntaxTree.FilePath ) )
+                if ( input.FinalCompilationModel.PartialCompilation.IsSyntaxTreeObserved( transformedSyntaxTree.FilePath ) )
                 {
                     var canonicalTargetDeclaration = GetCanonicalTargetDeclaration( transformation.TargetDeclaration );
                     observedCanonicalTargetDeclarations.Add( canonicalTargetDeclaration );
@@ -235,7 +235,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             var transformations = transformationPair.Value;
 
             this.IndexAuxiliaryMemberTransformations(
-                input.CompilationModel,
+                input.FinalCompilationModel,
                 transformationCollection,
                 lexicalScopeFactory,
                 aspectReferenceSyntaxProvider,
@@ -246,18 +246,18 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         await this._concurrentTaskRunner.RunConcurrentlyAsync( auxiliaryMemberTransformations, ProcessAuxiliaryMemberTransformations, cancellationToken );
 
-        var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
+        var syntaxTreeForGlobalAttributes = input.FinalCompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
-        if ( !input.CompilationModel.PartialCompilation.SyntaxTrees.ContainsKey( syntaxTreeForGlobalAttributes.FilePath )
+        if ( !input.FinalCompilationModel.PartialCompilation.SyntaxTrees.ContainsKey( syntaxTreeForGlobalAttributes.FilePath )
              && input.Transformations.OfType<IntroduceAttributeTransformation>().Any( t => t.TransformedSyntaxTree == syntaxTreeForGlobalAttributes ) )
         {
             transformationCollection.AddIntroducedSyntaxTree( syntaxTreeForGlobalAttributes );
         }
 
         // Replace wildcard AssemblyVersionAttribute with actual version.
-        var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToFullRef() );
-        var assemblyVersionAttributeType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
-        var assemblyVersionAttribute = input.CompilationModel.Attributes.OfAttributeType( assemblyVersionAttributeType ).FirstOrDefault();
+        var attributes = input.FinalCompilationModel.GetAttributeCollection( input.FinalCompilationModel.ToFullRef() );
+        var assemblyVersionAttributeType = (INamedType) input.FinalCompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
+        var assemblyVersionAttribute = input.FinalCompilationModel.Attributes.OfAttributeType( assemblyVersionAttributeType ).FirstOrDefault();
 
 #pragma warning disable CA1307 // Specify StringComparison for clarity
         if ( assemblyVersionAttribute?.ConstructorArguments.FirstOrDefault() is { Value: string version }
@@ -275,13 +275,13 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 {
                     ConstructorArguments = ImmutableArray.Create(
                         TypedConstant.Create(
-                            input.CompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString(),
+                            input.FinalCompilationModel.RoslynCompilation.Assembly.Identity.Version.ToString(),
                             assemblyVersionAttributeConstructor.Parameters[0].Type ) )
                 };
 
             var attributeBuilder = new AttributeBuilder(
                 null!,
-                input.CompilationModel.DeclaringAssembly,
+                input.FinalCompilationModel.DeclaringAssembly,
                 newAssemblyVersionAttribute );
 
             attributeBuilder.Freeze();
@@ -293,7 +293,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // Add syntax trees that were introduced (typically empty). These are trees currently created by transformation and the 
         // intermediate registry needs to create a map of transformation target syntax tree to modified syntax tree.
         var compilationWithIntroducedTrees =
-            input.CompilationModel.PartialCompilation.Update(
+            input.FinalCompilationModel.PartialCompilation.Update(
                 transformationCollection.IntroducedSyntaxTrees.SelectAsArray( SyntaxTreeTransformation.AddTree ) );
 
         // Update the syntax trees and create a new partial compilation.
@@ -304,7 +304,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             Rewriter rewriter = new(
                 this,
                 transformationCollection,
-                input.CompilationModel,
+                input.FinalCompilationModel,
                 syntaxTreeForGlobalAttributes );
 
             var oldRoot = await initialSyntaxTree.GetRootAsync( cancellationToken );
@@ -354,8 +354,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         return
             new LinkerInjectionStepOutput(
                 diagnostics,
-                input.SourceCompilationModel,
-                input.CompilationModel,
+                input.InitialCompilationModel,
+                input.FinalCompilationModel,
                 intermediateCompilation,
                 injectionRegistry,
                 lateTransformationRegistry,
@@ -513,7 +513,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                         aspectReferenceSyntaxProvider,
                         lexicalScopeFactory,
                         syntaxGenerationContext,
-                        input.CompilationModel );
+                        input.FinalCompilationModel );
 
                     var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
 
@@ -527,7 +527,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     // Create the SyntaxGenerationContext for the insertion point.
                     var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions );
 
-                    var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( syntaxGenerationContext, input.CompilationModel );
+                    var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( syntaxGenerationContext, input.FinalCompilationModel );
                     var introducedInterface = new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterfaceSyntax );
 
                     transformationCollection.AddInjectedInterface( injectInterfaceTransformation.TargetDeclaration.As<INamedType>(), introducedInterface );
@@ -691,7 +691,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                         this._serviceProvider,
                         diagnostics,
                         syntaxGenerationContext,
-                        input.CompilationModel,
+                        input.FinalCompilationModel,
                         lexicalScopeFactory,
                         insertStatementTransformation,
                         m ) );

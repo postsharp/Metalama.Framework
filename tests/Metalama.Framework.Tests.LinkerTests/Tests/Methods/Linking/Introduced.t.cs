@@ -4,13 +4,6 @@ class Target
   {
     this.Foo_Override6();
   }
-  public void Bar()
-  {
-    this.Bar_Override5_2();
-  }
-  private void Bar_Empty()
-  {
-  }
   private void Bar_Override1_1()
   {
     // Should invoke empty code.
@@ -120,5 +113,12 @@ class Target
     this.Bar();
     // Should invoke the final declaration.
     this.Bar();
+  }
+  public void Bar()
+  {
+    this.Bar_Override5_2();
+  }
+  private void Bar_Empty()
+  {
   }
 }

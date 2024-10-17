@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.LinkerTests.Tests;
 using Microsoft.CodeAnalysis;
@@ -24,13 +23,18 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
         private const string _testTemporaryNodeAnnotationId = "LinkerTestTemporaryNode";
         private static int _nextNodeId;
 
-        private static T AssignNodeId<T>( T node )
+        private static string AllocateNodeId()
+        {
+            return Interlocked.Increment( ref _nextNodeId ).ToString();
+        }
+
+        private static T AssignNodeId<T>( T node, string nodeId )
             where T : SyntaxNode
         {
             if ( node is EventFieldDeclarationSyntax eventFieldDecl )
             {
                 var declarator = eventFieldDecl.Declaration.Variables.Single();
-                declarator = AssignNodeId( declarator );
+                declarator = AssignNodeId( declarator, nodeId );
 
                 return (T) (SyntaxNode) eventFieldDecl
                     .WithDeclaration( eventFieldDecl.Declaration.WithVariables( SeparatedList( new[] { declarator } ) ) );
@@ -42,9 +46,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                     return node;
                 }
 
-                var id = Interlocked.Increment( ref _nextNodeId ).ToString();
-
-                return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
+                return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, nodeId ) );
             }
         }
 
@@ -88,40 +90,45 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
         }
 
         /// <summary>
-        /// Rewrites method bodies, replacing call to pseudo method called "annotate" with linker annotation.
+        /// Catalogues all transformations defined by [Pseudo] attributes and removes them from syntax trees. 
+        /// Also marks non-pseudo nodes with IDs, which are later used to create insert positions.
         /// </summary>
         private sealed class TestRewriter : SafeSyntaxRewriter
         {
-            private readonly List<AspectLayerId> _orderedAspectLayers;
-            private readonly List<ITransformation> _observableTransformations;
-            private readonly List<ITransformation> _replacedTransformations;
-            private readonly List<ITransformation> _nonObservableTransformations;
+            private readonly List<AspectLayerId> _aspectLayers;
+            private readonly Dictionary<AspectLayerId, int> _aspectLayerOrder;
 
-            public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
+            public IReadOnlyList<AspectLayerId> OrderedAspectLayers =>
+                this._aspectLayers.ToOrderedList( al =>
+                {
+                    if ( this._aspectLayerOrder.TryGetValue( al, out var order ) )
+                    {
+                        return order;
+                    }
 
-            public IReadOnlyList<ITransformation> ReplacedTransformations => this._replacedTransformations;
-
-            public IReadOnlyList<ITransformation> NonObservableTransformations => this._nonObservableTransformations;
-
-            public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
+                    return int.MaxValue;
+                } );
 
             public ProjectServiceProvider ServiceProvider { get; }
 
-            public CompilationContext CompilationContext { get; }
+            public CompilationContext InputCompilation { get; }
 
-            public TestRewriter( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+            public LinkerTestInputBuilder Builder { get; }
+
+            public TestRewriter( in ProjectServiceProvider serviceProvider, LinkerTestInputBuilder builder, CompilationContext inputCompilation )
             {
-                this.CompilationContext = compilationContext;
-                this._orderedAspectLayers = new List<AspectLayerId>();
-                this._observableTransformations = new List<ITransformation>();
-                this._replacedTransformations = new List<ITransformation>();
-                this._nonObservableTransformations = new List<ITransformation>();
+                this.Builder = builder;
+                this.InputCompilation = inputCompilation;
+
+                this._aspectLayers = new List<AspectLayerId>();
+                this._aspectLayerOrder = new Dictionary<AspectLayerId, int>();
 
                 this.ServiceProvider = serviceProvider;
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
             {
+                // This removes the static using of linker helpers.
                 if ( !node.StaticKeyword.IsMissing && StringComparer.Ordinal.Equals( node.Name?.ToString(), typeof(Api).FullName ) )
                 {
                     return null;
@@ -132,56 +139,46 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                if ( HasLayerOrderAttribute( node ) )
-                {
-                    node = (ClassDeclarationSyntax) this.ProcessLayerOrderAttributeNode( node ).AssertNotNull();
-                }
-
                 var typeRewriter = new TestTypeRewriter( this );
 
-                var ret = typeRewriter.VisitClassDeclaration( node );
+                var newNode = (ClassDeclarationSyntax) typeRewriter.VisitClassDeclaration( node );
 
-                this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
-                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
-                this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
+                if ( HasLayerOrderAttribute( node ) )
+                {
+                    newNode = (ClassDeclarationSyntax) this.ProcessLayerOrderAttributeNode( newNode ).AssertNotNull();
+                }
 
-                return ret;
+                return newNode;
             }
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                if ( HasLayerOrderAttribute( node ) )
-                {
-                    node = (RecordDeclarationSyntax) this.ProcessLayerOrderAttributeNode( node ).AssertNotNull();
-                }
 
                 var typeRewriter = new TestTypeRewriter( this );
 
-                var ret = typeRewriter.VisitRecordDeclaration( node );
+                var newNode = (RecordDeclarationSyntax) typeRewriter.VisitRecordDeclaration( node );
 
-                this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
-                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
-                this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
+                if ( HasLayerOrderAttribute( node ) )
+                {
+                    newNode = (RecordDeclarationSyntax) this.ProcessLayerOrderAttributeNode( newNode ).AssertNotNull();
+                }
 
-                return ret;
+                return newNode;
             }
 
             public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
             {
-                if ( HasLayerOrderAttribute( node ) )
-                {
-                    node = (StructDeclarationSyntax) this.ProcessLayerOrderAttributeNode( node ).AssertNotNull();
-                }
 
                 var typeRewriter = new TestTypeRewriter( this );
 
-                var ret = typeRewriter.VisitStructDeclaration( node );
+                var newNode = (StructDeclarationSyntax) typeRewriter.VisitStructDeclaration( node );
 
-                this._observableTransformations.AddRange( typeRewriter.ObservableTransformations );
-                this._replacedTransformations.AddRange( typeRewriter.ReplacedTransformations );
-                this._nonObservableTransformations.AddRange( typeRewriter.NonObservableTransformations );
+                if ( HasLayerOrderAttribute( node ) )
+                {
+                    newNode = (StructDeclarationSyntax) this.ProcessLayerOrderAttributeNode( newNode ).AssertNotNull();
+                }
 
-                return ret;
+                return newNode;
             }
 
             private static bool HasLayerOrderAttribute( TypeDeclarationSyntax node )
@@ -189,24 +186,34 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString() == "PseudoLayerOrder" );
             }
 
-            public AspectLayerId GetOrAddAspectLayer( string aspectName, string? layerName )
+            public AspectLayerId GetOrAddAspectLayer( string aspectName, string? layerName, int? order = null )
             {
-                if ( !this._orderedAspectLayers.Any( x => x.AspectName == aspectName && x.LayerName == layerName ) )
+                AspectLayerId result;
+
+                if ( !this._aspectLayers.Any( x => x.AspectName == aspectName && x.LayerName == layerName ) )
                 {
                     var newLayer = new AspectLayerId( aspectName, layerName );
-                    this._orderedAspectLayers.Add( newLayer );
+                    this._aspectLayers.Add( newLayer );
 
-                    return newLayer;
+                    result = newLayer;
                 }
                 else
                 {
-                    return this._orderedAspectLayers.Single( x => x.AspectName == aspectName && x.LayerName == layerName );
+                    result = this._aspectLayers.Single( x => x.AspectName == aspectName && x.LayerName == layerName );
                 }
+
+                if ( order != null )
+                {
+                    this._aspectLayerOrder[result] = order.Value;
+                }
+
+                return result;
             }
 
             private TypeDeclarationSyntax ProcessLayerOrderAttributeNode( TypeDeclarationSyntax node )
             {
                 var newAttributeLists = new List<AttributeListSyntax>();
+                int order = 0;
 
                 foreach ( var attributeList in node.AttributeLists )
                 {
@@ -229,7 +236,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                                 layerName = attribute.ArgumentList.Arguments[1].ToString().Trim( '\"' );
                             }
 
-                            this.GetOrAddAspectLayer( aspectName, layerName );
+                            this.GetOrAddAspectLayer( aspectName, layerName, order++ );
                         }
                         else
                         {
