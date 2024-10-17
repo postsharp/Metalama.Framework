@@ -92,8 +92,8 @@ class C<T>
             Assert.Same( builtPromotedField.OverridingProperty.OriginalField, builtPromotedField );
 
             // Get generic instances.
-            var genericField = field.ForTypeInstance( field.DeclaringType.WithTypeArguments( typeof(int) ) );
-            var genericPromotedField = builtPromotedField.ForTypeInstance( builtPromotedField.DeclaringType.WithTypeArguments( typeof(int) ) );
+            var genericField = field.ForTypeInstance( field.DeclaringType.MakeGenericInstance( typeof(int) ) );
+            var genericPromotedField = builtPromotedField.ForTypeInstance( builtPromotedField.DeclaringType.MakeGenericInstance( typeof(int) ) );
 
             // Assertions on declarations.
             var genericFieldAfter = genericField.ForCompilation( compilation );

@@ -6,13 +6,14 @@ using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
-using Metalama.Framework.Engine.CodeModel.Source.Types;
+using Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Factories;
@@ -452,5 +453,44 @@ public partial class DeclarationFactory
 
             return this.GetAssembly( assemblySymbol );
         }
+    }
+
+    internal IArrayType MakeArrayType( ITypeSymbol elementType, int rank )
+        => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( elementType, rank ) );
+
+    internal IPointerType MakePointerType( ITypeSymbol pointedType )
+        => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( pointedType ) );
+
+    internal IType MakeNullableType<T>( T type, bool isNullable )
+        where T : IType, ISymbolBasedCompilationElement
+    {
+        var typeSymbol = (ITypeSymbol) type.Symbol;
+
+        if ( type.IsNullable == isNullable )
+        {
+            return type;
+        }
+
+        ITypeSymbol newTypeSymbol;
+
+        if ( type.IsReferenceType ?? true )
+        {
+            newTypeSymbol = typeSymbol
+                .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
+        }
+        else
+        {
+            if ( isNullable )
+            {
+                newTypeSymbol = this._compilationModel.RoslynCompilation.GetSpecialType( RoslynSpecialType.System_Nullable_T )
+                    .Construct( typeSymbol );
+            }
+            else
+            {
+                return ((INamedType) type).TypeArguments[0];
+            }
+        }
+
+        return this.GetIType( newTypeSymbol );
     }
 }

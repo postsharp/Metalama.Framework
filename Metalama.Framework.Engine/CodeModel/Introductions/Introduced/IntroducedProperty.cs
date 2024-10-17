@@ -18,7 +18,9 @@ internal class IntroducedProperty : IntroducedPropertyOrIndexer, IPropertyImpl
 {
     public PropertyBuilderData PropertyBuilderData { get; }
 
-    public IntroducedProperty( PropertyBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public IntroducedProperty( PropertyBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base(
+        compilation,
+        genericContext )
     {
         this.PropertyBuilderData = builderData;
     }
@@ -46,7 +48,7 @@ internal class IntroducedProperty : IntroducedPropertyOrIndexer, IPropertyImpl
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     [Memo]
-    private IFullRef<IProperty> Ref => this.RefFactory.FromBuilt<IProperty>( this );
+    private IFullRef<IProperty> Ref => this.RefFactory.FromIntroducedDeclaration<IProperty>( this );
 
     IRef<IProperty> IProperty.ToRef() => this.Ref;
 

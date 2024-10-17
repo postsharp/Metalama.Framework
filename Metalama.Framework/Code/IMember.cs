@@ -49,5 +49,7 @@ namespace Metalama.Framework.Code
         new IMember Definition { get; }
 
         new IRef<IMember> ToRef();
+        
+        IMember? OverriddenMember { get; }
     }
 }

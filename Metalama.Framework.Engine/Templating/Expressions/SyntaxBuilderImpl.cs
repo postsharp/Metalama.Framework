@@ -157,7 +157,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
                 ? SyntaxFactory.DefaultExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) )
                 : SyntaxFactoryEx.Null;
 
-            type = this._compilation.Factory.GetSpecialType( SpecialType.String ).ToNullableType();
+            type = this._compilation.Factory.GetSpecialType( SpecialType.String ).ToNullable();
         }
         else
         {
@@ -224,7 +224,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
 
     public IExpression NullExpression( IType? type )
-        => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullableType() ?? this._targetTypedExpressionType );
+        => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullable() ?? this._targetTypedExpressionType );
 
     public IExpression DefaultExpression( IType? type )
     {

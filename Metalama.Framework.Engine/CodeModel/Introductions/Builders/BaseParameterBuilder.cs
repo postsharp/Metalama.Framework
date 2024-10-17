@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 
@@ -17,6 +16,8 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl
 {
+    public IntroducedRef<IParameter> Ref { get; }
+
     public abstract string Name { get; set; }
 
     public abstract IType Type { get; set; }
@@ -35,11 +36,14 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public abstract bool IsReturnParameter { get; }
 
-    IRef<IParameter> IParameter.ToRef() => this.Immutable.ToRef();
+    IRef<IParameter> IParameter.ToRef() => this.Ref;
 
     public sealed override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
-    protected BaseParameterBuilder( AspectLayerInstance aspectLayerInstance ) : base( aspectLayerInstance ) { }
+    protected BaseParameterBuilder( CompilationModel compilation, AspectLayerInstance aspectLayerInstance ) : base( aspectLayerInstance )
+    {
+        this.Ref = new IntroducedRef<IParameter>( compilation.RefFactory );
+    }
 
     bool IExpression.IsAssignable => true;
 
@@ -53,10 +57,14 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
                 ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                 true ) );
 
-    [Memo]
-    public ParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new ParameterBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+    }
+
+    public ParameterBuilderData BuilderData => (ParameterBuilderData) this.Ref.BuilderData;
 
     public override bool IsDesignTimeObservable => true;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 }

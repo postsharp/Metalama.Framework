@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public override bool IsAsync => false;
 
-        public IMember? OverriddenMember => null;
+        public override IMember? OverriddenMember => null;
 
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 

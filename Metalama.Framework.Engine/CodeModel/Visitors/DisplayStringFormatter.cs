@@ -466,4 +466,6 @@ internal class DisplayStringFormatter : CompilationElementVisitor
     }
 
     protected override void VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => this.Append( "<function pointer>" );
+
+    protected override void VisitNull() => this.Append( "<uninitialized>" );
 }

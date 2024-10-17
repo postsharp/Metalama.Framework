@@ -11,5 +11,5 @@ internal interface ISdkCompilation : ICompilation
 
     SemanticModel GetCachedSemanticModel( SyntaxTree syntaxTree );
 
-    ISdkDeclarationFactory Factory { get; }
+    new ISdkDeclarationFactory Factory { get; }
 }

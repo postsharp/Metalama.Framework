@@ -214,7 +214,8 @@ namespace Metalama.Framework.Aspects
         /// <seealso cref="ExpressionFactory.CastTo(Metalama.Framework.Code.IExpression,Metalama.Framework.Code.IType)"/>
         [TemplateKeyword]
         [return: NotNullIfNotNull( nameof(value) )]
-        public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).Factory.Cast( type, (object?) value );
+        [CompileTime( isTemplateOnly: true )]
+        public static dynamic? Cast( IType type, dynamic? value ) => ExpressionFactory.CastTo( ExpressionFactory.Capture( (object?) value ), type ).Value;
 
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the specified type.

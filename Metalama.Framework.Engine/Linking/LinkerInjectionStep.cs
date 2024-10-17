@@ -286,7 +286,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
             attributeBuilder.Freeze();
 
-            attributes.Add( attributeBuilder.Immutable );
+            attributes.Add( attributeBuilder.BuilderData );
         }
 #pragma warning restore CA1307
 
@@ -627,7 +627,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             case IPropertyOrIndexer propertyOrIndexer:
                 {
                     var insertedStatements = GetInsertedStatements();
-                    
+
                     // Note that we are doing cross-compilation comparisons here below.
 
                     if ( propertyOrIndexer.GetMethod != null )

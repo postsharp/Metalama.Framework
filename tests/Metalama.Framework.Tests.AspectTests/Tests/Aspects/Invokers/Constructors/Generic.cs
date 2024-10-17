@@ -14,7 +14,7 @@ public class InvokerAspect : MethodAspect
             new
             {
                 target = builder.Target.DeclaringType!.Constructors.Single(),
-                target2 = builder.Target.DeclaringType!.WithTypeArguments( typeof(int) ).Constructors.Single()
+                target2 = builder.Target.DeclaringType!.MakeGenericInstance( typeof(int) ).Constructors.Single()
             } );
     }
 

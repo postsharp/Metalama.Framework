@@ -14,7 +14,7 @@ public class Aspect : TypeAspect
             {
                 var typeParameter = methodBuilder.AddTypeParameter( "T" );
                 typeParameter.TypeKindConstraint = TypeKindConstraint.Struct;
-                var nullableTypeParameter = typeParameter.ToNullableType();
+                var nullableTypeParameter =  typeParameter.ToNullable();
                 methodBuilder.AddParameter( "arg", nullableTypeParameter );
             } );
     }

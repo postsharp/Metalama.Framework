@@ -7,7 +7,9 @@ using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
@@ -19,7 +21,22 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
 {
     private readonly GenericContext _genericContext; // Gives the type arguments for the builder.
 
-    public DeclarationBuilderData BuilderData { get; }
+    // We use a StrongBox because:
+    // (1) the DeclarationBuilderData may be assigned after the constructor is called, typically just after DeclarationBuilde.Freeze.
+    // (2) in the meantime, a copy of this reference may have been taken with the WithGenericContext method.
+    private readonly StrongBox<DeclarationBuilderData> _builderData;
+
+    public DeclarationBuilderData BuilderData
+    {
+        get => this._builderData.Value ?? throw new InvalidOperationException( "The BuilderData property has not been set." );
+
+        set
+        {
+            Invariant.Assert( this._builderData.Value == null );
+            CheckBuilderData( value );
+            this._builderData.Value = value;
+        }
+    }
 
     public IFullRef? ReplacedDeclaration
         => this.BuilderData switch
@@ -29,21 +46,47 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
             _ => null
         };
 
-    public IntroducedRef( DeclarationBuilderData builder, RefFactory refFactory, GenericContext? genericContext = null ) : base( refFactory )
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IntroducedRef{TInterface}"/> class when the <see cref="DeclarationBuilderData"/>
+    /// is already known.
+    /// </summary>
+    public IntroducedRef( DeclarationBuilderData builderData, RefFactory refFactory, GenericContext? genericContext = null ) : base( refFactory )
+    {
+        CheckBuilderData( builderData );
+        this._builderData = new StrongBox<DeclarationBuilderData>( builderData );
+        this._genericContext = genericContext ?? GenericContext.Empty;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IntroducedRef{TInterface}"/> class when the <see cref="DeclarationBuilderData"/>
+    /// has not been created yet.
+    /// </summary>
+    /// <param name="refFactory"></param>
+    public IntroducedRef( RefFactory refFactory ) : base( refFactory )
+    {
+        this._builderData = new StrongBox<DeclarationBuilderData>();
+        this._genericContext = GenericContext.Empty;
+    }
+
+    private IntroducedRef( IntroducedRef<T> prototype, GenericContext? genericContext ) : base( prototype.RefFactory )
+    {
+        this._builderData = prototype._builderData;
+        this._genericContext = genericContext ?? GenericContext.Empty;
+    }
+
+    [Conditional( "DEBUG" )]
+    private static void CheckBuilderData( DeclarationBuilderData builderData )
     {
         // Type parameter must match the builder type.
         Invariant.Assert(
-            builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Contains( typeof(T) ),
-            $"The interface type was expected to be of type {builder.DeclarationKind.GetPossibleDeclarationInterfaceTypes()} but was {typeof(T)}." );
+            builderData.DeclarationKind.GetPossibleDeclarationInterfaceTypes().Contains( typeof(T) ),
+            $"The interface type was expected to be of type {string.Join( " or", builderData.DeclarationKind.GetPossibleDeclarationInterfaceTypes().SelectAsReadOnlyCollection( t => t.Name ) )} but was {typeof(T)}." );
 
         // Constructor replacements must be resolved upstream, but this invariant can no longer be enforced here because the reference
         // is built when the BuilderData is being built.
 
         // References to promoted fields must be a SymbolRef to the IFieldSymbol if it is an IRef<IField>.
-        Invariant.Assert( !(typeof(T) == typeof(IField) && builder is PropertyBuilderData) );
-
-        this.BuilderData = builder;
-        this._genericContext = genericContext ?? GenericContext.Empty;
+        Invariant.Assert( !(typeof(T) == typeof(IField) && builderData is PropertyBuilderData) );
     }
 
     public override bool IsDefinition => this._genericContext.IsEmptyOrIdentity;
@@ -51,7 +94,7 @@ internal sealed partial class IntroducedRef<T> : FullRef<T>, IIntroducedRef
     public override IFullRef<T> DefinitionRef => this.IsDefinition ? this : (IFullRef<T>) this.BuilderData.ToFullRef();
 
     public override FullRef<T> WithGenericContext( GenericContext genericContext )
-        => genericContext.IsEmptyOrIdentity ? this : new IntroducedRef<T>( this.BuilderData, this.RefFactory, genericContext );
+        => genericContext.IsEmptyOrIdentity ? this : new IntroducedRef<T>( this, genericContext );
 
     public override IFullRef? ContainingDeclaration => this.BuilderData.ContainingDeclaration;
 

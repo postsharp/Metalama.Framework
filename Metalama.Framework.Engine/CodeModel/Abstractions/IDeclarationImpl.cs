@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -8,7 +9,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Abstractions;
 
-internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, ICompilationElementImpl
+internal interface IDeclarationImpl : ISdkDeclaration, ICompilationElementImpl, IMeasurableInternal
 {
     /// <summary>
     /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxReference"/> syntaxes that declare the current declaration.
@@ -28,6 +29,6 @@ internal interface IDeclarationImpl : ISdkDeclaration, IDeclarationInternal, ICo
     SyntaxTree? PrimarySyntaxTree { get; }
 
     IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default );
-    
+
     DeclarationImplementationKind ImplementationKind { get; }
 }

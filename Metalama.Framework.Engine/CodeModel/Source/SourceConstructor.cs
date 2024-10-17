@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         [Memo]
         public bool IsPrimary => this.MethodSymbol.IsPrimaryConstructor();
 
-        public IMember? OverriddenMember => null;
+        public override IMember? OverriddenMember => null;
 
         public IConstructor? GetBaseConstructor()
         {

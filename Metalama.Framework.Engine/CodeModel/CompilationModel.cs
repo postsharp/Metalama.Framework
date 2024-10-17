@@ -411,7 +411,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
-        IDeclarationFactory ICompilationInternal.Factory => this.Factory;
+        IDeclarationFactory ICompilation.Factory => this.Factory;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 

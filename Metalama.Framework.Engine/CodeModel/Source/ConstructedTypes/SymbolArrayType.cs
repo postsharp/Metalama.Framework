@@ -10,9 +10,9 @@ using Microsoft.CodeAnalysis;
 using System;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source.Types
+namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
 {
-    internal sealed class SymbolArrayType : SymbolType<IArrayTypeSymbol>, IArrayType
+    internal sealed class SymbolArrayType : SymbolConstructedType<IArrayTypeSymbol>, IArrayType
     {
         internal SymbolArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation, GenericContext? genericContext ) : base(
             typeSymbol,
@@ -53,6 +53,10 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
         public IType ElementType => this.Compilation.Factory.GetIType( this.Symbol.ElementType, this.GenericContextForSymbolMapping );
 
         public int Rank => this.Symbol.Rank;
+
+        public new IArrayType ToNullable() => (IArrayType) this.Compilation.Factory.MakeNullableType( this, true );
+
+        public new IArrayType ToNonNullable() => (IArrayType) this.Compilation.Factory.MakeNullableType( this, false );
 
         public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }

@@ -151,7 +151,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                     return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self, context );
                 }
             },
-            (this.Options & InvokerOptions.NullConditional) != 0 ? this.Member.ReturnType.ToNullableType() : this.Member.ReturnType );
+            (this.Options & InvokerOptions.NullConditional) != 0 ? this.Member.ReturnType.ToNullable() : this.Member.ReturnType );
     }
 
     private ExpressionSyntax CreateInvocationExpression(

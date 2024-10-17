@@ -85,10 +85,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal abstract GenericContext GenericContext { get; }
 
-        ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
-
-        protected virtual ISymbol? GetSymbol() => null;
-
         public T GetMetric<T>()
             where T : IMetric
             => this.Compilation.MetricManager.GetMetric<T>( this );

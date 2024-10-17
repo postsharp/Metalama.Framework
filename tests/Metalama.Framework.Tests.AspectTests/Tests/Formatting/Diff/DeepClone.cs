@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Formatting.Diff
                 baseCall = (IExpression) meta.Target.Method.Invoke()!;
             }
 
-            var clone = meta.Cast( meta.Target.Type.ToNonNullableType(), baseCall )!;
+            var clone = meta.Cast( meta.Target.Type.ToNonNullable(), baseCall )!;
 
             // Select clonable fields.
             var clonableFields =

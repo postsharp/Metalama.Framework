@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
@@ -15,16 +16,16 @@ namespace Metalama.Framework.Engine.CodeModel
     [PublicAPI]
     public static class SymbolExtensions
     {
-        public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;
+        public static ISymbol? GetSymbol( this ICompilationElement declaration ) => (declaration as ISymbolBasedCompilationElement)?.Symbol;
 
         public static ISymbol? GetSymbol( this IRef declaration, Compilation compilation, bool ignoreAssemblyKey = false )
             => ((ISdkRef) declaration).GetSymbol( compilation, ignoreAssemblyKey );
 
-        private static T? GetSymbol<T>( this IDeclaration declaration )
+        private static T? GetSymbol<T>( this ICompilationElement declaration )
             where T : ISymbol
-            => (T?) ((ISdkDeclaration) declaration).Symbol;
+            => (T?) (declaration as ISymbolBasedCompilationElement)?.Symbol;
 
-        public static ITypeSymbol? GetSymbol( this IType type ) => ((ISdkType) type).TypeSymbol;
+        public static ITypeSymbol? GetSymbol( this IType type ) => type.GetSymbol<ITypeSymbol>();
 
         public static INamedTypeSymbol? GetSymbol( this INamedType namedType ) => namedType.GetSymbol<INamedTypeSymbol>();
 
@@ -90,7 +91,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public static string ToDebugString( this ISymbol symbol )
             => symbol switch
             {
-                IParameterSymbol parameter => parameter.ContainingSymbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ) + "/" + parameter.Name,
+                IParameterSymbol parameter => parameter.ContainingSymbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ) + "/"
+                    + parameter.Name,
                 _ => symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )
             };
 

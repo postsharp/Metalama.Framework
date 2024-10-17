@@ -98,6 +98,8 @@ internal abstract class PseudoAccessor : IMethodImpl
 
     public IRef<IMethod> ToRef() => this.Ref;
 
+    IMethod IMethod.MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
+
     IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
 
     IRef<IMember> IMember.ToRef() => this.Ref;
@@ -159,9 +161,7 @@ internal abstract class PseudoAccessor : IMethodImpl
         => throw new NotSupportedException( $"'{this}' is implicitly defined  declaration and cannot be represented as a System.Reflection object." );
 
     IHasAccessors IMethod.DeclaringMember => this.DeclaringMember;
-
-    public ISymbol? Symbol => null;
-
+    
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
     bool IDeclarationImpl.CanBeInherited => false;
@@ -175,9 +175,7 @@ internal abstract class PseudoAccessor : IMethodImpl
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
         => newCompilation.Factory.Translate( this.DeclaringMember, genericContext ).AssertNotNull().GetAccessor( this.MethodKind );
-
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
-
+    
     public IMember? OverriddenMember => ((IHasAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 
     public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
@@ -200,5 +198,5 @@ internal abstract class PseudoAccessor : IMethodImpl
 
     public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
 
-    public GenericContext? GenericContextForSymbolMapping => ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
+    public GenericContext? GenericContextForSymbolMapping => (GenericContext?) ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
 }

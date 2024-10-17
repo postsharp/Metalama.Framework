@@ -6,13 +6,17 @@ using Metalama.Framework.Engine.CodeModel.Visitors;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source.Types
+namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
 {
-    internal sealed class DynamicType : SymbolType<IDynamicTypeSymbol>, IDynamicType
+    internal sealed class DynamicType : SymbolConstructedType<IDynamicTypeSymbol>, IDynamicType
     {
         internal DynamicType( IDynamicTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation, null ) { }
 
         public override TypeKind TypeKind => TypeKind.Dynamic;
+
+        public new IDynamicType ToNullable() => (IDynamicType) this.Compilation.Factory.MakeNullableType( this, true );
+
+        public new IDynamicType ToNonNullable() => (IDynamicType) this.Compilation.Factory.MakeNullableType( this, false );
 
         public override IType Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }

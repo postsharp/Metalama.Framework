@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         protected override IMemberOrNamedType GetDefinitionMemberOrNamedType() => this.Definition;
 
-        public IMember? OverriddenMember => this.OverriddenProperty;
+        public override IMember? OverriddenMember => this.OverriddenProperty;
 
         [Memo]
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations

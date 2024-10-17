@@ -19,6 +19,8 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 {
+    public IntroducedRef<IAttribute> Ref { get; }
+
     internal IAttributeData AttributeConstruction { get; }
 
     public AttributeBuilder( AspectLayerInstance aspectLayerInstance, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base(
@@ -26,6 +28,7 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     {
         this.AttributeConstruction = attributeConstruction;
         this.ContainingDeclaration = containingDeclaration;
+        this.Ref = new IntroducedRef<IAttribute>( this.Compilation.RefFactory );
     }
 
     string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
@@ -68,10 +71,14 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
 
-    [Memo]
-    public AttributeBuilderData Immutable => new( this, this.ContainingDeclaration.ToFullRef() );
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new AttributeBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+    }
 
-    public new IRef<IAttribute> ToRef() => this.Immutable.ToRef();
+    public AttributeBuilderData BuilderData => (AttributeBuilderData) this.Ref.BuilderData;
+
+    public new IRef<IAttribute> ToRef() => this.Ref;
 
     protected override IFullRef<IDeclaration> ToFullDeclarationRef() => throw new NotSupportedException();
 }

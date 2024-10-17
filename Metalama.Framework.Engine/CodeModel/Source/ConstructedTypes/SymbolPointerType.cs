@@ -10,9 +10,9 @@ using Microsoft.CodeAnalysis;
 using System;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source.Types
+namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
 {
-    internal sealed class SymbolPointerType : SymbolType<IPointerTypeSymbol>, IPointerType
+    internal sealed class SymbolPointerType : SymbolConstructedType<IPointerTypeSymbol>, IPointerType
     {
         internal SymbolPointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation, GenericContext? genericContext ) : base(
             typeSymbol,

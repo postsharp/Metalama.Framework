@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -21,9 +20,24 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 {
     public ParameterBuilderList Parameters { get; } = [];
 
-    public override void Freeze()
+    public IntroducedRef<IIndexer> Ref { get; }
+
+    public IndexerBuilder(
+        AspectLayerInstance aspectLayerInstance,
+        INamedType targetType,
+        bool hasGetter,
+        bool hasSetter )
+        : base( aspectLayerInstance, targetType, "this[]", hasGetter, hasSetter, false, false )
     {
-        base.Freeze();
+        Invariant.Assert( hasGetter || hasSetter );
+
+        this.HasInitOnlySetter = false;
+        this.Ref = new IntroducedRef<IIndexer>( this.Compilation.RefFactory );
+    }
+
+    protected override void FreezeChildren()
+    {
+        base.FreezeChildren();
 
         foreach ( var p in this.Parameters )
         {
@@ -86,18 +100,6 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public override IMember? OverriddenMember => this.OverriddenIndexer;
 
-    public IndexerBuilder(
-        AspectLayerInstance aspectLayerInstance,
-        INamedType targetType,
-        bool hasGetter,
-        bool hasSetter )
-        : base( aspectLayerInstance, targetType, "this[]", hasGetter, hasSetter, false, false )
-    {
-        Invariant.Assert( hasGetter || hasSetter );
-
-        this.HasInitOnlySetter = false;
-    }
-
     public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = default )
     {
         this.CheckNotFrozen();
@@ -121,12 +123,16 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public void SetExplicitInterfaceImplementation( IIndexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = [interfaceIndexer];
 
-    public new IRef<IIndexer> ToRef() => this.Immutable.ToRef();
+    public new IRef<IIndexer> ToRef() => this.Ref;
 
-    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Ref;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
-    [Memo]
-    public IndexerBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new IndexerBuilderData( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
+    }
+
+    public IndexerBuilderData BuilderData => (IndexerBuilderData) this.Ref.BuilderData;
 }

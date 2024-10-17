@@ -14,29 +14,34 @@ internal static class IntroduceMemberTransformationFactory
     {
         Invariant.Assert( propertyBuilder.OriginalField == null );
 
-        return new IntroducePropertyTransformation( propertyBuilder.AspectLayerInstance, propertyBuilder.Immutable, template );
+        return new IntroducePropertyTransformation( propertyBuilder.AspectLayerInstance, propertyBuilder.BuilderData, template );
     }
 
     public static ITransformation CreateTransformation( this AttributeBuilder attributeBuilder )
-        => new IntroduceAttributeTransformation( attributeBuilder.AspectLayerInstance, attributeBuilder.Immutable );
+        => new IntroduceAttributeTransformation( attributeBuilder.AspectLayerInstance, attributeBuilder.BuilderData );
 
     public static IInjectMemberTransformation CreateTransformation( this ConstructorBuilder constructorBuilder )
         => constructorBuilder.IsStatic
-            ? new IntroduceStaticConstructorTransformation( constructorBuilder.AspectLayerInstance, constructorBuilder.Immutable )
-            : new IntroduceConstructorTransformation( constructorBuilder.AspectLayerInstance, constructorBuilder.Immutable );
+            ? new IntroduceStaticConstructorTransformation( constructorBuilder.AspectLayerInstance, constructorBuilder.BuilderData )
+            : new IntroduceConstructorTransformation( constructorBuilder.AspectLayerInstance, constructorBuilder.BuilderData );
 
     public static IInjectMemberTransformation CreateTransformation( this EventBuilder eventBuilder, TemplateMember<IEvent>? template = null )
-        => new IntroduceEventTransformation( eventBuilder.AspectLayerInstance, eventBuilder.Immutable, template );
+        => new IntroduceEventTransformation( eventBuilder.AspectLayerInstance, eventBuilder.BuilderData, template );
 
     public static IInjectMemberTransformation CreateTransformation( this FieldBuilder fieldBuilder, TemplateMember<IField>? template = null )
-        => new IntroduceFieldTransformation( fieldBuilder.AspectLayerInstance, fieldBuilder.Immutable, template );
+        => new IntroduceFieldTransformation( fieldBuilder.AspectLayerInstance, fieldBuilder.BuilderData, template );
 
     public static IInjectMemberTransformation CreateTransformation( this IndexerBuilder indexerBuilder )
-        => new IntroduceIndexerTransformation( indexerBuilder.AspectLayerInstance, indexerBuilder.Immutable );
+        => new IntroduceIndexerTransformation( indexerBuilder.AspectLayerInstance, indexerBuilder.BuilderData );
 
     public static IntroduceNamedTypeTransformation CreateTransformation( this NamedTypeBuilder namedTypeBuilder )
-        => new( namedTypeBuilder.AspectLayerInstance, namedTypeBuilder.Immutable );
+        => new( namedTypeBuilder.AspectLayerInstance, namedTypeBuilder.BuilderData );
 
     public static IntroduceNamespaceTransformation CreateTransformation( this NamespaceBuilder namespaceBuilder )
-        => new( namespaceBuilder.AspectLayerInstance, namespaceBuilder.Immutable );
+        => new( namespaceBuilder.AspectLayerInstance, namespaceBuilder.BuilderData );
+
+    public static IInjectMemberTransformation ToTransformation( this MethodBuilder methodBuilder )
+    {
+        return new IntroduceMethodTransformation( methodBuilder.AspectLayerInstance, methodBuilder.BuilderData );
+    }
 }

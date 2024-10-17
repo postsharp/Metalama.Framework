@@ -13,7 +13,7 @@ internal partial class AccessorBuilder
     {
         protected AccessorBuilder Accessor { get; }
 
-        protected ParameterBuilderBase( AccessorBuilder accessor, int index ) : base( accessor.AspectLayerInstance )
+        protected ParameterBuilderBase( AccessorBuilder accessor, int index ) : base( accessor.Compilation, accessor.AspectLayerInstance )
         {
             this.Accessor = accessor;
             this.Index = index;

@@ -18,7 +18,9 @@ internal sealed class IntroducedIndexer : IntroducedPropertyOrIndexer, IIndexerI
 {
     private readonly IndexerBuilderData _indexerBuilderData;
 
-    public IntroducedIndexer( IndexerBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base( compilation, genericContext )
+    public IntroducedIndexer( IndexerBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base(
+        compilation,
+        genericContext )
     {
         this._indexerBuilderData = builderData;
     }
@@ -50,7 +52,7 @@ internal sealed class IntroducedIndexer : IntroducedPropertyOrIndexer, IIndexerI
     protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
     [Memo]
-    private IFullRef<IIndexer> Ref => this.RefFactory.FromBuilt<IIndexer>( this );
+    private IFullRef<IIndexer> Ref => this.RefFactory.FromIntroducedDeclaration<IIndexer>( this );
 
     public IRef<IIndexer> ToRef() => this.Ref;
 

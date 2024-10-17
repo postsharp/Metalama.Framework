@@ -40,7 +40,7 @@ internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
     }
 
     [Memo]
-    public IParameter ReturnParameter => new PseudoMethodReturnParameter( this, this.MethodSymbol );
+    public IParameter ReturnParameter => new PseudoReturnParameter( this, this.MethodSymbol );
 
     [Memo]
     public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType, this.GenericContextForSymbolMapping );
@@ -86,7 +86,7 @@ internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
 
     public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
+    public IMethod MakeGenericInstance( IReadOnlyList<IType> typeArguments )
     {
         if ( typeArguments.Any( GenericContext.ReferencesAnyIntroducedType ) )
         {
@@ -151,7 +151,7 @@ internal sealed class SourceMethod : SourceMethodBase, IMethodImpl
 
     public override MethodBase ToMethodBase() => this.ToMethodInfo();
 
-    public IMember? OverriddenMember => this.OverriddenMethod;
+    public override IMember? OverriddenMember => this.OverriddenMethod;
 
     public bool IsCanonicalGenericInstance => ReferenceEquals( this.Symbol.OriginalDefinition, this.Symbol );
 

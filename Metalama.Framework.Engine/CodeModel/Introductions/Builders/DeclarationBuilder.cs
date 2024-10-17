@@ -111,11 +111,22 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
     {
         this.IsFrozen = true;
 
+        this.EnsureReferenceCreated();
+        this.FreezeChildren();
+        this.EnsureReferenceInitialized();
+    }
+
+    protected virtual void FreezeChildren()
+    {
         foreach ( var attribute in this.Attributes )
         {
             attribute.Freeze();
         }
     }
+
+    protected abstract void EnsureReferenceInitialized();
+
+    protected virtual void EnsureReferenceCreated() { }
 
     public SerializableDeclarationId ToSerializableId()
     {
@@ -130,8 +141,6 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
     public IRef<IDeclaration> ToRef() => this.ToFullDeclarationRef();
 
     protected abstract IFullRef<IDeclaration> ToFullDeclarationRef();
-
-    ISymbol? ISdkDeclaration.Symbol => null;
 
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences
         => ((IDeclarationImpl?) this.ContainingDeclaration)?.DeclaringSyntaxReferences ?? ImmutableArray<SyntaxReference>.Empty;

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -34,8 +35,6 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
     private readonly SourceNamedType _facade;
 
     private readonly INamedTypeSymbol _namedTypeSymbol;
-
-    ITypeSymbol ISdkType.TypeSymbol => this._namedTypeSymbol;
 
     public override ISymbol Symbol => this._namedTypeSymbol;
 
@@ -127,6 +126,16 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this._facade, otherType );
+
+    IArrayType IType.MakeArrayType( int rank ) => throw new NotImplementedException();
+
+    IPointerType IType.MakePointerType() => throw new NotImplementedException();
+
+    INamedType INamedType.ToNullable() => throw new NotImplementedException();
+
+    IType IType.ToNullable() => throw new NotImplementedException();
+
+    IType IType.ToNonNullable() => throw new NotImplementedException();
 
     public override MemberInfo ToMemberInfo() => this.ToType();
 
@@ -367,7 +376,7 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
+    public INamedType MakeGenericInstance( IReadOnlyList<IType> typeArguments )
     {
         if ( typeArguments.Any( GenericContext.ReferencesAnyIntroducedType ) )
         {

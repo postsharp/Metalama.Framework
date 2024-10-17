@@ -13,6 +13,14 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 {
+    public IntroducedRef<INamespace> Ref { get; }
+
+    public NamespaceBuilder( AspectLayerInstance aspectLayerInstance, INamespace containingNamespace, string name ) : base( aspectLayerInstance, name )
+    {
+        this.ContainingNamespace = containingNamespace;
+        this.Ref = new IntroducedRef<INamespace>( this.Compilation.RefFactory );
+    }
+
     public string FullName
         => !this.ContainingNamespace.AssertNotNull().IsGlobalNamespace
             ? $"{this.ContainingNamespace.FullName}.{this.Name}"
@@ -40,11 +48,6 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public override bool CanBeInherited => false;
 
-    public NamespaceBuilder( AspectLayerInstance aspectLayerInstance, INamespace containingNamespace, string name ) : base( aspectLayerInstance, name )
-    {
-        this.ContainingNamespace = containingNamespace;
-    }
-
     public override SyntaxTree? PrimarySyntaxTree => null;
 
     public INamespace? GetDescendant( string ns )
@@ -53,12 +56,16 @@ internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         return null;
     }
 
-    IRef<INamespace> INamespace.ToRef() => this.Immutable.ToRef();
+    IRef<INamespace> INamespace.ToRef() => this.Ref;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
-    [Memo]
-    public NamespaceBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.AssertNotNull().ToFullRef() );
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new NamespaceBuilderData( this, this.ContainingDeclaration.AssertNotNull().ToFullRef() );
+    }
+
+    public NamespaceBuilderData BuilderData => (NamespaceBuilderData) this.Ref.BuilderData;
 }

@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         IType IHasType.Type => this.Type;
 
-        public IMember? OverriddenMember => this.OverriddenEvent;
+        public override IMember? OverriddenMember => this.OverriddenEvent;
 
         [Memo]
         private IFullRef<IEvent> Ref => this.RefFactory.FromSymbolBasedDeclaration<IEvent>( this );

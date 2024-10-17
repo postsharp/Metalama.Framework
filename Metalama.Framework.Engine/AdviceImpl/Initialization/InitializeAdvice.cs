@@ -84,10 +84,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
             {
                 // Missing explicit ctor.
                 var builder =
-                    new ConstructorBuilder( this.AspectLayerInstance, ctor.DeclaringType )
-                    {
-                        ReplacedImplicitConstructor = ctor, Accessibility = Accessibility.Public
-                    };
+                    new ConstructorBuilder( this.AspectLayerInstance, ctor );
 
                 builder.Freeze();
                 context.AddTransformation( builder.CreateTransformation() );

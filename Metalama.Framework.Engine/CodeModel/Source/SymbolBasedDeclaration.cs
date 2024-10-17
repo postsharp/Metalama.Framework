@@ -32,6 +32,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public GenericContext? GenericContextForSymbolMapping { get; }
 
+        IGenericContext? ISymbolBasedCompilationElement.GenericContextForSymbolMapping => this.GenericContextForSymbolMapping;
+
         /// <summary>
         /// Gets a value indicating whether the <see cref="Symbol"/> property must be mapped with the <see cref="GenericContext"/>.
         /// Returns <c>false</c> is the symbol is already mapped.
@@ -47,8 +49,6 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => DisplayStringFormatter.Format( this, format, context );
-
-        protected override ISymbol GetSymbol() => this.Symbol;
 
         public override Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
 

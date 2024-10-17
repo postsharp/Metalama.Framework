@@ -59,7 +59,7 @@ internal sealed class SourceIndexer : SourcePropertyOrIndexer, IIndexerImpl
 
     public object SetValue( object? value, params object?[] args ) => new IndexerInvoker( this ).SetValue( value, args );
 
-    public IMember? OverriddenMember => this.OverriddenIndexer;
+    public override IMember? OverriddenMember => this.OverriddenIndexer;
 
     [Memo]
     public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations

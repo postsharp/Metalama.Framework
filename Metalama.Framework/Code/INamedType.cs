@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code.Collections;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
@@ -183,5 +184,11 @@ namespace Metalama.Framework.Code
         INamedType UnderlyingType { get; }
 
         new IRef<INamedType> ToRef();
+
+        new INamedType ToNullable();
+        
+        // Note that ToNonNullable, when called with Nullable<T>, can return an ITypeParameter and therefore cannot be cast to INamedType.
+
+        INamedType MakeGenericInstance( IReadOnlyList<IType> typeArguments );
     }
 }

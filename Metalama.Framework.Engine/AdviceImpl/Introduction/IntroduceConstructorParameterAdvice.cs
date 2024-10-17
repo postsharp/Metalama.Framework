@@ -79,10 +79,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
-            var constructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, constructor.DeclaringType )
-            {
-                ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
-            };
+            var constructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, constructor );
 
             constructorBuilder.Freeze();
 
@@ -104,7 +101,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         this._buildAction?.Invoke( parameterBuilder );
 
         parameterBuilder.Freeze();
-        var parameterBuilderData = parameterBuilder.Immutable;
+        var parameterBuilderData = parameterBuilder.BuilderData;
 
         context.AddTransformation( new IntroduceParameterTransformation( this.AspectLayerInstance, parameterBuilderData ) );
 
@@ -159,10 +156,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
-                    var derivedConstructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, chainedConstructor.DeclaringType )
-                    {
-                        ReplacedImplicitConstructor = chainedConstructor, Accessibility = Accessibility.Public
-                    };
+                    var derivedConstructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, chainedConstructor );
 
                     derivedConstructorBuilder.Freeze();
                     contextCopy.AddTransformation( derivedConstructorBuilder.CreateTransformation() );
@@ -200,7 +194,8 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
                         recursiveParameterBuilder.Freeze();
 
-                        contextCopy.AddTransformation( new IntroduceParameterTransformation( this.AspectLayerInstance, recursiveParameterBuilder.Immutable ) );
+                        contextCopy.AddTransformation(
+                            new IntroduceParameterTransformation( this.AspectLayerInstance, recursiveParameterBuilder.BuilderData ) );
 
                         var recursiveParameter = recursiveParameterBuilder;
 

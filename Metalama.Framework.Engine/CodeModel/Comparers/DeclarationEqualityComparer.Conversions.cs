@@ -358,7 +358,7 @@ internal partial class DeclarationEqualityComparer
 
         private static IEnumerable<INamedType> GetTypesParticipatingInUserDefinedConversion( IType type, bool includeBaseTypes )
         {
-            type = type.ToNonNullableType();
+            type = type.ToNonNullable();
 
             if ( type is ITypeParameter typeParameter )
             {
@@ -447,7 +447,7 @@ internal partial class DeclarationEqualityComparer
 
                         if ( right.IsNullableValueType() && IsValidNullableValueTypeArgument( convertsTo ) )
                         {
-                            convertsTo = convertsTo.ToNullableType();
+                            convertsTo = convertsTo.ToNullable();
                             liftingCount = 1;
                         }
 
@@ -457,14 +457,14 @@ internal partial class DeclarationEqualityComparer
                               && IsValidNullableValueTypeArgument( convertsFrom )
                               && (right.IsReferenceType == true || right.IsNullable == true) )
                     {
-                        var nullableFrom = convertsFrom.ToNullableType();
+                        var nullableFrom = convertsFrom.ToNullable();
                         var liftingCount = 1;
 
                         var nullableTo = convertsTo;
 
                         if ( IsValidNullableValueTypeArgument( nullableTo ) )
                         {
-                            nullableTo = nullableTo.ToNullableType();
+                            nullableTo = nullableTo.ToNullable();
                             liftingCount = 2;
                         }
 

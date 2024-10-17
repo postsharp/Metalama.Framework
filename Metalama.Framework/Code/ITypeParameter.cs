@@ -9,6 +9,7 @@ namespace Metalama.Framework.Code
         Type,
         Method
     }
+
     /// <summary>
     /// Represents a generic parameter of a method or type.
     /// </summary>
@@ -53,7 +54,11 @@ namespace Metalama.Framework.Code
         /// is a generic instance. If it is a generic definition, returns the current instance.
         /// </summary>
         IType ResolvedType { get; }
-        
+
         TypeParameterKind TypeParameterKind { get; }
+        
+        new ITypeParameter ToNonNullable();
+        
+        // Note that ToNullable, when called with T : struct, can return the INamedType Nullable<T> and therefore cannot be cast to an ITypeParameter.
     }
 }

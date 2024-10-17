@@ -18,7 +18,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndexer
+internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndexer, IFieldOrPropertyOrIndexerImpl
 {
     protected IPropertySymbol PropertySymbol { get; }
 
@@ -50,7 +50,7 @@ internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndex
         {
             // Generate a pseudo-setter for read-only automatic properties.
             { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() == true
-                => new PseudoSetter( (IFieldOrPropertyOrIndexerImpl) this, Accessibility.Private ),
+                => new PseudoSetter( this, Accessibility.Private ),
             { SetMethod: null } => null,
             _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod, this.GenericContextForSymbolMapping )
         };

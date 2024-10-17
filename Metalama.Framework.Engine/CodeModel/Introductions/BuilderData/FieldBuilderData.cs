@@ -36,7 +36,7 @@ internal class FieldBuilderData : MemberBuilderData
 
     public FieldBuilderData( FieldBuilder builder, IFullRef<INamedType> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new IntroducedRef<IField>( this, containingDeclaration.RefFactory );
+        this._ref = builder.Ref;
 
         this.Type = builder.Type.ToRef();
         this.Writeability = builder.Writeability;

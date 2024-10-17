@@ -23,6 +23,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         IRef<IMember> IMember.ToRef() => this.ToMemberRef();
 
+        public abstract IMember? OverriddenMember { get; }
+
         protected abstract IRef<IMember> ToMemberRef();
 
         public abstract bool IsAsync { get; }

@@ -329,7 +329,7 @@ class C
         // Add a field.
         var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
         parameterBuilder.Freeze();
-        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.Immutable ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.BuilderData ) );
 
         Assert.Single( constructor.Parameters );
     }
@@ -363,7 +363,7 @@ class C
             aspectLayerInstance );
 
         parameterBuilder.Freeze();
-        compilation.AddTransformation( new IntroduceParameterTransformation( aspectLayerInstance, parameterBuilder.Immutable ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( aspectLayerInstance, parameterBuilder.BuilderData ) );
 
         Assert.Single( constructor.Parameters );
     }

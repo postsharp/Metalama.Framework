@@ -3,12 +3,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -18,9 +17,25 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParameterBuilder, ISdkType
+internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParameterBuilder
 {
     private readonly List<IType> _typeConstraints = [];
+
+    public IntroducedRef<ITypeParameter> Ref { get; }
+
+    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.AspectLayerInstance, name )
+    {
+        this.ContainingDeclaration = containingMethod;
+        this.Index = index;
+        this.Ref = new IntroducedRef<ITypeParameter>( this.Compilation.RefFactory );
+    }
+
+    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.AspectLayerInstance, name )
+    {
+        this.ContainingDeclaration = containingType;
+        this.Index = index;
+        this.Ref = new IntroducedRef<ITypeParameter>( this.Compilation.RefFactory );
+    }
 
     public int Index { get; }
 
@@ -60,18 +75,6 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
-    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.AspectLayerInstance, name )
-    {
-        this.ContainingDeclaration = containingMethod;
-        this.Index = index;
-    }
-
-    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.AspectLayerInstance, name )
-    {
-        this.ContainingDeclaration = containingType;
-        this.Index = index;
-    }
-
     bool IType.Equals( SpecialType specialType ) => false;
 
     bool IEquatable<IType>.Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
@@ -79,9 +82,22 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
-    public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
+    // TODO: Type constructions can't be supported with the current model because the NamedTypeBuilder would need to be frozen,
+    // but when these methods would be used (in the build action), it is not frozen yet.
 
-    IRef<ITypeParameter> ITypeParameter.ToRef() => this.Immutable.ToRef();
+    public IArrayType MakeArrayType( int rank = 1 ) => throw new NotImplementedException();
+
+    public IPointerType MakePointerType() => throw new NotImplementedException();
+
+    public ITypeParameter ToNullable() => throw new NotImplementedException();
+
+    public ITypeParameter ToNonNullable() => throw new NotImplementedException();
+
+    IType IType.ToNullable() => this.ToNullable();
+
+    IType IType.ToNonNullable() => this.ToNonNullable();
+
+    IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 
     public IType ResolvedType => this;
 
@@ -92,11 +108,15 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
             DeclarationKind.Method => TypeParameterKind.Method,
             _ => throw new AssertionFailedException()
         };
-    
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
 
-    IRef<IType> IType.ToRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
-    [Memo]
-    public TypeParameterBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
+    IRef<IType> IType.ToRef() => this.Ref;
+
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new TypeParameterBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+    }
+
+    public TypeParameterBuilderData BuilderData => (TypeParameterBuilderData) this.Ref.BuilderData;
 }

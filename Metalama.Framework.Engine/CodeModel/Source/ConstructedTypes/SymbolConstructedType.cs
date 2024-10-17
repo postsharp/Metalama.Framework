@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -13,12 +14,14 @@ using System;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source.Types
+namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
 {
-    internal abstract class SymbolType<T> : ITypeImpl, ISymbolBasedCompilationElement
+    internal abstract class SymbolConstructedType<T> : ITypeImpl, ISymbolBasedCompilationElement
         where T : ITypeSymbol
     {
         public GenericContext? GenericContextForSymbolMapping { get; }
+
+        IGenericContext? ISymbolBasedCompilationElement.GenericContextForSymbolMapping => this.GenericContextForSymbolMapping;
 
         public CompilationModel Compilation { get; }
 
@@ -34,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
 
         protected T Symbol { get; }
 
-        protected SymbolType( T symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping )
+        protected SymbolConstructedType( T symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping )
         {
             this.GenericContextForSymbolMapping = genericContextForSymbolMapping;
             this.Compilation = compilation;
@@ -64,9 +67,15 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Types
         public bool Equals( IType? otherType, TypeComparison typeComparison )
             => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType ); // TODO: Mapping
 
-        ICompilation ICompilationElement.Compilation => this.Compilation;
+        public IArrayType MakeArrayType( int rank = 1 ) => this.Compilation.Factory.MakeArrayType( this.Symbol, rank );
 
-        ITypeSymbol ISdkType.TypeSymbol => this.Symbol;
+        public IPointerType MakePointerType() => this.Compilation.Factory.MakePointerType( this.Symbol );
+
+        public IType ToNullable() => this.Compilation.Factory.MakeNullableType( this, true );
+
+        public IType ToNonNullable() => this.Compilation.Factory.MakeNullableType( this, false );
+
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 

@@ -64,7 +64,7 @@ internal sealed class IntroducedEvent : IntroducedMember, IEventImpl
     public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
     [Memo]
-    private IFullRef<IEvent> Ref => this.RefFactory.FromBuilt<IEvent>( this );
+    private IFullRef<IEvent> Ref => this.RefFactory.FromIntroducedDeclaration<IEvent>( this );
 
     public IRef<IEvent> ToRef() => this.Ref;
 

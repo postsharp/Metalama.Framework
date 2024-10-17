@@ -25,6 +25,8 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     private readonly List<IAttributeData> _fieldAttributes;
     private INamedType _type;
 
+    public IntroducedRef<IEvent> Ref { get; }
+
     public bool IsEventField { get; }
 
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
@@ -39,6 +41,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         this.IsEventField = isEventField;
         this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         this._fieldAttributes = [];
+        this.Ref = new IntroducedRef<IEvent>( this.Compilation.RefFactory );
     }
 
     public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
@@ -113,11 +116,11 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
-    public new IRef<IEvent> ToRef() => this.Immutable.ToRef();
+    public new IRef<IEvent> ToRef() => this.Ref;
 
-    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Ref;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 
@@ -151,14 +154,18 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         }
     }
 
-    public override void Freeze()
+    protected override void FreezeChildren()
     {
-        base.Freeze();
+        base.FreezeChildren();
 
         this.AddMethod.Freeze();
         this.RemoveMethod.Freeze();
     }
 
-    [Memo]
-    public EventBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new EventBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+    }
+
+    public EventBuilderData BuilderData => (EventBuilderData) this.Ref.BuilderData;
 }

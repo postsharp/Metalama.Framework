@@ -4,7 +4,4 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel.Abstractions;
 
-internal interface IMemberImpl : IMemberOrNamedTypeImpl, IMember
-{
-    IMember? OverriddenMember { get; }
-}
+internal interface IMemberImpl : IMemberOrNamedTypeImpl, IMember;

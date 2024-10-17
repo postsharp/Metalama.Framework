@@ -11,7 +11,7 @@ public class MyAspect : TypeAspect
     public void Introduced()
     {
         meta.Target.Type.Methods.OfName( "Method" ).Single().Invoke();
-        meta.Target.Type.WithTypeArguments( typeof(int) ).Methods.OfName( "Method" ).Single().Invoke();
+        meta.Target.Type.MakeGenericInstance( typeof(int) ).Methods.OfName( "Method" ).Single().Invoke();
     }
 }
 

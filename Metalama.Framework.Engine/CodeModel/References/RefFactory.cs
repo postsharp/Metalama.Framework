@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.ConstructedTypes;
 using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
@@ -48,9 +49,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
             where T : class, IDeclaration
             => new IntroducedRef<T>( builder, this, genericContext );
 
-        public FullRef<T> FromBuilt<T>( IntroducedDeclaration introducedDeclaration )
+        public FullRef<T> FromIntroducedDeclaration<T>( IntroducedDeclaration introducedDeclaration )
             where T : class, IDeclaration
             => this.FromBuilderData<T>( introducedDeclaration.BuilderData, introducedDeclaration.GenericContext );
+
+        public FullRef<T> FromConstructedType<T>( ConstructedType constructedType )
+            where T : class, IType
+            => new ConstructedTypeRef<T>( this, constructedType.ForCompilation( this.CanonicalCompilation ) );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.

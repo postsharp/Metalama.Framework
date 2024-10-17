@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
@@ -29,6 +30,8 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     private bool _isPartial;
     private INamedType? _baseType;
 
+    public IntroducedRef<INamedType> Ref { get; }
+
     public TypeParameterBuilderList TypeParameters { get; } = [];
 
     public NamedTypeBuilder( AspectLayerInstance aspectLayerInstance, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
@@ -43,12 +46,14 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             _ => throw new AssertionFailedException( $"Unsupported: {declaringNamespaceOrType}" )
         };
 
+        this.Ref = new IntroducedRef<INamedType>( this.Compilation.RefFactory );
+
         this.BaseType = ((CompilationModel) this.ContainingNamespace.Compilation).Factory.GetSpecialType( SpecialType.Object );
     }
 
-    public override void Freeze()
+    protected override void FreezeChildren()
     {
-        base.Freeze();
+        base.FreezeChildren();
 
         foreach ( var typeParameter in this.TypeParameters )
         {
@@ -209,16 +214,27 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     public override bool CanBeInherited => false;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
-
-    public ISymbol? Symbol => this.TypeSymbol;
-
-    public ITypeSymbol? TypeSymbol => null;
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public bool Equals( SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+
+    // TODO: Type constructions can't be supported with the current model because the NamedTypeBuilder would need to be frozen,
+    // but when these methods would be used (in the build action), it is not frozen yet.
+
+    public IArrayType MakeArrayType( int rank = 1 ) => throw new NotImplementedException();
+
+    public IPointerType MakePointerType() => throw new NotImplementedException();
+
+    public INamedType ToNullable() => throw new NotImplementedException();
+
+    public IType ToNonNullable() => throw new NotImplementedException();
+
+    public INamedType MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
+
+    IType IType.ToNullable() => this.ToNullable();
 
     public bool Equals( IType? other ) => this.Compilation.Comparers.Default.Equals( this, other );
 
@@ -239,8 +255,6 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
 
     IType ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
-
     [Memo]
     public override SyntaxTree PrimarySyntaxTree
         => this.ContainingDeclaration switch
@@ -251,14 +265,18 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
 
-    IRef<INamedType> INamedType.ToRef() => this.Immutable.ToRef();
+    IRef<INamedType> INamedType.ToRef() => this.Ref;
 
-    public new IFullRef<INamedType> ToRef() => this.Immutable.ToRef();
+    public new IFullRef<INamedType> ToRef() => this.Ref;
 
-    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Immutable.ToRef();
+    IRef<INamespaceOrNamedType> INamespaceOrNamedType.ToRef() => this.Ref;
 
-    IRef<IType> IType.ToRef() => this.Immutable.ToRef();
+    IRef<IType> IType.ToRef() => this.Ref;
 
-    [Memo]
-    public NamedTypeBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new NamedTypeBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+    }
+
+    public NamedTypeBuilderData BuilderData => (NamedTypeBuilderData) this.Ref.BuilderData;
 }

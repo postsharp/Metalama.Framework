@@ -95,9 +95,9 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
         }
     }
 
-    public override void Freeze()
+    protected override void FreezeChildren()
     {
-        base.Freeze();
+        base.FreezeChildren();
 
         this.GetMethod?.Freeze();
         this.SetMethod?.Freeze();

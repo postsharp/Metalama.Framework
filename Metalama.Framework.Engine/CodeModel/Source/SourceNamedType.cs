@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -132,6 +133,23 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public bool Equals( IType? otherType, TypeComparison typeComparison ) => this.Implementation.Equals( otherType, typeComparison );
 
+        public IArrayType MakeArrayType( int rank = 1 ) => this.Compilation.Factory.MakeArrayType( this._typeSymbol, rank );
+
+        public IPointerType MakePointerType() => this.Compilation.Factory.MakePointerType( this._typeSymbol );
+
+        public INamedType ToNullable() => (INamedType) this.Compilation.Factory.MakeNullableType( this, true );
+
+        public INamedType MakeGenericInstance( IReadOnlyList<IType> typeArguments )
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.MakeGenericInstance( typeArguments );
+        }
+
+        IType IType.ToNullable() => this.ToNullable();
+
+        public IType ToNonNullable() => this.Compilation.Factory.MakeNullableType( this, false );
+
         public ITypeParameterList TypeParameters
         {
             get
@@ -170,13 +188,6 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
                 return this.Implementation.IsCanonicalGenericInstance;
             }
-        }
-
-        public IGeneric ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
-        {
-            this.OnUsingDeclaration();
-
-            return ((IGenericInternal) this.Implementation).ConstructGenericInstance( typeArguments );
         }
 
         public override bool IsPartial
@@ -543,8 +554,6 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         }
 
         public override IDeclaration ContainingDeclaration => this.Implementation.ContainingDeclaration;
-
-        ITypeSymbol ISdkType.TypeSymbol => this._typeSymbol;
 
         public bool Equals( IType? other )
         {

@@ -93,7 +93,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 
     private PromoteFieldTransformation( AspectLayerInstance aspectLayerInstance, IField replacedField, PropertyBuilder overridingProperty ) : base(
         aspectLayerInstance,
-        overridingProperty.Immutable,
+        overridingProperty.BuilderData,
         null )
     {
         this.OverridingProperty = overridingProperty;

@@ -512,7 +512,6 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 var declarationOrdinal = this._nextDeclarationOrdinal++;
 
                 A.CallTo( () => transformation.Observability ).Returns( TransformationObservability.None );
-                A.CallTo( () => ((ISdkDeclaration) transformation).Symbol ).Returns( null );
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( $"Introduced {declarationKind}" );
 

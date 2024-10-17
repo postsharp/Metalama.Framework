@@ -35,7 +35,7 @@ internal sealed class CapturedUserExpression : UserExpression
                    : null,
                _ => null
            } ??
-           ((ICompilationInternal) this._compilation).Factory.GetSpecialType( SpecialType.Object );
+           this._compilation.Factory.GetSpecialType( SpecialType.Object );
 
     protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         => TypedExpressionSyntaxImpl.FromValue( this._expression, syntaxSerializationContext ).Syntax;

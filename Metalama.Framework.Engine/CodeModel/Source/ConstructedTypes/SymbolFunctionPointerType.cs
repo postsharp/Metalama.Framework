@@ -7,9 +7,9 @@ using Metalama.Framework.Engine.CodeModel.Visitors;
 using Microsoft.CodeAnalysis;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Source.Types;
+namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes;
 
-internal sealed class SymbolFunctionPointerType : SymbolType<IFunctionPointerTypeSymbol>, IFunctionPointerType
+internal sealed class SymbolFunctionPointerType : SymbolConstructedType<IFunctionPointerTypeSymbol>, IFunctionPointerType
 {
     public SymbolFunctionPointerType( IFunctionPointerTypeSymbol symbol, CompilationModel compilation, GenericContext? genericContext ) : base(
         symbol,

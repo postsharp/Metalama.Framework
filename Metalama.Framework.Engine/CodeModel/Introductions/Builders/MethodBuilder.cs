@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
@@ -12,8 +11,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -24,6 +21,35 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 {
     private bool _isReadOnly;
     private bool _isIteratorMethod;
+
+    public IntroducedRef<IMethod> Ref { get; }
+
+    public MethodBuilder(
+        AspectLayerInstance aspectLayerInstance,
+        INamedType targetType,
+        string name,
+        DeclarationKind declarationKind = DeclarationKind.Method,
+        OperatorKind operatorKind = OperatorKind.None )
+        : base( aspectLayerInstance, targetType, name )
+    {
+        Invariant.Assert(
+            declarationKind == DeclarationKind.Operator
+                            ==
+                            (operatorKind != OperatorKind.None) );
+
+        this.Ref = new IntroducedRef<IMethod>( this.Compilation.RefFactory );
+        this.DeclarationKind = declarationKind;
+        this.OperatorKind = operatorKind;
+
+        this.ReturnParameter =
+            new ParameterBuilder(
+                this,
+                -1,
+                null,
+                this.Compilation.Cache.SystemVoidType.AssertNotNull(),
+                RefKind.None,
+                this.AspectLayerInstance );
+    }
 
     public TypeParameterBuilderList TypeParameters { get; } = [];
 
@@ -46,9 +72,9 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     IHasAccessors? IMethod.DeclaringMember => null;
 
-    public override void Freeze()
+    protected override void FreezeChildren()
     {
-        base.Freeze();
+        base.FreezeChildren();
 
         foreach ( var typeParameter in this.TypeParameters )
         {
@@ -111,8 +137,6 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     public override MethodBase ToMethodBase() => this.ToMethodInfo();
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
-
     public override DeclarationKind DeclarationKind { get; }
 
     public OperatorKind OperatorKind { get; }
@@ -139,49 +163,24 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     internal void SetIsIteratorMethod( bool value ) => this._isIteratorMethod = value;
 
-    public MethodBuilder(
-        AspectLayerInstance aspectLayerInstance,
-        INamedType targetType,
-        string name,
-        DeclarationKind declarationKind = DeclarationKind.Method,
-        OperatorKind operatorKind = OperatorKind.None )
-        : base( aspectLayerInstance, targetType, name )
-    {
-        Invariant.Assert(
-            declarationKind == DeclarationKind.Operator
-                            ==
-                            (operatorKind != OperatorKind.None) );
-
-        this.DeclarationKind = declarationKind;
-        this.OperatorKind = operatorKind;
-
-        this.ReturnParameter =
-            new ParameterBuilder(
-                this,
-                -1,
-                null,
-                this.Compilation.Cache.SystemVoidType.AssertNotNull(),
-                RefKind.None,
-                this.AspectLayerInstance );
-    }
-
     public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = [interfaceMethod];
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
-    public IInjectMemberTransformation ToTransformation()
+    public new IRef<IMethod> ToRef() => this.Ref;
+
+    IMethod IMethod.MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
+
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Ref;
+
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
+
+    protected override void EnsureReferenceInitialized()
     {
-        return new IntroduceMethodTransformation( this.AspectLayerInstance, this.Immutable );
+        this.Ref.BuilderData = new MethodBuilderData( this, this.ContainingDeclaration.ToFullRef() );
     }
 
-    public new IRef<IMethod> ToRef() => this.Immutable.ToRef();
-
-    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
-
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
-
-    [Memo]
-    public MethodBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
+    public MethodBuilderData BuilderData => (MethodBuilderData) this.Ref.BuilderData;
 }

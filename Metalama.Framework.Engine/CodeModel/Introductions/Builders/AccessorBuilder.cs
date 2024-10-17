@@ -25,6 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuilderImpl
 {
+    public IntroducedRef<IMethod> Ref { get; }
+
     public MemberBuilder ContainingMember { get; }
 
     private Accessibility? _accessibility;
@@ -42,6 +44,7 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
         this._accessibility = null;
         this.MethodKind = methodKind;
         this.IsImplicitlyDeclared = isImplicit;
+        this.Ref = new IntroducedRef<IMethod>( this.Compilation.RefFactory );
     }
 
     TypeParameterBuilderList IMethodBuilderImpl.TypeParameters => TypeParameterBuilderList.Empty;
@@ -314,9 +317,9 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
 
     public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-    public override void Freeze()
+    protected override void FreezeChildren()
     {
-        base.Freeze();
+        base.FreezeChildren();
         this.ReturnParameter.Freeze();
 
         foreach ( var parameter in this.Parameters )
@@ -325,18 +328,21 @@ internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuild
         }
     }
 
-    IRef<IMethodBase> IMethodBase.ToRef() => this.Immutable.ToRef();
+    IRef<IMethodBase> IMethodBase.ToRef() => this.Ref;
 
-    public new IRef<IMethod> ToRef() => this.Immutable.ToRef();
+    IMethod IMethod.MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
 
-    IRef<IMethod> IMethod.ToRef() => this.Immutable.ToRef();
+    public new IRef<IMethod> ToRef() => this.Ref;
 
-    IRef<IMember> IMember.ToRef() => this.Immutable.ToRef();
+    IRef<IMethod> IMethod.ToRef() => this.Ref;
 
-    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Immutable.ToRef();
+    IRef<IMember> IMember.ToRef() => this.Ref;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
 
-    [Memo]
-    public MethodBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
+
+    protected override void EnsureReferenceInitialized() => this.Ref.BuilderData = new MethodBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+
+    public MethodBuilderData BuilderData => (MethodBuilderData) this.Ref.BuilderData;
 }
