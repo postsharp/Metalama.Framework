@@ -493,7 +493,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                             aspectLayerInstance,
                             insertPosition,
                             builderData,
-                            node );
+                            introductionSyntax );
                 }
 
                 this._owner.Builder.AddTransformationFactory( CreateTransformation );
@@ -641,10 +641,11 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 {
                     var overriddenDeclaration = this._owner.Builder.TranslateOriginalSymbol( overriddenDeclarationSymbol ).GetTarget( compilationModel );
                     var aspectLayerInstance = this.CreateTestAspectLayerInstance( compilationModel.CompilationContext, overriddenDeclaration, aspectLayer );
+                    var insertPosition = this._owner.Builder.TranslateInsertPosition( compilationModel.CompilationContext, insertPositionRecord );
 
                     return new TestOverrideDeclarationTransformation(
                         aspectLayerInstance,
-                        this._owner.Builder.TranslateInsertPosition( compilationModel.CompilationContext, insertPositionRecord ),
+                        insertPosition,
                         overriddenDeclaration.ToFullRef(),
                         overrideSyntax );
                 }

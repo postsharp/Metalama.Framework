@@ -92,8 +92,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             var mutableCompilationModel = initialCompilationModel.CreateMutableClone();
             var transformations = new List<ITransformation>();
 
-            var aspectInstanceCounters = new Dictionary<string, int>();
-            int order = 0;
+            var order = 0;
 
             foreach (var transformationFactory in this._transformationFactories )
             {
@@ -102,10 +101,9 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 mutableCompilationModel.AddTransformation( transformation );
 
                 // Set order.
-                transformation.OrderWithinPipeline = 0;//layerOrderLookup[transformation.AspectLayerId];
+                transformation.OrderWithinPipeline = 0;
                 transformation.OrderWithinPipelineStepAndType = 0;
                 transformation.OrderWithinPipelineStepAndTypeAndAspectInstance = order++;
-                    //aspectInstanceCounters[transformation.AspectLayerId.AspectName] = aspectInstanceCounters.GetValueOrDefault(transformation.AspectLayerId.AspectName );
 
                 transformations.Add( transformation );
             }
