@@ -495,8 +495,7 @@ namespace Metalama.Framework.Engine.Templating
             allArguments[0] = this.ForTemplate( templateName, templateProvider );
             TemplateDriver.CopyTemplateArguments( templateArguments, allArguments, 1, this._templateExpansionContext.SyntaxGenerationContext );
 
-            var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo(
-                templateMember.DeclarationRef.GetSymbol( this._templateExpansionContext.Compilation.AssertNotNull().RoslynCompilation ).AssertSymbolNotNull() );
+            var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Symbol );
 
             return compiledTemplateMethodInfo.Invoke( templateProvider.Object ?? context.TemplateProvider.Object, allArguments )
                 .AssertNotNull()

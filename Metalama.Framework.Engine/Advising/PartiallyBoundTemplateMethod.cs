@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -20,7 +21,7 @@ internal sealed class PartiallyBoundTemplateMethod
     /// <summary>
     /// Gets the template declaration.
     /// </summary>
-    public IRef<IMethod> Declaration => this.TemplateMember.DeclarationRef;
+    public IMethod GetDeclaration( CompilationModel compilation ) => this.TemplateMember.GetDeclaration( compilation );
 
     /// <summary>
     /// Gets arguments of the template.

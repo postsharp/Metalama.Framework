@@ -42,7 +42,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
     protected override EventBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
 
         return new EventBuilder(
             this.AspectLayerInstance,
@@ -60,12 +60,12 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
         var serviceProvider = context.ServiceProvider;
 
-        var eventTemplateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        var eventTemplateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
 
         if ( this._addTemplate != null || this._removeTemplate != null )
         {
             var primaryTemplate = (this._addTemplate ?? this._removeTemplate).AssertNotNull();
-            var primaryTemplateDeclaration = primaryTemplate.Declaration.GetTarget( this.SourceCompilation );
+            var primaryTemplateDeclaration = primaryTemplate.GetDeclaration( this.SourceCompilation );
 
             var runtimeParameters = primaryTemplate.TemplateMember.TemplateClassMember.RunTimeParameters;
 
@@ -116,7 +116,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         {
             AddAttributeForAccessorTemplate(
                 this._addTemplate.TemplateMember.TemplateClassMember,
-                this._addTemplate.Declaration.GetTarget( this.SourceCompilation ),
+                this._addTemplate.GetDeclaration( this.SourceCompilation ),
                 builder.AddMethod );
         }
         else if ( this.Template != null )
@@ -134,7 +134,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         {
             AddAttributeForAccessorTemplate(
                 this._removeTemplate.TemplateMember.TemplateClassMember,
-                this._removeTemplate.Declaration.GetTarget( this.SourceCompilation ),
+                this._removeTemplate.GetDeclaration( this.SourceCompilation ),
                 builder.RemoveMethod );
         }
         else if ( this.Template != null )
@@ -169,7 +169,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
 
     protected override IntroductionAdviceResult<IEvent> ImplementCore( EventBuilder builder, in AdviceImplementationContext context )
     {
-        var eventTemplateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        var eventTemplateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
 
         // this.Tags: Override transformations.
         var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );

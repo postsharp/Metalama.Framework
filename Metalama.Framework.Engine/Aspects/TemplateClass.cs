@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -22,8 +21,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
-using RefKind = Microsoft.CodeAnalysis.RefKind;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -37,9 +34,8 @@ public abstract class TemplateClass : IDiagnosticSource
 
     private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
     private readonly ITemplateReflectionContext? _templateReflectionContext; // TODO: Don't keep a reference because this goes to the pipeline config. But how?
-    private readonly TemplateClass? _baseClass;
-    private readonly ITemplateInfoService _symbolClassificationService;
-    private readonly TemplateAttributeFactory _templateAttributeFactory;
+
+    public TemplateClass? BaseClass { get; }
 
     private protected TemplateClass(
         ProjectServiceProvider serviceProvider,
@@ -49,11 +45,11 @@ public abstract class TemplateClass : IDiagnosticSource
         TemplateClass? baseClass,
         string shortName )
     {
+        var memberBuilder = serviceProvider.GetRequiredService<ITemplateClassMemberBuilder>();
+        
         this.ServiceProvider = serviceProvider;
-        this._symbolClassificationService = serviceProvider.GetRequiredService<ITemplateInfoService>();
-        this._templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
-        this._baseClass = baseClass;
-        this.Members = this.GetMembers( typeSymbol, templateReflectionContext.CompilationContext, diagnosticAdder );
+        this.BaseClass = baseClass;
+
         this.ShortName = shortName;
 
         if ( templateReflectionContext.IsCacheable )
@@ -71,6 +67,9 @@ public abstract class TemplateClass : IDiagnosticSource
             // We have a fake!!
             this.TypeId = default;
         }
+        
+        this.HasError = !memberBuilder.TryGetMembers( this, typeSymbol, templateReflectionContext.CompilationContext, diagnosticAdder, out var members );
+        this.Members = members;
     }
 
     public string ShortName { get; }
@@ -125,235 +124,7 @@ public abstract class TemplateClass : IDiagnosticSource
         => this.Members.TryGetValue( symbol.GetDocumentationCommentId().AssertNotNull(), out member )
            && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
-    private ImmutableDictionary<string, TemplateClassMember> GetMembers(
-        INamedTypeSymbol type,
-        CompilationContext compilationContext,
-        IDiagnosticAdder diagnosticAdder )
-    {
-        var members = ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
-
-        if ( this._baseClass != null )
-        {
-            foreach ( var baseMember in this._baseClass.Members )
-            {
-                var derivedMember = baseMember.Value with
-                {
-                    TemplateClass = this,
-                    Accessors = baseMember.Value.Accessors
-                        .SelectAsReadOnlyCollection( kvp => (kvp.Key, Value: kvp.Value with { TemplateClass = this }) )
-                        .ToImmutableDictionary( kvp => kvp.Key, kvp => kvp.Value )
-                };
-
-                members.Add( baseMember.Key, derivedMember );
-            }
-        }
-
-        foreach ( var memberSymbol in type.GetMembers() )
-        {
-            var templateInfo = this._symbolClassificationService.GetTemplateInfo( memberSymbol );
-
-            var memberKey = memberSymbol.Name;
-
-            switch ( templateInfo.AttributeType )
-            {
-                case TemplateAttributeType.DeclarativeAdvice when memberSymbol is IMethodSymbol { AssociatedSymbol: not null }:
-                    // This is an accessor of a template or event declarative advice. We don't index them.
-                    continue;
-
-                case TemplateAttributeType.DeclarativeAdvice:
-                case TemplateAttributeType.InterfaceMember:
-                    // For declarative advices and interface members, we don't require a unique name, so we identify the template by a special id.
-                    memberKey = memberSymbol.GetDocumentationCommentId().AssertNotNull();
-
-                    break;
-            }
-
-            IAdviceAttribute? attribute = null;
-
-            if ( !templateInfo.IsNone && !this._templateAttributeFactory.TryGetTemplateAttribute(
-                    templateInfo.Id,
-                    compilationContext,
-                    diagnosticAdder,
-                    out attribute ) )
-            {
-                continue;
-            }
-
-            var templateParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
-            var templateTypeParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
-            var accessors = ImmutableDictionary<MethodKind, TemplateClassMember>.Empty;
-
-            void AddAccessor( IMethodSymbol? accessor )
-            {
-                if ( accessor != null )
-                {
-                    var accessorParameters =
-                        accessor.Parameters.Select( p => new TemplateClassMemberParameter( p, false, null ) )
-                            .ToImmutableArray();
-
-                    accessors = accessors.Add(
-                        accessor.MethodKind,
-                        new TemplateClassMember(
-                            accessor.Name,
-                            accessor.Name,
-                            this,
-                            templateInfo,
-                            attribute,
-                            accessor.GetSerializableId(),
-                            accessorParameters,
-                            ImmutableArray<TemplateClassMemberParameter>.Empty,
-                            ImmutableDictionary<MethodKind, TemplateClassMember>.Empty ) );
-                }
-            }
-
-            switch ( memberSymbol )
-            {
-                case IMethodSymbol method:
-                    {
-                        // Forbid ref methods.
-                        if ( method.RefKind != RefKind.None )
-                        {
-                            diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic(
-                                    method.GetDiagnosticLocation(),
-                                    method,
-                                    this ) );
-
-                            this.HasError = true;
-                        }
-
-                        // Add parameters.
-                        var parameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.Parameters.Length );
-                        var allTemplateParametersCount = 0;
-
-                        foreach ( var parameter in method.Parameters )
-                        {
-                            var isCompileTime = this._symbolClassificationService.IsCompileTimeParameter( parameter );
-
-                            parameterBuilder.Add(
-                                new TemplateClassMemberParameter(
-                                    parameter,
-                                    isCompileTime,
-                                    allTemplateParametersCount ) );
-
-                            allTemplateParametersCount++;
-                        }
-
-                        templateParameters = parameterBuilder.MoveToImmutable();
-
-                        // Add type parameters.
-                        var typeParameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.TypeParameters.Length );
-
-                        foreach ( var typeParameter in method.TypeParameters )
-                        {
-                            var isCompileTime =
-                                this._symbolClassificationService.IsCompileTimeTypeParameter( typeParameter );
-
-                            typeParameterBuilder.Add(
-                                new TemplateClassMemberParameter(
-                                    typeParameter.Ordinal,
-                                    typeParameter.Name,
-                                    Type: null,
-                                    isCompileTime,
-                                    allTemplateParametersCount ) );
-
-                            allTemplateParametersCount++;
-                        }
-
-                        templateTypeParameters = typeParameterBuilder.MoveToImmutable();
-
-                        break;
-                    }
-
-                case IPropertySymbol property:
-                    // Forbid ref properties.
-                    if ( property.RefKind != RefKind.None )
-                    {
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic(
-                                property.GetDiagnosticLocation(),
-                                property,
-                                this ) );
-
-                        this.HasError = true;
-                    }
-
-                    // Add accessors.
-                    AddAccessor( property.GetMethod );
-                    AddAccessor( property.SetMethod );
-
-                    break;
-
-                // ReSharper disable once UnusedVariable
-                case IFieldSymbol field:
-                    // Forbid ref fields.
-                    if ( field.RefKind != RefKind.None )
-                    {
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field, this ) );
-
-                        this.HasError = true;
-                    }
-
-                    break;
-
-                case IEventSymbol @event:
-                    AddAccessor( @event.AddMethod );
-                    AddAccessor( @event.RemoveMethod );
-
-                    break;
-            }
-
-            if ( memberSymbol is IMethodSymbol { MethodKind: MethodKind.PropertySet } && templateParameters.Length != 1 )
-            {
-                throw new AssertionFailedException( $"'{memberSymbol}' is a property setter but there is {templateParameters.Length} template parameters." );
-            }
-
-            var aspectClassMember = new TemplateClassMember(
-                memberSymbol.Name,
-                memberKey,
-                this,
-                templateInfo,
-                attribute,
-                memberSymbol.GetSerializableId(),
-                templateParameters,
-                templateTypeParameters,
-                accessors );
-
-            if ( !templateInfo.IsNone )
-            {
-                if ( members.TryGetValue( memberKey, out var existingMember ) && !memberSymbol.IsOverride &&
-                     !existingMember.TemplateInfo.IsNone )
-                {
-                    // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
-                    // would have failed.
-
-                    // The template is already defined and we are not overwriting a template of the base class.
-                    diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
-                            memberSymbol.GetDiagnosticLocation(),
-                            (memberKey, type.Name, existingMember.TemplateClass._baseClass!.Type.Name),
-                            this ) );
-
-                    this.HasError = true;
-
-                    continue;
-                }
-
-                // Add or replace the template.
-                members[memberKey] = aspectClassMember;
-            }
-            else
-            {
-                if ( !members.ContainsKey( memberKey ) )
-                {
-                    members.Add( memberKey, aspectClassMember );
-                }
-            }
-        }
-
-        return members.ToImmutable();
-    }
+  
 
     internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice(
         in ProjectServiceProvider serviceProvider,
@@ -420,7 +191,7 @@ public abstract class TemplateClass : IDiagnosticSource
     internal ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext )
         => this._templateReflectionContext ?? compilationContext;
 
-    internal CompilationModel GetTemplateReflectionCompilationModel( CompilationModel compilationModel )
+    internal CompilationModel GetTemplateReflectionCompilation( CompilationModel compilationModel )
         => this._templateReflectionContext?.GetCompilationModel( compilationModel ) ?? compilationModel;
 
     string IDiagnosticSource.DiagnosticSourceDescription => this.ShortName;

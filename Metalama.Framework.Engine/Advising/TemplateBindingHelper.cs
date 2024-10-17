@@ -98,7 +98,7 @@ internal static class TemplateBindingHelper
             {
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a template for the {targetMethod.OperatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
+                        $"Cannot use the method '{template.TemplateMember.Symbol}' as a template for the {targetMethod.OperatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
             }
 
             var templateArguments = GetTemplateArguments( template.TemplateMember, template.TemplateArguments, CreateParameterMapping() );
@@ -148,14 +148,14 @@ internal static class TemplateBindingHelper
         this TemplateMember<IMethod> template,
         IObjectReader? arguments = null )
     {
-        var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
+        var templateMethodSymbol = (IMethodSymbol) template.Symbol;
 
         // The template must be void.
         if ( templateMethodSymbol.ReturnType.SpecialType != RoslynSpecialType.System_Void )
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.DeclarationRef}' as an initializer template: the method return type must be a void." ) );
+                    $"Cannot use the method '{template.Symbol}' as an initializer template: the method return type must be a void." ) );
         }
 
         // The template must not have run-time parameters.
@@ -163,7 +163,7 @@ internal static class TemplateBindingHelper
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.DeclarationRef}' as an initializer template: the method cannot have run-time parameters." ) );
+                    $"Cannot use the method '{template.Symbol}' as an initializer template: the method cannot have run-time parameters." ) );
         }
 
         return new BoundTemplateMethod(
@@ -181,7 +181,7 @@ internal static class TemplateBindingHelper
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.DeclarationRef}' in meta.InvokeTemplate: the method cannot have run-time parameters." ) );
+                    $"Cannot use the method '{template.Symbol}' in meta.InvokeTemplate: the method cannot have run-time parameters." ) );
         }
 
         // The template must not have run-time type parameters.
@@ -189,7 +189,7 @@ internal static class TemplateBindingHelper
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.DeclarationRef}' in meta.InvokeTemplate: the method cannot have run-time type parameters." ) );
+                    $"Cannot use the method '{template.Symbol}' in meta.InvokeTemplate: the method cannot have run-time type parameters." ) );
         }
 
         return GetTemplateArguments( template, arguments, ImmutableDictionary<string, ExpressionSyntax>.Empty );
@@ -203,14 +203,13 @@ internal static class TemplateBindingHelper
         ExpressionSyntax valueExpression,
         IObjectReader? arguments = null )
     {
-        var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
+        var templateMethodSymbol = (IMethodSymbol) template.Symbol;
 
         // The template must be void.
         if ( templateMethodSymbol.ReturnType.SpecialType != RoslynSpecialType.System_Void )
         {
             throw new InvalidTemplateSignatureException(
-                MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.DeclarationRef}' as a contract template: the method return type must be a void." ) );
+                MetalamaStringFormatter.Format( $"Cannot use the method '{template.Symbol}' as a contract template: the method return type must be a void." ) );
         }
 
         // The template must not have run-time parameters.
@@ -218,7 +217,7 @@ internal static class TemplateBindingHelper
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.DeclarationRef}' as a contract template: the method cannot have run-time parameters except 'value'." ) );
+                    $"Cannot use the method '{template.Symbol}' as a contract template: the method cannot have run-time parameters except 'value'." ) );
         }
 
         if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( "value", out var valueTemplateParameter )
@@ -226,7 +225,7 @@ internal static class TemplateBindingHelper
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the method '{template.DeclarationRef}' as a contract template: the method must have a run-time parameter named 'value'." ) );
+                    $"Cannot use the method '{template.Symbol}' as a contract template: the method must have a run-time parameter named 'value'." ) );
         }
 
         var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty
@@ -240,7 +239,7 @@ internal static class TemplateBindingHelper
         IConstructor targetConstructor,
         IObjectReader? arguments = null )
     {
-        var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
+        var templateMethodSymbol = (IMethodSymbol) template.Symbol;
 
         templateMethodSymbol.ThrowIfBelongsToDifferentCompilationThan( targetConstructor.GetSymbol() );
         arguments ??= ObjectReader.Empty;
@@ -270,14 +269,14 @@ internal static class TemplateBindingHelper
 
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format(
-                        $"Cannot use the template '{template.DeclarationRef}' to override the constructor '{targetConstructor}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
+                        $"Cannot use the template '{template.Symbol}' to override the constructor '{targetConstructor}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
             }
 
             if ( !VerifyTemplateType( templateParameter.Type, constructorParameter.Type, template, arguments ) )
             {
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format(
-                        $"Cannot use the template '{template.DeclarationRef}' to override the constructor '{targetConstructor}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{constructorParameter.Name}'." ) );
+                        $"Cannot use the template '{template.Symbol}' to override the constructor '{targetConstructor}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{constructorParameter.Name}'." ) );
             }
 
             AddParameter( constructorParameter, templateParameter );
@@ -291,7 +290,7 @@ internal static class TemplateBindingHelper
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
-                    $"Cannot use the template '{template.DeclarationRef}' to override the constructor '{targetConstructor}': the template return type '{templateMethodSymbol.ReturnType}' is not compatible with 'void'." ) );
+                    $"Cannot use the template '{template.Symbol}' to override the constructor '{targetConstructor}': the template return type '{templateMethodSymbol.ReturnType}' is not compatible with 'void'." ) );
         }
 
         return new BoundTemplateMethod( template, templateArguments );
@@ -305,7 +304,7 @@ internal static class TemplateBindingHelper
         IMethod targetMethod,
         IObjectReader? arguments = null )
     {
-        var templateMethodSymbol = (IMethodSymbol) template.DeclarationRef.Symbol;
+        var templateMethodSymbol = (IMethodSymbol) template.Symbol;
         templateMethodSymbol.ThrowIfBelongsToDifferentCompilationThan( targetMethod.GetSymbol() );
         arguments ??= ObjectReader.Empty;
         var parameterMapping = ImmutableDictionary.CreateBuilder<string, ExpressionSyntax>();
@@ -475,7 +474,8 @@ internal static class TemplateBindingHelper
         AsyncInfo? toMethodAsyncInfo = null )
     {
         // fromType may come from the template reflection compilation context, different than our main compilation context.
-        var translatedFromType = toType.GetCompilationContext().SymbolTranslator.Translate( fromType );
+        var translatedFromType = toType.GetCompilationContext().SymbolTranslator.Translate( fromType ).AssertSymbolNotNull();
+
         return VerifyTemplateType( toType.GetCompilationModel().Factory.GetIType( translatedFromType ), toType, template, arguments, toMethodAsyncInfo );
     }
 
@@ -684,8 +684,7 @@ internal static class TemplateBindingHelper
                 else
                 {
                     throw new InvalidAdviceParametersException(
-                        MetalamaStringFormatter.Format(
-                            $"No value has been provided for the parameter '{parameter.Name}' of template '{template.DeclarationRef}'." ) );
+                        MetalamaStringFormatter.Format( $"No value has been provided for the parameter '{parameter.Name}' of template '{template.Symbol}'." ) );
                 }
             }
             else
@@ -716,7 +715,7 @@ internal static class TemplateBindingHelper
                 {
                     throw new InvalidAdviceParametersException(
                         MetalamaStringFormatter.Format(
-                            $"No value has been provided for the type parameter '{parameter.Name}' of template '{template.DeclarationRef}'." ) );
+                            $"No value has been provided for the type parameter '{parameter.Name}' of template '{template.Symbol}'." ) );
                 }
 
                 var typeModel = parameterValue switch
@@ -725,10 +724,10 @@ internal static class TemplateBindingHelper
                     Type type => TypeFactory.Implementation.GetTypeByReflectionType( type ),
                     null => throw new InvalidAdviceParametersException(
                         MetalamaStringFormatter.Format(
-                            $"The value of type parameter '{parameter.Name}' for template '{template.DeclarationRef}' must not be null." ) ),
+                            $"The value of type parameter '{parameter.Name}' for template '{template.Symbol}' must not be null." ) ),
                     _ => throw new InvalidAdviceParametersException(
                         MetalamaStringFormatter.Format(
-                            $"The value of parameter '{parameter.Name}' for template '{template.DeclarationRef}' must be of type IType or Type." ) )
+                            $"The value of parameter '{parameter.Name}' for template '{template.Symbol}' must be of type IType or Type." ) )
                 };
 
                 templateArguments.Add( new TemplateTypeArgumentFactory( typeModel, parameter.Name ) );
@@ -744,7 +743,7 @@ internal static class TemplateBindingHelper
             if ( template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) && !parameter.IsCompileTime )
             {
                 throw new InvalidTemplateSignatureException(
-                    MetalamaStringFormatter.Format( $"The parameter '{name}' of template '{template.DeclarationRef}' is not compile-time." ) );
+                    MetalamaStringFormatter.Format( $"The parameter '{name}' of template '{template.Symbol}' is not compile-time." ) );
             }
         }
     }

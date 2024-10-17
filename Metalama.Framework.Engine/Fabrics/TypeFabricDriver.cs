@@ -84,7 +84,7 @@ internal sealed class TypeFabricDriver : FabricDriver
                 foreach ( var advice in declarativeAdvice )
                 {
                     ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
-                        advice.DeclarationRef.GetTarget( compilation ),
+                        advice.GetDeclaration( compilation ),
                         advice.TemplateClassMember.Key,
                         (IAspectBuilder<IDeclaration>) aspectBuilder );
                 }

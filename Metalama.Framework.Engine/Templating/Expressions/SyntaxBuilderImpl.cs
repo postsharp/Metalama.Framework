@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -29,18 +28,19 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     // Note that the implementation of this class cannot use TemplateExpansionContext because there is no necessarily one active.
     // For instance, in the BuildAspect method, there is none.
 
-    private readonly CompilationModel _compilation;
     private readonly SyntaxGenerationContext _syntaxGenerationContext;
     private readonly INamedType? _currentType;
     private readonly IType _targetTypedExpressionType;
 
-    public ICompilation Compilation => this._compilation;
+     ICompilation ISyntaxBuilderImpl.Compilation => this.Compilation;
+    
+    public CompilationModel Compilation { get; }
 
     private ContextualSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
 
     protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext, INamedType? currentType )
     {
-        this._compilation = compilation;
+        this.Compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
         this._currentType = currentType;
 
@@ -64,7 +64,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         var expression = SyntaxFactoryEx.ParseExpressionSafe( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-        return new SyntaxUserExpression( expression, this._compilation.Cache.SystemObjectType );
+        return new SyntaxUserExpression( expression, this.Compilation.Cache.SystemObjectType );
     }
 
     public IStatement ParseStatement( string code )
@@ -78,7 +78,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => new UserStatement(
             SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this.CreateSyntaxSerializationContext() ) ) );
 
-    private SyntaxSerializationContext CreateSyntaxSerializationContext() => new( this._compilation, this._syntaxGenerationContext, this._currentType );
+    private SyntaxSerializationContext CreateSyntaxSerializationContext() => new( this.Compilation, this._syntaxGenerationContext, this._currentType );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -157,12 +157,12 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
                 ? SyntaxFactory.DefaultExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) )
                 : SyntaxFactoryEx.Null;
 
-            type = this._compilation.Factory.GetSpecialType( SpecialType.String ).ToNullable();
+            type = this.Compilation.Factory.GetSpecialType( SpecialType.String ).ToNullable();
         }
         else
         {
             expression = this.GetLiteralImpl( value, specialType, stronglyTyped );
-            type = this._compilation.Factory.GetSpecialType( specialType );
+            type = this.Compilation.Factory.GetSpecialType( specialType );
         }
 
         return new SyntaxUserExpression( expression, type );
@@ -176,7 +176,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendTypeName( Type type, StringBuilder stringBuilder )
         => this.AppendTypeName(
-            this.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( type ),
+            this.Compilation.Factory.GetTypeByReflectionType( type ),
             stringBuilder );
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )

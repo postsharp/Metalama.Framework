@@ -171,7 +171,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         serviceProvider,
         UserCodeDescription.Create(
             "executing the template method '{0}' in the context of the aspect '{1}' applied to '{2}'",
-            methodTemplate?.TemplateMember.DeclarationRef.GetSymbol( syntaxGenerationContext.CompilationContext.Compilation ),
+            methodTemplate?.TemplateMember.Symbol,
             metaApi.AspectInstance?.AspectClass.FullName,
             metaApi.AspectInstance?.TargetDeclaration ),
         syntaxGenerationContext.CompilationContext,
@@ -184,7 +184,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         this._methodTemplate = methodTemplate?.TemplateMember;
         this.TemplateProvider = templateProvider;
         this.SyntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
-        this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext, metaApi.Type );
+        this.SyntaxSerializationContext = new SyntaxSerializationContext( metaApi.Compilation, syntaxGenerationContext, metaApi.Type );
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpressionProvider = proceedExpressionProvider;
@@ -714,7 +714,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
                     (aspectClass?.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
-                     targetLanguageVersion.Value.ToDisplayString(), templateMember.DeclarationRef.GetTarget( context.Compilation.AssertNotNull() )),
+                     targetLanguageVersion.Value.ToDisplayString(), templateMember.GetDeclaration( context.Compilation.AssertNotNull() )),
                     deduplicationKey: aspectClass?.FullName ) );
         }
     }

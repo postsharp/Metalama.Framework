@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 
@@ -11,9 +12,11 @@ namespace Metalama.Framework.Engine.Advising;
 internal sealed class TemplateMember<T> : TemplateMember
     where T : class, IMemberOrNamedType
 {
-    protected override ISymbolRef<IMemberOrNamedType> GetDeclaration() => this.DeclarationRef;
+    private readonly ISymbolRef<T> _declarationRef;
 
-    public new ISymbolRef<T> DeclarationRef { get; }
+    internal override ISymbolRef<IMemberOrNamedType> GetDeclarationRef() => this._declarationRef;
+
+    public new T GetDeclaration( CompilationModel compilationModel ) => this._declarationRef.GetTarget( this.GetTemplateReflectionCompilation( compilationModel ) );
 
     public TemplateMember(
         ISymbolRef<T> implementation,
@@ -46,11 +49,11 @@ internal sealed class TemplateMember<T> : TemplateMember
         selectedTemplateKind,
         interpretedTemplateKind )
     {
-        this.DeclarationRef = (ISymbolRef<T>) implementation.As<T>();
+        this._declarationRef = (ISymbolRef<T>) implementation.As<T>();
     }
 
     public TemplateMember( TemplateMember prototype ) : base( prototype )
     {
-        this.DeclarationRef = (ISymbolRef<T>) prototype.DeclarationRef.As<T>();
+        this._declarationRef = (ISymbolRef<T>) prototype.GetDeclarationRef().As<T>();
     }
 }

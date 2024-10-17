@@ -48,7 +48,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template.AssertNotNull().GetDeclaration( this.SourceCompilation );
 
         var typeRewriter = TemplateTypeRewriter.Get( this._template );
 
