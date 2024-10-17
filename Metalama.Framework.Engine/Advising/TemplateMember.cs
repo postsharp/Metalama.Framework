@@ -121,21 +121,6 @@ internal abstract class TemplateMember
         TemplateProvider templateProvider,
         IAdviceAttribute adviceAttribute,
         IObjectReader tags,
-        TemplateKind selectedTemplateKind = TemplateKind.Default ) : this(
-        implementation,
-        templateClassMember,
-        templateProvider,
-        adviceAttribute,
-        tags,
-        selectedTemplateKind,
-        selectedTemplateKind ) { }
-
-    protected TemplateMember(
-        ISymbolRef<IMemberOrNamedType> implementation,
-        TemplateClassMember templateClassMember,
-        TemplateProvider templateProvider,
-        IAdviceAttribute adviceAttribute,
-        IObjectReader tags,
         TemplateKind selectedTemplateKind,
         TemplateKind interpretedTemplateKind )
     {

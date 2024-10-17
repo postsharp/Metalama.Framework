@@ -26,11 +26,11 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     public MethodBuilder(
         AspectLayerInstance aspectLayerInstance,
-        INamedType targetType,
+        INamedType declaringType,
         string name,
         DeclarationKind declarationKind = DeclarationKind.Method,
         OperatorKind operatorKind = OperatorKind.None )
-        : base( aspectLayerInstance, targetType, name )
+        : base( aspectLayerInstance, declaringType, name )
     {
         Invariant.Assert(
             declarationKind == DeclarationKind.Operator
@@ -110,7 +110,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
     IType IMethod.ReturnType => this.ReturnParameter.Type;
 
 #pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
-    public override BaseParameterBuilder ReturnParameter { get; set; }
+    public BaseParameterBuilder ReturnParameter { get; set; }
 #pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
     IParameter IMethod.ReturnParameter => this.ReturnParameter;

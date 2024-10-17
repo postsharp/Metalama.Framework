@@ -14,9 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, IMethodBaseImpl
 {
     public ParameterBuilderList Parameters { get; } = [];
-
-    public abstract BaseParameterBuilder? ReturnParameter { get; set; }
-
+    
     protected override void FreezeChildren()
     {
         base.FreezeChildren();
@@ -58,7 +56,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
 
     protected MethodBaseBuilder(
         AspectLayerInstance aspectLayerInstance,
-        INamedType targetType,
+        INamedType declaringType,
         string name )
-        : base( targetType, name, aspectLayerInstance ) { }
+        : base( declaringType, name, aspectLayerInstance ) { }
 }

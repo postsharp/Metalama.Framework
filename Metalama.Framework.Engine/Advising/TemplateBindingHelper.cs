@@ -473,7 +473,11 @@ internal static class TemplateBindingHelper
         TemplateMember<IMethod> template,
         IObjectReader arguments,
         AsyncInfo? toMethodAsyncInfo = null )
-        => VerifyTemplateType( toType.GetCompilationModel().Factory.GetIType( fromType ), toType, template, arguments, toMethodAsyncInfo );
+    {
+        // fromType may come from the template reflection compilation context, different than our main compilation context.
+        var translatedFromType = toType.GetCompilationContext().SymbolTranslator.Translate( fromType );
+        return VerifyTemplateType( toType.GetCompilationModel().Factory.GetIType( translatedFromType ), toType, template, arguments, toMethodAsyncInfo );
+    }
 
     private static bool VerifyTemplateType(
         IType fromType,

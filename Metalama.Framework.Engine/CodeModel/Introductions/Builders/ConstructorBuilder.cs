@@ -25,8 +25,8 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public IFullRef<IConstructor> Ref
         => this._ref ?? throw new InvalidOperationException( "Cannot create a reference to a ConstructorBuilder until it is frozen." );
 
-    public ConstructorBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType )
-        : base( aspectLayerInstance, targetType, null! )
+    public ConstructorBuilder( AspectLayerInstance aspectLayerInstance, INamedType declaringType )
+        : base( aspectLayerInstance, declaringType, null! )
     {
         this.InitializerArguments = [];
     }
@@ -115,13 +115,7 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
     IConstructor IConstructor.Definition => this;
-
-    public override BaseParameterBuilder? ReturnParameter
-    {
-        get => null;
-        set => throw new NotSupportedException();
-    }
-
+    
     public override MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     public new IRef<IConstructor> ToRef() => this.Ref;
