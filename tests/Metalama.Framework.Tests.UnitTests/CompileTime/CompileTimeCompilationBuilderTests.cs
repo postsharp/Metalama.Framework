@@ -719,7 +719,7 @@ public class ReferencedClass
                     out var compileTimeProject ) );
 
             Assert.NotNull( compileTimeProject );
-            Assert.Single( compileTimeProject.References.Where( r => !r.IsFramework ) );
+            Assert.Single( compileTimeProject.References, r => !r.IsFramework );
         }
 
         [Fact]

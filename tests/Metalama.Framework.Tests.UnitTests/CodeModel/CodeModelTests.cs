@@ -8,8 +8,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -23,7 +21,6 @@ using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
@@ -1207,7 +1204,7 @@ public class PublicClass
             var compilation = testContext.CreateCompilationModel( "", masterCode );
             var type = compilation.Factory.GetTypeByReflectionName( "PublicClass" );
             Assert.True( type.DeclaringAssembly.IsExternal );
-            Assert.Single( type.Fields.Where( f => !f.IsImplicitlyDeclared ) );
+            Assert.Single( type.Fields, f => !f.IsImplicitlyDeclared );
             Assert.Single( type.Methods );
             Assert.Single( type.Properties );
             Assert.Single( type.Types );
@@ -1932,9 +1929,7 @@ public partial class C
             Assert.Same( interfaceMethod, roundtrip );
             
             var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
-            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out var memberImplementation ) );
-            
-
+            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out _ ) );
         }
 
         private sealed class TestClassificationService : ISymbolClassificationService
