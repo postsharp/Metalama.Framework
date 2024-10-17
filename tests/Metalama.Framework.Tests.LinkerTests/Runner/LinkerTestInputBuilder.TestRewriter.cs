@@ -95,9 +95,19 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
         /// </summary>
         private sealed class TestRewriter : SafeSyntaxRewriter
         {
-            private readonly List<AspectLayerId> _orderedAspectLayers;
+            private readonly List<AspectLayerId> _aspectLayers;
+            private readonly Dictionary<AspectLayerId, int> _aspectLayerOrder;
 
-            public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
+            public IReadOnlyList<AspectLayerId> OrderedAspectLayers =>
+                this._aspectLayers.ToOrderedList( al =>
+                {
+                    if ( this._aspectLayerOrder.TryGetValue( al, out var order ) )
+                    {
+                        return order;
+                    }
+
+                    return int.MaxValue;
+                } );
 
             public ProjectServiceProvider ServiceProvider { get; }
 
@@ -110,7 +120,8 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 this.Builder = builder;
                 this.InputCompilation = inputCompilation;
 
-                this._orderedAspectLayers = new List<AspectLayerId>();
+                this._aspectLayers = new List<AspectLayerId>();
+                this._aspectLayerOrder = new Dictionary<AspectLayerId, int>();
 
                 this.ServiceProvider = serviceProvider;
             }
@@ -175,24 +186,34 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString() == "PseudoLayerOrder" );
             }
 
-            public AspectLayerId GetOrAddAspectLayer( string aspectName, string? layerName )
+            public AspectLayerId GetOrAddAspectLayer( string aspectName, string? layerName, int? order = null )
             {
-                if ( !this._orderedAspectLayers.Any( x => x.AspectName == aspectName && x.LayerName == layerName ) )
+                AspectLayerId result;
+
+                if ( !this._aspectLayers.Any( x => x.AspectName == aspectName && x.LayerName == layerName ) )
                 {
                     var newLayer = new AspectLayerId( aspectName, layerName );
-                    this._orderedAspectLayers.Add( newLayer );
+                    this._aspectLayers.Add( newLayer );
 
-                    return newLayer;
+                    result = newLayer;
                 }
                 else
                 {
-                    return this._orderedAspectLayers.Single( x => x.AspectName == aspectName && x.LayerName == layerName );
+                    result = this._aspectLayers.Single( x => x.AspectName == aspectName && x.LayerName == layerName );
                 }
+
+                if ( order != null )
+                {
+                    this._aspectLayerOrder[result] = order.Value;
+                }
+
+                return result;
             }
 
             private TypeDeclarationSyntax ProcessLayerOrderAttributeNode( TypeDeclarationSyntax node )
             {
                 var newAttributeLists = new List<AttributeListSyntax>();
+                int order = 0;
 
                 foreach ( var attributeList in node.AttributeLists )
                 {
@@ -215,7 +236,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                                 layerName = attribute.ArgumentList.Arguments[1].ToString().Trim( '\"' );
                             }
 
-                            this.GetOrAddAspectLayer( aspectName, layerName );
+                            this.GetOrAddAspectLayer( aspectName, layerName, order++ );
                         }
                         else
                         {
