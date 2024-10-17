@@ -16,14 +16,24 @@ namespace Metalama.Framework.Engine.CodeModel
     [PublicAPI]
     public static class SymbolExtensions
     {
-        public static ISymbol? GetSymbol( this ICompilationElement declaration ) => (declaration as ISymbolBasedCompilationElement)?.Symbol;
+        private static ISymbol? GetSymbolImpl( ICompilationElement declaration )
+            => declaration switch
+            {
+                ISymbolBasedCompilationElement { SymbolMustBeMapped: false, Symbol: { } symbol } => symbol,
+                ISymbolBasedCompilationElement => throw new ArgumentOutOfRangeException(
+                    nameof(declaration),
+                    $"The symbol of '{declaration}' is available, but it must be mapped with the generic context" ),
+                _ => null // not symbol-backed.
+            };
+
+        public static ISymbol? GetSymbol( this ICompilationElement declaration ) => GetSymbolImpl( declaration );
 
         public static ISymbol? GetSymbol( this IRef declaration, Compilation compilation, bool ignoreAssemblyKey = false )
             => ((ISdkRef) declaration).GetSymbol( compilation, ignoreAssemblyKey );
 
         private static T? GetSymbol<T>( this ICompilationElement declaration )
-            where T : ISymbol
-            => (T?) (declaration as ISymbolBasedCompilationElement)?.Symbol;
+            where T : class, ISymbol
+            => (T?) GetSymbolImpl( declaration );
 
         public static ITypeSymbol? GetSymbol( this IType type ) => type.GetSymbol<ITypeSymbol>();
 

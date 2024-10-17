@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -83,7 +84,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
                     [(ITypeSymbol) compilation.Factory.GetSpecialType( SpecialType.Int32 ).GetSymbol()],
                     [RefKind.None] );
 
-            var functionPointerType = new SymbolFunctionPointerType( functionPointerTypeSymbol, compilation, null );
+            var functionPointerType = new SymbolFunctionPointerType( functionPointerTypeSymbol, compilation, GenericContext.Empty );
 
             Assert.Equal( "typeof(delegate*<global::System.Int32,global::System.Int32>)", GetSyntaxString( syntaxSerializationContext, functionPointerType ) );
         }

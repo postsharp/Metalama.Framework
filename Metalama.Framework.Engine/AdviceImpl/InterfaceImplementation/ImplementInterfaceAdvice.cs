@@ -266,7 +266,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
         {
             return this.TemplateInstance.TemplateClass.TryGetInterfaceMember(
-                member.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation ),
+                member.GetSymbol().AssertSymbolNotNull(),
                 out templateClassMember );
         }
     }

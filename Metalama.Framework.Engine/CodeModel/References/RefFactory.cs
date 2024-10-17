@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
 
             return new SymbolRef<IMethod>(
-                declaringMember.GetSymbol().AssertSymbolNotNull(),
+                ((SourceMember) declaringMember).Symbol,
                 accessor.GenericContextForSymbolMapping,
                 this,
                 accessor.MethodKind.ToDeclarationRefTargetKind() );

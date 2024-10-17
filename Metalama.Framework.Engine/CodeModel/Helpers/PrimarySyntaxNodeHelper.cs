@@ -10,11 +10,30 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
 {
     public static class PrimarySyntaxNodeHelper
     {
-        internal static SyntaxNode? GetPrimaryDeclarationSyntax( this IDeclaration declaration ) => declaration.GetSymbol()?.GetPrimaryDeclarationSyntax();
+        internal static SyntaxNode? GetPrimaryDeclarationSyntax( this IDeclaration declaration )
+            => declaration switch
+            {
+                ISymbolBasedCompilationElement symbolBased => symbolBased.Symbol.GetPrimaryDeclarationSyntax(),
+                _ => null
+            };
+
+        internal static ISymbol? GetClosestSymbol( this IDeclaration declaration )
+        {
+            for ( var d = declaration; d != null && d.DeclarationKind != DeclarationKind.Namespace; d = d.ContainingDeclaration )
+            {
+                if ( d is ISymbolBasedCompilationElement symbolBased )
+                {
+                    return symbolBased.Symbol;
+                }
+            }
+
+            return null;
+        }
 
         internal static SyntaxNode? GetClosestPrimaryDeclarationSyntax( this IDeclaration declaration )
         {
-            for ( var symbol = declaration.GetSymbol(); symbol != null && symbol.Kind != SymbolKind.Namespace; symbol = symbol.ContainingSymbol )
+            // Then find the first symbol with syntax.
+            for ( var symbol = GetClosestSymbol( declaration ); symbol != null && symbol.Kind != SymbolKind.Namespace; symbol = symbol.ContainingSymbol )
             {
                 var syntax = symbol.GetPrimaryDeclarationSyntax();
 
