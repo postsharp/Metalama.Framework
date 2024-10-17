@@ -120,7 +120,7 @@ internal sealed class SourceAttribute : IAttributeImpl
 
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences
         => this.AttributeData.ApplicationSyntaxReference != null
-            ? [this.AttributeData.ApplicationSyntaxReference]
+            ? ImmutableArray.Create( this.AttributeData.ApplicationSyntaxReference )
             : ImmutableArray<SyntaxReference>.Empty;
 
     bool IDeclarationImpl.CanBeInherited => false;
