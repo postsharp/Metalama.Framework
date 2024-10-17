@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -90,11 +92,21 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             var mutableCompilationModel = initialCompilationModel.CreateMutableClone();
             var transformations = new List<ITransformation>();
 
+            var typeOrder = 0;
+            var aspectInstanceCounters = new Dictionary<string, int>();
+
             foreach (var transformationFactory in this._transformationFactories )
             {
                 var transformation = transformationFactory( mutableCompilationModel );
 
                 mutableCompilationModel.AddTransformation( transformation );
+
+                // We emulate a single pipeline step.
+                transformation.OrderWithinPipeline = 0;
+                transformation.OrderWithinPipelineStepAndType = typeOrder++;
+                transformation.OrderWithinPipelineStepAndTypeAndAspectInstance = 
+                    aspectInstanceCounters[transformation.AspectLayerId.AspectName] = aspectInstanceCounters.GetValueOrDefault(transformation.AspectLayerId.AspectName );
+
                 transformations.Add( transformation );
             }
 
