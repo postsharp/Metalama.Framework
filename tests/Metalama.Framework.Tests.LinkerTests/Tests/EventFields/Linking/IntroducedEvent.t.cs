@@ -1,4 +1,4 @@
-class Target
+internal class Target
 {
   public event EventHandler Foo
   {
@@ -11,25 +11,79 @@ class Target
       this.Foo_Override7 -= value;
     }
   }
-  private event EventHandler? _bar;
-  public event EventHandler? Bar
+  private event EventHandler? Bar_Override2
   {
     add
     {
-      this.Bar_Override6 += value;
+      // Should invoke source code.
+      this._bar += value;
+      // Should invoke source code.
+      this._bar += value;
+      // Should invoke override 2.
+      this.Bar_Override2 += value;
+      // Should invoke the final declaration.
+      this.Bar += value;
     }
     remove
     {
-      this.Bar_Override6 -= value;
+      // Should invoke introduced event field.
+      this._bar -= value;
+      // Should invoke introduced event field.
+      this._bar -= value;
+      // Should invoke override 2.
+      this.Bar_Override2 -= value;
+      // Should invoke the final declaration.
+      this.Bar -= value;
     }
   }
-  private event EventHandler? Bar_Empty
+  private event EventHandler? Bar_Override4
   {
     add
     {
+      // Should invoke override 2.
+      this.Bar_Override2 += value;
+      // Should invoke override 2.
+      this.Bar_Override2 += value;
+      // Should invoke override 4.
+      this.Bar_Override4 += value;
+      // Should invoke the final declaration.
+      this.Bar += value;
     }
     remove
     {
+      // Should invoke override 2.
+      this.Bar_Override2 -= value;
+      // Should invoke override 2.
+      this.Bar_Override2 -= value;
+      // Should invoke override 4.
+      this.Bar_Override4 -= value;
+      // Should invoke the final declaration.
+      this.Bar -= value;
+    }
+  }
+  private event EventHandler? Bar_Override6
+  {
+    add
+    {
+      // Should invoke override 4.
+      this.Bar_Override4 += value;
+      // Should invoke override 4.
+      this.Bar_Override4 += value;
+      // Should invoke the final declaration.
+      this.Bar += value;
+      // Should invoke the final declaration.
+      this.Bar += value;
+    }
+    remove
+    {
+      // Should invoke override 4.
+      this.Bar_Override4 -= value;
+      // Should invoke override 4.
+      this.Bar_Override4 -= value;
+      // Should invoke the final declaration.
+      this.Bar -= value;
+      // Should invoke the final declaration.
+      this.Bar -= value;
     }
   }
   public event EventHandler Foo_Override0
@@ -132,79 +186,25 @@ class Target
       this.Bar -= value;
     }
   }
-  private event EventHandler? Bar_Override2
+  private event EventHandler? _bar;
+  public event EventHandler? Bar
   {
     add
     {
-      // Should invoke source code.
-      this._bar += value;
-      // Should invoke source code.
-      this._bar += value;
-      // Should invoke override 2.
-      this.Bar_Override2 += value;
-      // Should invoke the final declaration.
-      this.Bar += value;
+      this.Bar_Override6 += value;
     }
     remove
     {
-      // Should invoke introduced event field.
-      this._bar -= value;
-      // Should invoke introduced event field.
-      this._bar -= value;
-      // Should invoke override 2.
-      this.Bar_Override2 -= value;
-      // Should invoke the final declaration.
-      this.Bar -= value;
+      this.Bar_Override6 -= value;
     }
   }
-  private event EventHandler? Bar_Override4
+  private event EventHandler? Bar_Empty
   {
     add
     {
-      // Should invoke override 2.
-      this.Bar_Override2 += value;
-      // Should invoke override 2.
-      this.Bar_Override2 += value;
-      // Should invoke override 4.
-      this.Bar_Override4 += value;
-      // Should invoke the final declaration.
-      this.Bar += value;
     }
     remove
     {
-      // Should invoke override 2.
-      this.Bar_Override2 -= value;
-      // Should invoke override 2.
-      this.Bar_Override2 -= value;
-      // Should invoke override 4.
-      this.Bar_Override4 -= value;
-      // Should invoke the final declaration.
-      this.Bar -= value;
-    }
-  }
-  private event EventHandler? Bar_Override6
-  {
-    add
-    {
-      // Should invoke override 4.
-      this.Bar_Override4 += value;
-      // Should invoke override 4.
-      this.Bar_Override4 += value;
-      // Should invoke the final declaration.
-      this.Bar += value;
-      // Should invoke the final declaration.
-      this.Bar += value;
-    }
-    remove
-    {
-      // Should invoke override 4.
-      this.Bar_Override4 -= value;
-      // Should invoke override 4.
-      this.Bar_Override4 -= value;
-      // Should invoke the final declaration.
-      this.Bar -= value;
-      // Should invoke the final declaration.
-      this.Bar -= value;
     }
   }
 }

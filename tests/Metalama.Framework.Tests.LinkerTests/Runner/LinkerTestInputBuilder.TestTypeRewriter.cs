@@ -319,7 +319,12 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                     throw new ArgumentException( "PseudoIntroduction should have 1 or 2 arguments - aspect name and optionally layer name." );
                 }
 
-                var symbol = semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+                var symbol = node switch
+                {
+                    FieldDeclarationSyntax { Declaration.Variables: [{ } variable] } => semanticModel.GetDeclaredSymbol( variable ).AssertNotNull(),
+                    EventFieldDeclarationSyntax { Declaration.Variables: [{ } variable] } => semanticModel.GetDeclaredSymbol( variable ).AssertNotNull(),
+                    _ => semanticModel.GetDeclaredSymbol( node ).AssertNotNull(),
+                };
 
                 var aspectName = introductionAttribute.ArgumentList.Arguments[0].ToString().Trim( '\"' );
 
@@ -449,7 +454,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
                         case EventDeclarationSyntax eventDeclaration:
                             var eventSymbol = (IEventSymbol) symbol;
-                            var eventBuilder = new EventBuilder( aspectLayerInstance, declaringType, eventDeclaration.Identifier.ValueText, eventSymbol.IsEventField()!.Value );
+                            var eventBuilder = new EventBuilder( aspectLayerInstance, declaringType, eventDeclaration.Identifier.ValueText, false );
                             builder = eventBuilder;
 
                             eventBuilder.Type = (INamedType) compilationModel.Factory.GetIType( eventSymbol.Type );
@@ -462,6 +467,15 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                             builder = fieldBuilder;
 
                             fieldBuilder.Type = compilationModel.Factory.GetIType( fieldSymbol.Type );
+
+                            break;
+
+                        case EventFieldDeclarationSyntax eventFieldDeclaration:
+                            var eventFieldSymbol = (IEventSymbol) symbol;
+                            var eventFieldBuilder = new EventBuilder( aspectLayerInstance, declaringType, eventFieldDeclaration.Declaration.Variables.Single().Identifier.ValueText, true );
+                            builder = eventFieldBuilder;
+
+                            eventFieldBuilder.Type = (INamedType) compilationModel.Factory.GetIType( eventFieldSymbol.Type );
 
                             break;
 
@@ -567,14 +581,31 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 var overriddenDeclarationSymbol =
                     nameofArgumentInfo switch
                     {
-                        { Symbol: { } symbol } => symbol,
+                        { 
+                            CandidateReason: CandidateReason.MemberGroup, 
+                            CandidateSymbols: [{ ContainingType.TypeKind: Microsoft.CodeAnalysis.TypeKind.Interface } interfaceMemberSymbol] 
+                        } => 
+                            semanticModel.GetDeclaredSymbol( node ).ContainingType.FindImplementationForInterfaceMember( interfaceMemberSymbol ).AssertNotNull(),
+                        { 
+                            CandidateReason: CandidateReason.MemberGroup, 
+                            CandidateSymbols: { Length: > 1 } symbols 
+                        } when
+                            symbols.All( s => s is IMethodSymbol { ContainingType.TypeKind: Microsoft.CodeAnalysis.TypeKind.Interface } )
+                            && node is MethodDeclarationSyntax { ParameterList.Parameters: { } parameters }
+                            && symbols.Count( s => ((IMethodSymbol) s).Parameters.Length == parameters.Count ) == 1 =>
+                                semanticModel.GetDeclaredSymbol( node ).ContainingType.FindImplementationForInterfaceMember( 
+                                    symbols.Single( s => ((IMethodSymbol) s).Parameters.Length == parameters.Count ))
+                                .AssertNotNull(),
+                        { Symbol: { ContainingType.TypeKind: Microsoft.CodeAnalysis.TypeKind.Interface } interfaceMemberSymbol } =>
+                            semanticModel.GetDeclaredSymbol(node).ContainingType.FindImplementationForInterfaceMember( interfaceMemberSymbol ).AssertNotNull(),
                         { CandidateReason: CandidateReason.MemberGroup, CandidateSymbols: [{ } symbol] } => symbol,
-                        { CandidateReason: CandidateReason.MemberGroup, CandidateSymbols: { Length: > 1 } symbols } 
+                        { CandidateReason: CandidateReason.MemberGroup, CandidateSymbols: { Length: > 1 } symbols }
                             when
                                 symbols.All( s => s is IMethodSymbol )
-                                && node is MethodDeclarationSyntax { ParameterList.Parameters: { } parameters } 
-                                && symbols.Count(s => ((IMethodSymbol)s).Parameters.Length == parameters.Count) == 1 => 
+                                && node is MethodDeclarationSyntax { ParameterList.Parameters: { } parameters }
+                                && symbols.Count( s => ((IMethodSymbol) s).Parameters.Length == parameters.Count ) == 1 =>
                                     symbols.Single( s => ((IMethodSymbol) s).Parameters.Length == parameters.Count ),
+                        { Symbol: { } symbol } => symbol,
                         _ => throw new AssertionFailedException("Unsupported"),
                     };
 

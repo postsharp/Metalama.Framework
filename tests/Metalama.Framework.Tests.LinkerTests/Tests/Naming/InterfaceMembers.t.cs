@@ -14,9 +14,9 @@ class Target : ITest
   }
   int ITest.Bar()
   {
-    return this.Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Bar_Source();
+    return this.Metalama_Framework_Tests_LinkerTests_Tests_Naming_InterfaceMembers_ITest_Bar_Source();
   }
-  private int Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Bar_Source()
+  private int Metalama_Framework_Tests_LinkerTests_Tests_Naming_InterfaceMembers_ITest_Bar_Source()
   {
     return 42;
   }
@@ -24,14 +24,14 @@ class Target : ITest
   {
     add
     {
-      this.Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Quz_Source += value;
+      this.Metalama_Framework_Tests_LinkerTests_Tests_Naming_InterfaceMembers_ITest_Quz_Source += value;
     }
     remove
     {
-      this.Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Quz_Source -= value;
+      this.Metalama_Framework_Tests_LinkerTests_Tests_Naming_InterfaceMembers_ITest_Quz_Source -= value;
     }
   }
-  private event EventHandler Metalama_Framework_Tests_Integration_Tests_Linker_Naming_InterfaceMembers_ITest_Quz_Source
+  private event EventHandler Metalama_Framework_Tests_LinkerTests_Tests_Naming_InterfaceMembers_ITest_Quz_Source
   {
     add
     {

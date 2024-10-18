@@ -310,9 +310,11 @@ internal sealed class AspectReferenceResolver
                     resolvedIndex = lowerOverride.Index;
                     resolvedInjectedMember = lowerOverride.Override;
                 }
-                else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex
-                                                          && HasImplicitImplementation( referencedSymbol ) )
+                else if ( targetIntroductionIndex != null 
+                          && targetIntroductionIndex.Value.WithoutTransformationIndex() < annotationLayerIndex.WithoutTransformationIndex()
+                          && HasImplicitImplementation( referencedSymbol ) )
                 {
+                    // We specifically want the index without the transformation index to test that the introduction happened in earlier aspect.
                     resolvedIndex = targetIntroductionIndex.Value;
                     resolvedInjectedMember = targetIntroductionInjectedMember;
                 }

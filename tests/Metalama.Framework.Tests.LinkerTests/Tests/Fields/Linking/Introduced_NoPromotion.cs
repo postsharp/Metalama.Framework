@@ -4,6 +4,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Tests.Fields.Linking.Introduced_N
 {
     [PseudoLayerOrder("A0")]
     [PseudoLayerOrder("A1")]
+    [PseudoLayerOrder("A2")]
     // <target>
     class Target
     {
@@ -21,11 +22,11 @@ namespace Metalama.Framework.Tests.LinkerTests.Tests.Fields.Linking.Introduced_N
             }
         }
 
-        [PseudoIntroduction("A0")]
+        [PseudoIntroduction("A1")]
         [PseudoNotInlineable]
         public int Bar;
 
-        [PseudoOverride(nameof(Foo), "A0")]
+        [PseudoOverride( nameof( Foo ), "A0" )]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public int Foo_Override0
@@ -33,8 +34,39 @@ namespace Metalama.Framework.Tests.LinkerTests.Tests.Fields.Linking.Introduced_N
             get
             {
                 // Should invoke empty code.
-                _ = link(_this.Bar, @base);
+                _ = link( _this.Bar, @base );
                 // Should invoke empty code.
+                _ = link( _this.Bar, previous );
+                // Should invoke empty code.
+                _ = link( _this.Bar, current );
+                // Should invoke the final declaration.
+                _ = link( _this.Bar, final );
+
+                return 42;
+            }
+            set
+            {
+                // Should invoke empty code.
+                link[_this.Bar, @base] = value;
+                // Should invoke empty code.
+                link[_this.Bar, previous] = value;
+                // Should invoke empty code.
+                link[_this.Bar, current] = value;
+                // Should invoke the final declaration.
+                link[_this.Bar, final] = value;
+            }
+        }
+
+        [PseudoOverride(nameof(Foo), "A1")]
+        [PseudoNotInlineable]
+        [PseudoNotDiscardable]
+        public int Foo_Override1
+        {
+            get
+            {
+                // Should invoke empty code.
+                _ = link(_this.Bar, @base);
+                // Should invoke the final declaration.
                 _ = link(_this.Bar, previous);
                 // Should invoke the final declaration.
                 _ = link(_this.Bar, current);
@@ -47,7 +79,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Tests.Fields.Linking.Introduced_N
             {
                 // Should invoke empty code.
                 link[_this.Bar, @base] = value;
-                // Should invoke empty code.
+                // Should invoke the final declaration.
                 link[_this.Bar, previous] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, current] = value;
@@ -56,7 +88,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Tests.Fields.Linking.Introduced_N
             }
         }
 
-        [PseudoOverride(nameof(Foo), "A1")]
+        [PseudoOverride(nameof(Foo), "A2")]
         [PseudoNotInlineable]
         [PseudoNotDiscardable]
         public int Foo_Override2
