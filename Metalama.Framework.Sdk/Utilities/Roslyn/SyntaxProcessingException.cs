@@ -77,8 +77,12 @@ internal sealed class SyntaxProcessingException : Exception
         var path = Path.Combine( directory, $"{Guid.NewGuid()}.txt" );
         File.WriteAllText( path, message + Environment.NewLine + Environment.NewLine + innerException );
 
-        return message;
+        throw new InvestigationException( $"SyntaxProcessingException: {message}. The exception has been saved to '{path}'.", innerException );
+        
+        //return message;
     }
 
     private static string FormatLinePosition( in LinePosition position ) => $"{position.Line + 1},{position.Character + 1}";
 }
+
+public class InvestigationException( string message, Exception innerException ) : Exception( message, innerException ) { }
