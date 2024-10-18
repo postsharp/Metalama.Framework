@@ -1,38 +1,62 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
+internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
     where T : class, ICompilationElement
 {
+    private readonly GenericContext _genericContextForSymbolMapping;
+
     public ISymbol Symbol { get; }
 
-    public override CompilationContext CompilationContext { get; }
-
-    public override bool IsDefinition => this.Symbol.IsDefinitionSafe();
+    public override bool IsDefinition => this.Symbol.IsDefinitionSafe() && this._genericContextForSymbolMapping.IsEmptyOrIdentity;
 
     [Memo]
-    public override IRef Definition => new SymbolRef<T>( this.Symbol.OriginalDefinition, this.CompilationContext, this.TargetKind );
+    public override IFullRef<T> DefinitionRef => new SymbolRef<T>( this.Symbol.OriginalDefinition, null, this.RefFactory, this.TargetKind );
 
     public override RefTargetKind TargetKind { get; }
 
+    public bool SymbolMustBeMapped => !this._genericContextForSymbolMapping.IsEmptyOrIdentity;
+
+    [Memo]
+    public override IFullRef ContainingDeclaration => this.RefFactory.FromAnySymbol( this.Symbol.ContainingSymbol );
+
+    [Memo]
+    public override IFullRef<INamedType> DeclaringType => this.RefFactory.FromSymbol<INamedType>( this.Symbol.ContainingType );
+
     public override string Name => this.Symbol.Name;
 
-    public override SerializableDeclarationId ToSerializableId() => this.Symbol.GetSerializableId();
+    public override SerializableDeclarationId ToSerializableId()
+    {
+        if ( this.SymbolMustBeMapped )
+        {
+            return ((IDeclaration) this.Definition).GetSerializableId( this.TargetKind );
+        }
+        else
+        {
+            return this.Symbol.GetSerializableId( this.TargetKind );
+        }
+    }
 
-    public SymbolRef( ISymbol symbol, CompilationContext compilationContext, RefTargetKind targetKind = RefTargetKind.Default )
+    public SymbolRef(
+        ISymbol symbol,
+        GenericContext? genericContextForSymbolMapping,
+        RefFactory refFactory,
+        RefTargetKind targetKind = RefTargetKind.Default ) : base( refFactory )
     {
         Invariant.Assert(
-            symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
-            $"The interface type was expected to be of type {symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind )} but was {typeof(T)}." );
+            symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
+            $"The interface type was expected to be of type {string.Join( " or ", symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).SelectAsReadOnlyCollection( t => t.Name ) )} but was {typeof(T)}." );
 
         // Verify that RefTargetKind is used only in reference to declarations that don't have a symbol, i.e. the reference must be normalized
         // before calling the constructor.
@@ -49,34 +73,69 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
 
         this.Symbol = symbol;
         this.TargetKind = targetKind;
-        this.CompilationContext = compilationContext;
+        this._genericContextForSymbolMapping = genericContextForSymbolMapping ?? GenericContext.Empty;
+
+        // If a genericContextForSymbolMapping is supplied, we must have a symbol definition.
+        Invariant.Assert( this._genericContextForSymbolMapping.IsEmptyOrIdentity || symbol.IsDefinitionSafe() );
     }
 
-    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext )
+    public override FullRef<T> WithGenericContext( GenericContext genericContext )
     {
-        if ( genericContext.IsEmptyOrIdentity )
+        if ( !this.IsDefinition )
         {
-            return this;
+            throw new InvalidOperationException(
+                $"{nameof(this.WithGenericContext)} must be called on a generic definition, but the current object is a generic instance." );
         }
-        else
-        {
-            // TODO: Test.
-            var mappedSymbol =
-                genericContext.NamedTypeSymbol!.GetMembers( this.Symbol.Name ).Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
 
-            return new SymbolRef<T>( mappedSymbol, this.CompilationContext, this.TargetKind );
+        switch ( genericContext.Kind )
+        {
+            case GenericContextKind.Null:
+                return this;
+
+            case GenericContextKind.Symbol:
+
+                Invariant.Assert( this._genericContextForSymbolMapping.IsEmptyOrIdentity );
+
+                var mappedSymbol =
+                    ((SymbolGenericContext) genericContext).NamedTypeSymbol.GetMembers( this.Symbol.Name )
+                    .Single( s => s.OriginalDefinition.Equals( this.Symbol.OriginalDefinition ) );
+
+                return this.RefFactory.FromSymbol<T>( mappedSymbol, targetKind: this.TargetKind );
+
+            case GenericContextKind.Introduced:
+                return this.RefFactory.FromSymbol<T>( this.Symbol, genericContext, targetKind: this.TargetKind );
+
+            default:
+                throw new AssertionFailedException();
         }
     }
-
-    public override IRefStrategy Strategy => this.CompilationContext.SymbolRefStrategy;
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
         => compilationContext.SymbolTranslator.Translate( this.Symbol ).AssertSymbolNotNull();
 
-    protected override T? Resolve(
+    public override SyntaxTree? PrimarySyntaxTree => this.Symbol.GetClosestPrimaryDeclarationSyntax()?.SyntaxTree;
+
+    private GenericContext SelectGenericContext( IGenericContext genericContext )
+    {
+        if ( this._genericContextForSymbolMapping.IsEmptyOrIdentity )
+        {
+            return (GenericContext) genericContext;
+        }
+        else if ( genericContext is { IsEmptyOrIdentity: true } )
+        {
+            return this._genericContextForSymbolMapping;
+        }
+        else
+        {
+            throw new InvalidOperationException( "Cannot combine two non-empty generic contexts." );
+        }
+    }
+
+    protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext )
+        IGenericContext genericContext,
+        Type interfaceType )
     {
         var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( this.Symbol, this.CompilationContext.Compilation );
 
@@ -86,22 +145,32 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         }
 
         return ConvertDeclarationOrThrow(
-            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, genericContext ).AssertNotNull(),
-            compilation );
+            compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind, this.SelectGenericContext( genericContext ), interfaceType )
+                .AssertNotNull(),
+            compilation,
+            interfaceType );
     }
 
     public override string ToString()
-        => this.TargetKind switch
+    {
+        var symbol = this.TargetKind switch
         {
-            RefTargetKind.Default => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ),
-            _ => $"{this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )}:{this.TargetKind}"
+            RefTargetKind.Default => this.Symbol.ToDebugString(),
+            _ => $"{this.Symbol.ToDebugString()}:{this.TargetKind}"
         };
 
-    public override IRefImpl<TOut> As<TOut>()
-        => (IRefImpl<TOut>) (object) this; // There should be no reason to upcast since we always create instances of the right type.
+        if ( !this._genericContextForSymbolMapping.IsEmptyOrIdentity )
+        {
+            symbol += " in context " + this._genericContextForSymbolMapping;
+        }
+
+        return symbol;
+    }
+
+    protected override IFullRef<TOut> CastAsFullRef<TOut>() => (IFullRef<TOut>) (object) this;
 
     public override int GetHashCode( RefComparison comparison )
-        => HashCode.Combine( comparison.GetSymbolComparer().GetHashCode( this.Symbol ), this.TargetKind );
+        => HashCode.Combine( comparison.GetSymbolComparer().GetHashCode( this.Symbol ), this.TargetKind, this._genericContextForSymbolMapping );
 
     public override DeclarationKind DeclarationKind => this.TargetKind.ToDeclarationKind() ?? this.Symbol.GetDeclarationKind( this.CompilationContext );
 
@@ -120,9 +189,19 @@ internal sealed class SymbolRef<T> : CompilationBoundRef<T>, ISymbolRef
         Invariant.Assert(
             this.CompilationContext == otherRef.CompilationContext ||
             comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
-            "Compilation mistmatch in a non-structural comparison." );
+            "Compilation mismatch in a non-structural comparison." );
 
-        return comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext ).Equals( this.Symbol, otherRef.Symbol )
-               && this.TargetKind == otherRef.TargetKind;
+        if ( !comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext ).Equals( this.Symbol, otherRef.Symbol )
+             && this.TargetKind == otherRef.TargetKind )
+        {
+            return false;
+        }
+
+        if ( !this._genericContextForSymbolMapping.Equals( otherRef._genericContextForSymbolMapping ) )
+        {
+            return false;
+        }
+
+        return true;
     }
 }

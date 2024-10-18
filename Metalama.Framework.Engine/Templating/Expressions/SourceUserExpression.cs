@@ -1,7 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -21,6 +22,19 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
         isAssignable ) { }
 
     public object AsSyntaxNode => this.Expression;
+
+    // We add a cast to the original target type because the original expression may be target-typed, but may be used in a more weakly typed target.
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
+    {
+        if ( targetType?.Equals( this.Type ) != true )
+        {
+            return syntaxSerializationContext.SyntaxGenerator.CastExpression( this.Type, this.Expression );
+        }
+        else
+        {
+            return this.Expression;
+        }
+    }
 
     [Memo]
     public string AsString => this.Expression.NormalizeWhitespace().ToString();

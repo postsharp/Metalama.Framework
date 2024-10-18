@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Validation;

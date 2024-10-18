@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,31 +12,18 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// <summary>
     /// Base implementation of <see cref="IRef"/> for <see cref="IAttribute"/>.
     /// </summary>
-    internal abstract class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
+    internal abstract class AttributeRef : IRef<IAttribute>, IEquatable<AttributeRef>, IRefImpl
     {
-        protected AttributeRef( IRef<IDeclaration> containingDeclaration, IRef<INamedType> attributeType, CompilationContext compilationContext )
-        {
-            this.ContainingDeclaration = containingDeclaration;
-            this.AttributeType = attributeType;
-            this.CompilationContext = compilationContext;
-        }
+        // Note: These references are not necessarily full refs in case of deserialization.
+        public abstract IRef<IDeclaration> ContainingDeclaration { get; }
 
-        public IRef<IDeclaration> ContainingDeclaration { get; }
-
-        public IRef<INamedType> AttributeType { get; }
-
-        public CompilationContext CompilationContext { get; }
-
-        public ISymbol GetClosestContainingSymbol( CompilationContext compilationContext )
-            => ((IRefImpl) this.ContainingDeclaration).GetClosestContainingSymbol( compilationContext );
+        public abstract IRef<INamedType> AttributeType { get; }
 
         public abstract string? Name { get; }
 
         SerializableDeclarationId IRef.ToSerializableId() => throw new NotSupportedException();
 
-        SerializableDeclarationId IRefImpl.ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();
-
-        IRefImpl<TOut> IRefImpl<IAttribute>.As<TOut>() => this as IRefImpl<TOut> ?? throw new NotSupportedException();
+        IRef<TOut> IRef.As<TOut>() => this as IRef<TOut> ?? throw new NotSupportedException();
 
         public IAttribute GetTarget( ICompilation compilation, IGenericContext? genericContext = null )
         {
@@ -49,16 +35,23 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return attribute;
         }
 
-        ICompilationElement? IRef.GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext )
-            => this.GetTargetOrNull( compilation, genericContext );
-
         public IDurableRef<IAttribute> ToDurable() => throw new NotSupportedException();
 
         public bool IsDurable => false;
 
         IRef IRefImpl.ToDurable() => this.ToDurable();
 
-        ICompilationElement IRef.GetTarget( ICompilation compilation, IGenericContext? genericContext ) => this.GetTarget( compilation );
+        ICompilationElement? IRef.GetTargetInterface( ICompilation compilation, Type? interfaceType, IGenericContext? genericContext, bool throwIfMissing )
+        {
+            var target = this.GetTargetOrNull( compilation, genericContext );
+
+            if ( target == null && throwIfMissing )
+            {
+                throw new InvalidOperationException();
+            }
+
+            return target;
+        }
 
         public IAttribute? GetTargetOrNull( ICompilation compilation, IGenericContext? genericContext = null )
         {
@@ -107,8 +100,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 RefComparison.Default => this.GetHashCode(),
                 _ => throw new NotSupportedException( "Non-default comparison of attributes is not supported." )
             };
-
-        public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
         public virtual bool Equals( AttributeRef? other )
         {

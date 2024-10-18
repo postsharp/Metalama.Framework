@@ -76,5 +76,10 @@ namespace Metalama.Framework.Code
         IDeclarationCache Cache { get; }
 
         new IRef<ICompilation> ToRef();
+
+        /// <summary>
+        /// Gets a service that allows to create declaration and type instances for the current <see cref="ICompilation"/>.
+        /// </summary>
+        IDeclarationFactory Factory { get; }
     }
 }

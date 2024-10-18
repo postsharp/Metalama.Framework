@@ -17,7 +17,7 @@ internal sealed class ImplicitLastOverrideReferenceInliner : Inliner
     public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
     {
         SyntaxNode body =
-            aspectReference.ContainingSemantic.Symbol.GetPrimaryDeclaration() switch
+            aspectReference.ContainingSemantic.Symbol.GetPrimaryDeclarationSyntax() switch
             {
                 MethodDeclarationSyntax { Body: { } methodBody } => methodBody,
                 MethodDeclarationSyntax { ExpressionBody: { } methodBody } => methodBody,

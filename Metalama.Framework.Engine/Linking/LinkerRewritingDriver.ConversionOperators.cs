@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -52,11 +52,11 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )];
             }
             else
             {
-                return new[] { operatorDeclaration };
+                return [operatorDeclaration];
             }
 
             ConversionOperatorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

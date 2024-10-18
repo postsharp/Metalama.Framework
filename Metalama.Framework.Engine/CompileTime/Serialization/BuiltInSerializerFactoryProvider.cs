@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.Services;
@@ -52,13 +51,13 @@ internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvid
         this.AddSerializer( typeof(DeclarationIdRef<>), typeof(RefSerializer<>) );
         this.AddSerializer( typeof(TypeIdRef<>), typeof(TypeIdRefSerializer<>) );
         this.AddSerializer( typeof(SymbolIdRef<>), typeof(RefSerializer<>) );
-        this.AddSerializer( typeof(BuilderRef<>), typeof(RefSerializer<>) );
+        this.AddSerializer( typeof(IntroducedRef<>), typeof(RefSerializer<>) );
         this.AddSerializer<SerializableDeclarationId, SerializableDeclarationIdSerializer>();
         this.AddSerializer<SerializableTypeId, SerializableTypeIdSerializer>();
         this.AddSerializer<SymbolAttributeRef, AttributeRefSerializer>();
         this.AddSerializer<DeserializedAttributeRef, AttributeRefSerializer>();
         this.AddSerializer<SyntaxAttributeRef, AttributeRefSerializer>();
-        this.AddSerializer<BuilderAttributeRef, AttributeRefSerializer>();
+        this.AddSerializer<IntroducedAttributeRef, AttributeRefSerializer>();
         this.AddSerializer<TypedConstantRef, TypedConstantRefSerializer>();
         this.AddSerializer<AttributeSerializationData, AttributeSerializationDataSerializer>();
 

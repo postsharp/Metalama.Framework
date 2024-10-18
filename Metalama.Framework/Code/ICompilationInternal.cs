@@ -9,11 +9,6 @@ namespace Metalama.Framework.Code
     {
         ICompilationHelpers Helpers { get; }
 
-        /// <summary>
-        /// Gets a service that allows to create type instances and compare them.
-        /// </summary>
-        IDeclarationFactory Factory { get; }
-
         IAspectRepository AspectRepository { get; }
 
         IHierarchicalOptionsManager HierarchicalOptionsManager { get; }

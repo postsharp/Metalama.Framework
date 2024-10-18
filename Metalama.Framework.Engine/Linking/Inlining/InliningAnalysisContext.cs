@@ -4,42 +4,44 @@ namespace Metalama.Framework.Engine.Linking.Inlining;
 
 internal sealed class InliningAnalysisContext
 {
-    private readonly PersistentContext _persistentContext;
+    private readonly IdGenerator _idGenerator;
 
     public bool UsingSimpleInlining { get; }
 
     public string? ReturnVariableIdentifier { get; }
 
-    public int Ordinal { get; }
+    public InliningId Id { get; }
 
-    public int? ParentOrdinal { get; }
+    public InliningId? ParentId { get; }
 
-    public InliningAnalysisContext() : this( null, new PersistentContext(), true, null ) { }
+    public InliningAnalysisContext() : this( null, new IdGenerator(), true, null ) { }
 
-    private InliningAnalysisContext( int? parentOrdinal, PersistentContext identifierProvider, bool usingSimpleInlining, string? returnVariableIdentifier )
+    private InliningAnalysisContext( InliningId? parentId, IdGenerator identifierProvider, bool usingSimpleInlining, string? returnVariableIdentifier )
     {
         this.UsingSimpleInlining = usingSimpleInlining;
-        this._persistentContext = identifierProvider;
-        this.Ordinal = this._persistentContext.GetNextOrdinal();
-        this.ParentOrdinal = parentOrdinal;
+        this._idGenerator = identifierProvider;
+        this.Id = this._idGenerator.GetNextId();
+        this.ParentId = parentId;
         this.ReturnVariableIdentifier = returnVariableIdentifier;
     }
 
-    public string AllocateReturnLabel() => this._persistentContext.AllocateReturnLabel();
+    public string AllocateReturnLabel() => this._idGenerator.AllocateReturnLabel();
 
-    internal InliningAnalysisContext Recurse() => new( this.Ordinal, this._persistentContext, this.UsingSimpleInlining, null );
+    internal InliningAnalysisContext Recurse() => new( this.Id, this._idGenerator, this.UsingSimpleInlining, null );
 
-    internal InliningAnalysisContext RecurseWithSimpleInlining() => new( this.Ordinal, this._persistentContext, true, null );
+    internal InliningAnalysisContext RecurseWithSimpleInlining() => new( this.Id, this._idGenerator, true, null );
 
     internal InliningAnalysisContext RecurseWithComplexInlining( string? returnVariableIdentifier )
-        => new( this.Ordinal, this._persistentContext, false, returnVariableIdentifier );
+        => new( this.Id, this._idGenerator, false, returnVariableIdentifier );
 
-    private sealed class PersistentContext
+    public override string ToString() => $"{{Id={this.Id}, ParentId={this.ParentId?.ToString() ?? "null"}, ReturnVariableIdentifier={this.ReturnVariableIdentifier ?? "null"}}}";
+
+    private sealed class IdGenerator
     {
-        private int _nextOrdinal;
+        private int _nextOrdinal = 1;
         private int _nextReturnLabelIdentifier = 1;
 
-        public int GetNextOrdinal() => this._nextOrdinal++;
+        public InliningId GetNextId() => new InliningId( this._nextOrdinal++ );
 
         public string AllocateReturnLabel()
         {

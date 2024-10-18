@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -21,7 +22,7 @@ internal sealed class LinkerLateTransformationRegistry
 
     public LinkerLateTransformationRegistry(
         PartialCompilation intermediateCompilation,
-        IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> lateTypeLevelTransformations )
+        IReadOnlyDictionary<ISymbolRef<INamedType>, LateTypeLevelTransformations> lateTypeLevelTransformations )
     {
         // TODO: Parallelize.
         HashSet<INamedTypeSymbol> typesWithRemovedPrimaryConstructor;
@@ -38,7 +39,7 @@ internal sealed class LinkerLateTransformationRegistry
             var type = lateTypeLevelTransformationPair.Key;
             var transformations = lateTypeLevelTransformationPair.Value;
 
-            var typeSymbol = intermediateCompilation.CompilationContext.SymbolTranslator.Translate( type.GetSymbol().AssertNotNull() ).AssertNotNull();
+            var typeSymbol = (INamedTypeSymbol) intermediateCompilation.CompilationContext.SymbolTranslator.Translate( type.Symbol ).AssertNotNull();
 
             if ( transformations.ShouldRemovePrimaryConstructor )
             {
@@ -54,7 +55,7 @@ internal sealed class LinkerLateTransformationRegistry
                     switch ( symbol )
                     {
                         case IFieldSymbol { IsStatic: false } fieldSymbol:
-                            var declarator = (VariableDeclaratorSyntax) fieldSymbol.GetPrimaryDeclaration().AssertNotNull();
+                            var declarator = (VariableDeclaratorSyntax) fieldSymbol.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             if ( declarator.Initializer == null )
                             {
@@ -66,7 +67,7 @@ internal sealed class LinkerLateTransformationRegistry
                             break;
 
                         case IPropertySymbol { IsStatic: false } propertySymbol:
-                            var primaryDeclaration = propertySymbol.GetPrimaryDeclaration().AssertNotNull();
+                            var primaryDeclaration = propertySymbol.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             switch ( primaryDeclaration )
                             {
@@ -89,7 +90,7 @@ internal sealed class LinkerLateTransformationRegistry
                             break;
 
                         case IEventSymbol { IsStatic: false } eventSymbol:
-                            var eventDeclaration = eventSymbol.GetPrimaryDeclaration().AssertNotNull();
+                            var eventDeclaration = eventSymbol.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             if ( eventDeclaration is VariableDeclaratorSyntax eventFieldDeclarator )
                             {
@@ -140,7 +141,7 @@ internal sealed class LinkerLateTransformationRegistry
     public IReadOnlyList<IPropertySymbol> GetPrimaryConstructorProperties( INamedTypeSymbol type )
 #pragma warning restore CA1822 // Mark members as static
     {
-        return type.GetMembers().OfType<IPropertySymbol>().Where( p => p.GetPrimaryDeclaration() is ParameterSyntax ).ToArray();
+        return type.GetMembers().OfType<IPropertySymbol>().Where( p => p.GetPrimaryDeclarationSyntax() is ParameterSyntax ).ToArray();
     }
 
     public bool IsPrimaryConstructorInitializedMember( ISymbol symbol ) => this._primaryConstructorInitializedMembers.Contains( symbol );

@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
@@ -22,27 +22,34 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransformation
 {
-    protected new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+    public IFullRef<IMethod> OverriddenMethod { get; }
 
-    protected OverrideMethodBaseTransformation( Advice advice, IMethod targetMethod, IObjectReader tags )
-        : base( advice, targetMethod, tags ) { }
+    protected OverrideMethodBaseTransformation( AspectLayerInstance aspectLayerInstance, IFullRef<IMethod> targetMethod )
+        : base( aspectLayerInstance, targetMethod )
+    {
+        this.OverriddenMethod = targetMethod;
+    }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this.OverriddenMethod;
 
     protected SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context, TemplateKind templateKind )
         => ProceedHelper.CreateProceedDynamicExpression(
             context.SyntaxGenerationContext,
-            this.CreateInvocationExpression( context.SyntaxGenerationContext, context.AspectReferenceSyntaxProvider ),
+            this.CreateInvocationExpression( context ),
             templateKind,
-            this.OverriddenDeclaration );
+            this.OverriddenMethod.GetTarget( context.FinalCompilation ) );
 
     protected InjectedMember[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
     {
         TypeSyntax? returnType = null;
 
-        var modifiers = this.OverriddenDeclaration
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( this.InitialCompilation );
+
+        var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async | ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
-        if ( !this.OverriddenDeclaration.IsAsync )
+        if ( !overriddenDeclaration.IsAsync )
         {
             if ( isAsyncTemplate )
             {
@@ -61,14 +68,13 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             // If the template is async and the target declaration is `async void`, and regardless of the async flag the template, we have to change the type to ValueTask, otherwise
             // it is not awaitable
 
-            if ( this.OverriddenDeclaration.ReturnType.Equals( SpecialType.Void ) )
+            if ( overriddenDeclaration.ReturnType.Equals( SpecialType.Void ) )
             {
-                returnType = context.SyntaxGenerator.Type(
-                    this.OverriddenDeclaration.GetCompilationContext().ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
+                returnType = context.SyntaxGenerator.Type( overriddenDeclaration.GetCompilationContext().ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
             }
         }
 
-        returnType ??= context.SyntaxGenerator.Type( this.OverriddenDeclaration.ReturnType );
+        returnType ??= context.SyntaxGenerator.Type( overriddenDeclaration.ReturnType );
 
         var introducedMethod = MethodDeclaration(
             List<AttributeListSyntax>(),
@@ -77,43 +83,47 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             null,
             Identifier(
                 context.InjectionNameProvider.GetOverrideName(
-                    this.OverriddenDeclaration.DeclaringType,
-                    this.ParentAdvice.AspectLayerId,
-                    this.OverriddenDeclaration ) ),
-            context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
-            context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, true ),
-            context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
+                    overriddenDeclaration.DeclaringType,
+                    this.AspectLayerId,
+                    overriddenDeclaration ) ),
+            context.SyntaxGenerator.TypeParameterList( overriddenDeclaration, context.FinalCompilation ),
+            context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.FinalCompilation, true ),
+            context.SyntaxGenerator.ConstraintClauses( overriddenDeclaration ),
             newMethodBody,
             null );
 
-        return new[]
-        {
+        return
+        [
             new InjectedMember(
                 this,
                 introducedMethod,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
-        };
+                overriddenDeclaration.ToFullRef() )
+        ];
     }
 
-    private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext, AspectReferenceSyntaxProvider referenceSyntaxProvider )
-        => this.OverriddenDeclaration.MethodKind switch
+    private ExpressionSyntax CreateInvocationExpression( MemberInjectionContext context )
+    {
+        var overriddenDeclaration = this.OverriddenMethod.GetTarget( context.FinalCompilation );
+
+        return overriddenDeclaration.MethodKind switch
         {
             MethodKind.Default or MethodKind.ExplicitInterfaceImplementation =>
                 InvocationExpression(
-                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
+                    this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, context ),
                     ArgumentList(
                         SeparatedList(
-                            this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList(
+                            overriddenDeclaration.Parameters.SelectAsReadOnlyList(
                                 p => Argument( null, p.RefKind.InvocationRefKindToken(), IdentifierName( p.Name ) ) ) ) ) ),
             MethodKind.Finalizer =>
-                referenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
+                context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.AspectLayerId ),
             MethodKind.Operator =>
-                referenceSyntaxProvider.GetOperatorReference(
-                    this.ParentAdvice.AspectLayerId,
-                    (IMethod) this.TargetDeclaration,
-                    generationContext.SyntaxGenerator ),
-            _ => throw new AssertionFailedException( $"Unsupported method kind: {this.OverriddenDeclaration} is {this.OverriddenDeclaration.MethodKind}." )
+                context.AspectReferenceSyntaxProvider.GetOperatorReference(
+                    this.AspectLayerId,
+                    (IMethod) this.TargetDeclaration.GetTarget( context.FinalCompilation ),
+                    context.SyntaxGenerator ),
+            _ => throw new AssertionFailedException( $"Unsupported method kind: {overriddenDeclaration} is {overriddenDeclaration.MethodKind}." )
         };
+    }
 }

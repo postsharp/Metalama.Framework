@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -15,15 +18,18 @@ internal sealed class BoundTemplateMethod
     /// </summary>
     public TemplateMember<IMethod> TemplateMember { get; }
 
+    public TemplateProvider TemplateProvider => this.TemplateMember.TemplateProvider;
+
     public BoundTemplateMethod( TemplateMember<IMethod> template, object?[] templateArguments )
     {
         this.TemplateMember = template;
         this.TemplateArguments = templateArguments;
 
 #if DEBUG
-        if ( template.Declaration.MethodKind is MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove && templateArguments.Length != 1 )
+        if ( ((IMethodSymbol) template.Symbol).MethodKind is MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove
+             && templateArguments.Length != 1 )
         {
-            throw new AssertionFailedException( $"'{template.Declaration}' is an accessor the the template has '{templateArguments.Length}' arguments." );
+            throw new AssertionFailedException( $"'{template.Symbol}' is an accessor the the template has '{templateArguments.Length}' arguments." );
         }
 #endif
     }

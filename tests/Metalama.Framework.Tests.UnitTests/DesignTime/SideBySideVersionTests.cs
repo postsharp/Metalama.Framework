@@ -20,17 +20,18 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public sealed class SideBySideVersionTests : DesignTimeTestBase
 {
-    private static async Task<(DesignTimeAspectPipelineFactory PipelineFactory, Compilation DependentCompilation, SyntaxTree DependentCodeTree)> PreparePipeline(
-        TestContext testContext,
-        string masterCode,
-        string dependentCode )
+    private static async Task<(DesignTimeAspectPipelineFactory PipelineFactory, Compilation DependentCompilation, SyntaxTree DependentCodeTree)>
+        PreparePipeline(
+            TestContext testContext,
+            string masterCode,
+            string dependentCode )
     {
         var workspaceProvider = new TestWorkspaceProvider( testContext.ServiceProvider );
 
         var entryPointManager = new DesignTimeEntryPointManager();
         var consumer = entryPointManager.GetConsumer( CurrentContractVersions.All );
 
-        var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof( IDesignTimeEntryPointConsumer ), consumer )
+        var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof(IDesignTimeEntryPointConsumer), consumer )
             .WithService( workspaceProvider );
 
         // Initialize dependencies simulating the current version.
@@ -62,12 +63,12 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         return (currentVersionPipelineFactory, dependentCompilation, dependentCodeSyntaxTree);
     }
 
-    private async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> RunPipeline( string masterCode, string dependentCode )
+    private async Task<FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>> RunPipeline( string masterCode, string dependentCode )
     {
         using var testContext = this.CreateTestContext();
         var (pipelineFactory, dependentCompilation, _) = await PreparePipeline( testContext, masterCode, dependentCode );
 
-        return await pipelineFactory.ExecuteAsync( dependentCompilation!, AsyncExecutionContext.Get() );
+        return await pipelineFactory.ExecuteAsync( dependentCompilation, AsyncExecutionContext.Get() );
     }
 
     private async Task<List<Diagnostic>> RunAnalyzer( string masterCode, string dependentCode )
@@ -75,7 +76,7 @@ public sealed class SideBySideVersionTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var (pipelineFactory, dependentCompilation, dependentSyntaxTree) = await PreparePipeline( testContext, masterCode, dependentCode );
 
-        var semanticModel = dependentCompilation!.GetSemanticModel( dependentSyntaxTree! );
+        var semanticModel = dependentCompilation.GetSemanticModel( dependentSyntaxTree );
 
         var analyzer = new TheDiagnosticAnalyzer( pipelineFactory.ServiceProvider );
         var analysisContext = new TestSemanticModelAnalysisContext( semanticModel, testContext.ProjectOptions );

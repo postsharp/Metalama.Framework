@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal sealed class AttributeCollection : DeclarationCollection<IAttribute>, IAttributeCollection
+    internal sealed class AttributeCollection : DeclarationCollection<IAttribute, IRef<IAttribute>>, IAttributeCollection
     {
         public static AttributeCollection Empty { get; } = new();
 
@@ -27,7 +28,14 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.OfAttributeType( type, conversionKind );
 
         private IEnumerable<IAttribute> OfAttributeType( IType type, ConversionKind conversionKind = ConversionKind.Default )
-            => this.GetItems( this.Source.Where( a => ((AttributeRef) a).AttributeType.IsConvertibleTo( type.ToRef(), conversionKind ) ) );
+            => this.GetItems(
+                this.Source.Where(
+                    a =>
+                    {
+                        var attributeType = ((AttributeRef) a).AttributeType.ToFullRef( type.GetRefFactory() ).ConstructedDeclaration;
+
+                        return attributeType.Is( type, conversionKind );
+                    } ) );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
 
@@ -38,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.GetItems( this.Source.Where( a => predicate( ((AttributeRef) a).AttributeType.GetTarget( this.Compilation ) ) ) );
 
         public IEnumerable<T> GetConstructedAttributesOfType<T>()
-            where T : System.Attribute
+            where T : Attribute
             => this.OfAttributeType( typeof(T) ).Select( a => a.Construct<T>() );
 
         private IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind = ConversionKind.Default )
@@ -46,7 +54,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             if ( this.ContainingDeclaration == null )
             {
                 // The collection is empty.
-                return Enumerable.Empty<IAttribute>();
+                return [];
             }
 
             return this.OfAttributeType(

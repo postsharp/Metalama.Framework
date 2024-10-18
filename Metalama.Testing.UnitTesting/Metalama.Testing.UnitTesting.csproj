@@ -12,7 +12,7 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.AspectTests.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Workspaces" />
     </ItemGroup>

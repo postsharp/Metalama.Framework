@@ -13,7 +13,7 @@ internal class AttributeRefSerializer : ReferenceTypeSerializer
     {
         var data = constructorArguments.GetValue<AttributeSerializationData>( "data" ).AssertNotNull();
 
-        return new DeserializedAttributeRef( data, ((ISerializationContext) constructorArguments).CompilationContext );
+        return new DeserializedAttributeRef( data );
     }
 
     public override void SerializeObject( object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )

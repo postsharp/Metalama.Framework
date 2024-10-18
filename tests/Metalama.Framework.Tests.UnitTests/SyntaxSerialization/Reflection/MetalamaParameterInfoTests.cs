@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using System.Linq;
 using System.Reflection;
@@ -186,7 +187,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 .Methods.Single( m => m.Name == "Method" )
                 .Parameters.First( p => p.Name == "target" );
 
-            var parameter = (Parameter) single;
+            var parameter = (SourceParameter) single;
 
             var actual =
                 testContext.Serialize( CompileTimeParameterInfo.Create( parameter ) )
@@ -201,7 +202,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
-            var p = (MethodReturnParameter) single;
+            var p = (PseudoReturnParameter) single;
 
             var actual = testContext.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();
@@ -215,7 +216,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
-            var p = (MethodReturnParameter) single;
+            var p = (PseudoReturnParameter) single;
 
             var actual = testContext.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();

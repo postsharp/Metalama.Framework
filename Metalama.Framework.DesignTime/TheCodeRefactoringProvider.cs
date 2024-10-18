@@ -96,7 +96,7 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                if (!syntaxRoot.Span.Contains(context.Span))
+                if ( !syntaxRoot.Span.Contains( context.Span ) )
                 {
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): requested span out-of-bounds." );
 

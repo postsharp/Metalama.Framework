@@ -40,8 +40,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.AspectTests.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.TemplateTests.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>

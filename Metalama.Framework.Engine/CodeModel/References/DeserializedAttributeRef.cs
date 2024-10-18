@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -13,13 +12,14 @@ internal sealed class DeserializedAttributeRef : AttributeRef
 {
     private readonly AttributeSerializationData _serializationData;
 
-    public DeserializedAttributeRef( AttributeSerializationData serializationData, CompilationContext compilationContext ) : base(
-        serializationData.ContainingDeclaration,
-        serializationData.Type,
-        compilationContext )
+    public DeserializedAttributeRef( AttributeSerializationData serializationData )
     {
         this._serializationData = serializationData;
     }
+
+    public override IRef<IDeclaration> ContainingDeclaration => this._serializationData.ContainingDeclaration;
+
+    public override IRef<INamedType> AttributeType => this._serializationData.Type;
 
     public override bool TryGetTarget( CompilationModel compilation, IGenericContext? genericContext, [NotNullWhen( true )] out IAttribute? attribute )
     {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -9,31 +10,28 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
+internal sealed partial class SyntaxRef<T> : FullRef<T>
     where T : class, ICompilationElement
 {
     public SyntaxNode SyntaxNode { get; }
 
-    public SyntaxRef( SyntaxNode syntaxNode, RefTargetKind targetKind, CompilationContext compilationContext )
+    public SyntaxRef( SyntaxNode syntaxNode, RefTargetKind targetKind, RefFactory refFactory ) : base( refFactory )
     {
         this.SyntaxNode = syntaxNode.AssertNotNull();
         this.TargetKind = targetKind;
-        this.CompilationContext = compilationContext;
     }
 
-    public override CompilationContext CompilationContext { get; }
-
-    public override ICompilationBoundRefImpl WithGenericContext( GenericContext genericContext ) => throw new NotImplementedException();
-
-    public override IRefStrategy Strategy => throw new NotSupportedException();
+    public override FullRef<T> WithGenericContext( GenericContext genericContext ) => throw new NotImplementedException();
 
     public override bool IsDefinition => true;
 
-    public override IRef Definition => this;
+    public override IFullRef<T> DefinitionRef => this;
 
     public override RefTargetKind TargetKind { get; }
 
-    public override string? Name => null;
+    public override IFullRef ContainingDeclaration => throw new NotImplementedException();
+
+    public override IFullRef<INamedType> DeclaringType => throw new NotImplementedException();
 
     protected override ISymbol GetSymbolIgnoringRefKind( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {
@@ -41,6 +39,8 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
 
         return this.Symbol;
     }
+
+    public override SyntaxTree PrimarySyntaxTree => this.SyntaxNode.SyntaxTree;
 
     [Memo]
     private ISymbol Symbol => this.GetSymbol();
@@ -57,10 +57,11 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
                ?? throw new AssertionFailedException( $"Cannot get a symbol for {this.SyntaxNode.GetType().Name}." );
     }
 
-    protected override T? Resolve(
+    protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext )
+        IGenericContext genericContext,
+        Type interfaceType )
     {
         return ConvertDeclarationOrThrow(
             compilation.Factory.GetCompilationElement(
@@ -68,7 +69,8 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
                     this.TargetKind,
                     genericContext )
                 .AssertNotNull(),
-            compilation );
+            compilation,
+            interfaceType );
     }
 
     public override string ToString()
@@ -78,7 +80,8 @@ internal sealed class SyntaxRef<T> : CompilationBoundRef<T>
             _ => $"{this.SyntaxNode.GetType().Name}:{this.TargetKind}"
         };
 
-    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.CompilationContext );
+    protected override IFullRef<TOut> CastAsFullRef<TOut>()
+        => this as IFullRef<TOut> ?? new SyntaxRef<TOut>( this.SyntaxNode, this.TargetKind, this.RefFactory );
 
     public override bool Equals( IRef? other, RefComparison comparison )
     {

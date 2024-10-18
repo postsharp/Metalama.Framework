@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Validation;
@@ -57,17 +58,22 @@ internal sealed class OutboundReferenceIndexBuilder : ReferenceIndexBuilder
 
         var sources = declaration.Sources;
 
-        if ( sources.Length == 0 )
+        switch ( sources.Length )
         {
-            return;
-        }
-        else if ( sources.Length == 1 )
-        {
-            Index( sources[0] );
-        }
-        else
-        {
-            this._taskRunner.RunSynchronously( () => this._concurrentTaskRunner.RunConcurrentlyAsync( sources, Index, cancellationToken ), cancellationToken );
+            case 0:
+                return;
+
+            case 1:
+                Index( sources[0] );
+
+                break;
+
+            default:
+                this._taskRunner.RunSynchronously(
+                    () => this._concurrentTaskRunner.RunConcurrentlyAsync( sources, Index, cancellationToken ),
+                    cancellationToken );
+
+                break;
         }
 
         void Index( SourceReference source )

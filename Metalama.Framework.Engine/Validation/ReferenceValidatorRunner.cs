@@ -183,7 +183,7 @@ public sealed class ReferenceValidatorRunner
                                 diagnosticAdder,
                                 this._userCodeInvoker,
                                 userCodeExecutionContext,
-                                new[] { reference.Reference } );
+                                [reference.Reference] );
                         }
                     }
                     else

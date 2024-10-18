@@ -6,13 +6,13 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,14 +23,13 @@ using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public sealed class CodeModelTests : UnitTestClass
+    public sealed partial class CodeModelTests : UnitTestClass
     {
         [Fact]
         public void ObjectIdentity()
@@ -579,7 +578,7 @@ class C<T>
 
             var type = Assert.Single( compilation.Types );
 
-            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeKind.TypeParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Fields.SelectAsImmutableArray( p => p.Type.TypeKind ) );
         }
@@ -682,7 +681,7 @@ class C
                 "Dictionary<int, string>",
                 compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) ).ToString() );
 
-            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) ).ToString() );
+            Assert.Equal( "int[][,]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) ).ToString() );
             Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof(void*) ).ToString() );
 
             Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof(int).MakeByRefType() ) );
@@ -760,18 +759,20 @@ class C<TC>
             var type = Assert.Single( compilation.Types );
 
             var openMethod = type.Methods.First();
-            var closedType = type.WithTypeArguments( typeof(string) );
+            var closedType = type.MakeGenericInstance( typeof(string) );
             var closedTypeMethod = closedType.Methods.First();
-            var closedMethod = closedTypeMethod.WithTypeArguments( typeof(int) );
+            var closedMethod = closedTypeMethod.MakeGenericInstance( typeof(int) );
 
             Assert.Equal( "(TC, TM)", openMethod.ReturnType.ToString() );
             Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
             Assert.Equal( "(string, int)", closedMethod.ReturnType.ToString() );
 
             // Generic type from a typeof.
-            _ = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).WithTypeArguments( typeof(int) );
+            _ = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).MakeGenericInstance( typeof(int) );
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var closedMethod2 = openMethod.WithTypeArguments( new[] { typeof(int) }, new[] { typeof(string) } );
+#pragma warning restore CS0618 // Type or member is obsolete
             Assert.Equal( "(int, string)", closedMethod2.ReturnType.ToString() );
         }
 
@@ -796,7 +797,7 @@ class Class<T>
             using var userCodeContext = testContext.WithExecutionContext( compilation );
 
             var openType = compilation.Types.Single();
-            var typeInstance = openType.WithTypeArguments( typeof(string) );
+            var typeInstance = openType.MakeGenericInstance( typeof(string) );
 
             Assert.Equal( "string", openType.Fields.Single( f => !f.IsImplicitlyDeclared ).ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Properties.Single().ForTypeInstance( typeInstance ).Type.ToString() );
@@ -846,8 +847,8 @@ class Parent<TParent>
             Assert.False( nonGenericMethodOnOpenNonGenericNestedType.IsGeneric );
 
             // Creating a closed nested type.
-            var closedParentType = openParentType.WithTypeArguments( typeof(string) );
-            var closedGenericNestedType = closedParentType.Types.OfName( "NestedGeneric" ).Single().WithTypeArguments( typeof(int) );
+            var closedParentType = openParentType.MakeGenericInstance( typeof(string) );
+            var closedGenericNestedType = closedParentType.Types.OfName( "NestedGeneric" ).Single().MakeGenericInstance( typeof(int) );
             Assert.Equal( "int", closedGenericNestedType.TypeArguments.ElementAt( 0 ).ToString() );
 
             // Open method of closed nested type.
@@ -856,7 +857,7 @@ class Parent<TParent>
             Assert.Equal( "(string, int, TMethod)", openMethodOfClosedNestedType.ReturnType.ToString() );
 
             // Closed method in closed nested type.
-            var closedMethod = openMethodOfClosedNestedType.WithTypeArguments( typeof(long) );
+            var closedMethod = openMethodOfClosedNestedType.MakeGenericInstance( typeof(long) );
             Assert.Equal( "(string, int, long)", closedMethod.ReturnType.ToString() );
         }
 
@@ -1221,12 +1222,12 @@ public class PublicClass
             var compilation = testContext.CreateCompilationModel( "" );
             var intType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) );
             Assert.False( intType.IsNullable );
-            Assert.Same( intType, intType.ToNonNullableType() );
+            Assert.Same( intType, intType.ToNonNullable() );
             Assert.Same( intType, intType.UnderlyingType );
-            var nullableIntType = intType.ToNullableType();
+            var nullableIntType = intType.ToNullable();
             Assert.NotSame( intType, nullableIntType );
             Assert.True( nullableIntType.IsNullable );
-            Assert.Same( intType, nullableIntType.ToNonNullableType() );
+            Assert.Same( intType, nullableIntType.ToNonNullable() );
         }
 
         [Fact]
@@ -1238,13 +1239,13 @@ public class PublicClass
             var objectType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(object) );
             Assert.Null( objectType.IsNullable );
             Assert.Same( objectType, objectType.UnderlyingType );
-            var nonNullableObjectType = (INamedType) objectType.ToNonNullableType();
+            var nonNullableObjectType = (INamedType) objectType.ToNonNullable();
             Assert.False( nonNullableObjectType.IsNullable );
             Assert.Same( objectType, nonNullableObjectType.UnderlyingType );
-            var nullableObjectType = objectType.ToNullableType();
+            var nullableObjectType = objectType.ToNullable();
             Assert.NotSame( objectType, nullableObjectType );
             Assert.True( nullableObjectType.IsNullable );
-            Assert.Same( nonNullableObjectType, nullableObjectType.ToNonNullableType() );
+            Assert.Same( nonNullableObjectType, nullableObjectType.ToNonNullable() );
             Assert.Same( objectType, nullableObjectType.UnderlyingType );
             Assert.Equal( objectType, nullableObjectType, compilation.Comparers.Default );
             Assert.Equal( objectType, nonNullableObjectType, compilation.Comparers.Default );
@@ -1521,7 +1522,7 @@ class C {}
         }
 
         [Fact]
-        public void IsPartialMethod()
+        public void PartialMethods()
         {
             using var testContext = this.CreateTestContext();
 
@@ -1551,6 +1552,19 @@ public partial class C
             Assert.True( partialVoidNoImpl.IsPartial );
             Assert.True( partialVoidImpl.IsPartial );
             Assert.True( partialNonVoid.IsPartial );
+
+            var partialDefinition = (IMethodSymbol) compilation.Types.Single().GetSymbol().AssertSymbolNotNull().GetMembers( "PartialVoid_Impl" ).Single();
+            var partialImplementation = partialDefinition.PartialImplementationPart;
+
+            Assert.NotSame( partialDefinition, partialImplementation );
+
+            // Ensure references of both parts are the same.
+            var partialImplementationRef = partialDefinition.ToRef( compilation.RefFactory );
+            var partialDefinitionRef = partialImplementation.ToRef( compilation.RefFactory );
+            Assert.Same( partialImplementationRef, partialDefinitionRef );
+
+            // Ensure declarations of both parts are the same.
+            Assert.Same( compilation.Factory.GetMethod( partialDefinition ), compilation.Factory.GetMethod( partialImplementation ) );
         }
 
         [Fact]
@@ -1741,20 +1755,20 @@ public partial class C
             var parameterType1 = method.Parameters[0].Type;
             Assert.True( parameterType1.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType1 );
-            Assert.Equal( parameterType1, parameterType1.ToNonNullableType().ToNullableType() );
+            Assert.Equal( parameterType1, parameterType1.ToNonNullable().ToNullable() );
             Assert.Equal( SpecialType.None, parameterType1.SpecialType );
 
             var parameterType2 = method.Parameters[1].Type;
             Assert.True( parameterType2.IsNullable );
             var parameterType2AsNamedType = Assert.IsAssignableFrom<INamedType>( parameterType2 );
             Assert.Same( parameterType2AsNamedType.UnderlyingType, parameterType2AsNamedType );
-            Assert.Equal( parameterType2, parameterType2.ToNonNullableType().ToNullableType() );
+            Assert.Equal( parameterType2, parameterType2.ToNonNullable().ToNullable() );
             Assert.Equal( SpecialType.None, parameterType2.SpecialType );
 
             var parameterType3 = method.Parameters[2].Type;
             Assert.True( parameterType3.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType3 );
-            Assert.Equal( parameterType3, parameterType3.ToNonNullableType().ToNullableType() );
+            Assert.Equal( parameterType3, parameterType3.ToNonNullable().ToNullable() );
             Assert.Equal( SpecialType.None, parameterType3.SpecialType );
 
             var parameterType4 = method.Parameters[3].Type;
@@ -1786,22 +1800,22 @@ public partial class C
 
             var typeParameter1 = type.TypeParameters[0];
             Assert.Null( typeParameter1.IsNullable );
-            Assert.True( typeParameter1.ToNullableType().IsNullable );
-            Assert.Null( typeParameter1.ToNonNullableType().IsNullable );
+            Assert.True( typeParameter1.ToNullable().IsNullable );
+            Assert.Null( typeParameter1.ToNonNullable().IsNullable );
             Assert.True( method.Parameters["n1"].Type.IsNullable );
             Assert.Null( method.Parameters["nn1"].Type.IsNullable );
 
             var typeParameter2 = type.TypeParameters[1];
             Assert.Null( typeParameter2.IsNullable );
-            Assert.True( typeParameter2.ToNullableType().IsNullable );
-            Assert.Null( typeParameter2.ToNonNullableType().IsNullable );
+            Assert.True( typeParameter2.ToNullable().IsNullable );
+            Assert.Null( typeParameter2.ToNonNullable().IsNullable );
             Assert.True( method.Parameters["n2"].Type.IsNullable );
             Assert.Null( method.Parameters["nn2"].Type.IsNullable );
 
             var typeParameter3 = type.TypeParameters[2];
             Assert.Null( typeParameter3.IsNullable );
-            Assert.True( typeParameter3.ToNullableType().IsNullable );
-            Assert.Null( typeParameter3.ToNonNullableType().IsNullable );
+            Assert.True( typeParameter3.ToNullable().IsNullable );
+            Assert.Null( typeParameter3.ToNonNullable().IsNullable );
             Assert.True( method.Parameters["n3"].Type.IsNullable );
             Assert.Null( method.Parameters["nn3"].Type.IsNullable );
         }
@@ -1827,7 +1841,7 @@ public partial class C
             var nullableAsTypeParameter =
                 factory.GetTypeParameter( (ITypeParameterSymbol) typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
 
-            var nullableFromIType = asType.ToNullableType();
+            var nullableFromIType = asType.ToNullable();
 
             Assert.Same( asType, asTypeParameter );
 
@@ -1902,7 +1916,7 @@ public partial class C
             {
                 var genericMethodDefinition = compilation.Types.Single().Methods.Single();
 
-                var genericMethodInstance = genericMethodDefinition.WithTypeArguments( typeof(int) );
+                var genericMethodInstance = genericMethodDefinition.MakeGenericInstance( typeof(int) );
 
                 Assert.Equal( SpecialType.Int32, genericMethodInstance.ReturnType.SpecialType );
                 Assert.Equal( SpecialType.Int32, genericMethodInstance.Parameters[0].Type.SpecialType );
@@ -1924,31 +1938,56 @@ public partial class C
                                 """;
 
             var compilation = testContext.CreateCompilationModel( code );
-            
+
             var interfaceType = (INamedType) compilation.Types.Single().Fields.OfName( "f1" ).Single().Type;
             var interfaceMethod = interfaceType.Properties.OfName( "Count" ).Single().GetMethod;
 
             Assert.True( interfaceType.TryFindImplementationForInterfaceMember( interfaceMethod, out var roundtrip ) );
             Assert.Same( interfaceMethod, roundtrip );
-            
-            var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
-            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out var memberImplementation ) );
-            
 
+            var classType = (INamedType) compilation.Types.Single().Fields.OfName( "f2" ).Single().Type;
+            Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out _ ) );
         }
 
-        private sealed class TestClassificationService : ISymbolClassificationService
+        [Fact]
+        public void IsDefinition()
         {
-            public ExecutionScope GetExecutionScope( ISymbol symbol )
-                => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) )
-                    ? ExecutionScope.CompileTime
-                    : ExecutionScope.Default;
+            using var testContext = this.CreateTestContext();
 
-            public bool IsTemplate( ISymbol symbol ) => throw new NotImplementedException();
+            const string code = @"
+using System;
 
-            public bool IsCompileTimeParameter( IParameterSymbol symbol ) => throw new NotImplementedException();
+class B<TB>
+{
+   public virtual TB BaseMethod() => default;
+   public virtual TB BaseMethod2() => default; 
+}
 
-            public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => throw new NotImplementedException();
+class C<TC> : B<TC>
+{    
+    TC field;
+    TC Property { get; set; }
+    TC Method( TC p1, TC[] p2, Action<TC> p3 ) => p1;
+    event Action<TC> Event;
+   public override TC BaseMethod() => base.BaseMethod();
+}";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            // All members are definitions.
+            foreach ( var member in compilation.Types.OfName( "B" ).Single().Members() )
+            {
+                Assert.True( member.GetSymbol().IsDefinitionSafe() );
+            }
+
+            foreach ( var member in compilation.Types.OfName( "C" ).Single().Members() )
+            {
+                Assert.True( member.GetSymbol().IsDefinitionSafe() );
+            }
+
+            // Inherited members are not definitions.
+            var inheritedMethod = compilation.Types.OfName( "C" ).Single().AllMethods.OfName( "BaseMethod2" ).Single();
+            Assert.False( inheritedMethod.GetSymbol().IsDefinitionSafe() );
         }
     }
 }

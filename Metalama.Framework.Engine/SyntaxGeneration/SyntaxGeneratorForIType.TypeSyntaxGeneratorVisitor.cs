@@ -2,8 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Visitors;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -299,9 +300,9 @@ internal sealed partial class SyntaxGeneratorForIType
         {
             private const string _kind = "SymbolId";
 
-            public static SyntaxAnnotation Create( IType type ) => new( _kind, DeclarationDocumentationCommentId.CreateReferenceId( type ) );
+            public static SyntaxAnnotation Create( IType type ) => new( _kind, DocumentationIdHelper.CreateReferenceId( type ) );
 
-            public static SyntaxAnnotation Create( INamespace ns ) => new( _kind, DeclarationDocumentationCommentId.CreateReferenceId( ns ) );
+            public static SyntaxAnnotation Create( INamespace ns ) => new( _kind, DocumentationIdHelper.CreateReferenceId( ns ) );
         }
     }
 }

@@ -3,44 +3,57 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.Diagnostics;
 using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advice<IntroductionAdviceResult<TIntroduced>>
     where TIntroduced : class, IDeclaration
-    where TBuilder : DeclarationBuilder
+    where TBuilder : DeclarationBuilder, TIntroduced
 {
-    protected TBuilder Builder { get; init; }
-
-    protected Action<TBuilder>? BuildAction { get; }
+    private readonly Action<TBuilder>? _buildAction;
 
     protected IntroduceDeclarationAdvice( AdviceConstructorParameters parameters, Action<TBuilder>? buildAction )
         : base( parameters )
     {
-        this.BuildAction = buildAction;
-
-        // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
-        // constructor. Other designs are more cumbersome.
-        this.Builder = null!;
+        this._buildAction = buildAction;
     }
 
-    protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome = AdviceOutcome.Default, TIntroduced? member = null )
+    protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome, TIntroduced introducedMember )
     {
-        var reference = member != null
-            ? member.ToRef()
-            : this.Builder.ToRef();
-
-        return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, reference, null );
+        return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, introducedMember.ToRef().As<TIntroduced>(), null );
     }
 
     protected IntroductionAdviceResult<TIntroduced> CreateIgnoredResult( IMemberOrNamedType existingMember )
         => new(
             this.AdviceKind,
             AdviceOutcome.Ignore,
-            existingMember is TIntroduced typedMember ? typedMember.ToRef() : null,
+            existingMember is TIntroduced typedMember ? typedMember.ToRef().As<TIntroduced>() : null,
             existingMember.ToRef() );
 
-    public override string ToString() => $"Introduce {this.Builder}";
+    protected sealed override IntroductionAdviceResult<TIntroduced> Implement( in AdviceImplementationContext context )
+    {
+        var builder = this.CreateBuilder( context );
+        context.ThrowIfAnyError();
+
+        this.InitializeBuilder( builder, in context );
+
+        this._buildAction?.Invoke( builder );
+
+        this.ValidateBuilder( builder, context.Diagnostics );
+
+        return this.ImplementCore( builder, in context );
+    }
+
+    protected abstract TBuilder CreateBuilder( in AdviceImplementationContext context );
+
+    protected virtual void InitializeBuilder( TBuilder builder, in AdviceImplementationContext context ) { }
+
+    protected abstract IntroductionAdviceResult<TIntroduced> ImplementCore( TBuilder builder, in AdviceImplementationContext context );
+
+    protected virtual void ValidateBuilder( TBuilder builder, IDiagnosticAdder diagnosticAdder ) { }
+
+    public override string ToString() => $"Introduce {typeof(TIntroduced).Name}";
 }

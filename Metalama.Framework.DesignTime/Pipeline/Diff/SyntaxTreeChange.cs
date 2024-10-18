@@ -9,7 +9,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// <summary>
     /// Represents a change between two versions of a <see cref="SyntaxTree"/>.
     /// </summary>
-    internal readonly struct SyntaxTreeChange
+    internal readonly struct SyntaxTreeChange : IEquatable<SyntaxTreeChange>
     {
         private readonly WeakReference<SyntaxTree>? _oldSyntaxTreeRef;
         private readonly SyntaxTreeVersionData _oldSyntaxTreeVersionData;
@@ -174,5 +174,26 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 oldSyntaxTreeVersion,
                 newChange.NewSyntaxTreeVersion );
         }
+
+        public bool Equals( SyntaxTreeChange other )
+            => ReferenceEquals( this._oldSyntaxTreeRef, other._oldSyntaxTreeRef )
+               && this._oldSyntaxTreeVersionData.Equals( other._oldSyntaxTreeVersionData )
+               && this.NewSyntaxTreeVersion.Equals( other.NewSyntaxTreeVersion )
+               && this.SyntaxTreeChangeKind == other.SyntaxTreeChangeKind
+               && this.CompileTimeChangeKind == other.CompileTimeChangeKind
+               && this.FilePath == other.FilePath
+               && this.PartialTypeChanges.Equals( other.PartialTypeChanges );
+
+        public override bool Equals( object? obj ) => obj is SyntaxTreeChange other && this.Equals( other );
+
+        public override int GetHashCode()
+            => HashCode.Combine(
+                this._oldSyntaxTreeRef,
+                this._oldSyntaxTreeVersionData,
+                this.NewSyntaxTreeVersion,
+                (int) this.SyntaxTreeChangeKind,
+                (int) this.CompileTimeChangeKind,
+                this.FilePath,
+                this.PartialTypeChanges );
     }
 }

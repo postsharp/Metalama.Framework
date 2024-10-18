@@ -16,5 +16,9 @@ namespace Metalama.Framework.Code.Types
         /// Gets the array rank (1 for <c>T[]</c>, 2 for <c>T[,]</c>, ...).
         /// </summary>
         int Rank { get; }
+
+        new IArrayType ToNullable();
+
+        new IArrayType ToNonNullable();
     }
 }

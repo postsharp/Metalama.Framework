@@ -23,7 +23,7 @@ internal sealed class DelegateUserExpression : UserExpression
         this.IsReferenceable = isReferenceable;
     }
 
-    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         => this._createExpression( syntaxSerializationContext );
 
     public override IType Type { get; }

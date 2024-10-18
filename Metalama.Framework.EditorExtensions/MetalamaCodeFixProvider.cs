@@ -47,7 +47,9 @@ namespace Metalama.Framework.CompilerExtensions
             }
         }
 
+#pragma warning disable VSTHRD110
         public override Task RegisterCodeFixesAsync( CodeFixContext context ) => this._impl?.RegisterCodeFixesAsync( context ) ?? Task.CompletedTask;
+#pragma warning restore VSTHRD110
 
         public override ImmutableArray<string> FixableDiagnosticIds => this._impl?.FixableDiagnosticIds ?? ImmutableArray<string>.Empty;
 

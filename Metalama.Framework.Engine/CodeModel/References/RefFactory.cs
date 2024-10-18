@@ -2,10 +2,17 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.ConstructedTypes;
+using Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
+using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References
@@ -13,68 +20,79 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// <summary>
     /// Builds instances of the <see cref="IRef{T}"/> interface.
     /// </summary>
-    internal sealed class RefFactory
+    internal sealed partial class RefFactory
     {
-        private readonly CompilationContext _compilationContext;
+        private readonly CompilationModel? _canonicalCompilationModel;
+        private readonly ConcurrentDictionary<SymbolCacheKey, ISymbolRef<ICompilationElement>> _symbolCache = new( new SymbolCacheKeyComparer() );
 
-        public RefFactory( CompilationContext compilationContext )
+        // There is no need for a cache of builder-based references because the unique instance of the reference is stored
+        // inside DeclarationBuilderData.
+
+        public CompilationContext CompilationContext { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RefFactory"/> class and assigns a <see cref="CompilationModel"/>.
+        /// </summary>
+        public RefFactory( CompilationModel canonicalCompilationModel )
         {
-            this._compilationContext = compilationContext;
+            this._canonicalCompilationModel = canonicalCompilationModel;
+            this.CompilationContext = canonicalCompilationModel.CompilationContext;
         }
+
+        public CompilationModel CanonicalCompilation
+            => this._canonicalCompilationModel ?? throw new InvalidOperationException( "The CanonicalCompilation is not available." );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        public CompilationBoundRef<T> FromBuilder<T>( IDeclarationBuilder builder, GenericContext? genericContext = null )
+        public FullRef<T> FromBuilderData<T>( DeclarationBuilderData builder, GenericContext? genericContext = null )
             where T : class, IDeclaration
-        {
-            if ( typeof(T) == typeof(IField) && builder is PromotedField promotedField )
-            {
-                return (CompilationBoundRef<T>) ((ICompilationBoundRefImpl) promotedField.OriginalSourceFieldOrFieldBuilder.ToRef())
-                    .WithGenericContext( genericContext ?? GenericContext.Empty );
-            }
-            else
-            {
-                return new BuilderRef<T>( builder, genericContext, this._compilationContext );
-            }
-        }
+            => new IntroducedRef<T>( builder, this, genericContext );
 
-        public CompilationBoundRef<T> FromBuilt<T>( BuiltDeclaration builtDeclaration )
+        public FullRef<T> FromIntroducedDeclaration<T>( IntroducedDeclaration introducedDeclaration )
             where T : class, IDeclaration
-            => this.FromBuilder<T>( builtDeclaration.Builder, builtDeclaration.GenericContext );
+            => this.FromBuilderData<T>( introducedDeclaration.BuilderData, introducedDeclaration.GenericContext );
+
+        public FullRef<T> FromConstructedType<T>( ConstructedType constructedType )
+            where T : class, IType
+            => new ConstructedTypeRef<T>( this, constructedType.ForCompilation( this.CanonicalCompilation ) );
 
         /// <summary>
         /// Creates an <see cref="IRef{T}"/> from a Roslyn symbol.
         /// </summary>
-        public IRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (IRef<IDeclaration>) this.FromAnySymbol( symbol );
+        public ISymbolRef<IDeclaration> FromDeclarationSymbol( ISymbol symbol ) => (ISymbolRef<IDeclaration>) this.FromAnySymbol( symbol );
 
-        public IRef<ICompilationElement> FromAnySymbol( ISymbol symbol )
-            => symbol.GetDeclarationKind( this._compilationContext ) switch
-            {
-                DeclarationKind.Compilation => new SymbolRef<ICompilation>( symbol, this._compilationContext ),
-                DeclarationKind.NamedType => new SymbolRef<INamedType>( symbol, this._compilationContext ),
-                DeclarationKind.Method => new SymbolRef<IMethod>( symbol, this._compilationContext ),
-                DeclarationKind.Property => new SymbolRef<IProperty>( symbol, this._compilationContext ),
-                DeclarationKind.Indexer => new SymbolRef<IIndexer>( symbol, this._compilationContext ),
-                DeclarationKind.Field => new SymbolRef<IField>( symbol, this._compilationContext ),
-                DeclarationKind.Event => new SymbolRef<IEvent>( symbol, this._compilationContext ),
-                DeclarationKind.Parameter => new SymbolRef<IParameter>( symbol, this._compilationContext ),
-                DeclarationKind.TypeParameter => new SymbolRef<ITypeParameter>( symbol, this._compilationContext ),
-                DeclarationKind.Attribute => new SymbolRef<IAttribute>( symbol, this._compilationContext ),
-                DeclarationKind.ManagedResource => new SymbolRef<IManagedResource>( symbol, this._compilationContext ),
-                DeclarationKind.Constructor => new SymbolRef<IConstructor>( symbol, this._compilationContext ),
-                DeclarationKind.Finalizer => new SymbolRef<IMethod>( symbol, this._compilationContext ),
-                DeclarationKind.Operator => new SymbolRef<IMethod>( symbol, this._compilationContext ),
-                DeclarationKind.AssemblyReference => new SymbolRef<IAssembly>( symbol, this._compilationContext ),
-                DeclarationKind.Namespace => new SymbolRef<INamespace>( symbol, this._compilationContext ),
-                DeclarationKind.Type => new SymbolRef<IType>( symbol, this._compilationContext ),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+        // Must be called _before_ cache lookup to make sure we have unique ref instances.
 
-        public SymbolRef<IMethod> PseudoAccessor( IMethod accessor )
+        public ISymbolRef<ICompilationElement> FromAnySymbol( ISymbol symbol, GenericContext? genericContextForSymbolMapping = null )
+            => this._symbolCache.GetOrAdd(
+                SymbolCacheKey.Create( symbol, RefTargetKind.Default, genericContextForSymbolMapping ?? GenericContext.Empty, this ),
+                static ( key, me ) => key.Symbol.GetDeclarationKind( me.CompilationContext ) switch
+                {
+                    DeclarationKind.Compilation => new SymbolRef<ICompilation>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.NamedType => new SymbolRef<INamedType>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Method => new SymbolRef<IMethod>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Property => new SymbolRef<IProperty>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Indexer => new SymbolRef<IIndexer>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Field => new SymbolRef<IField>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Event => new SymbolRef<IEvent>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Parameter => new SymbolRef<IParameter>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.TypeParameter => new SymbolRef<ITypeParameter>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Attribute => new SymbolRef<IAttribute>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.ManagedResource => new SymbolRef<IManagedResource>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Constructor => new SymbolRef<IConstructor>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Finalizer => new SymbolRef<IMethod>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Operator => new SymbolRef<IMethod>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.AssemblyReference => new SymbolRef<IAssembly>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Namespace => new SymbolRef<INamespace>( key.Symbol, key.GenericContext, me ),
+                    DeclarationKind.Type => new SymbolRef<IType>( key.Symbol, key.GenericContext, me ),
+                    _ => throw new ArgumentOutOfRangeException()
+                },
+                this );
+
+        public SymbolRef<IMethod> FromPseudoAccessor( PseudoAccessor accessor )
         {
-            Invariant.Assert( accessor.IsImplicitlyDeclared );
-            Invariant.Assert( accessor.GetCompilationContext() == this._compilationContext );
+            Invariant.Assert( accessor.GetRefFactory() == this );
 
             if ( accessor.ContainingDeclaration is not IHasAccessors declaringMember )
             {
@@ -82,27 +100,29 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
 
             return new SymbolRef<IMethod>(
-                declaringMember.GetSymbol().AssertSymbolNotNull(),
-                declaringMember.GetCompilationContext(),
+                ((SourceMember) declaringMember).Symbol,
+                accessor.GenericContextForSymbolMapping,
+                this,
                 accessor.MethodKind.ToDeclarationRefTargetKind() );
         }
 
-        public SymbolRef<IParameter> PseudoParameter( IParameter pseudoParameter )
+        public SymbolRef<IParameter> FromPseudoParameter( PseudoParameter pseudoParameter )
         {
-            Invariant.Assert( pseudoParameter.GetCompilationContext() == this._compilationContext );
+            Invariant.Assert( pseudoParameter.GetRefFactory() == this );
 
             var accessor = (IMethod) pseudoParameter.DeclaringMember;
 
             Invariant.Assert( accessor.IsImplicitlyDeclared );
 
-            if ( accessor.ContainingDeclaration is not IHasAccessors declaringMember )
+            if ( accessor.ContainingDeclaration is not IHasAccessors )
             {
                 throw new AssertionFailedException( $"Unexpected containing declaration: '{accessor.ContainingDeclaration}'." );
             }
 
             return new SymbolRef<IParameter>(
-                declaringMember.GetSymbol().AssertSymbolNotNull(),
-                this._compilationContext,
+                pseudoParameter.PropertyOrEvent.Symbol,
+                pseudoParameter.PropertyOrEvent.GenericContextForSymbolMapping,
+                this,
                 accessor.MethodKind switch
                 {
                     MethodKind.PropertySet when pseudoParameter.IsReturnParameter => RefTargetKind.PropertySetReturnParameter,
@@ -120,26 +140,30 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public SymbolRef<T> FromSymbol<T>(
             ISymbol symbol,
+            GenericContext? genericContext = null,
             RefTargetKind targetKind = RefTargetKind.Default )
             where T : class, ICompilationElement
-            => new SymbolRef<T>( symbol, this._compilationContext, targetKind );
+            => (SymbolRef<T>)
+                this._symbolCache.GetOrAdd(
+                    SymbolCacheKey.Create( symbol, targetKind, genericContext ?? GenericContext.Empty, this ),
+                    static ( key, me ) => new SymbolRef<T>( key.Symbol, key.GenericContext, me, key.TargetKind ),
+                    this );
 
-        public SymbolRef<IParameter> ReturnParameter( IMethodSymbol methodSymbol )
-            => new SymbolRef<IParameter>( methodSymbol, this._compilationContext, RefTargetKind.Return );
+        public SymbolRef<IParameter> FromReturnParameter( IMethodSymbol methodSymbol )
+            => this.FromSymbol<IParameter>( methodSymbol, null, RefTargetKind.Return );
 
-        internal SymbolRef<ICompilation> Compilation( CompilationContext compilationContext )
-        {
-            Invariant.Assert( compilationContext == this._compilationContext );
-
-            return this.FromSymbol<ICompilation>( compilationContext.Compilation.Assembly );
-        }
+        internal SymbolRef<ICompilation> ForCompilation() => this.FromSymbol<ICompilation>( this.CompilationContext.Compilation.Assembly );
 
         public SymbolRef<T> FromSymbolBasedDeclaration<T>( SymbolBasedDeclaration declaration )
             where T : class, IDeclaration
         {
-            Invariant.Assert( declaration.GetCompilationContext() == this._compilationContext );
+            Invariant.Assert( declaration.GetRefFactory() == this );
 
-            return this.FromSymbol<T>( declaration.Symbol );
+            var reference = this.FromSymbol<T>( declaration.Symbol, declaration.GenericContextForSymbolMapping );
+
+            Invariant.Assert( reference.SymbolMustBeMapped == declaration.SymbolMustBeMapped );
+
+            return reference;
         }
     }
 }

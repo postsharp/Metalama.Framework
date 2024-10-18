@@ -52,8 +52,9 @@ added because the package already contains file 'analyzers/dotnet/cs/Metalama.Fr
         <!-- By convention, we use InternalsVisibleTo only for test projects that must have access to internals.. -->
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Benchmarks" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)" />
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.AspectTests.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.TemplateTests.$(ThisRoslynVersionNoPreview)" />
     </ItemGroup>
 
     <ItemGroup>

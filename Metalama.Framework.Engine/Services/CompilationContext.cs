@@ -3,8 +3,12 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Comparers;
+using Metalama.Framework.Engine.CodeModel.Factories;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
@@ -38,9 +42,6 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal CompilationComparers Comparers => new( this.Compilation );
-
-    [Memo]
-    internal RefFactory RefFactory => new( this );
 
     public Compilation Compilation { get; }
 
@@ -123,11 +124,18 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
 
-    [Memo]
-    internal SymbolRefStrategy SymbolRefStrategy => new( this );
-
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );
+
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, IRef reference )
+        => reference switch
+        {
+            ISymbolRef symbolRef => this.GetSyntaxGenerationContext( options, symbolRef.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() ),
+            IIntroducedRef builtDeclarationRef => this.GetSyntaxGenerationContext(
+                options,
+                builtDeclarationRef.GetClosestContainingSymbol().GetPrimaryDeclarationSyntax().AssertNotNull() ),
+            _ => throw new AssertionFailedException()
+        };
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext(
         SyntaxGenerationOptions options,
