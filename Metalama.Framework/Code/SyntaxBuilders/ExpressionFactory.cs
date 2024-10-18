@@ -232,5 +232,5 @@ public static class ExpressionFactory
     /// be used when the of the nullability given expression is wrongly infered.
     /// </summary>
     public static IExpression WithNullability( this IExpression expression, bool isNullable )
-        => expression.WithType( isNullable ? expression.Type.ToNullableType() : expression.Type.ToNonNullableType() );
+        => expression.WithType( isNullable ? expression.Type.ToNullable() : expression.Type.ToNonNullable() );
 }

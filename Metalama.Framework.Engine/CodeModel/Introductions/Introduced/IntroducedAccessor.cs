@@ -80,11 +80,13 @@ internal sealed class IntroducedAccessor : IntroducedDeclaration, IMethodImpl
     public IMethod Definition => this.Compilation.Factory.GetAccessor( this._builderDataData );
 
     [Memo]
-    private IFullRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
+    private IFullRef<IMethod> Ref => this.RefFactory.FromIntroducedDeclaration<IMethod>( this );
 
     private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     IRef<IMember> IMember.ToRef() => this.Ref;
+
+    IMethod IMethod.MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
 
     IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
 
@@ -123,9 +125,6 @@ internal sealed class IntroducedAccessor : IntroducedDeclaration, IMethodImpl
     public bool IsGeneric => false;
 
     public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
-
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
-        => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
     [Memo]
     public IMethod? OverriddenMethod => this.MapDeclaration( this._builderDataData.OverriddenMethod );

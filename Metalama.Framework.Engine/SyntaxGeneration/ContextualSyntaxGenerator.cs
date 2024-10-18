@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
@@ -507,15 +508,15 @@ internal sealed partial class ContextualSyntaxGenerator
     public TypeSyntax Type( IFullRef<IType> type )
         => type switch
         {
-            ISymbolRef symbolRef => this.Type( (ITypeSymbol) symbolRef.Symbol ),
+            ISymbolRef { SymbolMustBeMapped: false } symbolRef => this.Type( (ITypeSymbol) symbolRef.Symbol ),
             _ => this.Type( type.ConstructedDeclaration )
         };
 
     public TypeSyntax Type( IType type, bool bypassSymbols = false )
     {
-        if ( type.GetSymbol() is { } symbol && !bypassSymbols )
+        if ( type is ISymbolBasedCompilationElement { SymbolMustBeMapped: false } symbolRef && !bypassSymbols )
         {
-            return this.Type( symbol );
+            return this.Type( (ITypeSymbol) symbolRef.Symbol );
         }
 
         if ( this.SyntaxGenerationContext.HasCompilationContext && type.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )

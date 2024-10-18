@@ -10,6 +10,8 @@ internal interface ISymbolRef : IFullRef
     ISymbol Symbol { get; }
 
     RefTargetKind TargetKind { get; }
+    
+    bool SymbolMustBeMapped { get; }
 }
 
 internal interface ISymbolRef<out T> : ISymbolRef, IFullRef<T>

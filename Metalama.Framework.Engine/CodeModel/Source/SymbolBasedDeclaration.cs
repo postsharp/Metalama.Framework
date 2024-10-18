@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -19,18 +20,30 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 {
     public abstract class SymbolBasedDeclaration : BaseDeclaration, ISymbolBasedCompilationElement
     {
+        private protected SymbolBasedDeclaration( GenericContext? genericContextForSymbolMapping )
+        {
+            this.GenericContextForSymbolMapping = genericContextForSymbolMapping ?? GenericContext.Empty;
+        }
+
         public abstract ISymbol Symbol { get; }
 
+        public GenericContext GenericContextForSymbolMapping { get; }
+
+        public bool SymbolMustBeMapped => !this.GenericContextForSymbolMapping.IsEmptyOrIdentity;
+
+        IGenericContext ISymbolBasedCompilationElement.GenericContextForSymbolMapping => this.GenericContextForSymbolMapping;
+
         [Memo]
-        internal sealed override GenericContext GenericContext => SymbolGenericContext.Get( this.Symbol, this.GetCompilationContext() );
+        internal sealed override GenericContext GenericContext
+            => this.GenericContextForSymbolMapping.IsEmptyOrIdentity
+                ? SymbolGenericContext.Get( this.Symbol, this.GetCompilationContext() )
+                : this.GenericContextForSymbolMapping;
 
         [Memo]
         public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Symbol.ContainingSymbol );
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.Symbol.ToDisplayString( format.ToRoslyn() );
-
-        protected override ISymbol GetSymbol() => this.Symbol;
+            => DisplayStringFormatter.Format( this, format, context );
 
         public override Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
 
@@ -127,6 +140,16 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 if ( translatedSymbol == null )
                 {
                     return null;
+                }
+
+                if ( genericContext is not { IsEmptyOrIdentity: true } )
+                {
+                    genericContext = this.GenericContextForSymbolMapping;
+                }
+                else
+                {
+                    // We can't combine two contexts at the moment.
+                    Invariant.Assert( this.GenericContextForSymbolMapping.IsEmptyOrIdentity );
                 }
 
                 return newCompilation.Factory.GetCompilationElement( translatedSymbol, genericContext: genericContext );

@@ -163,7 +163,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                                     syntaxGenerator.DefaultExpression( propertyBuilder.Type ),
                                     propertyBuilder.Type.IsReferenceType == false
                                         ? propertyBuilder.Type
-                                        : propertyBuilder.Type.ToNullableType() ),
+                                        : propertyBuilder.Type.ToNullable() ),
                                 Token( TriviaList(), SyntaxKind.SemicolonToken, context.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) ),
                     null,
                     propertyBuilder.IsAutoPropertyOrField is true ? Token( SyntaxKind.SemicolonToken ) : default );

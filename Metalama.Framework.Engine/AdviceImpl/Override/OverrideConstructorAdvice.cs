@@ -29,10 +29,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
         if ( constructor.IsImplicitInstanceConstructor() )
         {
             // Missing implicit ctor.
-            var builder = new ConstructorBuilder( this.AspectLayerInstance, constructor.DeclaringType )
-            {
-                ReplacedImplicitConstructor = constructor, Accessibility = Accessibility.Public
-            };
+            var builder = new ConstructorBuilder( this.AspectLayerInstance, constructor );
 
             builder.Freeze();
 

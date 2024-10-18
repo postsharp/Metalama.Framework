@@ -3,13 +3,14 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.ConstructedTypes;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -23,11 +24,12 @@ internal sealed class IntroducedNamedType : IntroducedMemberOrNamedType, INamedT
 {
     public NamedTypeBuilderData NamedTypeBuilderData { get; }
 
-    public IntroducedNamedType( NamedTypeBuilderData builderData, CompilationModel compilation, IGenericContext genericContext ) : base(
+    public IntroducedNamedType( NamedTypeBuilderData builderData, CompilationModel compilation, IGenericContext genericContext, bool isNullable ) : base(
         compilation,
         genericContext )
     {
         this.NamedTypeBuilderData = builderData;
+        this.IsNullable = isNullable;
     }
 
     public override DeclarationBuilderData BuilderData => this.NamedTypeBuilderData;
@@ -69,7 +71,7 @@ internal sealed class IntroducedNamedType : IntroducedMemberOrNamedType, INamedT
     }
 
     [Memo]
-    private IFullRef<INamedType> Ref => this.RefFactory.FromBuilt<INamedType>( this );
+    private IFullRef<INamedType> Ref => this.RefFactory.FromIntroducedDeclaration<INamedType>( this );
 
     public IRef<INamedType> ToRef() => this.Ref;
 
@@ -172,7 +174,7 @@ internal sealed class IntroducedNamedType : IntroducedMemberOrNamedType, INamedT
 
     public bool IsRef => this.NamedTypeBuilderData.IsRef;
 
-    public bool? IsNullable => false; // TODO: We don't have a mechanism to create nullable introduced types
+    public bool? IsNullable { get; }
 
     [Memo]
     public ITypeParameterList TypeParameters => new TypeParameterList( this, this.NamedTypeBuilderData.TypeParameters.SelectAsReadOnlyList( t => t.ToRef() ) );
@@ -186,14 +188,37 @@ internal sealed class IntroducedNamedType : IntroducedMemberOrNamedType, INamedT
 
     public ExecutionScope ExecutionScope => ExecutionScope.RunTime;
 
-    public ITypeSymbol? TypeSymbol => null;
-
-    public ISymbol? Symbol => null;
-
     public bool Equals( SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+
+    public IArrayType MakeArrayType( int rank = 1 ) => new ConstructedArrayType( this.Compilation, this.Ref, rank );
+
+    public IPointerType MakePointerType() => new ConstructedPointerType( this.Compilation, this.Ref );
+
+    IType IType.ToNullable() => this.ToNullable();
+
+    public IType ToNonNullable()
+    {
+        if ( this.IsNullable == false )
+        {
+            return this;
+        }
+        else if ( this.IsReferenceType ?? true )
+        {
+            return this.Compilation.Factory.GetNamedType( this.NamedTypeBuilderData, this.GenericContext );
+        }
+        else
+        {
+            return this.Compilation.Factory.CreateNullableValueType( this );
+        }
+    }
+
+    public INamedType ToNullable()
+        => this.IsNullable == true ? this : this.Compilation.Factory.GetNamedType( this.NamedTypeBuilderData, this.GenericContext, true );
+
+    public INamedType MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
     public bool Equals( IType? other ) => this.Compilation.Comparers.Default.Equals( this, other );
 
@@ -206,35 +231,16 @@ internal sealed class IntroducedNamedType : IntroducedMemberOrNamedType, INamedT
 
     public bool IsSubclassOf( INamedType type ) => type.SpecialType == SpecialType.Object;
 
-    public Type ToType()
-    {
-        throw new NotSupportedException( "Reflection types on introduced types are not yet supported." );
-    }
-
-    protected override ISymbol? GetSymbol() => this.TypeSymbol;
+    public Type ToType() => throw new NotImplementedException( "Reflection types on introduced types are not yet implemented." );
 
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
-    {
-        throw new NotSupportedException( "TryFindImplementationForInterfaceMember on introduced types is not yet supported." );
-    }
+        => throw new NotImplementedException( "TryFindImplementationForInterfaceMember on introduced types is not yet implemented." );
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
-    {
-        throw new NotSupportedException( "GetOverridingMembers on introduced types is not yet supported." );
-    }
+        => throw new NotImplementedException( "GetOverridingMembers on introduced types is not yet implemented." );
 
     bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
-    {
-        throw new NotSupportedException( "IsImplementationOfInterfaceMember on introduced types is not yet supported." );
-    }
+        => throw new NotSupportedException( "IsImplementationOfInterfaceMember on introduced types is not yet implemented." );
 
-    IType ITypeImpl.Accept( TypeRewriter visitor )
-    {
-        return visitor.Visit( this );
-    }
-
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
-    {
-        throw new NotSupportedException( "ConstructGenericInstance on introduced types is not yet supported." );
-    }
+    IType ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
 }

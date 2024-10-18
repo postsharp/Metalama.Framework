@@ -93,7 +93,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 
     private PromoteFieldTransformation( AspectLayerInstance aspectLayerInstance, IField replacedField, PropertyBuilder overridingProperty ) : base(
         aspectLayerInstance,
-        overridingProperty.Immutable,
+        overridingProperty.BuilderData,
         null )
     {
         this.OverridingProperty = overridingProperty;
@@ -102,7 +102,7 @@ internal sealed class PromoteFieldTransformation : IntroducePropertyTransformati
 
     public override InsertPosition InsertPosition => this._replacedField.ToInsertPosition();
 
-    IFullRef<IMember>? IReplaceMemberTransformation.ReplacedMember => this._replacedField;
+    IFullRef<IMember> IReplaceMemberTransformation.ReplacedMember => this._replacedField;
 
     public override IFullRef<IDeclaration> TargetDeclaration => this._replacedField;
 }

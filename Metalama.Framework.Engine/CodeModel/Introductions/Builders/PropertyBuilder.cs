@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
@@ -25,7 +24,31 @@ internal sealed class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuild
     private readonly List<IAttributeData> _fieldAttributes;
     private IExpression? _initializerExpression;
 
-    // private TemplateMember<IProperty>? _initializerTemplate;
+    public IntroducedRef<IProperty> Ref { get; }
+
+    public PropertyBuilder(
+        AspectLayerInstance aspectLayerInstance,
+        INamedType targetType,
+        string name,
+        bool hasGetter,
+        bool hasSetter,
+        bool isAutoProperty,
+        bool hasInitOnlySetter,
+        bool hasImplicitGetter,
+        bool hasImplicitSetter )
+        : base( aspectLayerInstance, targetType, name, hasGetter, hasSetter, hasImplicitGetter, hasImplicitSetter )
+    {
+        // TODO: Sanity checks.
+
+        Invariant.Assert( hasGetter || hasSetter );
+        Invariant.Assert( !(!hasSetter && hasImplicitSetter) );
+        Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
+
+        this.Ref = new IntroducedRef<IProperty>( this.Compilation.RefFactory );
+        this.IsAutoPropertyOrField = isAutoProperty;
+        this.HasInitOnlySetter = hasInitOnlySetter;
+        this._fieldAttributes = [];
+    }
 
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
@@ -95,29 +118,6 @@ internal sealed class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuild
         => new FieldOrPropertyInvoker( this )
             .ToTypedExpressionSyntax( syntaxGenerationContext );
 
-    public PropertyBuilder(
-        AspectLayerInstance aspectLayerInstance,
-        INamedType targetType,
-        string name,
-        bool hasGetter,
-        bool hasSetter,
-        bool isAutoProperty,
-        bool hasInitOnlySetter,
-        bool hasImplicitGetter,
-        bool hasImplicitSetter )
-        : base( aspectLayerInstance, targetType, name, hasGetter, hasSetter, hasImplicitGetter, hasImplicitSetter )
-    {
-        // TODO: Sanity checks.
-
-        Invariant.Assert( hasGetter || hasSetter );
-        Invariant.Assert( !(!hasSetter && hasImplicitSetter) );
-        Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
-
-        this.IsAutoPropertyOrField = isAutoProperty;
-        this.HasInitOnlySetter = hasInitOnlySetter;
-        this._fieldAttributes = [];
-    }
-
     public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
@@ -126,18 +126,22 @@ internal sealed class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuild
 
     public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = [interfaceProperty];
 
-    IRef<IProperty> IProperty.ToRef() => this.Immutable.ToRef();
+    IRef<IProperty> IProperty.ToRef() => this.Ref;
 
-    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Ref;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
-    public new IFullRef<IProperty> ToRef() => this.Immutable.ToRef();
+    public new IFullRef<IProperty> ToRef() => this.Ref;
 
-    [Memo]
-    public PropertyBuilderData Immutable => new( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new PropertyBuilderData( this.AssertFrozen(), this.DeclaringType.ToFullRef() );
+    }
+
+    public PropertyBuilderData BuilderData => (PropertyBuilderData) this.Ref.BuilderData;
 
     public bool? IsDesignTimeObservableOverride { get; init; }
 

@@ -32,7 +32,7 @@ internal abstract class DeclarationBuilderData
         Invariant.Assert( builder.DeclarationKind == DeclarationKind.Namespace || builder.PrimarySyntaxTree != null );
 
         this.ParentAdvice = builder.AspectLayerInstance;
-        this.ContainingDeclaration = containingDeclaration;
+        this.ContainingDeclaration = containingDeclaration.AssertNotNull();
         this.PrimarySyntaxTree = builder.PrimarySyntaxTree;
         this.IsDesignTimeObservable = builder.IsDesignTimeObservable;
     }

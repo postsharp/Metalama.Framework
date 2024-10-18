@@ -205,7 +205,7 @@ internal sealed class CompileTimeProject : IProjectService
         this.References = references;
 
         this._assembly = assembly;
-        this.ClosureProjects = this.SelectManyRecursiveDistinct( p => p.References ).ToImmutableList();
+        this.ClosureProjects = this.SelectManyRecursiveDistinct( p => p.References ).ToImmutableArray();
         this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
         this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.SelectAsImmutableArray( p => p.DiagnosticManifest ) );
 

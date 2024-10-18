@@ -5,6 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Testing.UnitTesting;
@@ -329,7 +330,7 @@ class C
         // Add a field.
         var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
         parameterBuilder.Freeze();
-        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.Immutable ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder.BuilderData ) );
 
         Assert.Single( constructor.Parameters );
     }
@@ -363,7 +364,7 @@ class C
             aspectLayerInstance );
 
         parameterBuilder.Freeze();
-        compilation.AddTransformation( new IntroduceParameterTransformation( aspectLayerInstance, parameterBuilder.Immutable ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( aspectLayerInstance, parameterBuilder.BuilderData ) );
 
         Assert.Single( constructor.Parameters );
     }

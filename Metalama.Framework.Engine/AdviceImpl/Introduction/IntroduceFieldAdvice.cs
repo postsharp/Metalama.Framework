@@ -36,7 +36,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
         builder.IsRequired = templateAttributeProperties?.IsRequired ?? templateDeclaration?.IsRequired ?? false;
 
         if ( this.Template != null )

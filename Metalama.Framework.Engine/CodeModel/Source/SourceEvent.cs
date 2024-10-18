@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
@@ -26,13 +27,15 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public override ISymbol Symbol => this._symbol;
 
-        public SourceEvent( IEventSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public SourceEvent( IEventSymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            compilation,
+            genericContextForSymbolMapping )
         {
             this._symbol = symbol;
         }
 
         [Memo]
-        public INamedType Type => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
+        public INamedType Type => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type, this.GenericContextForSymbolMapping );
 
         public RefKind RefKind => RefKind.None;
 
@@ -114,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         IType IHasType.Type => this.Type;
 
-        public IMember? OverriddenMember => this.OverriddenEvent;
+        public override IMember? OverriddenMember => this.OverriddenEvent;
 
         [Memo]
         private IFullRef<IEvent> Ref => this.RefFactory.FromSymbolBasedDeclaration<IEvent>( this );

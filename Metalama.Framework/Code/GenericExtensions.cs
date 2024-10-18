@@ -70,44 +70,64 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Constructs a generic instance of an <see cref="INamedType"/>, with type arguments given as <see cref="IType"/>.
         /// </summary>
-        public static INamedType WithTypeArguments( this INamedType type, params IType[] typeArguments )
-            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
+        public static INamedType WithTypeArguments( this INamedType type, params IType[] typeArguments ) => type.MakeGenericInstance( typeArguments );
 
-        /// <summary>
-        /// Constructs a generic instance of an <see cref="INamedType"/>, with type arguments given a reflection <see cref="Type"/>.
-        /// </summary>
-        public static INamedType WithTypeArguments( this INamedType type, params Type[] typeArguments )
-            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
+        private static IReadOnlyList<IType> ConvertTypes( ICompilation compilation, IReadOnlyList<Type> types )
+        {
+            var convertedTypes = new IType[types.Count];
 
-        public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<Type> typeArguments )
-            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
+            for ( var i = 0; i < convertedTypes.Length; i++ )
+            {
+                convertedTypes[i] = compilation.Factory.GetTypeByReflectionType( types[i] );
+            }
 
-        public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<IType> typeArguments )
-            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
+            return convertedTypes;
+        }
 
-        /// <summary>
-        /// Constructs a generic instance of an <see cref="IMethod"/>, with type arguments given as reflection <see cref="Type"/>.
-        /// </summary>
-        public static IMethod WithTypeArguments( this IMethod type, params Type[] typeArguments )
-            => (IMethod) ConstructGenericInstanceImpl( type, typeArguments );
+        [Obsolete( "Use MakeGenericInstance instead." )]
+        public static INamedType WithTypeArguments( this INamedType type, params Type[] typeArguments ) => type.MakeGenericInstance( typeArguments );
 
-        /// <summary>
-        /// Constructs a generic instance of an <see cref="IMethod"/>, with type arguments given as <see cref="IType"/>.
-        /// </summary>
-        public static IMethod WithTypeArguments( this IMethod method, params IType[] typeArguments )
-            => (IMethod) ConstructGenericInstanceImpl( method, typeArguments );
+        public static INamedType MakeGenericInstance( this INamedType type, params Type[] typeArguments )
+            => type.MakeGenericInstance( ConvertTypes( type.Compilation, typeArguments ) );
 
-        public static IMethod WithTypeArguments( this IMethod method, IReadOnlyList<Type> typeArguments )
-            => (IMethod) ConstructGenericInstanceImpl( method, typeArguments );
+        public static INamedType MakeGenericInstance( this INamedType type, params IType[] typeArguments ) => type.MakeGenericInstance( typeArguments );
 
-        public static IMethod WithTypeArguments( this IMethod method, IReadOnlyList<IType> typeArguments )
-            => (IMethod) ConstructGenericInstanceImpl( method, typeArguments );
+        [Obsolete( "Use MakeGenericInstance instead." )]
+        public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<Type> typeArguments ) => type.MakeGenericInstance( typeArguments );
 
+        public static INamedType MakeGenericInstance( this INamedType type, IReadOnlyList<Type> typeArguments )
+            => type.MakeGenericInstance( ConvertTypes( type.Compilation, typeArguments ) );
+
+        [Obsolete( "Use INamedType.MakeGenericInstance instead." )]
+        public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<IType> typeArguments ) => type.MakeGenericInstance( typeArguments );
+
+        [Obsolete( "Use MakeGenericInstance instead." )]
+        public static IMethod WithTypeArguments( this IMethod method, params Type[] typeArguments )
+            => method.MakeGenericInstance( ConvertTypes( method.Compilation, typeArguments ) );
+
+        [Obsolete( "Use MakeGenericInstance instead." )]
+        public static IMethod WithTypeArguments( this IMethod method, params IType[] typeArguments ) => method.MakeGenericInstance( typeArguments );
+
+        [Obsolete( "Use MakeGenericInstance instead." )]
+        public static IMethod MakeGenericInstance( this IMethod method, IReadOnlyList<Type> typeArguments )
+            => method.MakeGenericInstance( ConvertTypes( method.Compilation, typeArguments ) );
+
+        public static IMethod MakeGenericInstance( this IMethod method, params Type[] typeArguments )
+            => method.MakeGenericInstance( ConvertTypes( method.Compilation, typeArguments ) );
+
+        public static IMethod MakeGenericInstance( this IMethod method, params IType[] typeArguments ) => method.MakeGenericInstance( typeArguments );
+
+        public static IMethod WithTypeArguments( this IMethod method, IReadOnlyList<IType> typeArguments ) => method.MakeGenericInstance( typeArguments );
+
+        [Obsolete(
+            "This method does not handle nested generic types into account. Use INamedType.MakeGenericInstance for each type, then IMethod.MakeGenericInstance." )]
         public static IMethod WithTypeArguments( this IMethod method, IReadOnlyList<Type> typeTypeArguments, IReadOnlyList<Type> methodTypeArguments )
-            => method.ForTypeInstance( method.DeclaringType.WithTypeArguments( typeTypeArguments ) ).WithTypeArguments( methodTypeArguments );
+            => method.ForTypeInstance( method.DeclaringType.MakeGenericInstance( typeTypeArguments ) ).MakeGenericInstance( methodTypeArguments );
 
+        [Obsolete(
+            "This method does not handle nested generic types into account. Use INamedType.MakeGenericInstance for each type, then IMethod.MakeGenericInstance." )]
         public static IMethod WithTypeArguments( this IMethod method, Type[] typeTypeArguments, Type[] methodTypeArguments )
-            => method.ForTypeInstance( method.DeclaringType.WithTypeArguments( typeTypeArguments ) ).WithTypeArguments( methodTypeArguments );
+            => method.ForTypeInstance( method.DeclaringType.MakeGenericInstance( typeTypeArguments ) ).WithTypeArguments( methodTypeArguments );
 
         public static IMemberOrNamedType ForTypeInstance( this IMemberOrNamedType declaration, INamedType typeInstance )
             => ForTypeInstanceImpl( declaration, typeInstance );
@@ -151,12 +171,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         public static IConstructor ForTypeInstance( this IConstructor declaration, INamedType typeInstance )
             => (IConstructor) ForTypeInstanceImpl( declaration, typeInstance );
-
-        private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, IReadOnlyList<IType> typeArguments )
-            => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments );
-
-        private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, IReadOnlyList<Type> typeArguments )
-            => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments.Select( TypeFactory.GetType ).ToList() );
 
         private static IMemberOrNamedType ForTypeInstanceImpl( this IMemberOrNamedType declaration, INamedType typeInstance )
         {

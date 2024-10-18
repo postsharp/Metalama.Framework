@@ -42,7 +42,7 @@ internal class MethodBuilderData : MemberBuilderData
     {
         this.DeclarationKind = builder.DeclarationKind; // Can be Method, Finalizer, Operator.
 
-        this._ref = new IntroducedRef<IMethod>( this, containingDeclaration.RefFactory );
+        this._ref = builder.Ref;
 
         this.IsReadOnly = builder.IsReadOnly;
         this.IsIteratorMethod = builder.IsIteratorMethod.AssertNotNull();
@@ -65,6 +65,5 @@ internal class MethodBuilderData : MemberBuilderData
     public override IEnumerable<DeclarationBuilderData> GetOwnedDeclarations()
         => base.GetOwnedDeclarations().Concat( this.Parameters ).Concat( this.ReturnParameter );
 
-    public override string ToString()
-        => $"{this.ContainingDeclaration}.{this.Name}({string.Join( ", ", this.Parameters.Select( p => p.Type.ToString() ) )})";
+    public override string ToString() => $"{this.ContainingDeclaration}.{this.Name}({string.Join( ", ", this.Parameters.Select( p => p.Type.ToString() ) )})";
 }

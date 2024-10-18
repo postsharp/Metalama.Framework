@@ -55,7 +55,7 @@ internal sealed partial class LinkerInjectionStep
 
         private readonly HashSet<ITransformation> _transformationsCausingAuxiliaryOverrides;
 
-        private readonly Dictionary<string,SyntaxTree> _introducedSyntaxTrees;
+        private readonly Dictionary<string, SyntaxTree> _introducedSyntaxTrees;
         private readonly InjectedMemberComparer _injectedMemberComparer;
 
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
@@ -661,7 +661,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 return;
             }
-                
+
             lock ( this._introducedSyntaxTrees )
             {
                 var added = this._introducedSyntaxTrees.TryAdd( transformedSyntaxTree.FilePath, transformedSyntaxTree );

@@ -20,20 +20,25 @@ namespace Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder
-                .ImplementInterface( ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( aspectBuilder.Target.TypeParameters[0] ) );
+            void ImplementInterface( IType typeArgument )
+            {
+                aspectBuilder
+                    .ImplementInterface( ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( typeArgument ) );
 
-            aspectBuilder
-                .ImplementInterface(
-                    ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( aspectBuilder.Target.TypeParameters[0].MakeArrayType() ) );
+                aspectBuilder.IntroduceMethod( nameof(Foo), args: new { T = typeArgument } );
+            }
 
-            aspectBuilder
-                .ImplementInterface(
-                    ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) )
-                    .WithTypeArguments(
-                        ( (INamedType)TypeFactory.GetType( typeof(Tuple<,>) ) )
-                        .WithTypeArguments( aspectBuilder.Target.TypeParameters[0], aspectBuilder.Target.TypeParameters[0] ) ) );
+            ImplementInterface( aspectBuilder.Target.TypeParameters[0] );
+            ImplementInterface( aspectBuilder.Target.TypeParameters[0].MakeArrayType() );
+
+            ImplementInterface(
+                ( (INamedType)TypeFactory.GetType( typeof(Tuple<,>) ) ).WithTypeArguments(
+                    aspectBuilder.Target.TypeParameters[0],
+                    aspectBuilder.Target.TypeParameters[0].MakeArrayType() ) );
         }
+
+        [Template]
+        public void Foo<[CompileTime] T>( T t ) { }
     }
 
     // <target>

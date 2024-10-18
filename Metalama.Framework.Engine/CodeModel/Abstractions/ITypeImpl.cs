@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.CodeModel.Visitors;
 
 namespace Metalama.Framework.Engine.CodeModel.Abstractions
 {
-    internal interface ITypeImpl : ISdkType, ICompilationElementImpl
+    internal interface ITypeImpl : IType, ICompilationElementImpl
     {
         IType Accept( TypeRewriter visitor );
     }

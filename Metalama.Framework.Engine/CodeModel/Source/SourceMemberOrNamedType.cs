@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -62,11 +63,15 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         [Memo]
         private INamedType? DeclaringTypeImpl
-            => this.Symbol.ContainingType != null ? this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType ) : null;
+            => this.Symbol.ContainingType != null
+                ? this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType, this.GenericContextForSymbolMapping )
+                : null;
 
         public abstract MemberInfo ToMemberInfo();
 
-        protected SourceMemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
+        protected SourceMemberOrNamedType( CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            compilation,
+            genericContextForSymbolMapping ) { }
 
         public Accessibility Accessibility
         {

@@ -7,13 +7,13 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 {
-    internal sealed class PseudoSetter : PseudoAccessor<IFieldOrPropertyOrIndexerImpl>
+    internal sealed class PseudoSetter : PseudoAccessor
     {
         private readonly Accessibility? _accessibility;
 
         public override Accessibility Accessibility => this._accessibility ?? this.DeclaringMember.Accessibility;
 
-        public PseudoSetter( IFieldOrPropertyOrIndexerImpl property, Accessibility? accessibility ) : base( property, MethodKind.PropertySet )
+        public PseudoSetter( IHasAccessorsImpl property, Accessibility? accessibility ) : base( property, MethodKind.PropertySet )
         {
             this._accessibility = accessibility;
         }

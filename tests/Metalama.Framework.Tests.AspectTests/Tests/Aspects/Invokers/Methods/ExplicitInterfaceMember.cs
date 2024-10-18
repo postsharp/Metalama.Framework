@@ -12,8 +12,8 @@ public sealed class TestAspect : OverrideMethodAspect
     {
         _ = meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).First().Invoke();
         meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).First().Invoke();
-        _ = meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).Skip( 1 ).First().WithTypeArguments( typeof(int) ).Invoke();
-        meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).Skip( 1 ).First().WithTypeArguments( typeof(int) ).Invoke();
+        _ = meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).Skip( 1 ).First().MakeGenericInstance( typeof(int) ).Invoke();
+        meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).Skip( 1 ).First().MakeGenericInstance( typeof(int) ).Invoke();
 
         return meta.Proceed();
     }

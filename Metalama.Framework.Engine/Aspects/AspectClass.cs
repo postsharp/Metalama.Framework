@@ -91,7 +91,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     /// <summary>
     /// Initializes a new instance of the <see cref="AspectClass"/> class.
     /// </summary>
-    internal AspectClass(
+    private AspectClass(
         ProjectServiceProvider serviceProvider,
         INamedTypeSymbol typeSymbol,
         AspectClass? baseClass,

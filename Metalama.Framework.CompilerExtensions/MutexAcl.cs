@@ -1,5 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.Win32.SafeHandles;
 using System;
@@ -7,6 +6,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+
+// ReSharper disable TooWideLocalVariableScope
+// ReSharper disable InconsistentNaming
+// ReSharper disable MemberHidesStaticFromOuterClass
 
 namespace Metalama.Framework.Threading;
 
@@ -40,8 +43,7 @@ internal static class MutexAcl
         {
             var secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES
             {
-                nLength = (uint) sizeof( Interop.Kernel32.SECURITY_ATTRIBUTES ),
-                lpSecurityDescriptor = pSecurityDescriptor
+                nLength = (uint) sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES), lpSecurityDescriptor = pSecurityDescriptor
             };
 
             var handle = Interop.Kernel32.CreateMutexEx(
@@ -58,7 +60,7 @@ internal static class MutexAcl
 
                 if ( errorCode == Interop.Errors.ERROR_FILENAME_EXCED_RANGE )
                 {
-                    throw new ArgumentException( "Mutex name too long", nameof( name ) );
+                    throw new ArgumentException( "Mutex name too long", nameof(name) );
                 }
 
                 if ( errorCode == Interop.Errors.ERROR_INVALID_HANDLE )
@@ -93,13 +95,13 @@ internal static class MutexAcl
     {
         if ( sddlForm == null )
         {
-            throw new ArgumentNullException( nameof( sddlForm ) );
+            throw new ArgumentNullException( nameof(sddlForm) );
         }
 
         int error;
         var byteArray = IntPtr.Zero;
         uint byteArraySize = 0;
-        byte[]? binaryForm = null;
+        byte[]? binaryForm;
 
         try
         {
@@ -111,14 +113,11 @@ internal static class MutexAcl
             {
                 error = Marshal.GetLastWin32Error();
 
-                if ( error == Interop.Errors.ERROR_INVALID_PARAMETER ||
-                    error == Interop.Errors.ERROR_INVALID_ACL ||
-                    error == Interop.Errors.ERROR_INVALID_SECURITY_DESCR ||
-                    error == Interop.Errors.ERROR_UNKNOWN_REVISION )
+                if ( error is Interop.Errors.ERROR_INVALID_PARAMETER or Interop.Errors.ERROR_INVALID_ACL or Interop.Errors.ERROR_INVALID_SECURITY_DESCR or Interop.Errors.ERROR_UNKNOWN_REVISION )
                 {
                     throw new ArgumentException(
                         "Invalid SD SDDL form",
-                        nameof( sddlForm ) );
+                        nameof(sddlForm) );
                 }
                 else if ( error == Interop.Errors.ERROR_NOT_ENOUGH_MEMORY )
                 {
@@ -130,11 +129,12 @@ internal static class MutexAcl
                 {
                     throw new ArgumentException(
                         "Invalid SID in SDDL string",
-                        nameof( sddlForm ) );
+                        nameof(sddlForm) );
                 }
                 else if ( error != Interop.Errors.ERROR_SUCCESS )
                 {
                     Debug.Fail( $"Unexpected error out of Win32.ConvertStringSdToSd: {error}" );
+
                     throw new Win32Exception( error, $"Unexpected error 0x{error:x8}" );
                 }
             }
@@ -176,7 +176,7 @@ internal static class MutexAcl
 
     internal static class Interop
     {
-        internal static partial class Advapi32
+        internal static class Advapi32
         {
             [DllImport(
                 Libraries.Advapi32,
@@ -187,12 +187,13 @@ internal static class MutexAcl
                 CharSet = CharSet.Unicode )]
             internal static extern bool ConvertStringSdToSd(
                 string stringSd,
-                /* DWORD */ uint stringSdRevision,
+                /* DWORD */
+                uint stringSdRevision,
                 out IntPtr resultSd,
                 ref uint resultSdLength );
         }
 
-        internal static partial class Kernel32
+        internal static class Kernel32
         {
             internal const uint CREATE_MUTEX_INITIAL_OWNER = 0x1;
 
@@ -207,7 +208,8 @@ internal static class MutexAcl
                 internal BOOL bInheritHandle;
             }
         }
-        internal static partial class Libraries
+
+        internal static class Libraries
         {
             internal const string Advapi32 = "advapi32.dll";
             internal const string Kernel32 = "kernel32.dll";
@@ -222,14 +224,14 @@ internal static class MutexAcl
         /// as BOOL. It is best to never compare BOOL to TRUE. Always use bResult != BOOL.FALSE
         /// or bResult == BOOL.FALSE .
         /// </remarks>
-        internal enum BOOL : int
+        internal enum BOOL
         {
             FALSE = 0,
-            TRUE = 1,
+            TRUE = 1
         }
 
         // As defined in winerror.h and https://learn.microsoft.com/windows/win32/debug/system-error-codes
-        internal static partial class Errors
+        internal static class Errors
         {
             internal const int ERROR_SUCCESS = 0x0;
             internal const int ERROR_INVALID_HANDLE = 0x6;

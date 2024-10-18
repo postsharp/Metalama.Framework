@@ -62,7 +62,7 @@ internal sealed class AspectDriver : IAspectDriver
 
                 ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
                     eligibilityBuilder,
-                    declarativeAdvice.DeclarationRef.GetTarget( compilation ) );
+                    declarativeAdvice.GetDeclaration( compilation ) );
 
                 this.EligibilityRule = eligibilityBuilder.Build();
             }
@@ -262,7 +262,7 @@ internal sealed class AspectDriver : IAspectDriver
                             foreach ( var advice in declarativeAdvice )
                             {
                                 ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
-                                    advice.DeclarationRef.GetTarget( initialCompilationRevision ),
+                                    advice.GetDeclaration( initialCompilationRevision ),
                                     advice.TemplateClassMember.Key,
                                     aspectBuilder );
                             }

@@ -62,8 +62,8 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        var setTemplateDeclaration = this._setTemplate?.TemplateMember.DeclarationRef.GetTarget( this.SourceCompilation );
-        var getTemplateDeclaration = this._getTemplate?.TemplateMember.DeclarationRef.GetTarget( this.SourceCompilation );
+        var setTemplateDeclaration = this._setTemplate?.TemplateMember.GetDeclaration( this.SourceCompilation );
+        var getTemplateDeclaration = this._getTemplate?.TemplateMember.GetDeclaration( this.SourceCompilation );
 
         var serviceProvider = context.ServiceProvider;
 

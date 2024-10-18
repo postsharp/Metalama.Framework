@@ -21,6 +21,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected override bool CanBeNull => false;
 
-        public override IType Type => ((ICompilationInternal) this._type.Compilation).Factory.GetTypeByReflectionType( typeof(Type) );
+        public override IType Type => this._type.Compilation.Factory.GetTypeByReflectionType( typeof(Type) );
     }
 }

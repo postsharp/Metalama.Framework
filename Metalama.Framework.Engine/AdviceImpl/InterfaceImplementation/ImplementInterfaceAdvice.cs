@@ -91,12 +91,6 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             return;
         }
 
-        if ( !interfaceType.IsFullyBound() )
-        {
-            // Temporary limitation.
-            throw new NotImplementedException( "Overriding unbound generic interfaces is not yet supported." );
-        }
-
         // When initializing, it is not known which types the target type is implementing.
         // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
         // should be reported.
@@ -119,7 +113,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             var introducedInterface = pair.Key;
             List<MemberSpecification> memberSpecifications = [];
 
-            void TryAddMember<T>( T interfaceMember, Func<T, TemplateMember<T>?> getAspectInterfaceMember, Func<IRef<T>, bool> membersMatch )
+            void TryAddMember<T>( T interfaceMember, Func<T, TemplateMember<T>?> getAspectInterfaceMember, Func<T, bool> membersMatch )
                 where T : class, IMember
             {
                 var memberTemplate = getAspectInterfaceMember( interfaceMember );
@@ -130,9 +124,9 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 }
                 else
                 {
-                    var memberTemplateDeclaration = memberTemplate.DeclarationRef.GetTarget( this.SourceCompilation );
+                    var memberTemplateDeclaration = memberTemplate.GetDeclaration( this.SourceCompilation );
 
-                    if ( !membersMatch( memberTemplate.DeclarationRef ) )
+                    if ( !membersMatch( memberTemplateDeclaration ) )
                     {
                         contextCopy.Diagnostics.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
@@ -183,17 +177,10 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 TryAddMember(
                     interfaceMethod,
                     GetAspectInterfaceMethod,
-                    templateMethodRef =>
-                    {
-                        var templateMethod = templateMethodRef.GetTarget( this.SourceCompilation );
-
-                        return SignatureTypeSymbolComparer.Instance.Equals(
-                                   interfaceMethod.ReturnParameter.Type.GetSymbol()
-                                       .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
-                                   templateMethod.ReturnParameter.Type.GetSymbol()
-                                       .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ) )
-                               && interfaceMethod.ReturnParameter.RefKind == templateMethod.ReturnParameter.RefKind;
-                    } );
+                    templateMethod => SignatureTypeComparer.Instance.Equals(
+                                          interfaceMethod.ReturnParameter.Type,
+                                          templateMethod.ReturnParameter.Type )
+                                      && interfaceMethod.ReturnParameter.RefKind == templateMethod.ReturnParameter.RefKind );
             }
 
             foreach ( var interfaceIndexer in introducedInterface.Indexers )
@@ -208,13 +195,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 TryAddMember(
                     interfaceProperty,
                     GetAspectInterfaceProperty,
-                    templatePropertyRef =>
-                    {
-                        var templateProperty = templatePropertyRef.GetTarget( this.SourceCompilation );
-
-                        return this.SourceCompilation.Comparers.Default.Equals( interfaceProperty.Type, templateProperty.Type )
-                               && interfaceProperty.RefKind == templateProperty.RefKind;
-                    } );
+                    templateProperty => this.SourceCompilation.Comparers.Default.Equals( interfaceProperty.Type, templateProperty.Type )
+                                        && interfaceProperty.RefKind == templateProperty.RefKind );
             }
 
             foreach ( var interfaceEvent in introducedInterface.Events )
@@ -222,12 +204,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                 TryAddMember(
                     interfaceEvent,
                     GetAspectInterfaceEvent,
-                    templateEventRef =>
-                    {
-                        var templateEvent = templateEventRef.GetTarget( this.SourceCompilation );
-
-                        return this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, templateEvent.Type );
-                    } );
+                    templateEvent => this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, templateEvent.Type ) );
             }
 
             this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface.ToRef(), memberSpecifications ) );
@@ -274,7 +251,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
         {
             return this.TemplateInstance.TemplateClass.TryGetInterfaceMember(
-                member.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation ),
+                member.GetSymbol().AssertSymbolNotNull(),
                 out templateClassMember );
         }
     }
@@ -388,7 +365,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case IMethod interfaceMethod:
                         var existingMethod = targetType.AllMethods.OfName( interfaceMethod.Name ).SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
                         var templateMethod = memberSpec.Template?.As<IMethod>();
-                        var templateMethodDeclaration = templateMethod?.DeclarationRef.GetTarget( context.MutableCompilation );
+                        var templateMethodDeclaration = templateMethod?.GetDeclaration( context.MutableCompilation );
                         var redirectionTargetMethod = memberSpec.TargetMember?.As<IMethod>().GetTarget( context.MutableCompilation );
 
                         if ( existingMethod != null && !memberSpec.IsExplicit )
@@ -522,7 +499,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     case IProperty interfaceProperty:
                         var existingProperty = targetType.Properties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
                         var templateProperty = memberSpec.Template?.As<IProperty>();
-                        var templatePropertyDeclaration = templateProperty?.DeclarationRef.GetTarget( context.MutableCompilation );
+                        var templatePropertyDeclaration = templateProperty?.GetDeclaration( context.MutableCompilation );
                         var redirectionTargetProperty = memberSpec.TargetMember?.As<IProperty>().GetTarget( context.MutableCompilation );
 
                         if ( existingProperty != null && !memberSpec.IsExplicit )
@@ -880,7 +857,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                         void IntroduceEvent( bool isExplicit, bool isOverride )
                         {
-                            var templateEventDeclaration = templateEvent?.DeclarationRef.GetTarget( contextCopy.MutableCompilation );
+                            var templateEventDeclaration = templateEvent?.GetDeclaration( contextCopy.MutableCompilation );
                             var isEventField = templateEventDeclaration?.IsEventField() ?? false;
                             var isVirtual = templateAttributeProperties?.IsVirtual ?? templateEventDeclaration is { IsVirtual: true };
 

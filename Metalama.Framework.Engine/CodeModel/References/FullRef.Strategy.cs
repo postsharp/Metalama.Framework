@@ -12,7 +12,7 @@ internal abstract partial class FullRef<T>
 
     public abstract IFullRef? ContainingDeclaration { get; }
 
-    public abstract IFullRef<INamedType> DeclaringType { get; }
+    public abstract IFullRef<INamedType>? DeclaringType { get; }
 
     public abstract string? Name { get; }
 

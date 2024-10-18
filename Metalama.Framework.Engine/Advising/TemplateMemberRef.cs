@@ -46,7 +46,7 @@ internal readonly struct TemplateMemberRef
             throw new InvalidOperationException();
         }
 
-        // PERF: do not resolve dependencies here but upstream.
+        // TODO PERF: do not resolve dependencies here but upstream.
         var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>();
         var templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 

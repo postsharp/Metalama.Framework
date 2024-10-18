@@ -2,8 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.ConstructedTypes;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -14,12 +16,18 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 internal sealed class IntroducedTypeParameter : IntroducedDeclaration, ITypeParameter
 {
     private readonly TypeParameterBuilderData _typeParameterBuilderData;
+    private readonly bool? _isNullableOverride;
 
-    public IntroducedTypeParameter( TypeParameterBuilderData builder, CompilationModel compilation, IGenericContext genericContext ) : base(
+    public IntroducedTypeParameter(
+        TypeParameterBuilderData builder,
+        CompilationModel compilation,
+        IGenericContext genericContext,
+        bool? isNullableOverride ) : base(
         compilation,
         genericContext )
     {
         this._typeParameterBuilderData = builder;
+        this._isNullableOverride = isNullableOverride;
     }
 
     public override DeclarationBuilderData BuilderData => this._typeParameterBuilderData;
@@ -32,12 +40,39 @@ internal sealed class IntroducedTypeParameter : IntroducedDeclaration, ITypePara
 
     public bool? IsReferenceType => this._typeParameterBuilderData.IsReferenceType;
 
-    public bool? IsNullable => this._typeParameterBuilderData.IsNullable;
+    public bool? IsNullable => this._isNullableOverride ?? this._typeParameterBuilderData.IsNullable;
 
     bool IType.Equals( SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => otherType is IntroducedTypeParameter otherBuildTypeParameter && otherBuildTypeParameter.BuilderData == this.BuilderData;
+
+    public IArrayType MakeArrayType( int rank = 1 ) => new ConstructedArrayType( this.Compilation, this.Ref, rank );
+
+    public IPointerType MakePointerType() => new ConstructedPointerType( this.Compilation, this.Ref );
+
+    public IType ToNullable()
+    {
+        if ( this.IsNullable == true )
+        {
+            return this;
+        }
+        else if ( this.IsReferenceType ?? true )
+        {
+            return this.Compilation.Factory.GetTypeParameter( this._typeParameterBuilderData, this.GenericContext, true );
+        }
+        else
+        {
+            return this.Compilation.Factory.CreateNullableValueType( this );
+        }
+    }
+
+    public ITypeParameter ToNonNullable()
+        => this.IsNullable == false ? this : this.Compilation.Factory.GetTypeParameter( this._typeParameterBuilderData, this.GenericContext );
+
+    IType IType.ToNullable() => this.ToNullable();
+
+    IType IType.ToNonNullable() => this.ToNonNullable();
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -56,7 +91,7 @@ internal sealed class IntroducedTypeParameter : IntroducedDeclaration, ITypePara
 
     public bool HasDefaultConstructorConstraint => this._typeParameterBuilderData.HasDefaultConstructorConstraint;
 
-    private IFullRef<ITypeParameter> Ref => this.RefFactory.FromBuilt<ITypeParameter>( this );
+    private IFullRef<ITypeParameter> Ref => this.RefFactory.FromIntroducedDeclaration<ITypeParameter>( this );
 
     IRef<ITypeParameter> ITypeParameter.ToRef() => this.Ref;
 

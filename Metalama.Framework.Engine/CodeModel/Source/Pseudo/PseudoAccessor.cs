@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -22,12 +23,11 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 
-internal abstract class PseudoAccessor<T> : IMethodImpl
-    where T : class, IHasAccessorsImpl
+internal abstract class PseudoAccessor : IMethodImpl
 {
-    protected T DeclaringMember { get; }
+    protected IHasAccessorsImpl DeclaringMember { get; }
 
-    protected PseudoAccessor( T containingMember, MethodKind semantic )
+    protected PseudoAccessor( IHasAccessorsImpl containingMember, MethodKind semantic )
     {
         this.DeclaringMember = containingMember;
         this.MethodKind = semantic;
@@ -94,9 +94,11 @@ internal abstract class PseudoAccessor<T> : IMethodImpl
     public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
     [Memo]
-    private IRef<IMethod> Ref => this.Compilation.RefFactory.PseudoAccessor( this );
+    private IRef<IMethod> Ref => this.Compilation.RefFactory.FromPseudoAccessor( this );
 
     public IRef<IMethod> ToRef() => this.Ref;
+
+    IMethod IMethod.MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
 
     IRef<IMemberOrNamedType> IMemberOrNamedType.ToRef() => this.Ref;
 
@@ -159,9 +161,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl
         => throw new NotSupportedException( $"'{this}' is implicitly defined  declaration and cannot be represented as a System.Reflection object." );
 
     IHasAccessors IMethod.DeclaringMember => this.DeclaringMember;
-
-    public ISymbol? Symbol => null;
-
+    
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
     bool IDeclarationImpl.CanBeInherited => false;
@@ -175,9 +175,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
         => newCompilation.Factory.Translate( this.DeclaringMember, genericContext ).AssertNotNull().GetAccessor( this.MethodKind );
-
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotSupportedException();
-
+    
     public IMember? OverriddenMember => ((IHasAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 
     public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
@@ -199,4 +197,6 @@ internal abstract class PseudoAccessor<T> : IMethodImpl
     public ImmutableArray<SourceReference> Sources => ImmutableArray<SourceReference>.Empty;
 
     public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
+
+    public GenericContext GenericContextForSymbolMapping => (GenericContext) ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
 }

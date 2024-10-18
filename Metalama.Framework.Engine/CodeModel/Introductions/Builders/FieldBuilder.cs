@@ -26,6 +26,15 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     private IType _type;
     private Writeability _writeability = Writeability.All;
 
+    public IntroducedRef<IField> Ref { get; }
+
+    public FieldBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType, string name )
+        : base( targetType, name, aspectLayerInstance )
+    {
+        this._type = this.Compilation.Cache.SystemObjectType;
+        this.Ref = new IntroducedRef<IField>( this.Compilation.RefFactory );
+    }
+
     public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
     public IType Type
@@ -62,15 +71,15 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public IProperty? OverridingProperty => null;
 
-    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Immutable.ToRef();
+    IRef<IFieldOrProperty> IFieldOrProperty.ToRef() => this.Ref;
 
-    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Ref;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
-    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Immutable.ToRef();
+    IRef<IFieldOrPropertyOrIndexer> IFieldOrPropertyOrIndexer.ToRef() => this.Ref;
 
-    IRef<IField> IField.ToRef() => this.Immutable.ToRef();
+    IRef<IField> IField.ToRef() => this.Ref;
 
     public Writeability Writeability
     {
@@ -106,12 +115,6 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     // public TemplateMember<IField>? InitializerTemplate { get; set; }
 
-    public FieldBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType, string name )
-        : base( targetType, name, aspectLayerInstance )
-    {
-        this._type = this.Compilation.Cache.SystemObjectType;
-    }
-
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
     public IEnumerable<IMethod> Accessors
@@ -136,12 +139,16 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
-    [Memo]
-    public FieldBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef<INamedType>() );
-
-    public override void Freeze()
+    protected override void EnsureReferenceInitialized()
     {
-        base.Freeze();
+        this.Ref.BuilderData = new FieldBuilderData( this, this.ContainingDeclaration.ToFullRef<INamedType>() );
+    }
+
+    public FieldBuilderData BuilderData => (FieldBuilderData) this.Ref.BuilderData;
+
+    protected override void FreezeChildren()
+    {
+        base.FreezeChildren();
         this.GetMethod.Freeze();
         this.SetMethod.Freeze();
     }

@@ -190,7 +190,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
                 node = AssignNodeId( node, nodeId );
                 this._currentInsertPosition = new InsertPositionRecord( InsertPositionRelation.After, nodeId );
 
-                return [node];
+                return new[] { node };
             }
 
             private static bool HasPseudoAttribute( MemberDeclarationSyntax node )

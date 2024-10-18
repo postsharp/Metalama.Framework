@@ -14,8 +14,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         {
             if ( type.IsReferenceType == true )
             {
-                this.Type = type.ToNullableType();
-                this._givenType = type.ToNonNullableType();
+                this.Type = type.ToNullable();
+                this._givenType = type.ToNonNullable();
             }
             else
             {

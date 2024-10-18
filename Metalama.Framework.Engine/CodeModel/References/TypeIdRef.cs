@@ -33,9 +33,11 @@ internal class TypeIdRef<T> : DurableRef<T>
     protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext,
+        IGenericContext genericContext,
         Type interfaceType )
     {
+        Invariant.Assert( genericContext.IsEmptyOrIdentity );
+        
         if ( !compilation.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( this.Id ), out var symbol ) )
         {
             return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );

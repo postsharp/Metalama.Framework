@@ -47,7 +47,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
     protected override PropertyBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        var templatePropertyDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        var templatePropertyDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
         var name = this.MemberName;
 
         var hasGet = this._isProgrammaticAutoProperty
@@ -82,9 +82,9 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
-        var getTemplateDeclaration = this._getTemplate?.Declaration.GetTarget( this.SourceCompilation );
-        var setTemplateDeclaration = this._setTemplate?.Declaration.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
+        var getTemplateDeclaration = this._getTemplate?.GetDeclaration( this.SourceCompilation );
+        var setTemplateDeclaration = this._setTemplate?.GetDeclaration( this.SourceCompilation );
 
         var serviceProvider = context.ServiceProvider;
 
@@ -213,7 +213,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
         var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
-        var templateDeclaration = this.Template?.DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
         var isAutoProperty = templateDeclaration is { IsAutoPropertyOrField: true };
 
         // TODO: Introduce attributes that are added not present on the existing member?

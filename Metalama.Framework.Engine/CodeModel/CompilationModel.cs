@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.CodeModel
             ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>? annotations,
             IExternalAnnotationProvider? externalAnnotationProvider,
             CompilationModelOptions? options,
-            string? debugLabel )
+            string? debugLabel ) : base( null )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
@@ -306,7 +306,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable, string? debugLabel, CompilationModelOptions? options = null )
+        private CompilationModel( CompilationModel prototype, bool mutable, string? debugLabel, CompilationModelOptions? options = null ) : base( null )
         {
             this.IsMutable = mutable;
             this.RefFactory = prototype.RefFactory; // Intentionally sharing the RefFactory.
@@ -355,16 +355,26 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.CompilationContext.GetSyntaxGenerationContext( options, node );
 
         internal CompilationModel WithTransformationsAndAspectInstances(
-            IReadOnlyCollection<ITransformation>? introducedDeclarations,
+            IReadOnlyCollection<ITransformation>? transformations,
             IEnumerable<AspectInstance>? aspectInstances,
-            string? debugLabel )
+            string? debugLabel = null )
         {
-            if ( introducedDeclarations?.Count == 0 && aspectInstances == null )
+            if ( transformations?.Count == 0 && aspectInstances == null )
             {
                 return this;
             }
 
-            return new CompilationModel( this, introducedDeclarations, aspectInstances, debugLabel );
+            return new CompilationModel( this, transformations, aspectInstances, debugLabel );
+        }
+
+        internal CompilationModel WithTransformations( IReadOnlyCollection<ITransformation>? transformations, string? debugLabel = null )
+        {
+            if ( transformations?.Count == 0 )
+            {
+                return this;
+            }
+
+            return new CompilationModel( this, transformations, null, debugLabel );
         }
 
         internal CompilationModel WithAspectRepository( AspectRepository aspectRepository, string? debugLabel )
@@ -401,7 +411,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
-        IDeclarationFactory ICompilationInternal.Factory => this.Factory;
+        IDeclarationFactory ICompilation.Factory => this.Factory;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 

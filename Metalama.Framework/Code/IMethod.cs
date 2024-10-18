@@ -71,5 +71,7 @@ namespace Metalama.Framework.Code
         bool IsExtern { get; }
 
         new IRef<IMethod> ToRef();
+
+        IMethod MakeGenericInstance( IReadOnlyList<IType> typeArguments );
     }
 }

@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.Abstractions;
 
 internal interface ISdkCompilation : ICompilation
 {
@@ -11,5 +11,5 @@ internal interface ISdkCompilation : ICompilation
 
     SemanticModel GetCachedSemanticModel( SyntaxTree syntaxTree );
 
-    ISdkDeclarationFactory Factory { get; }
+    new ISdkDeclarationFactory Factory { get; }
 }

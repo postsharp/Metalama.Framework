@@ -29,7 +29,7 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
 
     public override RefTargetKind TargetKind { get; }
 
-    public override IFullRef? ContainingDeclaration => throw new NotImplementedException();
+    public override IFullRef ContainingDeclaration => throw new NotImplementedException();
 
     public override IFullRef<INamedType> DeclaringType => throw new NotImplementedException();
 
@@ -40,7 +40,7 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
         return this.Symbol;
     }
 
-    public override SyntaxTree? PrimarySyntaxTree => this.SyntaxNode.SyntaxTree;
+    public override SyntaxTree PrimarySyntaxTree => this.SyntaxNode.SyntaxTree;
 
     [Memo]
     private ISymbol Symbol => this.GetSymbol();
@@ -60,7 +60,7 @@ internal sealed partial class SyntaxRef<T> : FullRef<T>
     protected override ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext,
+        IGenericContext genericContext,
         Type interfaceType )
     {
         return ConvertDeclarationOrThrow(

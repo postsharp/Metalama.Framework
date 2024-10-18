@@ -126,8 +126,8 @@ namespace Metalama.Framework.Code
             => declaration switch
             {
                 // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
-                INamedType namedType => namedType.ToNonNullableType() as INamedType,
-                IMember member => member.DeclaringType.ToNonNullableType() as INamedType,
+                INamedType namedType => namedType.ToNonNullable() as INamedType,
+                IMember member => member.DeclaringType.ToNonNullable() as INamedType,
                 { ContainingDeclaration: { } containingDeclaration } => GetClosestNamedType( containingDeclaration ),
                 _ => null
             };
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Code
             => declaration switch
             {
                 // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
-                INamedType namedType => namedType.ToNonNullableType() as INamedType,
+                INamedType namedType => namedType.ToNonNullable() as INamedType,
                 IMember member => member,
                 { ContainingDeclaration: { } containingDeclaration } => GetClosestMemberOrNamedType( containingDeclaration ),
                 _ => null
@@ -153,7 +153,7 @@ namespace Metalama.Framework.Code
             => declaration switch
             {
                 // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
-                INamedType { DeclaringType: null } namedType => namedType.ToNonNullableType() as INamedType,
+                INamedType { DeclaringType: null } namedType => namedType.ToNonNullable() as INamedType,
                 INamedType { DeclaringType: not null } namedType => namedType.DeclaringType.GetTopmostNamedType(),
                 _ => declaration.GetClosestNamedType()?.GetTopmostNamedType()
             };
@@ -184,7 +184,7 @@ namespace Metalama.Framework.Code
             else
             {
                 return
-                    ((ICompilationInternal) compilation).Factory.Translate( compilationElement )
+                    compilation.Factory.Translate( compilationElement )
                     ?? throw new InvalidOperationException(
                         $"The declaration '{compilationElement}' does not exist in the requested compilation. "
                         + $"Use TryForCompilation to avoid this exception." );
@@ -208,7 +208,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                translated = ((ICompilationInternal) compilation).Factory.Translate( compilationElement );
+                translated = compilation.Factory.Translate( compilationElement );
 
                 return translated != null;
             }

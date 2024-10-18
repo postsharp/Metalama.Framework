@@ -20,7 +20,7 @@ internal class Aspect : TypeAspect
             buildMethod: methodBuilder =>
             {
                 methodBuilder.Name = "Nullable";
-                methodBuilder.Parameters.Single().Type = objectType.ToNullableType();
+                methodBuilder.Parameters.Single().Type = objectType.ToNullable();
             } );
 
         builder.IntroduceMethod(
@@ -28,7 +28,7 @@ internal class Aspect : TypeAspect
             buildMethod: methodBuilder =>
             {
                 methodBuilder.Name = "NonNullable";
-                methodBuilder.Parameters.Single().Type = objectType.ToNonNullableType();
+                methodBuilder.Parameters.Single().Type = objectType.ToNonNullable();
             } );
 
         builder.IntroduceMethod(

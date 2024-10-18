@@ -11,5 +11,5 @@ internal static class TemplateMemberExtensions
     /// Returns <c>null</c> if the input <see cref="BoundTemplateMethod"/> does not represent a method with an implementation.
     /// </summary>
     public static BoundTemplateMethod? ExplicitlyImplementedOrNull( this BoundTemplateMethod? templateMethod )
-        => templateMethod == null ? null : ((IMethodSymbol) templateMethod.TemplateMember.DeclarationRef.Symbol).IsAutoAccessor() ? null : templateMethod;
+        => templateMethod == null ? null : ((IMethodSymbol) templateMethod.TemplateMember.Symbol).IsAutoAccessor() ? null : templateMethod;
 }

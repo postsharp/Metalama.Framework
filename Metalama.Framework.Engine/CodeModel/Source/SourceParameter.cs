@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -24,7 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         private readonly IParameterSymbol _parameterSymbol;
 
         [Memo]
-        private SourceMember DeclaringMember => (SourceMember) this.Compilation.Factory.GetDeclaration( this._parameterSymbol.ContainingSymbol );
+        private SourceMember DeclaringMember
+            => (SourceMember) this.Compilation.Factory.GetDeclaration( this._parameterSymbol.ContainingSymbol, this.GenericContextForSymbolMapping );
 
         public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this );
 
@@ -32,7 +34,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         IHasParameters IParameter.DeclaringMember => (IHasParameters) this.DeclaringMember;
 
-        public SourceParameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public SourceParameter( IParameterSymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            compilation,
+            genericContextForSymbolMapping )
         {
             this._parameterSymbol = symbol;
         }
@@ -51,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             };
 
         [Memo]
-        public IType Type => this.Compilation.Factory.GetIType( this._parameterSymbol.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this._parameterSymbol.Type, this.GenericContextForSymbolMapping );
 
         public string Name => this._parameterSymbol.Name;
 
@@ -72,7 +76,9 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public TypedConstant? DefaultValue
             => this._parameterSymbol.HasExplicitDefaultValue
-                ? TypedConstant.Create( this._parameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.Translate( this.Type ) )
+                ? TypedConstant.Create(
+                    this._parameterSymbol.ExplicitDefaultValue,
+                    this.Compilation.Factory.Translate( this.Type, this.GenericContextForSymbolMapping ) )
                 : null;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

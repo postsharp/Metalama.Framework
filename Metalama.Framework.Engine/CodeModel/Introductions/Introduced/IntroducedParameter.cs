@@ -55,7 +55,7 @@ internal sealed class IntroducedParameter : IntroducedDeclaration, IParameterImp
     public bool IsReturnParameter => this.Index < 0;
 
     [Memo]
-    private IFullRef<IParameter> Ref => this.RefFactory.FromBuilt<IParameter>( this );
+    private IFullRef<IParameter> Ref => this.RefFactory.FromIntroducedDeclaration<IParameter>( this );
 
     public IRef<IParameter> ToRef() => this.Ref;
 

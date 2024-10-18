@@ -52,7 +52,7 @@ public class DeepCloneAttribute : TypeAspect
         }
 
         // Define a local variable of the same type as the target type.
-        var clone = meta.Cast( meta.Target.Type.ToNonNullableType(), baseCall )!;
+        var clone = meta.Cast( meta.Target.Type.ToNonNullable(), baseCall )!;
 
         // Select clonable fields.
         var clonableFields =
@@ -82,7 +82,7 @@ public class DeepCloneAttribute : TypeAspect
                 callClone = (IExpression)( (ICloneable?)field.Value )?.Clone()!;
             }
 
-            if (cloneMethod == null || !cloneMethod.ReturnType.ToNullableType().Is( fieldType ))
+            if (cloneMethod == null || !cloneMethod.ReturnType.ToNullable().Is( fieldType ))
             {
                 // If necessary, cast the return value of Clone to the field type.
                 callClone = (IExpression)meta.Cast( fieldType, callClone.Value );

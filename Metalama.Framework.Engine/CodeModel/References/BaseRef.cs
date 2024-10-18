@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -49,6 +50,8 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
 
     private ICompilationElement? GetTargetImpl( ICompilation compilation, bool throwIfMissing, IGenericContext? genericContext, Type interfaceType )
     {
+        genericContext ??= GenericContext.Empty;
+        
         using ( StackOverflowHelper.Detect() )
         {
             var compilationModel = (CompilationModel) compilation;
@@ -64,7 +67,7 @@ internal abstract class BaseRef<T> : IRefImpl, IRef<T>
     protected abstract ICompilationElement? Resolve(
         CompilationModel compilation,
         bool throwIfMissing,
-        IGenericContext? genericContext,
+        IGenericContext genericContext,
         Type interfaceType );
 
     protected static T? ReturnNullOrThrow( string id, bool throwIfMissing, CompilationModel compilation, Exception? ex = null )

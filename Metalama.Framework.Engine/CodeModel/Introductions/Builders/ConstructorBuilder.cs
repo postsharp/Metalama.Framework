@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -18,22 +17,40 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
-    private IConstructor? _replacedImplicitConstructor;
     private ConstructorInitializerKind _initializerKind;
+    private ConstructorBuilderData? _builderData;
+    private IFullRef<IConstructor>? _ref;
 
-    public IConstructor? ReplacedImplicitConstructor
+    // In ConstructorBuilders, references cannot be created until freeze because it depends on the ReplacedImplicitConstructor property.
+    public IFullRef<IConstructor> Ref
+        => this._ref ?? throw new InvalidOperationException( "Cannot create a reference to a ConstructorBuilder until it is frozen." );
+
+    public ConstructorBuilder( AspectLayerInstance aspectLayerInstance, INamedType declaringType )
+        : base( aspectLayerInstance, declaringType, null! )
     {
-        get => this._replacedImplicitConstructor;
-        set
-        {
-            // We intentionally don't store a reference to the replaced constructor, but the constructor itself,
-            // because references are always resolved to the _replacement_.
-
-            Invariant.Assert( value is null or SourceConstructor or ConstructorBuilder );
-            this.CheckNotFrozen();
-            this._replacedImplicitConstructor = value;
-        }
+        this.InitializerArguments = [];
     }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConstructorBuilder"/> class that replaces an implicit constructor.
+    /// </summary>
+    public ConstructorBuilder( AspectLayerInstance aspectLayerInstance, IConstructor replacedImplicitConstructor )
+        : base( aspectLayerInstance, replacedImplicitConstructor.DeclaringType, null! )
+    {
+        this.InitializerArguments = [];
+
+        // We intentionally don't store a reference to the replaced constructor, but the constructor itself,
+        // because references are always resolved to the _replacement_.
+
+        Invariant.Assert( replacedImplicitConstructor is SourceConstructor or ConstructorBuilder );
+        Invariant.Assert( replacedImplicitConstructor.IsImplicitlyDeclared );
+
+        this.ReplacedImplicitConstructor = replacedImplicitConstructor;
+        this.Accessibility = replacedImplicitConstructor.Accessibility;
+        this.IsStatic = replacedImplicitConstructor.IsStatic;
+    }
+
+    public IConstructor? ReplacedImplicitConstructor { get; set; }
 
     public ConstructorInitializerKind InitializerKind
     {
@@ -47,11 +64,29 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
 
     public List<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
-    public ConstructorBuilder( AspectLayerInstance aspectLayerInstance, INamedType targetType )
-        : base( aspectLayerInstance, targetType, null! )
+    protected override void EnsureReferenceCreated()
     {
-        this.InitializerArguments = [];
+        if ( this.ReplacedImplicitConstructor != null )
+        {
+            this._ref = this.ReplacedImplicitConstructor.ToFullRef();
+        }
+        else
+        {
+            this._ref = new IntroducedRef<IConstructor>( this.Compilation.RefFactory );
+        }
     }
+
+    protected override void EnsureReferenceInitialized()
+    {
+        this._builderData = new ConstructorBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+
+        if ( this._ref is IntroducedRef<IConstructor> introducedRef )
+        {
+            introducedRef.BuilderData = this._builderData;
+        }
+    }
+
+    public ConstructorBuilderData BuilderData => this.AssertFrozen()._builderData!;
 
     public void AddInitializerArgument( IExpression expression, string? parameterName )
     {
@@ -80,20 +115,14 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
     IConstructor IConstructor.Definition => this;
-
-    public override BaseParameterBuilder? ReturnParameter
-    {
-        get => null;
-        set => throw new NotSupportedException();
-    }
-
+    
     public override MethodBase ToMethodBase() => this.ToConstructorInfo();
 
-    public new IRef<IConstructor> ToRef() => this.Immutable.ToRef();
+    public new IRef<IConstructor> ToRef() => this.Ref;
 
-    protected override IFullRef<IMember> ToMemberFullRef() => this.Immutable.ToRef();
+    protected override IFullRef<IMember> ToMemberFullRef() => this.Ref;
 
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
@@ -117,7 +146,4 @@ internal sealed class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilde
         Type? interfaceType = null )
         => this.ReplacedImplicitConstructor?.Translate( newCompilation ) ?? base.Translate( newCompilation, genericContext );
         */
-
-    [Memo]
-    public ConstructorBuilderData Immutable => new( this.AssertFrozen(), this.ContainingDeclaration.ToFullRef() );
 }

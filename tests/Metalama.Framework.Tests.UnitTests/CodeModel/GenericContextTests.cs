@@ -37,7 +37,7 @@ public class GenericContextTests : UnitTestClass
         Assert.Equal( "C<int>.D", mappedClassD.ToString() );
 
         // Map through ITypeSymbol.
-        var mappedClassDSymbol = ((SymbolGenericContext) genericTypeInstance.GenericContext).Map( classD.GetSymbol() );
+        var mappedClassDSymbol = ((SymbolGenericContext) genericTypeInstance.GenericContext).MapToSymbol( classD.GetSymbol() );
         Assert.Equal( "C<int>.D", mappedClassDSymbol.ToString() );
     }
 
@@ -67,7 +67,7 @@ public class GenericContextTests : UnitTestClass
         Assert.Equal( "C<int>.D<string>", mappedClassD.ToString() );
 
         // Map through ITypeSymbol.
-        var mappedClassDSymbol = ((SymbolGenericContext) genericTypeInstance.GenericContext).Map( classD.GetSymbol() );
+        var mappedClassDSymbol = ((SymbolGenericContext) genericTypeInstance.GenericContext).MapToSymbol( classD.GetSymbol() );
         Assert.Equal( "C<int>.D<string>", mappedClassDSymbol.ToString() );
     }
 }

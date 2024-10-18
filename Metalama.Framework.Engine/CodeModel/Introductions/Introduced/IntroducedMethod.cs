@@ -58,11 +58,13 @@ internal sealed class IntroducedMethod : IntroducedMember, IMethodImpl
     IHasAccessors? IMethod.DeclaringMember => null;
 
     [Memo]
-    private IFullRef<IMethod> Ref => this.RefFactory.FromBuilt<IMethod>( this );
+    private IFullRef<IMethod> Ref => this.RefFactory.FromIntroducedDeclaration<IMethod>( this );
 
     public MethodBase ToMethodBase() => throw new NotImplementedException();
 
     IRef<IMethodBase> IMethodBase.ToRef() => this.ToRef();
+
+    public IMethod MakeGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
     public override IFullRef<IMember> ToMemberFullRef() => this.Ref;
 
@@ -87,9 +89,7 @@ internal sealed class IntroducedMethod : IntroducedMember, IMethodImpl
     public bool IsGeneric => !this._methodBuilderData.TypeParameters.IsEmpty;
 
     public bool IsCanonicalGenericInstance => throw new NotImplementedException();
-
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
-
+    
     [Memo]
     public IMethod? OverriddenMethod => this.MapDeclaration( this._methodBuilderData.OverriddenMethod );
 

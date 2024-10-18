@@ -467,29 +467,6 @@ public static class DeclarationExtensions
         }
     }
 
-    internal static bool IsFullyBound( this INamedType type )
-    {
-        return DoesNotContainGenericParameters( type );
-
-        static bool DoesNotContainGenericParameters( IType type )
-        {
-            switch ( type )
-            {
-                case INamedType namedType:
-                    return namedType.TypeArguments.All( DoesNotContainGenericParameters );
-
-                case IArrayType array:
-                    return DoesNotContainGenericParameters( array.ElementType );
-
-                case ITypeParameter:
-                    return false;
-
-                default:
-                    return true;
-            }
-        }
-    }
-
     internal static bool TryGetHiddenDeclaration( this IMemberOrNamedType declaration, [NotNullWhen( true )] out IMemberOrNamedType? hiddenDeclaration )
     {
         if ( declaration is IMember { IsOverride: true } )

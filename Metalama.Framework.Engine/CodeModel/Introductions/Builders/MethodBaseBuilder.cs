@@ -11,15 +11,13 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, IMethodBaseImpl, IMemberOrNamedTypeBuilderImpl
+internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, IMethodBaseImpl
 {
     public ParameterBuilderList Parameters { get; } = [];
-
-    public abstract BaseParameterBuilder? ReturnParameter { get; set; }
-
-    public override void Freeze()
+    
+    protected override void FreezeChildren()
     {
-        base.Freeze();
+        base.FreezeChildren();
 
         foreach ( var parameter in this.Parameters )
         {
@@ -58,7 +56,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
 
     protected MethodBaseBuilder(
         AspectLayerInstance aspectLayerInstance,
-        INamedType targetType,
+        INamedType declaringType,
         string name )
-        : base( targetType, name, aspectLayerInstance ) { }
+        : base( declaringType, name, aspectLayerInstance ) { }
 }

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.Contracts.Indexer_I
             }
 
             var introducedIndexer = builder.IntroduceIndexer(
-                    TypeFactory.GetType( typeof(string) ).ToNullableType(),
+                    TypeFactory.GetType( typeof(string) ).ToNullable(),
                     nameof(GetTemplate),
                     nameof(SetTemplate) )
                 .Declaration;

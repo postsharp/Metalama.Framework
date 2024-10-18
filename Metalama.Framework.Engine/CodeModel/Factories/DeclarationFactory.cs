@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -77,6 +76,8 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
 
     public IType GetTypeByReflectionType( Type type ) => this.GetIType( this._compilationModel.CompilationContext.ReflectionMapper.GetTypeSymbol( type ) );
 
+    public INamedType GetNamedTypeByReflectionType( Type type ) => (INamedType) this.GetTypeByReflectionType( type );
+
     public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
 
     internal INamedType GetSpecialType( InternalSpecialType specialType )
@@ -114,8 +115,6 @@ public sealed partial class DeclarationFactory : IDeclarationFactory, ISdkDeclar
             InternalSpecialType.ITemplateAttribute => (INamedType) this.GetTypeByReflectionType( typeof(ITemplateAttribute) ),
             _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
         };
-
-    object IDeclarationFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
     public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
     {

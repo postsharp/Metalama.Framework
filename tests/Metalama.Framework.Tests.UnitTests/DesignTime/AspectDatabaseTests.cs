@@ -191,7 +191,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
         AssertAspectTransformations(
             [
                 "Add the 'MethodAspect' aspect to 'Target.M()'.",
-                "Introduce constructor 'Target.Target()' into type 'Target'.",
+                "Introduce constructor 'Target()' into type 'Target'.",
                 "Introduce field 'i' into type 'Target'.",
                 "Introduce parameter 'p' into constructor 'Target.Target()'."
             ],
@@ -437,7 +437,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
                     // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
-                        Assert.Equal( "Introduce constructor 'WithoutCtor.WithoutCtor()' into type 'WithoutCtor'.", transformation.Description );
+                        Assert.Equal( "Introduce constructor 'WithoutCtor()' into type 'WithoutCtor'.", transformation.Description );
                     } );
             } );
 #pragma warning restore IDE0053

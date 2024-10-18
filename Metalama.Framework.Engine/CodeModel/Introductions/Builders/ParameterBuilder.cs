@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Reflection;
@@ -17,6 +19,21 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
     private TypedConstant? _defaultValue;
     private RefKind _refKind;
     private IType _type;
+
+    public ParameterBuilder(
+        IHasParameters declaringMember,
+        int index,
+        string? name,
+        IType type,
+        RefKind refKind,
+        AspectLayerInstance aspectLayerInstance ) : base( declaringMember.GetCompilationModel(), aspectLayerInstance )
+    {
+        this.DeclaringMember = declaringMember;
+        this.Index = index;
+        this._name = name;
+        this._type = this.Translate( type );
+        this._refKind = refKind;
+    }
 
     public override RefKind RefKind
     {
@@ -89,22 +106,12 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
 
     public override bool IsReturnParameter => this.Index < 0;
 
-    public ParameterBuilder(
-        IHasParameters declaringMember,
-        int index,
-        string? name,
-        IType type,
-        RefKind refKind,
-        AspectLayerInstance aspectLayerInstance ) : base( aspectLayerInstance )
-    {
-        this.DeclaringMember = declaringMember;
-        this.Index = index;
-        this._name = name;
-        this._type = this.Translate( type );
-        this._refKind = refKind;
-    }
-
-    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Immutable.ToRef();
+    protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
+
+    protected override void EnsureReferenceInitialized()
+    {
+        this.Ref.BuilderData = new ParameterBuilderData( this, this.ContainingDeclaration.ToFullRef() );
+    }
 }

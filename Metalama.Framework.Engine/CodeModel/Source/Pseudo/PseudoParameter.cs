@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
     {
         private readonly string? _name;
 
+        public SymbolBasedDeclaration PropertyOrEvent => (SymbolBasedDeclaration) this.DeclaringAccessor.DeclaringMember.AssertNotNull();
+
         private IMethod DeclaringAccessor { get; }
 
         public IHasParameters DeclaringMember => this.DeclaringAccessor;
@@ -62,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
 
         public override CompilationModel Compilation => this.DeclaringAccessor.GetCompilationModel();
 
-        public PseudoParameter( IMethod declaringAccessor, int index, IType type, string? name )
+        public PseudoParameter( PseudoAccessor declaringAccessor, int index, IType type, string? name )
         {
             this.DeclaringAccessor = declaringAccessor;
             this.Index = index;
@@ -117,7 +119,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
         internal override GenericContext GenericContext => (GenericContext) this.ContainingDeclaration.GenericContext;
 
         [Memo]
-        private IFullRef<IParameter> Ref => this.RefFactory.PseudoParameter( this );
+        private IFullRef<IParameter> Ref => this.RefFactory.FromPseudoParameter( this );
 
         IRef<IParameter> IParameter.ToRef() => this.Ref;
 

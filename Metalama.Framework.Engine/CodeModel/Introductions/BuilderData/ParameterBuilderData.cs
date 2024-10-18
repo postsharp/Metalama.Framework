@@ -25,7 +25,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     public ParameterBuilderData( BaseParameterBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
-        this._ref = new IntroducedRef<IParameter>( this, containingDeclaration.RefFactory );
+        this._ref = builder.Ref;
 
         this.Name = !builder.IsReturnParameter ? builder.Name : "<return>";
 
@@ -41,7 +41,7 @@ internal class ParameterBuilderData : DeclarationBuilderData
 
     public override IFullRef<INamedType>? DeclaringType => this.ContainingDeclaration.DeclaringType;
 
-    public new IntroducedRef<IParameter> ToRef() => this._ref;
+    public new IFullRef<IParameter> ToRef() => this._ref;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 

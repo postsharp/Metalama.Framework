@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using System.Linq;
@@ -249,10 +250,8 @@ class C
 
         var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToFullRef<INamedType>(), interfaceType.ToFullRef(), [] );
 
-        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
-            [baseType.CreateTransformation(), derivedType.CreateTransformation(), implementInterface],
-            null,
-            null );
+        var finalCompilation = initialCompilation.WithTransformations(
+            [baseType.CreateTransformation(), derivedType.CreateTransformation(), implementInterface] );
 
         var baseClass = finalCompilation.Types.OfName( "Target" ).Single().Types.OfName( "B" ).Single();
 
@@ -265,5 +264,57 @@ class C
         var implementingClass = Assert.Single( finalCompilation.GetDerivedTypes( implementedInterface ) );
 
         Assert.Same( derivedClass, implementingClass );
+    }
+
+    [Fact]
+    public void IntroducedTypeAsTypeArgument()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+using System;
+
+class B<TB>
+{
+   public virtual TB BaseMethod() => default;
+   public virtual TB BaseMethod2() => default; 
+}
+
+class C<TC> : B<TC>
+{    
+    TC field;
+    TC Property { get; set; }
+    TC Method( TC p1, TC[] p2, Action<TC> p3 ) => p1;
+    event Action<TC> Event;
+   public override TC BaseMethod() => base.BaseMethod();
+}";
+
+        var immutableCompilation1 = testContext.CreateCompilationModel( code );
+
+        // Add a type.
+        var typeBuilder = new NamedTypeBuilder( null!, immutableCompilation1.GlobalNamespace, "Introduced" );
+        typeBuilder.Freeze();
+
+        var finalCompilation = immutableCompilation1.WithTransformations( [typeBuilder.CreateTransformation()] );
+
+        var genericClass = finalCompilation.Types.OfName( "C" ).Single();
+        var introducedClass = typeBuilder.ForCompilation<INamedType>( finalCompilation );
+
+        var genericClassInstance = genericClass.WithTypeArguments( introducedClass );
+
+        Assert.Equal( "C<Introduced>", genericClassInstance.ToString() );
+        Assert.Equal( "B<Introduced>", genericClassInstance.BaseType!.ToString() );
+        Assert.Equal( introducedClass, genericClassInstance.Fields.OfName( "field" ).Single().Type );
+        Assert.Equal( introducedClass, genericClassInstance.Properties.Single().Type );
+        var method = genericClassInstance.Methods.OfName( "Method" ).Single();
+        Assert.Equal( introducedClass, method.ReturnType );
+        Assert.Equal( introducedClass, method.Parameters[0].Type );
+        Assert.Equal( "Introduced[]", method.Parameters[1].Type.ToString() );
+        Assert.Equal( "Action<Introduced>", method.Parameters[2].Type.ToString() );
+
+        Assert.Contains( "B<Introduced>.BaseMethod2()", genericClassInstance.AllMethods.SelectAsArray( m => m.ToString() ) );
+
+        var overridingMethod = genericClassInstance.Methods.OfName( "BaseMethod" ).Single();
+        Assert.Equal( "B<Introduced>.BaseMethod()", overridingMethod.OverriddenMethod.ToString() );
     }
 }

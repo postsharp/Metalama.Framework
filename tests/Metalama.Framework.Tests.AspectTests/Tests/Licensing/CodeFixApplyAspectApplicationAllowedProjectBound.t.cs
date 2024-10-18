@@ -1,5 +1,5 @@
 // Warning MY001 on `Method`: `Implement manually`
-//    CodeFix: Apply MyAspect to int TargetCode.Method(int a)`
+//    CodeFix: Apply MyAspect to TargetCode.Method(int)`
 namespace Metalama.Framework.Tests.AspectTests.Tests.Licensing.CodeFixApplyAspectApplicationAllowedProjectBound;
 class Dummy
 {

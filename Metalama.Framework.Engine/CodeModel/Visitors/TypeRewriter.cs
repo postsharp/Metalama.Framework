@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Source;
-using Metalama.Framework.Engine.CodeModel.Source.Types;
+using Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes;
 using System;
 using System.Linq;
 

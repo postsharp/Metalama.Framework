@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
@@ -164,12 +166,12 @@ public static class RefExtensions
 
     internal static ISymbolRef<INamespace> ToRef( this INamespaceSymbol symbol, RefFactory refFactory ) => refFactory.FromSymbol<INamespace>( symbol );
 
-    internal static ISymbolRef<IType> ToRef( this ITypeSymbol symbol, RefFactory refFactory )
+    internal static ISymbolRef<IType> ToRef( this ITypeSymbol symbol, RefFactory refFactory, GenericContext? genericContext = null )
         => symbol.Kind switch
         {
-            SymbolKind.TypeParameter => refFactory.FromSymbol<ITypeParameter>( symbol ),
-            SymbolKind.NamedType => refFactory.FromSymbol<INamedType>( symbol ),
-            _ => refFactory.FromSymbol<IType>( symbol )
+            SymbolKind.TypeParameter => refFactory.FromSymbol<ITypeParameter>( symbol, genericContext ),
+            SymbolKind.NamedType => refFactory.FromSymbol<INamedType>( symbol, genericContext ),
+            _ => refFactory.FromSymbol<IType>( symbol, genericContext )
         };
 
     internal static IEqualityComparer<ISymbol> GetSymbolComparer(
@@ -203,5 +205,21 @@ public static class RefExtensions
         {
             SymbolBasedDeclaration symbolBased => symbolBased.Symbol,
             _ => declaration.ToRef().GetOriginalSymbol()
+        };
+
+    internal static RefComparison ToRefComparison( this TypeComparison typeComparison )
+        => typeComparison switch
+        {
+            TypeComparison.Default => RefComparison.Default,
+            TypeComparison.IncludeNullability => RefComparison.IncludeNullability,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    
+    internal static TypeComparison ToTypeComparison( this RefComparison typeComparison )
+        => typeComparison switch
+        {
+            RefComparison.Default => TypeComparison.Default,
+            RefComparison.IncludeNullability => TypeComparison.IncludeNullability,
+            _ => throw new ArgumentOutOfRangeException()
         };
 }

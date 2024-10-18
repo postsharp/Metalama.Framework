@@ -116,7 +116,10 @@ namespace Metalama.Framework.Tests.TemplateTests.Runner
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
-            var serviceProvider = testContext.ServiceProvider.WithService( SyntaxGenerationOptions.Formatted );
+            var serviceProvider = testContext.ServiceProvider
+                .WithService( SyntaxGenerationOptions.Formatted )
+                .WithService( new TestTemplateClassMemberBuilder() );
+            
             var assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
 
             // Create an empty compilation (just with references) for the compile-time project.
@@ -242,10 +245,12 @@ namespace Metalama.Framework.Tests.TemplateTests.Runner
                     new ProjectModel( testResult.InputCompilation, serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
+                var fakeTemplateClass = new TestTemplateClass( serviceProvider, testResult.InputCompilation.GetCompilationContext(), templateMethod.ContainingType, compiledAspectType );
+
                 var fakeTemplateClassMember = new TemplateClassMember(
                     "Template",
                     "Template",
-                    null!,
+                    fakeTemplateClass,
                     NullTemplateInfo.Instance,
                     new TestTemplateAttribute(),
                     default,
@@ -381,5 +386,39 @@ namespace Metalama.Framework.Tests.TemplateTests.Runner
                                             SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
             }
         }
+
+        class TestTemplateClassMemberBuilder : ITemplateClassMemberBuilder
+        {
+            public bool TryGetMembers(
+                TemplateClass templateClass,
+                INamedTypeSymbol type,
+                CompilationContext compilationContext,
+                IDiagnosticAdder diagnosticAdder,
+                out ImmutableDictionary<string, TemplateClassMember>? members )
+            {
+                members = ImmutableDictionary<string, TemplateClassMember>.Empty;
+
+                return true;
+            }
+        }
+
+        class TestTemplateClass : TemplateClass
+        {
+            private readonly Type _templateType;
+
+            internal TestTemplateClass(
+                ProjectServiceProvider serviceProvider,
+                ITemplateReflectionContext templateReflectionContext,
+                INamedTypeSymbol templateTypeSymbol,
+                Type templateType) : base( serviceProvider, templateReflectionContext, templateTypeSymbol, ThrowingDiagnosticAdder.Instance, null, templateType.Name )
+            {
+                this._templateType = templateType;
+            }
+
+            internal override Type Type => this._templateType;
+
+            public override string FullName => this._templateType.FullName;
+        }
+   
     }
 }

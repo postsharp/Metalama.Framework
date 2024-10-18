@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
@@ -18,11 +19,15 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal abstract class TemplateMember
 {
-    protected abstract ISymbolRef<IMemberOrNamedType> GetDeclaration();
+    internal abstract ISymbolRef<IMemberOrNamedType> GetDeclarationRef();
 
-    public IFullRef<IMemberOrNamedType> DeclarationRef => this.GetDeclaration();
-
+    protected CompilationModel GetTemplateReflectionCompilation( CompilationModel compilationModel )
+        => this.TemplateClassMember.TemplateClass.GetTemplateReflectionCompilation( compilationModel );
     public TemplateClassMember TemplateClassMember { get; }
+
+    public ISymbol Symbol => this.GetDeclarationRef().Symbol;
+
+    public RefFactory RefFactory => this.GetDeclarationRef().RefFactory;
 
     // Can be null in the default instance.
     public IAdviceAttribute? AdviceAttribute { get; }
@@ -97,7 +102,7 @@ internal abstract class TemplateMember
     }
 
     [Memo]
-    public TemplateDriver Driver => this.TemplateClassMember.TemplateClass.GetTemplateDriver( this.DeclarationRef );
+    public TemplateDriver Driver => this.TemplateClassMember.TemplateClass.GetTemplateDriver( this.GetDeclarationRef() );
 
     protected TemplateMember( TemplateMember prototype )
     {
@@ -114,21 +119,6 @@ internal abstract class TemplateMember
         this.TemplateProvider = prototype.TemplateProvider;
         this.Tags = prototype.Tags;
     }
-
-    protected TemplateMember(
-        ISymbolRef<IMemberOrNamedType> implementation,
-        TemplateClassMember templateClassMember,
-        TemplateProvider templateProvider,
-        IAdviceAttribute adviceAttribute,
-        IObjectReader tags,
-        TemplateKind selectedTemplateKind = TemplateKind.Default ) : this(
-        implementation,
-        templateClassMember,
-        templateProvider,
-        adviceAttribute,
-        tags,
-        selectedTemplateKind,
-        selectedTemplateKind ) { }
 
     protected TemplateMember(
         ISymbolRef<IMemberOrNamedType> implementation,
@@ -241,5 +231,5 @@ internal abstract class TemplateMember
         where TOther : class, IMemberOrNamedType
         => this as TemplateMember<TOther> ?? new TemplateMember<TOther>( this );
 
-    public override string ToString() => $"{this.DeclarationRef.Name}:{this.SelectedTemplateKind}";
+    public override string ToString() => $"{this.GetDeclarationRef().Name}:{this.SelectedTemplateKind}";
 }

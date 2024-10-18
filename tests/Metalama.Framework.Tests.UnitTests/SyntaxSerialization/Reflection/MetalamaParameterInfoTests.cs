@@ -202,7 +202,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter;
-            var p = (PseudoMethodReturnParameter) single;
+            var p = (PseudoReturnParameter) single;
 
             var actual = testContext.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();
@@ -216,7 +216,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).GetMethod!.ReturnParameter;
-            var p = (PseudoMethodReturnParameter) single;
+            var p = (PseudoReturnParameter) single;
 
             var actual = testContext.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();

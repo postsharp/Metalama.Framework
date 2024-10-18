@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -17,11 +18,13 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Source;
 
-internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndexer
+internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndexer, IFieldOrPropertyOrIndexerImpl
 {
     protected IPropertySymbol PropertySymbol { get; }
 
-    protected SourcePropertyOrIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( compilation )
+    protected SourcePropertyOrIndexer( IPropertySymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+        compilation,
+        genericContextForSymbolMapping )
     {
         this.PropertySymbol = symbol.AssertBelongsToCompilationContext( compilation.CompilationContext );
     }
@@ -33,10 +36,13 @@ internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndex
     public override bool IsExplicitInterfaceImplementation => !this.PropertySymbol.ExplicitInterfaceImplementations.IsEmpty;
 
     [Memo]
-    public IType Type => this.Compilation.Factory.GetIType( this.PropertySymbol.Type );
+    public IType Type => this.Compilation.Factory.GetIType( this.PropertySymbol.Type, this.GenericContextForSymbolMapping );
 
     [Memo]
-    public IMethod? GetMethod => this.PropertySymbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this.PropertySymbol.GetMethod );
+    public IMethod? GetMethod
+        => this.PropertySymbol.GetMethod == null
+            ? null
+            : this.Compilation.Factory.GetMethod( this.PropertySymbol.GetMethod, this.GenericContextForSymbolMapping );
 
     [Memo]
     public virtual IMethod? SetMethod
@@ -44,9 +50,9 @@ internal abstract class SourcePropertyOrIndexer : SourceMember, IPropertyOrIndex
         {
             // Generate a pseudo-setter for read-only automatic properties.
             { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() == true
-                => new PseudoSetter( (IFieldOrPropertyOrIndexerImpl) this, Accessibility.Private ),
+                => new PseudoSetter( this, Accessibility.Private ),
             { SetMethod: null } => null,
-            _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod )
+            _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod, this.GenericContextForSymbolMapping )
         };
 
     public override MemberInfo ToMemberInfo() => this.ToPropertyInfo();

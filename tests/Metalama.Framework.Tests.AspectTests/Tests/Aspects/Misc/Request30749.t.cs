@@ -6,7 +6,7 @@ public class OrderAsyncResponseProcessor<TCommand> : BaseProcessor where TComman
   {
     var __metalma_currentThreadId = global::System.Threading.Thread.CurrentThread.ManagedThreadId;
     var __metalama_result = new global::System.Text.StringBuilder();
-    __metalama_result.Append("Metalama.Framework.Tests.AspectTests.Tests.Aspects.Misc.Request30749.OrderAsyncResponseProcessor<TCommand>");
+    __metalama_result.Append("OrderAsyncResponseProcessor<TCommand>");
     __metalama_result.Append(".");
     __metalama_result.Append("HandleFailureAsync");
     __metalama_result.Append("(");

@@ -81,7 +81,7 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
         => ref RefHelper.Wrap(
             new DelegateUserExpression(
                 context => this.CreatePropertyExpression( AspectReferenceTargetKind.Self, context ),
-                (this.Options & InvokerOptions.NullConditional) != 0 ? this.Member.Type.ToNullableType() : this.Member.Type,
+                (this.Options & InvokerOptions.NullConditional) != 0 ? this.Member.Type.ToNullable() : this.Member.Type,
                 this.IsRef(),
                 this.Member.Writeability != Writeability.None ) );
 

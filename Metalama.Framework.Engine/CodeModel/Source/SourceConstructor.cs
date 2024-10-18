@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -21,7 +22,10 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 {
     internal sealed class SourceConstructor : SourceMethodBase, IConstructorImpl
     {
-        public SourceConstructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
+        public SourceConstructor( IMethodSymbol symbol, CompilationModel compilation, GenericContext? genericContextForSymbolMapping ) : base(
+            symbol,
+            compilation,
+            genericContextForSymbolMapping )
         {
             if ( symbol.MethodKind != RoslynMethodKind.Constructor && symbol.MethodKind != RoslynMethodKind.StaticConstructor )
             {
@@ -72,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         [Memo]
         public bool IsPrimary => this.MethodSymbol.IsPrimaryConstructor();
 
-        public IMember? OverriddenMember => null;
+        public override IMember? OverriddenMember => null;
 
         public IConstructor? GetBaseConstructor()
         {
@@ -102,7 +106,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
                 }
                 else
                 {
-                    return this.Compilation.Factory.GetConstructor( symbol );
+                    return this.Compilation.Factory.GetConstructor( symbol, this.GenericContextForSymbolMapping );
                 }
             }
         }

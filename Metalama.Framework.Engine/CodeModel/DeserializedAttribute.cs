@@ -114,8 +114,6 @@ internal class DeserializedAttribute : IAttributeImpl
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
 
-    ISymbol? ISdkDeclaration.Symbol => null;
-
     Location? ISdkDeclaration.DiagnosticLocation => null;
 
     T IMeasurableInternal.GetMetric<T>() => throw new NotSupportedException();

@@ -67,10 +67,7 @@ internal static class OverrideHelper
             // If there is no 'this()' constructor, add one.
             if ( type.Constructors.FirstOrDefault() is { IsImplicitlyDeclared: true } implicitConstructor )
             {
-                var constructorBuilder = new ConstructorBuilder( aspectLayerInstance, type )
-                {
-                    ReplacedImplicitConstructor = implicitConstructor, Accessibility = Accessibility.Public
-                };
+                var constructorBuilder = new ConstructorBuilder( aspectLayerInstance, implicitConstructor );
 
                 constructorBuilder.Freeze();
 

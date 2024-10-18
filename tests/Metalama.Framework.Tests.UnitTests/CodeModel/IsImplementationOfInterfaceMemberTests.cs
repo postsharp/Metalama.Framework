@@ -202,13 +202,13 @@ public sealed class IsImplementationOfInterfaceMemberTests : UnitTestClass
         var interfaceType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "IInterface" );
 
         var interfaceInstanceType1 =
-            (INamedTypeImpl) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Int32 ) } );
+            interfaceType.MakeGenericInstance( [compilation.Factory.GetSpecialType( SpecialType.Int32 )] );
 
         var interfaceInstanceType2 =
-            (INamedTypeImpl) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.String ) } );
+            interfaceType.MakeGenericInstance( [compilation.Factory.GetSpecialType( SpecialType.String )] );
 
         var interfaceInstanceType3 =
-            (INamedTypeImpl) interfaceType.ConstructGenericInstance( new[] { compilation.Factory.GetSpecialType( SpecialType.Decimal ) } );
+            interfaceType.MakeGenericInstance( [compilation.Factory.GetSpecialType( SpecialType.Decimal )] );
 
         var implementationType = (INamedTypeImpl) compilation.AllTypes.Single( t => t.Name == "Implementation" );
 

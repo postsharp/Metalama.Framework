@@ -82,7 +82,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
         // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
         if ( x is IType xType && y is IType yType )
         {
-            if ( xType.GetSymbol() is { } xSymbol && yType.GetSymbol() is { } ySymbol && this._symbolComparer != null )
+            if ( xType.GetSymbol( false ) is { } xSymbol && yType.GetSymbol( false ) is { } ySymbol && this._symbolComparer != null )
             {
                 return this._symbolComparer.Compare( xSymbol, ySymbol );
             }
@@ -91,7 +91,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
         }
         else if ( x is IDeclaration xDeclaration && y is IDeclaration yDeclaration )
         {
-            if ( xDeclaration.GetSymbol() is { } xSymbol && yDeclaration.GetSymbol() is { } ySymbol && this._symbolComparer != null )
+            if ( xDeclaration.GetSymbol( false ) is { } xSymbol && yDeclaration.GetSymbol( false ) is { } ySymbol && this._symbolComparer != null )
             {
                 return this._symbolComparer.Compare( xSymbol, ySymbol );
             }

@@ -36,7 +36,7 @@ internal sealed class MethodCastReturnStatementInliner : MethodInliner
             return false;
         }
 
-        if ( !SignatureTypeSymbolComparer.Instance.Equals(
+        if ( !SignatureTypeComparer.Instance.Equals(
                 semanticModel.GetSymbolInfo( castExpression.Type ).Symbol,
                 aspectReference.ContainingSemantic.Symbol.ReturnType ) )
         {

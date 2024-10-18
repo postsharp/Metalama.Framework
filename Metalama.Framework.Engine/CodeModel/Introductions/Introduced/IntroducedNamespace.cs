@@ -34,7 +34,7 @@ internal sealed class IntroducedNamespace : IntroducedNamedDeclaration, INamespa
     public INamespace ContainingNamespace => this.MapDeclaration( this.NamedDeclarationBuilderData.ContainingDeclaration.As<INamespace>() );
 
     [Memo]
-    private IFullRef<INamespace> Ref => this.RefFactory.FromBuilt<INamespace>( this );
+    private IFullRef<INamespace> Ref => this.RefFactory.FromIntroducedDeclaration<INamespace>( this );
 
     IRef<INamespace> INamespace.ToRef() => this.Ref;
 

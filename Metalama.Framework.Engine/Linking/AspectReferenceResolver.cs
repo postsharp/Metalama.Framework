@@ -627,9 +627,9 @@ internal sealed class AspectReferenceResolver
                             .Single(
                                 m =>
                                     m.Parameters.Length == 2
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                                    && SignatureTypeComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                    && SignatureTypeComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
+                                    && SignatureTypeComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
                     }
                     else
                     {
@@ -638,8 +638,8 @@ internal sealed class AspectReferenceResolver
                             .Single(
                                 m =>
                                     m.Parameters.Length == 1
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                                    && SignatureTypeComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                    && SignatureTypeComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
                     }
 
                     return;

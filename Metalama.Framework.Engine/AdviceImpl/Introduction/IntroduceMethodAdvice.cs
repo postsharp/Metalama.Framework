@@ -43,7 +43,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
     {
         base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        var templateDeclaration = this.Template.AssertNotNull().DeclarationRef.GetTarget( this.SourceCompilation );
+        var templateDeclaration = this.Template.AssertNotNull().GetDeclaration( this.SourceCompilation );
 
         var serviceProvider = context.ServiceProvider;
 

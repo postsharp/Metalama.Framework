@@ -48,9 +48,9 @@ public sealed class SerializableTypeIdResolverForIType : SerializableTypeIdResol
 
     protected override IType CreatePointerType( IType pointedAtType ) => pointedAtType.MakePointerType();
 
-    protected override IType CreateNullableType( IType elementType ) => elementType.ToNullableType();
+    protected override IType CreateNullableType( IType elementType ) => elementType.ToNullable();
 
-    protected override IType CreateNonNullableReferenceType( IType referenceType ) => referenceType.ToNonNullableType();
+    protected override IType CreateNonNullableReferenceType( IType referenceType ) => referenceType.ToNonNullable();
 
     protected override IType ConstructGenericType( IType genericType, IType[] typeArguments )
         => genericType.AssertCast<INamedType>().WithTypeArguments( typeArguments );

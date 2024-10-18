@@ -26,10 +26,10 @@ internal sealed class BoundTemplateMethod
         this.TemplateArguments = templateArguments;
 
 #if DEBUG
-        if ( ((IMethodSymbol) template.DeclarationRef.Symbol).MethodKind is MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove
+        if ( ((IMethodSymbol) template.Symbol).MethodKind is MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove
              && templateArguments.Length != 1 )
         {
-            throw new AssertionFailedException( $"'{template.DeclarationRef}' is an accessor the the template has '{templateArguments.Length}' arguments." );
+            throw new AssertionFailedException( $"'{template.Symbol}' is an accessor the the template has '{templateArguments.Length}' arguments." );
         }
 #endif
     }

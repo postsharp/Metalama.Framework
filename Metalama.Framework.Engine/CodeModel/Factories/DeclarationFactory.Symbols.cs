@@ -2,17 +2,19 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Source;
-using Metalama.Framework.Engine.CodeModel.Source.Types;
+using Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Factories;
@@ -33,6 +35,7 @@ public partial class DeclarationFactory
 
     private TDeclaration GetDeclarationFromSymbol<TDeclaration, TSymbol>(
         TSymbol symbol,
+        GenericContext? genericContext,
         CreateFromSymbolDelegate<TDeclaration, TSymbol> createDeclaration,
         bool supportsRedirection = false )
         where TSymbol : ISymbol
@@ -42,9 +45,11 @@ public partial class DeclarationFactory
         {
             symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
+            var canonicalKey = SymbolNormalizer.GetCanonicalSymbol( symbol, genericContext ?? GenericContext.Empty, this._compilationModel.RefFactory );
+
             return (TDeclaration) this._symbolCache.GetOrAdd(
-                symbol,
-                GenericContext.Empty,
+                canonicalKey.Symbol,
+                canonicalKey.Context,
                 typeof(TDeclaration),
                 static ( _, _, x ) =>
                 {
@@ -57,14 +62,15 @@ public partial class DeclarationFactory
                         return x.me.GetDeclaration( redirectedDefinition, genericContext, typeof(TDeclaration) );
                     }
 
-                    return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, GenericContext.Empty ) );
+                    return x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ?? GenericContext.Empty ) );
                 },
-                (me: this, symbol, createDeclaration, supportsRedirection) );
+                (me: this, symbol, createDeclaration, supportsRedirection, genericContext) );
         }
     }
 
     private TType GetTypeFromSymbol<TType, TSymbol>(
         TSymbol symbol,
+        GenericContext? genericContext,
         CreateFromSymbolDelegate<TType, TSymbol> createType,
         bool supportsRedirection = false )
         where TSymbol : ITypeSymbol
@@ -74,32 +80,13 @@ public partial class DeclarationFactory
         {
             symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
-            return (TType) this._typeCache.GetOrAdd(
-                symbol,
-                GenericContext.Empty,
-                typeof(IType),
-                static ( _, _, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, GenericContext.Empty ) ),
-                (me: this, symbol, createDeclaration: createType, supportsRedirection) );
-        }
-    }
-
-    private TType GetTypeFromSymbol<TType, TSymbol>(
-        TSymbol symbol,
-        GenericContext genericContext,
-        CreateFromSymbolDelegate<TType, TSymbol> createType,
-        bool supportsRedirection = false )
-        where TSymbol : ITypeSymbol
-        where TType : class, IType
-    {
-        using ( StackOverflowHelper.Detect() )
-        {
-            symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
+            var canonicalKey = SymbolNormalizer.GetCanonicalSymbol( symbol, genericContext ?? GenericContext.Empty, this._compilationModel.RefFactory );
 
             return (TType) this._typeCache.GetOrAdd(
-                symbol,
-                genericContext,
+                (TSymbol) canonicalKey.Symbol,
+                canonicalKey.Context,
                 typeof(IType),
-                static ( _, _, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ) ),
+                static ( _, _, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ?? GenericContext.Empty ) ),
                 (me: this, symbol, createDeclaration: createType, supportsRedirection, genericContext) );
         }
     }
@@ -107,51 +94,60 @@ public partial class DeclarationFactory
     internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
         => this.GetDeclarationFromSymbol<INamespace, INamespaceSymbol>(
             namespaceSymbol,
+            null,
             static ( in CreateFromSymbolArgs<INamespaceSymbol> args ) => new SourceNamespace( args.Symbol, args.Compilation ) );
 
     internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
         => this.GetDeclarationFromSymbol<IAssembly, IAssemblySymbol>(
             assemblySymbol,
+            null,
             static ( in CreateFromSymbolArgs<IAssemblySymbol> args ) =>
                 !args.Symbol.Identity.Equals( args.Compilation.RoslynCompilation.Assembly.Identity )
                     ? new ExternalAssembly( args.Symbol, args.Compilation )
                     : args.Compilation );
 
-    public IType GetIType( ITypeSymbol typeSymbol )
+    public IType GetIType( ITypeSymbol typeSymbol, GenericContext? genericContext = null )
         => typeSymbol switch
         {
             // TODO PERF: switch by SymbolKind.
-            INamedTypeSymbol namedType => this.GetNamedType( namedType ),
-            IArrayTypeSymbol arrayType => this.GetArrayType( arrayType ),
-            IPointerTypeSymbol pointerType => this.GetPointerType( pointerType ),
-            ITypeParameterSymbol typeParameter => this.GetTypeParameter( typeParameter ),
+            INamedTypeSymbol namedType => this.GetNamedType( namedType, genericContext ),
+            IArrayTypeSymbol arrayType => this.GetArrayType( arrayType, genericContext ),
+            IPointerTypeSymbol pointerType => this.GetPointerType( pointerType, genericContext ),
+            ITypeParameterSymbol typeParameter => this.GetTypeParameter( typeParameter, genericContext ).ResolvedType,
             IDynamicTypeSymbol dynamicType => this.GetDynamicType( dynamicType ),
-            IFunctionPointerTypeSymbol functionPointerType => this.GetFunctionPointerType( functionPointerType ),
+            IFunctionPointerTypeSymbol functionPointerType => this.GetFunctionPointerType( functionPointerType, genericContext ),
             _ => throw new NotImplementedException( $"Types of kind {typeSymbol.Kind} are not implemented." )
         };
 
-    private IArrayType GetArrayType( IArrayTypeSymbol typeSymbol )
+    private IArrayType GetArrayType( IArrayTypeSymbol typeSymbol, GenericContext? genericContext = null )
         => this.GetTypeFromSymbol<IArrayType, IArrayTypeSymbol>(
             typeSymbol,
-            static ( in CreateFromSymbolArgs<IArrayTypeSymbol> args ) => new SymbolArrayType( args.Symbol, args.Compilation ) );
+            genericContext,
+            static ( in CreateFromSymbolArgs<IArrayTypeSymbol> args ) => new SymbolArrayType( args.Symbol, args.Compilation, args.GenericContext ) );
 
-    private IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
+    internal IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
         => this.GetTypeFromSymbol<IDynamicType, IDynamicTypeSymbol>(
             typeSymbol,
+            null,
             static ( in CreateFromSymbolArgs<IDynamicTypeSymbol> args ) => new DynamicType( args.Symbol, args.Compilation ) );
 
-    private IPointerType GetPointerType( IPointerTypeSymbol typeSymbol )
+    private IPointerType GetPointerType( IPointerTypeSymbol typeSymbol, GenericContext? genericContext = null )
         => this.GetTypeFromSymbol<IPointerType, IPointerTypeSymbol>(
             typeSymbol,
-            static ( in CreateFromSymbolArgs<IPointerTypeSymbol> args ) => new SymbolPointerType( args.Symbol, args.Compilation ) );
+            genericContext,
+            static ( in CreateFromSymbolArgs<IPointerTypeSymbol> args ) => new SymbolPointerType( args.Symbol, args.Compilation, args.GenericContext ) );
 
-    private IFunctionPointerType GetFunctionPointerType( IFunctionPointerTypeSymbol typeSymbol )
+    private IFunctionPointerType GetFunctionPointerType( IFunctionPointerTypeSymbol typeSymbol, GenericContext? genericContext = null )
         => this.GetTypeFromSymbol<IFunctionPointerType, IFunctionPointerTypeSymbol>(
             typeSymbol,
-            static ( in CreateFromSymbolArgs<IFunctionPointerTypeSymbol> args ) => new SymbolFunctionPointerType( args.Symbol, args.Compilation ) );
+            genericContext,
+            static ( in CreateFromSymbolArgs<IFunctionPointerTypeSymbol> args )
+                => new SymbolFunctionPointerType( args.Symbol, args.Compilation, args.GenericContext ) );
 
     public INamedType GetNamedType( INamedTypeSymbol typeSymbol, IGenericContext? genericContext = null )
     {
+        Invariant.Assert( genericContext is not SymbolGenericContext );
+
         // Roslyn considers the type in e.g. typeof(List<>) to be different from e.g. List<T>.
         // That distinction makes things more complicated for us (e.g. it's not representable using Type), so get rid of it.
         if ( typeSymbol.IsUnboundGenericType )
@@ -164,74 +160,77 @@ public partial class DeclarationFactory
             return this.GetSpecialType( SpecialType.Object );
         }
 
+        // We must use GetTypeFromSymbol and not GetDeclarationFromSymbol because of nullability.
         return this.GetTypeFromSymbol<INamedType, INamedTypeSymbol>(
             typeSymbol,
+            genericContext.AsGenericContext(),
             static ( in CreateFromSymbolArgs<INamedTypeSymbol> args ) =>
-                new SourceNamedType( args.Symbol, args.Compilation ) );
+                new SourceNamedType( args.Symbol, args.Compilation, args.GenericContext ) );
     }
 
     // We must use GetTypeFromSymbol and not GetDeclarationFromSymbol because of nullability.
-    public ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol )
-        => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
-            typeParameterSymbol,
-            static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
-                new SourceTypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
-
-    private ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol, GenericContext genericContext )
+    public ITypeParameter GetTypeParameter( ITypeParameterSymbol typeParameterSymbol, GenericContext? genericContext = null )
         => this.GetTypeFromSymbol<ITypeParameter, ITypeParameterSymbol>(
             typeParameterSymbol,
             genericContext,
             static ( in CreateFromSymbolArgs<ITypeParameterSymbol> args ) =>
                 new SourceTypeParameter( args.Symbol, args.Compilation, args.GenericContext ) );
 
-    public IMethod GetMethod( IMethodSymbol methodSymbol )
+    public IMethod GetMethod( IMethodSymbol methodSymbol, GenericContext? genericContext = null )
     {
         // Standardize on the partial definition part for partial methods.
         methodSymbol = methodSymbol.PartialDefinitionPart ?? methodSymbol;
 
         return this.GetDeclarationFromSymbol<IMethod, IMethodSymbol>(
             methodSymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<IMethodSymbol> args ) =>
-                new SourceMethod( args.Symbol, args.Compilation ) );
+                new SourceMethod( args.Symbol, args.Compilation, args.GenericContext ) );
     }
 
-    public IProperty GetProperty( IPropertySymbol propertySymbol )
+    public IProperty GetProperty( IPropertySymbol propertySymbol, GenericContext? genericContext = null )
         => this.GetDeclarationFromSymbol<IProperty, IPropertySymbol>(
             propertySymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<IPropertySymbol> args ) =>
-                new SourceProperty( args.Symbol, args.Compilation ) );
+                new SourceProperty( args.Symbol, args.Compilation, args.GenericContext ) );
 
-    public IIndexer GetIndexer( IPropertySymbol propertySymbol )
+    public IIndexer GetIndexer( IPropertySymbol propertySymbol, GenericContext? genericContext = null )
         => this.GetDeclarationFromSymbol<IIndexer, IPropertySymbol>(
             propertySymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<IPropertySymbol> args ) =>
-                new SourceIndexer( args.Symbol, args.Compilation ) );
+                new SourceIndexer( args.Symbol, args.Compilation, args.GenericContext ) );
 
     // Fields support redirections, but fields redirect to properties, so it is not handled at this level.
-    public IField GetField( IFieldSymbol fieldSymbol )
+    public IField GetField( IFieldSymbol fieldSymbol, GenericContext? genericContext = null )
         => this.GetDeclarationFromSymbol<IField, IFieldSymbol>(
             fieldSymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<IFieldSymbol> args ) =>
-                new SourceField( args.Symbol, args.Compilation ) );
+                new SourceField( args.Symbol, args.Compilation, args.GenericContext ) );
 
-    public IConstructor GetConstructor( IMethodSymbol methodSymbol )
+    public IConstructor GetConstructor( IMethodSymbol methodSymbol, GenericContext? genericContext = null )
         => this.GetDeclarationFromSymbol<IConstructor, IMethodSymbol>(
             methodSymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<IMethodSymbol> args ) =>
-                new SourceConstructor( args.Symbol, args.Compilation ),
+                new SourceConstructor( args.Symbol, args.Compilation, args.GenericContext ),
             true );
 
-    public IParameter GetParameter( IParameterSymbol parameterSymbol )
+    public IParameter GetParameter( IParameterSymbol parameterSymbol, GenericContext? genericContext = null )
         => this.GetDeclarationFromSymbol<IParameter, IParameterSymbol>(
             parameterSymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<IParameterSymbol> args ) =>
-                new SourceParameter( args.Symbol, args.Compilation ) );
+                new SourceParameter( args.Symbol, args.Compilation, args.GenericContext ) );
 
-    public IEvent GetEvent( IEventSymbol eventSymbol )
+    public IEvent GetEvent( IEventSymbol eventSymbol, GenericContext? genericContext = null )
         => this.GetDeclarationFromSymbol<IEvent, IEventSymbol>(
             eventSymbol,
+            genericContext,
             static ( in CreateFromSymbolArgs<IEventSymbol> args ) =>
-                new SourceEvent( args.Symbol, args.Compilation ) );
+                new SourceEvent( args.Symbol, args.Compilation, args.GenericContext ) );
 
     public bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
     {
@@ -246,7 +245,8 @@ public partial class DeclarationFactory
 
     public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetSymbolId().Resolve( this.Compilation ).AssertSymbolNotNull() );
 
-    public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, RefTargetKind.Default );
+    public IDeclaration GetDeclaration( ISymbol symbol, GenericContext? genericContext = null )
+        => this.GetDeclaration( symbol, RefTargetKind.Default, genericContext );
 
     internal IDeclaration GetDeclaration( ISymbol symbol, RefTargetKind kind, GenericContext? genericContext = null )
     {
@@ -279,16 +279,25 @@ public partial class DeclarationFactory
         var typedGenericContext = genericContext.AsGenericContext();
 
         ISymbol mappedSymbol;
+        GenericContext? genericContectForSymbolMapping;
 
         switch ( typedGenericContext.Kind )
         {
             case GenericContextKind.Null:
                 mappedSymbol = symbol;
+                genericContectForSymbolMapping = null;
 
                 break;
 
             case GenericContextKind.Symbol:
-                mappedSymbol = ((SymbolGenericContext) typedGenericContext).Map( symbol );
+                mappedSymbol = ((SymbolGenericContext) typedGenericContext).MapToSymbol( symbol );
+                genericContectForSymbolMapping = null;
+
+                break;
+
+            case GenericContextKind.Introduced:
+                mappedSymbol = symbol;
+                genericContectForSymbolMapping = typedGenericContext;
 
                 break;
 
@@ -302,25 +311,25 @@ public partial class DeclarationFactory
             // The Roslyn code model does not support "generic instances" of type parameters, the support for this feature in
             // our code model is done in the TypeParameter class.
 
-            return this.GetTypeParameter( (ITypeParameterSymbol) symbol, typedGenericContext );
+            return this.GetTypeParameter( (ITypeParameterSymbol) symbol, genericContectForSymbolMapping );
         }
         else
         {
-            return this.GetCompilationElementCore( mappedSymbol, targetKind, typedGenericContext, interfaceType );
+            return this.GetCompilationElementCore( mappedSymbol, targetKind, genericContectForSymbolMapping, interfaceType );
         }
     }
 
     private ICompilationElement? GetCompilationElementCore(
         ISymbol mappedSymbol,
         RefTargetKind targetKind,
-        GenericContext genericContext,
+        GenericContext? genericContext,
         Type? interfaceType )
     {
         switch ( mappedSymbol.Kind )
         {
             case SymbolKind.NamedType:
                 {
-                    var type = this.GetNamedType( (INamedTypeSymbol) mappedSymbol );
+                    var type = this.GetNamedType( (INamedTypeSymbol) mappedSymbol, genericContext );
 
                     return targetKind switch
                     {
@@ -331,10 +340,10 @@ public partial class DeclarationFactory
                 }
 
             case SymbolKind.ArrayType:
-                return this.GetArrayType( (IArrayTypeSymbol) mappedSymbol );
+                return this.GetArrayType( (IArrayTypeSymbol) mappedSymbol, genericContext );
 
             case SymbolKind.PointerType:
-                return this.GetPointerType( (IPointerTypeSymbol) mappedSymbol );
+                return this.GetPointerType( (IPointerTypeSymbol) mappedSymbol, genericContext );
 
             case SymbolKind.DynamicType:
                 return this.GetDynamicType( (IDynamicTypeSymbol) mappedSymbol );
@@ -346,12 +355,12 @@ public partial class DeclarationFactory
                     return
                         targetKind switch
                         {
-                            RefTargetKind.Return => this.GetReturnParameter( method ),
-                            RefTargetKind.Parameter => this.GetParameter( method.Parameters[0] ),
+                            RefTargetKind.Return => this.GetReturnParameter( method, genericContext ),
+                            RefTargetKind.Parameter => this.GetParameter( method.Parameters[0], genericContext ),
                             RefTargetKind.Default => method.GetDeclarationKind( this.CompilationContext ) switch
                             {
-                                DeclarationKind.Method or DeclarationKind.Finalizer => this.GetMethod( method ),
-                                DeclarationKind.Constructor => this.GetConstructor( method ),
+                                DeclarationKind.Method or DeclarationKind.Finalizer => this.GetMethod( method, genericContext ),
+                                DeclarationKind.Constructor => this.GetConstructor( method, genericContext ),
                                 _ => throw new AssertionFailedException(
                                     $"Unexpected DeclarationRefTargetKind: {method.GetDeclarationKind( this.CompilationContext )}." )
                             },
@@ -363,8 +372,8 @@ public partial class DeclarationFactory
                 var propertySymbol = (IPropertySymbol) mappedSymbol;
 
                 var propertyOrIndexer = propertySymbol.IsIndexer
-                    ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol )
-                    : this.GetProperty( propertySymbol );
+                    ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol, genericContext )
+                    : this.GetProperty( propertySymbol, genericContext );
 
                 return targetKind switch
                 {
@@ -377,14 +386,14 @@ public partial class DeclarationFactory
                     RefTargetKind.Property => propertyOrIndexer,
 
                     // The underlying field.
-                    RefTargetKind.Field => this.GetField( propertySymbol.GetBackingField().AssertSymbolNotNull() ),
+                    RefTargetKind.Field => this.GetField( propertySymbol.GetBackingField().AssertSymbolNotNull(), genericContext ),
 
                     _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                 };
 
             case SymbolKind.Field:
                 {
-                    var field = this.GetField( (IFieldSymbol) mappedSymbol );
+                    var field = this.GetField( (IFieldSymbol) mappedSymbol, genericContext );
 
                     return targetKind switch
                     {
@@ -400,14 +409,14 @@ public partial class DeclarationFactory
                 }
 
             case SymbolKind.TypeParameter:
-                return this.GetTypeParameter( (ITypeParameterSymbol) mappedSymbol );
+                return this.GetTypeParameter( (ITypeParameterSymbol) mappedSymbol, genericContext );
 
             case SymbolKind.Parameter:
-                return this.GetParameter( (IParameterSymbol) mappedSymbol );
+                return this.GetParameter( (IParameterSymbol) mappedSymbol, genericContext );
 
             case SymbolKind.Event:
                 {
-                    var @event = this.GetEvent( (IEventSymbol) mappedSymbol );
+                    var @event = this.GetEvent( (IEventSymbol) mappedSymbol, genericContext );
 
                     return targetKind switch
                     {
@@ -433,7 +442,8 @@ public partial class DeclarationFactory
         }
     }
 
-    public IParameter GetReturnParameter( IMethodSymbol methodSymbol ) => this.GetMethod( methodSymbol ).ReturnParameter;
+    public IParameter GetReturnParameter( IMethodSymbol methodSymbol, GenericContext? genericContext = null )
+        => this.GetMethod( methodSymbol, genericContext ).ReturnParameter;
 
     public IAssembly GetAssembly( AssemblyIdentity assemblyIdentity )
     {
@@ -448,5 +458,44 @@ public partial class DeclarationFactory
 
             return this.GetAssembly( assemblySymbol );
         }
+    }
+
+    internal IArrayType MakeArrayType( ITypeSymbol elementType, int rank )
+        => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( elementType, rank ) );
+
+    internal IPointerType MakePointerType( ITypeSymbol pointedType )
+        => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( pointedType ) );
+
+    internal IType MakeNullableType<T>( T type, bool isNullable )
+        where T : IType, ISymbolBasedCompilationElement
+    {
+        var typeSymbol = (ITypeSymbol) type.Symbol;
+
+        if ( type.IsNullable == isNullable )
+        {
+            return type;
+        }
+
+        ITypeSymbol newTypeSymbol;
+
+        if ( type.IsReferenceType ?? true )
+        {
+            newTypeSymbol = typeSymbol
+                .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
+        }
+        else
+        {
+            if ( isNullable )
+            {
+                newTypeSymbol = this._compilationModel.RoslynCompilation.GetSpecialType( RoslynSpecialType.System_Nullable_T )
+                    .Construct( typeSymbol );
+            }
+            else
+            {
+                return ((INamedType) type).TypeArguments[0];
+            }
+        }
+
+        return this.GetIType( newTypeSymbol );
     }
 }

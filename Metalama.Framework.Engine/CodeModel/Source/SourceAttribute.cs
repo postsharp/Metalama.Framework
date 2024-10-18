@@ -118,8 +118,6 @@ internal sealed class SourceAttribute : IAttributeImpl
 
     public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
 
-    ISymbol? ISdkDeclaration.Symbol => null;
-
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences
         => this.AttributeData.ApplicationSyntaxReference != null
             ? ImmutableArray.Create( this.AttributeData.ApplicationSyntaxReference )

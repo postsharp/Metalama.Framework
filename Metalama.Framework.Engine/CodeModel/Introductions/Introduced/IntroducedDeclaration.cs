@@ -40,7 +40,7 @@ internal abstract class IntroducedDeclaration : BaseDeclaration
     internal override GenericContext GenericContext { get; }
 
     public sealed override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => DisplayStringFormatter.Format( this, format, context );
+        => DisplayStringFormatter.Format( this, format, context, this.GenericContext );
 
     public override IAssembly DeclaringAssembly => this.Compilation;
 
@@ -90,8 +90,6 @@ internal abstract class IntroducedDeclaration : BaseDeclaration
     public override DeclarationKind DeclarationKind => this.BuilderData.DeclarationKind;
 
     public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
-
-    public sealed override string ToString() => this.ToDisplayString();
 
     public override Location? DiagnosticLocation => this.ContainingDeclaration.GetDiagnosticLocation();
 
