@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
-using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Linking;
@@ -496,12 +495,12 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
                     builder.Freeze();
 
-                    MemberBuilderData builderData = builder switch
+                    var builderData = builder switch
                     {
-                        MethodBuilder methodBuilder => new MethodBuilderData( methodBuilder, declaringType.ToFullRef() ),
-                        PropertyBuilder propertyBuilder => new PropertyBuilderData( propertyBuilder, declaringType.ToFullRef() ),
-                        EventBuilder eventBuilder => new EventBuilderData( eventBuilder, declaringType.ToFullRef() ),
-                        FieldBuilder fieldBuilder => new FieldBuilderData( fieldBuilder, declaringType.ToFullRef() ),
+                        MethodBuilder => ((IntroducedRef<IMethod>) builder.ToFullRef()).BuilderData,
+                        PropertyBuilder => ((IntroducedRef<IProperty>) builder.ToFullRef()).BuilderData,
+                        EventBuilder => ((IntroducedRef<IEvent>) builder.ToFullRef()).BuilderData,
+                        FieldBuilder => ((IntroducedRef<IField>) builder.ToFullRef()).BuilderData,
                         _ => throw new NotSupportedException()
                     };
 

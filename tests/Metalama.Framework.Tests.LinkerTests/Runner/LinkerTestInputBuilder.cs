@@ -155,7 +155,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             return durableRef.ToFullRef<IDeclaration>( this._initialCompilationModel.RefFactory );
         }
 
-        private void RegisterBuilderDataForSymbol( ISymbol symbol, MemberBuilderData builderData )
+        private void RegisterBuilderDataForSymbol( ISymbol symbol, DeclarationBuilderData builderData )
         {
             this._symbolToBuilderDataMap[symbol] = builderData;
         }
