@@ -7,7 +7,7 @@ public class Target
     get
     {
       global::System.Console.WriteLine(typeof(global::System.Int32));
-      return (global::System.Int32)((global::System.Int32)this._p);
+      return (global::System.Int32)this._p;
     }
     set
     {

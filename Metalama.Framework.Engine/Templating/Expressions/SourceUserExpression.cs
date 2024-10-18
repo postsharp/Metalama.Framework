@@ -28,8 +28,7 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
     {
         if ( targetType?.Equals( this.Type ) != true )
         {
-            return syntaxSerializationContext.SyntaxGenerator.CastExpression( this.Type, this.Expression )
-                .WithSimplifierAnnotationIfNecessary( syntaxSerializationContext.SyntaxGenerationContext );
+            return syntaxSerializationContext.SyntaxGenerator.CastExpression( this.Type, this.Expression );
         }
         else
         {

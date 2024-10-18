@@ -207,21 +207,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public CastExpressionSyntax CastExpression( IType targetType, ExpressionSyntax expression ) => this.CastExpression( this.Type( targetType ), expression );
 
-    private CastExpressionSyntax CastExpression( TypeSyntax targetType, ExpressionSyntax expression )
-    {
-        switch ( expression )
-        {
-            case BinaryExpressionSyntax:
-            case ConditionalExpressionSyntax:
-            case CastExpressionSyntax:
-            case PrefixUnaryExpressionSyntax:
-                expression = ParenthesizedExpression( expression );
-
-                break;
-        }
-
-        return this.SafeCastExpression( targetType, expression );
-    }
+    private CastExpressionSyntax CastExpression( TypeSyntax targetType, ExpressionSyntax expression ) => this.SafeCastExpression( targetType, expression );
 
     public TypeSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
     {
@@ -920,6 +906,10 @@ internal sealed partial class ContextualSyntaxGenerator
             ObjectCreationExpressionSyntax => false,
             ArrayCreationExpressionSyntax => false,
             PostfixUnaryExpressionSyntax => false,
+            
+#if ROSLYN_4_8_0_OR_GREATER
+            CollectionExpressionSyntax => false,
+#endif
 
             // The syntax (T)-x is ambiguous and interpreted as binary minus, not cast of unary minus.
             PrefixUnaryExpressionSyntax { RawKind: not (int) SyntaxKind.UnaryMinusExpression } => false,
@@ -930,12 +920,12 @@ internal sealed partial class ContextualSyntaxGenerator
 
         if ( requiresParenthesis )
         {
-            return SyntaxFactory.CastExpression( type, ParenthesizedExpression( syntax ).WithAdditionalAnnotations( Simplifier.Annotation ) )
+            return SyntaxFactory.CastExpression( type, ParenthesizedExpression( syntax ).WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ) )
                 .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
         }
         else
         {
-            return SyntaxFactory.CastExpression( type, syntax ).WithAdditionalAnnotations( Simplifier.Annotation );
+            return SyntaxFactory.CastExpression( type, syntax ).WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
         }
     }
 
