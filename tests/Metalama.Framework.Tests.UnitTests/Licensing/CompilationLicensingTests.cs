@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness) )]
         [InlineData( nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
         [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeyProvider.MetalamaUltimateProjectBoundProjectName )]
-        public async Task CompilationPassesWithNoMetalamaUsageAsync( string licenseKeyName, string projectName = "TestProject" )
+        public async Task CompilationPassesWithNoMetalamaUsageAsync( string? licenseKeyName, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
             

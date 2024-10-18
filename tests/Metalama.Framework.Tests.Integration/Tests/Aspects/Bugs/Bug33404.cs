@@ -1,7 +1,5 @@
 using System;
-using Castle.DynamicProxy.Generators;
 using System.Threading.Tasks;
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 
@@ -60,3 +58,5 @@ public partial class TestClass
         yield return default;
     }
 }
+
+public struct CacheKey { }
