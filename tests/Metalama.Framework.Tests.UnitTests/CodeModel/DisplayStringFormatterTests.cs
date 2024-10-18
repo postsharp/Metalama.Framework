@@ -12,6 +12,7 @@ public class DisplayStringFormatterTests : UnitTestClass
     [InlineData( "int" )]
     [InlineData( "int?" )]
     [InlineData( "string?" )]
+    [InlineData( "decimal?" )]
     [InlineData( "(int, string)" )]
     [InlineData( "void" )]
     [InlineData( "Action<int>" )]

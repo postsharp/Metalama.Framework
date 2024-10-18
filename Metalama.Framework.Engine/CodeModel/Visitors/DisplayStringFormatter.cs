@@ -36,7 +36,8 @@ internal class DisplayStringFormatter : CompilationElementVisitor
         [SpecialType.SByte] = "sbyte",
         [SpecialType.UInt16] = "ushort",
         [SpecialType.UInt32] = "uint",
-        [SpecialType.UInt64] = "ulong"
+        [SpecialType.UInt64] = "ulong",
+        [SpecialType.Decimal] = "decimal"
     };
 
     private static readonly Dictionary<MethodKind, string> _methodKinds = new()
