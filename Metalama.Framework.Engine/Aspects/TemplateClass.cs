@@ -124,8 +124,6 @@ public abstract class TemplateClass : IDiagnosticSource
         => this.Members.TryGetValue( symbol.GetDocumentationCommentId().AssertNotNull(), out member )
            && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
-  
-
     internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice(
         in ProjectServiceProvider serviceProvider,
         CompilationModel compilation,

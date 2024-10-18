@@ -20,13 +20,13 @@ public partial class GenericContext
             this._compilation = compilation;
         }
 
-        public override IType? DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException( $"Unexpected symbol kind: '{symbol.Kind}'." );
+        public override IType DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException( $"Unexpected symbol kind: '{symbol.Kind}'." );
 
-        public override IType? VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType ).MakeArrayType( symbol.Rank );
+        public override IType VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType )!.MakeArrayType( symbol.Rank );
 
-        public override IType? VisitDynamicType( IDynamicTypeSymbol symbol ) => this._compilation.Factory.GetDynamicType( symbol );
+        public override IType VisitDynamicType( IDynamicTypeSymbol symbol ) => this._compilation.Factory.GetDynamicType( symbol );
 
-        public override IType? VisitNamedType( INamedTypeSymbol symbol )
+        public override IType VisitNamedType( INamedTypeSymbol symbol )
         {
             INamedType namedType;
 
@@ -51,14 +51,14 @@ public partial class GenericContext
                 for ( var index = 0; index < symbol.TypeArguments.Length; index++ )
                 {
                     var typeArgumentSymbol = symbol.TypeArguments[index];
-                    typeArguments[index] = this.Visit( typeArgumentSymbol );
+                    typeArguments[index] = this.Visit( typeArgumentSymbol )!;
                 }
 
                 return namedType.MakeGenericInstance( typeArguments );
             }
         }
 
-        public override IType? VisitPointerType( IPointerTypeSymbol symbol ) => this.Visit( symbol.PointedAtType ).MakePointerType();
+        public override IType? VisitPointerType( IPointerTypeSymbol symbol ) => this.Visit( symbol.PointedAtType )!.MakePointerType();
 
         public override IType? VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol )
             => throw new NotImplementedException( UnsupportedFeatures.FunctionPointerMapping );

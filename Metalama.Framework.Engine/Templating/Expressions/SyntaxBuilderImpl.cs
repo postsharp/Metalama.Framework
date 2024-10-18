@@ -32,7 +32,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     private readonly INamedType? _currentType;
     private readonly IType _targetTypedExpressionType;
 
-     ICompilation ISyntaxBuilderImpl.Compilation => this.Compilation;
+    ICompilation ISyntaxBuilderImpl.Compilation => this.Compilation;
     
     public CompilationModel Compilation { get; }
 
