@@ -356,6 +356,12 @@ internal class DisplayStringFormatter : CompilationElementVisitor
 
             this.Append( ")" );
         }
+        else if ( namedType is { Name: nameof(Nullable), ContainingNamespace.FullName: "System" , TypeParameters.Count: 1 } )
+        {
+            this.Visit( namedType.TypeArguments[0] );
+            
+            // The trailing ? is appended lower in this method.
+        }
         else
         {
             if ( namedType.DeclaringType != null )
