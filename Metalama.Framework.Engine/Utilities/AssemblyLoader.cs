@@ -25,7 +25,18 @@ internal sealed class AssemblyLoader : IDisposable
         // (or ALCs don't exist), which means loading everything using Assembly.LoadFile works (though it's also a memory leak).
         // But in RoslynCodeAnalysisService, compiler assemblies are loaded into a separate ALC, so we have to do something different.
 
-        var alcType = Type.GetType( "System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader" );
+        Type? alcType;
+
+        try
+        {
+            alcType = Type.GetType( "System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader" );
+        }
+        catch ( NullReferenceException )
+        {
+            // .Net Framework sometimes throws NullReferenceException when trying to resolve this type, instead of returning null.
+            alcType = null;
+        }
+
         var currentAlc = alcType?.GetMethod( "GetLoadContext" )!.Invoke( null, new object[] { typeof(AssemblyLoader).Assembly } );
 
         if ( currentAlc != null )
