@@ -1,10 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -55,18 +53,16 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
     internal sealed partial class LinkerTestInputBuilder
     {
-        private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
 
         private readonly List<Func<CompilationModel, TestTransformationBase>> _transformationFactories = new();
         private readonly Dictionary<ISymbol, DeclarationBuilderData> _symbolToBuilderDataMap = new( SymbolEqualityComparer.Default );
 
-        private CompilationModel _initialCompilationModel;
-        private Dictionary<string, SyntaxNode> _syntaxNodeMap;
+        private CompilationModel? _initialCompilationModel;
+        private Dictionary<string, SyntaxNode>? _syntaxNodeMap;
 
         public LinkerTestInputBuilder( in ProjectServiceProvider serviceProvider, CompilationContext inputCompilationContext )
         {
-            this._serviceProvider = serviceProvider;
             this._rewriter = new TestRewriter( serviceProvider, this, inputCompilationContext );
         }
 
@@ -80,7 +76,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             this._initialCompilationModel = initialCompilationModel;
 
             this._syntaxNodeMap =
-                this._initialCompilationModel.CompilationContext.Compilation.SyntaxTrees.SelectMany( GetNodesWithId )
+                this._initialCompilationModel.AssertNotNull().CompilationContext.Compilation.SyntaxTrees.SelectMany( GetNodesWithId )
                 .ToDictionary( GetNodeId );
 
             var orderedLayers = this._rewriter.OrderedAspectLayers
@@ -128,7 +124,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             switch ( insertPositionRecord )
             {
                 case { Relation: var relation, NodeId: { } nodeId }:
-                    var node = this._syntaxNodeMap[nodeId] switch
+                    var node = this._syntaxNodeMap.AssertNotNull()[nodeId] switch
                     {
                         MemberDeclarationSyntax memberDeclaration => memberDeclaration,
                         VariableDeclaratorSyntax variableDeclaration => (MemberDeclarationSyntax)variableDeclaration.Parent.Parent,
@@ -152,7 +148,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
 
             var symbolId = SymbolId.Create( overriddenDeclarationSymbol );
             var durableRef = DurableRefFactory.FromSymbolId<IDeclaration>( symbolId );
-            return durableRef.ToFullRef<IDeclaration>( this._initialCompilationModel.RefFactory );
+            return durableRef.ToFullRef<IDeclaration>( this._initialCompilationModel.AssertNotNull().RefFactory );
         }
 
         private void RegisterBuilderDataForSymbol( ISymbol symbol, DeclarationBuilderData builderData )

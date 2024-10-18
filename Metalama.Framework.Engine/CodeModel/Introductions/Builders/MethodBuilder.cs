@@ -109,9 +109,7 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilderImpl
 
     IType IMethod.ReturnType => this.ReturnParameter.Type;
 
-#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
     public BaseParameterBuilder ReturnParameter { get; set; }
-#pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
 
     IParameter IMethod.ReturnParameter => this.ReturnParameter;
 
