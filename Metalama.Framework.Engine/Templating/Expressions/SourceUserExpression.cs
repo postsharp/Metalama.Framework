@@ -22,12 +22,11 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
         isAssignable ) { }
 
     public object AsSyntaxNode => this.Expression;
-    
+
     // We add a cast to the original target type because the original expression may be target-typed, but may be used in a more weakly typed target.
     protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         => syntaxSerializationContext.SyntaxGenerator.CastExpression( this.Type, this.Expression )
             .WithSimplifierAnnotationIfNecessary( syntaxSerializationContext.SyntaxGenerationContext );
-
 
     [Memo]
     public string AsString => this.Expression.NormalizeWhitespace().ToString();
