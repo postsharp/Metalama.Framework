@@ -280,14 +280,12 @@ internal sealed partial class ContextualSyntaxGenerator
             {
                 case TypeKindConstraint.Class:
                     constraints ??= [];
-                    var constraint = ClassOrStructConstraint( SyntaxKind.ClassConstraint );
 
-                    if ( genericParameter.HasDefaultConstructorConstraint )
-                    {
-                        constraint = constraint.WithQuestionToken( Token( SyntaxKind.QuestionToken ) );
-                    }
+                    var questionToken = genericParameter.IsConstraintNullable == true
+                        ? Token( SyntaxKind.QuestionToken )
+                        : default;
 
-                    constraints.Add( constraint );
+                    constraints.Add( ClassOrStructConstraint( SyntaxKind.ClassConstraint, Token( SyntaxKind.ClassKeyword ), questionToken ) );
 
                     break;
 
@@ -332,8 +330,23 @@ internal sealed partial class ContextualSyntaxGenerator
                 constraints.Add( ConstructorConstraint() );
             }
 
+#if ROSLYN_4_12_0_OR_GREATER
+            if ( genericParameter.AllowsRefStruct )
+            {
+                constraints ??= [];
+
+                constraints.Add(
+                    AllowsConstraintClause(
+                        TokenWithTrailingSpace( SyntaxKind.AllowsKeyword ),
+                        SingletonSeparatedList<AllowsConstraintSyntax>(
+                            RefStructConstraint( TokenWithTrailingSpace( SyntaxKind.RefKeyword ), Token( SyntaxKind.StructKeyword ) ) ) ) );
+            }
+#endif
+
             if ( constraints != null )
             {
+                constraints[^1] = constraints[^1].WithOptionalTrailingLineFeed( this.SyntaxGenerationContext );
+
                 clauses ??= [];
 
                 clauses.Add(
@@ -905,7 +918,7 @@ internal sealed partial class ContextualSyntaxGenerator
             ObjectCreationExpressionSyntax => false,
             ArrayCreationExpressionSyntax => false,
             PostfixUnaryExpressionSyntax => false,
-            
+
 #if ROSLYN_4_8_0_OR_GREATER
             CollectionExpressionSyntax => false,
 #endif

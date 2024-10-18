@@ -85,6 +85,8 @@ internal sealed class IntroducedTypeParameter : IntroducedDeclaration, ITypePara
 
     public TypeKindConstraint TypeKindConstraint => this._typeParameterBuilderData.TypeKindConstraint;
 
+    public bool AllowsRefStruct => this._typeParameterBuilderData.AllowsRefStruct;
+
     public VarianceKind Variance => this._typeParameterBuilderData.Variance;
 
     public bool? IsConstraintNullable => this._typeParameterBuilderData.IsConstraintNullable;

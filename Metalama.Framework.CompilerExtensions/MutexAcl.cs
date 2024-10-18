@@ -1,5 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.ComponentModel;
@@ -113,7 +116,8 @@ internal static class MutexAcl
             {
                 error = Marshal.GetLastWin32Error();
 
-                if ( error is Interop.Errors.ERROR_INVALID_PARAMETER or Interop.Errors.ERROR_INVALID_ACL or Interop.Errors.ERROR_INVALID_SECURITY_DESCR or Interop.Errors.ERROR_UNKNOWN_REVISION )
+                if ( error is Interop.Errors.ERROR_INVALID_PARAMETER or Interop.Errors.ERROR_INVALID_ACL or Interop.Errors.ERROR_INVALID_SECURITY_DESCR
+                    or Interop.Errors.ERROR_UNKNOWN_REVISION )
                 {
                     throw new ArgumentException(
                         "Invalid SD SDDL form",

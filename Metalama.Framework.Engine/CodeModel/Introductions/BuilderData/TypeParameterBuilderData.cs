@@ -16,6 +16,8 @@ internal class TypeParameterBuilderData : NamedDeclarationBuilderData
 
     public VarianceKind Variance { get; }
 
+    public bool AllowsRefStruct { get; }
+
     public bool? IsConstraintNullable { get; }
 
     public bool HasDefaultConstructorConstraint { get; }
@@ -36,6 +38,7 @@ internal class TypeParameterBuilderData : NamedDeclarationBuilderData
         this._ref = new IntroducedRef<ITypeParameter>( this, containingDeclaration.RefFactory );
         this.Index = builder.Index;
         this.Variance = builder.Variance;
+        this.AllowsRefStruct = builder.AllowsRefStruct;
         this.IsConstraintNullable = builder.IsConstraintNullable;
         this.HasDefaultConstructorConstraint = builder.HasDefaultConstructorConstraint;
         this.TypeConstraints = builder.TypeConstraints.SelectAsImmutableArray( t => t.ToRef() );

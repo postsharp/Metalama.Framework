@@ -9,6 +9,9 @@
 
         <!-- Disable warning: conflicting versions -->
         <NoWarn>$(NoWarn);MSB3277</NoWarn>
+
+        <!-- Disable vulnerability warnings causing weird error (see https://github.com/dotnet/sdk/issues/16666) -->
+        <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
         <ResolveAssemblyReferencesSilent>True</ResolveAssemblyReferencesSilent>
     </PropertyGroup>
 

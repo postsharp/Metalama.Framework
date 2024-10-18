@@ -9,7 +9,7 @@
     <Import Project="../../eng/Coverage.props" />
 
     <PropertyGroup>
-        <TargetFrameworks>netframework4.8;net8.0</TargetFrameworks>
+        <TargetFrameworks>netframework4.8;net9.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaTestAutoExclude>False</MetalamaTestAutoExclude>
@@ -43,14 +43,6 @@
         <Compile Remove="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
         <!-- But still show them in solution explorer -->
         <None Include="$(MSBuildThisFileDirectory)/Tests/**/__*.cs" />
-        <Compile Update="Tests\Aspects\Contracts\Parameter_ParamAndReturn_CrossAssembly.cs">
-          <DependentUpon>$([System.String]::Copy('Parameter_ParamAndReturn').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Tests\Aspects\Contracts\Parameter_ParamAndReturn_CrossAssembly.Dependency.cs">
-          <DependentUpon>$([System.String]::Copy('Parameter_ParamAndReturn').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -73,9 +65,6 @@
             <_Parameter2>$(PostSharpEngineeringDataDirectory)</_Parameter2>
         </AssemblyAttribute>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Tests\Templating\" />
-    </ItemGroup>
+    
     
 </Project>

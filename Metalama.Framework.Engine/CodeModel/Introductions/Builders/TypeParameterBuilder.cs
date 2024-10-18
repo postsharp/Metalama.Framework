@@ -20,6 +20,11 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParameterBuilder
 {
     private readonly List<IType> _typeConstraints = [];
+    private bool _allowsRefStruct;
+    private TypeKindConstraint _typeKindConstraint;
+    private VarianceKind _variance;
+    private bool? _isConstraintNullable;
+    private bool _hasDefaultConstructorConstraint;
 
     public IntroducedRef<ITypeParameter> Ref { get; }
 
@@ -43,13 +48,56 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     public IReadOnlyList<IType> ReadOnlyTypeConstraints => this._typeConstraints;
 
-    public TypeKindConstraint TypeKindConstraint { get; set; }
+    public TypeKindConstraint TypeKindConstraint
+    {
+        get => this._typeKindConstraint;
+        set
+        {
+            this.CheckNotFrozen();
+            this._typeKindConstraint = value;
+        }
+    }
 
-    public VarianceKind Variance { get; set; }
+    public VarianceKind Variance
+    {
+        get => this._variance;
+        set
+        {
+            this.CheckNotFrozen();
+            this._variance = value;
+        }
+    }
 
-    public bool? IsConstraintNullable { get; set; }
+    public bool AllowsRefStruct
+    {
+        get => this._allowsRefStruct;
+        set
+        {
+            this.CheckNotFrozen();
 
-    public bool HasDefaultConstructorConstraint { get; set; }
+            this._allowsRefStruct = value;
+        }
+    }
+
+    public bool? IsConstraintNullable
+    {
+        get => this._isConstraintNullable;
+        set
+        {
+            this.CheckNotFrozen();
+            this._isConstraintNullable = value;
+        }
+    }
+
+    public bool HasDefaultConstructorConstraint
+    {
+        get => this._hasDefaultConstructorConstraint;
+        set
+        {
+            this.CheckNotFrozen();
+            this._hasDefaultConstructorConstraint = value;
+        }
+    }
 
     public void AddTypeConstraint( IType type ) => this._typeConstraints.Add( this.Translate( type ) );
 

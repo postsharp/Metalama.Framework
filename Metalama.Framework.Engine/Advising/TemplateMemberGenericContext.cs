@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Advising;
 /// An ad-hoc, single-use implementation of <see cref="GenericContext"/> based on a <see cref="TemplateMember"/> and its arguments.
 /// Dot not support all features.
 /// </summary>
-internal class TemplateMemberGenericContext : GenericContext
+internal sealed class TemplateMemberGenericContext : GenericContext
 {
     private readonly TemplateMember _templateMember;
     private readonly IObjectReader _arguments;

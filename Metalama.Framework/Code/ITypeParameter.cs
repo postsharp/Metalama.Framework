@@ -31,6 +31,11 @@ namespace Metalama.Framework.Code
         TypeKindConstraint TypeKindConstraint { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the generic parameter has the <c>allows ref struct</c> anti-constraint.
+        /// </summary>
+        bool AllowsRefStruct { get; }
+
+        /// <summary>
         /// Gets the kind variance: <see cref="VarianceKind.In"/>, <see cref="VarianceKind.Out"/> or <see cref="VarianceKind.None"/>.
         /// </summary>
         VarianceKind Variance { get; }
@@ -56,9 +61,9 @@ namespace Metalama.Framework.Code
         IType ResolvedType { get; }
 
         TypeParameterKind TypeParameterKind { get; }
-        
+
         new ITypeParameter ToNonNullable();
-        
+
         // Note that ToNullable, when called with T : struct, can return the INamedType Nullable<T> and therefore cannot be cast to an ITypeParameter.
     }
 }

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
     internal sealed class SourceTypeParameter : SourceDeclaration, ITypeParameter, ITypeImpl
     {
         private readonly ITypeParameterSymbol _typeParameterSymbol;
-        
+
         internal SourceTypeParameter(
             ITypeParameterSymbol typeParameterSymbol,
             CompilationModel compilation,
@@ -81,6 +81,14 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             }
         }
 
+        public bool AllowsRefStruct
+            =>
+#if ROSLYN_4_12_0_OR_GREATER
+                this._typeParameterSymbol.AllowsRefLikeType;
+#else
+            false;
+#endif
+
         public VarianceKind Variance
             => this._typeParameterSymbol.Variance switch
             {
@@ -123,12 +131,12 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public IArrayType MakeArrayType( int rank = 1 ) => this.Compilation.Factory.MakeArrayType( this._typeParameterSymbol, rank ); // TODO: GenericContext?
 
-        public IPointerType MakePointerType() => this.Compilation.Factory.MakePointerType( this._typeParameterSymbol);
+        public IPointerType MakePointerType() => this.Compilation.Factory.MakePointerType( this._typeParameterSymbol );
 
         public IType ToNullable() => this.Compilation.Factory.MakeNullableType( this, true );
 
         public ITypeParameter ToNonNullable() => (ITypeParameter) this.Compilation.Factory.MakeNullableType( this, false );
-        
+
         IType IType.ToNonNullable() => this.ToNonNullable();
 
         public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
