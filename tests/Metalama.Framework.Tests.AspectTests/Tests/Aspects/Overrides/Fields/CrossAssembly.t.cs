@@ -30,7 +30,7 @@ internal class TargetClass
       this._existingField_ReadOnly = value;
     }
   }
-  private global::System.String _existingField_Initializer = "42";
+  private global::System.String _existingField_Initializer = (global::System.String)"42";
   public global::System.String ExistingField_Initializer
   {
     get

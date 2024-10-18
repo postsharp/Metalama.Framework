@@ -2,7 +2,7 @@ internal class TargetCode
 {
   private class Nullable
   {
-    private global::System.String? _field = null;
+    private global::System.String? _field = (global::System.String? )null;
     [global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Nullable.DynamicParameterContract.Aspect]
     public global::System.String? Field
     {
@@ -58,7 +58,7 @@ internal class TargetCode
   }
   private class NotNullable
   {
-    private global::System.String _field = null !;
+    private global::System.String _field = (global::System.String)null !;
     [global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Nullable.DynamicParameterContract.Aspect]
     public global::System.String Field
     {
@@ -115,7 +115,7 @@ internal class TargetCode
 #nullable disable
   private class Oblivious
   {
-    private global::System.String _field = null;
+    private global::System.String _field = (global::System.String)null;
     [global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Nullable.DynamicParameterContract.Aspect]
     public global::System.String Field
     {

@@ -1,7 +1,7 @@
 [Introduction]
 internal struct TargetStruct(int x)
 {
-  private global::System.Int32 _field = x;
+  private global::System.Int32 _field = (global::System.Int32)x;
   public global::System.Int32 Field
   {
     get

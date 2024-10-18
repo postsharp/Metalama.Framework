@@ -33,7 +33,7 @@ internal class TargetClass
       global::Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Overrides.Fields.Multiple.TargetClass._staticField = value;
     }
   }
-  private global::System.Int32 _initializerField = 42;
+  private global::System.Int32 _initializerField = (global::System.Int32)42;
   public global::System.Int32 InitializerField
   {
     get

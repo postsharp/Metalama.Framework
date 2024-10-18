@@ -34,7 +34,7 @@ internal class TargetClass
       this._staticField = value;
     }
   }
-  private global::System.Int32 _initializerField = 42;
+  private global::System.Int32 _initializerField = (global::System.Int32)42;
   [global::Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
   public global::System.Int32 InitializerField
   {
