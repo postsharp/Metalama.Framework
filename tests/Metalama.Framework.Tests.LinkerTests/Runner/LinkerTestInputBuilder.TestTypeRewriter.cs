@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.LinkerTests.Runner
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPositionRecord? _currentInsertPosition;
-            private Dictionary<IFullRef<IField>, IFullRef<IProperty>> _promotions;
+            private readonly Dictionary<IFullRef<IField>, IFullRef<IProperty>> _promotions;
 
             public TestTypeRewriter( TestRewriter owner )
             {
