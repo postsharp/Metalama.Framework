@@ -272,7 +272,7 @@ internal static class TemplateBindingHelper
                         $"Cannot use the template '{template.Symbol}' to override the constructor '{targetConstructor}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
             }
 
-            if ( !VerifyTemplateType( templateParameter.Type, constructorParameter.Type, template, arguments ) )
+            if ( !VerifyTemplateType( templateParameter.Type, constructorParameter.Type, template, targetConstructor, arguments ) )
             {
                 throw new InvalidTemplateSignatureException(
                     MetalamaStringFormatter.Format(
@@ -286,7 +286,12 @@ internal static class TemplateBindingHelper
         var templateArguments = GetTemplateArguments( template, arguments, parameterMapping.ToImmutable() );
 
         // Verify that the template return type matches the target.
-        if ( !VerifyTemplateType( templateMethodSymbol.ReturnType, TypeFactory.Implementation.GetSpecialType( OurSpecialType.Void ), template, arguments ) )
+        if ( !VerifyTemplateType(
+                templateMethodSymbol.ReturnType,
+                TypeFactory.Implementation.GetSpecialType( OurSpecialType.Void ),
+                template,
+                targetConstructor,
+                arguments ) )
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
@@ -359,7 +364,7 @@ internal static class TemplateBindingHelper
 
                         AddParameter( methodParameter, templateParameter );
 
-                        if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
+                        if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, targetMethod, arguments ) )
                         {
                             throw new InvalidTemplateSignatureException(
                                 MetalamaStringFormatter.Format(
@@ -390,7 +395,7 @@ internal static class TemplateBindingHelper
                                 $"Cannot use the template '{templateMethodSymbol}' to override the method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
                     }
 
-                    if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
+                    if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, targetMethod, arguments ) )
                     {
                         throw new InvalidTemplateSignatureException(
                             MetalamaStringFormatter.Format(
@@ -432,7 +437,7 @@ internal static class TemplateBindingHelper
         var templateArguments = GetTemplateArguments( template, arguments, parameterMapping.ToImmutable() );
 
         // Verify that the template return type matches the target.
-        if ( !VerifyTemplateType( templateMethodSymbol.ReturnType, targetMethod.ReturnType, template, arguments, targetMethod.GetAsyncInfo() ) )
+        if ( !VerifyTemplateType( templateMethodSymbol.ReturnType, targetMethod.ReturnType, template, targetMethod, arguments, targetMethod.GetAsyncInfo() ) )
         {
             throw new InvalidTemplateSignatureException(
                 MetalamaStringFormatter.Format(
@@ -446,6 +451,7 @@ internal static class TemplateBindingHelper
         IReadOnlyList<IType> fromTypes,
         IReadOnlyList<IType> toTypes,
         TemplateMember<IMethod> template,
+        IMethodBase targetMethod,
         IObjectReader arguments )
     {
         if ( fromTypes.Count != toTypes.Count )
@@ -456,7 +462,7 @@ internal static class TemplateBindingHelper
         {
             for ( var i = 0; i < fromTypes.Count; i++ )
             {
-                if ( !VerifyTemplateType( fromTypes[i], toTypes[i], template, arguments ) )
+                if ( !VerifyTemplateType( fromTypes[i], toTypes[i], template, targetMethod, arguments ) )
                 {
                     return false;
                 }
@@ -470,33 +476,70 @@ internal static class TemplateBindingHelper
         ITypeSymbol fromType,
         IType toType,
         TemplateMember<IMethod> template,
+        IMethodBase targetMethod,
         IObjectReader arguments,
         AsyncInfo? toMethodAsyncInfo = null )
     {
-        // fromType may come from the template reflection compilation context, different than our main compilation context.
-        var translatedFromType = toType.GetCompilationContext().SymbolTranslator.Translate( fromType ).AssertSymbolNotNull();
+        // 'fromType' may come from the template reflection compilation context, different than our main compilation context.
 
-        return VerifyTemplateType( toType.GetCompilationModel().Factory.GetIType( translatedFromType ), toType, template, arguments, toMethodAsyncInfo );
+        IType mappedFromType;
+
+        if ( TypeParameterDetector.ReferencesTypeParameter( fromType ) )
+        {
+            // Map the template type.
+            var genericContext = new TemplateMemberGenericContext( template, arguments, targetMethod );
+            mappedFromType = genericContext.Map( fromType, toType.GetRefFactory() ).GetTarget( toType.GetCompilationModel() );
+
+            if ( genericContext.HasError )
+            {
+                return false;
+            }
+        }
+        else
+        {
+            var translatedFromType = toType.GetCompilationContext().SymbolTranslator.Translate( fromType ).AssertSymbolNotNull();
+            mappedFromType = toType.GetCompilationModel().Factory.GetIType( translatedFromType );
+        }
+
+        return VerifyTemplateTypeCore( mappedFromType, toType, template, targetMethod, arguments, toMethodAsyncInfo );
     }
 
     private static bool VerifyTemplateType(
         IType fromType,
         IType toType,
         TemplateMember<IMethod> template,
+        IMethodBase targetMethod,
         IObjectReader arguments,
         AsyncInfo? toMethodAsyncInfo = null )
     {
-        // Replace type parameters by arguments. Do this before translation, in case fromType is a type parameter that can't be translated.
-        if ( fromType is ITypeParameter genericParameter && template.TemplateClassMember.TypeParameters[genericParameter.Index].IsCompileTime )
+        IType mappedFromType;
+
+        if ( TypeParameterDetector.ReferencesTypeParameter( fromType ) )
         {
-            fromType = arguments[genericParameter.Name] switch
+            var genericContext = new TemplateMemberGenericContext( template, arguments, targetMethod );
+            mappedFromType = genericContext.Map( fromType );
+
+            if ( genericContext.HasError )
             {
-                IType typeArg => typeArg,
-                Type type => TypeFactory.GetType( type ),
-                _ => throw new AssertionFailedException( $"Unexpected value of type '{arguments[genericParameter.Name]?.GetType()}'." )
-            };
+                return false;
+            }
+        }
+        else
+        {
+            mappedFromType = fromType;
         }
 
+        return VerifyTemplateTypeCore( mappedFromType, toType, template, targetMethod, arguments, toMethodAsyncInfo );
+    }
+
+    private static bool VerifyTemplateTypeCore(
+        IType fromType,
+        IType toType,
+        TemplateMember<IMethod> template,
+        IMethodBase targetMethod,
+        IObjectReader arguments,
+        AsyncInfo? toMethodAsyncInfo )
+    {
         if ( fromType.TryForCompilation( toType.Compilation, out var translatedFromType ) )
         {
             fromType = translatedFromType;
@@ -570,7 +613,7 @@ internal static class TemplateBindingHelper
             }
             else if ( fromNamedType.TypeArguments.Count > 0 &&
                       fromOriginalDefinition.Equals( toNamedType.Definition ) &&
-                      VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, arguments ) )
+                      VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, targetMethod, arguments ) )
             {
                 return true;
             }
