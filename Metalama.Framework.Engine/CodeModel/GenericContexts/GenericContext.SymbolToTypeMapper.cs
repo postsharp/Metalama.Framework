@@ -24,7 +24,7 @@ public partial class GenericContext
 
         public override IType VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType )!.MakeArrayType( symbol.Rank );
 
-        public override IType VisitDynamicType( IDynamicTypeSymbol symbol ) => this._compilation.Factory.GetDynamicType( symbol );
+        public override IType VisitDynamicType( IDynamicTypeSymbol symbol ) => this._compilation.Factory.GetDynamicType( this._parent.TranslateSymbolIfNecessary( symbol ) );
 
         public override IType VisitNamedType( INamedTypeSymbol symbol )
         {
@@ -37,7 +37,7 @@ public partial class GenericContext
             }
             else
             {
-                namedType = this._compilation.Factory.GetNamedType( symbol.OriginalDefinition );
+                namedType = this._compilation.Factory.GetNamedType( this._parent.TranslateSymbolIfNecessary( symbol.OriginalDefinition ) );
             }
 
             if ( !namedType.IsGeneric )

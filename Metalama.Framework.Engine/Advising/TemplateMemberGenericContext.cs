@@ -75,4 +75,10 @@ internal class TemplateMemberGenericContext : GenericContext
     public override bool Equals( GenericContext? other ) => throw new NotSupportedException();
 
     protected override int GetHashCodeCore() => throw new NotSupportedException();
+
+    protected override T TranslateSymbolIfNecessary<T>( T symbol )
+    {
+        // We have symbols from a different source compilation than target compilation, so we may have to translate.
+        return this._targetMethod.GetCompilationContext().SymbolTranslator.Translate( symbol ).AssertSymbolNotNull();
+    }
 }

@@ -68,4 +68,8 @@ public abstract partial class GenericContext : IEquatable<GenericContext?>, IGen
     public sealed override bool Equals( object? obj ) => obj is GenericContext genericMap && this.Equals( genericMap );
 
     private protected static bool ReferencesTypeParameter( ITypeSymbol typeSymbol ) => TypeParameterSymbolDetector.Instance.Visit( typeSymbol );
+
+    protected virtual T TranslateSymbolIfNecessary<T>( T symbol ) 
+        where T : class, ISymbol
+        => symbol;
 }
