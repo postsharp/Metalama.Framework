@@ -44,7 +44,7 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
         }
         else
         {
-            return this.Symbol.GetSerializableId();
+            return this.Symbol.GetSerializableId( this.TargetKind );
         }
     }
 
