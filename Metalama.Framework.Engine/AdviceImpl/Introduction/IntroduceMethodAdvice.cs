@@ -99,6 +99,8 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
             typeParameterBuilder.Variance = templateTypeParameter.Variance;
             typeParameterBuilder.HasDefaultConstructorConstraint = templateTypeParameter.HasDefaultConstructorConstraint;
             typeParameterBuilder.TypeKindConstraint = templateTypeParameter.TypeKindConstraint;
+            typeParameterBuilder.AllowsRefStruct = templateTypeParameter.AllowsRefStruct;
+            typeParameterBuilder.IsConstraintNullable = templateTypeParameter.IsConstraintNullable;
 
             foreach ( var templateGenericParameterConstraint in templateTypeParameter.TypeConstraints )
             {
