@@ -1,7 +1,7 @@
 [Introduction]
 internal class TargetClass(int x)
 {
-  private global::System.Int32 _field = (global::System.Int32)x;
+  private global::System.Int32 _field = x;
   public global::System.Int32 Field
   {
     get

@@ -116,7 +116,7 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
             this._argumentFactory = argumentFactory;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
@@ -152,7 +152,7 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
             this._initializers = initializers;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),

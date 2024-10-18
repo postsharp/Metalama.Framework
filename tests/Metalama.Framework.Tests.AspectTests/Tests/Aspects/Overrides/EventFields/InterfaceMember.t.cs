@@ -36,7 +36,7 @@ internal class TargetClass : Interface, global::Metalama.Framework.Tests.AspectT
   public static void Bar(global::System.Object? sender, global::System.EventArgs args)
   {
   }
-  private event global::System.EventHandler? _initializerIntroducedEvent = (global::System.EventHandler? )Bar;
+  private event global::System.EventHandler? _initializerIntroducedEvent = Bar;
   public event global::System.EventHandler? InitializerIntroducedEvent
   {
     add
@@ -78,7 +78,7 @@ internal class TargetClass : Interface, global::Metalama.Framework.Tests.AspectT
       this._explicitIntroducedEvent -= value;
     }
   }
-  private event global::System.EventHandler? _initializerExplicitIntroducedEvent = (global::System.EventHandler? )Bar;
+  private event global::System.EventHandler? _initializerExplicitIntroducedEvent = Bar;
   event global::System.EventHandler? global::Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Overrides.EventFields.InterfaceMember.IntroducedInterface.InitializerExplicitIntroducedEvent
   {
     add

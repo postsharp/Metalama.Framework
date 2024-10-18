@@ -36,9 +36,9 @@ internal sealed partial class TemplateExpansionContext
             }
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
-            var generatedExpression = this._expression.ToExpressionSyntax( syntaxSerializationContext );
+            var generatedExpression = this._expression.ToExpressionSyntax( syntaxSerializationContext, targetType );
 
             // generatedExpression.ConfigureAwait(true/false)
             return InvocationExpression(

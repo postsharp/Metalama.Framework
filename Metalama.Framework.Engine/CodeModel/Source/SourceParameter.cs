@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source
 
         public ref object? Value => ref RefHelper.Wrap( new SyntaxVariableExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, this.RefKind ) );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
             => new(
                 new TypedExpressionSyntaxImpl(
                     SyntaxFactory.IdentifierName( this.Name ),

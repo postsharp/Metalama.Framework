@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = this._itemType.MakeArrayType();
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
             var items = this._arrayBuilder.Items.SelectAsImmutableArray( i => TypedExpressionSyntaxImpl.FromValue( i, syntaxSerializationContext ).Syntax );
 

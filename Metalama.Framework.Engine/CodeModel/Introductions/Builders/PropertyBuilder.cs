@@ -114,9 +114,9 @@ internal sealed class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuild
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         => new FieldOrPropertyInvoker( this )
-            .ToTypedExpressionSyntax( syntaxGenerationContext );
+            .ToTypedExpressionSyntax( syntaxGenerationContext, targetType );
 
     public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
 

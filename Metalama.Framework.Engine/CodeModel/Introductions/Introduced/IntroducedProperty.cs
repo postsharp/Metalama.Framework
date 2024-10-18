@@ -76,9 +76,9 @@ internal class IntroducedProperty : IntroducedPropertyOrIndexer, IPropertyImpl
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         => new FieldOrPropertyInvoker( this )
-            .ToTypedExpressionSyntax( syntaxGenerationContext );
+            .ToTypedExpressionSyntax( syntaxGenerationContext, targetType );
 
     [Memo]
     public IField? OriginalField => this.GetOriginalField();

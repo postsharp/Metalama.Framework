@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = compilation.GetCompilationModel().Cache.SystemStringType;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 

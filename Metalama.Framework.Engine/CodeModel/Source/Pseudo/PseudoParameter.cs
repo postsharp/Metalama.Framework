@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
         public ref object? Value
             => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, isReferenceable: true ) );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
             => new TypedExpressionSyntaxImpl(
                 SyntaxFactory.IdentifierName( this.Name ),
                 this.Type,

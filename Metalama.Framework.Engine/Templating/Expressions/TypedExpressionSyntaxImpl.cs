@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     return runtimeExpression;
 
                 case IExpression dynamicMember:
-                    return dynamicMember.ToTypedExpressionSyntax( serializationContext );
+                    return dynamicMember.ToTypedExpressionSyntax( serializationContext, null );
 
                 case ExpressionSyntax syntax:
                     return new TypedExpressionSyntaxImpl( syntax, serializationContext.CompilationModel );

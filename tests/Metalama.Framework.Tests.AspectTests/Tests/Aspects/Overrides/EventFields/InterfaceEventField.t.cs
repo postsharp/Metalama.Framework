@@ -6,7 +6,7 @@ internal partial class TargetClass : global::Metalama.Framework.Tests.AspectTest
   public static void Foo(global::System.Object? sender, global::System.EventArgs args)
   {
   }
-  private event global::System.EventHandler? _eventField = (global::System.EventHandler? )Foo;
+  private event global::System.EventHandler? _eventField = Foo;
   event global::System.EventHandler? global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface.EventField
   {
     add
@@ -20,7 +20,7 @@ internal partial class TargetClass : global::Metalama.Framework.Tests.AspectTest
       this._eventField -= value;
     }
   }
-  private event global::System.EventHandler? _eventField_Default = (global::System.EventHandler? )default;
+  private event global::System.EventHandler? _eventField_Default = default;
   event global::System.EventHandler? global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Overrides.EventFields.InterfaceEventField.Interface.EventField_Default
   {
     add

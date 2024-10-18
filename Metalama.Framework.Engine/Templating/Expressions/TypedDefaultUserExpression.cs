@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     internal sealed class TypedDefaultUserExpression : UserExpression
     {
         private readonly IType _givenType;
-        
+
         public TypedDefaultUserExpression( IType type )
         {
             if ( type.IsReferenceType == true )
@@ -23,8 +23,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             }
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
-            => syntaxSerializationContext.SyntaxGenerator.DefaultExpression( this._givenType );
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
+            => syntaxSerializationContext.SyntaxGenerator.DefaultExpression( this._givenType, targetType );
 
         public override IType Type { get; }
     }

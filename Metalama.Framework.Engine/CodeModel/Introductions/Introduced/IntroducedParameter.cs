@@ -65,7 +65,7 @@ internal sealed class IntroducedParameter : IntroducedDeclaration, IParameterImp
 
     public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         => new(
             new TypedExpressionSyntaxImpl(
                 SyntaxFactory.IdentifierName( this.Name ),

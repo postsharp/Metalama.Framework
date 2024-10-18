@@ -19,14 +19,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._value = value;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
             var valueSyntax = this._value switch
             {
                 ExpressionSyntax e => e,
                 TypedExpressionSyntaxImpl runtimeExpression => runtimeExpression.Syntax,
                 TypedExpressionSyntax runtimeExpression => runtimeExpression.Syntax,
-                IUserExpression ue => ue.ToExpressionSyntax( syntaxSerializationContext ),
+                IUserExpression ue => ue.ToExpressionSyntax( syntaxSerializationContext, targetType ),
                 _ => throw new AssertionFailedException( $"Unexpected value type: '{this._value?.GetType()}'." )
             };
 

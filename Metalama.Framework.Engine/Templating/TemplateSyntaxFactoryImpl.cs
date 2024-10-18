@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public void AddStatement( List<StatementOrTrivia> list, IExpression expression )
         {
-            var statement = SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this.SyntaxSerializationContext ).RemoveParenthesis() );
+            var statement = SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this.SyntaxSerializationContext, null ).RemoveParenthesis() );
 
             list.Add( new StatementOrTrivia( statement ) );
         }
@@ -206,13 +206,13 @@ namespace Metalama.Framework.Engine.Templating
                         $"expression is of type 'void'. Use a simple assignment ('x = meta.Proceed') instead." );
                 }
 
-                return SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this.SyntaxSerializationContext ).RemoveParenthesis() );
+                return SyntaxFactory.ExpressionStatement( expression.ToExpressionSyntax( this.SyntaxSerializationContext, null ).RemoveParenthesis() );
             }
             else if ( awaitResult && expression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
                 return
                     SyntaxFactory.ExpressionStatement(
-                        SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this.SyntaxSerializationContext ) )
+                        SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this.SyntaxSerializationContext, null ) )
                             .RemoveParenthesis() );
             }
             else
@@ -222,8 +222,8 @@ namespace Metalama.Framework.Engine.Templating
                             kind,
                             identifier,
                             awaitResult
-                                ? SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this.SyntaxSerializationContext ).RemoveParenthesis() )
-                                : expression.ToExpressionSyntax( this.SyntaxSerializationContext ) )
+                                ? SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( this.SyntaxSerializationContext, null ).RemoveParenthesis() )
+                                : expression.ToExpressionSyntax( this.SyntaxSerializationContext, null ) )
                         .RemoveParenthesis() );
             }
         }
@@ -241,7 +241,7 @@ namespace Metalama.Framework.Engine.Templating
                 throw new AssertionFailedException( "The expression should not be null." );
             }
 
-            var runtimeExpression = value.ToExpressionSyntax( this.SyntaxSerializationContext );
+            var runtimeExpression = value.ToExpressionSyntax( this.SyntaxSerializationContext, null );
 
             if ( value.Type.Equals( SpecialType.Void )
                  || (awaitResult && value.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void )) )
@@ -313,7 +313,7 @@ namespace Metalama.Framework.Engine.Templating
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
-            var expression = userExpression.ToExpressionSyntax( this.SyntaxSerializationContext );
+            var expression = userExpression.ToExpressionSyntax( this.SyntaxSerializationContext, null );
 
             return new TypedExpressionSyntaxImpl(
                 SyntaxFactory.MemberAccessExpression(
@@ -408,7 +408,7 @@ namespace Metalama.Framework.Engine.Templating
             switch ( expression )
             {
                 case IExpression dynamicExpression:
-                    return dynamicExpression.ToTypedExpressionSyntax( this.SyntaxSerializationContext );
+                    return dynamicExpression.ToTypedExpressionSyntax( this.SyntaxSerializationContext, null );
 
                 default:
                     if ( this._templateExpansionContext.SyntaxSerializationService.TrySerialize(
@@ -423,7 +423,8 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public TypedExpressionSyntax GetTypedExpression( IExpression expression ) => expression.ToTypedExpressionSyntax( this.SyntaxSerializationContext );
+        public TypedExpressionSyntax GetTypedExpression( IExpression expression )
+            => expression.ToTypedExpressionSyntax( this.SyntaxSerializationContext, null );
 
         public TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null )
         {

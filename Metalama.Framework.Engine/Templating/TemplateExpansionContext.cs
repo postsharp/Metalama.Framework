@@ -579,7 +579,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                     }
 
                     var returnExpression = returnUserExpression
-                        .ToExpressionSyntax( this.SyntaxSerializationContext )
+                        .ToExpressionSyntax( this.SyntaxSerializationContext, returnType )
                         .RemoveParenthesis();
 
                     return Block( ExpressionStatement( returnExpression ), returnStatement )
@@ -614,7 +614,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                 ExpressionStatement(
                                     AwaitExpression(
                                         Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                        returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext ) ) ),
+                                        returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext, returnType ) ) ),
                                 ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -625,14 +625,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                 ExpressionStatement(
                                     AwaitExpression(
                                         Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                        returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext ) ) ),
+                                        returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext, returnType ) ) ),
                                 ReturnStatement( SyntaxFactoryEx.Default ).WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
             }
             else
             {
-                return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext ), awaitResult );
+                return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxSerializationContext, null ), awaitResult );
             }
         }
     }

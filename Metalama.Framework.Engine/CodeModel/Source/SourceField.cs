@@ -118,11 +118,11 @@ namespace Metalama.Framework.Engine.CodeModel.Source
             }
         }
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         {
             this.CheckNotPropertyBackingField();
 
-            return new FieldOrPropertyInvoker( this ).ToTypedExpressionSyntax( syntaxGenerationContext );
+            return new FieldOrPropertyInvoker( this ).ToTypedExpressionSyntax( syntaxGenerationContext, targetType );
         }
 
         private IExpression? GetInitializerExpressionCore()

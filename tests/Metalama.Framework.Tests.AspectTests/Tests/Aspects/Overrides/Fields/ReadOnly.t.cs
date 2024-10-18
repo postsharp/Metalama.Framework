@@ -30,7 +30,7 @@ internal class TargetClass
       global::Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Overrides.Fields.ReadOnly.TargetClass._staticReadOnlyField = value;
     }
   }
-  private readonly global::System.Int32 _initializerReadOnlyField = (global::System.Int32)42;
+  private readonly global::System.Int32 _initializerReadOnlyField = 42;
   [global::Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
   public global::System.Int32 InitializerReadOnlyField
   {
@@ -45,7 +45,7 @@ internal class TargetClass
       this._initializerReadOnlyField = value;
     }
   }
-  private static global::System.Int32 _staticInitializerReadOnlyField = (global::System.Int32)42;
+  private static global::System.Int32 _staticInitializerReadOnlyField = 42;
   [global::Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
   public static global::System.Int32 StaticInitializerReadOnlyField
   {

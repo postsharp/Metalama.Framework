@@ -147,7 +147,8 @@ internal class AdviceSyntaxGenerator
             {
                 initializerExpressionSyntax =
                     initializerExpression.ToExpressionSyntax(
-                        new SyntaxSerializationContext( context.FinalCompilation, context.SyntaxGenerationContext, member.DeclaringType ) );
+                        new SyntaxSerializationContext( context.FinalCompilation, context.SyntaxGenerationContext, member.DeclaringType ),
+                        targetType );
             }
             catch ( Exception ex )
             {

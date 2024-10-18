@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
@@ -32,7 +33,7 @@ internal class PseudoReturnParameter : BaseDeclaration, IParameterImpl
         this._declaringMethod = declaringMethod;
     }
 
-    public Code.RefKind RefKind => this._methodSymbol.RefKind.ToOurRefKind();
+    public RefKind RefKind => this._methodSymbol.RefKind.ToOurRefKind();
 
     public string Name => "<return>";
 
@@ -75,7 +76,7 @@ internal class PseudoReturnParameter : BaseDeclaration, IParameterImpl
 
     public ref object? Value => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
     public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;

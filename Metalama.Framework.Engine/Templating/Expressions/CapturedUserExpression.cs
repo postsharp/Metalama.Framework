@@ -37,6 +37,6 @@ internal sealed class CapturedUserExpression : UserExpression
            } ??
            this._compilation.Factory.GetSpecialType( SpecialType.Object );
 
-    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         => TypedExpressionSyntaxImpl.FromValue( this._expression, syntaxSerializationContext ).Syntax;
 }

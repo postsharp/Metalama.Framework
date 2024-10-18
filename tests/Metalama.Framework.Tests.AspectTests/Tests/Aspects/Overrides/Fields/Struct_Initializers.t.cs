@@ -1,7 +1,7 @@
 [Introduction]
 internal struct TargetStruct
 {
-  private global::System.Int32 _field = (global::System.Int32)42;
+  private global::System.Int32 _field = 42;
   public global::System.Int32 Field
   {
     get
@@ -15,7 +15,7 @@ internal struct TargetStruct
       this._field = value;
     }
   }
-  private static global::System.Int32 _staticField = (global::System.Int32)42;
+  private static global::System.Int32 _staticField = 42;
   public static global::System.Int32 StaticField
   {
     get

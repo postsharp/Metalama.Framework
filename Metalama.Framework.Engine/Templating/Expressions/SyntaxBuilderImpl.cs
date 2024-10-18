@@ -33,7 +33,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     private readonly IType _targetTypedExpressionType;
 
     ICompilation ISyntaxBuilderImpl.Compilation => this.Compilation;
-    
+
     public CompilationModel Compilation { get; }
 
     private ContextualSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
@@ -76,7 +76,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IStatement CreateExpressionStatement( IExpression expression )
         => new UserStatement(
-            SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this.CreateSyntaxSerializationContext() ) ) );
+            SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this.CreateSyntaxSerializationContext(), null ) ) );
 
     private SyntaxSerializationContext CreateSyntaxSerializationContext() => new( this.Compilation, this._syntaxGenerationContext, this._currentType );
 
@@ -181,7 +181,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
-            expression.ToExpressionSyntax( this.CreateSyntaxSerializationContext() )
+            expression.ToExpressionSyntax( this.CreateSyntaxSerializationContext(), null )
                 .NormalizeWhitespace()
                 .ToFullString() );
 
@@ -223,8 +223,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
 
-    public IExpression NullExpression( IType? type )
-        => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullable() ?? this._targetTypedExpressionType );
+    public IExpression NullExpression( IType? type ) => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullable() ?? this._targetTypedExpressionType );
 
     public IExpression DefaultExpression( IType? type )
     {

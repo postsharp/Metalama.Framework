@@ -98,8 +98,8 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
 
     private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
     {
-        return this.GetUserExpression().ToTypedExpressionSyntax( syntaxGenerationContext );
+        return this.GetUserExpression().ToTypedExpressionSyntax( syntaxGenerationContext, targetType );
     }
 }

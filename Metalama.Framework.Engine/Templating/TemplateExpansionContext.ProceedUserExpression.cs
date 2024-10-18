@@ -24,12 +24,12 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+            protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
             {
                 this.Validate();
 
                 return this._parent._proceedExpressionProvider!( this._parent._methodTemplate!.EffectiveTemplateKind )
-                    .ToTypedExpressionSyntax( syntaxSerializationContext )
+                    .ToTypedExpressionSyntax( syntaxSerializationContext, targetType )
                     .Syntax;
             }
 

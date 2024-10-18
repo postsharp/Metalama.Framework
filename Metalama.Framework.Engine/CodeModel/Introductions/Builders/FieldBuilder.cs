@@ -109,9 +109,9 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         => new FieldOrPropertyInvoker( this )
-            .ToTypedExpressionSyntax( syntaxGenerationContext );
+            .ToTypedExpressionSyntax( syntaxGenerationContext, targetType );
 
     // public TemplateMember<IField>? InitializerTemplate { get; set; }
 
