@@ -61,7 +61,7 @@ namespace Metalama.Framework.DesignTime.Refactoring
 
                 if ( await newRoot.SyntaxTree.GetRootAsync( cancellationToken ) is CompilationUnitSyntax newUnit )
                 {
-                    if ( newUnit.Usings.All( u => u.Name?.ToString() != ns ) )
+                    if ( newUnit.Usings.All( u => u.Name.ToString() != ns ) )
                     {
                         newRoot =
                             newUnit.AddUsings(

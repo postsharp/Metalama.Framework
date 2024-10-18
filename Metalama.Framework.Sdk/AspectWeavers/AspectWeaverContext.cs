@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;

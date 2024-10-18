@@ -6,8 +6,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
-// ReSharper disable TooWideLocalVariableScope
 
+// ReSharper disable TooWideLocalVariableScope
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberHidesStaticFromOuterClass
 
@@ -101,7 +101,7 @@ internal static class MutexAcl
         int error;
         var byteArray = IntPtr.Zero;
         uint byteArraySize = 0;
-        byte[]? binaryForm = null;
+        byte[]? binaryForm;
 
         try
         {

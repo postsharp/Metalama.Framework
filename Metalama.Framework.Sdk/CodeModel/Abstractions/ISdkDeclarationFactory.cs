@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.Abstractions;
 
 internal interface ISdkDeclarationFactory
 {

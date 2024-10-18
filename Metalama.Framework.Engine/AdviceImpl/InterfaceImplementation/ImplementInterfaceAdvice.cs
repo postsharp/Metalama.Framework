@@ -179,7 +179,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                     GetAspectInterfaceMethod,
                     templateMethod => SignatureTypeComparer.Instance.Equals(
                                           interfaceMethod.ReturnParameter.Type,
-                                          templateMethod.ReturnParameter.Type)
+                                          templateMethod.ReturnParameter.Type )
                                       && interfaceMethod.ReturnParameter.RefKind == templateMethod.ReturnParameter.RefKind );
             }
 

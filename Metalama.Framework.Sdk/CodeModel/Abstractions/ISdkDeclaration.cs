@@ -2,9 +2,8 @@
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel.Abstractions
 {
     internal interface ISdkDeclaration : IDeclaration
     {

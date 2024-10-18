@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.GenericContexts;

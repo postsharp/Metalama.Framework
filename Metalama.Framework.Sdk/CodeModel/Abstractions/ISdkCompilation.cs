@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.CodeModel.Abstractions;
 
 internal interface ISdkCompilation : ICompilation
 {

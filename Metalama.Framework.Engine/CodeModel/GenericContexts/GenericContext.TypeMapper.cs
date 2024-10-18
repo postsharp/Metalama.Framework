@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Visitors;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
 
