@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
@@ -30,7 +31,7 @@ internal class IntroducedGenericContext : GenericContext
 
     internal override ImmutableArray<IFullRef<IType>> TypeArguments => this._typeArguments;
 
-    public override IType Map( ITypeParameter typeParameter )
+    internal override IType Map( ITypeParameter typeParameter )
     {
         if ( typeParameter.ContainingDeclaration.AssertNotNull().GetDefinition().Equals( this._definition.Definition ) )
         {
@@ -44,6 +45,44 @@ internal class IntroducedGenericContext : GenericContext
         {
             throw new ArgumentOutOfRangeException();
         }
+    }
+
+    internal override IType Map( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation )
+    {
+        // We must be called only in the context of the symbol-based declaration, otherwise there could be no ITypeParameterSymbol.
+        var ourDefinitionSymbol = this._definition.Definition.GetSymbol().AssertSymbolNotNull();
+
+        if ( typeParameterSymbol.ContainingSymbol.OriginalDefinition.Equals( ourDefinitionSymbol ) )
+        {
+            return this._typeArguments[typeParameterSymbol.Ordinal].GetTarget( compilation );
+        }
+        else if ( this._parentContext != null )
+        {
+            return this._parentContext.Map( typeParameterSymbol, compilation );
+        }
+        else
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    internal override GenericContext Map( GenericContext genericContext, RefFactory refFactory )
+    {
+        var parentContext = (IntroducedGenericContext?) this._parentContext?.Map( genericContext, refFactory );
+
+        var mappedTypeArguments = ImmutableArray.CreateBuilder<IFullRef<IType>>( this.TypeArguments.Length );
+
+        foreach ( var typeArgument in this.TypeArguments )
+        {
+            mappedTypeArguments.Add( genericContext.Map( typeArgument.ConstructedDeclaration ).ToFullRef() );
+        }
+
+        var mappedGenericContext = new IntroducedGenericContext(
+            mappedTypeArguments.MoveToImmutable(),
+            this._definition,
+            parentContext );
+
+        return mappedGenericContext;
     }
 
     public override bool Equals( GenericContext? other )
@@ -92,14 +131,14 @@ internal class IntroducedGenericContext : GenericContext
 
         if ( this._parentContext != null )
         {
-            s = this._parentContext + ",";
+            s = this._parentContext + ".";
         }
         else
         {
             s = "";
         }
 
-        s += "[" + string.Join( ", ", this._typeArguments ) + "]";
+        s += "<" + string.Join( ", ", this._typeArguments ) + ">";
 
         return s;
     }

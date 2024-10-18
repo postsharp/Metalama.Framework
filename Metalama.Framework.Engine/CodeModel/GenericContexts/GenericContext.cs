@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -23,10 +24,24 @@ public abstract partial class GenericContext : IEquatable<GenericContext?>, IGen
 
     internal abstract ImmutableArray<IFullRef<IType>> TypeArguments { get; }
 
-    public abstract IType Map( ITypeParameter typeParameter );
+    internal abstract IType Map( ITypeParameter typeParameter );
+
+    internal abstract IType Map( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation );
+
+    internal IFullRef<IType> Map( ITypeSymbol typeSymbol, RefFactory refFactory )
+    {
+        if ( !ReferencesTypeParameter( typeSymbol ) )
+        {
+            return refFactory.FromSymbol<IType>( typeSymbol );
+        }
+
+        var mapper = new SymbolToTypeMapper( this, refFactory.CanonicalCompilation );
+
+        return mapper.Visit( typeSymbol ).AssertNotNull().ToFullRef();
+    }
 
     [return: NotNullIfNotNull( nameof(type) )]
-    public IType? Map( IType? type )
+    internal IType? Map( IType? type )
     {
         if ( this.IsEmptyOrIdentity )
         {
@@ -42,6 +57,8 @@ public abstract partial class GenericContext : IEquatable<GenericContext?>, IGen
         };
     }
 
+    internal abstract GenericContext Map( GenericContext genericContext, RefFactory refFactory );
+
     public abstract bool Equals( GenericContext? other );
 
     protected abstract int GetHashCodeCore();
@@ -49,4 +66,6 @@ public abstract partial class GenericContext : IEquatable<GenericContext?>, IGen
     public override int GetHashCode() => this.GetHashCodeCore();
 
     public sealed override bool Equals( object? obj ) => obj is GenericContext genericMap && this.Equals( genericMap );
+
+    private protected static bool ReferencesTypeParameter( ITypeSymbol typeSymbol ) => TypeParameterSymbolDetector.Instance.Visit( typeSymbol );
 }

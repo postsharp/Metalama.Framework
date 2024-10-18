@@ -8,7 +8,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
@@ -30,7 +29,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public sealed class CodeModelTests : UnitTestClass
+    public sealed partial class CodeModelTests : UnitTestClass
     {
         [Fact]
         public void ObjectIdentity()
@@ -1950,18 +1949,45 @@ public partial class C
             Assert.True( classType.TryFindImplementationForInterfaceMember( interfaceMethod, out _ ) );
         }
 
-        private sealed class TestClassificationService : ISymbolClassificationService
+        [Fact]
+        public void IsDefinition()
         {
-            public ExecutionScope GetExecutionScope( ISymbol symbol )
-                => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) )
-                    ? ExecutionScope.CompileTime
-                    : ExecutionScope.Default;
+            using var testContext = this.CreateTestContext();
 
-            public bool IsTemplate( ISymbol symbol ) => throw new NotImplementedException();
+            const string code = @"
+using System;
 
-            public bool IsCompileTimeParameter( IParameterSymbol symbol ) => throw new NotImplementedException();
+class B<TB>
+{
+   public virtual TB BaseMethod() => default;
+   public virtual TB BaseMethod2() => default; 
+}
 
-            public bool IsCompileTimeTypeParameter( ITypeParameterSymbol symbol ) => throw new NotImplementedException();
+class C<TC> : B<TC>
+{    
+    TC field;
+    TC Property { get; set; }
+    TC Method( TC p1, TC[] p2, Action<TC> p3 ) => p1;
+    event Action<TC> Event;
+   public override TC BaseMethod() => base.BaseMethod();
+}";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            // All members are definitions.
+            foreach ( var member in compilation.Types.OfName( "B" ).Single().Members() )
+            {
+                Assert.True( member.GetSymbol().IsDefinitionSafe() );
+            }
+
+            foreach ( var member in compilation.Types.OfName( "C" ).Single().Members() )
+            {
+                Assert.True( member.GetSymbol().IsDefinitionSafe() );
+            }
+
+            // Inherited members are not definitions.
+            var inheritedMethod = compilation.Types.OfName( "C" ).Single().AllMethods.OfName( "BaseMethod2" ).Single();
+            Assert.False( inheritedMethod.GetSymbol().IsDefinitionSafe() );
         }
     }
 }

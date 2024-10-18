@@ -16,7 +16,7 @@ internal sealed class TemplateMember<T> : TemplateMember
 
     internal override ISymbolRef<IMemberOrNamedType> GetDeclarationRef() => this._declarationRef;
 
-    public new T GetDeclaration( CompilationModel compilationModel ) => this._declarationRef.GetTarget( this.GetTemplateReflectionCompilation( compilationModel ) );
+    public T GetDeclaration( CompilationModel compilationModel ) => this._declarationRef.GetTarget( this.GetTemplateReflectionCompilation( compilationModel ) );
 
     public TemplateMember(
         ISymbolRef<T> implementation,

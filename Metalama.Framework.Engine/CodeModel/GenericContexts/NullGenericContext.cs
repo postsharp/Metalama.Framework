@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
@@ -12,7 +14,12 @@ internal sealed class NullGenericContext : GenericContext
 
     internal override ImmutableArray<IFullRef<IType>> TypeArguments => ImmutableArray<IFullRef<IType>>.Empty;
 
-    public override IType Map( ITypeParameter typeParameter ) => typeParameter;
+    internal override IType Map( ITypeParameter typeParameter ) => typeParameter;
+
+    internal override IType Map( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation )
+        => compilation.Factory.GetIType( typeParameterSymbol );
+
+    internal override GenericContext Map( GenericContext genericContext, RefFactory refFactory ) => Empty;
 
     public override bool Equals( GenericContext? other ) => other is NullGenericContext;
 

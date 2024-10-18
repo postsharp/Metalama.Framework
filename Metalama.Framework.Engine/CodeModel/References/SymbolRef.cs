@@ -56,7 +56,7 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
     {
         Invariant.Assert(
             symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).Contains( typeof(T) ),
-            $"The interface type was expected to be of type {symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind )} but was {typeof(T)}." );
+            $"The interface type was expected to be of type {string.Join( " or ", symbol.GetDeclarationKind( refFactory.CompilationContext ).GetPossibleDeclarationInterfaceTypes( targetKind ).SelectAsReadOnlyCollection( t => t.Name ) )} but was {typeof(T)}." );
 
         // Verify that RefTargetKind is used only in reference to declarations that don't have a symbol, i.e. the reference must be normalized
         // before calling the constructor.

@@ -1,104 +1,74 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Immutable;
+using TypeParameterKind = Microsoft.CodeAnalysis.TypeParameterKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal static class SymbolNormalizer
 {
-    public static IMethodSymbol GetCanonicalSymbol( IMethodSymbol methodSymbol )
+    private static (ISymbol Symbol, GenericContext Context) GetCanonicalSymbol(
+        IMethodSymbol methodSymbol,
+        GenericContext genericContext,
+        RefFactory refFactory )
     {
         if ( methodSymbol.PartialImplementationPart != null )
         {
             methodSymbol = methodSymbol.PartialImplementationPart;
         }
 
-        if ( IsCanonicalGenericMethodInstance( methodSymbol ) )
+        if ( GenericContextHelper.IsCanonicalGenericMethodInstance( methodSymbol ) )
         {
-            return methodSymbol.OriginalDefinition;
+            return (methodSymbol.OriginalDefinition, genericContext);
+        }
+        else if ( genericContext.IsEmptyOrIdentity )
+        {
+            return (methodSymbol, genericContext);
         }
         else
         {
-            return methodSymbol;
+            return (methodSymbol.OriginalDefinition, SymbolGenericContext.Get( methodSymbol, refFactory.CompilationContext ).Map( genericContext, refFactory ));
         }
     }
 
-    public static INamedTypeSymbol GetCanonicalSymbol( INamedTypeSymbol namedTypeSymbol )
+    private static (ISymbol Symbol, GenericContext Context) GetCanonicalSymbol(
+        INamedTypeSymbol namedTypeSymbol,
+        GenericContext genericContext,
+        RefFactory refFactory )
     {
-        if ( IsCanonicalGenericTypeInstance( namedTypeSymbol ) )
+        if ( GenericContextHelper.IsCanonicalGenericTypeInstance( namedTypeSymbol ) )
         {
-            return namedTypeSymbol.OriginalDefinition;
+            var definition = namedTypeSymbol.OriginalDefinition.WithNullableAnnotation( namedTypeSymbol.NullableAnnotation );
+
+            return (definition, genericContext);
+        }
+        else if ( genericContext.IsEmptyOrIdentity )
+        {
+            return (namedTypeSymbol, genericContext);
         }
         else
         {
-            return namedTypeSymbol;
+            return (namedTypeSymbol.OriginalDefinition,
+                    SymbolGenericContext.Get( namedTypeSymbol, refFactory.CompilationContext ).Map( genericContext, refFactory ));
         }
     }
 
-    public static ISymbol GetCanonicalSymbol( ISymbol symbol )
+    public static (ISymbol Symbol, GenericContext Context) GetCanonicalSymbol( ISymbol symbol, GenericContext genericContext, RefFactory refFactory )
     {
         switch ( symbol.Kind )
         {
             case SymbolKind.Method:
-                return GetCanonicalSymbol( (IMethodSymbol) symbol );
+                return GetCanonicalSymbol( (IMethodSymbol) symbol, genericContext, refFactory );
 
             case SymbolKind.NamedType:
-                return GetCanonicalSymbol( (INamedTypeSymbol) symbol );
+                return GetCanonicalSymbol( (INamedTypeSymbol) symbol, genericContext, refFactory );
 
             default:
-                return symbol;
-        }
-    }
-
-    private static bool IsCanonicalGenericTypeInstance( INamedTypeSymbol namedTypeSymbol )
-    {
-        if ( namedTypeSymbol.IsDefinitionSafe() )
-        {
-            return false;
-        }
-        else
-        {
-            for ( var i = 0; i < namedTypeSymbol.TypeArguments.Length; i++ )
-            {
-                if ( namedTypeSymbol.TypeArguments[i] is not ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Type } typeParameterSymbol
-                     || typeParameterSymbol.Ordinal != i )
-                {
-                    return false;
-                }
-            }
-
-            if ( namedTypeSymbol.ContainingType != null && !IsCanonicalGenericTypeInstance( namedTypeSymbol.ContainingType ) )
-            {
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    private static bool IsCanonicalGenericMethodInstance( IMethodSymbol methodSymbol )
-    {
-        if ( methodSymbol.IsDefinitionSafe() )
-        {
-            return false;
-        }
-        else
-        {
-            for ( var i = 0; i < methodSymbol.TypeArguments.Length; i++ )
-            {
-                if ( methodSymbol.TypeArguments[i] is not ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Method } typeParameterSymbol
-                     || typeParameterSymbol.Ordinal != i )
-                {
-                    return false;
-                }
-            }
-
-            if ( !IsCanonicalGenericTypeInstance( methodSymbol.ContainingType ) )
-            {
-                return false;
-            }
-
-            return true;
+                return (symbol, genericContext);
         }
     }
 }

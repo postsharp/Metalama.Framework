@@ -16,5 +16,6 @@ namespace Metalama.Framework.Engine
         public const string Uncategorized = "Uncategorized";
 
         public const string IntroducedFunctionPointerComparison = "Comparison of function pointers in introduced members";
+        public const string FunctionPointerMapping = "Generic mapping of function pointers";
     }
 }

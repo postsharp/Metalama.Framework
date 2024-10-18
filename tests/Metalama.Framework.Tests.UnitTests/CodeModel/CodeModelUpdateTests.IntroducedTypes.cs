@@ -274,19 +274,19 @@ class C
         const string code = @"
 using System;
 
-class B<T>
+class B<TB>
 {
-   public virtual T BaseMethod() => default;
-   public virtual T BaseMethod2() => default; 
+   public virtual TB BaseMethod() => default;
+   public virtual TB BaseMethod2() => default; 
 }
 
-class C<T> : B<T>
+class C<TC> : B<TC>
 {    
-    T field;
-    T Property { get; set; }
-    T Method( T p1, T[] p2, Action<T> p3 ) => p1;
-    event Action<T> Event;
-   public override T BaseMethod() => base.BaseMethod();
+    TC field;
+    TC Property { get; set; }
+    TC Method( TC p1, TC[] p2, Action<TC> p3 ) => p1;
+    event Action<TC> Event;
+   public override TC BaseMethod() => base.BaseMethod();
 }";
 
         var immutableCompilation1 = testContext.CreateCompilationModel( code );

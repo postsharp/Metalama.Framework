@@ -5,23 +5,12 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Aspects;
-
-internal interface ITemplateClassMemberBuilder : IProjectService
-{
-    bool TryGetMembers(
-        TemplateClass templateClass,
-        INamedTypeSymbol type,
-        CompilationContext compilationContext,
-        IDiagnosticAdder diagnosticAdder,
-        out ImmutableDictionary<string, TemplateClassMember>? members );
-}
 
 internal class TemplateClassMemberBuilder : ITemplateClassMemberBuilder
 {
@@ -39,7 +28,7 @@ internal class TemplateClassMemberBuilder : ITemplateClassMemberBuilder
         INamedTypeSymbol type,
         CompilationContext compilationContext,
         IDiagnosticAdder diagnosticAdder,
-        out ImmutableDictionary<string, TemplateClassMember>? members )
+        out ImmutableDictionary<string, TemplateClassMember> members )
     {
         var membersBuilder = ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
         var hasError = false;

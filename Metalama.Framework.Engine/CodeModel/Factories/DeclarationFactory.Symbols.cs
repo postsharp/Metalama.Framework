@@ -45,9 +45,11 @@ public partial class DeclarationFactory
         {
             symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
+            var canonicalKey = SymbolNormalizer.GetCanonicalSymbol( symbol, genericContext ?? GenericContext.Empty, this._compilationModel.RefFactory );
+
             return (TDeclaration) this._symbolCache.GetOrAdd(
-                SymbolNormalizer.GetCanonicalSymbol( symbol ),
-                genericContext,
+                canonicalKey.Symbol,
+                canonicalKey.Context,
                 typeof(TDeclaration),
                 static ( _, _, x ) =>
                 {
@@ -78,9 +80,11 @@ public partial class DeclarationFactory
         {
             symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
+            var canonicalKey = SymbolNormalizer.GetCanonicalSymbol( symbol, genericContext ?? GenericContext.Empty, this._compilationModel.RefFactory );
+
             return (TType) this._typeCache.GetOrAdd(
-                (TSymbol) SymbolNormalizer.GetCanonicalSymbol( symbol ),
-                genericContext,
+                (TSymbol) canonicalKey.Symbol,
+                canonicalKey.Context,
                 typeof(IType),
                 static ( _, _, x ) => x.createDeclaration( new CreateFromSymbolArgs<TSymbol>( x.symbol, x.me, x.genericContext ?? GenericContext.Empty ) ),
                 (me: this, symbol, createDeclaration: createType, supportsRedirection, genericContext) );
@@ -121,7 +125,7 @@ public partial class DeclarationFactory
             genericContext,
             static ( in CreateFromSymbolArgs<IArrayTypeSymbol> args ) => new SymbolArrayType( args.Symbol, args.Compilation, args.GenericContext ) );
 
-    private IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
+    internal IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
         => this.GetTypeFromSymbol<IDynamicType, IDynamicTypeSymbol>(
             typeSymbol,
             null,
@@ -286,7 +290,7 @@ public partial class DeclarationFactory
                 break;
 
             case GenericContextKind.Symbol:
-                mappedSymbol = ((SymbolGenericContext) typedGenericContext).Map( symbol );
+                mappedSymbol = ((SymbolGenericContext) typedGenericContext).MapToSymbol( symbol );
                 genericContectForSymbolMapping = null;
 
                 break;

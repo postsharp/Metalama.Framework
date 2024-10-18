@@ -1,45 +1,45 @@
 [Introduction]
 public class TargetClass : global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface
 {
-    global::System.Int32 global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.AutoProperty { get; set; }
-    global::System.Int32 global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.Property
+  global::System.Int32 global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.AutoProperty { get; set; }
+  global::System.Int32 global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.Property
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("This is introduced interface member.");
-            return default(global::System.Int32);
-        }
-        set
-        {
-            global::System.Console.WriteLine("This is introduced interface member.");
-        }
+      global::System.Console.WriteLine("This is introduced interface member.");
+      return default(global::System.Int32);
     }
-    global::System.Int32 global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.InterfaceMethod()
+    set
     {
-        global::System.Console.WriteLine("This is introduced interface member.");
-        return default(global::System.Int32);
+      global::System.Console.WriteLine("This is introduced interface member.");
     }
-    event global::System.EventHandler global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.Event
+  }
+  global::System.Int32 global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.InterfaceMethod()
+  {
+    global::System.Console.WriteLine("This is introduced interface member.");
+    return default(global::System.Int32);
+  }
+  event global::System.EventHandler global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.Event
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine("This is introduced interface member.");
-        }
-        remove
-        {
-            global::System.Console.WriteLine("This is introduced interface member.");
-        }
+      global::System.Console.WriteLine("This is introduced interface member.");
     }
-    private event global::System.EventHandler? _eventField;
-    event global::System.EventHandler? global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.EventField
+    remove
     {
-        add
-        {
-            this._eventField += value;
-        }
-        remove
-        {
-            this._eventField -= value;
-        }
+      global::System.Console.WriteLine("This is introduced interface member.");
     }
+  }
+  private event global::System.EventHandler? _eventField;
+  event global::System.EventHandler? global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.EventField
+  {
+    add
+    {
+      this._eventField += value;
+    }
+    remove
+    {
+      this._eventField -= value;
+    }
+  }
 }

@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using TypeParameterKind = Microsoft.CodeAnalysis.TypeParameterKind;
@@ -19,13 +20,13 @@ namespace Metalama.Framework.Engine.CodeModel.GenericContexts;
 /// </summary>
 internal partial class SymbolGenericContext : GenericContext
 {
-    private readonly CompilationContext? _compilationContext;
+    private readonly CompilationContext _compilationContext;
 
     public INamedTypeSymbol NamedTypeSymbol { get; }
 
     public IMethodSymbol? MethodSymbol { get; }
 
-    private SymbolGenericContext( INamedTypeSymbol namedTypeSymbol, IMethodSymbol? methodSymbol, CompilationContext? compilationContext )
+    private SymbolGenericContext( INamedTypeSymbol namedTypeSymbol, IMethodSymbol? methodSymbol, CompilationContext compilationContext )
     {
         // Assert that we only create a non-empty GenericContext only when we have a non-canonical mapping.
         Invariant.Assert( !namedTypeSymbol.IsDefinitionSafe() || methodSymbol != null );
@@ -81,7 +82,7 @@ internal partial class SymbolGenericContext : GenericContext
     [Memo]
     private SymbolMapper SymbolMapperInstance => new( this );
 
-    private ITypeSymbol Map( ITypeParameterSymbol typeParameter )
+    private ITypeSymbol MapToSymbol( ITypeParameterSymbol typeParameter )
     {
         if ( this.IsEmptyOrIdentity )
         {
@@ -121,7 +122,7 @@ internal partial class SymbolGenericContext : GenericContext
     }
 
     [return: NotNullIfNotNull( nameof(type) )]
-    public ITypeSymbol? Map( ITypeSymbol? type )
+    public ITypeSymbol? MapToSymbol( ITypeSymbol? type )
     {
         if ( this.IsEmptyOrIdentity )
         {
@@ -131,13 +132,13 @@ internal partial class SymbolGenericContext : GenericContext
         return type switch
         {
             null => null,
-            ITypeParameterSymbol typeParameter => this.Map( typeParameter ),
-            _ => TypeSymbolVisitor.Instance.Visit( type ) ? this.TypeSymbolMapperInstance.Visit( type ) : type
+            ITypeParameterSymbol typeParameter => this.MapToSymbol( typeParameter ),
+            _ => ReferencesTypeParameter( type ) ? this.TypeSymbolMapperInstance.Visit( type ) : type
         };
     }
 
     [return: NotNullIfNotNull( nameof(symbol) )]
-    public ISymbol? Map( ISymbol? symbol )
+    public ISymbol? MapToSymbol( ISymbol? symbol )
     {
         if ( this.IsEmptyOrIdentity )
         {
@@ -156,7 +157,7 @@ internal partial class SymbolGenericContext : GenericContext
 
     internal override ImmutableArray<IFullRef<IType>> TypeArguments => throw new NotImplementedException();
 
-    public override IType Map( ITypeParameter typeParameter )
+    internal override IType Map( ITypeParameter typeParameter )
     {
         if ( this.IsEmptyOrIdentity )
         {
@@ -223,6 +224,64 @@ internal partial class SymbolGenericContext : GenericContext
         }
     }
 
+    internal override IType Map( ITypeParameterSymbol typeParameterSymbol, CompilationModel compilation )
+    {
+        return compilation.Factory.GetIType( this.MapToSymbol( typeParameterSymbol ) );
+    }
+
+    internal override GenericContext Map( GenericContext genericContext, RefFactory refFactory )
+    {
+        return MapRecursive( this.MethodSymbol ?? (ISymbol) this.NamedTypeSymbol );
+
+        IntroducedGenericContext MapRecursive( ISymbol symbol )
+        {
+            ImmutableArray<ITypeSymbol> typeArguments;
+            IntroducedGenericContext? parentContext;
+            ISymbol symbolDefinition;
+
+            switch ( symbol )
+            {
+                case IMethodSymbol methodSymbol:
+                    parentContext = MapRecursive( methodSymbol.ContainingSymbol );
+                    typeArguments = methodSymbol.TypeArguments;
+                    symbolDefinition = methodSymbol.OriginalDefinition;
+
+                    break;
+
+                case INamedTypeSymbol namedTypeSymbol:
+                    parentContext = namedTypeSymbol.ContainingType != null ? MapRecursive( namedTypeSymbol.ContainingType ) : null;
+                    typeArguments = namedTypeSymbol.TypeArguments;
+                    symbolDefinition = namedTypeSymbol.OriginalDefinition;
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            if ( typeArguments.Length > 0 )
+            {
+                var mappedTypeArguments = ImmutableArray.CreateBuilder<IFullRef<IType>>( typeArguments.Length );
+
+                foreach ( var typeArgumentSymbol in typeArguments )
+                {
+                    mappedTypeArguments.Add( genericContext.Map( typeArgumentSymbol, refFactory ) );
+                }
+
+                var mappedGenericContext = new IntroducedGenericContext(
+                    mappedTypeArguments.MoveToImmutable(),
+                    refFactory.FromAnySymbol( symbolDefinition ).As<IDeclaration>(),
+                    parentContext );
+
+                return mappedGenericContext;
+            }
+            else
+            {
+                return parentContext.AssertNotNull();
+            }
+        }
+    }
+
     public override bool Equals( GenericContext? other )
     {
         if ( other is not SymbolGenericContext otherSymbolGenericContect )
@@ -230,10 +289,10 @@ internal partial class SymbolGenericContext : GenericContext
             return false;
         }
 
-        return SymbolEqualityComparer.Default.Equals( this.NamedTypeSymbol, otherSymbolGenericContect.NamedTypeSymbol );
+        return SymbolEqualityComparer.IncludeNullability.Equals( this.NamedTypeSymbol, otherSymbolGenericContect.NamedTypeSymbol );
     }
 
-    protected override int GetHashCodeCore() => SymbolEqualityComparer.Default.GetHashCode( this.NamedTypeSymbol );
+    protected override int GetHashCodeCore() => SymbolEqualityComparer.IncludeNullability.GetHashCode( this.NamedTypeSymbol );
 
     public override string ToString()
         => (this.NamedTypeSymbol, this.MethodSymbol) switch
