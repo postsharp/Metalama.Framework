@@ -1,24 +1,20 @@
-using System;
-
 internal class Target
 {
-    private readonly string _q = default !;
-
-    [NotNull]
-    public string Q
+  private readonly string _q = default !;
+  [NotNull]
+  public string Q
+  {
+    get
     {
-        get
-        {
-            return _q;
-        }
-        private init
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            _q = value;
-        }
+      return this._q;
     }
+    private init
+    {
+      if (value == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      this._q = value;
+    }
+  }
 }
