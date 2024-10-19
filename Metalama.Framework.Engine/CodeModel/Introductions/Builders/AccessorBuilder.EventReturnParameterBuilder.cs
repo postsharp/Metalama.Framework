@@ -26,7 +26,7 @@ internal partial class AccessorBuilder
 
         public override string Name
         {
-            get => throw new NotSupportedException( "Cannot get the name of a return parameter." );
+            get => "<return>";
             set => throw new NotSupportedException( "Cannot set the name of a return parameter." );
         }
     }

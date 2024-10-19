@@ -161,7 +161,7 @@ internal abstract class PseudoAccessor : IMethodImpl
         => throw new NotSupportedException( $"'{this}' is implicitly defined  declaration and cannot be represented as a System.Reflection object." );
 
     IHasAccessors IMethod.DeclaringMember => this.DeclaringMember;
-    
+
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
     bool IDeclarationImpl.CanBeInherited => false;
@@ -175,7 +175,7 @@ internal abstract class PseudoAccessor : IMethodImpl
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
         => newCompilation.Factory.Translate( this.DeclaringMember, genericContext ).AssertNotNull().GetAccessor( this.MethodKind );
-    
+
     public IMember? OverriddenMember => ((IHasAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 
     public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
@@ -186,7 +186,11 @@ internal abstract class PseudoAccessor : IMethodImpl
         where TExtension : IMetric
         => this.Compilation.MetricManager.GetMetric<TExtension>( this );
 
-    public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
+    public bool Equals( IDeclaration? other )
+        => other is PseudoAccessor pseudoAccessor && this.DeclaringMember.Equals( pseudoAccessor.DeclaringMember )
+                                                  && this.MethodKind == pseudoAccessor.MethodKind;
+
+    public override int GetHashCode() => HashCode.Combine( this.DeclaringMember, this.MethodKind );
 
     bool? IMethodImpl.IsIteratorMethod => false;
 
@@ -198,5 +202,6 @@ internal abstract class PseudoAccessor : IMethodImpl
 
     public IGenericContext GenericContext => this.ContainingDeclaration.GenericContext;
 
-    public GenericContext GenericContextForSymbolMapping => (GenericContext) ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
+    public GenericContext GenericContextForSymbolMapping
+        => (GenericContext) ((ISymbolBasedCompilationElement) this.DeclaringMember).GenericContextForSymbolMapping;
 }

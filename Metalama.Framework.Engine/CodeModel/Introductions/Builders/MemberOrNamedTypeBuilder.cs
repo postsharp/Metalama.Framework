@@ -17,6 +17,7 @@ internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMem
     private bool _usesNewKeyword;
     private bool _isAbstract;
     private bool _isStatic;
+    private string _name;
 
     public bool IsSealed
     {
@@ -90,10 +91,21 @@ internal abstract class MemberOrNamedTypeBuilder : NamedDeclarationBuilder, IMem
         }
     }
 
+    public override string Name
+    {
+        get => this._name;
+        set
+        {
+            this.CheckNotFrozen();
+            this._name = value;
+        }
+    }
+
     public override IDeclaration ContainingDeclaration => this.DeclaringType.AssertNotNull( "Declaring type should not be null (missing override?)." );
 
-    protected MemberOrNamedTypeBuilder( AspectLayerInstance aspectLayerInstance, INamedType? declaringType, string name ) : base( aspectLayerInstance, name )
+    protected MemberOrNamedTypeBuilder( AspectLayerInstance aspectLayerInstance, INamedType? declaringType, string name ) : base( aspectLayerInstance )
     {
+        this._name = name;
         this.DeclaringType = declaringType;
         this._usesNewKeyword = false;
     }

@@ -42,6 +42,8 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 
         this._buildAction?.Invoke( builder );
 
+        this.CompleteBuilder( builder, in context );
+
         this.ValidateBuilder( builder, context.Diagnostics );
 
         return this.ImplementCore( builder, in context );
@@ -50,6 +52,8 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
     protected abstract TBuilder CreateBuilder( in AdviceImplementationContext context );
 
     protected virtual void InitializeBuilder( TBuilder builder, in AdviceImplementationContext context ) { }
+
+    protected virtual void CompleteBuilder( TBuilder builder, in AdviceImplementationContext context ) { }
 
     protected abstract IntroductionAdviceResult<TIntroduced> ImplementCore( TBuilder builder, in AdviceImplementationContext context );
 

@@ -25,21 +25,24 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
     private VarianceKind _variance;
     private bool? _isConstraintNullable;
     private bool _hasDefaultConstructorConstraint;
+    private string _name;
 
     public IntroducedRef<ITypeParameter> Ref { get; }
 
-    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.AspectLayerInstance, name )
+    public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.AspectLayerInstance )
     {
         this.ContainingDeclaration = containingMethod;
         this.Index = index;
         this.Ref = new IntroducedRef<ITypeParameter>( this.Compilation.RefFactory );
+        this._name = name;
     }
 
-    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.AspectLayerInstance, name )
+    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.AspectLayerInstance )
     {
         this.ContainingDeclaration = containingType;
         this.Index = index;
         this.Ref = new IntroducedRef<ITypeParameter>( this.Compilation.RefFactory );
+        this._name = name;
     }
 
     public int Index { get; }
@@ -55,6 +58,16 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
         {
             this.CheckNotFrozen();
             this._typeKindConstraint = value;
+        }
+    }
+
+    public override string Name
+    {
+        get => this._name;
+        set
+        {
+            this.CheckNotFrozen();
+            this._name = value;
         }
     }
 

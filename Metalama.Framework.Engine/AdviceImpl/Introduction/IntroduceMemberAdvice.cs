@@ -103,6 +103,11 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         }
 
         this.InitializeBuilderCore( builder, templateAttributeProperties, in context );
+    }
+
+    protected override void CompleteBuilder( TBuilder builder, in AdviceImplementationContext context )
+    {
+        base.CompleteBuilder( builder, in context );
 
         SetBuilderExplicitInterfaceImplementation( builder, this._explicitlyImplementedInterfaceType );
     }

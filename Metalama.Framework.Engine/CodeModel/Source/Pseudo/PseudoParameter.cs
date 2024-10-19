@@ -96,9 +96,10 @@ namespace Metalama.Framework.Engine.CodeModel.Source.Pseudo
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringAccessor).PrimarySyntaxTree;
 
         public override bool Equals( IDeclaration? other )
-            => other is PseudoParameter pseudoParameter && this.DeclaringMember.Equals( pseudoParameter.DeclaringMember );
+            => other is PseudoParameter pseudoParameter && this.DeclaringMember.Equals( pseudoParameter.DeclaringMember )
+                                                        && this.Index == pseudoParameter.Index;
 
-        protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 5;
+        protected override int GetHashCodeCore() => HashCode.Combine( this.DeclaringMember.GetHashCode(), this.Index );
 
         bool IExpression.IsAssignable => true;
 

@@ -14,11 +14,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
-internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl
+internal abstract class BaseParameterBuilder : NamedDeclarationBuilder, IParameterBuilder, IParameterImpl
 {
     public IntroducedRef<IParameter> Ref { get; }
-
-    public abstract string Name { get; set; }
 
     public abstract IType Type { get; set; }
 
