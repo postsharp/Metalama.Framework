@@ -20,6 +20,8 @@ public readonly struct TypedExpressionSyntax
 
     public ExpressionSyntax Syntax => this.Implementation.Syntax;
 
+    public bool? IsReferenceable => this.Implementation.IsReferenceable;
+
     public static implicit operator ExpressionSyntax( TypedExpressionSyntax runtimeExpression ) => runtimeExpression.Syntax;
 
     public static implicit operator ExpressionStatementSyntax?( TypedExpressionSyntax runtimeExpression ) => runtimeExpression.Implementation.ToStatement();

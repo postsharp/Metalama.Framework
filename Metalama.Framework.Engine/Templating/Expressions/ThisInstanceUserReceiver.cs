@@ -25,6 +25,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public override bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
+        private protected override bool? IsReferenceable => this.IsAssignable;
+
         public override IType Type => this._type;
 
         public override TypedExpressionSyntaxImpl CreateMemberAccessExpression( string member )

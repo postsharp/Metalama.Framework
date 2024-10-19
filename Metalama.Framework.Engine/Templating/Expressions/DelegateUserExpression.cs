@@ -30,7 +30,7 @@ internal sealed class DelegateUserExpression : UserExpression
 
     public override bool IsAssignable { get; }
 
-    private protected override bool IsReferenceable { get; }
+    private protected override bool? IsReferenceable { get; }
 
     protected override string ToStringCore() => "<late bound>";
 }
