@@ -7,11 +7,9 @@ using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 
-internal class ParameterBuilderData : DeclarationBuilderData
+internal class ParameterBuilderData : NamedDeclarationBuilderData
 {
     private readonly IntroducedRef<IParameter> _ref;
-
-    public string Name { get; }
 
     public IFullRef<IType> Type { get; }
 
@@ -26,8 +24,6 @@ internal class ParameterBuilderData : DeclarationBuilderData
     public ParameterBuilderData( BaseParameterBuilder builder, IFullRef<IDeclaration> containingDeclaration ) : base( builder, containingDeclaration )
     {
         this._ref = builder.Ref;
-
-        this.Name = !builder.IsReturnParameter ? builder.Name : "<return>";
 
         this.Type = builder.Type.ToFullRef();
         this.RefKind = builder.RefKind;

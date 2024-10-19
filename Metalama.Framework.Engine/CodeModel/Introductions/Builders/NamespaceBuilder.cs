@@ -13,12 +13,25 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal sealed class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 {
+    private string _name;
+
     public IntroducedRef<INamespace> Ref { get; }
 
-    public NamespaceBuilder( AspectLayerInstance aspectLayerInstance, INamespace containingNamespace, string name ) : base( aspectLayerInstance, name )
+    public NamespaceBuilder( AspectLayerInstance aspectLayerInstance, INamespace containingNamespace, string name ) : base( aspectLayerInstance )
     {
+        this._name = name;
         this.ContainingNamespace = containingNamespace;
         this.Ref = new IntroducedRef<INamespace>( this.Compilation.RefFactory );
+    }
+
+    public override string Name
+    {
+        get => this._name;
+        set
+        {
+            this.CheckNotFrozen();
+            this._name = value;
+        }
     }
 
     public string FullName

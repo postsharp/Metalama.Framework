@@ -6,21 +6,7 @@ namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
 internal abstract class NamedDeclarationBuilder : DeclarationBuilder, INamedDeclarationBuilderImpl
 {
-    private string _name;
+    public abstract string Name { get; set; }
 
-    public virtual string Name
-    {
-        get => this._name;
-        set
-        {
-            this.CheckNotFrozen();
-
-            this._name = value;
-        }
-    }
-
-    protected NamedDeclarationBuilder( AspectLayerInstance aspectLayerInstance, string name ) : base( aspectLayerInstance )
-    {
-        this._name = name;
-    }
+    protected NamedDeclarationBuilder( AspectLayerInstance aspectLayerInstance ) : base( aspectLayerInstance ) { }
 }
