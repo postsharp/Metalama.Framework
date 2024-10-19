@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public virtual bool IsAssignable => false;
 
-        private protected virtual bool IsReferenceable => false;
+        private protected virtual bool? IsReferenceable => null;
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
