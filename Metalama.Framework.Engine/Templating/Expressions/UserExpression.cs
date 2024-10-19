@@ -35,7 +35,9 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public virtual RefKind RefKind => RefKind.None;
 
-        public virtual bool IsAssignable => false;
+        bool IExpression.IsAssignable => this.IsAssignable ?? false;
+
+        public virtual bool? IsAssignable => null;
 
         private protected virtual bool? IsReferenceable => null;
 
