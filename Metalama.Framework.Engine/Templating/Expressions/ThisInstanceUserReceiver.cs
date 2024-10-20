@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext ) => ThisExpression();
 
-        public override bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
+        public override bool? IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
         private protected override bool? IsReferenceable => this.IsAssignable;
 
