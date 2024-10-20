@@ -18,8 +18,8 @@ internal class TargetCode : ICloneable
   private TargetCode Method()
   {
     var clone = (TargetCode)MemberwiseClone();
-    clone.s = (string? )s!.Clone();
-    clone.tc = (TargetCode? )((ICloneable)tc!).Clone();
+    clone.s = (string? )s.Clone();
+    clone.tc = (TargetCode? )((ICloneable)tc).Clone();
     return clone;
   }
   object ICloneable.Clone() => new();

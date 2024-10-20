@@ -10,20 +10,20 @@ public class Vehicle
     Payload = payload;
     Fuel = fuel;
   }
-  public void Restore(global::System.Object snapshot)
+  public void Restore(object snapshot)
   {
-    this.Payload = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2.Vehicle.Snapshot)snapshot).Payload;
-    this.Fuel = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2.Vehicle.Snapshot)snapshot).Fuel;
+    Payload = ((Snapshot)snapshot).Payload;
+    Fuel = ((Snapshot)snapshot).Fuel;
   }
-  public global::System.Object Save()
+  public object Save()
   {
-    return new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Memento2.Vehicle.Snapshot(this.Payload, this.Fuel);
+    return new Snapshot(Payload, Fuel);
   }
   private class Snapshot
   {
-    public readonly global::System.String Fuel;
-    public readonly global::System.Decimal Payload;
-    public Snapshot(global::System.Decimal Payload, global::System.String Fuel)
+    public readonly string Fuel;
+    public readonly decimal Payload;
+    public Snapshot(decimal Payload, string Fuel)
     {
       this.Payload = Payload;
       this.Fuel = Fuel;
