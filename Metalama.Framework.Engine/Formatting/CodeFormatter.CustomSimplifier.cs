@@ -5,6 +5,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
+using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Formatting;
 
@@ -130,6 +132,72 @@ public sealed partial class CodeFormatter
             }
 
             return base.VisitObjectCreationExpression( node )!;
+        }
+
+        public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
+        {
+            if ( node.Type.Kind() == SyntaxKind.TupleType && node.HasAnnotation( Simplifier.Annotation ) )
+            {
+                var tupleType = (TupleTypeSyntax) node.Type;
+
+                if ( tupleType.Elements.All( e => e.Identifier == default ) )
+                {
+                    if ( this._semanticModel == null )
+                    {
+                        this.RequiresSemanticModel = true;
+
+                        return node;
+                    }
+                    else
+                    {
+                        // Check if this can be simplified. We must compare element by element, ignoring labels, because
+                        // Roslyn will return a different type if labels are different.
+                        var targetType = this._semanticModel.GetTypeInfo( node.Type ).Type as INamedTypeSymbol;
+                        var expressionType = this._semanticModel.GetTypeInfo( node.Expression ).Type as INamedTypeSymbol;
+
+                        if ( targetType != null && expressionType is { Name: nameof(ValueTuple) } && targetType.Arity == expressionType.Arity )
+                        {
+                            for ( var i = 0; i < targetType.TypeArguments.Length; i++ )
+                            {
+                                if ( !targetType.TypeArguments[i].Equals( expressionType.TypeArguments[i], SymbolEqualityComparer.IncludeNullability ) )
+                                {
+                                    // No match.
+                                    return node;
+                                }
+                            }
+
+                            // The types are equal, ignoring labels.
+                            return node.Expression;
+                        }
+                    }
+                }
+            }
+
+            return base.VisitCastExpression( node );
+        }
+
+        public override SyntaxNode? VisitPostfixUnaryExpression( PostfixUnaryExpressionSyntax node )
+        {
+            if ( node.OperatorToken.IsKind( SyntaxKind.ExclamationToken ) && node.HasAnnotation( Simplifier.Annotation ) )
+            {
+                if ( this._semanticModel == null )
+                {
+                    this.RequiresSemanticModel = true;
+
+                    return node;
+                }
+                else
+                {
+                    var expressionType = this._semanticModel.GetTypeInfo( node.Operand );
+
+                    if ( expressionType.Type is { NullableAnnotation: NullableAnnotation.NotAnnotated } )
+                    {
+                        return node.Operand;
+                    }
+                }
+            }
+
+            return base.VisitPostfixUnaryExpression( node );
         }
     }
 }

@@ -1,27 +1,27 @@
 [DeepClone]
-internal class AutomaticallyCloneable : global::System.ICloneable
+internal class AutomaticallyCloneable : ICloneable
 {
   private int _a;
   private ManuallyCloneable? _b;
   private AutomaticallyCloneable? _c;
-  public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable Clone()
+  public virtual AutomaticallyCloneable Clone()
   {
-    var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)this.MemberwiseClone());
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._b = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.ManuallyCloneable? )this._b?.Clone()!);
-    ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone)._c = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable? )this._c?.Clone()!);
-    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.AutomaticallyCloneable)clone;
+    var clone = (AutomaticallyCloneable)this.MemberwiseClone();
+    clone._b = (ManuallyCloneable? )_b?.Clone();
+    clone._c = (_c?.Clone());
+    return clone;
   }
-  global::System.Object global::System.ICloneable.Clone()
+  object ICloneable.Clone()
   {
-    return (global::System.Object)this.Clone();
+    return Clone();
   }
 }
 internal class DerivedCloneable : AutomaticallyCloneable
 {
   private string? _d;
-  public override global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.DerivedCloneable Clone()
+  public override DerivedCloneable Clone()
   {
-    var clone = ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.DerivedCloneable)base.Clone());
-    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone2.DerivedCloneable)clone;
+    var clone = (DerivedCloneable)base.Clone();
+    return clone;
   }
 }

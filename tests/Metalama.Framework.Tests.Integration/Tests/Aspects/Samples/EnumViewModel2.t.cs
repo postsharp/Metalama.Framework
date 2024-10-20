@@ -11,37 +11,37 @@ public class TargetClass
   }
   public class StringOptionsViewModel
   {
-    private readonly global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions _value;
-    public StringOptionsViewModel(global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions value)
+    private readonly StringOptions _value;
+    public StringOptionsViewModel(StringOptions value)
     {
-      this._value = value;
+      _value = value;
     }
-    public global::System.Boolean IsNone
+    public bool IsNone
     {
       get
       {
-        return (global::System.Boolean)((this._value & global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.None) == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.None);
+        return (_value & StringOptions.None) == StringOptions.None;
       }
     }
-    public global::System.Boolean IsRemoveSpace
+    public bool IsRemoveSpace
     {
       get
       {
-        return (global::System.Boolean)((this._value & global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.RemoveSpace) == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.RemoveSpace);
+        return (_value & StringOptions.RemoveSpace) == StringOptions.RemoveSpace;
       }
     }
-    public global::System.Boolean IsToUpperCase
+    public bool IsToUpperCase
     {
       get
       {
-        return (global::System.Boolean)((this._value & global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.ToUpperCase) == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.ToUpperCase);
+        return (_value & StringOptions.ToUpperCase) == StringOptions.ToUpperCase;
       }
     }
-    public global::System.Boolean IsTrim
+    public bool IsTrim
     {
       get
       {
-        return (global::System.Boolean)((this._value & global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.Trim) == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2.TargetClass.StringOptions.Trim);
+        return (_value & StringOptions.Trim) == StringOptions.Trim;
       }
     }
   }

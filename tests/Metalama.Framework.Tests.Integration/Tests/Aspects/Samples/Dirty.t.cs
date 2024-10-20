@@ -1,21 +1,21 @@
 [Dirty]
-public class TargetClass : global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.IDirty
+public class TargetClass : IDirty
 {
   private int _a;
   public int A
   {
     get
     {
-      return this._a;
+      return _a;
     }
     set
     {
-      this._a = value;
-      if (this.DirtyState == global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState.Clean)
+      _a = value;
+      if (this.DirtyState == DirtyState.Clean)
       {
-        this.DirtyState = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState.Dirty;
+        this.DirtyState = DirtyState.Dirty;
       }
     }
   }
-  public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty.DirtyState DirtyState { get; protected set; }
+  public DirtyState DirtyState { get; protected set; }
 }
