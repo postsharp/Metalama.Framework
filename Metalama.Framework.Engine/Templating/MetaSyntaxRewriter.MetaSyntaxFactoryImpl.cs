@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
@@ -155,14 +155,13 @@ namespace Metalama.Framework.Engine.Templating
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                new[]
-                                {
-                                    SyntaxFactory.Argument( leadingTrivia ),
-                                    SyntaxFactory.Argument( syntaxKind ),
-                                    SyntaxFactory.Argument( text ),
-                                    SyntaxFactory.Argument( valueText ),
-                                    SyntaxFactory.Argument( trailingTrivia )
-                                } ) ) );
+                            [
+                                SyntaxFactory.Argument( leadingTrivia ),
+                                SyntaxFactory.Argument( syntaxKind ),
+                                SyntaxFactory.Argument( text ),
+                                SyntaxFactory.Argument( valueText ),
+                                SyntaxFactory.Argument( trailingTrivia )
+                            ] ) ) );
 
                 return result;
             }
@@ -188,14 +187,13 @@ namespace Metalama.Framework.Engine.Templating
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                new[]
-                                {
-                                    SyntaxFactory.Argument( leading ),
-                                    SyntaxFactory.Argument( kind ),
-                                    SyntaxFactory.Argument( text ),
-                                    SyntaxFactory.Argument( valueText ),
-                                    SyntaxFactory.Argument( trailing )
-                                } ) ) );
+                            [
+                                SyntaxFactory.Argument( leading ),
+                                SyntaxFactory.Argument( kind ),
+                                SyntaxFactory.Argument( text ),
+                                SyntaxFactory.Argument( valueText ),
+                                SyntaxFactory.Argument( trailing )
+                            ] ) ) );
 
                 return result;
             }

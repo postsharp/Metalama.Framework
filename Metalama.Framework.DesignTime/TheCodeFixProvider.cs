@@ -44,6 +44,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeActionExecutionService _codeActionExecutionService;
         private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetSharedServiceProvider() ) { }
 
@@ -66,6 +67,7 @@ namespace Metalama.Framework.DesignTime
 
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
             this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
         }
 
         public override Task RegisterCodeFixesAsync( CodeFixContext context ) => this.RegisterCodeFixesAsync( new CodeFixContextAdapter( context ) );
@@ -181,7 +183,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e, this._logger );
+                this._exceptionHandler.ReportException( e, this._logger );
             }
         }
 
@@ -228,7 +230,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e )
             {
-                DesignTimeExceptionHandler.ReportException( e, this._logger );
+                this._exceptionHandler.ReportException( e, this._logger );
 
                 return document;
             }

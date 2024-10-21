@@ -10,6 +10,8 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Templating;
 
+#pragma warning disable IDE0051 // Remove unused private members
+
 internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
 {
     private readonly IDiagnosticAdder _diagnostics;

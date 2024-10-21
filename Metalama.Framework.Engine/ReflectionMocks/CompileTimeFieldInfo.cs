@@ -2,8 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using System;
 using System.Globalization;
@@ -11,13 +9,13 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal sealed class CompileTimeFieldInfo : FieldInfo, ICompileTimeReflectionObject<IField>
+    internal sealed class CompileTimeFieldInfo : FieldInfo, ICompileTimeReflectionObject<IFieldOrProperty>
     {
-        public ISdkRef<IField> Target { get; }
+        public IRef<IFieldOrProperty> Target { get; }
 
         private CompileTimeFieldInfo( IField field )
         {
-            this.Target = field.ToValueTypedRef();
+            this.Target = field.ToRef();
         }
 
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "FieldInfo" );
@@ -57,7 +55,10 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => CompileTimeMocksHelper.ToTypedExpressionSyntax( this, CompileTimeFieldInfoSerializer.SerializeField, syntaxGenerationContext );
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
+            => CompileTimeMocksHelper.ToTypedExpressionSyntax(
+                this,
+                ( fieldOrProperty, context ) => CompileTimeFieldInfoSerializer.SerializeField( (IField) fieldOrProperty, context ),
+                syntaxGenerationContext );
     }
 }

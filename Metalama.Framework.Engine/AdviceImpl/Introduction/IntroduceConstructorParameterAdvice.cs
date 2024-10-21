@@ -3,14 +3,14 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -45,14 +45,14 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceParameter;
 
-    protected override IntroduceConstructorParameterAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroduceConstructorParameterAdviceResult Implement( in AdviceImplementationContext context )
     {
+        var compilation = context.MutableCompilation;
+        var contextCopy = context;
+        var serviceProvider = context.ServiceProvider;
         var syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
 
-        var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
+        var constructor = (IConstructor) this.TargetDeclaration.ForCompilation( compilation );
         var initializedConstructor = constructor;
 
         var existingParameter = constructor.Parameters.FirstOrDefault( p => p.Name == this._parameterName );
@@ -62,7 +62,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             return this.CreateFailedResult(
                 AdviceDiagnosticDescriptors.CannotIntroduceParameterAlreadyExists.CreateRoslynDiagnostic(
                     constructor.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this._parameterName, constructor, existingParameter),
+                    (this.AspectInstance.AspectClass.ShortName, this._parameterName, constructor, existingParameter.Name),
                     this ) );
         }
 
@@ -79,13 +79,12 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
-            var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType )
-            {
-                ReplacedImplicit = constructor.ToValueTypedRef(), Accessibility = Accessibility.Public
-            };
+            var constructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, constructor );
+
+            constructorBuilder.Freeze();
 
             initializedConstructor = constructorBuilder;
-            addTransformation( constructorBuilder.ToTransformation() );
+            context.AddTransformation( constructorBuilder.CreateTransformation() );
         }
 
         // Create the parameter.
@@ -95,18 +94,21 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             this._parameterName,
             this._parameterType,
             RefKind.None,
-            this ) { DefaultValue = this._defaultValue };
+            this.AspectLayerInstance ) { DefaultValue = this._defaultValue };
 
-        var parameter = parameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
+        var parameter = parameterBuilder;
 
         this._buildAction?.Invoke( parameterBuilder );
 
-        addTransformation( new IntroduceParameterTransformation( this, parameterBuilder ) );
+        parameterBuilder.Freeze();
+        var parameterBuilderData = parameterBuilder.BuilderData;
+
+        context.AddTransformation( new IntroduceParameterTransformation( this.AspectLayerInstance, parameterBuilderData ) );
 
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
 
-        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToValueTypedRef<IParameter>() );
+        return new IntroduceConstructorParameterAdviceResult( parameterBuilderData.ToRef() );
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
@@ -154,12 +156,10 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
-                    var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType )
-                    {
-                        ReplacedImplicit = chainedConstructor.ToValueTypedRef(), Accessibility = Accessibility.Public
-                    };
+                    var derivedConstructorBuilder = new ConstructorBuilder( this.AspectLayerInstance, chainedConstructor );
 
-                    addTransformation( derivedConstructorBuilder.ToTransformation() );
+                    derivedConstructorBuilder.Freeze();
+                    contextCopy.AddTransformation( derivedConstructorBuilder.CreateTransformation() );
                     initializedChainedConstructor = derivedConstructorBuilder;
                 }
 
@@ -189,13 +189,15 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                             pullParameterAction.ParameterName.AssertNotNull(),
                             pullParameterAction.ParameterType.AssertNotNull(),
                             RefKind.None,
-                            this ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
+                            this.AspectLayerInstance ) { DefaultValue = pullParameterAction.ParameterDefaultValue };
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
+                        recursiveParameterBuilder.Freeze();
 
-                        addTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder ) );
+                        contextCopy.AddTransformation(
+                            new IntroduceParameterTransformation( this.AspectLayerInstance, recursiveParameterBuilder.BuilderData ) );
 
-                        var recursiveParameter = recursiveParameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
+                        var recursiveParameter = recursiveParameterBuilder;
 
                         // Process all constructors calling this constructor.
                         PullConstructorParameterRecursive( chainedConstructor, recursiveParameter );
@@ -207,10 +209,10 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
                 }
 
                 // Append an argument to the call to the current constructor. 
-                addTransformation(
+                contextCopy.AddTransformation(
                     new IntroduceConstructorInitializerArgumentTransformation(
-                        this,
-                        initializedChainedConstructor,
+                        this.AspectLayerInstance,
+                        initializedChainedConstructor.ToFullRef(),
                         baseParameter.Index,
                         parameterValue ) );
             }

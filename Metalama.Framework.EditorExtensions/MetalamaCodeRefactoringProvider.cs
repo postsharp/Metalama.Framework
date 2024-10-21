@@ -46,7 +46,9 @@ namespace Metalama.Framework.CompilerExtensions
             }
         }
 
+#pragma warning disable VSTHRD110
         public override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
             => this._impl?.ComputeRefactoringsAsync( context ) ?? Task.CompletedTask;
+#pragma warning restore VSTHRD110
     }
 }

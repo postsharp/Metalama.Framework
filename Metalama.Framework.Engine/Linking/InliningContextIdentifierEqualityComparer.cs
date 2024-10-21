@@ -25,7 +25,7 @@ internal sealed class InliningContextIdentifierEqualityComparer : IEqualityCompa
         => (x == null && y == null)
            || (
                x != null && y != null &&
-               x.InliningId == y.InliningId
+               x.InliningId?.Value == y.InliningId?.Value
                && this._symbolComparer.Equals( x.DestinationSemantic.Symbol, y.DestinationSemantic.Symbol )
                && x.DestinationSemantic.Kind == y.DestinationSemantic.Kind);
 
@@ -39,7 +39,7 @@ internal sealed class InliningContextIdentifierEqualityComparer : IEqualityCompa
         {
             // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
             return HashCode.Combine(
-                x.InliningId,
+                x.InliningId?.Value,
                 this._symbolComparer.GetHashCode( x.DestinationSemantic.Symbol ),
                 (int) x.DestinationSemantic.Kind );
         }

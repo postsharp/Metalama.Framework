@@ -1,7 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
+using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using System.Linq;
 using Xunit;
 
@@ -9,6 +13,51 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
 public sealed partial class CodeModelUpdateTests
 {
+    [Fact]
+    public void AddTypeToCompilation_VisibleInCompilationTypesCollection()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var compilation = testContext.CreateCompilationModel( "class Outer;" ).CreateMutableClone();
+
+        var type = new NamedTypeBuilder( null!, compilation.GlobalNamespace, "C" );
+        type.Freeze();
+        compilation.AddTransformation( type.CreateTransformation() );
+
+        Assert.Single( compilation.GlobalNamespace.Types.OfName( "C" ) );
+        Assert.Single( compilation.Types.OfName( "C" ) );
+
+        var nestedType = new NamedTypeBuilder( null!, compilation.Types.OfName( "Outer" ).Single(), "Inner" );
+        nestedType.Freeze();
+        compilation.AddTransformation( nestedType.CreateTransformation() );
+
+        Assert.Single( compilation.GlobalNamespace.Types.OfName( "Outer" ).Single().Types );
+        Assert.Single( compilation.AllTypes.OfName( "Inner" ) );
+    }
+
+    [Fact]
+    public void AddTypeToIntroducedNamespace_IsVisibleInThatNamespace()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var compilation = testContext.CreateCompilationModel( "" ).CreateMutableClone();
+
+        var nsBuilder = new NamespaceBuilder( null!, compilation.GlobalNamespace, "NS" );
+        nsBuilder.Freeze();
+        compilation.AddTransformation( nsBuilder.CreateTransformation() );
+
+        var typeBuilder = new NamedTypeBuilder( null!, nsBuilder, "C" );
+        typeBuilder.Freeze();
+        compilation.AddTransformation( typeBuilder.CreateTransformation() );
+
+        var ns = compilation.GlobalNamespace.GetDescendant( "NS" );
+
+        Assert.NotNull( ns );
+
+        Assert.Single( ns.Types.OfName( "C" ) );
+        Assert.Single( compilation.Types.OfName( "C" ) );
+    }
+
     [Fact]
     public void AddMethodToEmptyIntroducedType_InitializeBefore_Complete()
     {
@@ -28,7 +77,8 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        typeBuilder.Freeze();
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -41,6 +91,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -69,7 +120,8 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        typeBuilder.Freeze();
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -82,6 +134,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -110,7 +163,8 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        typeBuilder.Freeze();
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -120,6 +174,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -148,7 +203,8 @@ class C
 
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
+        typeBuilder.Freeze();
+        mutableCompilation1.AddTransformation( typeBuilder.CreateTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
@@ -158,6 +214,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
+        methodBuilder.Freeze();
         mutableCompilation2.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
@@ -184,17 +241,17 @@ class C
         var target = initialCompilation.Types.OfName( "Target" ).Single();
 
         var baseType = new NamedTypeBuilder( null!, target, "B" );
+        baseType.Freeze();
 
         var derivedType = new NamedTypeBuilder( null!, target, "C" ) { BaseType = baseType };
+        derivedType.Freeze();
 
         var interfaceType = initialCompilation.Types.OfName( "I" ).Single();
 
-        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType, interfaceType, [] );
+        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType.ToFullRef<INamedType>(), interfaceType.ToFullRef(), [] );
 
-        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
-            [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface],
-            null,
-            null );
+        var finalCompilation = initialCompilation.WithTransformations(
+            [baseType.CreateTransformation(), derivedType.CreateTransformation(), implementInterface] );
 
         var baseClass = finalCompilation.Types.OfName( "Target" ).Single().Types.OfName( "B" ).Single();
 
@@ -207,5 +264,57 @@ class C
         var implementingClass = Assert.Single( finalCompilation.GetDerivedTypes( implementedInterface ) );
 
         Assert.Same( derivedClass, implementingClass );
+    }
+
+    [Fact]
+    public void IntroducedTypeAsTypeArgument()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+using System;
+
+class B<TB>
+{
+   public virtual TB BaseMethod() => default;
+   public virtual TB BaseMethod2() => default; 
+}
+
+class C<TC> : B<TC>
+{    
+    TC field;
+    TC Property { get; set; }
+    TC Method( TC p1, TC[] p2, Action<TC> p3 ) => p1;
+    event Action<TC> Event;
+   public override TC BaseMethod() => base.BaseMethod();
+}";
+
+        var immutableCompilation1 = testContext.CreateCompilationModel( code );
+
+        // Add a type.
+        var typeBuilder = new NamedTypeBuilder( null!, immutableCompilation1.GlobalNamespace, "Introduced" );
+        typeBuilder.Freeze();
+
+        var finalCompilation = immutableCompilation1.WithTransformations( [typeBuilder.CreateTransformation()] );
+
+        var genericClass = finalCompilation.Types.OfName( "C" ).Single();
+        var introducedClass = typeBuilder.ForCompilation<INamedType>( finalCompilation );
+
+        var genericClassInstance = genericClass.WithTypeArguments( introducedClass );
+
+        Assert.Equal( "C<Introduced>", genericClassInstance.ToString() );
+        Assert.Equal( "B<Introduced>", genericClassInstance.BaseType!.ToString() );
+        Assert.Equal( introducedClass, genericClassInstance.Fields.OfName( "field" ).Single().Type );
+        Assert.Equal( introducedClass, genericClassInstance.Properties.Single().Type );
+        var method = genericClassInstance.Methods.OfName( "Method" ).Single();
+        Assert.Equal( introducedClass, method.ReturnType );
+        Assert.Equal( introducedClass, method.Parameters[0].Type );
+        Assert.Equal( "Introduced[]", method.Parameters[1].Type.ToString() );
+        Assert.Equal( "Action<Introduced>", method.Parameters[2].Type.ToString() );
+
+        Assert.Contains( "B<Introduced>.BaseMethod2()", genericClassInstance.AllMethods.SelectAsArray( m => m.ToString() ) );
+
+        var overridingMethod = genericClassInstance.Methods.OfName( "BaseMethod" ).Single();
+        Assert.Equal( "B<Introduced>.BaseMethod()", overridingMethod.OverriddenMethod.ToString() );
     }
 }

@@ -61,5 +61,13 @@ namespace Metalama.Framework.Code
         IMemberOrNamedType Definition { get; }
 
         new IRef<IMemberOrNamedType> ToRef();
+
+        /// <summary>
+        /// Gets a value indicating whether the type or member is marked as <c>partial</c> in source code. 
+        /// </summary>
+        /// <remarks>
+        /// To check whether a partial member has an implementation, check the <see cref="IMember.HasImplementation"/> property.
+        /// </remarks>
+        bool IsPartial { get; }
     }
 }

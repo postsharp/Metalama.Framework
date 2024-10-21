@@ -36,6 +36,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeActionExecutionService _codeActionExecutionService;
         private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetSharedServiceProvider() ) { }
 
@@ -46,6 +47,7 @@ namespace Metalama.Framework.DesignTime
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
             this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
         }
 
         public sealed override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
@@ -94,7 +96,7 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                if (!syntaxRoot.Span.Contains(context.Span))
+                if ( !syntaxRoot.Span.Contains( context.Span ) )
                 {
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): requested span out-of-bounds." );
 
@@ -167,7 +169,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
             }
         }
     }

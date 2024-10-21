@@ -19,5 +19,10 @@ namespace Metalama.Framework.Code
         /// by the main project of the compilation).
         /// </summary>
         ICompilation Compilation { get; }
+
+        /// <summary>
+        /// Gets the kind of declaration.
+        /// </summary>
+        DeclarationKind DeclarationKind { get; }
     }
 }

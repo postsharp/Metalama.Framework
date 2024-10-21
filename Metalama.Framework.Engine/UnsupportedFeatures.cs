@@ -14,5 +14,8 @@ namespace Metalama.Framework.Engine
         public const string DesignTimeIntroducedTypeConstructorParameters = "Design time support for introducing constructor parameters of introduced type.";
         public const string IntroducedTypeStateMachines = "Introduced type state machines.";
         public const string Uncategorized = "Uncategorized";
+
+        public const string IntroducedFunctionPointerComparison = "Comparison of function pointers in introduced members";
+        public const string FunctionPointerMapping = "Generic mapping of function pointers";
     }
 }

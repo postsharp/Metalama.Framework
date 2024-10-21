@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using System.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;

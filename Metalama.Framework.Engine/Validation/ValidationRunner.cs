@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -91,7 +92,11 @@ internal sealed class ValidationRunner
     {
         var validators = await this.GetValidatorsAsync( ValidatorKind.Definition, compilation, version, diagnosticAdder, cancellationToken );
 
-        var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
+        var userCodeExecutionContext = new UserCodeExecutionContext(
+            this._serviceProvider,
+            default,
+            compilation,
+            diagnostics: diagnosticAdder );
 
         using ( UserCodeExecutionContext.WithContext( userCodeExecutionContext ) )
         {
@@ -138,7 +143,11 @@ internal sealed class ValidationRunner
     {
         var validators = await this.GetValidatorsAsync( ValidatorKind.Definition, compilation, version, diagnosticAdder, cancellationToken );
 
-        var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
+        var userCodeExecutionContext = new UserCodeExecutionContext(
+            this._serviceProvider,
+            default,
+            compilation,
+            diagnostics: diagnosticAdder );
 
         await this._concurrentTaskRunner.RunConcurrentlyAsync( validators, RunValidator, cancellationToken );
 

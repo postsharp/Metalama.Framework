@@ -1,11 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
 using System;
@@ -20,10 +22,13 @@ public sealed partial class HierarchicalOptionsManager
 {
     private sealed class OptionTypeNode
     {
+        // Options are also evaluated after the linker, so we must use portable references
+        private readonly ConcurrentDictionary<IRef<IDeclaration>, DeclarationNode> _optionsByDeclaration =
+            new( RefEqualityComparer<IDeclaration>.Structural );
+
         private readonly IHierarchicalOptions _defaultOptions;
         private readonly IHierarchicalOptions _emptyOptions;
         private readonly HierarchicalOptionsManager _parent;
-        private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
         private readonly Type _type;
         private readonly string _typeName;
@@ -35,7 +40,8 @@ public sealed partial class HierarchicalOptionsManager
             Type type,
             IUserDiagnosticSink diagnosticAdder,
             IHierarchicalOptions defaultOptions,
-            IHierarchicalOptions emptyOptions )
+            IHierarchicalOptions emptyOptions,
+            CompilationContext compilationContext )
         {
             this._parent = parent;
             this._type = type;
@@ -43,13 +49,13 @@ public sealed partial class HierarchicalOptionsManager
             this._emptyOptions = emptyOptions;
             this._typeName = type.FullName.AssertNotNull();
             var invoker = parent._serviceProvider.GetRequiredService<UserCodeInvoker>();
-            var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
+            var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ), compilationContext );
 
             var prototype =
                 invoker.Invoke( () => (IHierarchicalOptions) Activator.CreateInstance( type ).AssertNotNull(), context );
 
             this._eligibilityHelper = new EligibilityHelper( prototype, parent._serviceProvider, type );
-            this._eligibilityHelper.PopulateRules( diagnosticAdder );
+            this._eligibilityHelper.PopulateRules( diagnosticAdder, compilationContext );
             this.Metadata = type.GetCustomAttributes<HierarchicalOptionsAttribute>().SingleOrDefault() ?? HierarchicalOptionsAttribute.Default;
         }
 
@@ -243,7 +249,7 @@ public sealed partial class HierarchicalOptionsManager
         private DeclarationNode GetOrAddDeclarationNode( IDeclaration declaration )
         {
             return this._optionsByDeclaration.GetOrAdd(
-                declaration.ToValueTypedRef(),
+                declaration.ToRef(),
                 static ( _, ctx ) =>
                 {
                     var node = new DeclarationNode();
@@ -291,7 +297,7 @@ public sealed partial class HierarchicalOptionsManager
             bool createNodeIfEmpty = false )
         {
             // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToValueTypedRef(), out var node ) )
+            if ( !this._optionsByDeclaration.TryGetValue( declaration.ToRef(), out var node ) )
             {
                 if ( !declaration.BelongsToCurrentProject
                      && this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out _ ) == true )
@@ -326,7 +332,7 @@ public sealed partial class HierarchicalOptionsManager
             // options may be project-dependency.
             var compilationOptions = this._defaultOptions;
 
-            if ( this._optionsByDeclaration.TryGetValue( compilation.ToValueTypedRef<IDeclaration>(), out var compilationNode )
+            if ( this._optionsByDeclaration.TryGetValue( compilation.ToRef(), out var compilationNode )
                  && compilationNode.DirectOptions != null )
             {
                 compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation )

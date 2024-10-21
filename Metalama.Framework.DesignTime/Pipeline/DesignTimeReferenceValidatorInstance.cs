@@ -3,11 +3,13 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
@@ -37,10 +39,11 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
         ValidatorDriver driver,
         ValidatorImplementation implementation,
         string description,
-        ReferenceGranularity granularity )
+        ReferenceGranularity granularity,
+        CompilationContext compilationContext )
     {
         this.ValidatedDeclaration = SymbolDictionaryKey.CreatePersistentKey( validatedDeclaration );
-        this.ValidatedDeclarationKind = validatedDeclaration.GetDeclarationKind();
+        this.ValidatedDeclarationKind = validatedDeclaration.GetDeclarationKind( compilationContext );
         this.ReferenceKinds = referenceReferenceKinds;
         this.IncludeDerivedTypes = includeDerivedTypes;
         this._driver = driver;
@@ -50,7 +53,7 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
 
         this.ValidatedIdentifier = validatedDeclaration switch
         {
-            IMethodSymbol method when method.MethodKind == Microsoft.CodeAnalysis.MethodKind.Constructor => method.ContainingType.Name,
+            IMethodSymbol { MethodKind: MethodKind.Constructor } method => method.ContainingType.Name,
             _ => validatedDeclaration.Name
         };
     }

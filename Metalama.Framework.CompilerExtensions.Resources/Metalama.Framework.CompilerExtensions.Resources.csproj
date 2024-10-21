@@ -9,16 +9,17 @@
 
         <!-- Disable warning: conflicting versions -->
         <NoWarn>$(NoWarn);MSB3277</NoWarn>
-        <!-- Referenced package has a known vulnerability; somehow, this warning is causing an exception in the ResolvePackageDependencies task, see https://github.com/dotnet/sdk/issues/16666. -->
-        <NoWarn>$(NoWarn);NU1903</NoWarn>
+
+        <!-- Disable vulnerability warnings causing weird error (see https://github.com/dotnet/sdk/issues/16666) -->
+        <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
         <ResolveAssemblyReferencesSilent>True</ResolveAssemblyReferencesSilent>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Metalama.Framework.DesignTime.4.0.1/Metalama.Framework.DesignTime.4.0.1.csproj" />
-        <ProjectReference Include="../Metalama.Framework.DesignTime.VisualStudio.4.0.1/Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj"  />
         <ProjectReference Include="../Metalama.Framework.DesignTime.4.4.0/Metalama.Framework.DesignTime.4.4.0.csproj" />
         <ProjectReference Include="../Metalama.Framework.DesignTime.VisualStudio.4.4.0/Metalama.Framework.DesignTime.VisualStudio.4.4.0.csproj"  />
+        <ProjectReference Include="../Metalama.Framework.DesignTime.4.8.0/Metalama.Framework.DesignTime.4.8.0.csproj" />
+        <ProjectReference Include="../Metalama.Framework.DesignTime.VisualStudio.4.8.0/Metalama.Framework.DesignTime.VisualStudio.4.8.0.csproj"  />
         <ProjectReference Include="../Metalama.Framework.DesignTime/Metalama.Framework.DesignTime.csproj" />
         <ProjectReference Include="../Metalama.Framework.DesignTime.VisualStudio/Metalama.Framework.DesignTime.VisualStudio.csproj" />
     </ItemGroup>

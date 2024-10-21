@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
 #pragma warning disable VSTHRD200
 
-public sealed class DiagnosticSuppressorTests : UnitTestClass
+public sealed class DiagnosticSuppressorTests : FrameworkBaseTestClass
 {
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
@@ -55,7 +54,7 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
-                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            namespace Metalama.Framework.Tests.AspectTests.Aspects.Suppressions.Methods
                             {
                                 public class SuppressWarningAttribute : MethodAspect
                                 {
@@ -100,7 +99,7 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
-                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            namespace Metalama.Framework.Tests.AspectTests.Aspects.Suppressions.Methods
                             {
                                 public class SuppressWarningAttribute : FieldAspect
                                 {

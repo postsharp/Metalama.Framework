@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
 
-public sealed class PipelineCancellationTests : UnitTestClass
+public sealed class PipelineCancellationTests : FrameworkBaseTestClass
 {
     private const int _maxCancellationPoints = 24;
     private const int _getConfigurationMaxCancellationPoints = 2;

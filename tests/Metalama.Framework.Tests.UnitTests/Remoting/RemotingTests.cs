@@ -10,7 +10,6 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
 #pragma warning disable VSTHRD200, VSTHRD103
 
-public sealed class RemotingTests : UnitTestClass
+public sealed class RemotingTests : FrameworkBaseTestClass
 {
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 

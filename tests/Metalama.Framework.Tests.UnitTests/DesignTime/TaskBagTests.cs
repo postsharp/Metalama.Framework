@@ -9,12 +9,13 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public sealed class TaskBagTests
+public sealed class TaskBagTests : FrameworkBaseTestClass
 {
     [Fact]
     public async Task NonYielding()
     {
-        var bag = new TaskBag( NullLogger.Instance );
+        using var testContext = this.CreateTestContext();
+        var bag = new TaskBag( NullLogger.Instance, testContext.ServiceProvider.Global );
 
         for ( var i = 0; i < 1000; i++ )
         {
@@ -30,7 +31,8 @@ public sealed class TaskBagTests
     [Fact]
     public async Task Yielding()
     {
-        var bag = new TaskBag( NullLogger.Instance );
+        using var testContext = this.CreateTestContext();
+        var bag = new TaskBag( NullLogger.Instance, testContext.ServiceProvider.Global );
 
         for ( var i = 0; i < 1000; i++ )
         {

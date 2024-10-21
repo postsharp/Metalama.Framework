@@ -2,13 +2,10 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
@@ -22,37 +19,56 @@ internal sealed class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IF
         IObjectReader templateArguments )
         : base( parameters, template, direction, tags, templateArguments ) { }
 
-    protected override AddContractAdviceResult<IFieldOrPropertyOrIndexer> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddContractAdviceResult<IFieldOrPropertyOrIndexer> Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var serviceProvider = context.ServiceProvider;
+        var contextCopy = context;
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         switch ( targetDeclaration )
         {
-            case IField field:
-                var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
-                addTransformation( promotedField.ToTransformation() );
-                OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
-
-                addTransformation(
-                    new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
-
-                return CreateSuccessResult( promotedField );
-
             case IProperty property:
-                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                return AddContractToProperty( property );
 
-                return CreateSuccessResult( property );
+            case IField { OverridingProperty: { } overridingProperty }:
+                return AddContractToProperty( overridingProperty );
+
+            case IField field:
+                var transformation = PromoteFieldTransformation.Create( serviceProvider, field, this.AspectLayerInstance );
+                context.AddTransformation( transformation );
+                OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this.AspectLayerInstance, context.AddTransformation );
+
+                return AddContractToProperty( transformation.OverridingProperty );
 
             case IIndexer indexer:
-                addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                context.AddTransformation(
+                    new ContractIndexerTransformation(
+                        this.AspectLayerInstance,
+                        indexer.ToFullRef(),
+                        null,
+                        this.Direction,
+                        this.Template,
+                        this.TemplateArguments,
+                        this.TemplateProvider ) );
 
                 return CreateSuccessResult( indexer );
 
             default:
                 throw new AssertionFailedException();
+        }
+
+        AddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContractToProperty( IProperty property )
+        {
+            contextCopy.AddTransformation(
+                new ContractPropertyTransformation(
+                    this.AspectLayerInstance,
+                    property.ToFullRef(),
+                    this.Direction,
+                    this.Template,
+                    this.TemplateArguments,
+                    this.TemplateProvider ) );
+
+            return CreateSuccessResult( property );
         }
     }
 }

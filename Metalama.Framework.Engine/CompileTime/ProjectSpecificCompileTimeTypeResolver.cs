@@ -2,22 +2,22 @@
 
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver, IProjectService
+internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeResolver
 {
-    private readonly SystemTypeResolver _systemTypeResolver;
+    private readonly CompileTimeTypeResolver _systemTypeResolver;
     private readonly CompileTimeProjectRepository _projectRepository;
 
-    public ProjectSpecificCompileTimeTypeResolver( in ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    private ProjectSpecificCompileTimeTypeResolver( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) :
+        base( compilationContext )
     {
         this._projectRepository = serviceProvider.GetRequiredService<CompileTimeProjectRepository>();
-        this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
+        this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver.Provider>().Get( compilationContext );
     }
 
     /// <summary>
@@ -52,5 +52,13 @@ internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeRe
         var reflectionName = typeSymbol.GetReflectionFullName();
 
         return compileTimeProject?.GetTypeOrNull( reflectionName );
+    }
+
+    public sealed class Provider : CompilationServiceProvider<ProjectSpecificCompileTimeTypeResolver>
+    {
+        public Provider( in ProjectServiceProvider serviceProvider ) : base( in serviceProvider ) { }
+
+        protected override ProjectSpecificCompileTimeTypeResolver Create( CompilationContext compilationContext )
+            => new( this.ServiceProvider, compilationContext );
     }
 }

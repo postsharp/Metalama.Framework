@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -111,12 +111,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             if ( this._referencedProjects.TryGetValue( baseType.ContainingAssembly.Identity, out var referencedProject ) )
             {
                 var baseTypeReflectionType = referencedProject.GetType( baseType.GetFullName().AssertNotNull() );
-                var translatedBaseType = (INamedTypeSymbol?) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType );
 
-                if ( translatedBaseType == null )
-                {
-                    throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
-                }
+                var translatedBaseType = (INamedTypeSymbol?) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseTypeReflectionType )
+                                         ??
+                                         throw new AssertionFailedException( $"Could not translate {baseType} into the compile-time assembly." );
 
                 // The base type is outside of current assembly, check that it has the deserializing constructor.
                 // We need visibility for a type we are currently building in compile-time compilation. Testing for public or protected is a good approximation.
@@ -706,16 +704,15 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                             IdentifierName( nameof(IArgumentsWriter.SetValue) ) ),
                         ArgumentList(
                             SeparatedList(
-                                new[]
-                                {
-                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
-                                    Argument(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            objectExpression,
-                                            IdentifierName( member.Name ) ) ),
-                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
-                                } ) ) ) ) );
+                            [
+                                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
+                                Argument(
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        objectExpression,
+                                        IdentifierName( member.Name ) ) ),
+                                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
+                            ] ) ) ) ) );
         }
 
         return Block( statements );
@@ -757,11 +754,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                                     TypeArgumentList( SingletonSeparatedList( this._context.SyntaxGenerator.Type( memberType ) ) ) ) ),
                             ArgumentList(
                                 SeparatedList(
-                                    new[]
-                                    {
-                                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
-                                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
-                                    } ) ) ) ) ) );
+                                [
+                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( member.Name ) ) ),
+                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( serializedType.Type.Name ) ) )
+                                ] ) ) ) ) ) );
         }
 
         foreach ( var member in defaultLocationSelector( serializedType ) )

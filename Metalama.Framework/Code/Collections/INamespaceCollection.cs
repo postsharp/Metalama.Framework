@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Validation;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Code.Collections
 {
@@ -12,11 +11,8 @@ namespace Metalama.Framework.Code.Collections
     ///  <para>The order of items in this list is undetermined and may change between versions.</para>
     /// </remarks>
     [InternalImplement]
-    public interface INamespaceCollection : IReadOnlyCollection<INamespace>
+    public interface INamespaceCollection : INamedDeclarationCollection<INamespace>
     {
-        /// <summary>
-        /// Gets a child <see cref="INamespace"/> by name (not by <see cref="INamespaceOrNamedType.FullName"/>).
-        /// </summary>
-        INamespace? OfName( string name );
+        new INamespace? OfName( string name );
     }
 }

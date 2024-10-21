@@ -3,9 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime.Serialization;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Services;
 using Metalama.Testing.UnitTesting;
@@ -34,6 +32,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         protected override TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
             => new SerializationTestContext( contextOptions, services );
 
+        [MustDisposeResource]
         protected new SerializationTestContext CreateTestContext() => (SerializationTestContext) base.CreateTestContext();
 
         [MustDisposeResource]

@@ -28,12 +28,9 @@ namespace Metalama.Testing.AspectTesting
             else if ( this.Name != null )
             {
                 var assembly = AppDomainUtility.GetLoadedAssemblies( x => string.Equals( x.GetName().Name, this.Name, StringComparison.OrdinalIgnoreCase ) )
-                    .FirstOrDefault();
-
-                if ( assembly == null )
-                {
-                    assembly = Assembly.Load( this.Name );
-                }
+                                   .FirstOrDefault()
+                               ??
+                               Assembly.Load( this.Name );
 
                 return MetadataReference.CreateFromFile( assembly.Location );
             }

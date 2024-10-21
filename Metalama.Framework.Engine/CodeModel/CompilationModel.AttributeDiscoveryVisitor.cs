@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -18,14 +18,14 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         private sealed class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
-            private readonly ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef>.Builder _builder =
-                ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef>.CreateBuilder();
+            private readonly CompilationModel _compilation;
 
-            private readonly CompilationContext _compilationContext;
+            private readonly ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.Builder _builder =
+                ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.CreateBuilder( RefEqualityComparer<INamedType>.Default );
 
-            public AttributeDiscoveryVisitor( CompilationContext compilationContext )
+            public AttributeDiscoveryVisitor( CompilationModel compilation )
             {
-                this._compilationContext = compilationContext;
+                this._compilation = compilation;
             }
 
             public override void VisitAttribute( AttributeSyntax node )
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // We always need to resolve the constructor from the semantic model because the attribute name from
                 // the syntax may not correspond to the class name because of `using xx = yy` directives.
 
-                var semanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+                var semanticModel = this._compilation.CompilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
                 var attributeConstructor = semanticModel.GetSymbolInfo( node ).Symbol;
 
                 if ( attributeConstructor == null )
@@ -41,14 +41,14 @@ namespace Metalama.Framework.Engine.CodeModel
                     return;
                 }
 
-                var attributeType = Ref.FromSymbol<INamedType>( attributeConstructor.ContainingType, this._compilationContext );
+                var attributeType = this._compilation.RefFactory.FromSymbol<INamedType>( attributeConstructor.ContainingType );
 
                 // A local method that adds the attribute.
-                void IndexAttribute( SyntaxNode? parentDeclaration, DeclarationRefTargetKind kind )
+                void IndexAttribute( SyntaxNode parentDeclaration, RefTargetKind kind )
                 {
-                    void Add( SyntaxNode? realDeclaration )
+                    void Add( SyntaxNode realDeclaration )
                     {
-                        this._builder.Add( attributeType, new AttributeRef( attributeType, node, realDeclaration, kind, this._compilationContext ) );
+                        this._builder.Add( attributeType, new SyntaxAttributeRef( attributeType, node, realDeclaration, this._compilation.RefFactory, kind ) );
                     }
 
                     switch ( parentDeclaration )
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // Get the parent declaration. 
                 var attributeList = (AttributeListSyntax) node.Parent.AssertNotNull();
 
-                var declaration = attributeList.Parent;
+                var declaration = attributeList.Parent.AssertNotNull();
 
                 if ( attributeList.Target != null )
                 {
@@ -88,31 +88,27 @@ namespace Metalama.Framework.Engine.CodeModel
                     switch ( targetKind )
                     {
                         case SyntaxKind.ModuleKeyword:
-                            this._builder.Add(
-                                attributeType,
-                                new AttributeRef( attributeType, node, this._compilationContext.Compilation.SourceModule, this._compilationContext ) );
+                            IndexAttribute( declaration, RefTargetKind.Module );
 
                             break;
 
                         case SyntaxKind.AssemblyKeyword:
-                            this._builder.Add(
-                                attributeType,
-                                new AttributeRef( attributeType, node, this._compilationContext.Compilation.Assembly, this._compilationContext ) );
+                            IndexAttribute( declaration, RefTargetKind.Assembly );
 
                             break;
 
                         case SyntaxKind.FieldKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Field );
+                            IndexAttribute( declaration, RefTargetKind.Field );
 
                             break;
 
                         case SyntaxKind.ReturnKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Return );
+                            IndexAttribute( declaration, RefTargetKind.Return );
 
                             break;
 
                         case SyntaxKind.ParamKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Parameter );
+                            IndexAttribute( declaration, RefTargetKind.Parameter );
 
                             break;
 
@@ -121,26 +117,26 @@ namespace Metalama.Framework.Engine.CodeModel
                             {
                                 foreach ( var accessor in property.AccessorList.Accessors )
                                 {
-                                    IndexAttribute( accessor, DeclarationRefTargetKind.Default );
+                                    IndexAttribute( accessor, RefTargetKind.Default );
                                 }
                             }
 
                             break;
 
                         case SyntaxKind.PropertyKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Property );
+                            IndexAttribute( declaration, RefTargetKind.Property );
 
                             break;
 
                         case SyntaxKind.EventKeyword:
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Event );
+                            IndexAttribute( declaration, RefTargetKind.Event );
 
                             break;
 
                         case SyntaxKind.TypeKeyword:
                         case SyntaxKind.TypeVarKeyword:
                             // Using Default because we don't support types and generic parameter references at the moment.
-                            IndexAttribute( declaration, DeclarationRefTargetKind.Default );
+                            IndexAttribute( declaration, RefTargetKind.Default );
 
                             break;
 
@@ -150,13 +146,13 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
                 else
                 {
-                    IndexAttribute( declaration, DeclarationRefTargetKind.Default );
+                    IndexAttribute( declaration, RefTargetKind.Default );
                 }
 
                 base.VisitAttribute( node );
             }
 
-            public ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
+            public ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
 
             public void Visit( SyntaxTree tree )
             {

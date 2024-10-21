@@ -4,13 +4,13 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -54,7 +54,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
         public ProjectVersion? ProjectVersion { get; }
 
-        public AspectPipelineResult PipelineResult { get; }
+        public DesignTimeAspectPipelineResult PipelineResult { get; }
 
         private long SnapshotId { get; }
 
@@ -62,7 +62,7 @@ internal sealed partial class DesignTimeAspectPipeline
         {
             this._pipeline = pipeline;
             this._dependencies = DependencyGraph.Empty;
-            this.PipelineResult = new AspectPipelineResult();
+            this.PipelineResult = new DesignTimeAspectPipelineResult();
             this.CompileTimeSyntaxTrees = null;
             this.Configuration = null;
             this.Status = DesignTimeAspectPipelineStatus.Default;
@@ -96,7 +96,7 @@ internal sealed partial class DesignTimeAspectPipeline
             ImmutableDictionary<string, bool> compileTimeSyntaxTrees,
             DesignTimeAspectPipelineStatus status,
             ProjectVersion projectVersion,
-            AspectPipelineResult pipelineResult,
+            DesignTimeAspectPipelineResult pipelineResult,
             DependencyGraph dependencies,
             FallibleResultWithDiagnostics<AspectPipelineConfiguration>? configuration )
             : this( prototype )
@@ -124,7 +124,7 @@ internal sealed partial class DesignTimeAspectPipeline
         private PipelineState(
             PipelineState prototype,
             ProjectVersion projectVersion,
-            AspectPipelineResult pipelineResult,
+            DesignTimeAspectPipelineResult pipelineResult,
             DependencyGraph dependencies ) : this( prototype )
         {
             this.PipelineResult = pipelineResult;
@@ -201,7 +201,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
             ImmutableDictionary<string, bool> newCompileTimeSyntaxTrees;
             DependencyGraph newDependencyGraph;
-            AspectPipelineResult newAspectPipelineResult;
+            DesignTimeAspectPipelineResult newAspectPipelineResult;
 
             if ( newChanges.HasCompileTimeCodeChange )
             {
@@ -277,7 +277,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 if ( invalidateCompilationResult )
                 {
                     newDependencyGraph = DependencyGraph.Empty;
-                    newAspectPipelineResult = new AspectPipelineResult();
+                    newAspectPipelineResult = new DesignTimeAspectPipelineResult();
                 }
                 else
                 {
@@ -404,7 +404,7 @@ internal sealed partial class DesignTimeAspectPipeline
                 state._pipeline._eventHub?.PublishCompileTimeErrors(
                     state._pipeline.ProjectKey,
                     diagnosticAdder
-                        .Where( d => d.Severity == DiagnosticSeverity.Error && !d.IsSuppressed )
+                        .Where( d => d is { Severity: DiagnosticSeverity.Error, IsSuppressed: false } )
                         .Select( d => new DiagnosticData( d ) )
                         .ToReadOnlyList() );
 
@@ -465,11 +465,12 @@ internal sealed partial class DesignTimeAspectPipeline
         /// <summary>
         /// Executes the pipeline.
         /// </summary>
-        public static async Task<( FallibleResultWithDiagnostics<AspectPipelineResultAndState> CompilationResult, PipelineState NewState)> ExecuteAsync(
-            PipelineState state,
-            PartialCompilation compilation,
-            DesignTimeProjectVersion projectVersion,
-            TestableCancellationToken cancellationToken )
+        public static async Task<( FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState> CompilationResult, PipelineState NewState)>
+            ExecuteAsync(
+                PipelineState state,
+                PartialCompilation compilation,
+                DesignTimeProjectVersion projectVersion,
+                TestableCancellationToken cancellationToken )
         {
             if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
             {
@@ -495,7 +496,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 state = new PipelineState( state, getConfigurationResult, DesignTimeAspectPipelineStatus.Default );
 
-                return (FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( getConfigurationResult.Diagnostics ), state);
+                return (FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>.Failed( getConfigurationResult.Diagnostics ), state);
             }
 
             DiagnosticBag diagnosticBag = new();
@@ -552,7 +553,11 @@ internal sealed partial class DesignTimeAspectPipeline
 
             var transformations = pipelineResultValue?.Transformations ?? ImmutableArray<ITransformationBase>.Empty;
 
-            var annotations = pipelineResultValue?.Annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            var annotations = pipelineResultValue?.Annotations
+                              ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty.WithKeyComparer(
+                                  RefEqualityComparer<IDeclaration>.Default );
+
+            Invariant.Assert( annotations.KeyComparer is IRefEqualityComparer );
 
             var result = new DesignTimePipelineExecutionResult(
                 compilation.SyntaxTrees,
@@ -588,7 +593,7 @@ internal sealed partial class DesignTimeAspectPipeline
             // in case of cancellation. From our point of view, this is a safe place to commit.
             state = state.SetPipelineResult( compilation, result, newDependencies, projectVersion, getConfigurationResult.Value );
 
-            return (new AspectPipelineResultAndState(
+            return (new DesignTimeAspectPipelineResultAndState(
                         state.ProjectVersion.AssertNotNull(),
                         state.PipelineResult,
                         state.Status,

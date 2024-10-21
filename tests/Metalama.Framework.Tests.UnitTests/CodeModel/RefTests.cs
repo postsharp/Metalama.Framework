@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Xunit;
@@ -16,7 +18,7 @@ public sealed class RefTests : UnitTestClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( "/* nothing */" );
 
-        var compilationRef = compilation.ToValueTypedRef();
+        var compilationRef = compilation.ToRef();
         var resolved = compilationRef.GetTarget( compilation );
 
         Assert.Same( compilation, resolved );

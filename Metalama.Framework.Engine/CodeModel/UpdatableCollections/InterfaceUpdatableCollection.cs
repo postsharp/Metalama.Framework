@@ -1,22 +1,20 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollection<INamedType>
+internal sealed class InterfaceUpdatableCollection : DeclarationUpdatableCollection<INamedType>
 {
-    private readonly Ref<INamedType> _declaringType;
+    private readonly IRef<INamedType> _declaringType;
 
     public ImmutableArray<IntroduceInterfaceTransformation> Introductions { get; private set; } = ImmutableArray<IntroduceInterfaceTransformation>.Empty;
 
-    public InterfaceUpdatableCollection( CompilationModel compilation, in Ref<INamedType> declaringType ) : base( compilation )
+    public InterfaceUpdatableCollection( CompilationModel compilation, IRef<INamedType> declaringType ) : base( compilation )
     {
         this._declaringType = declaringType;
     }
@@ -24,38 +22,13 @@ internal sealed class InterfaceUpdatableCollection : UpdatableDeclarationCollect
     public void Add( IntroduceInterfaceTransformation introduction )
     {
         this.EnsureComplete();
-        this.AddItem( introduction.InterfaceType.ToValueTypedRef() );
+        this.AddItem( introduction.InterfaceType );
 
         this.Introductions = this.Introductions.Add( introduction );
     }
 
-    protected override void PopulateAllItems( Action<Ref<INamedType>> action )
+    protected override void PopulateAllItems( Action<IFullRef<INamedType>> action )
     {
-        switch ( this._declaringType.Target )
-        {
-            case INamedTypeSymbol namedTypeSymbol:
-                foreach ( var i in namedTypeSymbol.Interfaces )
-                {
-                    if ( !SymbolValidator.Instance.Visit( i ) )
-                    {
-                        continue;
-                    }
-
-                    action( new Ref<INamedType>( i, this.Compilation.CompilationContext ) );
-                }
-
-                break;
-
-            case INamedTypeBuilder builder:
-                foreach ( var i in builder.ImplementedInterfaces )
-                {
-                    action( i.ToValueTypedRef() );
-                }
-
-                break;
-
-            default:
-                throw new AssertionFailedException( $"Unexpected type: '{this._declaringType.Target?.GetType()}'." );
-        }
+        this._declaringType.AsFullRef().EnumerateImplementedInterfaces( this.Compilation, action );
     }
 }

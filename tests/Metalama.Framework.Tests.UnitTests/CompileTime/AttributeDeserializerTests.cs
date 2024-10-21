@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -30,7 +29,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         protected override void ConfigureServices( IAdditionalServiceCollection services )
         {
             base.ConfigureServices( services );
-            services.AddProjectService<SystemTypeResolver>( sp => new HackedSystemTypeResolver( sp ) );
+
+            // services.AddProjectService<CompilationServiceProvider<CompileTimeTypeResolver>>( sp => new ProjectSpecificCompileTimeTypeResolver.Provider( sp ) );
+            services.AddProjectService<SystemTypeResolver.Provider>( sp => new HackedSystemTypeResolver.Provider( sp ) );
         }
 
         private object? GetDeserializedProperty(
@@ -62,7 +63,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var attribute = compilation.Attributes.Single();
             ThrowingDiagnosticAdder diagnosticBag = new();
 
-            if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
+            if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
                     .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
                 throw new AssertionFailedException();
@@ -107,7 +108,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var attribute = compilation.Attributes.Single();
             DiagnosticBag diagnosticBag = new();
 
-            if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
+            if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
                     .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
                 throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
@@ -297,7 +298,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var diagnosticBag = new DiagnosticBag();
 
-                if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
+                if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
                         .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
                     throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
@@ -333,7 +334,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var diagnosticBag = new DiagnosticBag();
 
-                if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
+                if ( !compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
                         .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
                     throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
@@ -380,7 +381,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
-                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider ).TryCreateAttribute( attribute, diagnosticBag, out _ ) );
+                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
+                    .TryCreateAttribute( attribute, diagnosticBag, out _ ) );
 
             Assert.Empty( diagnosticBag );
         }
@@ -416,7 +418,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             DiagnosticBag diagnosticBag = new();
 
             Assert.False(
-                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
+                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
                     .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
 
             Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCode.Id );
@@ -442,7 +444,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             DiagnosticBag diagnosticBag = new();
 
             Assert.False(
-                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider )
+                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
                     .TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
 
             Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCode.Id );
@@ -467,12 +469,12 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             DiagnosticBag diagnosticBag = new();
 
             Assert.False(
-                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider ).TryCreateAttribute( attribute, diagnosticBag, out _ ) );
+                compileTimeProjectRepository.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
+                    .TryCreateAttribute( attribute, diagnosticBag, out _ ) );
 
             Assert.Contains( diagnosticBag, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
         }
 
-#if ROSLYN_4_4_0_OR_GREATER
         [Fact]
         public void GenericAttribute()
         {
@@ -511,7 +513,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var attribute = compilation.Attributes.Single();
             Assert.Equal( "x", attribute.NamedArguments["Property"].Value );
         }
-#endif
 
         // ReSharper disable UnusedParameter.Local
 #pragma warning disable SA1401
@@ -633,10 +634,22 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             // We provide a non-standard CompileTimeTypeFactory to break a conflict in the initialization of dependencies.
             // Another CompileTimeTypeFactory instance is created by the ServiceProviderFactory. It should not matter for this test.
 
-            public HackedSystemTypeResolver( in ProjectServiceProvider serviceProvider ) : base( serviceProvider.WithService( new CompileTimeTypeFactory() ) ) { }
+            private HackedSystemTypeResolver( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base(
+                serviceProvider,
+                compilationContext ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;
+
+            public new sealed class Provider : SystemTypeResolver.Provider
+            {
+                public Provider( in ProjectServiceProvider serviceProvider ) : base( in serviceProvider ) { }
+
+                protected override SystemTypeResolver Create( CompilationContext compilationContext )
+                {
+                    return new HackedSystemTypeResolver( this.ServiceProvider, compilationContext );
+                }
+            }
         }
     }
 }

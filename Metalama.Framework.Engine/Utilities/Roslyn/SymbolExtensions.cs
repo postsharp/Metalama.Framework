@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
@@ -16,6 +17,7 @@ using System.Runtime.Versioning;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -152,11 +154,16 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => false
             };
 
-        internal static bool HasModifier( this ISymbol symbol, SyntaxKind kind )
+        internal static bool? HasModifier( this ISymbol symbol, SyntaxKind kind )
         {
             if ( symbol.DeclaringSyntaxReferences.IsEmpty )
             {
-                throw new ArgumentOutOfRangeException();
+                if ( symbol is IMethodSymbol { MethodKind: MethodKind.Constructor, IsImplicitlyDeclared: true } && kind == SyntaxKind.UnsafeKeyword )
+                {
+                    return false;
+                }
+
+                return null;
             }
 
             return symbol.DeclaringSyntaxReferences.Any(
@@ -212,7 +219,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         internal static bool IsPrimaryConstructor( this IMethodSymbol constructorSymbol )
         {
-            var declarationSyntax = constructorSymbol.GetPrimaryDeclaration();
+            var declarationSyntax = constructorSymbol.GetPrimaryDeclarationSyntax();
 
 #if ROSLYN_4_8_0_OR_GREATER
             return
@@ -304,6 +311,23 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
 #endif
             return symbol;
+        }
+
+        public static bool TryGetNamedArgument( this AttributeData attribute, string name, out TypedConstant value )
+        {
+            foreach ( var argument in attribute.NamedArguments )
+            {
+                if ( argument.Key == name )
+                {
+                    value = argument.Value;
+
+                    return true;
+                }
+            }
+
+            value = default;
+
+            return false;
         }
     }
 }

@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
@@ -34,7 +35,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public sealed class DesignTimePipelineTests : UnitTestClass
+public sealed class DesignTimePipelineTests : FrameworkBaseTestClass
 {
     public DesignTimePipelineTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -122,7 +123,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
         }
     }
 
-    private static string DumpResults( AspectPipelineResultAndState results )
+    private static string DumpResults( DesignTimeAspectPipelineResultAndState results )
     {
         StringBuilder stringBuilder = new();
 
@@ -1806,7 +1807,7 @@ class D{version}
 
         var targetPipeline1 = CreatePipeline( testContext.ProjectOptions );
 
-        var targetPipeline2 = CreatePipeline( new TestProjectOptions( testContext.ProjectOptions, Engine.Formatting.CodeFormattingOptions.None ) );
+        CreatePipeline( new TestProjectOptions( testContext.ProjectOptions, CodeFormattingOptions.None ) );
 
         GC.Collect();
 
@@ -1816,7 +1817,7 @@ class D{version}
         {
             var pipeline = factory.GetOrCreatePipeline( options, targetCompilation );
 
-            return new( pipeline );
+            return new WeakReference<DesignTimeAspectPipeline>( pipeline );
         }
     }
 
@@ -1893,7 +1894,10 @@ class D{version}
 
         var code = new Dictionary<string, string>
         {
-            ["options.cs"] = options, ["aspect.cs"] = aspect, ["optionsAttribute.cs"] = "", ["target.cs"] = target,
+            ["options.cs"] = options,
+            ["aspect.cs"] = aspect,
+            ["optionsAttribute.cs"] = "",
+            ["target.cs"] = target,
 #if NETFRAMEWORK
             ["isexternalinit.cs"] = "namespace System.Runtime.CompilerServices { internal static class IsExternalInit; }"
 #endif
@@ -1907,7 +1911,7 @@ class D{version}
 
         var warning = Assert.Single( result.GetAllDiagnostics() );
 
-        Assert.Equal( "Not enabled.", warning.GetMessage( null ) );
+        Assert.Equal( "Not enabled.", warning.GetMessage( CultureInfo.InvariantCulture ) );
 
         code["optionsAttribute.cs"] = optionsAttribute;
 
@@ -1973,8 +1977,8 @@ Target.cs:
             additionalReferences: new[] { aspectCompilation1.ToMetadataReference( ["aspects1"] ), aspectCompilation2.ToMetadataReference( ["aspects2"] ) } );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        var aspectProjectPipeline1 = factory.CreatePipeline( aspectCompilation1 );
-        var aspectProjectPipeline2 = factory.CreatePipeline( aspectCompilation2 );
+        factory.CreatePipeline( aspectCompilation1 );
+        factory.CreatePipeline( aspectCompilation2 );
         var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
 
         // Execute the pipeline.
@@ -1997,49 +2001,49 @@ Target.cs:
         var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
 
         const string aspectCode = """
-            using Metalama.Framework.Aspects; 
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Diagnostics;
-            using Metalama.Framework.Eligibility;
+                                  using Metalama.Framework.Aspects; 
+                                  using Metalama.Framework.Code;
+                                  using Metalama.Framework.Diagnostics;
+                                  using Metalama.Framework.Eligibility;
 
-            [Inheritable]
-            public class MyAspect : TypeAspect
-            {
-            }
-            """;
+                                  [Inheritable]
+                                  public class MyAspect : TypeAspect
+                                  {
+                                  }
+                                  """;
 
         const string leftCode = """
-            [MyAspect]
-            public class Left
-            {
-            }
-            """;
+                                [MyAspect]
+                                public class Left
+                                {
+                                }
+                                """;
 
         const string rightCode = """
-            [MyAspect]
-            public class Right
-            {
-            }
-            """;
+                                 [MyAspect]
+                                 public class Right
+                                 {
+                                 }
+                                 """;
 
         const string targetCode = """
-            class C : Left {}
-            class D : Right {}
-            """;
+                                  class C : Left {}
+                                  class D : Right {}
+                                  """;
 
         var expectedResult = $"""
-            :
-            2 diagnostic(s):
-               Error LAMA0113 on ``: `Cannot find in the current compilation the aspect type 'MyAspect' defined in the aspect library '{aspect1AssemblyName}'.`
-               Error LAMA0113 on ``: `Cannot find in the current compilation the aspect type 'MyAspect' defined in the aspect library '{aspect2AssemblyName}'.`
-            0 suppression(s):
-            0 introductions(s):
-            ----------------------------------------------------------
-            Target.cs:
-            0 diagnostic(s):
-            0 suppression(s):
-            0 introductions(s):
-            """;
+                              :
+                              2 diagnostic(s):
+                                 Error LAMA0113 on ``: `Cannot find in the current compilation the aspect type 'MyAspect' defined in the aspect library '{aspect1AssemblyName}'.`
+                                 Error LAMA0113 on ``: `Cannot find in the current compilation the aspect type 'MyAspect' defined in the aspect library '{aspect2AssemblyName}'.`
+                              0 suppression(s):
+                              0 introductions(s):
+                              ----------------------------------------------------------
+                              Target.cs:
+                              0 diagnostic(s):
+                              0 suppression(s):
+                              0 introductions(s):
+                              """;
 
         using var testContext = this.CreateTestContext();
 
@@ -2067,10 +2071,10 @@ Target.cs:
             additionalReferences: new[] { leftCompilation.ToMetadataReference(), rightCompilation.ToMetadataReference() } );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
-        var aspect1ProjectPipeline = factory.CreatePipeline( aspect1Compilation );
-        var aspect2ProjectPipeline = factory.CreatePipeline( aspect2Compilation );
-        var leftProjectPipeline = factory.CreatePipeline( leftCompilation );
-        var rightProjectPipeline = factory.CreatePipeline( rightCompilation );
+        factory.CreatePipeline( aspect1Compilation );
+        factory.CreatePipeline( aspect2Compilation );
+        factory.CreatePipeline( leftCompilation );
+        factory.CreatePipeline( rightCompilation );
         var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
 
         // First execution of the pipeline.
@@ -2088,7 +2092,7 @@ Target.cs:
     }
 
     [Fact]
-    public async Task IntroducedSyntaxTreeConflictAndChange()
+    public void IntroducedSyntaxTreeConflictAndChange()
     {
         // Tests a situation when designtime pipeline generated a syntax tree with undeterministic name.
         // Removing a type caused names to change in such a way that invalidated syntax trees were not correctly cleaned from AspectPipelineResult,
@@ -2276,7 +2280,7 @@ partial class A<T, U>
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
-        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var result ) );
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
     }
 
     [Fact]

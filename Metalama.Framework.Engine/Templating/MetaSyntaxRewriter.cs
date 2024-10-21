@@ -76,10 +76,10 @@ internal partial class MetaSyntaxRewriter : SafeSyntaxRewriter
 
     protected SyntaxTrivia[] GetIndentation( bool lineFeed = true )
         => lineFeed
-            ? new[] { this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia, Whitespace( this._indentTriviaStack.Peek() ) }
-            : new[] { Whitespace( this._indentTriviaStack.Peek() ) };
+            ? [this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia, Whitespace( this._indentTriviaStack.Peek() )]
+            : [Whitespace( this._indentTriviaStack.Peek() )];
 
-    protected static SyntaxTrivia[] GetLineBreak() => Array.Empty<SyntaxTrivia>();
+    protected static SyntaxTrivia[] GetLineBreak() => [];
 
     /// <summary>
     /// Adds indentation to a <see cref="SyntaxNode"/> and all its children.

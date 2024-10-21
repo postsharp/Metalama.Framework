@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -26,21 +25,20 @@ internal sealed class IntrospectionTransformation : IIntrospectionTransformation
     public IntrospectionTransformationKind TransformationKind => this._transformation.TransformationKind;
 
     [Memo]
-    public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.Translate( this._compilation );
+    public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.GetTarget( this._compilation );
 
     [Memo]
-    public FormattableString Description => FormattableStringHelper.MapString( this._transformation.ToDisplayString(), this._compilation );
+    public FormattableString Description => FormattableStringHelper.MapString( this._transformation.ToDisplayString().AssertNotNull(), this._compilation );
 
     [Memo]
     public IDeclaration? IntroducedDeclaration
         => this._transformation switch
         {
-            IIntroduceDeclarationTransformation introduceDeclarationTransformation => introduceDeclarationTransformation.DeclarationBuilder
-                .Translate<IDeclaration>( this._compilation ),
-            IIntroduceInterfaceTransformation introduceInterfaceTransformation => introduceInterfaceTransformation.TargetType.Translate<IDeclaration>(
-                this._compilation ),
-            IntroduceParameterTransformation introduceParameterTransformation => introduceParameterTransformation.Parameter.Translate<IDeclaration>(
-                this._compilation ),
+            IIntroduceDeclarationTransformation introduceDeclarationTransformation => introduceDeclarationTransformation.DeclarationBuilderData.ToRef()
+                .GetTarget( this._compilation ),
+            IIntroduceInterfaceTransformation introduceInterfaceTransformation => introduceInterfaceTransformation.TargetType.GetTarget( this._compilation ),
+            IntroduceParameterTransformation introduceParameterTransformation => introduceParameterTransformation.Parameter.ToRef()
+                .GetTarget( this._compilation ),
             _ => null
         };
 

@@ -25,9 +25,10 @@ public sealed class RecursiveFileSystemWatcherTests : UnitTestClass
         using var watcher = new RecursiveFileSystemWatcher( tempDirectory, "file.txt" );
 
         var wasRaised = new TaskCompletionSource<bool>();
-        watcher.Changed += ( s, e ) => wasRaised.TrySetResult( true );
+        watcher.Changed += ( _, _ ) => wasRaised.TrySetResult( true );
         watcher.EnableRaisingEvents = true;
 
+        // ReSharper disable once MethodHasAsyncOverload
         File.WriteAllText( Path.Combine( tempDirectory, "file.txt" ), "test" );
 
         Assert.Same( wasRaised.Task, await Task.WhenAny( wasRaised.Task, Task.Delay( TimeSpan.FromSeconds( 1 ) ) ) );
@@ -45,10 +46,12 @@ public sealed class RecursiveFileSystemWatcherTests : UnitTestClass
         using var watcher = new RecursiveFileSystemWatcher( directory, "file.txt" );
 
         var wasRaised = new TaskCompletionSource<bool>();
-        watcher.Changed += ( s, e ) => wasRaised.TrySetResult( true );
+        watcher.Changed += ( _, _ ) => wasRaised.TrySetResult( true );
         watcher.EnableRaisingEvents = true;
 
         Directory.CreateDirectory( directory );
+
+        // ReSharper disable once MethodHasAsyncOverload
         File.WriteAllText( Path.Combine( directory, "file.txt" ), "test" );
 
         Assert.Same( wasRaised.Task, await Task.WhenAny( wasRaised.Task, Task.Delay( TimeSpan.FromSeconds( 1 ) ) ) );
@@ -66,10 +69,12 @@ public sealed class RecursiveFileSystemWatcherTests : UnitTestClass
         using var watcher = new RecursiveFileSystemWatcher( directory, "file.txt" );
 
         var wasRaised = new TaskCompletionSource<bool>();
-        watcher.Changed += ( s, e ) => wasRaised.TrySetResult( true );
+        watcher.Changed += ( _, _ ) => wasRaised.TrySetResult( true );
         watcher.EnableRaisingEvents = true;
 
         Directory.CreateDirectory( directory );
+
+        // ReSharper disable once MethodHasAsyncOverload
         File.WriteAllText( Path.Combine( directory, "file.txt" ), "test" );
 
         Assert.Same( wasRaised.Task, await Task.WhenAny( wasRaised.Task, Task.Delay( TimeSpan.FromSeconds( 1 ) ) ) );
@@ -90,9 +95,10 @@ public sealed class RecursiveFileSystemWatcherTests : UnitTestClass
 
         Directory.CreateDirectory( directory );
         var wasRaised = new TaskCompletionSource<bool>();
-        watcher.Changed += ( s, e ) => wasRaised.TrySetResult( true );
+        watcher.Changed += ( _, _ ) => wasRaised.TrySetResult( true );
         watcher.EnableRaisingEvents = true;
 
+        // ReSharper disable once MethodHasAsyncOverload
         File.WriteAllText( Path.Combine( directory, "file.txt" ), "test" );
 
         Assert.Same( wasRaised.Task, await Task.WhenAny( wasRaised.Task, Task.Delay( TimeSpan.FromSeconds( 1 ) ) ) );

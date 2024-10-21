@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -20,13 +20,13 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         // We store a reference-typed ISdkRef instead of the value-typed Ref because it is only being accessed
         // through ICompileTimeReflectionObject, so boxing cannot be avoided anyway. It is better in this case
         // to box only once.
-        internal ISdkRef<IType> Target { get; }
+        internal IRef<IType> Target { get; }
 
-        ISdkRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
+        IRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
 
         private Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( this.Target.ToString() ?? "Type" );
 
-        private CompileTimeType( ISdkRef<IType> targetRef, ITypeSymbol symbolForMetadata )
+        private CompileTimeType( IRef<IType> targetRef, ITypeSymbol symbolForMetadata )
         {
             this.Namespace = symbolForMetadata.ContainingNamespace.GetFullName();
             this.Name = symbolForMetadata.GetReflectionName().AssertNotNull();
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = targetRef;
         }
 
-        private CompileTimeType( ISdkRef<IType> targetRef, CompileTimeTypeMetadata metadata )
+        private CompileTimeType( IRef<IType> targetRef, CompileTimeTypeMetadata metadata )
         {
             this.Namespace = metadata.Namespace;
             this.Name = metadata.Name;
@@ -46,21 +46,17 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = targetRef;
         }
 
-        internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, ITypeSymbol symbolForMetadata )
-            => new( Ref.FromSymbolId<IType>( symbolId ), symbolForMetadata );
-
         internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, ITypeSymbol symbolForMetadata )
-            => new( Ref.FromTypeId<IType>( typeId ), symbolForMetadata );
+            => new( DurableRefFactory.FromTypeId<IType>( typeId ), symbolForMetadata );
 
         internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, CompileTimeTypeMetadata metadata )
-            => new( Ref.FromTypeId<IType>( typeId ), metadata );
+            => new( DurableRefFactory.FromTypeId<IType>( typeId ), metadata );
 
         // For test only.
-        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol().AssertSymbolNotNull(), type.GetCompilationModel().CompilationContext );
+        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol().AssertSymbolNotNull(), type.GetRefFactory() );
 
         // For test only.
-        private static CompileTimeType Create( ITypeSymbol typeSymbol, CompilationContext compilation )
-            => new( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol );
+        private static CompileTimeType Create( ITypeSymbol typeSymbol, RefFactory refFactory ) => new( typeSymbol.ToRef( refFactory ), typeSymbol );
 
         public override string? Namespace { get; }
 
@@ -179,7 +175,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         {
             var compilation = ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel;
 

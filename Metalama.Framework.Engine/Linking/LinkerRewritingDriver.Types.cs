@@ -106,7 +106,7 @@ internal sealed partial class LinkerRewritingDriver
                 var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter ).AssertNotNull();
                 var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
 
-                if ( propertySymbol?.GetPrimaryDeclaration() is ParameterSyntax && this.IsRewriteTarget( propertySymbol ) )
+                if ( propertySymbol?.GetPrimaryDeclarationSyntax() is ParameterSyntax && this.IsRewriteTarget( propertySymbol ) )
                 {
                     SyntaxGenerationContext GetSyntaxGenerationContext()
                     {

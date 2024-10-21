@@ -23,11 +23,14 @@ namespace Metalama.Framework.Code
         /// </summary>
         public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
         {
-            var comparer = declaration.Compilation.Comparers.Default;
-
-            if ( comparer.Equals( declaration.GetDefinition(), containingDeclaration.GetDefinition() ) )
+            if ( declaration.GetDefinition().Equals( containingDeclaration.GetDefinition() ) )
             {
                 return true;
+            }
+
+            if ( !containingDeclaration.DeclarationKind.CanContain( declaration.DeclarationKind ) )
+            {
+                return false;
             }
 
             if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
@@ -37,6 +40,53 @@ namespace Metalama.Framework.Code
 
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
         }
+
+        private static bool CanContain( this DeclarationKind containingDeclarationKind, DeclarationKind containedDeclarationKind )
+        {
+            switch ( containingDeclarationKind )
+            {
+                case DeclarationKind.None:
+                case DeclarationKind.Attribute:
+                case DeclarationKind.AssemblyReference:
+                    return false;
+
+                case DeclarationKind.Compilation:
+                    return true;
+
+                case DeclarationKind.Namespace:
+                    return containedDeclarationKind != DeclarationKind.Compilation;
+
+                case DeclarationKind.NamedType:
+                    return containedDeclarationKind is not (DeclarationKind.Compilation or DeclarationKind.Namespace);
+
+                case DeclarationKind.Parameter:
+                case DeclarationKind.TypeParameter:
+                case DeclarationKind.Field:
+                    return containedDeclarationKind == DeclarationKind.Attribute;
+
+                case DeclarationKind.Operator:
+                case DeclarationKind.Constructor:
+                case DeclarationKind.Finalizer:
+                    return containedDeclarationKind is DeclarationKind.Parameter or DeclarationKind.Attribute;
+
+                case DeclarationKind.Method:
+                    return containedDeclarationKind is DeclarationKind.Parameter or DeclarationKind.Attribute or DeclarationKind.TypeParameter;
+
+                case DeclarationKind.Property:
+                case DeclarationKind.Event:
+                case DeclarationKind.Indexer:
+                    return containedDeclarationKind is DeclarationKind.Parameter or DeclarationKind.Attribute or DeclarationKind.TypeParameter
+                        or DeclarationKind.Method;
+
+                default:
+                    throw new ArgumentOutOfRangeException( nameof(containingDeclarationKind), $"Unexpected value: '{containingDeclarationKind}'." );
+            }
+        }
+
+        public static bool IsMemberKind( this DeclarationKind declarationKind )
+            => declarationKind is DeclarationKind.Event or DeclarationKind.Field or DeclarationKind.Finalizer or DeclarationKind.Property
+                or DeclarationKind.Indexer
+                or DeclarationKind.Constructor or DeclarationKind.Operator or DeclarationKind.Method;
 
         /// <summary>
         /// Gets all containing ancestors, i.e. <c>declaration.ContainingDeclaration</c>, <c>declaration.ContainingDeclaration.ContainingDeclaration</c>,
@@ -70,14 +120,14 @@ namespace Metalama.Framework.Code
             => new( declaration );
 
         /// <summary>
-        /// Gets the declaring <see cref="INamedType"/> of a given declaration if the declaration if not an <see cref="INamedType"/>, or the <see cref="INamedType"/> itself if the given declaration is itself an <see cref="INamedType"/>. 
+        /// Gets the declaring <see cref="INamedType"/> of a given declaration if the declaration is not an <see cref="INamedType"/>, or the <see cref="INamedType"/> itself if the given declaration is itself an <see cref="INamedType"/>. 
         /// </summary>
         public static INamedType? GetClosestNamedType( this IDeclaration declaration )
             => declaration switch
             {
                 // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
-                INamedType namedType => namedType.ToNonNullableType() as INamedType,
-                IMember member => member.DeclaringType.ToNonNullableType() as INamedType,
+                INamedType namedType => namedType.ToNonNullable() as INamedType,
+                IMember member => member.DeclaringType.ToNonNullable() as INamedType,
                 { ContainingDeclaration: { } containingDeclaration } => GetClosestNamedType( containingDeclaration ),
                 _ => null
             };
@@ -89,7 +139,7 @@ namespace Metalama.Framework.Code
             => declaration switch
             {
                 // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
-                INamedType namedType => namedType.ToNonNullableType() as INamedType,
+                INamedType namedType => namedType.ToNonNullable() as INamedType,
                 IMember member => member,
                 { ContainingDeclaration: { } containingDeclaration } => GetClosestMemberOrNamedType( containingDeclaration ),
                 _ => null
@@ -103,7 +153,7 @@ namespace Metalama.Framework.Code
             => declaration switch
             {
                 // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
-                INamedType { DeclaringType: null } namedType => namedType.ToNonNullableType() as INamedType,
+                INamedType { DeclaringType: null } namedType => namedType.ToNonNullable() as INamedType,
                 INamedType { DeclaringType: not null } namedType => namedType.DeclaringType.GetTopmostNamedType(),
                 _ => declaration.GetClosestNamedType()?.GetTopmostNamedType()
             };
@@ -124,7 +174,7 @@ namespace Metalama.Framework.Code
         /// Gets a representation of the current declaration in a different version of the compilation.
         /// </summary>
         [return: NotNullIfNotNull( nameof(compilationElement) )]
-        public static T? ForCompilation<T>( this T? compilationElement, ICompilation compilation, ReferenceResolutionOptions options = default )
+        public static T? ForCompilation<T>( this T? compilationElement, ICompilation compilation )
             where T : class, ICompilationElement
         {
             if ( compilationElement == null )
@@ -134,7 +184,7 @@ namespace Metalama.Framework.Code
             else
             {
                 return
-                    ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
+                    compilation.Factory.Translate( compilationElement )
                     ?? throw new InvalidOperationException(
                         $"The declaration '{compilationElement}' does not exist in the requested compilation. "
                         + $"Use TryForCompilation to avoid this exception." );
@@ -147,8 +197,7 @@ namespace Metalama.Framework.Code
         public static bool TryForCompilation<T>(
             this T? compilationElement,
             ICompilation compilation,
-            [NotNullWhen( true )] out T? translated,
-            ReferenceResolutionOptions options = default )
+            [NotNullWhen( true )] out T? translated )
             where T : class, ICompilationElement
         {
             if ( compilationElement == null )
@@ -159,7 +208,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                translated = ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+                translated = compilation.Factory.Translate( compilationElement );
 
                 return translated != null;
             }

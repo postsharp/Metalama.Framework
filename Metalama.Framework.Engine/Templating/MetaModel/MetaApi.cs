@@ -6,7 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -44,16 +44,25 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
 
             return TemplatingDiagnosticDescriptors.MetaMemberNotAvailable.CreateException(
-                (this._common.Template.Declaration, "meta.Target." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                (this._common.Template.GetDeclaration( this.Compilation ), "meta.Target." + memberName, this.Declaration,
+                 this.Declaration.DeclarationKind,
                  description ?? "I" + memberName, alternativeSuggestion) );
         }
+
+        ICompilation IMetaTarget.Compilation => this.Compilation;
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
         public IMethodBase MethodBase
             => (IMethodBase?) this._method ?? (IMethodBase?) this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IField Field => this._fieldOrPropertyOrIndexer as IField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+        public IField Field
+            => this._fieldOrPropertyOrIndexer switch
+            {
+                IField field => field,
+                IProperty { OriginalField: { } field } => field,
+                _ => throw this.CreateInvalidOperationException( nameof(this.Field) )
+            };
 
         public IFieldOrProperty FieldOrProperty
             => this._fieldOrPropertyOrIndexer as IFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
@@ -67,7 +76,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IProperty Property => this._fieldOrPropertyOrIndexer as IProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IProperty Property
+            => this._fieldOrPropertyOrIndexer switch
+            {
+                IProperty property => property,
+                IField { OverridingProperty: { } property } => property,
+                _ => throw this.CreateInvalidOperationException( nameof(this.Property) )
+            };
 
         public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
@@ -94,7 +109,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                     : $"the target {this.Declaration.DeclarationKind} is static";
 
                 return TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind, explanation) );
+                    (this._common.Template.GetDeclaration( this.Compilation ), expressionName, this.Declaration,
+                     this.Declaration.DeclarationKind, explanation) );
             }
 
             return (this._common.Staticity, this._type, this.Declaration) switch

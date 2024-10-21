@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
@@ -308,9 +307,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     foreach ( var baseTypeNode in node.BaseList.Types )
                     {
-                        var baseType = ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol as INamedTypeSymbol;
-
-                        if ( baseType == null )
+                        if ( ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol is not INamedTypeSymbol baseType )
                         {
                             continue;
                         }
@@ -449,7 +446,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     if ( this.IsInTemplate )
                     {
-                        if ( this._isDesignTime && !node.IsKind(SyntaxKind.UnknownAccessorDeclaration) )
+                        if ( this._isDesignTime && !node.IsKind( SyntaxKind.UnknownAccessorDeclaration ) )
                         {
                             this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._compilationContext );
                             _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
@@ -631,7 +628,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     if ( member is null or ITypeSymbol )
                     {
-                        return Enumerable.Empty<(ISymbol, INamedTypeSymbol)>();
+                        return [];
                     }
 
                     var selfAttributes = member.GetAttributes()

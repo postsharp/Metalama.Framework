@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using System;
@@ -33,11 +35,7 @@ internal sealed partial class LinkerInjectionStep
             { Accessibility.PrivateProtected, 4 },
             { Accessibility.Private, 5 }
         }.ToImmutableDictionary();
-
-        public static InjectedMemberComparer Instance { get; } = new();
-
-        private InjectedMemberComparer() { }
-
+        
         public int Compare( InjectedMember? x, InjectedMember? y )
         {
             if ( x == y )
@@ -58,9 +56,6 @@ internal sealed partial class LinkerInjectionStep
                 return -1;
             }
 
-            var declaration = GetDeclaration( x );
-            var otherDeclaration = GetDeclaration( y );
-
             // Order by kind.
             var kindComparison = GetKindOrder( x.Kind ).CompareTo( GetKindOrder( y.Kind ) );
 
@@ -70,12 +65,15 @@ internal sealed partial class LinkerInjectionStep
             }
 
             // Order by name.
-            var nameComparison = string.CompareOrdinal( declaration.Name, otherDeclaration.Name );
+            var nameComparison = string.CompareOrdinal( x.Declaration.Name, y.Declaration.Name );
 
             if ( nameComparison != 0 )
             {
                 return nameComparison;
             }
+
+            var declaration = GetDeclaration( x );
+            var otherDeclaration = GetDeclaration( y );
 
             // Order by signature.
             if ( declaration is IMethod )
@@ -88,9 +86,9 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
+            // Order by accessibility.
             if ( declaration is IMemberOrNamedType memberOrNamedType && otherDeclaration is IMemberOrNamedType otherMemberOrNamedType )
             {
-                // Order by accessibility.
                 var accessibilityComparison =
                     GetAccessibilityOrder( memberOrNamedType.Accessibility ).CompareTo( GetAccessibilityOrder( otherMemberOrNamedType.Accessibility ) );
 
@@ -180,14 +178,14 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                     // Order replaced declarations within the same layer.
-                    if ( x.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
-                         && replacedMemberRefX.Target == y.Transformation )
+                    if ( x.Transformation is IReplaceMemberTransformation { ReplacedMember: IIntroducedRef builderRefX }
+                         && builderRefX.BuilderData == y.BuilderData )
                     {
                         return 1;
                     }
 
-                    if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
-                         && replacedMemberRefY.Target == x.Transformation )
+                    if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: IIntroducedRef builderRefY }
+                         && builderRefY.BuilderData == x.BuilderData )
                     {
                         return -1;
                     }
@@ -215,7 +213,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( injectedMember.Transformation is IOverrideDeclarationTransformation overridden )
             {
-                declaration = (IMemberOrNamedType) overridden.OverriddenDeclaration;
+                declaration = overridden.OverriddenDeclaration;
             }
 
             if ( declaration == null )
@@ -223,7 +221,7 @@ internal sealed partial class LinkerInjectionStep
                 throw new AssertionFailedException( "Don't know how to sort." );
             }
 
-            return declaration;
+            return declaration.As<INamedDeclaration>().Definition;
         }
     }
 }

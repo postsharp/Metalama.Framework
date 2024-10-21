@@ -9,8 +9,11 @@ using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -30,6 +33,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly WorkspaceProvider _workspaceProvider;
     private readonly AnalysisProcessEventHub _eventHub;
+    private readonly DesignTimeExceptionHandler _exceptionHandler;
 
     private readonly WeakCache<Compilation, ImmutableArray<IIntrospectionAspectInstance>> _aspectInstanceCache = new();
 
@@ -39,6 +43,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._workspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
+        this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
     }
 
     private async Task<(DesignTimeAspectPipeline Pipeline, Compilation Compilation)?> GetPipelineAndCompilationAsync(
@@ -140,7 +145,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             }
             catch ( Exception ex )
             {
-                DesignTimeExceptionHandler.ReportException( ex );
+                this._exceptionHandler.ReportException( ex );
 
                 aspectInstances = ImmutableArray<IIntrospectionAspectInstance>.Empty;
             }
@@ -195,11 +200,11 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             // but we need the original declaration to get the correct serializable ID.
             // We can do that by going through the symbol, when it exists, which is never modified.
 
-            if ( declaration.GetSymbol() is { } symbol )
+            if ( declaration.GetOriginalSymbol() is { } symbol )
             {
                 return symbol.GetSerializableId().Id;
             }
-
+            
             return declaration.ToSerializableId().Id;
         }
 
@@ -223,7 +228,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                     {
                         new AspectDatabaseAspectTransformation(
                             GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
-                            $"Provide the '{aspectInstance.AspectClass}' aspect." )
+                            $"Add the '{aspectInstance.AspectClass}' aspect to '{aspectInstance.TargetDeclaration}'." )
                     } ) );
 #pragma warning restore IDE0300
 

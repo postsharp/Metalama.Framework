@@ -9,7 +9,9 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
@@ -37,8 +39,6 @@ namespace Metalama.Framework.Engine.Fabrics
     internal abstract class AspectReceiver<TDeclaration, TTag> : IAspectReceiver<TDeclaration, TTag>
         where TDeclaration : class, IDeclaration
     {
-        private readonly ISdkRef<IDeclaration> _containingDeclaration;
-
         protected abstract IAspectReceiverParent Parent { get; }
 
         private readonly CompilationModelVersion _compilationModelVersion;
@@ -51,13 +51,13 @@ namespace Metalama.Framework.Engine.Fabrics
 
         internal AspectReceiver(
             ProjectServiceProvider serviceProvider,
-            ISdkRef<IDeclaration> containingDeclaration,
+            IRef<IDeclaration> containingDeclaration,
             CompilationModelVersion compilationModelVersion,
             Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "AspectReceiver" );
             this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-            this._containingDeclaration = containingDeclaration;
+            this.OriginatingDeclaration = containingDeclaration;
             this._compilationModelVersion = compilationModelVersion;
             this._adder = addTargets;
         }
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public string? OriginatingNamespace => this.Parent.Namespace;
 
-        public IRef<IDeclaration> OriginatingDeclaration => this._containingDeclaration;
+        public IRef<IDeclaration> OriginatingDeclaration { get; }
 
         protected virtual bool ShouldCache => this._childrenCount > 1;
 
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     description,
                     granularity ) );
 
-            if ( validatedDeclaration is Method validatedMethod )
+            if ( validatedDeclaration is SourceMethod validatedMethod )
             {
                 switch ( validatedMethod.MethodKind )
                 {
@@ -356,7 +356,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private IAspectReceiver<INamedType, TTag> SelectTypesDerivedFromCore( Func<CompilationModel, INamedType> getBaseType, DerivedTypesOptions options )
             => this.AddChild(
                 new ChildAspectReceiver<INamedType, TTag>(
-                    this._containingDeclaration,
+                    this.OriginatingDeclaration,
                     this.Parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
@@ -437,21 +437,27 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public IReadOnlyCollection<TDeclaration> ToCollection( ICompilation? compilation )
         {
+            var compilationModel = (CompilationModel?) compilation ?? UserCodeExecutionContext.Current.Compilation.AssertNotNull();
+
+            if ( compilationModel.IsPartial )
+            {
+                throw new InvalidOperationException( "This method cannot be used with a partial compilation (typically at design time." );
+            }
+
             var bag = new ConcurrentQueue<TDeclaration>();
 
             this.Parent.ServiceProvider.Global.GetRequiredService<ITaskRunner>()
                 .RunSynchronously(
-                    () =>
-                        this.InvokeAdderAsync(
-                            new DeclarationSelectionContext(
-                                (CompilationModel?) compilation ?? UserCodeExecutionContext.Current.Compilation.AssertNotNull(),
-                                CancellationToken.None ),
-                            ( declaration, _, _ ) =>
-                            {
-                                bag.Enqueue( declaration );
+                    () => this.InvokeAdderAsync(
+                        new DeclarationSelectionContext(
+                            compilationModel,
+                            CancellationToken.None ),
+                        ( declaration, _, _ ) =>
+                        {
+                            bag.Enqueue( declaration );
 
-                                return Task.CompletedTask;
-                            } ) );
+                            return Task.CompletedTask;
+                        } ) );
 
             return bag;
         }
@@ -462,7 +468,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public IAspectReceiver<TDeclaration, TNewTag> Tag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
             => this.AddChild(
                 new ChildAspectReceiver<TDeclaration, TNewTag>(
-                    this._containingDeclaration,
+                    this.OriginatingDeclaration,
                     this.Parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
@@ -563,17 +569,17 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public IValidatorReceiver<TDeclaration, TTag> AfterAllAspects()
             => this.AddChild(
-                new ChildAspectReceiver<TDeclaration, TTag>( this._containingDeclaration, this.Parent, CompilationModelVersion.Final, this._adder ) );
+                new ChildAspectReceiver<TDeclaration, TTag>( this.OriginatingDeclaration, this.Parent, CompilationModelVersion.Final, this._adder ) );
 
         public IValidatorReceiver<TDeclaration, TTag> BeforeAnyAspect()
             => this.AddChild(
-                new ChildAspectReceiver<TDeclaration, TTag>( this._containingDeclaration, this.Parent, CompilationModelVersion.Initial, this._adder ) );
+                new ChildAspectReceiver<TDeclaration, TTag>( this.OriginatingDeclaration, this.Parent, CompilationModelVersion.Initial, this._adder ) );
 
         public IAspectReceiver<TMember, TTag> SelectMany<TMember>( Func<TDeclaration, TTag, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
             => this.AddChild(
                 new ChildAspectReceiver<TMember, TTag>(
-                    this._containingDeclaration,
+                    this.OriginatingDeclaration,
                     this.Parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
@@ -592,7 +598,7 @@ namespace Metalama.Framework.Engine.Fabrics
             where TMember : class, IDeclaration
             => this.AddChild(
                 new ChildAspectReceiver<TMember, TTag>(
-                    this._containingDeclaration,
+                    this.OriginatingDeclaration,
                     this.Parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
@@ -602,7 +608,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = true )
             => this.AddChild(
                 new ChildAspectReceiver<INamedType, TTag>(
-                    this._containingDeclaration,
+                    this.OriginatingDeclaration,
                     this.Parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
@@ -625,12 +631,12 @@ namespace Metalama.Framework.Engine.Fabrics
                                         break;
 
                                     case INamedType type:
-                                        types = new[] { type };
+                                        types = [type];
 
                                         break;
 
                                     case var _ when declaration.GetTopmostNamedType() is { } topmostType:
-                                        types = new[] { topmostType };
+                                        types = [topmostType];
 
                                         break;
 
@@ -655,7 +661,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public IAspectReceiver<TDeclaration, TTag> Where( Func<TDeclaration, TTag, bool> predicate )
             => this.AddChild(
                 new ChildAspectReceiver<TDeclaration, TTag>(
-                    this._containingDeclaration,
+                    this.OriginatingDeclaration,
                     this.Parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
@@ -676,7 +682,7 @@ namespace Metalama.Framework.Engine.Fabrics
             where TOut : class, IDeclaration
             => this.AddChild(
                 new ChildAspectReceiver<TOut, TTag>(
-                    this._containingDeclaration,
+                    this.OriginatingDeclaration,
                     this.Parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
@@ -985,7 +991,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 var predecessorInstance = (IAspectPredecessorImpl) this.Parent.AspectPredecessor.Instance;
 
                 // Verify containment.
-                var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
+                var containingDeclaration = this.OriginatingDeclaration.GetTarget( compilation ).AssertNotNull();
 
                 if ( !(targetDeclaration.IsContainedIn( containingDeclaration )
                        || (containingDeclaration is IParameter p && p.DeclaringMember.Equals( targetDeclaration ))
@@ -1056,7 +1062,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 var predecessorInstance = (IAspectPredecessorImpl) this.Parent.AspectPredecessor.Instance;
 
-                var containingTypeOrCompilation = (IDeclaration?) this._containingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()
+                var containingTypeOrCompilation = (IDeclaration?) this.OriginatingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()
                                                   ?? compilation;
 
                 if ( (!targetDeclaration.IsContainedIn( containingTypeOrCompilation ) || targetDeclaration.DeclaringAssembly.IsExternal)
@@ -1102,7 +1108,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             context2.Collector.AddAspectRequirement(
                                 new AspectRequirement(
-                                    declaration.ToValueTypedRef<IDeclaration>(),
+                                    declaration.ToRef(),
                                     this.Parent.AspectPredecessor.Instance ) );
 
                             return Task.CompletedTask;

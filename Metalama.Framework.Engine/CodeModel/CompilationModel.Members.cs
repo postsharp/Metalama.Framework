@@ -1,13 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
@@ -21,146 +20,99 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public sealed partial class CompilationModel
 {
-    private ImmutableDictionary<Ref<INamedType>, FieldUpdatableCollection> _fields;
-    private ImmutableDictionary<Ref<INamedType>, ISourceMemberCollection<IMethod>> _methods;
-    private ImmutableDictionary<Ref<INamedType>, ConstructorUpdatableCollection> _constructors;
-    private ImmutableDictionary<Ref<INamedType>, EventUpdatableCollection> _events;
-    private ImmutableDictionary<Ref<INamedType>, PropertyUpdatableCollection> _properties;
-    private ImmutableDictionary<Ref<INamedType>, IndexerUpdatableCollection> _indexers;
-    private ImmutableDictionary<Ref<INamedType>, InterfaceUpdatableCollection> _interfaceImplementations;
-    private ImmutableDictionary<Ref<INamedType>, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
-    private ImmutableDictionary<Ref<IHasParameters>, ParameterUpdatableCollection> _parameters;
-    private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
-    private ImmutableDictionary<Ref<INamedType>, IConstructorBuilder> _staticConstructors;
-    private ImmutableDictionary<Ref<INamedType>, IMethodBuilder> _finalizers;
-    private ImmutableDictionary<Ref<INamespaceOrNamedType>, TypeUpdatableCollection> _namedTypes;
-    private ImmutableDictionary<Ref<INamespace>, NamespaceUpdatableCollection> _namespaces;
+    private ImmutableDictionary<IFullRef<INamedType>, FieldUpdatableCollection> _fields;
+    private ImmutableDictionary<IFullRef<INamedType>, MethodUpdatableCollection> _methods;
+    private ImmutableDictionary<IFullRef<INamedType>, ConstructorUpdatableCollection> _constructors;
+    private ImmutableDictionary<IFullRef<INamedType>, EventUpdatableCollection> _events;
+    private ImmutableDictionary<IFullRef<INamedType>, PropertyUpdatableCollection> _properties;
+    private ImmutableDictionary<IFullRef<INamedType>, IndexerUpdatableCollection> _indexers;
+    private ImmutableDictionary<IFullRef<INamedType>, InterfaceUpdatableCollection> _interfaceImplementations;
+    private ImmutableDictionary<IFullRef<INamedType>, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
+    private ImmutableDictionary<IFullRef<IHasParameters>, ParameterUpdatableCollection> _parameters;
+    private ImmutableDictionary<IFullRef<IDeclaration>, AttributeUpdatableCollection> _attributes;
+    private ImmutableDictionary<IFullRef<INamedType>, ConstructorBuilderData> _staticConstructors;
+    private ImmutableDictionary<IFullRef<INamedType>, MethodBuilderData> _finalizers;
+    private ImmutableDictionary<IFullRef<INamespaceOrNamedType>, TypeUpdatableCollection> _namedTypesByParent;
+    private ImmutableDictionary<IFullRef<INamespace>, NamespaceUpdatableCollection> _namespaces;
+    private TypeUpdatableCollection? _topLevelNamedTypes;
 
-    internal ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
+    internal ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
 
     private bool IsMutable { get; }
 
-    internal bool Contains( FieldBuilder fieldBuilder )
-        => (this._fields.TryGetValue( fieldBuilder.DeclaringType.ToValueTypedRef(), out var fields )
-            && fields.Contains( fieldBuilder.ToValueTypedRef<IField>() ))
-           || this.TryGetRedirectedDeclaration( fieldBuilder.ToValueTypedRef(), out _ );
+    internal bool Contains( FieldBuilderData fieldBuilder )
+        => (this._fields.TryGetValue( fieldBuilder.DeclaringType, out var fields )
+            && fields.Contains( fieldBuilder.ToRef() ))
+           || this.IsRedirected( fieldBuilder.ToRef() );
 
-    internal bool Contains( MethodBuilder methodBuilder )
+    internal bool Contains( MethodBuilderData methodBuilder )
         => methodBuilder switch
         {
             { MethodKind: MethodKind.Finalizer } =>
-                this._finalizers.TryGetValue( methodBuilder.DeclaringType.ToValueTypedRef(), out var finalizer )
+                this._finalizers.TryGetValue( methodBuilder.DeclaringType, out var finalizer )
                 && finalizer == methodBuilder,
             _ =>
-                this._methods.TryGetValue( methodBuilder.DeclaringType.ToValueTypedRef(), out var methods )
-                && methods.Contains( methodBuilder.ToValueTypedRef<IMethod>() )
+                this._methods.TryGetValue( methodBuilder.DeclaringType, out var methods )
+                && methods.Contains( methodBuilder.ToRef() )
         };
 
-    internal bool Contains( ConstructorBuilder constructorBuilder )
-        => (this._constructors.TryGetValue( constructorBuilder.DeclaringType.ToValueTypedRef(), out var constructors )
-            && constructors.Contains( constructorBuilder.ToValueTypedRef<IConstructor>() ))
-           || (this._staticConstructors.TryGetValue( constructorBuilder.DeclaringType.ToValueTypedRef(), out var staticConstructors )
+    internal bool Contains( ConstructorBuilderData constructorBuilder )
+        => (this._constructors.TryGetValue( constructorBuilder.DeclaringType, out var constructors )
+            && constructors.Contains( constructorBuilder.ToRef() ))
+           || (this._staticConstructors.TryGetValue( constructorBuilder.DeclaringType, out var staticConstructors )
                && staticConstructors == constructorBuilder);
 
-    internal bool Contains( EventBuilder eventBuilder )
-        => this._events.TryGetValue( eventBuilder.DeclaringType.ToValueTypedRef(), out var events )
-           && events.Contains( eventBuilder.ToValueTypedRef<IEvent>() );
+    internal bool Contains( EventBuilderData eventBuilder )
+        => this._events.TryGetValue( eventBuilder.DeclaringType, out var events )
+           && events.Contains( eventBuilder.ToRef() );
 
-    internal bool Contains( PropertyBuilder propertyBuilder )
-        => this._properties.TryGetValue( propertyBuilder.DeclaringType.ToValueTypedRef(), out var properties )
-           && properties.Contains( propertyBuilder.ToValueTypedRef<IProperty>() );
+    internal bool Contains( PropertyBuilderData propertyBuilder )
+        => this._properties.TryGetValue( propertyBuilder.DeclaringType, out var properties )
+           && properties.Contains( propertyBuilder.ToRef() );
 
-    internal bool Contains( IndexerBuilder indexerBuilder )
-        => this._indexers.TryGetValue( indexerBuilder.DeclaringType.ToValueTypedRef(), out var indexers )
-           && indexers.Contains( indexerBuilder.ToValueTypedRef<IIndexer>() );
+    internal bool Contains( IndexerBuilderData indexerBuilder )
+        => this._indexers.TryGetValue( indexerBuilder.DeclaringType, out var indexers )
+           && indexers.Contains( indexerBuilder.ToRef() );
 
-    internal bool Contains( BaseParameterBuilder parameterBuilder )
+    internal bool Contains( ParameterBuilderData parameterBuilder )
         => parameterBuilder.ContainingDeclaration switch
         {
-            DeclarationBuilder declarationBuilder => this.Contains( declarationBuilder ),
             null => false,
-            _ => this._parameters.TryGetValue( ((IHasParameters) parameterBuilder.ContainingDeclaration).ToValueTypedRef(), out var parameters )
-                 && parameters.Contains( parameterBuilder.ToValueTypedRef<IParameter>() )
+            _ => this._parameters.TryGetValue( parameterBuilder.ContainingDeclaration.As<IHasParameters>(), out var parameters )
+                 && parameters.Contains( parameterBuilder.ToRef() )
         };
 
     internal bool Contains( NamedTypeBuilder namedTypeBuilder )
-        => this._namedTypes.TryGetValue(
-               ((INamespaceOrNamedType?) namedTypeBuilder.DeclaringType ?? namedTypeBuilder.ContainingNamespace ?? throw new AssertionFailedException())
-               .ToValueTypedRef(),
-               out var namedTypes )
-           && namedTypes.Contains( namedTypeBuilder.ToValueTypedRef<INamedType>() );
-
-    internal bool Contains( NamespaceBuilder namespaceBuilder )
-        => this._namespaces.TryGetValue(
-               (namespaceBuilder.ContainingNamespace ?? namespaceBuilder.ContainingNamespace ?? throw new AssertionFailedException())
-               .ToValueTypedRef(),
-               out var namespaces )
-           && namespaces.Contains( namespaceBuilder.ToValueTypedRef<INamespace>() );
-
-    private bool Contains( DeclarationBuilder builder )
-        => builder switch
-        {
-            FieldBuilder fieldBuilder => this.Contains( fieldBuilder ),
-            MethodBuilder methodBuilder => this.Contains( methodBuilder ),
-            ConstructorBuilder constructorBuilder => this.Contains( constructorBuilder ),
-            EventBuilder eventBuilder => this.Contains( eventBuilder ),
-            PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
-            IndexerBuilder indexerBuilder => this.Contains( indexerBuilder ),
-            BaseParameterBuilder parameterBuilder => this.Contains( parameterBuilder ),
-            _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
-        };
-
-    // TODO: Check why the next method is never used.
-    // Resharper disable UnusedMember.Global
-
-    internal bool Contains( ParameterBuilder parameterBuilder )
     {
-        if ( parameterBuilder.IsReturnParameter )
-        {
-            return this.Contains( (DeclarationBuilder) parameterBuilder.DeclaringMember );
-        }
-        else if ( parameterBuilder.DeclaringMember is DeclarationBuilder declarationBuilder )
-        {
-            return this.Contains( declarationBuilder ) && ((IHasParameters) declarationBuilder).Parameters.Contains( parameterBuilder );
-        }
+        var namespaceOrNamedType = (INamespaceOrNamedType?) namedTypeBuilder.DeclaringType
+                                   ?? namedTypeBuilder.ContainingNamespace ?? throw new AssertionFailedException();
 
-        // This can also be a parameter appended to an existing declaration.
-        return this._parameters.TryGetValue( parameterBuilder.DeclaringMember.ToValueTypedRef(), out var events )
-               && events.Contains( parameterBuilder.ToValueTypedRef<IParameter>() );
+        return this._namedTypesByParent.TryGetValue(
+                   namespaceOrNamedType.ToFullRef(),
+                   out var namedTypes )
+               && namedTypes.Contains( namedTypeBuilder.ToRef() );
     }
 
-    private TCollection GetMemberCollection<TOwner, TDeclaration, TCollection>(
-        ref ImmutableDictionary<Ref<TOwner>, TCollection> dictionary,
-        bool requestMutableCollection,
-        Ref<TOwner> declaringTypeRef,
-        Func<CompilationModel, Ref<TOwner>, TCollection> createCollection,
-        Func<TCollection, Ref<TOwner>, TCollection>? createSubstitutedCollection = null )
-        where TOwner : class, IDeclaration
-        where TDeclaration : class, IDeclaration
-        where TCollection : ISourceDeclarationCollection<TDeclaration>
-        => this.GetMemberCollection<TOwner, TDeclaration, Ref<TDeclaration>, TCollection>(
-            ref dictionary,
-            requestMutableCollection,
-            declaringTypeRef,
-            createCollection,
-            createSubstitutedCollection );
-
-    private TCollection GetMemberCollection<TOwner, TDeclaration, TRef, TCollection>(
-        ref ImmutableDictionary<Ref<TOwner>, TCollection> dictionary,
-        bool requestMutableCollection,
-        Ref<TOwner> declaration,
-        Func<CompilationModel, Ref<TOwner>, TCollection> createCollection,
-        Func<TCollection, Ref<TOwner>, TCollection>? createSubstitutedCollection )
-        where TOwner : class, IDeclaration
-        where TDeclaration : class, IDeclaration
-        where TCollection : ISourceDeclarationCollection<TDeclaration, TRef>
-        where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
+    internal bool Contains( NamespaceBuilder namespaceBuilder )
     {
-        if ( requestMutableCollection && !this.IsMutable )
-        {
-            // Cannot get a mutable collection when the model is immutable.
-            throw new InvalidOperationException();
-        }
+        var containingNamespace = namespaceBuilder.ContainingNamespace ?? namespaceBuilder.ContainingNamespace ?? throw new AssertionFailedException();
+
+        return this._namespaces.TryGetValue(
+                   containingNamespace.ToFullRef(),
+                   out var namespaces )
+               && namespaces.Contains( namespaceBuilder.ToRef() );
+    }
+
+    private TCollection GetMemberCollection<TOwner, TCollection>(
+        ref ImmutableDictionary<IFullRef<TOwner>, TCollection> dictionary,
+        bool requestMutableCollection,
+        IFullRef<TOwner> declaration,
+        Func<CompilationModel, IFullRef<TOwner>, TCollection> createCollection )
+        where TOwner : class, IDeclaration
+        where TCollection : IUpdatableCollection
+    {
+        Invariant.Assert( !(requestMutableCollection && !this.IsMutable) );
+        Invariant.Assert( declaration.IsDefinition );
 
         // If the model is mutable, we need to return a mutable collection because it may be mutated after the
         // front-end collection is returned.
@@ -175,189 +127,131 @@ public sealed partial class CompilationModel
                 collection = (TCollection) collection.Clone( this.Compilation );
                 dictionary = dictionary.SetItem( declaration, collection );
             }
-
-            return collection;
         }
         else
         {
-            if ( createSubstitutedCollection != null &&
-                 declaration.Target is INamedTypeSymbol { IsGenericType: true } substitutedType &&
-                 substitutedType.OriginalDefinition != substitutedType )
-            {
-                var sourceCollection = this.GetMemberCollection<TOwner, TDeclaration, TRef, TCollection>(
-                    ref dictionary,
-                    requestMutableCollection,
-                    substitutedType.OriginalDefinition.ToValueTypedRef<TOwner>( this.CompilationContext ),
-                    createCollection,
-                    createSubstitutedCollection );
-
-                collection = createSubstitutedCollection( sourceCollection, declaration );
-            }
-            else
-            {
-                collection = createCollection( this.Compilation, declaration );
-            }
-
+            collection = createCollection( this.Compilation, declaration );
             dictionary = dictionary.SetItem( declaration, collection );
         }
 
         return collection;
     }
 
-    internal FieldUpdatableCollection GetFieldCollection( in Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IField, FieldUpdatableCollection>(
+    internal FieldUpdatableCollection GetFieldCollection( IFullRef<INamedType> declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedType, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
-            ( c, t ) => new FieldUpdatableCollection( c, t ) );
+            static ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
-    internal ISourceMemberCollection<IMethod> GetMethodCollection( in Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IMethod, ISourceMemberCollection<IMethod>>(
+    internal MethodUpdatableCollection GetMethodCollection( IFullRef<INamedType> declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedType, MethodUpdatableCollection>(
             ref this._methods,
             mutable,
             declaringType,
-            ( c, t ) => new MethodUpdatableCollection( c, t ),
-            ( s, t ) => new MemberSubstitutedCollection<IMethod>( s, t ) );
+            static ( c, t ) => new MethodUpdatableCollection( c, t ) );
 
-    internal ConstructorUpdatableCollection GetConstructorCollection( in Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IConstructor, ConstructorUpdatableCollection>(
+    internal ConstructorUpdatableCollection GetConstructorCollection( IFullRef<INamedType> declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedType, ConstructorUpdatableCollection>(
             ref this._constructors,
             mutable,
             declaringType,
-            ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
+            static ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
 
-    internal PropertyUpdatableCollection GetPropertyCollection( in Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IProperty, PropertyUpdatableCollection>(
+    internal PropertyUpdatableCollection GetPropertyCollection( IFullRef<INamedType> declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedType, PropertyUpdatableCollection>(
             ref this._properties,
             mutable,
             declaringType,
-            ( c, t ) => new PropertyUpdatableCollection( c, t ) );
+            static ( c, t ) => new PropertyUpdatableCollection( c, t ) );
 
-    internal IndexerUpdatableCollection GetIndexerCollection( in Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IIndexer, IndexerUpdatableCollection>(
+    internal IndexerUpdatableCollection GetIndexerCollection( IFullRef<INamedType> declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedType, IndexerUpdatableCollection>(
             ref this._indexers,
             mutable,
             declaringType,
-            ( c, t ) => new IndexerUpdatableCollection( c, t ) );
+            static ( c, t ) => new IndexerUpdatableCollection( c, t ) );
 
-    internal EventUpdatableCollection GetEventCollection( in Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedType, IEvent, EventUpdatableCollection>(
+    internal EventUpdatableCollection GetEventCollection( IFullRef<INamedType> declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedType, EventUpdatableCollection>(
             ref this._events,
             mutable,
             declaringType,
-            ( c, t ) => new EventUpdatableCollection( c, t ) );
+            static ( c, t ) => new EventUpdatableCollection( c, t ) );
 
-    internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( in Ref<INamedType> declaringType, bool mutable )
-        => this.GetMemberCollection<INamedType, INamedType, InterfaceUpdatableCollection>(
+    internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( IFullRef<INamedType> declaringType, bool mutable )
+        => this.GetMemberCollection<INamedType, InterfaceUpdatableCollection>(
             ref this._interfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
 
-    internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( in Ref<INamedType> declaringType, bool mutable )
-        => this.GetMemberCollection<INamedType, INamedType, AllInterfaceUpdatableCollection>(
+    internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( IFullRef<INamedType> declaringType, bool mutable )
+        => this.GetMemberCollection<INamedType, AllInterfaceUpdatableCollection>(
             ref this._allInterfaceImplementations,
             mutable,
             declaringType,
-            ( c, t ) => new AllInterfaceUpdatableCollection( c, t ) );
+            static ( c, t ) => new AllInterfaceUpdatableCollection( c, t ) );
 
-    internal ParameterUpdatableCollection GetParameterCollection( in Ref<IHasParameters> parent, bool mutable = false )
-        => this.GetMemberCollection<IHasParameters, IParameter, ParameterUpdatableCollection>(
+    internal ParameterUpdatableCollection GetParameterCollection( IFullRef<IHasParameters> parent, bool mutable = false )
+        => this.GetMemberCollection<IHasParameters, ParameterUpdatableCollection>(
             ref this._parameters,
             mutable,
             parent,
-            ( c, t ) => new ParameterUpdatableCollection( c, t ) );
+            static ( c, t ) => new ParameterUpdatableCollection( c, t ) );
 
-    internal AttributeUpdatableCollection GetAttributeCollection( in Ref<IDeclaration> parent, bool mutable = false )
+    internal TypeUpdatableCollection GetNamedTypeCollectionByParent( IFullRef<INamespaceOrNamedType> parent, bool mutable = false )
+        => this.GetMemberCollection<INamespaceOrNamedType, TypeUpdatableCollection>(
+            ref this._namedTypesByParent,
+            mutable,
+            parent,
+            static ( c, t ) => new TypeUpdatableCollection( c, t ) );
+
+    internal TypeUpdatableCollection GetTopLevelNamedTypeCollection( bool mutable = false )
     {
-        var moduleSymbol = parent.Target is ISourceAssemblySymbol ? this.RoslynCompilation.SourceModule : null;
+        if ( this._topLevelNamedTypes != null )
+        {
+            if ( !ReferenceEquals( this._topLevelNamedTypes.Compilation, this ) && mutable )
+            {
+                // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
+                // We need to take a copy of it.
+                this._topLevelNamedTypes = (TypeUpdatableCollection) this._topLevelNamedTypes.Clone( this.Compilation );
+            }
+        }
+        else
+        {
+            this._topLevelNamedTypes = new TypeUpdatableCollection( this.Compilation );
+        }
 
-        return this.GetMemberCollection<IDeclaration, IAttribute, AttributeRef, AttributeUpdatableCollection>(
+        return this._topLevelNamedTypes;
+    }
+
+    internal NamespaceUpdatableCollection GetNamespaceCollection( IFullRef<INamespace> declaringNamespace, bool mutable = false )
+        => this.GetMemberCollection<INamespace, NamespaceUpdatableCollection>(
+            ref this._namespaces,
+            mutable,
+            declaringNamespace,
+            static ( c, t ) => new NamespaceUpdatableCollection( c, t ) );
+
+    internal AttributeUpdatableCollection GetAttributeCollection( IFullRef<IDeclaration> parent, bool mutable = false )
+        => this.GetMemberCollection<IDeclaration, AttributeUpdatableCollection>(
             ref this._attributes,
             mutable,
             parent,
-            ( c, t ) => new AttributeUpdatableCollection( c, t, moduleSymbol ),
-            null );
-    }
+            static ( c, t ) => new AttributeUpdatableCollection( c, t ) );
 
-    internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
+    internal ConstructorBuilderData? GetStaticConstructor( INamedTypeSymbol declaringType )
     {
-        this._staticConstructors.TryGetValue( declaringType.ToValueTypedRef<INamedType>( this.CompilationContext ), out var value );
+        this._staticConstructors.TryGetValue( declaringType.ToRef( this.RefFactory ), out var value );
 
         return value;
     }
 
-    internal IMethodBuilder? GetFinalizer( INamedTypeSymbol declaringType )
+    internal MethodBuilderData? GetFinalizer( INamedTypeSymbol declaringType )
     {
-        this._finalizers.TryGetValue( declaringType.ToValueTypedRef<INamedType>( this.CompilationContext ), out var value );
+        this._finalizers.TryGetValue( declaringType.ToRef( this.RefFactory ), out var value );
 
         return value;
-    }
-
-    internal TypeUpdatableCollection GetNamedTypeCollection( in Ref<INamespaceOrNamedType> declaringNamespaceOrType, bool mutable = false )
-    {
-        if ( mutable && !this.IsMutable )
-        {
-            // Cannot get a mutable collection when the model is immutable.
-            throw new InvalidOperationException();
-        }
-
-        // If the model is mutable, we need to return a mutable collection because it may be mutated after the
-        // front-end collection is returned.
-        var returnMutableCollection = mutable || this.IsMutable;
-
-        if ( this._namedTypes.TryGetValue( declaringNamespaceOrType, out var collection ) )
-        {
-            if ( !ReferenceEquals( collection.Compilation, this ) && returnMutableCollection )
-            {
-                // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
-                // We need to take a copy of it.
-                collection = (TypeUpdatableCollection) collection.Clone( this.Compilation );
-                this._namedTypes = this._namedTypes.SetItem( declaringNamespaceOrType, collection );
-            }
-
-            return collection;
-        }
-        else
-        {
-            collection = new TypeUpdatableCollection( this, declaringNamespaceOrType );
-            this._namedTypes = this._namedTypes.SetItem( declaringNamespaceOrType, collection );
-        }
-
-        return collection;
-    }
-
-    internal NamespaceUpdatableCollection GetNamespaceCollection( in Ref<INamespace> declaringNamespace, bool mutable = false )
-    {
-        if ( mutable && !this.IsMutable )
-        {
-            // Cannot get a mutable collection when the model is immutable.
-            throw new InvalidOperationException();
-        }
-
-        // If the model is mutable, we need to return a mutable collection because it may be mutated after the
-        // front-end collection is returned.
-        var returnMutableCollection = mutable || this.IsMutable;
-
-        if ( this._namespaces.TryGetValue( declaringNamespace, out var collection ) )
-        {
-            if ( !ReferenceEquals( collection.Compilation, this ) && returnMutableCollection )
-            {
-                // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
-                // We need to take a copy of it.
-                collection = (NamespaceUpdatableCollection) collection.Clone( this.Compilation );
-                this._namespaces = this._namespaces.SetItem( declaringNamespace, collection );
-            }
-
-            return collection;
-        }
-        else
-        {
-            collection = new NamespaceUpdatableCollection( this, declaringNamespace );
-            this._namespaces = this._namespaces.SetItem( declaringNamespace, collection );
-        }
-
-        return collection;
     }
 
     internal void AddTransformation( ITransformation transformation )
@@ -386,8 +280,7 @@ public sealed partial class CompilationModel
         // IMPORTANT: Keep the builder interface in this condition for linker tests, which use fake builders.
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
-            var builder = introduceDeclarationTransformation.DeclarationBuilder;
-            builder.Freeze();
+            var builder = introduceDeclarationTransformation.DeclarationBuilderData;
 
             this.AddDeclaration( builder );
         }
@@ -410,43 +303,49 @@ public sealed partial class CompilationModel
 
     private void AddAnnotation( AddAnnotationTransformation addAnnotationTransformation )
         => this.Annotations =
-            this.Annotations.Add( addAnnotationTransformation.TargetDeclaration.ToValueTypedRef(), addAnnotationTransformation.AnnotationInstance );
+            this.Annotations.Add(
+                addAnnotationTransformation.TargetDeclaration,
+                addAnnotationTransformation.AnnotationInstance );
 
     private void RemoveAttributes( RemoveAttributesTransformation removeAttributes )
     {
-        var attributes = this.GetAttributeCollection( removeAttributes.ContainingDeclaration.ToValueTypedRef(), true );
+        var attributes = this.GetAttributeCollection( removeAttributes.ContainingDeclaration, true );
         attributes.Remove( removeAttributes.AttributeType );
     }
 
     private void AddReplaceMemberTransformation( IReplaceMemberTransformation transformation )
     {
-        if ( transformation.ReplacedMember.IsDefault )
+        if ( transformation.ReplacedMember == null )
         {
             return;
         }
 
         var replaced = transformation.ReplacedMember;
+        this.Factory.Invalidate( replaced );
 
-        switch ( replaced.GetTarget( this ) )
+        switch ( replaced )
         {
-            case IConstructor { IsStatic: false } replacedConstructor:
-                var constructors = this.GetConstructorCollection( replacedConstructor.DeclaringType.ToValueTypedRef(), true );
-                constructors.Remove( replaced.As<IConstructor>() );
+            case IFullRef<IConstructor> replacedConstructor:
+                if ( !replacedConstructor.Definition.IsStatic )
+                {
+                    var constructors = this.GetConstructorCollection( replacedConstructor.ContainingDeclaration.AssertNotNull().As<INamedType>(), true );
+                    constructors.Remove( replacedConstructor );
+                }
+                else
+                {
+                    // Nothing to do, static constructor is replaced in the collection earlier.
+                }
 
                 break;
 
-            case IConstructor { IsStatic: true }:
-                // Nothing to do, static constructor is replaced in the collection earlier.
-                break;
-
-            case IField replacedField:
-                var fields = this.GetFieldCollection( replacedField.DeclaringType.ToValueTypedRef(), true );
-                fields.Remove( replaced.As<IField>() );
+            case IFullRef<IField> replacedField:
+                var fields = this.GetFieldCollection( replacedField.ContainingDeclaration.AssertNotNull().As<INamedType>(), true );
+                fields.Remove( replacedField );
 
                 break;
 
             default:
-                throw new AssertionFailedException( $"Unexpected declaration: '{replaced.GetTarget( this )}'." );
+                throw new AssertionFailedException( $"Unexpected declaration: '{replaced}'." );
         }
 
         // Update the redirection cache.
@@ -454,9 +353,11 @@ public sealed partial class CompilationModel
         {
             if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                this._redirections = this._redirections.Add(
-                    replacedMember.ToRef().As<IDeclaration>(),
-                    Ref.FromBuilder( introduceDeclarationTransformation.DeclarationBuilder ) );
+                var newBuilder = introduceDeclarationTransformation.DeclarationBuilderData;
+
+                Invariant.Assert( !(replacedMember is IIntroducedRef replacedBuilderRef && newBuilder.Equals( replacedBuilderRef.BuilderData )) );
+
+                this._redirections = this._redirections.Add( replacedMember, newBuilder );
             }
             else
             {
@@ -465,12 +366,14 @@ public sealed partial class CompilationModel
         }
     }
 
-    private void AddDeclaration( IDeclaration declaration )
+    private void AddDeclaration( DeclarationBuilderData declaration )
     {
+        // TODO Perf: switch on DeclarationKind,
+
         switch ( declaration )
         {
-            case IMethodBuilder { MethodKind: MethodKind.Finalizer } finalizer:
-                var finalizerDeclaringType = finalizer.DeclaringType.ToValueTypedRef();
+            case MethodBuilderData { MethodKind: MethodKind.Finalizer } finalizer:
+                var finalizerDeclaringType = finalizer.DeclaringType;
 
                 if ( this._finalizers.ContainsKey( finalizerDeclaringType ) )
                 {
@@ -482,20 +385,20 @@ public sealed partial class CompilationModel
 
                 break;
 
-            case IMethod method:
-                var methods = this.GetMethodCollection( method.DeclaringType.ToValueTypedRef(), true ).AssertCast<MethodUpdatableCollection>();
-                methods.Add( method.ToMemberRef() );
+            case MethodBuilderData method:
+                var methods = this.GetMethodCollection( method.DeclaringType, true ).AssertCast<MethodUpdatableCollection>();
+                methods.Add( method.ToRef() );
 
                 break;
 
-            case IConstructor { IsStatic: false } constructor:
-                var constructors = this.GetConstructorCollection( constructor.DeclaringType.ToValueTypedRef(), true );
-                constructors.Add( constructor.ToMemberRef() );
+            case ConstructorBuilderData { IsStatic: false } constructor:
+                var constructors = this.GetConstructorCollection( constructor.DeclaringType, true );
+                constructors.Add( constructor.ToRef() );
 
                 break;
 
-            case IConstructorBuilder { IsStatic: true } staticConstructorBuilder:
-                var staticCtorDeclaringType = staticConstructorBuilder.DeclaringType.ToValueTypedRef();
+            case ConstructorBuilderData { IsStatic: true } staticConstructorBuilder:
+                var staticCtorDeclaringType = staticConstructorBuilder.DeclaringType;
 
                 if ( this._staticConstructors.ContainsKey( staticCtorDeclaringType ) )
                 {
@@ -507,57 +410,63 @@ public sealed partial class CompilationModel
 
                 break;
 
-            case IField field:
-                var fields = this.GetFieldCollection( field.DeclaringType.ToValueTypedRef(), true );
-                fields.Add( field.ToMemberRef() );
+            case FieldBuilderData field:
+                var fields = this.GetFieldCollection( field.DeclaringType, true );
+                fields.Add( field.ToRef() );
 
                 break;
 
-            case IProperty property:
-                var properties = this.GetPropertyCollection( property.DeclaringType.ToValueTypedRef(), true );
-                properties.Add( property.ToMemberRef() );
+            case PropertyBuilderData property:
+                var properties = this.GetPropertyCollection( property.DeclaringType, true );
+                properties.Add( property.ToRef() );
 
                 break;
 
-            case IIndexer indexer:
-                var indexers = this.GetIndexerCollection( indexer.DeclaringType.ToValueTypedRef(), true );
-                indexers.Add( indexer.ToMemberRef() );
+            case IndexerBuilderData indexer:
+                var indexers = this.GetIndexerCollection( indexer.DeclaringType, true );
+                indexers.Add( indexer.ToRef() );
 
                 break;
 
-            case IEvent @event:
-                var events = this.GetEventCollection( @event.DeclaringType.ToValueTypedRef(), true );
-                events.Add( @event.ToMemberRef() );
+            case EventBuilderData @event:
+                var events = this.GetEventCollection( @event.DeclaringType, true );
+                events.Add( @event.ToRef() );
 
                 break;
 
-            case IParameterBuilder parameter:
-                var parameters = this.GetParameterCollection( parameter.DeclaringMember.ToValueTypedRef(), true );
+            case ParameterBuilderData parameter:
+                var parameters = this.GetParameterCollection( parameter.ContainingDeclaration.As<IHasParameters>(), true );
                 parameters.Add( parameter );
 
                 break;
 
-            case AttributeBuilder attribute:
-                var attributes = this.GetAttributeCollection( attribute.ContainingDeclaration.ToValueTypedRef(), true );
+            case AttributeBuilderData attribute:
+                var attributes = this.GetAttributeCollection( attribute.ContainingDeclaration, true );
                 attributes.Add( attribute );
 
                 break;
 
-            case INamedType namedType:
-                var types = this.GetNamedTypeCollection(
-                    namedType.ContainingDeclaration.AssertNotNull().ToValueTypedRef().As<INamespaceOrNamedType>(),
+            case NamedTypeBuilderData namedType:
+                var types = this.GetNamedTypeCollectionByParent(
+                    namedType.ContainingDeclaration.AssertNotNull().As<INamespaceOrNamedType>(),
                     true );
 
-                types.Add( namedType.ToMemberRef() );
+                types.Add( namedType.ToRef() );
+
+                if ( namedType.DeclaringType == null )
+                {
+                    var topLevelTypes = this.GetTopLevelNamedTypeCollection( true );
+                    topLevelTypes.Add( namedType.ToRef() );
+                }
 
                 break;
 
-            case INamespace @namespace:
+            case NamespaceBuilderData @namespace:
                 var namespaces = this.GetNamespaceCollection(
-                    @namespace.ContainingNamespace.AssertNotNull().ToValueTypedRef().As<INamespace>(),
+                    @namespace.ContainingDeclaration.AssertNotNull().As<INamespace>(),
                     true );
 
-                namespaces.Add( @namespace.ToMemberRef() );
+                namespaces.Add( @namespace.ToRef() );
 
                 break;
 
@@ -570,15 +479,15 @@ public sealed partial class CompilationModel
     {
         var introduceInterface = (IntroduceInterfaceTransformation) transformation;
 
-        var targetType = (INamedType) introduceInterface.ContainingDeclaration;
+        var targetType = introduceInterface.TargetType;
 
-        var interfaces = this.GetInterfaceImplementationCollection( targetType.ToValueTypedRef(), true );
+        var interfaces = this.GetInterfaceImplementationCollection( targetType, true );
 
         interfaces.Add( introduceInterface );
 
-        foreach ( var type in new[] { targetType }.Concat( this.GetDerivedTypes( targetType ) ) )
+        foreach ( var type in this.GetDerivedTypes( targetType ).Concat( targetType ) )
         {
-            var allInterfaces = this.GetAllInterfaceImplementationCollection( type.ToValueTypedRef(), true );
+            var allInterfaces = this.GetAllInterfaceImplementationCollection( type, true );
 
             allInterfaces.Add( introduceInterface );
         }

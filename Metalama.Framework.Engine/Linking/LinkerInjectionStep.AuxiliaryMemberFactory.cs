@@ -3,9 +3,10 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
@@ -52,7 +53,7 @@ internal sealed partial class LinkerInjectionStep
 
         private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
 
-        public ConstructorDeclarationSyntax GetAuxiliarySourceConstructor( IConstructor constructor )
+        public ConstructorDeclarationSyntax GetAuxiliarySourceConstructor( IFullRef<IConstructor> constructor )
         {
 #if ROSLYN_4_8_0_OR_GREATER
             var syntax = (TypeDeclarationSyntax) constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
@@ -85,10 +86,9 @@ internal sealed partial class LinkerInjectionStep
 
             return ConstructorDeclaration(
                 List<AttributeListSyntax>(),
-                constructor
-                    .GetSyntaxModifierList( ModifierCategories.Unsafe )
+                constructor.Definition.GetSyntaxModifierList( ModifierCategories.Unsafe )
                     .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
-                Identifier( constructor.DeclaringType.Name ),
+                Identifier( constructor.DeclaringType.AssertNotNull().Name.AssertNotNull() ),
                 parameters,
                 ConstructorInitializer(
                     SyntaxKind.ThisConstructorInitializer,
@@ -106,21 +106,20 @@ internal sealed partial class LinkerInjectionStep
         }
 
         public MemberDeclarationSyntax GetAuxiliaryContractMember(
-            IMember member,
-            CompilationModel compilationModel,
-            Advice advice,
+            IFullRef<IMember> member,
+            AspectLayerInstance aspectLayerInstance,
             string? returnVariableName )
         {
             switch ( member )
             {
-                case IMethod method:
-                    return this.GetAuxiliaryContractMethod( method, compilationModel, advice.AspectLayerId, returnVariableName );
+                case IFullRef<IMethod> method:
+                    return this.GetAuxiliaryContractMethod( method, aspectLayerInstance.AspectLayerId, returnVariableName );
 
-                case IProperty property:
-                    return this.GetAuxiliaryContractProperty( property, advice.AspectLayerId, returnVariableName );
+                case IFullRef<IProperty> property:
+                    return this.GetAuxiliaryContractProperty( property, aspectLayerInstance.AspectLayerId, returnVariableName );
 
-                case IIndexer indexer:
-                    return this.GetAuxiliaryContractIndexer( indexer, advice, returnVariableName );
+                case IFullRef<IIndexer> indexer:
+                    return this.GetAuxiliaryContractIndexer( indexer, aspectLayerInstance, returnVariableName );
 
                 default:
                     throw new AssertionFailedException( $"Unsupported kind: {member}" );
@@ -128,11 +127,12 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractMethod(
-            IMethod method,
-            CompilationModel compilationModel,
+            IFullRef<IMethod> methodRef,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
+            var method = methodRef.Definition.AssertNotNull();
+
             var primaryDeclaration = method.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =
@@ -199,7 +199,7 @@ internal sealed partial class LinkerInjectionStep
                 if ( method.ReturnType.Equals( SpecialType.Void ) )
                 {
                     returnType = syntaxGenerationContext.SyntaxGenerator.Type(
-                        compilationModel.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
+                        syntaxGenerationContext.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
                 }
             }
 
@@ -209,7 +209,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( emulatedTemplateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
                 {
-                    var returnItemName = this._lexicalScopeFactory.GetLexicalScope( method ).GetUniqueIdentifier( "returnItem" );
+                    var returnItemName = this._lexicalScopeFactory.GetLexicalScope( method.ToFullRef() ).GetUniqueIdentifier( "returnItem" );
 
                     body = Block(
                         CreateLocalVariableDeclaration( returnVariableName ),
@@ -219,7 +219,7 @@ internal sealed partial class LinkerInjectionStep
                          or EnumerableKind.IAsyncEnumerator )
                 {
                     // TODO: #34577 This is wrong, the enumerator needs to be cloned/reset.
-                    var bufferedEnumeratorName = this._lexicalScopeFactory.GetLexicalScope( method ).GetUniqueIdentifier( "bufferedEnumerator" );
+                    var bufferedEnumeratorName = this._lexicalScopeFactory.GetLexicalScope( method.ToFullRef() ).GetUniqueIdentifier( "bufferedEnumerator" );
 
                     body = Block(
                         CreateLocalVariableDeclaration( bufferedEnumeratorName ),
@@ -276,8 +276,8 @@ internal sealed partial class LinkerInjectionStep
                 returnType.WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ),
                 null,
                 Identifier( this._injectionNameProvider.GetOverrideName( method.DeclaringType, aspectLayerId, method ) ),
-                syntaxGenerationContext.SyntaxGenerator.TypeParameterList( method, compilationModel ),
-                syntaxGenerationContext.SyntaxGenerator.ParameterList( method, compilationModel, true ),
+                syntaxGenerationContext.SyntaxGenerator.TypeParameterList( method, this._finalCompilationModel ),
+                syntaxGenerationContext.SyntaxGenerator.ParameterList( method, this._finalCompilationModel, true ),
                 syntaxGenerationContext.SyntaxGenerator.ConstraintClauses( method ),
                 body,
                 null );
@@ -344,10 +344,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractProperty(
-            IProperty property,
+            IFullRef<IProperty> propertyRef,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
+            var property = propertyRef.Definition;
             var primaryDeclaration = property.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =
@@ -456,10 +457,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private MemberDeclarationSyntax GetAuxiliaryContractIndexer(
-            IIndexer indexer,
-            Advice advice,
+            IFullRef<IIndexer> indexerRef,
+            AspectLayerInstance aspectLayerInstance,
             string? returnVariableName )
         {
+            var indexer = indexerRef.Definition;
             var primaryDeclaration = indexer.GetPrimaryDeclarationSyntax();
 
             var syntaxGenerationContext =
@@ -483,7 +485,7 @@ internal sealed partial class LinkerInjectionStep
                                             null,
                                             EqualsValueClause(
                                                 this._aspectReferenceSyntaxProvider.GetIndexerReference(
-                                                    advice.AspectLayerId,
+                                                    aspectLayerInstance.AspectLayerId,
                                                     indexer,
                                                     AspectReferenceTargetKind.PropertyGetAccessor,
                                                     syntaxGenerationContext.SyntaxGenerator ) ) ) ) ) ),
@@ -498,7 +500,7 @@ internal sealed partial class LinkerInjectionStep
                                     this._aspectReferenceSyntaxProvider,
                                     syntaxGenerationContext,
                                     indexer,
-                                    advice.AspectLayerId ),
+                                    aspectLayerInstance.AspectLayerId ),
                                 Token( SyntaxKind.SemicolonToken ) ) )
                     : null;
 
@@ -521,7 +523,7 @@ internal sealed partial class LinkerInjectionStep
                                 this._aspectReferenceSyntaxProvider,
                                 syntaxGenerationContext,
                                 indexer,
-                                advice.AspectLayerId ) ) )
+                                aspectLayerInstance.AspectLayerId ) ) )
                     : null;
 
             var modifiers = indexer
@@ -540,7 +542,7 @@ internal sealed partial class LinkerInjectionStep
                         this._finalCompilationModel,
                         syntaxGenerationContext,
                         indexer,
-                        this._injectionNameProvider.GetAuxiliaryType( advice.AspectInstance, indexer, syntaxGenerationContext ) ),
+                        this._injectionNameProvider.GetAuxiliaryType( aspectLayerInstance.AspectInstance, indexer, syntaxGenerationContext ) ),
                     AccessorList(
                         List(
                             new[]

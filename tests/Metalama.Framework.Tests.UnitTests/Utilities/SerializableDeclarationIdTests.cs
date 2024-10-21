@@ -2,8 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Pseudo;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Source.Pseudo;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -120,7 +121,7 @@ class C<T>
     private static void Roundtrip( ICompilation compilation, ISymbol symbol, bool requireSameInstance = true )
     {
         var symbolDeclarationId = symbol.GetSerializableId();
-        var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetCompilationModel().CompilationContext );
+        var symbolRoundtrip = symbolDeclarationId.ResolveToSymbolOrNull( compilation.GetCompilationContext() );
 
         if ( symbol is INamespaceSymbol nss )
         {
@@ -136,7 +137,9 @@ class C<T>
         }
 
         // Also test a Ref roundtrip.
-        var symbolRoundtripFromRef = Ref.FromSymbol( symbol, compilation.GetCompilationModel().CompilationContext )
+        var symbolRoundtripFromRef = compilation
+            .GetRefFactory()
+            .FromAnySymbol( symbol )
             .GetSymbol( compilation.GetRoslynCompilation() );
 
         if ( requireSameInstance )

@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -22,12 +22,17 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
 {
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
+    private readonly CompilationContext _compilationContext;
     private readonly UserCodeInvoker _userCodeInvoker;
 
-    protected AttributeDeserializer( in ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
+    protected AttributeDeserializer(
+        in ProjectServiceProvider serviceProvider,
+        CompileTimeTypeResolver compileTimeTypeResolver,
+        CompilationContext compilationContext )
     {
         this._serviceProvider = serviceProvider;
         this._compileTimeTypeResolver = compileTimeTypeResolver;
+        this._compilationContext = compilationContext;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
@@ -165,8 +170,9 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
 
         var executionContext = new UserCodeExecutionContext(
             this._serviceProvider,
-            diagnosticAdder,
-            UserCodeDescription.Create( "calling the {0} constructor while instantiating a custom attribute", constructor ) );
+            UserCodeDescription.Create( "calling the {0} constructor while instantiating a custom attribute", constructor ),
+            this._compilationContext,
+            diagnostics: diagnosticAdder );
 
         if ( !this._userCodeInvoker.TryInvoke( () => (Attribute) constructor.Invoke( arguments ), executionContext, out var localAttributeInstance ) )
         {
@@ -207,7 +213,7 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
                 }
 
                 if ( !this._userCodeInvoker.TryInvoke(
-                        () => setter.Invoke( localAttributeInstance, new[] { translatedValue } ),
+                        () => setter.Invoke( localAttributeInstance, [translatedValue] ),
                         executionContext.WithDescription(
                             UserCodeDescription.Create( "setting the {0} property while instantiating a custom attribute", property ) ) ) )
                 {

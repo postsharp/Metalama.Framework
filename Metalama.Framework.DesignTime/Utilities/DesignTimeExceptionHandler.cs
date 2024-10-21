@@ -3,12 +3,21 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Telemetry;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.Utilities
 {
-    public static class DesignTimeExceptionHandler
+    public class DesignTimeExceptionHandler : IGlobalService
     {
+        private readonly IExceptionReporter? _exceptionReporter;
+
+        public DesignTimeExceptionHandler( ServiceProvider<IGlobalService> serviceProvider )
+        {
+            this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
+        }
+
         // It is critical that OperationCanceledException is NOT handled, i.e. this exception should flow to the caller, otherwise VS will be satisfied
         // with the incomplete results it received, and cache them. 
         internal static bool MustHandle( Exception e )
@@ -19,7 +28,7 @@ namespace Metalama.Framework.DesignTime.Utilities
                 _ => true
             };
 
-        public static void ReportException( Exception e, ILogger? logger = null )
+        public void ReportException( Exception e, ILogger? logger = null )
         {
             logger ??= Logger.DesignTime;
 
@@ -27,7 +36,10 @@ namespace Metalama.Framework.DesignTime.Utilities
             {
                 logger.Error?.Log( e.ToString() );
 
-                BackstageServiceFactory.ServiceProvider.GetBackstageService<IExceptionReporter>()?.ReportException( e );
+                // TODO: Is this guaranteed not to be called before the BackstageServiceFactory is initialized?
+                var exceptionReporter = this._exceptionReporter ?? BackstageServiceFactory.ServiceProvider.GetBackstageService<IExceptionReporter>();
+
+                exceptionReporter?.ReportException( e );
             }
             else
             {

@@ -24,16 +24,16 @@ class MyAttribute : System.Attribute { public MyAttribute( int id ) {} }
 [MyAttribute(3)]
 class C< [MyAttribute(4)]T> 
 {
-    [MyAttribute(5)]
-    [return: MyAttribute(6)]
+   [MyAttribute(5)]
+   [return: MyAttribute(6)]
    void M( [MyAttribute(7)] int p ) {}
 
    [MyAttribute(8)]
-    int f, g;
+   int f, g;
 
-    [MyAttribute(9)]
-    [field: MyAttribute(10)]
-    int P 
+   [MyAttribute(9)]
+   [field: MyAttribute(10)]
+   int P 
     {
         get;
         [param: MyAttribute(11)]set; 
@@ -59,12 +59,11 @@ class C< [MyAttribute(4)]T>
                 .ToArray();
 
             Assert.Equal(
-                new[]
-                {
+                [
                     "test:1",
                     "test:2",
                     "C<T>:3",
-                    "T:4",
+                    "C<T>/T:4",
                     "C<T>.M(int):5",
                     "C<T>.M(int)/<return>:6",
                     "C<T>.M(int)/p:7",
@@ -75,7 +74,7 @@ class C< [MyAttribute(4)]T>
                     "C<T>.P.set/value:11",
                     "C<T>.ee:13",
                     "C<T>.ff:13"
-                },
+                ],
                 targets );
         }
 
@@ -119,7 +118,7 @@ class C< [MyAttribute(4)]T>
 
             Assert.Equal( DayOfWeek.Monday, attribute.GetArgumentValue<DayOfWeek>( "DayOfWeek" ) );
 
-            Assert.Equal( DayOfWeek.Wednesday, attribute.GetArgumentValue<DayOfWeek>( "X", DayOfWeek.Wednesday ) );
+            Assert.Equal( DayOfWeek.Wednesday, attribute.GetArgumentValue( "X", DayOfWeek.Wednesday ) );
         }
     }
 }

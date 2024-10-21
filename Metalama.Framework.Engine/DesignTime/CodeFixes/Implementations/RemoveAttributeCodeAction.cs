@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -26,21 +26,15 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
-        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( context.CompilationContext );
+        var attributeTypeSymbol = (ITypeSymbol?) this.AttributeType.GetSymbol( context.CompilationContext )
+                                  ??
+                                  throw new InvalidOperationException(
+                                      $"Cannot remove attributes of type '{this.AttributeType}' because the type does not exist in the source compilation." );
 
-        if ( attributeTypeSymbol == null )
-        {
-            throw new InvalidOperationException(
-                $"Cannot remove attributes of type '{this.AttributeType}' because the type does not exist in the source compilation." );
-        }
-
-        var targetSymbol = this.TargetDeclaration.GetSymbol( context.CompilationContext );
-
-        if ( targetSymbol == null )
-        {
-            throw new InvalidOperationException(
-                $"Cannot remove attributes from '{this.TargetDeclaration}' because it does not exist in the source compilation." );
-        }
+        var targetSymbol = this.TargetDeclaration.GetSymbol( context.CompilationContext )
+                           ??
+                           throw new InvalidOperationException(
+                               $"Cannot remove attributes from '{this.TargetDeclaration}' because it does not exist in the source compilation." );
 
         // We need to process all syntaxes that define this symbol.
         foreach ( var syntaxReferenceGroup in targetSymbol.DeclaringSyntaxReferences.GroupBy( r => r.SyntaxTree ) )

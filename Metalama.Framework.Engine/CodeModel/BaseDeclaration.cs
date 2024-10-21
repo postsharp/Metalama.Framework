@@ -3,12 +3,16 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -22,22 +26,29 @@ namespace Metalama.Framework.Engine.CodeModel
         [PublicAPI]
         public abstract CompilationModel Compilation { get; }
 
+        ICompilationElement? ICompilationElementImpl.Translate(
+            CompilationModel newCompilation,
+            IGenericContext? genericContext,
+            Type? interfaceType )
+            => this.Translate( newCompilation, genericContext );
+
+        internal abstract ICompilationElement? Translate(
+            CompilationModel newCompilation,
+            IGenericContext? genericContext = null,
+            Type? interfaceType = null );
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.ToDeclarationRef();
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToFullDeclarationRef();
+
+        private protected virtual IRef<IDeclaration> ToDeclarationRef() => this.ToFullDeclarationRef();
 
         /// <summary>
-        /// Returns a <see cref="BoxedRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
+        /// Returns an <see cref="IRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
         /// but <see cref="IMethod"/>, <see cref="INamedType"/>, ... 
         /// </summary>
         /// <returns></returns>
-        private protected abstract IRef<IDeclaration> ToDeclarationRef();
-
-        internal abstract Ref<IDeclaration> ToValueTypedRef();
-
-        Ref<ICompilationElement> ICompilationElementImpl.ToValueTypedRef() => this.ToValueTypedRef().As<ICompilationElement>();
-
-        Ref<IDeclaration> IDeclarationImpl.ToValueTypedRef() => this.ToValueTypedRef().As<IDeclaration>();
+        private protected abstract IFullRef<IDeclaration> ToFullDeclarationRef();
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
@@ -46,6 +57,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract bool CanBeInherited { get; }
 
         public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default );
+
+        DeclarationImplementationKind IDeclarationImpl.ImplementationKind => this.ImplementationKind;
+
+        internal abstract DeclarationImplementationKind ImplementationKind { get; }
 
         public abstract IAssembly DeclaringAssembly { get; }
 
@@ -66,9 +81,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract ImmutableArray<SourceReference> Sources { get; }
 
-        ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
+        IGenericContext IDeclaration.GenericContext => this.GenericContext;
 
-        protected virtual ISymbol? GetSymbol() => null;
+        internal abstract GenericContext GenericContext { get; }
 
         public T GetMetric<T>()
             where T : IMetric
@@ -93,5 +108,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public override int GetHashCode() => this.GetHashCodeCore();
 
         protected abstract int GetHashCodeCore();
+
+        [Memo]
+        private protected RefFactory RefFactory => this.Compilation.RefFactory;
+
+        public override string ToString() => this.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage );
     }
 }

@@ -2,18 +2,14 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class EventUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IEvent>
+internal sealed class EventUpdatableCollection : UniquelyNamedUpdatableCollection<IEvent>
 {
-    public EventUpdatableCollection( CompilationModel compilation, in Ref<INamedType> declaringType ) : base(
+    public EventUpdatableCollection( CompilationModel compilation, IFullRef<INamedType> declaringType ) : base(
         compilation,
         declaringType.As<INamespaceOrNamedType>() ) { }
 
-    protected override bool IsSymbolIncluded( ISymbol symbol ) => symbol.Kind == SymbolKind.Event && base.IsSymbolIncluded( symbol );
-
-    protected override IEqualityComparer<MemberRef<IEvent>> MemberRefComparer => this.Compilation.CompilationContext.EventRefComparer;
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Event;
 }

@@ -1,79 +1,89 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollection<IParameter>
+internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollection<IParameter>
 {
-    private readonly Ref<IHasParameters> _parent;
+    private readonly IRef<IHasParameters> _parent;
 
-    public ParameterUpdatableCollection( CompilationModel compilation, in Ref<IHasParameters> parent ) : base( compilation )
+    public ParameterUpdatableCollection( CompilationModel compilation, IRef<IHasParameters> parent ) : base( compilation )
     {
         this._parent = parent;
     }
 
-    protected override void PopulateAllItems( Action<Ref<IParameter>> action )
+    protected override void PopulateAllItems( Action<IFullRef<IParameter>> action )
     {
-        switch ( this._parent.Target )
+        // TODO: Move to IRefCollectionStrategy.
+
+        switch ( this._parent )
         {
-            case IMethodSymbol method:
+            case ISymbolRef { Symbol: IMethodSymbol method }:
                 foreach ( var p in method.Parameters )
                 {
-                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.CompilationContext ) );
+                    action( this.RefFactory.FromSymbol<IParameter>( p ) );
                 }
 
                 break;
 
-            case IMethodBaseBuilder builder:
-                foreach ( var p in builder.Parameters )
-                {
-                    action( Ref.FromBuilder<IParameter>( p ) );
-                }
-
-                break;
-
-            case IPropertySymbol { Parameters.IsEmpty: false } indexer:
+            case ISymbolRef { Symbol: IPropertySymbol { Parameters.IsEmpty: false } indexer }:
                 foreach ( var p in indexer.Parameters )
                 {
-                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.CompilationContext ) );
+                    action( this.RefFactory.FromSymbol<IParameter>( p ) );
                 }
 
                 break;
 
-            case IIndexerBuilder indexerBuilder:
+            case IIntroducedRef { BuilderData: MethodBuilderData builder }:
+                foreach ( var p in builder.Parameters )
+                {
+                    action( this.RefFactory.FromBuilderData<IParameter>( p ) );
+                }
+
+                break;
+
+            case IIntroducedRef { BuilderData: ConstructorBuilderData builder }:
+                foreach ( var p in builder.Parameters )
+                {
+                    action( this.RefFactory.FromBuilderData<IParameter>( p ) );
+                }
+
+                break;
+
+            case IIntroducedRef { BuilderData: IndexerBuilderData indexerBuilder }:
                 foreach ( var p in indexerBuilder.Parameters )
                 {
-                    action( Ref.FromBuilder<IParameter>( p ) );
+                    action( this.RefFactory.FromBuilderData<IParameter>( p ) );
                 }
 
                 break;
 
             default:
-                throw new AssertionFailedException( $"Unexpected parent type: '{this._parent.Target?.GetType()}'." );
+                throw new AssertionFailedException( $"Unexpected parent type: '{this._parent}'." );
         }
     }
 
-    public void Add( IParameterBuilder parameterBuilder )
+    public void Add( ParameterBuilderData parameterBuilder )
     {
         this.EnsureComplete();
 
         var lastParam =
             this.Count > 0
-                ? (Ref<IParameter>?) this[this.Count - 1]
+                ? (IRef<IParameter>?) this[this.Count - 1]
                 : null;
 
-        if ( lastParam is { Target: IParameterSymbol { IsParams: true } } )
+        if ( lastParam is ISymbolRef { Symbol: IParameterSymbol { IsParams: true } } )
         {
-            this.InsertItem( this.Count - 1, parameterBuilder.ToValueTypedRef<IParameter>() );
+            this.InsertItem( this.Count - 1, parameterBuilder.ToRef() );
         }
         else
         {
-            this.AddItem( parameterBuilder.ToValueTypedRef<IParameter>() );
+            this.AddItem( parameterBuilder.ToRef() );
         }
     }
 }

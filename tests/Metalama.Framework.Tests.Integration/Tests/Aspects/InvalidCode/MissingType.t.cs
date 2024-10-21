@@ -1,2 +1,0 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0236 on `t`: `Cannot reference 'Foo t' in 'C.M(IAspectBuilder<Foo>)' (except for templates) because 'Foo t' is run-time-only but 'C.M(IAspectBuilder<Foo>)' is compile-time.`

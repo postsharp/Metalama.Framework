@@ -28,6 +28,7 @@
         <CompilerVisibleProperty Include="MetalamaCompileTimeTargetFrameworks"/>
         <CompilerVisibleProperty Include="MetalamaRestoreSources"/>
         <CompilerVisibleProperty Include="MetalamaTemplateLanguageVersion"/>
+        <CompilerVisibleProperty Include="MetalamaIgnoreUserLicenses"/>
         <CompilerVisibleProperty Include="MetalamaAssemblyLocatorHooksDirectory"/>
     </ItemGroup>
 

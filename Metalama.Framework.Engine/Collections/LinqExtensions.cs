@@ -73,6 +73,18 @@ public static partial class LinqExtensions
         return result;
     }
 
+    public static TOut[] SelectAsArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, int, TOut> func )
+    {
+        var result = new TOut[list.Count];
+
+        for ( var i = 0; i < result.Length; i++ )
+        {
+            result[i] = func( list[i], i );
+        }
+
+        return result;
+    }
+
     public static TOut[] SelectAsArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = new TOut[list.Count];
@@ -593,4 +605,6 @@ public static partial class LinqExtensions
 
         return maxItem;
     }
+
+    internal static bool Contains<T>( this T[] array, T item ) => Array.IndexOf( array, item ) >= 0;
 }

@@ -22,7 +22,7 @@ internal sealed class ValueArrayExpression : UserExpression
         this._parent = (ParameterList) parent;
     }
 
-    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
     {
         var syntaxGenerator = syntaxSerializationContext.SyntaxGenerator;
 

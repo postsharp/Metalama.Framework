@@ -192,7 +192,7 @@ namespace MoreLinq
                     yield return resultSelector( k, members );
                 }
 
-                group = (key, new List<TElement> { element });
+                group = (key, [element]);
             }
 
             {

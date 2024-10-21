@@ -12,6 +12,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -41,6 +42,7 @@ namespace Metalama.Framework.DesignTime
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
         private readonly IProjectOptionsFactory _projectOptionsFactory;
         private readonly UserCodeInvoker _userCodeInvoker;
+        private readonly DesignTimeExceptionHandler _exceptionHandler;
 
         static TheDiagnosticSuppressor()
         {
@@ -53,6 +55,8 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticSuppressor( GlobalServiceProvider serviceProvider )
         {
+            this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
+
             try
             {
                 this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
@@ -63,7 +67,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
 
                 throw;
             }
@@ -125,13 +129,16 @@ namespace Metalama.Framework.DesignTime
                     context.ReportedDiagnostics.Where( d => d.Location.SourceTree != null )
                         .GroupBy( d => d.Location.SourceTree! );
 
+                var compilationContext = compilation.GetCompilationContext();
+
                 foreach ( var diagnosticGroup in diagnosticsBySyntaxTree )
                 {
                     var syntaxTree = diagnosticGroup.Key;
 
                     var suppressions = pipelineResult.Value.GetSuppressionsOnSyntaxTree( syntaxTree.FilePath );
 
-                    var designTimeSuppressions = suppressions.Where( s => supportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) )
+                    var designTimeSuppressions = suppressions
+                        .Where( s => supportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) )
                         .ToReadOnlyList();
 
                     if ( designTimeSuppressions.Count == 0 )
@@ -163,13 +170,15 @@ namespace Metalama.Framework.DesignTime
                             }
 
                             foreach ( var suppression in suppressionsBySymbol[symbolId]
-                                         .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                                         .Where(
+                                             s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                             {
                                 if ( suppression.Filter is { } filter )
                                 {
                                     var executionContext = new UserCodeExecutionContext(
                                         pipeline.ServiceProvider,
-                                        UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ) );
+                                        UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ),
+                                        compilationContext );
 
                                     var filterPassed = this._userCodeInvoker.Invoke(
                                         () => filter( SuppressionFactories.CreateDiagnostic( diagnostic ) ),
@@ -203,7 +212,7 @@ namespace Metalama.Framework.DesignTime
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
-                DesignTimeExceptionHandler.ReportException( e );
+                this._exceptionHandler.ReportException( e );
             }
         }
 

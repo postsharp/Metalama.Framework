@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -70,15 +71,15 @@ internal sealed class SymbolClassifier : ISymbolClassifier
     private static readonly ImmutableDictionary<(string Type, string Member), (string Namespace, TemplatingScope? Scope)> _wellKnownMembers =
         new (Type Type, string[] MemberNames, TemplatingScope? Scope)[]
             {
-                (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
-                (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
+                (typeof(DateTime), [nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow)], TemplatingScope.RunTimeOnly),
+                (typeof(DateTimeOffset), [nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow)], TemplatingScope.RunTimeOnly)
             }.SelectMany( t => t.MemberNames.SelectAsReadOnlyList( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
             .ToImmutableDictionary(
                 t => (t.Type.Name.AssertNotNull(), t.MemberName),
                 t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
 
-    public static SymbolClassifier GetSymbolClassifier( in ProjectServiceProvider serviceProvider, Compilation compilation )
-        => new( serviceProvider, compilation );
+    public static SymbolClassifier GetSymbolClassifier( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+        => new( serviceProvider, compilationContext );
 
     private readonly Compilation _compilation;
     private readonly INamedTypeSymbol? _templateAttribute;
@@ -102,11 +103,11 @@ internal sealed class SymbolClassifier : ISymbolClassifier
     /// </summary>
     /// <param name="referenceAssemblyLocator"></param>
     /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-    private SymbolClassifier( in ProjectServiceProvider serviceProvider, Compilation compilation )
+    private SymbolClassifier( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
         : this(
             serviceProvider,
-            compilation,
-            serviceProvider.GetRequiredService<ISystemAttributeDeserializer>(),
+            compilationContext.Compilation,
+            serviceProvider.GetRequiredService<SystemAttributeDeserializer.Provider>().Get( compilationContext ),
             serviceProvider.GetReferenceAssemblyLocator() ) { }
 
     private SymbolClassifier(

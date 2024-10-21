@@ -19,7 +19,7 @@ internal static class DesignTimeReferenceValidatorRunner
     public static ImmutableUserDiagnosticList Validate(
         ProjectServiceProvider serviceProvider,
         SemanticModel model,
-        AspectPipelineResultAndState aspectPipelineResultAndState,
+        DesignTimeAspectPipelineResultAndState aspectPipelineResultAndState,
         CancellationToken cancellationToken = default )
     {
         if ( !aspectPipelineResultAndState.Result.ReferenceValidators.IsEmpty )

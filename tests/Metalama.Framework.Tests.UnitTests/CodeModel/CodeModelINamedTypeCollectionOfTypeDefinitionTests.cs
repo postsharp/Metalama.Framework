@@ -1,10 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Testing.UnitTesting;
-using System;
 using System.Linq;
 using Xunit;
 
@@ -304,30 +302,6 @@ class E
             var types = compilation.Types.OfTypeDefinition( interfaceBaseType ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray();
 
             Assert.Equal( new[] { type, interfaceBaseType, interfaceType }, types );
-        }
-
-        [Fact]
-        public void UnboundGenericError()
-        {
-            using var testContext = this.CreateTestContext();
-
-            const string code = @"
-class C<T>
-{
-}
-class D
-{
-}
-";
-
-            var compilation = testContext.CreateCompilationModel( code );
-
-            using var userCodeContext = testContext.WithExecutionContext( compilation );
-
-            var type = compilation.Types.Single( t => t.Name == "C" ).WithTypeArguments( typeof(int) );
-
-            Assert.Throws<ArgumentException>(
-                () => _ = compilation.Types.OfTypeDefinition( type ).OrderBy( x => x.GetSymbol(), StructuralSymbolComparer.Default ).ToArray() );
         }
     }
 }

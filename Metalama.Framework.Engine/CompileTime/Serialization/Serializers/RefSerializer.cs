@@ -6,26 +6,24 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
 
-internal sealed class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
+internal sealed class RefSerializer<T> : ReferenceTypeSerializer<BaseRef<T>>
     where T : class, ICompilationElement
 {
-    public override void SerializeObject( Ref<T> obj, IArgumentsWriter constructorArguments )
+    public override BaseRef<T> CreateInstance( IArgumentsReader constructorArguments )
     {
-        if ( !obj.IsDefault )
-        {
-            constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
-        }
+        var id = constructorArguments.GetValue<string>( "id" ).AssertNotNull();
+
+        return
+            (BaseRef<T>)
+            DurableRefFactory.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
     }
 
-    public override Ref<T> DeserializeObject( IArgumentsReader constructorArguments )
+    public override void SerializeObject( BaseRef<T> obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
     {
-        var id = constructorArguments.GetValue<string>( "id" );
-
-        if ( id == null )
-        {
-            return default;
-        }
-
-        return Ref.FromDeclarationId<T>( new SerializableDeclarationId( id ) );
+        var compilationContext = ((ISerializationContext) constructorArguments).CompilationContext;
+        var id = obj.ToSerializableId( compilationContext ).Id;
+        constructorArguments.SetValue( "id", id );
     }
+
+    public override void DeserializeFields( BaseRef<T> obj, IArgumentsReader initializationArguments ) { }
 }

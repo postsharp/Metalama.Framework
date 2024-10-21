@@ -1,2 +1,0 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `a`: `'Exception of type 'System.Exception' thrown while executing BuildAspect for aspect [MyAspect] applied to 'int a': Oops. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`

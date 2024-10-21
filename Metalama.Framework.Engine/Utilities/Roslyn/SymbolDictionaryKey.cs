@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
@@ -51,11 +52,11 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
             _ => throw new AssertionFailedException( $"Unexpected key type: {this._identity.GetType()}" )
         };
 
-    public Ref<IDeclaration> ToRef( CompilationContext compilationContext )
+    public IRef<IDeclaration> ToRef( CompilationContext compilationContext )
     {
         var symbolId = this._identity as string ?? throw new InvalidOperationException();
 
-        return Ref.FromSymbolId<IDeclaration>( new SymbolId( symbolId ), compilationContext );
+        return DurableRefFactory.FromSymbolId<IDeclaration>( new SymbolId( symbolId ) );
     }
 
     public override bool Equals( object? obj ) => obj is SymbolDictionaryKey other && this.Equals( other );

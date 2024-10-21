@@ -2,22 +2,18 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class ConstructorUpdatableCollection : NonUniquelyNamedMemberUpdatableCollection<IConstructor>
+internal sealed class ConstructorUpdatableCollection : NonUniquelyNamedUpdatableCollection<IConstructor>
 {
-    public ConstructorUpdatableCollection( CompilationModel compilation, in Ref<INamedType> declaringType ) : base(
+    public ConstructorUpdatableCollection( CompilationModel compilation, IFullRef<INamedType> declaringType ) : base(
         compilation,
         declaringType.As<INamespaceOrNamedType>() ) { }
 
-    protected override bool IsSymbolIncluded( ISymbol symbol )
-        => symbol.Kind == SymbolKind.Method &&
-           ((IMethodSymbol) symbol).MethodKind is MethodKind.Constructor && base.IsSymbolIncluded( symbol );
-
     // TODO: define implicit constructor
-    protected override IEqualityComparer<MemberRef<IConstructor>> MemberRefComparer => this.Compilation.CompilationContext.ConstructorRefComparer;
+    protected override IEqualityComparer<IRef<IConstructor>> MemberRefComparer => this.Compilation.CompilationContext.ConstructorRefComparer;
+
+    protected override DeclarationKind ItemsDeclarationKind => DeclarationKind.Constructor;
 }

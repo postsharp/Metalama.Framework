@@ -61,11 +61,6 @@ namespace Metalama.Framework.Code
         IAttributeCollection Attributes { get; }
 
         /// <summary>
-        /// Gets the kind of declaration.
-        /// </summary>
-        public DeclarationKind DeclarationKind { get; }
-
-        /// <summary>
         /// Gets a value indicating whether the member is implicitly declared, i.e. declared without being represented in source code.
         /// Returns <c>false</c> if it is explicitly declared in code.
         /// </summary>
@@ -91,5 +86,10 @@ namespace Metalama.Framework.Code
         /// set if the current declaration is not backed by source code.
         /// </summary>
         ImmutableArray<SourceReference> Sources { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IGenericContext"/> for the current declaration.
+        /// </summary>
+        IGenericContext GenericContext { get; }
     }
 }

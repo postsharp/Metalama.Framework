@@ -2,8 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using System;
 using System.Globalization;
@@ -13,11 +11,11 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 {
     internal sealed class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionObject<IMethod>
     {
-        public ISdkRef<IMethod> Target { get; }
+        public IRef<IMethod> Target { get; }
 
         private CompileTimeMethodInfo( IMethod method )
         {
-            this.Target = method.ToValueTypedRef();
+            this.Target = method.ToRef();
         }
 
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "MethodInfo" );
@@ -64,7 +62,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
             => CompileTimeMocksHelper.ToTypedExpressionSyntax( this, CompileTimeMethodInfoSerializer.SerializeMethodBase, syntaxGenerationContext );
     }
 }

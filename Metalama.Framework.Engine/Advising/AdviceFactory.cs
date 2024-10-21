@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -37,12 +38,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     private readonly string? _layerName;
     private readonly INamedType? _explicitlyImplementedInterfaceType;
 
-    private readonly ObjectReaderFactory _objectReaderFactory;
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
 
     private readonly CompilationModel _compilation;
     private readonly IDeclaration _aspectTarget;
     private readonly INamedType? _aspectTargetType;
+    private readonly ObjectReaderFactory _objectReaderFactory;
 
     public T Target { get; }
 
@@ -59,7 +60,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         this._layerName = layerName;
         this._explicitlyImplementedInterfaceType = explicitlyImplementedInterfaceType;
 
-        this._objectReaderFactory = state.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
         this._otherTemplateClassProvider = state.ServiceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
         // The AdviceFactory is now always working on the initial compilation.
@@ -67,12 +67,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         this._compilation = state.InitialCompilation;
         this._aspectTarget = state.AspectInstance.TargetDeclaration.GetTarget( this.MutableCompilation );
         this._aspectTargetType = this._aspectTarget.GetClosestNamedType();
+        this._objectReaderFactory = state.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
     }
 
     // We use return lazy object readers because these methods can be called before the BuildAspect method is called,
     // for declarative advice.
-    private IObjectReader GetTagsReader( object? tags )
-        => this._objectReaderFactory.GetLazyReader( tags, () => this._state.AspectBuilderState.AssertNotNull().Tags );
+    internal IObjectReader GetTagsReader( object? tags ) => this._state.AspectBuilderState.AssertNotNull().GetTagsReader( tags );
 
     private IObjectReader GetArgsReader( object? args ) => this._objectReaderFactory.GetReader( args );
 
@@ -95,6 +95,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     public IAdviceFactoryImpl WithExplicitInterfaceImplementation( INamedType explicitlyImplementedInterfaceType )
         => new AdviceFactory<T>( this.Target, this._state, this._templateClassInstance, this._layerName, explicitlyImplementedInterfaceType );
+
+    private TemplateProvider TemplateProvider => this._templateClassInstance.AssertNotNull().TemplateProvider;
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
         => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
@@ -266,7 +268,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         return new AdviceFactory<TNewTarget>( target, this._state, this._templateClassInstance, this._layerName, this._explicitlyImplementedInterfaceType );
     }
 
-    public ICompilation MutableCompilation => this._state.CurrentCompilation;
+    public ICompilation MutableCompilation => this._state.MutableCompilation;
 
     private void Validate( IDeclaration declaration, AdviceKind adviceKind, params IDeclaration[] otherTargets )
     {
@@ -317,7 +319,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         void ValidateOneTarget( IDeclaration target )
         {
             // Check that the compilation match.
-            if ( !ReferenceEquals( target.Compilation, this._compilation ) && !ReferenceEquals( target.Compilation, this._state.CurrentCompilation ) )
+            if ( !ReferenceEquals( target.Compilation, this._compilation ) && !ReferenceEquals( target.Compilation, this._state.MutableCompilation ) )
             {
                 throw new InvalidOperationException( "The target declaration is not in the current compilation." );
             }
@@ -357,11 +359,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
 
         return new Advice.AdviceConstructorParameters<TDeclaration>(
-            this._state.AspectInstance,
+            this._state.AspectLayerInstance,
             this._templateClassInstance,
-            target,
-            this._compilation,
-            this._layerName );
+            target );
     }
 
     public IOverrideAdviceResult<IMethod> Override(
@@ -374,6 +374,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         {
             this.Validate( targetMethod, AdviceKind.OverrideMethod );
 
+            var tagsReader = this.GetTagsReader( tags );
+
             switch ( targetMethod.MethodKind )
             {
                 case MethodKind.EventAdd:
@@ -381,14 +383,13 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
-                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, tagsReader )
                             .ForOverride( @event.AddMethod, this.GetArgsReader( args ) );
 
                         return new OverrideEventAdvice(
                                 this.GetAdviceConstructorParameters( @event ),
                                 addTemplate: template,
-                                removeTemplate: null,
-                                this.GetTagsReader( tags ) )
+                                removeTemplate: null )
                             .Execute( this._state )
                             .GetAccessor( e => e.AddMethod );
                     }
@@ -398,34 +399,32 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
-                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, tagsReader )
                             .ForOverride( @event.AddMethod, this.GetArgsReader( args ) );
 
                         return new OverrideEventAdvice(
                                 this.GetAdviceConstructorParameters( @event ),
                                 addTemplate: null,
-                                removeTemplate: template,
-                                this.GetTagsReader( tags ) )
+                                removeTemplate: template )
                             .Execute( this._state )
                             .GetAccessor( e => e.RemoveMethod );
                     }
 
                 case MethodKind.PropertyGet:
                     {
-                        var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
+                        var propertyOrIndexer = (IFieldOrPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.SelectGetterTemplate( propertyOrIndexer, templateSelector.AsGetterTemplateSelector(), true )
-                            ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                            ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, tagsReader )
                             .ForOverride( targetMethod, this.GetArgsReader( args ) );
 
                         switch ( propertyOrIndexer )
                         {
-                            case IProperty property:
+                            case IFieldOrProperty fieldOrProperty:
                                 return new OverrideFieldOrPropertyAdvice(
-                                        this.GetAdviceConstructorParameters<IFieldOrProperty>( property ),
+                                        this.GetAdviceConstructorParameters( fieldOrProperty ),
                                         getTemplate: template,
-                                        setTemplate: null,
-                                        this.GetTagsReader( tags ) )
+                                        setTemplate: null )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.GetMethod );
 
@@ -433,8 +432,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                                 return new OverrideIndexerAdvice(
                                         this.GetAdviceConstructorParameters( indexer ),
                                         getTemplate: template,
-                                        setTemplate: null,
-                                        this.GetTagsReader( tags ) )
+                                        setTemplate: null )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.GetMethod );
 
@@ -445,20 +443,19 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
                 case MethodKind.PropertySet:
                     {
-                        var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
+                        var propertyOrIndexer = (IFieldOrPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
                         var template = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )
-                            ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                            ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, tagsReader )
                             .ForOverride( targetMethod, this.GetArgsReader( args ) );
 
                         switch ( propertyOrIndexer )
                         {
-                            case IProperty property:
+                            case IFieldOrProperty property:
                                 return new OverrideFieldOrPropertyAdvice(
-                                        this.GetAdviceConstructorParameters<IFieldOrProperty>( property ),
+                                        this.GetAdviceConstructorParameters( property ),
                                         getTemplate: null,
-                                        setTemplate: template,
-                                        this.GetTagsReader( tags ) )
+                                        setTemplate: template )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.SetMethod );
 
@@ -466,8 +463,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                                 return new OverrideIndexerAdvice(
                                         this.GetAdviceConstructorParameters( indexer ),
                                         getTemplate: null,
-                                        setTemplate: template,
-                                        this.GetTagsReader( tags ) )
+                                        setTemplate: template )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.SetMethod );
 
@@ -479,14 +475,13 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 default:
                     {
                         var template = this.SelectMethodTemplate( targetMethod, templateSelector )
-                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, tagsReader )
                             .ForOverride( targetMethod, this.GetArgsReader( args ) )
                             .AssertNotNull();
 
                         return new OverrideMethodAdvice(
                                 this.GetAdviceConstructorParameters( targetMethod ),
-                                template,
-                                this.GetTagsReader( tags ) )
+                                template )
                             .Execute( this._state );
                     }
             }
@@ -508,7 +503,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 !.Value
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var advice = new IntroduceMethodAdvice(
                 this.GetAdviceConstructorParameters( targetType ),
@@ -516,7 +511,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildMethod,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -535,13 +529,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceFinalizer );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var advice = new IntroduceFinalizerAdvice(
                 this.GetAdviceConstructorParameters( targetType ),
                 template.PartialForIntroduction( this.GetArgsReader( args ) ),
-                whenExists,
-                this.GetTagsReader( tags ) );
+                whenExists );
 
             return advice.Execute( this._state );
         }
@@ -569,7 +562,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceOperator );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var advice = new IntroduceOperatorAdvice(
                 this.GetAdviceConstructorParameters( targetType ),
@@ -580,7 +573,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 template.PartialForIntroduction( this.GetArgsReader( args ) ),
                 whenExists,
                 buildAction,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -610,7 +602,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceOperator );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var advice = new IntroduceOperatorAdvice(
                 this.GetAdviceConstructorParameters( targetType ),
@@ -621,7 +613,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 template.PartialForIntroduction( this.GetArgsReader( args ) ),
                 whenExists,
                 buildAction,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -644,7 +635,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceOperator );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
 
@@ -657,7 +648,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 template.PartialForIntroduction( this.GetArgsReader( args ) ),
                 whenExists,
                 buildAction,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -676,13 +666,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             var boundTemplate =
                 this.ValidateTemplateName( template, TemplateKind.Default, true )
-                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) )
                     .ForOverride( targetConstructor, this.GetArgsReader( args ) );
 
             var advice = new OverrideConstructorAdvice(
                 this.GetAdviceConstructorParameters( targetConstructor ),
-                boundTemplate.AssertNotNull(),
-                this.GetTagsReader( tags ) );
+                boundTemplate.AssertNotNull() );
 
             return advice.Execute( this._state );
         }
@@ -702,14 +691,13 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             var template =
                 this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             return new IntroduceConstructorAdvice(
                     this.GetAdviceConstructorParameters( targetType ),
                     template.PartialForIntroduction( this.GetArgsReader( args ) ),
                     whenExists,
-                    buildAction,
-                    this.GetTagsReader( tags ) )
+                    buildAction )
                 .Execute( this._state );
         }
     }
@@ -725,7 +713,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             // Set template represents both set and init accessors.
             var propertyTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
-                .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
@@ -742,8 +730,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             var advice = new OverrideFieldOrPropertyAdvice(
                 this.GetAdviceConstructorParameters( targetFieldOrProperty ),
                 getTemplate,
-                setTemplate,
-                this.GetTagsReader( tags ) );
+                setTemplate );
 
             return advice.Execute( this._state );
         }
@@ -764,17 +751,18 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             }
 
             this.Validate( targetFieldOrPropertyOrIndexer, AdviceKind.OverrideFieldOrPropertyOrIndexer );
+            var tagsReader = this.GetTagsReader( tags );
 
             // Set template represents both set and init accessors.
             var boundGetTemplate = targetFieldOrPropertyOrIndexer.GetMethod != null
                 ? this.SelectGetterTemplate( targetFieldOrPropertyOrIndexer, getTemplateSelector, setTemplate == null )
-                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, tagsReader )
                     .ForOverride( targetFieldOrPropertyOrIndexer.GetMethod, this.GetArgsReader( args ) )
                 : null;
 
             var boundSetTemplate = targetFieldOrPropertyOrIndexer.SetMethod != null
                 ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
-                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, tagsReader )
                     .ForOverride( targetFieldOrPropertyOrIndexer.SetMethod, this.GetArgsReader( args ) )
                 : null;
 
@@ -790,8 +778,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         var advice = new OverrideFieldOrPropertyAdvice(
                             this.GetAdviceConstructorParameters( targetFieldOrProperty ),
                             boundGetTemplate,
-                            boundSetTemplate,
-                            this.GetTagsReader( tags ) );
+                            boundSetTemplate );
 
                         return advice.Execute( this._state );
                     }
@@ -801,8 +788,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         var advice = new OverrideIndexerAdvice(
                             this.GetAdviceConstructorParameters( targetIndexer ),
                             boundGetTemplate,
-                            boundSetTemplate,
-                            this.GetTagsReader( tags ) );
+                            boundSetTemplate );
 
                         return advice.Execute( this._state );
                     }
@@ -842,7 +828,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceField );
 
             var template = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
-                .GetTemplateMember<IField>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IField>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var advice = new IntroduceFieldAdvice(
                 this.GetAdviceConstructorParameters( targetType ),
@@ -850,8 +836,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 template,
                 scope,
                 whenExists,
-                buildField,
-                this.GetTagsReader( tags ) );
+                buildField );
 
             return advice.Execute( this._state );
         }
@@ -880,8 +865,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 {
                     builder.Type = fieldType;
                     buildField?.Invoke( builder );
-                },
-                this.GetTagsReader( tags ) );
+                } );
 
             return advice.Execute( this._state );
         }
@@ -927,7 +911,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildProperty,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -964,7 +947,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceProperty );
 
             var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
@@ -978,7 +961,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildProperty,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -1006,10 +988,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceProperty );
 
             var boundGetTemplate = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
-                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var boundSetTemplate = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
-                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var parameterReaders = this.GetArgsReader( args );
 
@@ -1023,7 +1005,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildProperty,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -1042,7 +1023,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         object? tags = null )
         => this.IntroduceIndexer(
             targetType,
-            new[] { (indexType, "index") },
+            [(indexType, "index")],
             getTemplate,
             setTemplate,
             scope,
@@ -1063,7 +1044,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         object? tags = null )
         => this.IntroduceIndexer(
             targetType,
-            new[] { (this._compilation.Factory.GetTypeByReflectionType( indexType ), "index") },
+            [(this._compilation.Factory.GetTypeByReflectionType( indexType ), "index")],
             getTemplate,
             setTemplate,
             scope,
@@ -1119,10 +1100,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceIndexer );
 
             var boundGetTemplate = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
-                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var boundSetTemplate = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
-                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var parameterReaders = this.GetArgsReader( args );
 
@@ -1134,7 +1115,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildIndexer,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -1165,19 +1145,18 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             var boundAddTemplate =
                 this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
-                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) )
                     .ForOverride( targetEvent.AddMethod, this.GetArgsReader( args ) );
 
             var boundRemoveTemplate =
                 this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
-                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) )
                     .ForOverride( targetEvent.RemoveMethod, this.GetArgsReader( args ) );
 
             var advice = new OverrideEventAdvice(
                 this.GetAdviceConstructorParameters( targetEvent ),
                 boundAddTemplate,
-                boundRemoveTemplate,
-                this.GetTagsReader( tags ) );
+                boundRemoveTemplate );
 
             return advice.Execute( this._state );
         }
@@ -1196,7 +1175,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceEvent );
 
             var eventTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var (add, remove) = eventTemplate.GetAccessorTemplates();
 
@@ -1209,7 +1188,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildEvent,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -1233,10 +1211,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.IntroduceEvent );
 
             var boundAddTemplate = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var boundRemoveTemplate = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var parameterReaders = this.GetArgsReader( args );
 
@@ -1249,7 +1227,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildEvent,
-                this.GetTagsReader( tags ),
                 this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
@@ -1271,7 +1248,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 interfaceType,
                 whenExists,
                 this.GetTagsReader( tags ),
-                this );
+                this,
+                this.TemplateProvider );
 
             return advice.Execute( this._state );
         }
@@ -1300,13 +1278,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetType, AdviceKind.AddInitializer );
 
             var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var advice = new TemplateBasedInitializeAdvice(
                 this.GetAdviceConstructorParameters<IMemberOrNamedType>( targetType ),
                 boundTemplate.ForInitializer( this.GetArgsReader( args ) ),
-                kind,
-                this.GetTagsReader( tags ) );
+                kind );
 
             return advice.Execute( this._state );
         }
@@ -1337,13 +1314,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             this.Validate( targetConstructor, AdviceKind.AddInitializer );
 
             var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
             var advice = new TemplateBasedInitializeAdvice(
                 this.GetAdviceConstructorParameters<IMemberOrNamedType>( targetConstructor ),
                 boundTemplate.ForInitializer( this.GetArgsReader( args ) ),
-                InitializerKind.BeforeInstanceConstructor,
-                this.GetTagsReader( tags ) );
+                InitializerKind.BeforeInstanceConstructor );
 
             return advice.Execute( this._state );
         }
@@ -1392,7 +1368,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         MetalamaStringFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
             }
 
-            if ( !this.TryPrepareContract( targetParameter, template, ref kind, out var boundTemplate ) )
+            if ( !this.TryPrepareContract( targetParameter, template, ref kind, tags, out var boundTemplate ) )
             {
                 return AddContractAdviceResult<IParameter>.Ignored;
             }
@@ -1417,7 +1393,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( !this.TryPrepareContract( targetMember, template, ref direction, out var boundTemplate ) )
+            if ( !this.TryPrepareContract( targetMember, template, ref direction, tags, out var boundTemplate ) )
             {
                 return AddContractAdviceResult<IFieldOrPropertyOrIndexer>.Ignored;
             }
@@ -1437,6 +1413,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         TContract targetDeclaration,
         string templateName,
         ref ContractDirection direction,
+        object? tags,
         [NotNullWhen( true )] out TemplateMember<IMethod>? boundTemplate )
         where TContract : class, IDeclaration
     {
@@ -1457,7 +1434,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         direction = ContractAspectHelper.GetEffectiveDirection( direction, targetDeclaration );
 
         boundTemplate = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
-            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+            .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider, this.TemplateProvider, this.GetTagsReader( tags ) );
 
         return true;
     }
@@ -1584,12 +1561,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             var advice = new AddAnnotationAdvice(
                 new Advice.AdviceConstructorParameters(
-                    this._state.AspectInstance,
+                    this._state.AspectLayerInstance,
                     this._templateClassInstance,
-                    declaration,
-                    this._compilation,
-                    LayerName: null ),
-                new AnnotationInstance( annotation, export, declaration.ToValueTypedRef<IDeclaration>() ) );
+                    declaration ),
+                new AnnotationInstance( annotation, export, declaration.ToRef() ) );
 
             advice.Execute( this._state );
         }

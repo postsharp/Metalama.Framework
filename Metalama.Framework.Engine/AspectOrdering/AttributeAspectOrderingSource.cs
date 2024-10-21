@@ -17,10 +17,10 @@ internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
     private readonly Compilation _compilation;
     private readonly IAttributeDeserializer _attributeDeserializer;
 
-    public AttributeAspectOrderingSource( in ProjectServiceProvider serviceProvider, Compilation compilation )
+    public AttributeAspectOrderingSource( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
-        this._compilation = compilation;
-        this._attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
+        this._compilation = compilationContext.Compilation;
+        this._attributeDeserializer = serviceProvider.GetRequiredService<SystemAttributeDeserializer.Provider>().Get( compilationContext );
     }
 
     public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )
@@ -33,7 +33,7 @@ internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
         var attributes =
             roslynCompilation.Assembly.Modules
                 .SelectMany( m => m.ReferencedAssemblySymbols )
-                .Concat( new[] { roslynCompilation.Assembly } )
+                .Concat( [roslynCompilation.Assembly] )
                 .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
                 .Where( a => a.attribute.AttributeClass?.GetReflectionFullName() == orderAttributeName );
 

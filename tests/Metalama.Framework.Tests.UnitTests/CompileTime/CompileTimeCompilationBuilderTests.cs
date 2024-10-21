@@ -100,7 +100,7 @@ class A : Attribute
             using var compileTimeDomain = testContext.Domain;
             var loader = CompileTimeProjectRepository.Create( compileTimeDomain, testContext.ServiceProvider, compilation.RoslynCompilation ).AssertNotNull();
 
-            if ( !loader.CreateAttributeDeserializer( testContext.ServiceProvider )
+            if ( !loader.CreateAttributeDeserializer( testContext.ServiceProvider, compilation.CompilationContext )
                     .TryCreateAttribute( compilation.Attributes.First(), new DiagnosticBag(), out var attribute ) )
             {
                 throw new AssertionFailedException();

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public sealed class SourceGeneratorIntegrationTests : UnitTestClass
+public sealed class SourceGeneratorIntegrationTests : FrameworkBaseTestClass
 {
     [Fact]
     public void ChangeInDependency_ChangeNotification()

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -37,7 +38,7 @@ namespace Metalama.Framework.Engine
 #else
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
             [DebuggerStepThrough]
-        public static void Assert( [DoesNotReturnIf( false )] bool condition ) { }
+        public static void Assert( [DoesNotReturnIf( false )] bool condition, string? expression = null ) { }
 #endif
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace Metalama.Framework.Engine
 #else
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
             [DebuggerStepThrough]
-        public static void AssertNot( [DoesNotReturnIf( false )] bool condition ) { }
+        public static void AssertNot( [DoesNotReturnIf( false )] bool condition, string? expression = null ) { }
 #endif
 
 #if !DEBUG
@@ -76,19 +77,28 @@ namespace Metalama.Framework.Engine
             return (T?) obj;
         }
 
-#if !DEBUG
-            [MethodImpl( MethodImplOptions.AggressiveInlining )]
-#endif
+#if DEBUG
+        [DebuggerStepThrough]
+        public static void Implies(
+            bool premise,
+            bool conclusion,
+            [CallerArgumentExpression( nameof(premise) )]
+            string? premiseExpression = null,
+            [CallerArgumentExpression( nameof(conclusion) )]
+            string? conclusionExpression = null )
+        {
+            if ( premise && !conclusion )
+            {
+                throw new AssertionFailedException( $"Implies({premiseExpression}, {conclusionExpression})" );
+            }
+        }
+#else
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
         [DebuggerStepThrough]
         public static void Implies( bool premise, bool conclusion )
         {
-#if DEBUG
-            if ( premise && !conclusion )
-            {
-                throw new AssertionFailedException();
-            }
-#endif
         }
+#endif
 
 #if !DEBUG
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -135,13 +145,13 @@ namespace Metalama.Framework.Engine
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
-        public static T AssertNotNull<T>( [NotNull] this T? obj, string? justification = null )
+        public static T AssertNotNull<T>( [NotNull] this T? obj, [CallerArgumentExpression( nameof(obj) )] string? description = null )
             where T : class
         {
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be null." );
+                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must not be null: '{description}'." );
             }
 
             return obj;
@@ -159,13 +169,13 @@ namespace Metalama.Framework.Engine
             [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
-        public static T AssertNotNull<T>( this T? obj, string? justification = null )
+        public static T AssertNotNull<T>( this T? obj, string? description = null )
             where T : struct
         {
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be null." );
+                throw new AssertionFailedException( description ?? $"The reference to {typeof(T).Name} must not be null." );
             }
 
             return obj.Value;
@@ -354,7 +364,7 @@ namespace Metalama.Framework.Engine
         public static TSymbol AssertSymbolNotNull<TSymbol>(
             this TSymbol? symbol,
             string? justification = null )
-            where TSymbol : Microsoft.CodeAnalysis.ISymbol
+            where TSymbol : class, ISymbol
         {
             if ( symbol == null )
             {
@@ -368,11 +378,12 @@ namespace Metalama.Framework.Engine
         public static TSymbol AssertSymbolNullNotImplemented<TSymbol>(
             this TSymbol? symbol,
             string? feature )
-            where TSymbol : Microsoft.CodeAnalysis.ISymbol
+            where TSymbol : ISymbol
         {
             if ( symbol == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof(TSymbol).Name} must not be null.{(feature != null ? $" Feature: {feature}" : "")}" );
+                throw new AssertionFailedException(
+                    $"The reference to {typeof(TSymbol).Name} must not be null.{(feature != null ? $" Feature: {feature}" : "")}" );
             }
 
             return symbol;

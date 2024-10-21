@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -30,12 +31,9 @@ internal sealed class AddAttributeCodeAction : ICodeAction
 
         var compilation = context.Compilation.Compilation;
 
-        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation );
-
-        if ( targetSymbol == null )
-        {
-            throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
-        }
+        var targetSymbol = this.TargetDeclaration.ToRef().GetSymbol( compilation )
+                           ??
+                           throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
 
         var originalNode = this.TargetDeclaration.GetPrimaryDeclarationSyntax();
 

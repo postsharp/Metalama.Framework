@@ -10,15 +10,13 @@ internal sealed partial class ImplementInterfaceAdvice
 {
     private readonly struct MemberSpecification
     {
-        public IMember InterfaceMember { get; }
+        public IRef<IMember> InterfaceMember { get; }
 
-        public IMember? TargetMember { get; }
+        public IRef<IMember>? TargetMember { get; }
 
         public TemplateMember<IMember>? Template { get; }
 
         public bool IsExplicit => ((IInterfaceMemberAttribute?) this.Template?.TemplateClassMember.Attribute).AssertNotNull().IsExplicit;
-
-        public IObjectReader? Tags { get; }
 
 #pragma warning disable CS0618 // Type or member is obsolete
         public InterfaceMemberOverrideStrategy OverrideStrategy
@@ -27,17 +25,15 @@ internal sealed partial class ImplementInterfaceAdvice
 #pragma warning restore CS0618
 
         public MemberSpecification(
-            IMember interfaceMember,
-            IMember? targetMember,
-            TemplateMember<IMember>? template,
-            IObjectReader? tags )
+            IRef<IMember> interfaceMember,
+            IRef<IMember>? targetMember,
+            TemplateMember<IMember>? template )
         {
             Invariant.AssertNot( targetMember == null && template == null );
 
             this.InterfaceMember = interfaceMember;
             this.TargetMember = targetMember;
             this.Template = template;
-            this.Tags = tags;
         }
     }
 }

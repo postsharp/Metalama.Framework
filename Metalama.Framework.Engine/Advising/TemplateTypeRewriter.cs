@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
@@ -19,7 +21,7 @@ namespace Metalama.Framework.Engine.Advising
                 ? Null
                 : new TemplateTypeRewriter( template );
 
-        internal override ITypeImpl Visit( TypeParameter typeParameter )
+        internal override IType Visit( ITypeParameter typeParameter )
         {
             if ( this._template.TemplateMember.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter )
                  && templateParameter.IsCompileTime )

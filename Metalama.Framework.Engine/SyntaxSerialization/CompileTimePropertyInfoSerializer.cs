@@ -43,14 +43,13 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
                         IdentifierName( "GetProperty" ) ),
                     ArgumentList(
                         SeparatedList(
-                            new[]
-                            {
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        Literal( propertyOrIndexer.Name ) ) ),
-                                Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) )
-                            } ) ) );
+                        [
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( propertyOrIndexer.Name ) ) ),
+                            Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) )
+                        ] ) ) );
 
                 break;
 
@@ -78,30 +77,29 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
                             IdentifierName( "GetProperty" ) ),
                         ArgumentList(
                             SeparatedList(
-                                new[]
-                                {
-                                    Argument(
-                                        LiteralExpression(
-                                            SyntaxKind.StringLiteralExpression,
-                                            Literal(
-                                                indexer.GetSymbol()
-                                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers )
-                                                    .MetadataName ) ) ),
-                                    Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ),
-                                    Argument( SyntaxFactoryEx.Null ), // binder
-                                    Argument( returnTypeCreation ),
-                                    Argument(
-                                        ArrayCreationExpression(
-                                                ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
-                                                    .WithRankSpecifiers(
-                                                        SingletonList(
-                                                            ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
-                                            .WithInitializer(
-                                                InitializerExpression(
-                                                    SyntaxKind.ArrayInitializerExpression,
-                                                    SeparatedList( parameterTypes ) ) ) ),
-                                    Argument( SyntaxFactoryEx.Null )
-                                } ) ) ); // modifiers
+                            [
+                                Argument(
+                                    LiteralExpression(
+                                        SyntaxKind.StringLiteralExpression,
+                                        Literal(
+                                            indexer.GetSymbol()
+                                                .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers )
+                                                .MetadataName ) ) ),
+                                Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ),
+                                Argument( SyntaxFactoryEx.Null ), // binder
+                                Argument( returnTypeCreation ),
+                                Argument(
+                                    ArrayCreationExpression(
+                                            ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
+                                                .WithRankSpecifiers(
+                                                    SingletonList(
+                                                        ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
+                                        .WithInitializer(
+                                            InitializerExpression(
+                                                SyntaxKind.ArrayInitializerExpression,
+                                                SeparatedList( parameterTypes ) ) ) ),
+                                Argument( SyntaxFactoryEx.Null )
+                            ] ) ) ); // modifiers
 
                     break;
                 }

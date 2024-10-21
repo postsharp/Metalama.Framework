@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -19,34 +19,37 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceConstructorTransformation
-    : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation, IInsertStatementTransformation
+    : IntroduceMemberTransformation<ConstructorBuilderData>, IReplaceMemberTransformation, IInsertStatementTransformation
 {
-    public IntroduceConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
+    public IntroduceConstructorTransformation( AspectLayerInstance aspectLayerInstance, ConstructorBuilderData introducedDeclaration ) : base(
+        aspectLayerInstance,
+        introducedDeclaration )
     {
         Invariant.Assert( !introducedDeclaration.IsStatic );
-        Invariant.Assert( !introducedDeclaration.IsRecordCopyConstructor() );
 
-        if ( !introducedDeclaration.ReplacedImplicit.IsDefault )
-        {
-            this.ReplacedMember = new MemberRef<IMember>( introducedDeclaration.ReplacedImplicit.As<IDeclaration>() );
-        }
+        this.ReplacedMember = introducedDeclaration.ReplacedImplicitConstructor;
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var constructorBuilder = this.IntroducedDeclaration;
+        // TODO: We must generate the code based on our _initial_ compilation because the last compilation may already contain introduced
+        // parameters, but these parameters will be added by the linker. We would have duplicates by adding them here.
+        // However, if we resolve to the initial compilation, we may get the replaced (implicit) constructor instead of the new one.
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
+
+        Invariant.Assert( !constructorBuilder.IsRecordCopyConstructor() );
 
         var statements = Array.Empty<StatementSyntax>();
 
         var syntaxSerializationContext = new SyntaxSerializationContext(
-            context.Compilation,
+            context.FinalCompilation,
             context.SyntaxGenerationContext,
-            constructorBuilder.DeclaringType.ForCompilation( context.Compilation ) );
+            constructorBuilder.DeclaringType );
 
         var arguments =
             ArgumentList(
                 SeparatedList(
-                    constructorBuilder.InitializerArguments.SelectAsArray(
+                    this.BuilderData.InitializerArguments.SelectAsArray(
                         a =>
                             Argument(
                                 a.ParameterName != null
@@ -67,51 +70,50 @@ internal sealed class IntroduceConstructorTransformation
                     ConstructorInitializer(
                         SyntaxKind.ThisConstructorInitializer,
                         arguments ),
-                var i => throw new AssertionFailedException( $"Unsupported initializer kind: {i}" ),
+                var i => throw new AssertionFailedException( $"Unsupported initializer kind: {i}" )
             };
 
         var syntax =
             ConstructorDeclaration(
-                constructorBuilder.GetAttributeLists( context ),
+                AdviceSyntaxGenerator.GetAttributeLists( constructorBuilder, context ),
                 constructorBuilder.GetSyntaxModifierList(),
                 Identifier( constructorBuilder.DeclaringType.Name ),
-                context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
+                context.SyntaxGenerator.ParameterList( constructorBuilder, context.FinalCompilation ),
                 initializer,
                 context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock( statements )
-                    .WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
+                    .WithGeneratedCodeAnnotation( this.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
                 null );
 
-        return new[]
-        {
+        return
+        [
             new InjectedMember(
                 this,
                 syntax,
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Introduction,
-                constructorBuilder )
-        };
+                this.BuilderData.ToRef() )
+        ];
     }
 
-    public MemberRef<IMember> ReplacedMember { get; }
+    public IFullRef<IMember>? ReplacedMember { get; }
 
-    public override InsertPosition InsertPosition
-        => this.ReplacedMember.Target != null
-            ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
-            : this.IntroducedDeclaration.ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember?.ToInsertPosition() ?? this.BuilderData.InsertPosition;
 
     public override TransformationObservability Observability
-        => this.ReplacedMember.IsDefault
+        => this.ReplacedMember == null
             ? TransformationObservability.Always
             : TransformationObservability.CompileTimeOnly;
 
     public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
+        var constructorBuilder = this.BuilderData.ToRef().GetTarget( context.FinalCompilation );
+
         // See https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11#auto-default-struct.
-        if ( this.IntroducedDeclaration.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct &&
+        if ( constructorBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct &&
              context.SyntaxGenerationContext.RequiresStructFieldInitialization )
         {
-            return new[]
-            {
+            return
+            [
                 // this = default;
                 new InsertedStatement(
                     ExpressionStatement(
@@ -119,15 +121,15 @@ internal sealed class IntroduceConstructorTransformation
                                 SyntaxKind.SimpleAssignmentExpression,
                                 ThisExpression(),
                                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ) ) )
-                        .WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
-                    this.IntroducedDeclaration,
+                        .WithGeneratedCodeAnnotation( this.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
+                    constructorBuilder,
                     this,
                     InsertedStatementKind.Initializer )
-            };
+            ];
         }
 
         return Array.Empty<InsertedStatement>();
     }
 
-    IMember IInsertStatementTransformation.TargetMember => this.IntroducedDeclaration;
+    IFullRef<IMember> IInsertStatementTransformation.TargetMember => this.BuilderData.ToRef();
 }

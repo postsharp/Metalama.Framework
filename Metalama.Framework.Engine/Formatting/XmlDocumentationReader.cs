@@ -1,7 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -45,16 +46,18 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        public string? GetFormattedDocumentation( ISymbol symbol, Compilation compilation, string prefix = "" )
+        public string? GetFormattedDocumentation( ISymbol symbol, CompilationContext compilationContext, string prefix = "" )
         {
+            var compilation = compilationContext.Compilation;
+
             switch ( symbol )
             {
                 case IMethodSymbol { IsOverride: true, OverriddenMethod: { } overriddenMethod }:
-                    return this.GetFormattedDocumentation( overriddenMethod, compilation, "Overrides the " );
+                    return this.GetFormattedDocumentation( overriddenMethod, compilationContext, "Overrides the " );
 
                 case IMethodSymbol { ExplicitInterfaceImplementations.Length: > 0 } methodSymbol:
                     // TODO: Implicit implementations are not trivial.
-                    return this.GetFormattedDocumentation( methodSymbol.ExplicitInterfaceImplementations.First(), compilation, "Implements the " );
+                    return this.GetFormattedDocumentation( methodSymbol.ExplicitInterfaceImplementations.First(), compilationContext, "Implements the " );
 
                 case IMethodSymbol methodSymbol:
                     symbol = methodSymbol.OriginalDefinition;
@@ -74,7 +77,7 @@ namespace Metalama.Framework.Engine.Formatting
                 // If the constructor is not documented, return the documentation of the type.
                 if ( symbol is IMethodSymbol { MethodKind: MethodKind.Constructor } methodSymbol )
                 {
-                    return this.GetFormattedDocumentation( methodSymbol.ContainingType, compilation );
+                    return this.GetFormattedDocumentation( methodSymbol.ContainingType, compilationContext );
                 }
 
                 return null;
@@ -164,7 +167,7 @@ namespace Metalama.Framework.Engine.Formatting
                     TypeKind.TypeParameter => "type parameter",
                     _ => namedType.TypeKind.ToString().ToLowerInvariant()
                 },
-                _ => symbol.GetDeclarationKind().ToDisplayString()
+                _ => symbol.GetDeclarationKind( compilationContext ).ToDisplayString()
             };
 
             var prolog = $"{symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat )} {declarationKind}\n\n";

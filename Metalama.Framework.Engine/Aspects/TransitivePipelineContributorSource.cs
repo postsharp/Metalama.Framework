@@ -4,6 +4,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Fabrics;
@@ -160,7 +162,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
             {
                 context.CancellationToken.ThrowIfCancellationRequested();
 
-                var validationTarget = validator.ValidatedDeclaration.GetTargetOrNull( context.Compilation );
+                var validationTarget = validator.ValidatedDeclaration?.GetTargetOrNull( context.Compilation );
 
                 if ( validationTarget?.GetSymbol() == null )
                 {

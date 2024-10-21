@@ -1,10 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -17,53 +18,60 @@ internal static class OverrideHelper
 {
     public static IProperty OverrideProperty(
         ProjectServiceProvider serviceProvider,
-        Advice advice,
+        AspectLayerInstance aspectLayerInstance,
         IFieldOrPropertyOrIndexer targetDeclaration,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
-        IObjectReader tags,
         Action<ITransformation> addTransformation )
     {
-        if ( targetDeclaration is IField field )
+        switch ( targetDeclaration )
         {
-            var propertyBuilder = new PromotedField( serviceProvider, field, tags, advice );
-            addTransformation( propertyBuilder.ToTransformation() );
-            addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
+            case IField { OverridingProperty: { } overridingProperty }:
+                return OverrideProperty( serviceProvider, aspectLayerInstance, overridingProperty, getTemplate, setTemplate, addTransformation );
 
-            AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+            case IField field:
+                {
+                    var transformation = PromoteFieldTransformation.Create( serviceProvider, field, aspectLayerInstance );
 
-            return propertyBuilder;
-        }
-        else if ( targetDeclaration is IProperty property )
-        {
-            addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
+                    addTransformation( transformation );
 
-            if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
-            {
-                AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
-            }
+                    addTransformation(
+                        new OverridePropertyTransformation( aspectLayerInstance, transformation.OverridingProperty.ToRef(), getTemplate, setTemplate ) );
 
-            return property;
-        }
-        else
-        {
-            throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." );
+                    AddTransformationsForStructField( targetDeclaration.DeclaringType, aspectLayerInstance, addTransformation );
+
+                    return transformation.OverridingProperty;
+                }
+
+            case IProperty property:
+                {
+                    addTransformation( new OverridePropertyTransformation( aspectLayerInstance, property.ToFullRef(), getTemplate, setTemplate ) );
+
+                    if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
+                    {
+                        AddTransformationsForStructField( targetDeclaration.DeclaringType, aspectLayerInstance, addTransformation );
+                    }
+
+                    return property;
+                }
+
+            default:
+                throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." );
         }
     }
 
-    public static void AddTransformationsForStructField( INamedType type, Advice advice, Action<ITransformation> addTransformation )
+    public static void AddTransformationsForStructField( INamedType type, AspectLayerInstance aspectLayerInstance, Action<ITransformation> addTransformation )
     {
         if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
         {
             // If there is no 'this()' constructor, add one.
             if ( type.Constructors.FirstOrDefault() is { IsImplicitlyDeclared: true } implicitConstructor )
             {
-                var constructorBuilder = new ConstructorBuilder( advice, type )
-                {
-                    ReplacedImplicit = implicitConstructor.ToValueTypedRef(), Accessibility = Accessibility.Public
-                };
+                var constructorBuilder = new ConstructorBuilder( aspectLayerInstance, implicitConstructor );
 
-                addTransformation( constructorBuilder.ToTransformation() );
+                constructorBuilder.Freeze();
+
+                addTransformation( constructorBuilder.CreateTransformation() );
             }
         }
     }

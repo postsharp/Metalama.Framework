@@ -1,13 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -19,9 +15,8 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
     public OverrideIndexerAdvice(
         AdviceConstructorParameters<IIndexer> parameters,
         BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
-        IObjectReader tags )
-        : base( parameters, tags )
+        BoundTemplateMethod? setTemplate )
+        : base( parameters )
     {
         this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
         this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
@@ -29,14 +24,12 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
-    protected override OverrideMemberAdviceResult<IIndexer> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IIndexer> Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
 
-        addTransformation( new OverrideIndexerTransformation( this, targetDeclaration, this._getTemplate, this._setTemplate, this.Tags ) );
+        context.AddTransformation(
+            new OverrideIndexerTransformation( this.AspectLayerInstance, targetDeclaration.ToFullRef(), this._getTemplate, this._setTemplate ) );
 
         return this.CreateSuccessResult( targetDeclaration );
     }

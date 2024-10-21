@@ -70,7 +70,7 @@ internal sealed class InboundReferenceIndexBuilder : ReferenceIndexBuilder
             {
                 this.AddToParent( child, referencedSymbol.ContainingNamespace, ChildKinds.ContainingDeclaration );
 
-                // There is no need to continue the descent since it was done when processing the containing type.
+                // There is no need to continue the descent since it was done when processing the containing namespace.
                 return;
             }
         }
@@ -91,7 +91,7 @@ internal sealed class InboundReferenceIndexBuilder : ReferenceIndexBuilder
         {
             parentNode = new ReferencedSymbolInfo( parent );
 
-            if ( this._references.GetOrAdd( parent, parentNode ) == parentNode )
+            if ( this._references.TryAdd( parent, parentNode ) )
             {
                 this.AddToParents( parentNode );
             }

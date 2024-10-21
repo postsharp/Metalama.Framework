@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal interface IAdviceExecutionContext
 {
-    CompilationModel CurrentCompilation { get; }
+    CompilationModel MutableCompilation { get; }
 
     IAspectInstanceInternal AspectInstance { get; }
 

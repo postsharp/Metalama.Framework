@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -25,7 +25,7 @@ internal sealed partial class EligibilityHelper
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules = new();
 
-    private readonly ConcurrentDictionary<Type, Func<EligibilityHelper, IDiagnosticAdder, bool>>
+    private readonly ConcurrentDictionary<Type, Func<EligibilityHelper, IDiagnosticAdder, CompilationContext, bool>>
         _tryInitializeEligibilityMethods = new();
 
     public EligibilityHelper( object prototype, in ProjectServiceProvider serviceProvider, object requester )
@@ -36,10 +36,10 @@ internal sealed partial class EligibilityHelper
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
-    private Func<EligibilityHelper, IDiagnosticAdder, bool> GetTryInitializeEligibilityMethod( Type type )
+    private Func<EligibilityHelper, IDiagnosticAdder, CompilationContext, bool> GetTryInitializeEligibilityMethod( Type type )
         => this._tryInitializeEligibilityMethods.GetOrAdd( type, GetTryInitializeEligibilityMethodCore );
 
-    private static Func<EligibilityHelper, IDiagnosticAdder, bool> GetTryInitializeEligibilityMethodCore( Type type )
+    private static Func<EligibilityHelper, IDiagnosticAdder, CompilationContext, bool> GetTryInitializeEligibilityMethodCore( Type type )
     {
         var method = typeof(EligibilityHelper).GetMethod( nameof(TryInitializeEligibility), BindingFlags.Instance | BindingFlags.NonPublic )
             .AssertNotNull()
@@ -47,16 +47,18 @@ internal sealed partial class EligibilityHelper
 
         var thisParameter = Expression.Parameter( typeof(EligibilityHelper) );
         var diagnosticAdderParameter = Expression.Parameter( typeof(IDiagnosticAdder) );
-        var callMethod = Expression.Call( thisParameter, method, diagnosticAdderParameter );
+        var compilationContextParameter = Expression.Parameter( typeof(CompilationContext) );
+        var callMethod = Expression.Call( thisParameter, method, diagnosticAdderParameter, compilationContextParameter );
 
-        return Expression.Lambda<Func<EligibilityHelper, IDiagnosticAdder, bool>>(
+        return Expression.Lambda<Func<EligibilityHelper, IDiagnosticAdder, CompilationContext, bool>>(
                 callMethod,
                 thisParameter,
-                diagnosticAdderParameter )
+                diagnosticAdderParameter,
+                compilationContextParameter )
             .Compile();
     }
 
-    private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder )
+    private bool TryInitializeEligibility<T>( IDiagnosticAdder diagnosticAdder, CompilationContext compilationContext )
         where T : class, IDeclaration
     {
         if ( this._prototype is IEligible<T> eligible )
@@ -65,8 +67,9 @@ internal sealed partial class EligibilityHelper
 
             var executionContext = new UserCodeExecutionContext(
                 this._serviceProvider,
-                diagnosticAdder,
-                UserCodeDescription.Create( "executing BuildEligibility for {0}", this._requester ) );
+                UserCodeDescription.Create( "executing BuildEligibility for {0}", this._requester ),
+                compilationContext,
+                diagnostics: diagnosticAdder );
 
             if ( !this._userCodeInvoker.TryInvoke( () => eligible.BuildEligibility( builder ), executionContext ) )
             {
@@ -79,7 +82,7 @@ internal sealed partial class EligibilityHelper
         return true;
     }
 
-    public bool PopulateRules( IDiagnosticAdder diagnosticAdder )
+    public bool PopulateRules( IDiagnosticAdder diagnosticAdder, CompilationContext compilationContext )
     {
         var eligibilitySuccess = true;
 
@@ -101,7 +104,7 @@ internal sealed partial class EligibilityHelper
                     new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IParameter), LocalFunctionParameterEligibilityRule.Instance ) );
             }
 
-            eligibilitySuccess &= this.GetTryInitializeEligibilityMethod( declarationInterface ).Invoke( this, diagnosticAdder );
+            eligibilitySuccess &= this.GetTryInitializeEligibilityMethod( declarationInterface ).Invoke( this, diagnosticAdder, compilationContext );
         }
 
         return eligibilitySuccess;
@@ -124,7 +127,7 @@ internal sealed partial class EligibilityHelper
         var executionContext = new UserCodeExecutionContext(
             this._serviceProvider,
             UserCodeDescription.Create( "evaluating eligibility for {0} applied to '{1}'", this._requester, obj ),
-            compilationModel: obj.GetCompilationModel() );
+            obj.GetCompilationModel() );
 
         return this._userCodeInvoker.Invoke( GetEligibilityCore, executionContext );
 
@@ -173,7 +176,8 @@ internal sealed partial class EligibilityHelper
         // so we have to let the exception fly.
         var executionContext = new UserCodeExecutionContext(
             this._serviceProvider,
-            UserCodeDescription.Create( "evaluating eligibility description for {0} applied to '{1}'", this, describedObject ) );
+            UserCodeDescription.Create( "evaluating eligibility description for {0} applied to '{1}'", this, describedObject ),
+            describedObject.Object.GetCompilationContext() );
 
         return this._userCodeInvoker.Invoke(
             () =>

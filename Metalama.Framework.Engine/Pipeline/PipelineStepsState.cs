@@ -7,6 +7,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -289,7 +290,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             var predecessors = requirement.Select( x => new AspectPredecessor( AspectPredecessorKind.RequiredAspect, x.Predecessor ) );
 
             var stronglyTypedAspectClass = (AspectClass) aspectClass;
-            var aspect = stronglyTypedAspectClass.CreateDefaultInstance();
+            var aspect = stronglyTypedAspectClass.CreateDefaultInstance( compilation.CompilationContext );
 
             var aspectInstance = new AspectInstance( aspect, requirementTarget, stronglyTypedAspectClass, predecessors.ToImmutableArray() );
             var eligibility = aspectInstance.ComputeEligibility( requirementTarget );

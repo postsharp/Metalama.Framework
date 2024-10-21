@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
 #pragma warning disable VSTHRD200
 
-public sealed class DiagnosticAnalyzerTests : UnitTestClass
+public sealed class DiagnosticAnalyzerTests : FrameworkBaseTestClass
 {
     private async Task<List<Diagnostic>> RunAnalyzer( string code, string? dependencyCode = null )
     {
@@ -268,29 +267,29 @@ public sealed class DiagnosticAnalyzerTests : UnitTestClass
                             """;
 
         const string dependencyCode =
-                            """
-                            using System;
-                            using Metalama.Framework.Fabrics;
-                            using Metalama.Framework.Code;
-                            using Metalama.Framework.Validation;
-                            using Metalama.Framework.Diagnostics;
-                            
-                            public class Fabric : ProjectFabric
-                            {
-                                static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
-                                public override void AmendProject( IProjectAmender amender )
-                                {
-                                    amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
-                                }
-                            
-                                private void ValidateReference( in ReferenceValidationContext context )
-                                {
-                                    context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
-                                }
-                            }
-                            
-                            public class A {}
-                            """;
+            """
+            using System;
+            using Metalama.Framework.Fabrics;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Validation;
+            using Metalama.Framework.Diagnostics;
+
+            public class Fabric : ProjectFabric
+            {
+                static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
+                public override void AmendProject( IProjectAmender amender )
+                {
+                    amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                }
+            
+                private void ValidateReference( in ReferenceValidationContext context )
+                {
+                    context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+                }
+            }
+
+            public class A {}
+            """;
 
         var diagnostics = await this.RunAnalyzer( code, dependencyCode );
         Assert.Single( diagnostics, d => d.Id == "MY001" );

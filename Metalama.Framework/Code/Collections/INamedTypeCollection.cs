@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Code.Collections
@@ -13,12 +12,12 @@ namespace Metalama.Framework.Code.Collections
     /// </remarks>
     public interface INamedTypeCollection : IMemberOrNamedTypeCollection<INamedType>
     {
+        /// <summary>
+        /// Gets the types in the collection that are derived from a given generic type,
+        /// taking any type instance into account.
+        /// </summary>
+        /// <param name="typeDefinition"></param>
+        /// <returns></returns>
         IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition );
-    }
-
-    [CompileTime]
-    public interface IAssemblyCollection : IReadOnlyCollection<IAssembly>
-    {
-        IEnumerable<IAssembly> OfName( string name );
     }
 }

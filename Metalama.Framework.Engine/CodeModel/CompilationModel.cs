@@ -4,17 +4,21 @@ using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.Factories;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Metrics;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
@@ -27,13 +31,20 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
     public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal, ISdkCompilation
     {
+        private static int _nextId;
+        private readonly int _id = Interlocked.Increment( ref _nextId );
+
+        internal new RefFactory RefFactory { get; }
+
         static CompilationModel()
         {
             MetalamaEngineModuleInitializer.EnsureInitialized();
@@ -44,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel
             PartialCompilation compilation,
             AspectRepository? aspectRepository = null,
             HierarchicalOptionsManager? hierarchicalOptionsManager = null,
-            ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>? annotations = null,
+            ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>? annotations = null,
             IExternalAnnotationProvider? externalAnnotationProvider = null,
             string? debugLabel = null )
             => new(
@@ -63,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel
             ImmutableArray<ManagedResource> resources = default,
             AspectRepository? aspectRepository = null,
             HierarchicalOptionsManager? hierarchicalOptionsManager = null,
-            ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>? annotations = null,
+            ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>? annotations = null,
             IExternalAnnotationProvider? externalAnnotationProvider = null,
             string? debugLabel = null )
             => new(
@@ -84,7 +95,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, null, options, debugLabel );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
-        private readonly ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> _allMemberAttributesByType;
+        private readonly ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef> _allMemberAttributesByType;
 
         internal AspectRepository AspectRepository { get; }
 
@@ -97,7 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( declaration.BelongsToCurrentProject )
             {
-                return this.Annotations[declaration.ToValueTypedRef()].Select( i => i.Annotation as T ).WhereNotNull();
+                return this.Annotations[declaration.ToRef()].Select( i => i.Annotation as T ).WhereNotNull();
             }
             else if ( this.ExternalAnnotationProvider != null )
             {
@@ -105,7 +116,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                return Enumerable.Empty<T>();
+                return [];
             }
         }
 
@@ -130,10 +141,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
-        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirections =
-            ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
+        private ImmutableDictionary<IRef, DeclarationBuilderData> _redirections =
+            ImmutableDictionary.Create<IRef, DeclarationBuilderData>( RefEqualityComparer.Default );
 
-        private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
+        private ImmutableDictionary<IRef<IDeclaration>, int> _depthsCache =
+            ImmutableDictionary.Create<IRef<IDeclaration>, int>( RefEqualityComparer<IDeclaration>.Default );
 
         SemanticModel ISdkCompilation.GetCachedSemanticModel( SyntaxTree syntaxTree ) => this.RoslynCompilation.GetCachedSemanticModel( syntaxTree );
 
@@ -147,7 +159,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IProject ICompilation.Project => this.Project;
 
-        internal CompilationContext CompilationContext { get; }
+        public CompilationContext CompilationContext { get; }
 
         public PartialCompilation PartialCompilation { get; }
 
@@ -164,23 +176,26 @@ namespace Metalama.Framework.Engine.CodeModel
             PartialCompilation partialCompilation,
             AspectRepository? aspectRepository,
             HierarchicalOptionsManager? hierarchicalOptionsManager,
-            ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>? annotations,
+            ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>? annotations,
             IExternalAnnotationProvider? externalAnnotationProvider,
             CompilationModelOptions? options,
-            string? debugLabel )
+            string? debugLabel ) : base( null )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this._debugLabel = debugLabel;
             this.ExternalAnnotationProvider = externalAnnotationProvider;
-
             this.CompilationContext = partialCompilation.Compilation.GetCompilationContext();
+            this.RefFactory = new RefFactory( this );
 
             this._staticConstructors =
-                ImmutableDictionary<Ref<INamedType>, IConstructorBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
+                ImmutableDictionary<IFullRef<INamedType>, ConstructorBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
-            this._finalizers = ImmutableDictionary<Ref<INamedType>, IMethodBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
-            this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            this._finalizers = ImmutableDictionary<IFullRef<INamedType>, MethodBuilderData>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
+
+            this.Annotations = annotations
+                               ?? ImmutableDictionaryOfArray<IRef<IDeclaration>, AnnotationInstance>.Empty.WithKeyComparer(
+                                   RefEqualityComparer<IDeclaration>.Default );
 
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
             this.HierarchicalOptionsManager = hierarchicalOptionsManager;
@@ -189,15 +204,13 @@ namespace Metalama.Framework.Engine.CodeModel
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
                                  ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
 
-            this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
-            this.Helpers = new CompilationHelpers( project.ServiceProvider );
+            this.Helpers = new CompilationHelpers( project.ServiceProvider, this.CompilationContext );
             this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
-            static void InitializeDictionary<T>( out ImmutableDictionary<Ref<INamedType>, T> dictionary )
+            static void InitializeDictionary<T>( out ImmutableDictionary<IFullRef<INamedType>, T> dictionary )
             {
-                dictionary = ImmutableDictionary.Create<Ref<INamedType>, T>()
-                    .WithComparers( RefEqualityComparer<INamedType>.Default );
+                dictionary = ImmutableDictionary.Create<IFullRef<INamedType>, T>( RefEqualityComparer<INamedType>.Default );
             }
 
             InitializeDictionary( out this._fields );
@@ -209,24 +222,23 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
-            this._namedTypes = ImmutableDictionary.Create<Ref<INamespaceOrNamedType>, TypeUpdatableCollection>()
-                .WithComparers( RefEqualityComparer<INamespaceOrNamedType>.Default );
+            this._namedTypesByParent =
+                ImmutableDictionary.Create<IFullRef<INamespaceOrNamedType>, TypeUpdatableCollection>( RefEqualityComparer<INamespaceOrNamedType>.Default );
 
-            this._namespaces = ImmutableDictionary.Create<Ref<INamespace>, NamespaceUpdatableCollection>()
-                .WithComparers( RefEqualityComparer<INamespace>.Default );
+            this._namespaces = ImmutableDictionary.Create<IFullRef<INamespace>, NamespaceUpdatableCollection>( RefEqualityComparer<INamespace>.Default );
 
-            this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
-                .WithComparers( RefEqualityComparer<IHasParameters>.Default );
+            this._parameters =
+                ImmutableDictionary.Create<IFullRef<IHasParameters>, ParameterUpdatableCollection>( RefEqualityComparer<IHasParameters>.Default );
 
             this._attributes =
-                ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection>.Empty.WithComparers( RefEqualityComparer<IDeclaration>.Default );
+                ImmutableDictionary.Create<IFullRef<IDeclaration>, AttributeUpdatableCollection>( RefEqualityComparer<IDeclaration>.Default );
 
             this.Factory = new DeclarationFactory( this );
 
             this.SerializableTypeIdResolver = new SerializableTypeIdResolverForIType( this );
 
             // Discover custom attributes.
-            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
+            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this );
 
             foreach ( var tree in partialCompilation.SyntaxTrees )
             {
@@ -265,18 +277,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 this.IsMutable = false;
 
-                // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allNewDeclarations =
                     observableTransformations
                         .OfType<IIntroduceDeclarationTransformation>()
-                        .SelectMany( t => t.DeclarationBuilder.GetContainedDeclarations() );
+                        .SelectMany( t => t.DeclarationBuilderData.GetOwnedDeclarations() );
 
-                // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
                 var allAttributes =
                     allNewDeclarations.SelectMany( c => c.Attributes )
-                        .Cast<AttributeBuilder>()
-                        .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
-                        .Select( a => new AttributeRef( a ) )
+                        .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.BuilderData ) )
+                        .Select( a => new IntroducedAttributeRef( a ) )
                         .ToReadOnlyList();
 
                 // TODO: this cache may need to be smartly invalidated when we have interface introductions.
@@ -297,9 +306,10 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private CompilationModel( CompilationModel prototype, bool mutable, string? debugLabel, CompilationModelOptions? options = null )
+        private CompilationModel( CompilationModel prototype, bool mutable, string? debugLabel, CompilationModelOptions? options = null ) : base( null )
         {
             this.IsMutable = mutable;
+            this.RefFactory = prototype.RefFactory; // Intentionally sharing the RefFactory.
             this.Project = prototype.Project;
             this.Helpers = prototype.Helpers;
             this.Options = options ?? prototype.Options;
@@ -322,7 +332,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Annotations = prototype.Annotations;
             this._parameters = prototype._parameters;
             this._attributes = prototype._attributes;
-            this._namedTypes = prototype._namedTypes;
+            this._namedTypesByParent = prototype._namedTypesByParent;
             this._namespaces = prototype._namespaces;
 
             this.Factory = new DeclarationFactory( this );
@@ -333,7 +343,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this.AspectRepository = prototype.AspectRepository;
             this.HierarchicalOptionsManager = prototype.HierarchicalOptionsManager;
             this.MetricManager = prototype.MetricManager;
-            this.EmptyGenericMap = prototype.EmptyGenericMap;
             this.SerializableTypeIdResolver = prototype.SerializableTypeIdResolver;
         }
 
@@ -346,16 +355,26 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.CompilationContext.GetSyntaxGenerationContext( options, node );
 
         internal CompilationModel WithTransformationsAndAspectInstances(
-            IReadOnlyCollection<ITransformation>? introducedDeclarations,
+            IReadOnlyCollection<ITransformation>? transformations,
             IEnumerable<AspectInstance>? aspectInstances,
-            string? debugLabel )
+            string? debugLabel = null )
         {
-            if ( introducedDeclarations?.Count == 0 && aspectInstances == null )
+            if ( transformations?.Count == 0 && aspectInstances == null )
             {
                 return this;
             }
 
-            return new CompilationModel( this, introducedDeclarations, aspectInstances, debugLabel );
+            return new CompilationModel( this, transformations, aspectInstances, debugLabel );
+        }
+
+        internal CompilationModel WithTransformations( IReadOnlyCollection<ITransformation>? transformations, string? debugLabel = null )
+        {
+            if ( transformations?.Count == 0 )
+            {
+                return this;
+            }
+
+            return new CompilationModel( this, transformations, null, debugLabel );
         }
 
         internal CompilationModel WithAspectRepository( AspectRepository aspectRepository, string? debugLabel )
@@ -365,24 +384,20 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamedTypeCollection Types
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection(
-                    this,
-                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToValueTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
-                    false ) );
+                this.GetTopLevelNamedTypeCollection() );
 
+        [Memo]
         public INamedTypeCollection AllTypes
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection(
-                    this,
-                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToValueTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
-                    true ) );
+                this.GetTopLevelNamedTypeCollection(),
+                true );
 
         [Memo]
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.GetAttributeCollection( Ref.Compilation( this.CompilationContext ).As<IDeclaration>() ) );
+                this.GetAttributeCollection( this.RefFactory.ForCompilation() ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 
@@ -396,7 +411,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
-        IDeclarationFactory ICompilationInternal.Factory => this.Factory;
+        IDeclarationFactory ICompilation.Factory => this.Factory;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
@@ -405,6 +420,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
         public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, DerivedTypesOptions options = default )
+        {
+            OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
+
+            return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType, options );
+        }
+
+        internal IEnumerable<IFullRef<INamedType>> GetDerivedTypes( IFullRef<INamedType> baseType, DerivedTypesOptions options = default )
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
@@ -420,7 +442,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IDeclaration? ContainingDeclaration => null;
 
-        DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
+        DeclarationKind ICompilationElement.DeclarationKind => DeclarationKind.Compilation;
 
         public override bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 
@@ -433,7 +455,9 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( includeDerivedTypes )
             {
-                return this._derivedTypes.Value.GetDerivedTypes( type ).Append( type ).SelectMany( GetAllAttributesOfExactType );
+                var attributeTypes = this._derivedTypes.Value.GetDerivedTypes( type ).Append( type );
+
+                return attributeTypes.SelectMany( GetAllAttributesOfExactType );
             }
             else
             {
@@ -442,11 +466,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
             IEnumerable<IAttribute> GetAllAttributesOfExactType( INamedType t )
             {
-                return this._allMemberAttributesByType[t.ToValueTypedRef()]
+                return this._allMemberAttributesByType[t.ToRef()]
                     .Select(
                         a =>
                         {
-                            a.TryGetTarget( this, out var target );
+                            if ( !a.TryGetTarget( this, default, out var target ) )
+                            {
+                                // Skipped by WhereNotNull.
+                                return null;
+                            }
 
                             return target;
                         } )
@@ -456,7 +484,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal int GetDepth( IDeclaration declaration )
         {
-            var reference = declaration.ToValueTypedRef();
+            var reference = declaration.ToRef();
 
             if ( this._depthsCache.TryGetValue( reference, out var value ) )
             {
@@ -515,7 +543,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return 0;
             }
 
-            var reference = namedType.ToValueTypedRef<IDeclaration>();
+            var reference = namedType.ToRef();
 
             if ( this._depthsCache.TryGetValue( reference, out var depth ) )
             {
@@ -544,40 +572,28 @@ namespace Metalama.Framework.Engine.CodeModel
             return depth;
         }
 
-        internal bool TryGetRedirectedDeclaration( Ref<IDeclaration> reference, out Ref<IDeclaration> redirected )
+        internal bool IsRedirected( IRef reference )
         {
-            var result = false;
-
-            while ( true )
-            {
-                if ( this._redirections.TryGetValue( reference, out var target ) )
-                {
-                    result = true;
-                    reference = target;
-                }
-                else
-                {
-                    redirected = reference;
-
-                    return result;
-                }
-            }
+            return reference is IRef<IDeclaration> declarationRef && this._redirections.ContainsKey( declarationRef );
         }
 
-        internal override Ref<IDeclaration> ToValueTypedRef() => Ref.Compilation( this.CompilationContext ).As<IDeclaration>();
+        internal bool TryGetRedirectedDeclaration( IRef reference, [NotNullWhen( true )] out DeclarationBuilderData? redirected )
+        {
+            return this._redirections.TryGetValue( reference, out redirected );
+        }
 
         [Memo]
-        private BoxedRef<ICompilation> BoxedRef => new( this.ToValueTypedRef() );
+        private IFullRef<ICompilation> Ref => this.RefFactory.ForCompilation();
 
-        IRef<ICompilation> ICompilation.ToRef() => this.BoxedRef;
+        public IRef<ICompilation> ToRef() => this.Ref;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.BoxedRef;
+        IRef<IDeclaration> IDeclaration.ToRef() => this.Ref;
 
-        IRef<IAssembly> IAssembly.ToRef() => this.BoxedRef;
+        IRef<IAssembly> IAssembly.ToRef() => this.Ref;
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => [];
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.RoslynCompilation.AssemblyName ?? "";
 
@@ -592,19 +608,17 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( this._debugLabel == null )
             {
-                return this.RoslynCompilation.AssemblyName ?? "<anonymous>";
+                return this.RoslynCompilation.AssemblyName ?? $"<anonymous> #{this._id}";
             }
             else
             {
-                return $"{this.RoslynCompilation.AssemblyName} ({this._debugLabel})";
+                return $"{this.RoslynCompilation.AssemblyName} ({this._debugLabel}) #{this._id}";
             }
         }
 
         private CompilationHelpers Helpers { get; }
 
         ICompilationHelpers ICompilationInternal.Helpers => this.Helpers;
-
-        internal GenericMap EmptyGenericMap { get; }
 
         bool IAssembly.IsExternal => false;
 
@@ -635,6 +649,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool BelongsToCurrentProject => true;
 
-        private protected override IRef<IDeclaration> ToDeclarationRef() => new BoxedRef<ICompilation>( this.ToValueTypedRef() );
+        private protected override IFullRef<IDeclaration> ToFullDeclarationRef() => this.Ref;
     }
 }

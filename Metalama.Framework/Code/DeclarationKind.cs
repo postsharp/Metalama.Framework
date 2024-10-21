@@ -95,6 +95,12 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// <see cref="INamespace"/>.
         /// </summary>
-        Namespace
+        Namespace,
+
+        /// <summary>
+        /// <see cref="IType"/>, but neither an <see cref="INamedType"/> nor an <see cref="ITypeParameter"/>.
+        /// Note that <see cref="IType"/> is not an <see cref="IDeclaration"/>.
+        /// </summary>
+        Type
     }
 }

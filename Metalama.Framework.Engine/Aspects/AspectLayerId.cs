@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     internal readonly struct AspectLayerId : IEquatable<AspectLayerId>, IEquatable<AspectLayer>
     {
-        private static readonly char[] _separators = { ':' };
+        private static readonly char[] _separators = [':'];
 
         public static AspectLayerId Null => default;
 

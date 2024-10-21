@@ -12,6 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
 internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi>, IServiceHubApiProvider
 {
+    private readonly DesignTimeExceptionHandler _exceptionHandler;
     private readonly AnalysisProcessEventHub _eventHub;
 
     public AnalysisProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base(
@@ -21,6 +22,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
     {
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChangedEvent.RegisterHandler( this.OnCompilationResultChanged );
+        this._exceptionHandler = serviceProvider.GetRequiredService<DesignTimeExceptionHandler>();
     }
 
 #pragma warning disable VSTHRD100
@@ -35,7 +37,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
         }
         catch ( Exception e )
         {
-            DesignTimeExceptionHandler.ReportException( e );
+            this._exceptionHandler.ReportException( e );
         }
     }
 #pragma warning restore VSTHRD100
@@ -103,7 +105,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
                 }
                 catch ( Exception e )
                 {
-                    DesignTimeExceptionHandler.ReportException( e, this.Logger );
+                    this._exceptionHandler.ReportException( e, this.Logger );
                 }
             } );
 #pragma warning restore VSTHRD110

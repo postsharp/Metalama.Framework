@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Testing.UnitTesting;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,17 +18,8 @@ public sealed class SerializableDeclarationIdForIntroducedTests : UnitTestClass
         const string code = """
                             using Metalama.Framework.Advising;
                             using Metalama.Framework.Aspects; 
-                            """ +
-#if !ROSLYN_4_4_0_OR_GREATER
-                            """
-                            class Aspect : TypeAspect
-                            """ +
-#else
-                            """
+
                             class Aspect<T> : TypeAspect
-                            """ +
-#endif
-                            """
                             {
                               [Introduce]
                               void M<T2>(int p) {}
@@ -42,17 +33,7 @@ public sealed class SerializableDeclarationIdForIntroducedTests : UnitTestClass
                               ~Aspect() {}
                             }
 
-                            """ +
-#if !ROSLYN_4_4_0_OR_GREATER
-                            """
-                            [Aspect]
-                            """ +
-#else
-                            """
                             [Aspect<int>]
-                            """ +
-#endif
-                            """
                             class C { }
                             """;
 

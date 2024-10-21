@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Services;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Formatting;
@@ -44,6 +45,7 @@ internal sealed class PreviewTestRunner : BaseTestRunner
         Assert.True( workspaceProvider.TrySetWorkspace( workspace ) );
 
         var serviceProvider = testContext.ServiceProvider.Global;
+        serviceProvider = serviceProvider.WithService( new DesignTimeExceptionHandler( serviceProvider ) );
         serviceProvider = serviceProvider.WithService( workspaceProvider );
         serviceProvider = serviceProvider.WithService( new DesignTimeAspectPipelineFactory( serviceProvider, testContext.Domain ) );
 
@@ -51,10 +53,7 @@ internal sealed class PreviewTestRunner : BaseTestRunner
 
         var projectKey = ProjectKeyFactory.FromProject( project )!;
 
-        var primarySyntaxTree = 
-            inputCompilation.SyntaxTrees
-            .Where( t => t.FilePath == $"{testInput.TestName}.cs" )
-            .Single();
+        var primarySyntaxTree = inputCompilation.SyntaxTrees.Single( t => t.FilePath == $"{testInput.TestName}.cs" );
 
         var primarySyntaxTreeName = primarySyntaxTree.FilePath;
 

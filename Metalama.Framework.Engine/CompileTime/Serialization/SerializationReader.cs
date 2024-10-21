@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Factories;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -27,17 +28,17 @@ internal sealed class SerializationReader
     private readonly InstanceFields _emptyInstanceFields;
 
     internal SerializationReader(
-        in ProjectServiceProvider serviceProvider,
         Stream stream,
         CompileTimeSerializer formatter,
         bool shouldReportExceptionCause,
-        string assemblyName )
+        string assemblyName,
+        CompilationContext compilationContext )
     {
         this._formatter = formatter;
         this._shouldReportExceptionCause = shouldReportExceptionCause;
         this._assemblyName = assemblyName;
         this._binaryReader = new SerializationBinaryReader( new BinaryReader( stream ) );
-        this._compileTimeTypeFactory = serviceProvider.GetService<CompileTimeTypeFactory>();
+        this._compileTimeTypeFactory = compilationContext.CompileTimeTypeFactory;
         this._emptyInstanceFields = new InstanceFields( formatter );
     }
 
@@ -48,7 +49,7 @@ internal sealed class SerializationReader
         if ( v is > SerializationProtocol.CurrentVersion or < SerializationProtocol.LastSupportedVersion )
         {
             throw new NotSupportedException(
-                $"The assembly '{this._assemblyName}' was compiled with an incompatible version of Metalama (protocol version: {v}). The '{this._assemblyName}' project must be recompiled or the package updated." );
+                $"The assembly '{this._assemblyName}' was compiled with an incompatible version of Metalama (actual version: {v}, supported versions: {SerializationProtocol.CurrentVersion}-{SerializationProtocol.LastSupportedVersion} ). The '{this._assemblyName}' project must be recompiled or the package updated." );
         }
 
         var instanceId = 1;

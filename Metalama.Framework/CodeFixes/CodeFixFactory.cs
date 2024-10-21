@@ -86,7 +86,7 @@ public static class CodeFixFactory
     public static CodeFix ApplyAspect<T>( T targetDeclaration, IAspect<T> aspect, string? title = null )
         where T : class, IDeclaration
         => new(
-            title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}",
+            title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString()}",
             builder => builder.ApplyAspectAsync( targetDeclaration, aspect ) );
 
     /// <summary>

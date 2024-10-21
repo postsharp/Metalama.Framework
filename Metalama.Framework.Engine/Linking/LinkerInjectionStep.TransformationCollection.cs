@@ -1,9 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -17,6 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using INamedType = Metalama.Framework.Code.INamedType;
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -27,73 +31,80 @@ internal sealed partial class LinkerInjectionStep
     /// </summary>
     private sealed class TransformationCollection
     {
+        private readonly CompilationModel _finalCompilationModel;
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly ConcurrentQueue<InjectedMember> _injectedMembers;
         private readonly ConcurrentDictionary<InsertPosition, List<InjectedMember>> _injectedMembersByInsertPosition;
         private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeDeclaration;
-        private readonly ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeBuilder;
+        private readonly ConcurrentDictionary<NamedTypeBuilderData, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeBuilder;
         private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
-        private readonly HashSet<IPropertyBuilder> _autoPropertyWithSynthesizedSetterBuilders;
+        private readonly HashSet<PropertyBuilderData> _autoPropertyWithSynthesizedSetterBuilders;
         private readonly ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
         private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
-        private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
-        private readonly ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
+        private readonly ConcurrentDictionary<DeclarationBuilderData, MemberLevelTransformations> _introductionMemberLevelTransformations;
+        private readonly ConcurrentDictionary<DeclarationBuilderData, IIntroduceDeclarationTransformation> _builderToTransformationMap;
 
-        private readonly ConcurrentDictionary<IMethodBase, List<InsertedStatement>> _insertedStatementsByTargetMethodBase;
+        private readonly ConcurrentDictionary<IRef<IMethodBase>, List<InsertedStatement>> _insertedStatementsByTargetMethodBase;
 
-        private readonly ConcurrentDictionary<IDeclaration, List<InjectedMember>> _injectedMembersByTargetDeclaration;
-        private readonly ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
+        private readonly ConcurrentDictionary<IRef<IDeclaration>, List<InjectedMember>> _injectedMembersByTargetDeclaration;
+        private readonly ConcurrentDictionary<IRef<IDeclaration>, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
 
-        private readonly ConcurrentDictionary<INamedType, LateTypeLevelTransformations> _lateTypeLevelTransformations;
+        private readonly ConcurrentDictionary<ISymbolRef<INamedType>, LateTypeLevelTransformations> _lateTypeLevelTransformations;
 
         private readonly HashSet<ITransformation> _transformationsCausingAuxiliaryOverrides;
 
-        private readonly HashSet<SyntaxTree> _introducedSyntaxTrees;
+        private readonly Dictionary<string, SyntaxTree> _introducedSyntaxTrees;
+        private readonly InjectedMemberComparer _injectedMemberComparer;
 
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
 
-        public IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> BuilderToTransformationMap => this._builderToTransformationMap;
+        public IReadOnlyDictionary<DeclarationBuilderData, IIntroduceDeclarationTransformation> BuilderToTransformationMap => this._builderToTransformationMap;
 
-        public IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> IntroducedParametersByTargetDeclaration
+        public IReadOnlyDictionary<IRef<IDeclaration>, IReadOnlyList<IntroduceParameterTransformation>> IntroducedParametersByTargetDeclaration
             => this._introducedParametersByTargetDeclaration;
 
-        public IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> LateTypeLevelTransformations => this._lateTypeLevelTransformations;
+        public IReadOnlyDictionary<ISymbolRef<INamedType>, LateTypeLevelTransformations> LateTypeLevelTransformations => this._lateTypeLevelTransformations;
 
         // ReSharper disable once InconsistentlySynchronizedField
         public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
 
         // ReSharper disable once InconsistentlySynchronizedField
-        public ISet<SyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees;
+        public IReadOnlyCollection<SyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees.Values;
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
+            this._finalCompilationModel = finalCompilationModel;
             this._comparer = comparer;
             this._injectedMembers = new ConcurrentQueue<InjectedMember>();
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
             this._injectedInterfacesByTargetTypeDeclaration = new ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>>();
-            this._injectedInterfacesByTargetTypeBuilder = new ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>>();
-            this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
-            this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
-            this._autoPropertyWithSynthesizedSetterBuilders = new HashSet<IPropertyBuilder>();
+            this._injectedInterfacesByTargetTypeBuilder = new ConcurrentDictionary<NamedTypeBuilderData, List<LinkerInjectedInterface>>();
+            this._removedVariableDeclaratorSyntax = [];
+            this._autoPropertyWithSynthesizedSetterSyntax = [];
+            this._autoPropertyWithSynthesizedSetterBuilders = [];
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>>();
-            this._nodesWithModifiedAttributes = new HashSet<SyntaxNode>();
+            this._nodesWithModifiedAttributes = [];
             this._symbolMemberLevelTransformations = new ConcurrentDictionary<SyntaxNode, MemberLevelTransformations>();
-            this._introductionMemberLevelTransformations = new ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations>();
-            this._builderToTransformationMap = new ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>();
+            this._introductionMemberLevelTransformations = new ConcurrentDictionary<DeclarationBuilderData, MemberLevelTransformations>();
+            this._builderToTransformationMap = new ConcurrentDictionary<DeclarationBuilderData, IIntroduceDeclarationTransformation>();
 
             this._insertedStatementsByTargetMethodBase =
-                new ConcurrentDictionary<IMethodBase, List<InsertedStatement>>( finalCompilationModel.Comparers.Default );
+                new ConcurrentDictionary<IRef<IMethodBase>, List<InsertedStatement>>( RefEqualityComparer<IMethodBase>.Default );
 
-            this._injectedMembersByTargetDeclaration = new ConcurrentDictionary<IDeclaration, List<InjectedMember>>( finalCompilationModel.Comparers.Default );
+            this._injectedMembersByTargetDeclaration =
+                new ConcurrentDictionary<IRef<IDeclaration>, List<InjectedMember>>( RefEqualityComparer<IDeclaration>.Default );
 
             this._introducedParametersByTargetDeclaration =
-                new ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>>( finalCompilationModel.Comparers.Default );
+                new ConcurrentDictionary<IRef<IDeclaration>, IReadOnlyList<IntroduceParameterTransformation>>( RefEqualityComparer<IDeclaration>.Default );
 
-            this._lateTypeLevelTransformations = new ConcurrentDictionary<INamedType, LateTypeLevelTransformations>( finalCompilationModel.Comparers.Default );
-            this._transformationsCausingAuxiliaryOverrides = new HashSet<ITransformation>();
-            this._introducedSyntaxTrees = new HashSet<SyntaxTree>();
+            this._lateTypeLevelTransformations =
+                new ConcurrentDictionary<ISymbolRef<INamedType>, LateTypeLevelTransformations>( RefEqualityComparer<INamedType>.Default );
+
+            this._transformationsCausingAuxiliaryOverrides = [];
+            this._introducedSyntaxTrees = [];
+            this._injectedMemberComparer = new InjectedMemberComparer();
         }
 
         public void AddInjectedMember( InjectedMember injectedMember )
@@ -110,11 +121,11 @@ internal sealed partial class LinkerInjectionStep
         private void AddInjectedMember( InsertPosition insertPosition, InjectedMember injectedMember )
         {
             // Injected member should always be root type member (not an accessor).
-            Invariant.Assert( injectedMember.Declaration is not { ContainingDeclaration: IMember } );
+            Invariant.Assert( injectedMember.Declaration is not { ContainingDeclaration: IRef<IMember> } );
 
             this._injectedMembers.Enqueue( injectedMember );
 
-            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => new List<InjectedMember>() );
+            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => [] );
 
             lock ( nodes )
             {
@@ -130,12 +141,31 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInjectedInterface( BaseTypeDeclarationSyntax targetType, LinkerInjectedInterface injectedInterface )
+        public void AddInjectedInterface( IRef<INamedType> targetType, LinkerInjectedInterface injectedInterface )
+        {
+            switch ( targetType )
+            {
+                case ISymbolRef symbolRef:
+                    this.AddInjectedInterface( (BaseTypeDeclarationSyntax) symbolRef.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull(), injectedInterface );
+
+                    break;
+
+                case IIntroducedRef builtDeclarationRef:
+                    this.AddInjectedInterface( (NamedTypeBuilderData) builtDeclarationRef.BuilderData, injectedInterface );
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException();
+            }
+        }
+
+        private void AddInjectedInterface( BaseTypeDeclarationSyntax targetType, LinkerInjectedInterface injectedInterface )
         {
             var interfaceList =
                 this._injectedInterfacesByTargetTypeDeclaration.GetOrAdd(
                     targetType,
-                    _ => new List<LinkerInjectedInterface>() );
+                    _ => [] );
 
             lock ( interfaceList )
             {
@@ -143,12 +173,12 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInjectedInterface( INamedTypeBuilder targetTypeBuilder, LinkerInjectedInterface injectedInterface )
+        private void AddInjectedInterface( NamedTypeBuilderData targetTypeBuilder, LinkerInjectedInterface injectedInterface )
         {
             var interfaceList =
                 this._injectedInterfacesByTargetTypeBuilder.GetOrAdd(
                     targetTypeBuilder,
-                    _ => new List<LinkerInjectedInterface>() );
+                    _ => [] );
 
             lock ( interfaceList )
             {
@@ -156,7 +186,26 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax declaration )
+        public void AddAutoPropertyWithSynthesizedSetter( IRef<IProperty> declaration )
+        {
+            switch ( declaration )
+            {
+                case ISymbolRef codeProperty:
+                    this.AddAutoPropertyWithSynthesizedSetter( (PropertyDeclarationSyntax) codeProperty.Symbol.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+                    break;
+
+                case IIntroducedRef builtDeclarationRef:
+                    this.AddAutoPropertyWithSynthesizedSetter( (PropertyBuilderData) builtDeclarationRef.BuilderData );
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
+            }
+        }
+
+        private void AddAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax declaration )
         {
             Invariant.Assert( declaration.IsAutoPropertyDeclaration() && !declaration.HasSetterAccessorDeclaration() );
 
@@ -166,7 +215,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddAutoPropertyWithSynthesizedSetter( IPropertyBuilder property )
+        private void AddAutoPropertyWithSynthesizedSetter( PropertyBuilderData property )
         {
             Invariant.Assert( property is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } );
 
@@ -179,7 +228,7 @@ internal sealed partial class LinkerInjectionStep
         // ReSharper disable once UnusedMember.Local
         public void AddDeclarationWithAdditionalFlags( PropertyDeclarationSyntax declaration, AspectLinkerDeclarationFlags flags )
         {
-            var list = this._additionalDeclarationFlags.GetOrAdd( declaration, _ => new List<AspectLinkerDeclarationFlags>() );
+            var list = this._additionalDeclarationFlags.GetOrAdd( declaration, _ => [] );
 
             lock ( list )
             {
@@ -187,11 +236,11 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInsertedStatements( IMethodBase targetMethod, IEnumerable<InsertedStatement> statements )
+        public void AddInsertedStatements( IRef<IMethodBase> targetMethod, IEnumerable<InsertedStatement> statements )
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
-            var statementList = this._insertedStatementsByTargetMethodBase.GetOrAdd( targetMethod, _ => new List<InsertedStatement>() );
+            var statementList = this._insertedStatementsByTargetMethodBase.GetOrAdd( targetMethod, _ => [] );
 
             lock ( statementList )
             {
@@ -244,7 +293,7 @@ internal sealed partial class LinkerInjectionStep
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
 
         // ReSharper disable once InconsistentlySynchronizedField
-        public bool IsAutoPropertyWithSynthesizedSetter( IPropertyBuilder propertyBuilder )
+        public bool IsAutoPropertyWithSynthesizedSetter( PropertyBuilderData propertyBuilder )
             => this._autoPropertyWithSynthesizedSetterBuilders.Contains( propertyBuilder );
 
         // ReSharper disable once InconsistentlySynchronizedField
@@ -255,7 +304,7 @@ internal sealed partial class LinkerInjectionStep
             if ( this._injectedMembersByInsertPosition.TryGetValue( position, out var injectedMembers ) )
             {
                 // IMPORTANT - do not change the introduced node here.
-                injectedMembers.Sort( InjectedMemberComparer.Instance );
+                injectedMembers.Sort( this._injectedMemberComparer );
 
                 return injectedMembers;
             }
@@ -275,7 +324,7 @@ internal sealed partial class LinkerInjectionStep
             return Array.Empty<LinkerInjectedInterface>();
         }
 
-        public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeBuilder( INamedTypeBuilder typeBuilder )
+        public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeBuilder( NamedTypeBuilderData typeBuilder )
         {
             if ( this._injectedInterfacesByTargetTypeBuilder.TryGetValue( typeBuilder, out var interfaceList ) )
             {
@@ -308,7 +357,7 @@ internal sealed partial class LinkerInjectionStep
             => this._symbolMemberLevelTransformations.TryGetValue( node, out memberLevelTransformations );
 
         public bool TryGetMemberLevelTransformations(
-            IDeclarationBuilder builder,
+            DeclarationBuilderData builder,
             [NotNullWhen( true )] out MemberLevelTransformations? memberLevelTransformations )
             => this._introductionMemberLevelTransformations.TryGetValue( builder, out memberLevelTransformations );
 
@@ -327,7 +376,9 @@ internal sealed partial class LinkerInjectionStep
                 cancellationToken );
         }
 
-        public void AddIntroduceTransformation( IDeclarationBuilder declarationBuilder, IIntroduceDeclarationTransformation introduceDeclarationTransformation )
+        public void AddIntroduceTransformation(
+            DeclarationBuilderData declarationBuilder,
+            IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
             var wasAdded = this._builderToTransformationMap.TryAdd( declarationBuilder, introduceDeclarationTransformation );
 
@@ -343,29 +394,47 @@ internal sealed partial class LinkerInjectionStep
         }
 
         public bool TryGetIntroduceDeclarationTransformation(
-            IDeclarationBuilder replacedBuilder,
+            DeclarationBuilderData replacedBuilder,
             [NotNullWhen( true )] out IIntroduceDeclarationTransformation? introduceDeclarationTransformation )
             => this._builderToTransformationMap.TryGetValue( replacedBuilder, out introduceDeclarationTransformation );
 
-        public MemberLevelTransformations GetOrAddMemberLevelTransformations( SyntaxNode declarationSyntax )
+        public MemberLevelTransformations GetOrAddMemberLevelTransformations( IRef<IDeclaration> declaration )
+            => declaration switch
+            {
+                ISymbolRef symbolRef when symbolRef.Symbol.GetPrimaryDeclarationSyntax() is { } syntax => this.GetOrAddMemberLevelTransformations( syntax ),
+                IIntroducedRef builtDeclarationRef => this.GetOrAddMemberLevelTransformations( builtDeclarationRef.BuilderData ),
+                _ when this._finalCompilationModel.TryGetRedirectedDeclaration( declaration, out var redirectedDeclaration ) => this
+                    .GetOrAddMemberLevelTransformations( redirectedDeclaration ),
+                _ => throw new AssertionFailedException()
+            };
+
+        private MemberLevelTransformations GetOrAddMemberLevelTransformations( SyntaxNode declarationSyntax )
             => this._symbolMemberLevelTransformations.GetOrAdd( declarationSyntax, static _ => new MemberLevelTransformations() );
 
-        public MemberLevelTransformations GetOrAddMemberLevelTransformations( IDeclarationBuilder declarationBuilder )
+        private MemberLevelTransformations GetOrAddMemberLevelTransformations( DeclarationBuilderData declarationBuilder )
             => this._introductionMemberLevelTransformations.GetOrAdd( declarationBuilder, static _ => new MemberLevelTransformations() );
 
-        public LateTypeLevelTransformations GetOrAddLateTypeLevelTransformations( INamedType type )
+        public LateTypeLevelTransformations GetOrAddLateTypeLevelTransformations( ISymbolRef<INamedType> type )
             => this._lateTypeLevelTransformations.GetOrAdd( type, static _ => new LateTypeLevelTransformations() );
 
         internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( InjectedMember injectedMember )
-            => this.GetInjectedEntryStatements( (IMethodBase) injectedMember.Declaration, injectedMember );
+        {
+            var targetMethod = injectedMember.Declaration.As<IMethodBase>();
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMethodBase sourceMethodBase )
-            => this.GetInjectedEntryStatements( sourceMethodBase, null );
+            return this.GetInjectedEntryStatements( targetMethod, targetMethod, injectedMember );
+        }
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMethodBase targetMethodBase, InjectedMember? targetInjectedMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IRef<IMethodBase> targetMethod, InjectedMember? targetInjectedMember = null )
+            => this.GetInjectedEntryStatements( targetMethod, targetMethod, targetInjectedMember );
+
+        /// <param name="targetTypeMember">In case of accessors, the property or event.</param>
+        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements(
+            IRef<IMethodBase> targetMethod,
+            IRef<IMember> targetTypeMember,
+            InjectedMember? targetInjectedMember = null )
         {
             // PERF: Iterating and reversing should be avoided.
-            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethodBase, out var insertedStatements ) )
+            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethod, out var insertedStatements ) )
             {
                 return ImmutableArray<StatementSyntax>.Empty;
             }
@@ -374,16 +443,8 @@ internal sealed partial class LinkerInjectionStep
             MemberLayerIndex? bottomBound;
             MemberLayerIndex? topBound;
 
-            var rootMember =
-                targetMethodBase switch
-                {
-                    IMethod { ContainingDeclaration: IProperty property } => property,
-                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
-                    _ => (IMember) targetMethodBase
-                };
-
             // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
-            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( rootMember, out var injectedMembers ) )
+            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( targetTypeMember, out var injectedMembers ) )
             {
                 hasInjectedMembers = false;
 
@@ -394,7 +455,7 @@ internal sealed partial class LinkerInjectionStep
                 }
                 else
                 {
-                    throw new AssertionFailedException( $"Missing injected member for {rootMember}" );
+                    throw new AssertionFailedException( $"Missing injected member for {targetTypeMember}" );
                 }
             }
             else
@@ -414,7 +475,7 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( targetInjectedMemberIndex < 0 )
                     {
-                        throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
+                        throw new AssertionFailedException( $"Missing injected members for {targetMethod}" );
                     }
 
                     bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
@@ -428,7 +489,7 @@ internal sealed partial class LinkerInjectionStep
 
             var statements = new List<StatementSyntax>();
 
-            if ( targetMethodBase is IConstructor )
+            if ( targetMethod is IRef<IConstructor> )
             {
                 if ( (!hasInjectedMembers && targetInjectedMember == null) || (hasInjectedMembers && targetInjectedMember == injectedMembers![^1]) )
                 {
@@ -468,12 +529,19 @@ internal sealed partial class LinkerInjectionStep
         }
 
         internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements( InjectedMember injectedMember )
-            => this.GetInjectedExitStatements( (IMethodBase) injectedMember.Declaration, injectedMember );
+        {
+            var targetMethod = injectedMember.Declaration.As<IMethodBase>();
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements( IMethodBase targetMethodBase, InjectedMember targetInjectedMember )
+            return this.GetInjectedExitStatements( targetMethod, targetMethod, injectedMember );
+        }
+
+        internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements(
+            IRef<IMethodBase> targetMethod,
+            IRef<IMember> targetTypeMember,
+            InjectedMember targetInjectedMember )
         {
             // PERF: Iterating and reversing should be avoided.
-            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethodBase, out var insertedStatements ) )
+            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethod, out var insertedStatements ) )
             {
                 return ImmutableArray<StatementSyntax>.Empty;
             }
@@ -481,18 +549,10 @@ internal sealed partial class LinkerInjectionStep
             MemberLayerIndex bottomBound;
             MemberLayerIndex? topBound;
 
-            var rootMember =
-                targetMethodBase switch
-                {
-                    IMethod { ContainingDeclaration: IProperty property } => property,
-                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
-                    _ => (IMember) targetMethodBase
-                };
-
             // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
-            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( rootMember, out var injectedMembers ) )
+            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( targetTypeMember, out var injectedMembers ) )
             {
-                throw new AssertionFailedException( $"Missing injected member for {targetMethodBase} (exit statements are not supported on source members)." );
+                throw new AssertionFailedException( $"Missing injected member for {targetMethod} (exit statements are not supported on source members)." );
             }
             else
             {
@@ -502,7 +562,7 @@ internal sealed partial class LinkerInjectionStep
 
                 if ( targetInjectedMemberIndex < 0 )
                 {
-                    throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
+                    throw new AssertionFailedException( $"Missing injected members for {targetMethod}" );
                 }
 
                 bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
@@ -593,9 +653,21 @@ internal sealed partial class LinkerInjectionStep
 
         public void AddIntroducedSyntaxTree( SyntaxTree transformedSyntaxTree )
         {
+            // HACK: When dependencies are incorrectly computed, the partial compilation may fail to contain all observed syntax trees.
+            // In this case, there will be an attempt to add an existing syntax tree to the compilation. Here we work around this issue,
+            // however the problem is upstream. Even if we solve the issue, it may be good to be tolerant of upstream bugs in this code.
+
+            if ( this._finalCompilationModel.RoslynCompilation.GetIndexedSyntaxTrees().ContainsKey( transformedSyntaxTree.FilePath ) )
+            {
+                return;
+            }
+
             lock ( this._introducedSyntaxTrees )
             {
-                this._introducedSyntaxTrees.Add( transformedSyntaxTree );
+                var added = this._introducedSyntaxTrees.TryAdd( transformedSyntaxTree.FilePath, transformedSyntaxTree );
+
+                // If the tree was not added, check that it was identically the same as the existing one with the same path.
+                Invariant.Assert( added || this._introducedSyntaxTrees[transformedSyntaxTree.FilePath] == transformedSyntaxTree );
             }
         }
     }

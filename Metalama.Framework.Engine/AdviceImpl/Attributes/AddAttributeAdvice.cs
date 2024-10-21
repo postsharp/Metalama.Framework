@@ -3,13 +3,12 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
@@ -28,12 +27,10 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceAttribute;
 
-    protected override AddAttributeAdviceResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override AddAttributeAdviceResult Implement( in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration;
+        var contextCopy = context;
 
         if ( this._overrideStrategy != OverrideStrategy.New )
         {
@@ -59,9 +56,9 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
-                            this,
-                            targetDeclaration,
-                            this._attribute.Type );
+                            this.AspectLayerInstance,
+                            targetDeclaration.ToFullRef(),
+                            this._attribute.Type.ToFullRef() );
 
                         return AddTransformations( AdviceOutcome.Override, removeTransformation );
 
@@ -77,22 +74,21 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
         {
             if ( removeTransformation != null )
             {
-                addTransformation( removeTransformation );
+                contextCopy.AddTransformation( removeTransformation );
             }
 
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicitlyDeclared: true } constructor )
             {
-                addTransformation(
-                    new ConstructorBuilder( this, constructor.DeclaringType )
-                    {
-                        ReplacedImplicit = constructor.ToValueTypedRef(), Accessibility = Accessibility.Public
-                    }.ToTransformation() );
+                contextCopy.AddTransformation(
+                    new ConstructorBuilder( this.AspectLayerInstance, constructor )
+                        .CreateTransformation() );
             }
 
-            var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );
-            addTransformation( attributeBuilder.ToTransformation() );
+            var attributeBuilder = new AttributeBuilder( this.AspectLayerInstance, targetDeclaration, this._attribute );
+            attributeBuilder.Freeze();
+            contextCopy.AddTransformation( attributeBuilder.CreateTransformation() );
 
-            return new AddAttributeAdviceResult( outcome, attributeBuilder.ToAttributeRef() );
+            return new AddAttributeAdviceResult( outcome, attributeBuilder.ToRef() );
         }
     }
 }

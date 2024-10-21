@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using System;
@@ -80,7 +81,6 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     }
 
     [Theory]
-    [InlineData( "X:x" )]
     [InlineData( "Y:x" )]
     [InlineData( "Y:+" )]
     [InlineData( "Y:List<x>" )]

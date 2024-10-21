@@ -77,15 +77,23 @@ internal sealed class CompileTimeSerializer
 
         try
         {
-            var serializationReader = new SerializationReader( this._serviceProvider, stream, this, false, assemblyName );
-
-            return serializationReader.Deserialize();
+            return Try( false );
         }
         catch ( CompileTimeSerializationException ) when ( stream.CanSeek )
         {
             stream.Seek( 0, SeekOrigin.Begin );
 
-            var serializationReader = new SerializationReader( this._serviceProvider, stream, this, true, assemblyName );
+            return Try( true );
+        }
+
+        object? Try( bool shouldReportExceptionCause )
+        {
+            var serializationReader = new SerializationReader(
+                stream,
+                this,
+                shouldReportExceptionCause,
+                assemblyName,
+                this.CompilationContext );
 
             return serializationReader.Deserialize();
         }
