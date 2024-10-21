@@ -1208,7 +1208,7 @@ public class PublicClass
             var compilation = testContext.CreateCompilationModel( "", masterCode );
             var type = compilation.Factory.GetTypeByReflectionName( "PublicClass" );
             Assert.True( type.DeclaringAssembly.IsExternal );
-            Assert.Single( type.Fields.Where( f => !f.IsImplicitlyDeclared ) );
+            Assert.Single( type.Fields, f => !f.IsImplicitlyDeclared );
             Assert.Single( type.Methods );
             Assert.Single( type.Properties );
             Assert.Single( type.Types );

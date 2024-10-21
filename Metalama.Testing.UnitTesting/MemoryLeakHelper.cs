@@ -31,7 +31,7 @@ internal static class MemoryLeakHelper
 
     public static void CaptureDotMemoryDumpAndThrow()
     {
-        DotMemory.EnsurePrerequisite();
+        DotMemory.Init();
         var dotMemoryConfig = new DotMemory.Config();
         var path = Path.Combine( MetalamaPathUtilities.GetTempPath(), "Metalama", "MemoryDumps" );
         dotMemoryConfig.SaveToDir( path );
