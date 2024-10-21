@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -921,7 +922,7 @@ internal sealed partial class ContextualSyntaxGenerator
         }
 
         return suppressNullableWarning
-            ? PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand )
+            ? PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand ).WithSimplifierAnnotation()
             : operand;
     }
 }

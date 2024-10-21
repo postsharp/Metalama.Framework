@@ -1,23 +1,22 @@
 // Warning CS8618 on `PropertyChanged`: `Non-nullable event 'PropertyChanged' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
 [NotifyPropertyChanged]
-internal class Car : global::System.ComponentModel.INotifyPropertyChanged
+internal class Car : INotifyPropertyChanged
 {
   private string? _make;
   public string? Make
   {
     get
     {
-      return this._make;
+      return _make;
     }
     set
     {
       var value_1 = value;
-      if (value_1 != this._make)
+      if (value_1 != _make)
       {
         this.OnPropertyChanged("Make");
-        this._make = value;
+        _make = value;
       }
-      return;
     }
   }
   private double _power;
@@ -25,22 +24,21 @@ internal class Car : global::System.ComponentModel.INotifyPropertyChanged
   {
     get
     {
-      return this._power;
+      return _power;
     }
     set
     {
       var value_1 = value;
-      if (value_1 != this._power)
+      if (value_1 != _power)
       {
         this.OnPropertyChanged("Power");
-        this._power = value;
+        _power = value;
       }
-      return;
     }
   }
-  protected virtual void OnPropertyChanged(global::System.String name)
+  protected virtual void OnPropertyChanged(string name)
   {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
+    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+  public event PropertyChangedEventHandler PropertyChanged;
 }

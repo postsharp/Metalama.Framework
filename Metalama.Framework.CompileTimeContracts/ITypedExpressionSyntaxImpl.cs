@@ -14,4 +14,6 @@ internal interface ITypedExpressionSyntaxImpl
     ExpressionStatementSyntax? ToStatement();
 
     IUserExpression ToUserExpression( ICompilation compilation );
+
+    bool? IsReferenceable { get; }
 }

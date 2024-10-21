@@ -28,9 +28,9 @@ internal sealed class DelegateUserExpression : UserExpression
 
     public override IType Type { get; }
 
-    public override bool IsAssignable { get; }
+    public override bool? IsAssignable { get; }
 
-    private protected override bool IsReferenceable { get; }
+    private protected override bool? IsReferenceable { get; }
 
     protected override string ToStringCore() => "<late bound>";
 }
