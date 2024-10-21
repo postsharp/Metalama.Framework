@@ -33,7 +33,7 @@ public class StringKeyedValue<T>
     }
     public StringKeyedValue<T> Build()
     {
-      return new StringKeyedValue<T>(Value)!;
+      return new StringKeyedValue<T>(Value);
     }
   }
 }
@@ -71,7 +71,7 @@ public class TaggedKeyValue : StringKeyedValue<string>
     }
     public new TaggedKeyValue Build()
     {
-      return new TaggedKeyValue(Tag, Value)!;
+      return new TaggedKeyValue(Tag, Value);
     }
   }
 }

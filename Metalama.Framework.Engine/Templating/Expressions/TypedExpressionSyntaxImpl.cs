@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
         /// </summary>
-        public bool IsReferenceable { get; }
+        public bool? IsReferenceable { get; }
 
         public ExpressionSyntax Syntax { get; }
 
@@ -70,12 +70,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
-
-            // If IsReferenceable is not specified explicitly, attempt to infer it.
-            // The inference is currently very simple: it's referenceable only of it's just an identifier.
-            // TODO: We could support ReturnsByRef but this information is not on the expression type but on the expression itself,
-            // so it must be sent from upstream.
-            this.IsReferenceable = isReferenceable ?? syntax is IdentifierNameSyntax;
+            this.IsReferenceable = isReferenceable ?? TypeAnnotationMapper.GetExpressionIsReferenceableFromAnnotation( syntax );
 
             // Infer nullability from the expression type if we have it.
             if ( canBeNull == null && expressionType is { IsNullable: not null } )

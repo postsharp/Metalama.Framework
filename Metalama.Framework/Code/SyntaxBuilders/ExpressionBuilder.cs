@@ -22,11 +22,21 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Creates a compile-time <see cref="IExpression"/> from the current <see cref="ExpressionBuilder"/>.
         /// </summary>
-        public IExpression ToExpression() => ExpressionFactory.Parse( this.ToString() );
+        public IExpression ToExpression() => ExpressionFactory.Parse( this.ToString(), this.ExpressionType, this.IsReferenceable );
 
         /// <summary>
         /// Returns a clone of the current <see cref="ExpressionBuilder"/>.
         /// </summary>
         public ExpressionBuilder Clone() => new( this );
+
+        /// <summary>
+        /// Gets or sets the resulting type of the expression, if known. This value allows to generate simpler code.
+        /// </summary>
+        public IType? ExpressionType { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the expression can be used in <c>ref</c> or <c>out</c> situations.
+        /// </summary>
+        public bool? IsReferenceable { get; set; }
     }
 }
