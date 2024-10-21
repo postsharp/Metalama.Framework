@@ -17,9 +17,7 @@ public sealed class MetalamaGeneratedCodeAnalyzer : DiagnosticAnalyzer
 
     public MetalamaGeneratedCodeAnalyzer()
     {
-        this._impl = (DiagnosticAnalyzer) (ProcessKindHelper.CurrentProcessKind == ProcessKind.Compiler
-            ? ResourceExtractor.CreateInstance( "Metalama.Framework.Engine", "Metalama.Framework.Engine.GeneratedCodeAnalysis.CompileTimeGeneratedCodeAnalyzer" )
-            : ResourceExtractor.CreateInstance( "Metalama.Framework.Engine", "Metalama.Framework.Engine.GeneratedCodeAnalysis.DesignTimeGeneratedCodeAnalyzer" ));
+        this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance( "Metalama.Framework.Engine", "Metalama.Framework.Engine.GeneratedCodeAnalyzer" );
     }
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => this._impl?.SupportedDiagnostics ?? ImmutableArray<DiagnosticDescriptor>.Empty;

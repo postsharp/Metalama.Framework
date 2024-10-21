@@ -77,24 +77,14 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
         return true;
     }
 
-    public Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteAsync(
+    public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteAsync(
         IDiagnosticAdder diagnosticAdder,
         Compilation compilation,
         ImmutableArray<ManagedResource> resources,
         TestableCancellationToken cancellationToken = default )
     {
-        var partialCompilation = PartialCompilation.CreateComplete( compilation );
-        return this.ExecuteAsync( diagnosticAdder, partialCompilation, resources, cancellationToken );
-    }
-
-    public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteAsync(
-        IDiagnosticAdder diagnosticAdder,
-        PartialCompilation partialCompilation,
-        ImmutableArray<ManagedResource> resources,
-        TestableCancellationToken cancellationToken = default )
-    {
-        var compilation = partialCompilation.Compilation;
         var compilationContext = this.ServiceProvider.GetRequiredService<ClassifyingCompilationContextFactory>().GetInstance( compilation );
+        var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
         // Skip if Metalama has been disabled for this project.
         if ( !this.ProjectOptions.IsFrameworkEnabled )

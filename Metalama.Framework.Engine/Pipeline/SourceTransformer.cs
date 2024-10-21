@@ -8,7 +8,6 @@ using Metalama.Backstage.Licensing.Consumption.Sources;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.GeneratedCodeAnalysis;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
@@ -97,8 +96,6 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
                 globalServices = globalServices.WithService( new CompileTimeExceptionHandler( globalServices ) );
             }
 
-            OriginalCompilationInfo.OriginalCompilation = context.Compilation;
-
             // Try.Metalama ships its own project options factory using the async-local service provider.
             var projectOptionsFactory = globalServices.GetRequiredService<IProjectOptionsFactory>();
             var projectOptions = projectOptionsFactory.GetProjectOptions( context.AnalyzerConfigOptionsProvider, context.Options );
@@ -131,8 +128,6 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
                 context.AddSyntaxTreeTransformations( pipelineResult.Value.SyntaxTreeTransformations );
                 HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult.Value );
                 HandleSuppressions( context, projectServiceProvider, pipelineResult.Value.DiagnosticSuppressions );
-
-                OriginalCompilationInfo.OriginalConfiguration = pipelineResult.Value.Configuration;
             }
         }
         catch ( Exception e )

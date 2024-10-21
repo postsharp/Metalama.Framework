@@ -110,8 +110,6 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
         /// a given <see cref="AttributeData"/>.
         /// </summary>
-        /// <param name="attribute"></param>
-        /// <returns></returns>
         internal static Location? GetDiagnosticLocation( this AttributeData attribute ) => attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
 }
