@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -137,7 +138,7 @@ internal sealed class LinkerInjectionHelperProvider
                         GenericName(
                             Identifier( baseTypeName ),
                             TypeArgumentList(
-                                SeparatedList( new[] { aspectTypeSyntax, GetOrdinalTypeArgument( aspectType.ShortName, description, ordinal ) } ) ) ) );
+                                SeparatedList( [aspectTypeSyntax, GetOrdinalTypeArgument( aspectType.ShortName, description, ordinal )] ) ) ) );
         }
     }
 

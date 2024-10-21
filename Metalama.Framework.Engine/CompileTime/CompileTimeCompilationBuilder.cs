@@ -353,8 +353,8 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         var preprocessorSymbols =
             preprocessorServiceProvider != null
-            ? preprocessorServiceProvider.PreprocessorSymbols.Concat( "NETSTANDARD_2_0" )
-            : ["NETSTANDARD_2_0"];
+                ? preprocessorServiceProvider.PreprocessorSymbols.Concat( "NETSTANDARD_2_0" )
+                : ["NETSTANDARD_2_0"];
 
         var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols, languageVersion: SupportedCSharpVersions.Default );
 

@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true ) };
+                    return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, true )];
                 }
                 else
                 {
@@ -106,8 +106,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 Invariant.Assert( symbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } );
 
-                return new[]
-                {
+                return
+                [
                     this.GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
                     this.GetOriginalImplProperty(
                         symbol,
@@ -117,11 +117,11 @@ namespace Metalama.Framework.Engine.Linking
                         propertyDeclaration.AccessorList,
                         propertyDeclaration.ExpressionBody,
                         generationContext )
-                };
+                ];
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, false ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, false )];
             }
             else
             {
@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Linking
                         semicolonToken: default(SyntaxToken) );
                 }
 
-                return new[] { propertyDeclaration };
+                return [propertyDeclaration];
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isOverrideOrOverrideTarget )

@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -12,7 +13,6 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
@@ -22,51 +22,57 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 /// </summary>
 internal sealed class OverrideFinalizerTransformation : OverrideMemberTransformation
 {
+    private readonly IFullRef<IMethod> _targetFinalizer;
+
     private BoundTemplateMethod BoundTemplate { get; }
 
-    private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
-
-    public OverrideFinalizerTransformation( Advice advice, IMethod targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( advice, targetFinalizer, tags )
+    public OverrideFinalizerTransformation(
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IMethod> targetFinalizer,
+        BoundTemplateMethod boundTemplate )
+        : base( aspectLayerInstance, targetFinalizer )
     {
+        this._targetFinalizer = targetFinalizer;
         this.BoundTemplate = boundTemplate;
     }
+
+    public override IFullRef<IMember> OverriddenDeclaration => this._targetFinalizer;
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var proceedExpression = this.CreateProceedExpression( context );
 
+        var overriddenDeclaration = this._targetFinalizer.GetTarget( this.InitialCompilation );
+
         var metaApi = MetaApi.ForMethod(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
-                this.BoundTemplate.TemplateMember.Cast(),
-                this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.BoundTemplate.TemplateMember.AsMemberOrNamedType(),
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             this.BoundTemplate,
             _ => proceedExpression,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );
+        var templateDriver = this.BoundTemplate.TemplateMember.Driver;
 
         if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
-        var modifiers = this.OverriddenDeclaration
+        var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
@@ -78,22 +84,22 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
                 null,
                 Identifier(
                     context.InjectionNameProvider.GetOverrideName(
-                        this.OverriddenDeclaration.DeclaringType,
-                        this.ParentAdvice.AspectLayerId,
-                        this.OverriddenDeclaration ) ),
+                        overriddenDeclaration.DeclaringType,
+                        this.AspectLayerId,
+                        overriddenDeclaration ) ),
                 null,
                 ParameterList(),
                 List<TypeParameterConstraintClauseSyntax>(),
                 newMethodBody,
                 null );
 
-        return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
+        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToFullRef() )];
     }
 
     private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )
         => new(
-            context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
-            this.OverriddenDeclaration.GetCompilationModel().Cache.SystemVoidType );
+            context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.AspectLayerId ),
+            context.FinalCompilation.Cache.SystemVoidType );
 
     public override TransformationObservability Observability => TransformationObservability.None;
 }

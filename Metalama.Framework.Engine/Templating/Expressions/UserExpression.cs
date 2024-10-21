@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis;
@@ -18,14 +18,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     {
         private string? _toString;
 
-        protected abstract ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext );
+        protected abstract ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null );
 
         /// <summary>
         /// Creates a <see cref="TypedExpressionSyntaxImpl"/> for the given <see cref="SyntaxGenerationContext"/>.
         /// </summary>
-        internal TypedExpressionSyntaxImpl ToTypedExpressionSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        internal TypedExpressionSyntaxImpl ToTypedExpressionSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
             => new(
-                this.ToSyntax( syntaxSerializationContext ),
+                this.ToSyntax( syntaxSerializationContext, targetType ),
                 this.Type,
                 syntaxSerializationContext.CompilationModel,
                 this.IsReferenceable,
@@ -41,8 +41,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => this.ToTypedExpressionSyntax( (SyntaxSerializationContext) syntaxGenerationContext );
+        TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType )
+            => this.ToTypedExpressionSyntax( (SyntaxSerializationContext) syntaxGenerationContext, targetType );
 
         public sealed override string ToString() => this._toString ??= this.ToStringCore();
 
@@ -57,7 +57,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                         new SyntaxSerializationContext(
                             compilation,
                             compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: false ),
-                            null ) )
+                            null ),
+                        null )
                     .NormalizeWhitespace()
                     .ToString();
         }

@@ -9,6 +9,9 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
@@ -141,7 +144,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     description,
                     granularity ) );
 
-            if ( validatedDeclaration is Method validatedMethod )
+            if ( validatedDeclaration is SourceMethod validatedMethod )
             {
                 switch ( validatedMethod.MethodKind )
                 {
@@ -628,12 +631,12 @@ namespace Metalama.Framework.Engine.Fabrics
                                         break;
 
                                     case INamedType type:
-                                        types = new[] { type };
+                                        types = [type];
 
                                         break;
 
                                     case var _ when declaration.GetTopmostNamedType() is { } topmostType:
-                                        types = new[] { topmostType };
+                                        types = [topmostType];
 
                                         break;
 

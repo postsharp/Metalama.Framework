@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
-internal class TypeIdRef<T> : StringRef<T>
+internal class TypeIdRef<T> : DurableRef<T>
     where T : class, ICompilationElement
 {
     private TypeIdRef( string id ) : base( id )
@@ -17,9 +17,8 @@ internal class TypeIdRef<T> : StringRef<T>
 
     public TypeIdRef( SerializableTypeId id ) : base( id.Id ) { }
 
-    public override SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
-
-    public override SerializableDeclarationId ToSerializableId( CompilationContext compilationContext ) => throw new NotSupportedException();
+    public override SerializableDeclarationId ToSerializableId()
+        => throw new NotSupportedException( "The durable reference must be first resolved to a full reference." );
 
     protected override ISymbol GetSymbol( CompilationContext compilationContext, bool ignoreAssemblyKey = false )
     {
@@ -31,15 +30,31 @@ internal class TypeIdRef<T> : StringRef<T>
         return symbol;
     }
 
-    protected override T? Resolve( CompilationModel compilation, bool throwIfMissing, IGenericContext? genericContext )
+    protected override ICompilationElement? Resolve(
+        CompilationModel compilation,
+        bool throwIfMissing,
+        IGenericContext genericContext,
+        Type interfaceType )
     {
+        Invariant.Assert( genericContext.IsEmptyOrIdentity );
+        
         if ( !compilation.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( this.Id ), out var symbol ) )
         {
             return ReturnNullOrThrow( this.Id, throwIfMissing, compilation );
         }
 
-        return ConvertDeclarationOrThrow( symbol, compilation );
+        return ConvertDeclarationOrThrow( symbol, compilation, interfaceType );
     }
 
-    public override IRefImpl<TOut> As<TOut>() => this as IRefImpl<TOut> ?? new TypeIdRef<TOut>( this.Id );
+    protected override IRef<TOut> CastAsRef<TOut>() => this as IRef<TOut> ?? new TypeIdRef<TOut>( this.Id );
+
+    public override IFullRef ToFullRef( RefFactory refFactory )
+    {
+        if ( !refFactory.CompilationContext.SerializableTypeIdResolver.TryResolveId( new SerializableTypeId( this.Id ), out var symbol ) )
+        {
+            throw new InvalidOperationException( $"Unable to resolve type id: {this.Id}." );
+        }
+
+        return refFactory.FromAnySymbol( symbol );
+    }
 }

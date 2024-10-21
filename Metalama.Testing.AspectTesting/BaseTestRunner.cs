@@ -338,6 +338,28 @@ internal abstract partial class BaseTestRunner
 
             var initialCompilation = (await mainProject.GetCompilationAsync())!;
 
+            // Preprocess the entire compilation.
+
+            var preprocessedCompilation = this.PreprocessCompilation( initialCompilation, testResult );
+
+            if ( preprocessedCompilation != initialCompilation )
+            {
+                // Index documents by their paths.
+                var documentIdsByPath = mainProject.Documents.ToDictionary( d => d.FilePath.AssertNotNull(), d => d.Id );
+
+                var updatedSolution = mainProject.Solution;
+
+                foreach ( var updatedSyntaxTree in preprocessedCompilation.SyntaxTrees )
+                {
+                    var documentId = documentIdsByPath[updatedSyntaxTree.FilePath];
+
+                    updatedSolution = updatedSolution.WithDocumentSyntaxRoot( documentId, await updatedSyntaxTree.GetRootAsync() );
+                }
+
+                initialCompilation = preprocessedCompilation;
+                mainProject = updatedSolution.GetProject( mainProject.Id ).AssertNotNull();
+            }
+
             ValidateCustomAttributes( initialCompilation );
 
             testResult.InputProject = mainProject;
@@ -526,6 +548,11 @@ internal abstract partial class BaseTestRunner
     /// <param name="testResult"></param>
     /// <returns></returns>
     private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestResult testResult ) => syntaxRoot;
+
+    private protected virtual Compilation PreprocessCompilation( Compilation initialCompilation, TestResult testResult )
+    {
+        return initialCompilation;
+    }
 
     private static void ValidateCustomAttributes( Compilation compilation )
     {

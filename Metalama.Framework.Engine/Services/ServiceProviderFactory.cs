@@ -3,7 +3,8 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Formatting;
@@ -160,6 +161,7 @@ public static class ServiceProviderFactory
             .WithService<CompilationServiceProvider<ProjectSpecificCompileTimeTypeResolver>>( sp => new ProjectSpecificCompileTimeTypeResolver.Provider( sp ) )
             .WithServiceConditional<UserCodeAttributeDeserializer.Provider>( sp => new UserCodeAttributeDeserializer.Provider( sp ) )
             .WithService<SymbolClassificationService>( _ => new SymbolClassificationService( repository ) )
-            .WithServiceConditional<TemplateAttributeFactory>( sp => new TemplateAttributeFactory( sp ) );
+            .WithServiceConditional<TemplateAttributeFactory>( sp => new TemplateAttributeFactory( sp ) )
+            .WithService( sp => new TemplateClassMemberBuilder( sp ) );
     }
 }

@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )];
             }
             else
             {
@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Linking
                     type.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                     null,
                     identifier,
-                    AccessorList( List( new[] { getAccessor, setAccessor } ) ),
+                    AccessorList( List( [getAccessor, setAccessor] ) ),
                     null,
                     null,
                     default );

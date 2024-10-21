@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Comparers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -30,7 +30,7 @@ internal sealed class MethodReturnStatementInliner : MethodInliner
             return false;
         }
 
-        if ( !SignatureTypeSymbolComparer.Instance.Equals(
+        if ( !SignatureTypeComparer.Instance.Equals(
                 methodSymbol.ReturnType,
                 aspectReference.ContainingSemantic.Symbol.ReturnType ) )
         {

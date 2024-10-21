@@ -29,15 +29,7 @@
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.12.0" />
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.12.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.12.0" />
-
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.4.0" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.8.0" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.12.0" />
-
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.12.0" />
-
+        
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.8.0" />
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting" />
@@ -45,6 +37,24 @@
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.8.0" />
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting" />
+
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.LinkerTests.4.12.0" />
+
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.AspectTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.AspectTests.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.AspectTests.4.12.0" />
+
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.12.0" />
+
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.TemplateTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.TemplateTests.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.TemplateTests.4.12.0" />
+
+
     </ItemGroup>
     
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />

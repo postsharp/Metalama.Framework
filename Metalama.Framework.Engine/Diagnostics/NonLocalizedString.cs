@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         public NonLocalizedString( string message, object?[]? arguments = null )
         {
             this._message = message;
-            this._arguments = arguments ?? Array.Empty<object?>();
+            this._arguments = arguments ?? [];
         }
 
         protected override string GetText( IFormatProvider? formatProvider )

@@ -46,6 +46,7 @@ namespace Metalama.Framework.CompilerExtensions
             }
         }
 
+#pragma warning disable VSTHRD110
         public override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
 #pragma warning disable VSTHRD110 // Observe the awaitable result of this method call by awaiting it, assigning to a variable, or passing it to another method
             => this._impl?.ComputeRefactoringsAsync( context ) ?? Task.CompletedTask;

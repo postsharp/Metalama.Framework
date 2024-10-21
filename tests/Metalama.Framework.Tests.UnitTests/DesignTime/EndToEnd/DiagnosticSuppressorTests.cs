@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Generic;
@@ -55,7 +54,7 @@ public sealed class DiagnosticSuppressorTests : FrameworkBaseTestClass
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
-                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            namespace Metalama.Framework.Tests.AspectTests.Aspects.Suppressions.Methods
                             {
                                 public class SuppressWarningAttribute : MethodAspect
                                 {
@@ -100,7 +99,7 @@ public sealed class DiagnosticSuppressorTests : FrameworkBaseTestClass
                             using Metalama.Framework.Code;
                             using Metalama.Framework.Diagnostics;
 
-                            namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+                            namespace Metalama.Framework.Tests.AspectTests.Aspects.Suppressions.Methods
                             {
                                 public class SuppressWarningAttribute : FieldAspect
                                 {

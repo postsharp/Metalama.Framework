@@ -25,5 +25,5 @@ public enum RefComparison
     /// <summary>
     /// Support cross-compilation comparisons and respects nullability when comparing <c>IRef{IType}</c>.
     /// </summary>
-    StructuralIncludeNullability,
+    StructuralIncludeNullability
 }

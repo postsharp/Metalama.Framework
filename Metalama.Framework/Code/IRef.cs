@@ -9,8 +9,8 @@ namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a reference to an <see cref="IDeclaration"/> or <see cref="IType"/>, which is valid across different compilation versions
-    /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes. References can be resolved using <see cref="GetTarget"/>,
-    /// given an compilation, or using the <see cref="RefExtensions.GetTarget{T}"/> extension method for the compilation of the current context.
+    /// (i.e. <see cref="ICompilation"/>) and, when serialized, across projects and processes.
+    /// References can be resolved using <see cref="RefExtensions.GetTarget{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/>.
     /// All objects implementing this interface also implement the stronly-typed <see cref="IRef{T}"/>.
     /// </summary>
     /// <remarks>
@@ -42,32 +42,23 @@ namespace Metalama.Framework.Code
         /// </summary>
         bool IsDurable { get; }
 
-        /// <summary>
-        /// Gets the target of the reference for a given compilation, or throws an exception if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTarget{T}"/> extension method.
-        /// </summary>
-        ICompilationElement GetTarget( ICompilation compilation, IGenericContext? genericContext = null );
-
-        /// <summary>
-        /// Gets the target of the reference for a given compilation, or returns <c>null</c> if the reference cannot be resolved. To get the reference for the
-        /// current execution context, use the <see cref="RefExtensions.GetTargetOrNull{T}"/> extension method.
-        /// </summary>
-        ICompilationElement? GetTargetOrNull(
-            ICompilation compilation,
-            IGenericContext? genericContext = null );
-
         bool Equals( IRef? other, RefComparison comparison = RefComparison.Default );
 
         int GetHashCode( RefComparison comparison );
 
         /// <summary>
-        /// Gets the <see cref="DeclarationKind"/> of the reference declaration, if available.
+        /// Gets the target of the reference for a given compilation, and specify the type of the interface to be returned.
+        /// Normally, the extension methods <see cref="RefExtensions.GetTarget{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/>
+        /// or <see cref="RefExtensions.GetTargetOrNull{T}(Metalama.Framework.Code.IRef{T},Metalama.Framework.Code.ICompilation,Metalama.Framework.Code.IGenericContext?)"/>
+        /// should be used instead of this one.
         /// </summary>
-        DeclarationKind DeclarationKind { get; }
+        ICompilationElement? GetTargetInterface(
+            ICompilation compilation,
+            Type? interfaceType,
+            IGenericContext? genericContext = null,
+            bool throwIfMissing = false );
 
-        /// <summary>
-        /// Gets the name of the referenced declaration, if available. 
-        /// </summary>
-        string? Name { get; }
+        // GetTargetInterface is intentionally in the IRef (and not in some IRefInternal) to avoid casts because we are in a performance-critical path.
+        // It is named differently than GetTarget to avoid name resolution problems.
     }
 }

@@ -13,7 +13,7 @@ namespace Metalama.Framework.DesignTime.Utilities
     {
         private readonly IExceptionReporter? _exceptionReporter;
 
-        public DesignTimeExceptionHandler(ServiceProvider<IGlobalService> serviceProvider)
+        public DesignTimeExceptionHandler( ServiceProvider<IGlobalService> serviceProvider )
         {
             this._exceptionReporter = serviceProvider.GetBackstageService<IExceptionReporter>();
         }
@@ -28,7 +28,7 @@ namespace Metalama.Framework.DesignTime.Utilities
                 _ => true
             };
 
-        public void ReportException( Exception e,  ILogger? logger = null )
+        public void ReportException( Exception e, ILogger? logger = null )
         {
             logger ??= Logger.DesignTime;
 

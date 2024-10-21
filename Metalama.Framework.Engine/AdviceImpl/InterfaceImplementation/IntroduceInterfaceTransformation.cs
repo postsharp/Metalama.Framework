@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
@@ -14,38 +16,30 @@ namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
 internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransformation, IIntroduceInterfaceTransformation, IInjectInterfaceTransformation
 {
-    public IDeclaration ContainingDeclaration => this.TargetType;
+    public IFullRef<INamedType> InterfaceType { get; }
 
-    public INamedType InterfaceType { get; }
-
-    public INamedType TargetType { get; }
+    public IFullRef<INamedType> TargetType { get; }
 
     public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
     public IntroduceInterfaceTransformation(
-        ImplementInterfaceAdvice implementInterfaceAdvice,
-        INamedType targetType,
-        INamedType interfaceType,
-        Dictionary<IMember, IMember> memberMap ) : base( implementInterfaceAdvice )
+        AspectLayerInstance implementInterfaceAspectLayerInstance,
+        IFullRef<INamedType> targetType,
+        IFullRef<INamedType> interfaceType,
+        Dictionary<IMember, IMember> memberMap ) : base( implementInterfaceAspectLayerInstance, targetType )
     {
         this.TargetType = targetType;
         this.InterfaceType = interfaceType;
         this.MemberMap = memberMap;
     }
 
-    public BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options )
+    public BaseTypeSyntax GetSyntax( SyntaxGenerationContext context, CompilationModel compilation )
     {
-        var syntaxGenerationContext =
-            this.TargetType.GetCompilationModel()
-                .CompilationContext.GetSyntaxGenerationContext(
-                    options,
-                    this.TargetType );
-
         // The type already implements the interface members itself.
-        return SimpleBaseType( syntaxGenerationContext.SyntaxGenerator.Type( this.InterfaceType ) );
+        return SimpleBaseType( context.SyntaxGenerator.Type( this.InterfaceType ) );
     }
 
-    public override IDeclaration TargetDeclaration => this.TargetType;
+    public override IFullRef<IDeclaration> TargetDeclaration => this.TargetType;
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 

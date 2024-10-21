@@ -64,20 +64,19 @@ namespace Metalama.Framework.Engine.Linking
             var accessorList =
                 AccessorList(
                     List(
-                        new[]
-                        {
-                            AccessorDeclaration(
-                                SyntaxKind.GetAccessorDeclaration,
-                                List<AttributeListSyntax>(),
-                                TokenList(),
-                                Token( SyntaxKind.GetKeyword ),
-                                null,
-                                ArrowExpressionClause( DefaultExpression( type ) ),
-                                Token( SyntaxKind.SemicolonToken ) ),
-                            AccessorDeclaration(
-                                setAccessorKind,
-                                context.SyntaxGenerator.FormattedBlock() )
-                        } ) );
+                    [
+                        AccessorDeclaration(
+                            SyntaxKind.GetAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            Token( SyntaxKind.GetKeyword ),
+                            null,
+                            ArrowExpressionClause( DefaultExpression( type ) ),
+                            Token( SyntaxKind.SemicolonToken ) ),
+                        AccessorDeclaration(
+                            setAccessorKind,
+                            context.SyntaxGenerator.FormattedBlock() )
+                    ] ) );
 
             return
                 PropertyDeclaration(

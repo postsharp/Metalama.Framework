@@ -28,18 +28,19 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     // Note that the implementation of this class cannot use TemplateExpansionContext because there is no necessarily one active.
     // For instance, in the BuildAspect method, there is none.
 
-    private readonly CompilationModel _compilation;
     private readonly SyntaxGenerationContext _syntaxGenerationContext;
     private readonly INamedType? _currentType;
     private readonly IType _targetTypedExpressionType;
 
-    public ICompilation Compilation => this._compilation;
+    ICompilation ISyntaxBuilderImpl.Compilation => this.Compilation;
+
+    public CompilationModel Compilation { get; }
 
     private ContextualSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
 
     protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext, INamedType? currentType )
     {
-        this._compilation = compilation;
+        this.Compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
         this._currentType = currentType;
 
@@ -63,7 +64,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         var expression = SyntaxFactoryEx.ParseExpressionSafe( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-        return new SyntaxUserExpression( expression, this._compilation.Cache.SystemObjectType );
+        return new SyntaxUserExpression( expression, this.Compilation.Cache.SystemObjectType );
     }
 
     public IStatement ParseStatement( string code )
@@ -75,9 +76,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IStatement CreateExpressionStatement( IExpression expression )
         => new UserStatement(
-            SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this.CreateSyntaxSerializationContext() ) ) );
+            SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this.CreateSyntaxSerializationContext(), null ) ) );
 
-    private SyntaxSerializationContext CreateSyntaxSerializationContext() => new( this._compilation, this._syntaxGenerationContext, this._currentType );
+    private SyntaxSerializationContext CreateSyntaxSerializationContext() => new( this.Compilation, this._syntaxGenerationContext, this._currentType );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -156,12 +157,12 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
                 ? SyntaxFactory.DefaultExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) )
                 : SyntaxFactoryEx.Null;
 
-            type = this._compilation.Factory.GetSpecialType( SpecialType.String ).ToNullableType();
+            type = this.Compilation.Factory.GetSpecialType( SpecialType.String ).ToNullable();
         }
         else
         {
             expression = this.GetLiteralImpl( value, specialType, stronglyTyped );
-            type = this._compilation.Factory.GetSpecialType( specialType );
+            type = this.Compilation.Factory.GetSpecialType( specialType );
         }
 
         return new SyntaxUserExpression( expression, type );
@@ -175,12 +176,12 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendTypeName( Type type, StringBuilder stringBuilder )
         => this.AppendTypeName(
-            this.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( type ),
+            this.Compilation.Factory.GetTypeByReflectionType( type ),
             stringBuilder );
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
-            expression.ToExpressionSyntax( this.CreateSyntaxSerializationContext() )
+            expression.ToExpressionSyntax( this.CreateSyntaxSerializationContext(), null )
                 .NormalizeWhitespace()
                 .ToFullString() );
 
@@ -222,8 +223,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
 
-    public IExpression NullExpression( IType? type )
-        => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullableType() ?? this._targetTypedExpressionType );
+    public IExpression NullExpression( IType? type ) => new SyntaxUserExpression( SyntaxFactoryEx.Null, type?.ToNullable() ?? this._targetTypedExpressionType );
 
     public IExpression DefaultExpression( IType? type )
     {

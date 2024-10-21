@@ -2,6 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Source;
+using Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes;
 using System;
 using System.Linq;
 
@@ -22,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Visitors
             {
                 return arrayType;
             }
-            else if ( arrayType is ArrayType sourceArrayType )
+            else if ( arrayType is SymbolArrayType sourceArrayType )
             {
                 return sourceArrayType.WithElementType( elementType );
             }
@@ -44,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Visitors
             {
                 return pointerType;
             }
-            else if ( pointerType is PointerType sourcePointerType )
+            else if ( pointerType is SymbolPointerType sourcePointerType )
             {
                 return sourcePointerType.WithPointedAtType( pointedAtType );
             }
@@ -97,7 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel.Visitors
 
             if ( hasChange )
             {
-                if ( typeDefinition is NamedType sourceNamedType )
+                if ( typeDefinition is SourceNamedType sourceNamedType )
                 {
                     return sourceNamedType.WithTypeArguments( typeArguments );
                 }

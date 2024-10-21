@@ -10,6 +10,7 @@ using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
@@ -48,8 +49,9 @@ internal sealed class AspectDriver : IAspectDriver
         // during pipeline execution, and execution has a different service provider.
 
         // Introductions must have a deterministic order because of testing.
+        // We can pass a null TemplateProvider here because the templates will not be executed, but only used to discover eligibility.
         var declarativeAdviceAttributes = aspectClass
-            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation ) )
+            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation, default, ObjectReader.Empty ) )
             .ToReadOnlyList();
 
         if ( declarativeAdviceAttributes.Count > 0 )
@@ -60,7 +62,7 @@ internal sealed class AspectDriver : IAspectDriver
 
                 ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
                     eligibilityBuilder,
-                    declarativeAdvice.Declaration );
+                    declarativeAdvice.GetDeclaration( compilation ) );
 
                 this.EligibilityRule = eligibilityBuilder.Build();
             }
@@ -208,12 +210,14 @@ internal sealed class AspectDriver : IAspectDriver
             // Apply options.
             ApplyOptions( aspectInstance, targetDeclaration, diagnosticSink, userCodeInvoker, buildAspectExecutionContext );
 
+            // Create the AspectLayerInstance.
+            var aspectLayerInstance = new AspectLayerInstance( aspectInstance, layer, initialCompilationRevision );
+
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(
                 serviceProvider,
-                initialCompilationRevision,
+                aspectLayerInstance,
                 currentCompilationRevision,
-                aspectInstance,
                 diagnosticSink,
                 buildAspectExecutionContext,
                 pipelineStepIndex,
@@ -225,11 +229,6 @@ internal sealed class AspectDriver : IAspectDriver
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
                 layer,
                 explicitlyImplementedInterfaceType: null );
-
-            // Prepare declarative advice.
-            var declarativeAdvice = this._aspectClass.TemplateClasses
-                .SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision ) )
-                .ToReadOnlyList();
 
             // Create the AspectBuilder.
             var aspectBuilderState = new AspectBuilderState(
@@ -245,6 +244,16 @@ internal sealed class AspectDriver : IAspectDriver
 
             adviceFactoryState.AspectBuilderState = aspectBuilderState;
 
+            // Prepare declarative advice.
+            var declarativeAdvice = this._aspectClass.TemplateClasses
+                .SelectMany(
+                    c => c.GetDeclarativeAdvice(
+                        serviceProvider,
+                        initialCompilationRevision,
+                        TemplateProvider.FromInstance( aspectInstance.Aspect ),
+                        adviceFactoryState.AspectBuilderState.GetTagsReader( null ) ) )
+                .ToReadOnlyList();
+
             if ( !userCodeInvoker
                     .TryInvoke(
                         () =>
@@ -253,7 +262,7 @@ internal sealed class AspectDriver : IAspectDriver
                             foreach ( var advice in declarativeAdvice )
                             {
                                 ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
-                                    advice.Declaration,
+                                    advice.GetDeclaration( initialCompilationRevision ),
                                     advice.TemplateClassMember.Key,
                                     aspectBuilder );
                             }

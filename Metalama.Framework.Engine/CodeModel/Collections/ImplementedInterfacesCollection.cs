@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public bool Contains( Type type )
         {
-            var itype = ((ICompilationInternal) this.ContainingDeclaration!.Compilation).Factory.GetTypeByReflectionType( type );
+            var itype = this.ContainingDeclaration!.Compilation.Factory.GetTypeByReflectionType( type );
 
             if ( itype is not INamedType namedType )
             {

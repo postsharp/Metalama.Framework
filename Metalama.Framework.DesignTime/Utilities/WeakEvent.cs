@@ -107,9 +107,9 @@ public abstract class WeakEventBase<TDelegate, TEventArgs>
             return false;
         }
 
-        for ( var i = 0; i < targets.Length; i++ )
+        foreach ( var t in targets )
         {
-            if ( targets[i] != null )
+            if ( t != null )
             {
                 return true;
             }
@@ -118,9 +118,9 @@ public abstract class WeakEventBase<TDelegate, TEventArgs>
         return false;
     }
 
-    public WeakEventBase()
+    protected WeakEventBase()
     {
-        this._lock = new();
+        this._lock = new object();
     }
 
     public void AddHandler( TDelegate handler )
@@ -171,7 +171,7 @@ public abstract class WeakEventBase<TDelegate, TEventArgs>
 
             this._handlers.Add( handler.Target, handler );
 
-            myTargets[index] = new( handler.Target );
+            myTargets[index] = new WeakReference<object>( handler.Target );
 
             this.Targets = myTargets;
         }

@@ -26,7 +26,7 @@ internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
         this._returnVariableIdentifier = returnVariableIdentifier;
     }
 
-    public override SyntaxNode TargetNode => this._rootNode;
+    public override SyntaxNode ReplacedNode => this._rootNode;
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {

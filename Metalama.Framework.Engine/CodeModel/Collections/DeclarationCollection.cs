@@ -1,7 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,21 +13,22 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal abstract class DeclarationCollection<T> : IReadOnlyCollection<T>
-        where T : class, IDeclaration
+    internal abstract class DeclarationCollection<TDeclaration, TRef> : IReadOnlyCollection<TDeclaration>
+        where TDeclaration : class, IDeclaration
+        where TRef : class, IRef<TDeclaration>
     {
         private readonly IGenericContext _genericContext;
 
         internal IDeclaration? ContainingDeclaration { get; }
 
-        protected IReadOnlyList<IRef<T>> Source { get; }
+        protected IReadOnlyList<TRef> Source { get; }
 
         internal CompilationModel Compilation => (CompilationModel) this.ContainingDeclaration.AssertNotNull().Compilation;
 
-        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<IRef<T>> source )
+        protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<TRef> source )
         {
 #if DEBUG
-            if ( containingDeclaration is NamedTypeImpl )
+            if ( containingDeclaration is SourceNamedTypeImpl )
             {
                 throw new ArgumentOutOfRangeException( nameof(containingDeclaration) );
             }
@@ -36,24 +40,27 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration}"/> class representing an empty list.
+        /// Initializes a new instance of the <see cref="DeclarationCollection{TDeclaration,TRef}"/> class representing an empty list.
         /// </summary>
         protected DeclarationCollection()
         {
-            this.Source = ImmutableArray<IRef<T>>.Empty;
+            this.Source = ImmutableArray<TRef>.Empty;
             this._genericContext = GenericContext.Empty;
         }
 
-        public IEnumerator<T> GetEnumerator()
+        public IEnumerator<TDeclaration> GetEnumerator()
         {
-            if ( this.Source is DeclarationUpdatableCollection<T> updatableCollection )
+            if ( this.Source is DeclarationUpdatableCollection<TDeclaration, TRef> updatableCollection )
             {
                 // We don't use the list enumeration pattern because this may lead to infinite recursions
                 // if the loop body adds items during the enumeration.
 
-                foreach ( var reference in updatableCollection )
+                using ( StackOverflowHelper.Detect() )
                 {
-                    yield return this.GetItem( reference );
+                    foreach ( var reference in updatableCollection )
+                    {
+                        yield return this.GetItem( reference );
+                    }
                 }
             }
             else
@@ -71,14 +78,14 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         // We allow resolving references to missing declarations because the collection may be a child collection of a missing declaration,
         // for instance the parameters of a method that has been introduced into the current compilation but is not included in the current compilation.
-        protected T GetItem( in IRef<T> reference )
+        protected TDeclaration GetItem( TRef reference )
         {
             var declaration = reference.GetTarget( this.Compilation, genericContext: this._genericContext );
 
             return declaration;
         }
 
-        protected IEnumerable<T> GetItems( IEnumerable<IRef<T>> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
+        protected IEnumerable<TDeclaration> GetItems( IEnumerable<IRef<TDeclaration>> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
 
         public override string ToString()
         {

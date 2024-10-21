@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Comparers;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
@@ -32,9 +32,9 @@ internal static class DeclarationExtensions
                 .Select( ( p, i ) => (p, i) )
                 .All(
                     amp =>
-                        SignatureTypeSymbolComparer.Instance.Equals(
-                            amp.p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
-                            other.Parameters[amp.i].Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ) )
+                        SignatureTypeComparer.Instance.Equals(
+                            amp.p.Type,
+                            other.Parameters[amp.i].Type )
                         && amp.p.RefKind == other.Parameters[amp.i].RefKind );
 
     /// <summary>
@@ -59,10 +59,10 @@ internal static class DeclarationExtensions
                 .Select( ( p, i ) => (p, i) )
                 .All(
                     amp =>
-                        SignatureTypeSymbolComparer.Instance.Equals(
-                            amp.p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
-                            other.Parameters[amp.i].Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ) )
-                        && amp.p.RefKind == other.Parameters[amp.i].RefKind );
+                        SignatureTypeComparer.Instance.Equals(
+                            amp.p.Type,
+                            other.Parameters[amp.i].Type )
+                           && amp.p.RefKind == other.Parameters[amp.i].RefKind );
 
     /// <summary>
     /// Determines whether the event's signature is equal to the signature of the given event.

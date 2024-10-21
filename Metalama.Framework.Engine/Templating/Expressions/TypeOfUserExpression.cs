@@ -16,11 +16,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._type = type;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
             => syntaxSerializationContext.SyntaxGenerator.TypeOfExpression( this._type );
 
         protected override bool CanBeNull => false;
 
-        public override IType Type => ((ICompilationInternal) this._type.Compilation).Factory.GetTypeByReflectionType( typeof(Type) );
+        public override IType Type => this._type.Compilation.Factory.GetTypeByReflectionType( typeof(Type) );
     }
 }

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the generic parameters of the current type or method.
         /// </summary>
-        IGenericParameterList TypeParameters { get; }
+        ITypeParameterList TypeParameters { get; }
 
         /// <summary>
         /// Gets the generic type arguments of the current type or method, which are the type values

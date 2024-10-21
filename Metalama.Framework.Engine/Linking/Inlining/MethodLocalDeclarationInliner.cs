@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Comparers;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Variable and method return type should be equal (i.e. no implicit conversions).
-            if ( !SignatureTypeSymbolComparer.Instance.Equals(
+            if ( !SignatureTypeComparer.Instance.Equals(
                     semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol,
                     methodSymbol.ReturnType ) )
             {

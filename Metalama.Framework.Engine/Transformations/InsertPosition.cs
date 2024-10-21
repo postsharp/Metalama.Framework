@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -24,7 +24,7 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     /// <summary>
     /// Gets the builder into which the new node should be inserted.
     /// </summary>
-    public NamedDeclarationBuilder? DeclarationBuilder { get; }
+    public NamedDeclarationBuilderData? BuilderData { get; }
 
     /// <summary>
     /// Gets the target syntax tree of the insertion.
@@ -38,13 +38,13 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
         this._syntaxTree = node?.SyntaxTree;
     }
 
-    public InsertPosition( InsertPositionRelation relation, NamedTypeBuilder builder )
+    public InsertPosition( InsertPositionRelation relation, NamedDeclarationBuilderData builderData )
     {
         this.Relation = relation;
-        this.DeclarationBuilder = builder;
-        this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
+        this.BuilderData = builderData;
+        this._syntaxTree = builderData.PrimarySyntaxTree.AssertNotNull();
     }
-    
+
     public InsertPosition( SyntaxTree introducedSyntaxTree )
     {
         this.Relation = InsertPositionRelation.Root;
@@ -56,18 +56,18 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     public bool Equals( InsertPosition other )
         => this.Relation == other.Relation
            && this.SyntaxNode == other.SyntaxNode
-           && this.DeclarationBuilder == other.DeclarationBuilder
+           && this.BuilderData == other.BuilderData
            && this.SyntaxTree == other.SyntaxTree;
 
-    public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode, this.DeclarationBuilder, this.SyntaxTree );
+    public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode, this.BuilderData, this.SyntaxTree );
 
     public override string ToString()
         => this.SyntaxNode != null
             ? $"{this.Relation} {this.SyntaxNode.Kind()} in {this.SyntaxNode.SyntaxTree.FilePath}"
-            : this.DeclarationBuilder switch
+            : this.BuilderData switch
             {
-                NamedTypeBuilder namedTypeBuilder => $"{this.Relation} {namedTypeBuilder.AssertNotNull().FullName} (built type)",
-                NamespaceBuilder namespaceBuilder => $"{this.Relation} {namespaceBuilder.AssertNotNull().FullName} (built namespace)",
-                _ => throw new AssertionFailedException( $"Unexpected: {this.DeclarationBuilder}" ),
+                NamedTypeBuilderData namedTypeBuilder => $"{this.Relation} {namedTypeBuilder.AssertNotNull().Name} (built type)",
+                NamespaceBuilderData namespaceBuilder => $"{this.Relation} {namespaceBuilder.AssertNotNull().Name} (built namespace)",
+                _ => throw new AssertionFailedException( $"Unexpected: {this.BuilderData}" )
             };
 }

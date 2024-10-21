@@ -13,5 +13,5 @@ internal abstract class BaseDeclarationCollection
 
     public CompilationModel Compilation { get; protected set; }
 
-    protected RefFactory RefFactory => this.Compilation.CompilationContext.RefFactory;
+    protected RefFactory RefFactory => this.Compilation.RefFactory;
 }

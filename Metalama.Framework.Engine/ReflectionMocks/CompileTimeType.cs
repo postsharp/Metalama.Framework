@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -53,11 +53,10 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             => new( DurableRefFactory.FromTypeId<IType>( typeId ), metadata );
 
         // For test only.
-        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol().AssertSymbolNotNull(), type.GetCompilationContext() );
+        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol().AssertSymbolNotNull(), type.GetRefFactory() );
 
         // For test only.
-        private static CompileTimeType Create( ITypeSymbol typeSymbol, CompilationContext compilationContext )
-            => new( typeSymbol.ToRef( compilationContext ), typeSymbol );
+        private static CompileTimeType Create( ITypeSymbol typeSymbol, RefFactory refFactory ) => new( typeSymbol.ToRef( refFactory ), typeSymbol );
 
         public override string? Namespace { get; }
 
@@ -176,7 +175,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
         {
             var compilation = ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel;
 

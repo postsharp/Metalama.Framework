@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.IsReferenceable = isReferenceable;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext ) => this.Expression;
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null ) => this.Expression;
 
         public override IType Type { get; }
 

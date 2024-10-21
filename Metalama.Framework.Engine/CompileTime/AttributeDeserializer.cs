@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -213,7 +213,7 @@ internal abstract class AttributeDeserializer : IAttributeDeserializer
                 }
 
                 if ( !this._userCodeInvoker.TryInvoke(
-                        () => setter.Invoke( localAttributeInstance, new[] { translatedValue } ),
+                        () => setter.Invoke( localAttributeInstance, [translatedValue] ),
                         executionContext.WithDescription(
                             UserCodeDescription.Create( "setting the {0} property while instantiating a custom attribute", property ) ) ) )
                 {

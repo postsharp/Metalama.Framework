@@ -1,13 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.SerializableIds;
 
 namespace Metalama.Framework.Engine.CodeModel.References;
 
 internal static class DurableRefFactory
 {
-        
     public static IDurableRef<T> FromSymbolId<T>( in SymbolId symbolKey )
         where T : class, ICompilationElement
         => new SymbolIdRef<T>( symbolKey );

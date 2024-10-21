@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -108,7 +109,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     return runtimeExpression;
 
                 case IExpression dynamicMember:
-                    return dynamicMember.ToTypedExpressionSyntax( serializationContext );
+                    return dynamicMember.ToTypedExpressionSyntax( serializationContext, null );
 
                 case ExpressionSyntax syntax:
                     return new TypedExpressionSyntaxImpl( syntax, serializationContext.CompilationModel );
@@ -142,7 +143,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 default:
                     if ( array.Length == 0 )
                     {
-                        return Array.Empty<TypedExpressionSyntaxImpl>();
+                        return [];
                     }
 
                     var newArray = new TypedExpressionSyntaxImpl[array.Length];

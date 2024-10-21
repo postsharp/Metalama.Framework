@@ -5,8 +5,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.Introductions.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -24,15 +24,13 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
     private readonly INamedType? _explicitlyImplementedInterfaceType;
 
-    protected new IRef<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+    protected new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
     protected string MemberName { get; }
 
     protected TemplateMember<TTemplate>? Template { get; }
 
     protected OverrideStrategy OverrideStrategy { get; }
-
-    protected IObjectReader Tags { get; }
 
     protected IntroduceMemberAdvice(
         AdviceConstructorParameters<INamedType> parameters,
@@ -41,7 +39,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<TBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, buildAction )
     {
@@ -49,7 +46,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         var templateAttributeProperties = templateAttribute?.Properties;
 
         this.MemberName = explicitName ?? templateAttributeProperties?.Name
-            ?? template?.Declaration.Name ?? throw new ArgumentNullException( nameof(explicitName) );
+            ?? template?.Symbol.Name ?? throw new ArgumentNullException( nameof(explicitName) );
 
         this.Template = template;
 
@@ -64,119 +61,101 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         if ( this._scope == IntroductionScope.Target )
         {
-            this._scope = parameters.AspectInstance.TargetDeclaration.GetTarget( parameters.SourceCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
+            this._scope = parameters.AspectLayerInstance.AspectInstance.TargetDeclaration.GetTarget( parameters.AspectLayerInstance.InitialCompilation )
+                .GetClosestMemberOrNamedType()
+                ?.IsStatic == false
                 ? IntroductionScope.Instance
                 : IntroductionScope.Static;
         }
 
         this.OverrideStrategy = overrideStrategy;
-        this.Tags = tags;
         this._explicitlyImplementedInterfaceType = explicitlyImplementedInterfaceType;
     }
 
-    protected virtual void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties ) { }
+    protected virtual void InitializeBuilderCore(
+        TBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context ) { }
 
-    protected sealed override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+    protected override void InitializeBuilder( TBuilder builder, in AdviceImplementationContext context )
     {
-        base.Initialize( serviceProvider, diagnosticAdder );
-
         var templateAttribute = (ITemplateAttribute?) this.Template?.AdviceAttribute;
         var templateAttributeProperties = templateAttribute?.Properties;
+        var templateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
 
-        this.Builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;
-        this.Builder.IsSealed = templateAttributeProperties?.IsSealed ?? this.Template?.Declaration.IsSealed ?? false;
-        this.Builder.IsVirtual = templateAttributeProperties?.IsVirtual ?? this.Template?.Declaration.IsVirtual ?? false;
+        builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;
+        builder.IsSealed = templateAttributeProperties?.IsSealed ?? templateDeclaration?.IsSealed ?? false;
+        builder.IsVirtual = templateAttributeProperties?.IsVirtual ?? templateDeclaration?.IsVirtual ?? false;
 
         // Handle the introduction scope.
 
-        switch ( this._scope )
+        builder.IsStatic = this._scope switch
         {
-            case IntroductionScope.Default:
-                if ( this.Template?.Declaration is { IsStatic: true } )
-                {
-                    this.Builder.IsStatic = true;
-                }
-                else
-                {
-                    this.Builder.IsStatic = false;
-                }
-
-                break;
-
-            case IntroductionScope.Instance:
-                this.Builder.IsStatic = false;
-
-                break;
-
-            case IntroductionScope.Static:
-                this.Builder.IsStatic = true;
-
-                break;
-
-            default:
-                throw new AssertionFailedException( $"Unexpected IntroductionScope: {this._scope}." );
-        }
+            IntroductionScope.Default => templateDeclaration is { IsStatic: true },
+            IntroductionScope.Instance => false,
+            IntroductionScope.Static => true,
+            _ => throw new AssertionFailedException( $"Unexpected IntroductionScope: {this._scope}." )
+        };
 
         if ( this.Template != null )
         {
-            CopyTemplateAttributes( this.Template.Declaration!, this.Builder, serviceProvider );
+            CopyTemplateAttributes( templateDeclaration!, builder, context.ServiceProvider );
         }
 
-        this.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
-
-        this.BuildAction?.Invoke( this.Builder );
-
-        SetBuilderExplicitInterfaceImplementation( this.Builder, this._explicitlyImplementedInterfaceType );
+        this.InitializeBuilderCore( builder, templateAttributeProperties, in context );
     }
 
-    protected override void Validate( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    protected override void CompleteBuilder( TBuilder builder, in AdviceImplementationContext context )
     {
-        this.ValidateBuilder( this.TargetDeclaration.GetTarget( compilation ), diagnosticAdder );
+        base.CompleteBuilder( builder, in context );
+
+        SetBuilderExplicitInterfaceImplementation( builder, this._explicitlyImplementedInterfaceType );
     }
 
-    protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+    protected override void ValidateBuilder( TBuilder builder, IDiagnosticAdder diagnosticAdder )
     {
+        base.ValidateBuilder( builder, diagnosticAdder );
+
+        var targetDeclaration = this.TargetDeclaration;
+
         // Check that static member is not virtual.
-        if ( this.Builder is { IsStatic: true, IsVirtual: true } )
+        if ( builder is { IsStatic: true, IsVirtual: true } )
         {
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotIntroduceStaticVirtualMember.CreateRoslynDiagnostic(
                     targetDeclaration.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this.Builder),
+                    (this.AspectInstance.AspectClass.ShortName, builder),
                     this ) );
         }
 
         // Check that static member is not sealed.
-        if ( this.Builder is { IsStatic: true, IsSealed: true } )
+        if ( builder is { IsStatic: true, IsSealed: true } )
         {
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotIntroduceStaticSealedMember.CreateRoslynDiagnostic(
                     targetDeclaration.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this.Builder),
+                    (this.AspectInstance.AspectClass.ShortName, builder),
                     this ) );
         }
 
         // Check that instance member is not introduced to a static type.
-        if ( targetDeclaration.IsStatic && !this.Builder.IsStatic )
+        if ( targetDeclaration.IsStatic && !builder.IsStatic )
         {
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotIntroduceInstanceMember.CreateRoslynDiagnostic(
                     targetDeclaration.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration),
+                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration),
                     this ) );
         }
 
         // Check that virtual member is not introduced to a sealed type or a struct.
-        if ( targetDeclaration is { IsSealed: true } or { TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
-             && this.Builder.IsVirtual )
+        if ( targetDeclaration is { IsSealed: true } or { DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
+             && builder.IsVirtual )
         {
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotIntroduceVirtualToTargetType.CreateRoslynDiagnostic(
                     targetDeclaration.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration),
+                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration),
                     this ) );
         }
     }
@@ -249,5 +228,10 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
                 $"The member '{builder}' can't be used to explicitly implement the interface '{explicitlyImplementedInterfaceType}', because it doesn't match any member of the interface." ) );
     }
 
-    public override string ToString() => $"Introduce {this.Builder}";
+    protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome, TBuilder introducedMember )
+    {
+        return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, introducedMember.ToRef().As<TIntroduced>(), null );
+    }
+
+    public override string ToString() => $"Introduce {typeof(TIntroduced)} '{this.MemberName}' into '{this.TargetDeclaration}'";
 }

@@ -35,7 +35,7 @@ public sealed class OutputPathHelperTests
 
     private sealed class TestTempFileManager : ITempFileManager
     {
-        private string _basePath;
+        private readonly string _basePath;
 
         public TestTempFileManager( string? basePath = null )
         {

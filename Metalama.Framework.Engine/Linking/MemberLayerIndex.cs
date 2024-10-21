@@ -62,6 +62,11 @@ internal readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEqua
 
     public override string ToString() => $"({this.LayerIndex}, {this.InstanceIndex}, {this.TransformationIndex})";
 
+    internal MemberLayerIndex WithoutTransformationIndex()
+    {
+        return new MemberLayerIndex( this.LayerIndex, this.InstanceIndex, 0 );
+    }
+
     public static bool operator ==( MemberLayerIndex a, MemberLayerIndex b ) => a.Equals( b );
 
     public static bool operator !=( MemberLayerIndex a, MemberLayerIndex b ) => !a.Equals( b );

@@ -26,7 +26,7 @@ internal sealed class ForcedInitializationSubstitution : SyntaxNodeSubstitution
         this._symbolsToInitialize = symbolsToInitialize;
     }
 
-    public override SyntaxNode TargetNode => this._rootNode;
+    public override SyntaxNode ReplacedNode => this._rootNode;
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
@@ -21,7 +21,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -49,7 +48,7 @@ internal sealed partial class LinkerInjectionStep
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
         }
 
-        private RefFactory RefFactory => this._compilation.CompilationContext.RefFactory;
+        private RefFactory RefFactory => this._compilation.RefFactory;
 
         private CompilationContext CompilationContext => this._parent._compilationContext;
 
@@ -107,11 +106,11 @@ internal sealed partial class LinkerInjectionStep
             {
                 case IMethodSymbol method:
                     this.RewriteAttributeLists(
-                        this.RefFactory.ReturnParameter( method ),
+                        this.RefFactory.FromReturnParameter( method ),
                         SyntaxKind.ReturnKeyword,
                         originalDeclaringNode,
                         attributeLists,
-                        ( a, n ) => a.ContainingDeclaration.ContainingDeclaration!.GetPrimaryDeclarationSyntax() == n,
+                        ( a, n ) => a.ContainingDeclaration.GetPrimaryDeclarationSyntax() == n,
                         outputLists,
                         outputTrivias,
                         ref syntaxGenerationContext );
@@ -130,11 +129,11 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private void RewriteAttributeLists(
-            IRef<IDeclaration> target,
+            IFullRef<IDeclaration> target,
             SyntaxKind targetKind,
             SyntaxNode originalDeclaringNode,
             SyntaxList<AttributeListSyntax> inputAttributeLists,
-            Func<AttributeBuilder, SyntaxNode, bool> isPrimaryNode,
+            Func<AttributeBuilderData, SyntaxNode, bool> isPrimaryNode,
             List<AttributeListSyntax> outputAttributeLists,
             List<SyntaxTrivia> outputTrivia,
             ref SyntaxGenerationContext? syntaxGenerationContext )
@@ -171,7 +170,7 @@ internal sealed partial class LinkerInjectionStep
 
                 foreach ( var attribute in list.Attributes )
                 {
-                    if ( !finalModelAttributes.Any( a => ((AttributeRef) a).IsSyntax( attribute ) ) )
+                    if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
                     {
                         modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives )!;
                     }
@@ -196,7 +195,7 @@ internal sealed partial class LinkerInjectionStep
                             if ( wasFirstList )
                             {
                                 // Trivia preceding the first attribute list needs to before the first final attribute list.
-                                targetList = firstListLeadingTrivia ??= new List<SyntaxTrivia>();
+                                targetList = firstListLeadingTrivia ??= [];
                             }
                             else
                             {
@@ -221,18 +220,20 @@ internal sealed partial class LinkerInjectionStep
             foreach ( var attribute in finalModelAttributes )
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                if ( attribute is BuilderAttributeRef builderAttributeRef && isPrimaryNode( builderAttributeRef.AttributeBuilder, originalDeclaringNode ) )
+                if ( attribute is IntroducedAttributeRef builderAttributeRef && isPrimaryNode( builderAttributeRef.BuilderData, originalDeclaringNode ) )
 #pragma warning restore CS0618 // Type or member is obsolete
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
-                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( builderAttributeRef.AttributeBuilder )
+                    var attributeModel = builderAttributeRef.GetTarget( this._compilation );
+
+                    var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeModel )
                         .AssertNotNull();
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
                         .WithOptionalTrailingLineFeed( syntaxGenerationContext )
                         .WithAdditionalAnnotations(
-                            builderAttributeRef.AttributeBuilder.ParentAdvice?.AspectInstance.AspectClass.GeneratedCodeAnnotation
+                            builderAttributeRef.BuilderData.ParentAdvice?.AspectInstance.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     if ( targetKind != SyntaxKind.None )
@@ -430,7 +431,7 @@ internal sealed partial class LinkerInjectionStep
             foreach ( var injectedMember in injectedMembersAtPosition )
             {
                 // We should inject into a correct syntax tree.
-                Invariant.Assert( injectedMember.TargetSyntaxTree == originalSyntaxTree );
+                Invariant.Assert( injectedMember.GetTargetSyntaxTree() == originalSyntaxTree );
 
                 // Allow for tracking of the node inserted.
                 // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
@@ -438,7 +439,7 @@ internal sealed partial class LinkerInjectionStep
 
                 switch ( injectedMember.Declaration )
                 {
-                    case IMethodBase methodBase:
+                    case IFullRef<IMethodBase> methodBase:
                         // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
                         var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
                         var exitStatements = this._transformationCollection.GetInjectedExitStatements( injectedMember );
@@ -451,17 +452,23 @@ internal sealed partial class LinkerInjectionStep
 
                         break;
 
-                    case IPropertyOrIndexer propertyOrIndexer:
+                    case IFullRef<IPropertyOrIndexer> propertyOrIndexerRef:
+                        var propertyOrIndexer = propertyOrIndexerRef.Definition;
+
                         if ( propertyOrIndexer.GetMethod != null )
                         {
                             var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
-                                propertyOrIndexer.GetMethod,
+                                propertyOrIndexer.GetMethod.ToRef(),
+                                propertyOrIndexerRef,
                                 injectedMember );
 
-                            var getExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.GetMethod, injectedMember );
+                            var getExitStatements = this._transformationCollection.GetInjectedExitStatements(
+                                propertyOrIndexer.GetMethod.ToRef(),
+                                propertyOrIndexerRef,
+                                injectedMember );
 
                             injectedNode = InjectStatementsIntoMemberDeclaration(
-                                propertyOrIndexer.GetMethod,
+                                propertyOrIndexer.GetMethod.ToFullRef(),
                                 getEntryStatements,
                                 getExitStatements,
                                 injectedNode );
@@ -470,13 +477,17 @@ internal sealed partial class LinkerInjectionStep
                         if ( propertyOrIndexer.SetMethod != null )
                         {
                             var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
-                                propertyOrIndexer.SetMethod,
+                                propertyOrIndexer.SetMethod.ToRef(),
+                                propertyOrIndexerRef,
                                 injectedMember );
 
-                            var setExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.SetMethod, injectedMember );
+                            var setExitStatements = this._transformationCollection.GetInjectedExitStatements(
+                                propertyOrIndexer.SetMethod.ToRef(),
+                                propertyOrIndexerRef,
+                                injectedMember );
 
                             injectedNode = InjectStatementsIntoMemberDeclaration(
-                                propertyOrIndexer.SetMethod,
+                                propertyOrIndexer.SetMethod.ToFullRef(),
                                 setEntryStatements,
                                 setExitStatements,
                                 injectedNode );
@@ -488,16 +499,16 @@ internal sealed partial class LinkerInjectionStep
                 injectedNode = injectedNode
                     .WithOptionalLeadingTrivia( syntaxGenerationContext.TwoElasticEndOfLinesTriviaList, syntaxGenerationContext.Options )
                     .WithGeneratedCodeAnnotation(
-                        injectedMember.Transformation?.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation
+                        injectedMember.Transformation?.AspectInstance.AspectClass.GeneratedCodeAnnotation
                         ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                 switch ( injectedNode )
                 {
                     case ConstructorDeclarationSyntax constructorDeclaration:
                         {
-                            if ( injectedMember.DeclarationBuilder != null &&
+                            if ( injectedMember.BuilderData != null &&
                                  this._transformationCollection.TryGetMemberLevelTransformations(
-                                     injectedMember.DeclarationBuilder.AssertNotNull(),
+                                     injectedMember.BuilderData.AssertNotNull(),
                                      out var memberLevelTransformations ) )
                             {
                                 injectedNode = this.ApplyMemberLevelTransformations(
@@ -510,7 +521,7 @@ internal sealed partial class LinkerInjectionStep
                         }
 
                     case PropertyDeclarationSyntax propertyDeclaration:
-                        if ( injectedMember.DeclarationBuilder is IPropertyBuilder propertyBuilder
+                        if ( injectedMember.BuilderData is PropertyBuilderData propertyBuilder
                              && this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( propertyBuilder ) )
                         {
                             switch ( injectedMember )
@@ -537,7 +548,7 @@ internal sealed partial class LinkerInjectionStep
 
                     case TypeDeclarationSyntax typeDeclaration:
 
-                        var typeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
+                        var typeBuilder = (NamedTypeBuilderData) injectedMember.BuilderData.AssertNotNull();
                         var injectedTypeMembers = new List<MemberDeclarationSyntax>();
 
                         this.AddInjectionsOnPosition(
@@ -554,7 +565,7 @@ internal sealed partial class LinkerInjectionStep
                     case NamespaceDeclarationSyntax namespaceDeclaration:
                         // This handles named types injected into a namespace.
 
-                        var namespaceTypeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
+                        var namespaceTypeBuilder = (NamedTypeBuilderData) injectedMember.BuilderData.AssertNotNull();
                         var injectedNamedTypeMembers = new List<MemberDeclarationSyntax>();
 
                         this.AddInjectionsOnPosition(
@@ -577,7 +588,7 @@ internal sealed partial class LinkerInjectionStep
 
                 targetList.Add( (T) injectedNode );
 
-                TypeDeclarationSyntax AddInjectedInterfaces( NamedTypeBuilder typeBuilder, TypeDeclarationSyntax typeDeclaration )
+                TypeDeclarationSyntax AddInjectedInterfaces( NamedTypeBuilderData typeBuilder, TypeDeclarationSyntax typeDeclaration )
                 {
                     var injectedInterfaces = this._transformationCollection.GetIntroducedInterfacesForTypeBuilder( typeBuilder );
 
@@ -594,7 +605,7 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration(
-            IMember contextDeclaration,
+            IFullRef<IMember> contextDeclaration,
             IReadOnlyList<StatementSyntax> entryStatements,
             IReadOnlyList<StatementSyntax> exitStatements,
             MemberDeclarationSyntax currentNode )
@@ -624,9 +635,8 @@ internal sealed partial class LinkerInjectionStep
                     var returnsVoid =
                         contextDeclaration switch
                         {
-                            IConstructor => true,
-                            IMethod { IsAsync: false } contextMethod => contextMethod.ReturnType.Is( SpecialType.Void ),
-                            IMethod { IsAsync: true } contextMethod => contextMethod.GetAsyncInfo().ResultType.Is( SpecialType.Void ),
+                            IFullRef<IConstructor> => true,
+                            IFullRef<IMethod> methodRef => methodRef.DoReturnStatementsRequireArgument(),
                             _ => throw new InvalidOperationException( $"Not supported: {contextDeclaration}" )
                         };
 
@@ -654,65 +664,73 @@ internal sealed partial class LinkerInjectionStep
                             body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) );
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
+                    {
+                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { Definition.MethodKind: MethodKind.PropertyGet } );
 
-                    return
-                        property.PartialUpdate(
-                            expressionBody: null,
-                            semicolonToken: default(SyntaxToken),
-                            accessorList: AccessorList(
-                                SingletonList(
-                                    AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                        return
+                            property.PartialUpdate(
+                                expressionBody: null,
+                                semicolonToken: default(SyntaxToken),
+                                accessorList: AccessorList(
+                                    SingletonList(
+                                        AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                    }
 
                 case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
+                    {
+                        Invariant.Assert( contextDeclaration is IFullRef<IMethod> { Definition.MethodKind: MethodKind.PropertyGet } );
 
-                    return
-                        indexer.PartialUpdate(
-                            expressionBody: null,
-                            semicolonToken: default(SyntaxToken),
-                            accessorList: AccessorList(
-                                SingletonList(
-                                    AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                        return
+                            indexer.PartialUpdate(
+                                expressionBody: null,
+                                semicolonToken: default(SyntaxToken),
+                                accessorList: AccessorList(
+                                    SingletonList(
+                                        AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+                    }
 
                 case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } );
-
-                    return
-                        propertyOrIndexer.WithAccessorList(
-                            accessorList.WithAccessors(
-                                List(
-                                    accessorList.Accessors.SelectAsArray(
-                                        a =>
-                                            IsMatchingAccessor( a, contextDeclaration )
-                                                ? a switch
-                                                {
-                                                    { Body: { } body } => a.WithBody(
-                                                        ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) ),
-                                                    { ExpressionBody: { } expressionBody } =>
-                                                        a.PartialUpdate(
-                                                            expressionBody: null,
-                                                            semicolonToken: default(SyntaxToken),
-                                                            body: ReplaceExpression(
-                                                                entryStatements,
-                                                                exitStatements,
-                                                                expressionBody.Expression,
-                                                                a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
-                                                    _ => throw new AssertionFailedException( $"Not supported: {a}" )
-                                                }
-                                                : a ) ) ) );
-
-                    static bool IsMatchingAccessor( AccessorDeclarationSyntax accessorDeclaration, IDeclaration contextDeclaration )
                     {
-                        return (accessorDeclaration.Kind(), contextDeclaration) switch
+                        var methodRef = contextDeclaration.As<IMethod>();
+                        var methodKind = methodRef.Definition.MethodKind;
+                        Invariant.Assert( methodKind is MethodKind.PropertyGet or MethodKind.PropertySet );
+
+                        return
+                            propertyOrIndexer.WithAccessorList(
+                                accessorList.WithAccessors(
+                                    List(
+                                        accessorList.Accessors.SelectAsArray(
+                                            a =>
+                                                IsMatchingAccessor( a, methodKind )
+                                                    ? a switch
+                                                    {
+                                                        { Body: { } body } => a.WithBody(
+                                                            ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) ),
+                                                        { ExpressionBody: { } expressionBody } =>
+                                                            a.PartialUpdate(
+                                                                expressionBody: null,
+                                                                semicolonToken: default(SyntaxToken),
+                                                                body: ReplaceExpression(
+                                                                    entryStatements,
+                                                                    exitStatements,
+                                                                    expressionBody.Expression,
+                                                                    a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
+                                                        _ => throw new AssertionFailedException( $"Not supported: {a}" )
+                                                    }
+                                                    : a ) ) ) );
+                    }
+
+                    static bool IsMatchingAccessor( AccessorDeclarationSyntax accessorDeclaration, MethodKind methodKind )
+                    {
+                        return (accessorDeclaration.Kind(), methodKind) switch
                         {
-                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertyGet }) => true,
-                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
-                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
+                            (SyntaxKind.GetAccessorDeclaration, MethodKind.PropertyGet) => true,
+                            (SyntaxKind.SetAccessorDeclaration, MethodKind.PropertySet) => true,
+                            (SyntaxKind.InitAccessorDeclaration, MethodKind.PropertySet) => true,
                             _ => false
                         };
                     }
@@ -722,7 +740,7 @@ internal sealed partial class LinkerInjectionStep
             }
 
             static BlockSyntax ReplaceBlock(
-                IDeclaration declaration,
+                IRef<IDeclaration> declaration,
                 IReadOnlyList<StatementSyntax> entryStatements,
                 IReadOnlyList<StatementSyntax> exitStatements,
                 BlockSyntax targetBlock )
@@ -856,7 +874,7 @@ internal sealed partial class LinkerInjectionStep
         {
             static MemberDeclarationSyntax[] Singleton( MemberDeclarationSyntax m )
             {
-                return new[] { m };
+                return [m];
             }
 
             return member switch
@@ -1055,7 +1073,7 @@ internal sealed partial class LinkerInjectionStep
                 {
                     if ( rewrittenVariables.Count > 0 )
                     {
-                        return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
+                        return [node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) )];
                     }
                     else
                     {
@@ -1064,7 +1082,7 @@ internal sealed partial class LinkerInjectionStep
                 }
                 else
                 {
-                    return new[] { node };
+                    return [node];
                 }
             }
         }
@@ -1097,7 +1115,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var constructor = (IConstructor) this._compilation.GetDeclaration( symbol );
+                var constructor = this._compilation.RefFactory.FromSymbol<IConstructor>( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( constructor );
 
                 node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
@@ -1125,7 +1143,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null && symbol is not { PartialImplementationPart: not null } )
             {
-                var method = (IMethod) this._compilation.GetDeclaration( symbol );
+                var method = this._compilation.RefFactory.FromSymbol<IMethod>( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
                 node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
@@ -1149,7 +1167,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var method = (IMethod) this._compilation.GetDeclaration( symbol );
+                var method = this._compilation.RefFactory.FromSymbol<IMethod>( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
                 node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
@@ -1215,15 +1233,17 @@ internal sealed partial class LinkerInjectionStep
             node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
 
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
-            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode ).AssertSymbolNotNull();
+            var property = this._compilation.RefFactory.FromSymbol<IProperty>( symbol );
 
-            if ( symbol is { SetMethod: not null } )
+            if ( symbol is { SetMethod: { } setMethodSymbol } )
             {
-                var declaration = (IProperty) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
+                var setter = this._compilation.RefFactory.FromSymbol<IMethod>( setMethodSymbol );
+
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( setter, property );
 
                 node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
-                    declaration.SetMethod,
+                    setter,
                     entryStatements,
                     Array.Empty<StatementSyntax>(),
                     node );
@@ -1258,14 +1278,15 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var declaration = (IPropertyOrIndexer) this._compilation.GetDeclaration( symbol );
+                var indexer = this.RefFactory.FromSymbol<IIndexer>( symbol );
 
                 if ( symbol.GetMethod != null )
                 {
-                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.GetMethod.AssertNotNull() );
+                    var getter = this.RefFactory.FromSymbol<IMethod>( symbol.GetMethod );
+                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( getter, indexer );
 
                     node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
-                        declaration.GetMethod,
+                        getter,
                         entryStatements,
                         Array.Empty<StatementSyntax>(),
                         node );
@@ -1273,10 +1294,11 @@ internal sealed partial class LinkerInjectionStep
 
                 if ( symbol.SetMethod != null )
                 {
-                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
+                    var setter = this._compilation.RefFactory.FromSymbol<IMethod>( symbol.SetMethod );
+                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( setter, indexer );
 
                     node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
-                        declaration.SetMethod,
+                        setter,
                         entryStatements,
                         Array.Empty<StatementSyntax>(),
                         node );
@@ -1362,18 +1384,18 @@ internal sealed partial class LinkerInjectionStep
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists, node );
                 node = this.ReplaceAttributes( node, rewrittenAttributes );
 
-                return new[] { node };
+                return [node];
             }
         }
 
         public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
         {
             SyntaxGenerationContext? syntaxGenerationContext = null;
-            List<AttributeListSyntax> outputLists = new();
-            List<SyntaxTrivia> outputTrivias = new();
+            List<AttributeListSyntax> outputLists = [];
+            List<SyntaxTrivia> outputTrivias = [];
 
             this.RewriteAttributeLists(
-                this._compilation.ToRef(),
+                this._compilation.ToFullRef(),
                 SyntaxKind.AssemblyKeyword,
                 node,
                 node.AttributeLists,

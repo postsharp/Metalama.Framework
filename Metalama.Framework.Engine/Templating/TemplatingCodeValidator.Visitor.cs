@@ -307,9 +307,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     foreach ( var baseTypeNode in node.BaseList.Types )
                     {
-                        var baseType = ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol as INamedTypeSymbol;
-
-                        if ( baseType == null )
+                        if ( ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol is not INamedTypeSymbol baseType )
                         {
                             continue;
                         }
@@ -630,7 +628,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     if ( member is null or ITypeSymbol )
                     {
-                        return Enumerable.Empty<(ISymbol, INamedTypeSymbol)>();
+                        return [];
                     }
 
                     var selfAttributes = member.GetAttributes()

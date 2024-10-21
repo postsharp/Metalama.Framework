@@ -3,9 +3,12 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
@@ -36,14 +39,16 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => this.ToDeclarationRef();
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToFullDeclarationRef();
+
+        private protected virtual IRef<IDeclaration> ToDeclarationRef() => this.ToFullDeclarationRef();
 
         /// <summary>
         /// Returns an <see cref="IRef{T}"/> for the topmost interface supported by the type, i.e. not the base <see cref="IDeclaration"/>
         /// but <see cref="IMethod"/>, <see cref="INamedType"/>, ... 
         /// </summary>
         /// <returns></returns>
-        private protected abstract IRef<IDeclaration> ToDeclarationRef();
+        private protected abstract IFullRef<IDeclaration> ToFullDeclarationRef();
 
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
@@ -52,6 +57,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract bool CanBeInherited { get; }
 
         public abstract IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default );
+
+        DeclarationImplementationKind IDeclarationImpl.ImplementationKind => this.ImplementationKind;
+
+        internal abstract DeclarationImplementationKind ImplementationKind { get; }
 
         public abstract IAssembly DeclaringAssembly { get; }
 
@@ -75,10 +84,6 @@ namespace Metalama.Framework.Engine.CodeModel
         IGenericContext IDeclaration.GenericContext => this.GenericContext;
 
         internal abstract GenericContext GenericContext { get; }
-
-        ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
-
-        protected virtual ISymbol? GetSymbol() => null;
 
         public T GetMetric<T>()
             where T : IMetric
@@ -105,6 +110,8 @@ namespace Metalama.Framework.Engine.CodeModel
         protected abstract int GetHashCodeCore();
 
         [Memo]
-        private protected RefFactory RefFactory => this.GetCompilationContext().RefFactory;
+        private protected RefFactory RefFactory => this.Compilation.RefFactory;
+
+        public override string ToString() => this.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage );
     }
 }

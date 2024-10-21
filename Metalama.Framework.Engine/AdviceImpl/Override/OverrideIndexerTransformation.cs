@@ -3,6 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -11,7 +13,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -22,12 +23,11 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
     private BoundTemplateMethod? SetTemplate { get; }
 
     public OverrideIndexerTransformation(
-        Advice advice,
-        IIndexer overriddenDeclaration,
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IIndexer> overriddenDeclaration,
         BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
-        IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        BoundTemplateMethod? setTemplate )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
         this.GetTemplate = getTemplate;
         this.SetTemplate = setTemplate;
@@ -38,14 +38,16 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
 
-        if ( this.OverriddenDeclaration.GetMethod != null )
+        var overriddenDeclaration = this.OverriddenPropertyOrIndexer.GetTarget( this.InitialCompilation );
+
+        if ( overriddenDeclaration.GetMethod != null )
         {
             if ( this.GetTemplate != null )
             {
                 templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                     context,
                     this.GetTemplate,
-                    this.OverriddenDeclaration.GetMethod,
+                    overriddenDeclaration.GetMethod,
                     out getAccessorBody );
             }
             else
@@ -60,14 +62,14 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
 
         BlockSyntax? setAccessorBody = null;
 
-        if ( this.OverriddenDeclaration.SetMethod != null )
+        if ( overriddenDeclaration.SetMethod != null )
         {
             if ( this.SetTemplate != null )
             {
                 templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                     context,
                     this.SetTemplate,
-                    this.OverriddenDeclaration.SetMethod,
+                    overriddenDeclaration.SetMethod,
                     out setAccessorBody );
             }
             else
@@ -83,7 +85,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         if ( templateExpansionError )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
         return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
@@ -95,35 +97,35 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         IMethod accessor,
         [NotNullWhen( true )] out BlockSyntax? body )
     {
+        var overriddenDeclaration = (IIndexer) this.OverriddenDeclaration.GetTarget( context.FinalCompilation );
+
         SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind )
         {
-            return this.CreateProceedDynamicExpression( context, accessor, kind );
+            return this.CreateProceedDynamicExpression( context, accessor, kind, overriddenDeclaration );
         }
 
         var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             accessor,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
-                accessorTemplate.TemplateMember.Cast(),
-                this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                accessorTemplate.TemplateMember.AsMemberOrNamedType(),
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
             accessor,
             accessorTemplate,
             ProceedExpressionProvider,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
+        var templateDriver = accessorTemplate.TemplateMember.Driver;
 
         return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
     }

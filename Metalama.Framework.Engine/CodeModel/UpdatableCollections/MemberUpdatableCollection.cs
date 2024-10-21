@@ -19,17 +19,16 @@ internal abstract class MemberUpdatableCollection<T> : DeclarationUpdatableColle
 
     protected abstract DeclarationKind ItemsDeclarationKind { get; }
 
-    protected virtual IEnumerable<IRef<T>> GetMemberRefsOfName( string name )
-        => this.ContainingDeclaration.GetCollectionStrategy()
+    protected virtual IEnumerable<IFullRef<T>> GetMemberRefsOfName( string name )
+        => this.ContainingDeclaration.AsFullRef()
             .GetMembersOfName(
-                this.ContainingDeclaration,
                 name,
                 this.ItemsDeclarationKind,
                 this.Compilation )
-            .Cast<IRef<T>>();
+            .Cast<IFullRef<T>>();
 
-    protected virtual IEnumerable<IRef<T>> GetMemberRefs()
-        => this.ContainingDeclaration.GetCollectionStrategy()
-            .GetMembers( this.ContainingDeclaration, this.ItemsDeclarationKind, this.Compilation )
-            .Cast<IRef<T>>();
+    protected virtual IEnumerable<IFullRef<T>> GetMemberRefs()
+        => this.ContainingDeclaration.AsFullRef()
+            .GetMembers( this.ItemsDeclarationKind, this.Compilation )
+            .Cast<IFullRef<T>>();
 }
