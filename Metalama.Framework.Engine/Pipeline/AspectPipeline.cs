@@ -101,11 +101,6 @@ public abstract class AspectPipeline : IDisposable
     {
         this.PipelineInitializationCount++;
 
-        // Check that we have the system library.
-        var objectType = compilation.GetSpecialType( SpecialType.System_Object );
-
-        if ( objectType.Kind == SymbolKind.ErrorType ) { }
-
         // Check that Metalama is enabled for the project.            
         if ( !this.IsMetalamaEnabled( compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
         {

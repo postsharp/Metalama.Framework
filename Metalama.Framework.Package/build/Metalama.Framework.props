@@ -33,4 +33,8 @@
         <MetalamaFormatOutput Condition="'$(MetalamaFormatOutput)'==''">True</MetalamaFormatOutput>
     </PropertyGroup>
 
+    <ItemGroup>
+        <MetalamaTransformedCodeAnalyzer Include="Metalama.Framework.CompilerExtensions.MetalamaGeneratedCodeAnalyzer" />
+    </ItemGroup>
+
 </Project>

@@ -37,8 +37,8 @@ namespace Metalama.Framework.Engine.Pipeline
                         AspectSources = input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.OverflowAspectSources ),
                         ValidatorSources = input.ContributorSources.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources )
                     },
-                    pipelineStepsResult.InheritableAspectInstances,
+                    pipelineStepsResult.InheritableAspectInstances.AddRange( pipelineStepsResult.InheritableAspectInstances ),
                     additionalSyntaxTrees: input.AdditionalSyntaxTrees,
-                    aspectInstanceResults: input.AspectInstanceResults ) );
+                    aspectInstanceResults: input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) ) );
     }
 }

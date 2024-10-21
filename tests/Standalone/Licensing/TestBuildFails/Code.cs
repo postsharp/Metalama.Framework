@@ -1,7 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using TestBuildFails;
 
-[assembly: AspectOrder(typeof(Aspect1), typeof(Aspect2), typeof(Aspect3), typeof(Aspect4))]
+[assembly: AspectOrder(AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2), typeof(Aspect3), typeof(Aspect4))]
 
 namespace TestBuildFails;
 
