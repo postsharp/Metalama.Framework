@@ -8,15 +8,14 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp13.EscapeEscape;
-
-// C# 13 feature: Escape sequence \e for the escape character
+namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.CSharp13.MethodGroupNaturalType;
 
 public class TheAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine("\e[1mThis is bold text from template.\e[0m");
+        var m = new C().M;
+        m();
 
         return meta.Proceed();
     }
@@ -28,8 +27,19 @@ class Target
     [TheAspect]
     void M()
     {
-        Console.WriteLine("\e[3mThis is italic text from target.\e[0m");
+        var m = new C().M;
+        m();
     }
+}
+
+class C
+{
+    public void M() { }
+}
+
+static class E
+{
+    public static void M(this C c, object o) { }
 }
 
 #endif
