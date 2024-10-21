@@ -22,7 +22,7 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
-    public static class SymbolExtensions
+    public static class RoslynSymbolExtensions
     {
         // Coverage: ignore
         internal static SpecialType ToOurSpecialType( this RoslynSpecialType type )

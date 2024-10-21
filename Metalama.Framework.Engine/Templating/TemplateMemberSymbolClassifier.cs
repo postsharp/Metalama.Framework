@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System.Linq;
-using SymbolExtensions = Metalama.Framework.Engine.Utilities.Roslyn.SymbolExtensions;
+using RoslynSymbolExtensions = Metalama.Framework.Engine.Utilities.Roslyn.RoslynSymbolExtensions;
 
 namespace Metalama.Framework.Engine.Templating;
 
@@ -58,5 +58,5 @@ internal abstract class TemplateMemberSymbolClassifier
 
     public static bool HasTemplateKeywordAttribute( ISymbol symbol )
         => symbol.GetAttributes()
-            .Any( a => a.AttributeClass != null && SymbolExtensions.AnyBaseType( a.AttributeClass, t => t.Name == nameof(TemplateKeywordAttribute) ) );
+            .Any( a => a.AttributeClass != null && RoslynSymbolExtensions.AnyBaseType( a.AttributeClass, t => t.Name == nameof(TemplateKeywordAttribute) ) );
 }

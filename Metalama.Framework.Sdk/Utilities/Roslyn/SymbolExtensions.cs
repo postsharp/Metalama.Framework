@@ -7,7 +7,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public static class SymbolExtensions
 {
-    public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
+    // TODO: this is really ugly
+
+    public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol
+#if !METALAMA_FRAMEWORK_ENGINE
+        , bool dummy = false
+#endif
+        )
     {
         if ( symbol == null )
         {
@@ -63,5 +69,9 @@ public static class SymbolExtensions
         }
     }
 
-    public static SyntaxNode? GetPrimaryDeclarationSyntax( this ISymbol symbol ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
+    public static SyntaxNode? GetPrimaryDeclarationSyntax( this ISymbol symbol
+#if !METALAMA_FRAMEWORK_ENGINE
+        , bool dummy = false
+#endif
+        ) => symbol.GetPrimarySyntaxReference()?.GetSyntax();
 }
