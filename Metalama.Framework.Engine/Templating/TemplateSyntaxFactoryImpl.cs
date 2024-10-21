@@ -408,7 +408,20 @@ namespace Metalama.Framework.Engine.Templating
             switch ( expression )
             {
                 case IExpression dynamicExpression:
-                    return dynamicExpression.ToTypedExpressionSyntax( this.SyntaxSerializationContext, null );
+                    {
+                        var syntax = dynamicExpression.ToTypedExpressionSyntax( this.SyntaxSerializationContext );
+
+                        // TODO: Fix the data flow. We have a UserExpression, generate an ExpressionSyntax, which may then be
+                        // wrapped again into a UserExpression.
+                        if ( syntax.IsReferenceable != null )
+                        {
+                            return TypeAnnotationMapper.AddIsExpressionReferenceableAnnotation( syntax, syntax.IsReferenceable.Value );
+                        }
+                        else
+                        {
+                            return syntax;
+                        }
+                    }
 
                 default:
                     if ( this._templateExpansionContext.SyntaxSerializationService.TrySerialize(

@@ -20,10 +20,12 @@ internal static class TypeAnnotationMapper
 
     // ReSharper disable once MemberCanBePrivate.Global
     public const string ExpressionITypeAnnotationKind = "Metalama.ExpressionIType";
+    public const string ExpressionIsReferenceableAnnotationKind = "Metalama.ExpressionIsReferenceable";
 
+    private static readonly SyntaxAnnotation _expressionIsReferenceableAnnotation = new( ExpressionIsReferenceableAnnotationKind, "true" );
+    private static readonly SyntaxAnnotation _expressionIsNotReferenceableAnnotation = new( ExpressionIsReferenceableAnnotationKind, "false" );
     private static readonly ConditionalWeakTable<SyntaxAnnotation, WeakReference<ITypeSymbol>> _annotationToSymbolMap = new();
     private static readonly ConditionalWeakTable<ITypeSymbol, List<SyntaxAnnotation>> _symbolToAnnotationsMap = new();
-
     private static readonly ConditionalWeakTable<SyntaxAnnotation, WeakReference<IType>> _annotationToITypeMap = new();
     private static readonly ConditionalWeakTable<IType, List<SyntaxAnnotation>> _iTypeToAnnotationsMap = new();
 
@@ -203,8 +205,31 @@ internal static class TypeAnnotationMapper
             return false;
         }
 
-        type = compilationModel.Factory.Translate( type ).AssertNotNull( $"The type '{type}' could not be translated." );
+        type = compilationModel.Factory.Translate( type )
+            .AssertNotNull( $"The type '{type}' could not be translated." );
 
         return true;
+    }
+
+    public static bool? GetExpressionIsReferenceableFromAnnotation( ExpressionSyntax expressionSyntax )
+        => expressionSyntax.GetAnnotations( ExpressionIsReferenceableAnnotationKind )?.FirstOrDefault()?.Data switch
+        {
+            null => null,
+            "true" => true,
+            "false" => false,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+    public static ExpressionSyntax AddIsExpressionReferenceableAnnotation( ExpressionSyntax expressionSyntax, bool isReferenceable )
+    {
+        if ( GetExpressionIsReferenceableFromAnnotation( expressionSyntax ) != null )
+        {
+            return expressionSyntax;
+        }
+        else
+        {
+            return expressionSyntax.WithAdditionalAnnotations(
+                isReferenceable ? _expressionIsReferenceableAnnotation : _expressionIsNotReferenceableAnnotation );
+        }
     }
 }

@@ -165,15 +165,17 @@ public static class DeclarationExtensions
                         // but only with `in` if it's a read-only variable/`readonly ref`.
                         // If the argument is not a `ref` or variable, no modifier is possible and the code produces a warning.
 
-                        refKindKeyword = arg.IsReferenceable ? SyntaxKind.InKeyword : SyntaxKind.None;
+                        refKindKeyword = arg.IsReferenceable == true ? SyntaxKind.InKeyword : SyntaxKind.None;
                     }
                     else
                     {
                         // With out and ref parameters, we unconditionally add the out or ref modifier, and "hope" the code will later compile.
                         // We also intentionally omit to cast the value since it would be illegal.
 
-                        if ( !arg.IsReferenceable )
+                        if ( arg.IsReferenceable == false )
                         {
+                            // If we know that the expression is not referenceable, throw. If have a doubt, assume it is.
+                            
                             throw new DiagnosticException(
                                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateRoslynDiagnostic(
                                     null,
