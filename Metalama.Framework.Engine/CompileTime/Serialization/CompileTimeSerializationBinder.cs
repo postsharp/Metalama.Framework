@@ -45,7 +45,7 @@ internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializat
 
     public override Type? BindToType( string typeName, string assemblyName )
     {
-        if ( this._deserializationSurrogateProvider.TryGetDeserializationSurrogate( typeName, out var surrogate ) )
+        if ( this._deserializationSurrogateProvider?.TryGetDeserializationSurrogate( typeName, out var surrogate ) == true )
         {
             return surrogate;
         }
