@@ -274,22 +274,26 @@ internal sealed class SerializationReader
             case SerializationIntrinsicType.Struct:
                 type = this.ReadNamedType();
 
+                /*
                 if ( type is not CompileTimeType && !type.IsValueType )
                 {
                     throw new CompileTimeSerializationException(
                         string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a value type.", type ) );
                 }
+                */
 
                 break;
 
             case SerializationIntrinsicType.Class:
                 type = this.ReadNamedType();
 
+                /*
                 if ( type is not CompileTimeType && type.IsValueType )
                 {
                     throw new CompileTimeSerializationException(
                         string.Format( CultureInfo.InvariantCulture, "Type '{0}' is expected to be a reference type.", type ) );
                 }
+                */
 
                 break;
 
