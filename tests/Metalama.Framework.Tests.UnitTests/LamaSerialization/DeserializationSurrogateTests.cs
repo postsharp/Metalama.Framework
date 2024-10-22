@@ -15,13 +15,13 @@ public class DeserializationSurrogateTests : SerializationTestsBase
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
         base.ConfigureServices( services );
-        services.AddProjectService( new SurrogateProvider() );
+        services.AddProjectService( new SurrogateProvider(), true );
     }
 
     [Fact]
     public void Test()
     {
-        var deserialized = this.TestSerialization<IInterface>( new SerializationClass( "id" ), testEquality: false );
+        var deserialized = this.TestSerialization<IInterface>( new SerializationStruct( "id" ), testEquality: false );
         Assert.IsType<DeserializationClass>( deserialized );
         Assert.Equal( "id", deserialized.Id );
     }
@@ -30,7 +30,7 @@ public class DeserializationSurrogateTests : SerializationTestsBase
     {
         public bool TryGetDeserializationSurrogate( string typeName, [NotNullWhen( true )] out Type? surrogateType )
         {
-            if ( typeName == typeof(SerializationClass).FullName )
+            if ( typeName == typeof(SerializationStruct).FullName )
             {
                 surrogateType = typeof(DeserializationClass);
 
@@ -50,24 +50,24 @@ public class DeserializationSurrogateTests : SerializationTestsBase
         string Id { get; }
     }
 
-    private sealed class SerializationClass : IInterface
+    private struct SerializationStruct : IInterface
     {
         public string Id { get; }
 
-        public SerializationClass( string id )
+        public SerializationStruct( string id )
         {
             this.Id = id;
         }
 
         [UsedImplicitly]
-        public class Serializer : ReferenceTypeSerializer<SerializationClass>
+        public class Serializer : ValueTypeSerializer<SerializationStruct>
         {
-            public override SerializationClass CreateInstance( IArgumentsReader constructorArguments ) => new( constructorArguments.GetValue<string>( "id" ) );
+            public override void SerializeObject( SerializationStruct obj, IArgumentsWriter constructorArguments )
+            {
+                constructorArguments.SetValue( "id", obj.Id );
+            }
 
-            public override void SerializeObject( SerializationClass obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments )
-                => constructorArguments.SetValue( "id", obj.Id );
-
-            public override void DeserializeFields( SerializationClass obj, IArgumentsReader initializationArguments ) { }
+            public override SerializationStruct DeserializeObject( IArgumentsReader constructorArguments ) => throw new NotImplementedException();
         }
     }
 

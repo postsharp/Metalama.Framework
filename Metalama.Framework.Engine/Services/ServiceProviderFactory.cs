@@ -136,7 +136,7 @@ public static class ServiceProviderFactory
 
         projectServiceProvider = projectServiceProvider
             .WithServiceConditional<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
-            .WithServiceConditional( sp => new DeserializationSurrogateProvider() )
+            .WithServiceConditional<IDeserializationSurrogateProvider>( sp => new DeserializationSurrogateProvider() )
             .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
             .WithService( _ => new SyntaxSerializationService() )
             .WithServiceConditional( sp => new SystemTypeResolver.Provider( sp ) )
