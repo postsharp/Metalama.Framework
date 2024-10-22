@@ -7,7 +7,7 @@ public class TargetClass
   [InvokerAspect]
   public void Invoker(TargetClass instance)
   {
-    ((global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Invokers.Methods.TargetClass_DifferentInstance_Current.TargetClass)instance).Method();
+    instance.Method();
     return;
   }
 }

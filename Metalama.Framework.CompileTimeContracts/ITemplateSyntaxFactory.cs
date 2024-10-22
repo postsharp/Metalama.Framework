@@ -69,6 +69,8 @@ public interface ITemplateSyntaxFactory
 
     TypedExpressionSyntax RunTimeExpression( ExpressionSyntax syntax, string? type = null );
 
+    ExpressionSyntax ConvertToExpressionSyntax( object value );
+    
     IUserExpression GetUserExpression( object expression );
 
     ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand );
@@ -90,4 +92,20 @@ public interface ITemplateSyntaxFactory
     ITemplateSyntaxFactory ForTemplate( string templateName, object? templateInstanceOrType );
 
     TemplateTypeArgument TemplateTypeArgument( string name, Type type );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IType type );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IType type, IExpression? expression );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IType type, ExpressionSyntax? expression );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, Type type );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, Type type, IExpression? expression );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, Type type, ExpressionSyntax? expression );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, ExpressionSyntax expression );
+
+    IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IExpression expression );
 }

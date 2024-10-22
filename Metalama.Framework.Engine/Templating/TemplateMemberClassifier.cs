@@ -118,6 +118,8 @@ namespace Metalama.Framework.Engine.Templating
                     "ProceedAsyncEnumerator" => MetaMemberKind.ProceedAsyncEnumerator,
                     nameof(meta.InvokeTemplate) => MetaMemberKind.InvokeTemplate,
                     nameof(meta.Return) => MetaMemberKind.Return,
+                    nameof(meta.DefineLocalVariable) => MetaMemberKind.DefineLocalVariable,
+                    nameof(meta.RunTime) => MetaMemberKind.RunTime,
                     _ => MetaMemberKind.Default
                 };
             }

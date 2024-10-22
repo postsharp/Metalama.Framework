@@ -1125,7 +1125,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                 var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument );
 
-                ExpressionSyntax transformedArgumentValue;
+                ExpressionSyntax transformedArgumentExpression;
 
                 // Transform the argument value.
                 var isDynamicParameter = TemplateMemberSymbolClassifier.IsDynamicParameter( parameter?.Type );
@@ -1144,7 +1144,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                                this._currentScopeContext.RunTimePreferred(
                                    $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
                     {
-                        transformedArgumentValue = this.Visit( argument.Expression );
+                        transformedArgumentExpression = this.Visit( argument.Expression );
                     }
 
                     // Dynamic arguments passed to a a compile-time method returning a compile-time value are forbidden.
@@ -1167,14 +1167,14 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     using ( this.WithScopeContext(
                                this._currentScopeContext.RunTimePreferred( $"argument of the run-time parameter '{parameter!.Name}' of a called template" ) ) )
                     {
-                        transformedArgumentValue = this.Visit( argument.Expression );
+                        transformedArgumentExpression = this.Visit( argument.Expression ).AddTargetScopeAnnotation( RunTimeOnly );
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )
                 {
                     using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"argument of the run-time method '{node.Expression}'" ) ) )
                     {
-                        transformedArgumentValue = this.Visit( argument.Expression );
+                        transformedArgumentExpression = this.Visit( argument.Expression );
                     }
 
                     var argumentType = this._syntaxTreeAnnotationMap.GetExpressionType( argument.Expression );
@@ -1191,12 +1191,18 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 {
                     using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a compile-time expression '{node.Expression}'" ) ) )
                     {
-                        transformedArgumentValue = this.Visit( argument.Expression );
+                        transformedArgumentExpression = this.Visit( argument.Expression );
                     }
                 }
 
+                if ( isDynamicParameter )
+                {
+                    // Make sure that RunTimeOrCompileTime is interpreted as run-time, so we get the meta-expression we need.
+                    transformedArgumentExpression = transformedArgumentExpression.AddTargetScopeAnnotation( RunTimeOnly );
+                }
+
                 // The scope of the argument itself copies the scope of the method.
-                var transformedArgument = argument.WithExpression( transformedArgumentValue )
+                var transformedArgument = argument.WithExpression( transformedArgumentExpression )
                     .WithTriviaFrom( argument )
                     .AddScopeAnnotation( expressionScope );
 
@@ -1853,6 +1859,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var (transformedOperand, scope) = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
 
         return node.Update( node.OperatorToken, transformedOperand ).WithSymbolAnnotationsFrom( node ).AddScopeAnnotation( scope );
+    
     }
 
     private (ExpressionSyntax TransformedOperand, TemplatingScope Scope) VisitUnaryExpressionOperand( ExpressionSyntax operand, SyntaxToken @operator )
@@ -2003,8 +2010,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             var type = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
             var typeIsIExpression = type is INamedTypeSymbol { Name: nameof(IExpression) };
 
-            if ( typeIsIExpression )
+            if ( typeIsIExpression && this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
             {
+                // This is the special case of casting dynamic to IExpression.
                 using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"cast to IExpression" ) ) )
                 {
                     annotatedExpression = this.Visit( node.Expression );
@@ -2020,11 +2028,21 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
                 if ( typeScope == CompileTimeOnly && expressionScope.GetExpressionValueScope() == RunTimeOnly )
                 {
-                    // We cannot cast a run-time expression to a compile-time type, except to IExpression.
-                    this.ReportDiagnostic(
-                        TemplatingDiagnosticDescriptors.CannotCastRunTimeExpressionToCompileTimeType,
-                        node.Type,
-                        (node.Expression.ToString(), node.Type.ToString()) );
+                    if ( typeIsIExpression )
+                    {
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.CannotCastRunTimeExpressionToIExpression,
+                            node.Type,
+                            node.Expression.ToString() );
+                    }
+                    else
+                    {
+                        // We cannot cast a run-time expression to a compile-time type, except to IExpression.
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.CannotCastRunTimeExpressionToCompileTimeType,
+                            node.Type,
+                            (node.Expression.ToString(), node.Type.ToString()) );
+                    }
 
                     // Act as if the cast worked, to suppress other errors.
                     castScope = CompileTimeOnly;

@@ -55,7 +55,7 @@ public partial class Comment : global::System.ComponentModel.INotifyPropertyChan
       if (IsTrackingChanges != value)
       {
         HasChanges = value ? false : null;
-        this.OnPropertyChanged((global::System.String)"IsTrackingChanges");
+        this.OnPropertyChanged("IsTrackingChanges");
       }
     }
   }
@@ -64,7 +64,7 @@ public partial class Comment : global::System.ComponentModel.INotifyPropertyChan
     if (HasChanges == false)
     {
       HasChanges = true;
-      this.OnPropertyChanged((global::System.String)"HasChanges");
+      this.OnPropertyChanged("HasChanges");
     }
   }
   protected void OnPropertyChanged(global::System.String name)

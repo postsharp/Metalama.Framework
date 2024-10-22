@@ -1,11 +1,12 @@
-    public class TargetClass
+public class TargetClass
 {
   private DifferentClass? instance;
   [InvokerAspect]
   public int Invoker
   {
     get
-    { // Invoke instance.Property
+    {
+      // Invoke instance.Property
       _ = this.instance.Property;
       // Invoke instance?.Property
       _ = this.instance?.Property;
