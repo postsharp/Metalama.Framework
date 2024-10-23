@@ -26,7 +26,7 @@ internal abstract class BaseParameterBuilder : NamedDeclarationBuilder, IParamet
 
     public abstract TypedConstant? DefaultValue { get; set; }
 
-    public abstract bool IsParams { get; }
+    public abstract bool IsParams { get; set; }
 
     public abstract IHasParameters DeclaringMember { get; }
 

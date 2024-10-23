@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking.Inlining;
@@ -17,17 +18,23 @@ internal sealed class ConstructorInliner : Inliner
         IMethodSymbol contextConstructor,
         ObjectCreationExpressionSyntax objectCreationExpression )
     {
-        var expectedNumberOfParameters =
-            contextConstructor.Parameters.LastOrDefault()?.Name == AspectReferenceSyntaxProvider.LinkerOverrideParamName
-                ? contextConstructor.Parameters.Length - 1
-                : contextConstructor.Parameters.Length;
+        (var expectedNumberOfParameters, var argumentMapFunc) =
+            contextConstructor.Parameters switch
+            {
+                [.., { Name: AspectReferenceSyntaxProvider.LinkerOverrideParamName }, { IsParams: true }] => 
+                    (contextConstructor.Parameters.Length - 1, i => i < contextConstructor.Parameters.Length - 2 ? i : i + 1 ),
+                [.., { Name: AspectReferenceSyntaxProvider.LinkerOverrideParamName }] =>
+                    (contextConstructor.Parameters.Length - 1, i => i ),
+                _ => 
+                    (contextConstructor.Parameters.Length, (Func<int, int>)(i => i)),
+            };
 
         return
             expectedNumberOfParameters == (objectCreationExpression.ArgumentList?.Arguments.Count ?? 0)
             && (objectCreationExpression.ArgumentList?.Arguments
                     .Select( ( x, i ) => (Argument: x.Expression, Index: i) )
                     .All(
-                        a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextConstructor.Parameters[a.Index] ) )
+                        a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextConstructor.Parameters[argumentMapFunc(a.Index)] ) )
                 ?? false);
     }
 

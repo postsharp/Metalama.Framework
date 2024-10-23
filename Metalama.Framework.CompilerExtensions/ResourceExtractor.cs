@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
@@ -199,12 +200,22 @@ public static class ResourceExtractor
         }
     }
 
+    private static string GetHash( string input )
+    {
+        // Can't use HashUtilities here, because of dependency on K4os.Hash.xxHash.
+        using var sha256 = SHA256.Create();
+        var inputBytes = Encoding.UTF8.GetBytes( input );
+        var hashBytes = sha256.ComputeHash( inputBytes );
+
+        return Convert.ToBase64String( hashBytes );
+    }
+
     private static void ExtractEmbeddedAssemblies( Assembly currentAssembly )
     {
         // Extract managed resources to a snapshot directory.
         var completedFilePath = Path.Combine( _snapshotDirectory, ".completed" );
         var cleanupJsonFilePath = Path.Combine( _snapshotDirectory, "cleanup.json" );
-        var mutexName = "Global\\Metalama_Extract_" + _buildId;
+        var mutexName = $"Global\\Metalama_Extract_{GetHash( _snapshotDirectory )}";
 
         var deleteCompletedFile = false;
 

@@ -73,7 +73,7 @@ internal sealed partial class LinkerInjectionStep
             }
 
             parameters =
-                parameters.AddParameters(
+                parameters.WithAdditionalParameters(
                     Parameter(
                         List<AttributeListSyntax>(),
                         TokenList(),
