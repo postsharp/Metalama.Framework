@@ -1,9 +1,10 @@
+// Warning CS8602 on `arg`: `Dereference of a possibly null reference.`
 [Aspect]
 internal class TargetCode
 {
   private global::System.String Default(global::System.Object arg)
   {
-    return (global::System.String)(arg?.ToString() + arg!.ToString());
+    return (global::System.String)(arg?.ToString() + arg.ToString());
   }
   private global::System.String NonNullable(global::System.Object arg)
   {

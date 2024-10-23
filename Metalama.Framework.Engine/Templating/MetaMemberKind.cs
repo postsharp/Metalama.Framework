@@ -54,6 +54,10 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// The <see cref="meta.Return()" /> method (or its overload).
         /// </summary>
-        Return
+        Return,
+
+        DefineLocalVariable,
+
+        RunTime
     }
 }

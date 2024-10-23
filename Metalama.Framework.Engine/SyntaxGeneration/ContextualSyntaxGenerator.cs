@@ -964,29 +964,41 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, IType? operandType )
     {
-        var suppressNullableWarning = false;
+        var isSuppressionEnabled = false;
 
         if ( this.IsNullAware )
         {
-            suppressNullableWarning = true;
+            isSuppressionEnabled = true;
 
             if ( operandType != null )
             {
-                // Value types, including nullable value types don't need suppression.
-                if ( operandType.IsReferenceType == false )
+                if ( operand.Kind() is SyntaxKind.NullLiteralExpression or SyntaxKind.DefaultLiteralExpression )
                 {
-                    suppressNullableWarning = false;
+                    // ! is required when assigning null to a non-nullable.
+                    if ( operandType is { IsReferenceType: true, IsNullable: true } )
+                    {
+                        isSuppressionEnabled = false;
+                    }
                 }
-
-                // Non-nullable types don't need suppression.
-                if ( operandType.IsNullable == false )
+                else if ( operandType.IsReferenceType == false )
                 {
-                    suppressNullableWarning = false;
+                    // Value types, including nullable value types don't need suppression.
+                    isSuppressionEnabled = false;
+                }
+                else
+                {
+                    var nullable = operandType.IsNullable;
+
+                    if ( nullable == false || ( nullable == null && operandType.TypeKind != TypeKind.TypeParameter) )
+                    {
+                        // Non-nullable and non-annotated types don't need suppression, except generic type parameters that are not explicitly marked as non nullable.
+                        isSuppressionEnabled = false;
+                    }
                 }
             }
         }
 
-        return suppressNullableWarning
+        return isSuppressionEnabled
             ? PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand ).WithSimplifierAnnotation()
             : operand;
     }

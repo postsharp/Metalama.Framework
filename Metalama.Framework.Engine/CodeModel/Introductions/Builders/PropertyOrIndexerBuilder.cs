@@ -38,6 +38,8 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
         {
             this.CheckNotFrozen();
 
+            Invariant.Assert( value is not { TypeKind: TypeKind.Dynamic } );
+
             this._type = this.Translate( value );
         }
     }

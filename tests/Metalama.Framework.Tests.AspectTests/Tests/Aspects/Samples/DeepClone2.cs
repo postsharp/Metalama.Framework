@@ -10,6 +10,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.Samples.DeepClone2;
 
@@ -44,11 +45,11 @@ public class DeepCloneAttribute : TypeAspect
 
         if (meta.Target.Method.IsOverride)
         {
-            baseCall = (IExpression)meta.Base.Clone();
+            baseCall = (IExpression) meta.Base.Clone();
         }
         else
         {
-            baseCall = (IExpression)meta.Base.MemberwiseClone();
+            baseCall =  (IExpression) meta.Base.MemberwiseClone();
         }
 
         // Define a local variable of the same type as the target type.
@@ -79,13 +80,13 @@ public class DeepCloneAttribute : TypeAspect
             else
             {
                 // If no, explicitly cast to the interface.
-                callClone = (IExpression)( (ICloneable?)field.Value )?.Clone()!;
+                callClone = ExpressionFactory.Capture( ( (ICloneable?)field.Value )?.Clone()! );
             }
 
             if (cloneMethod == null || !cloneMethod.ReturnType.ToNullable().Is( fieldType ))
             {
                 // If necessary, cast the return value of Clone to the field type.
-                callClone = (IExpression)meta.Cast( fieldType, callClone.Value );
+                callClone = ExpressionFactory.Capture( (IExpression) meta.Cast( fieldType, callClone.Value ) );
             }
 
             // Finally, set the field value.

@@ -27,4 +27,6 @@ public readonly struct TypedExpressionSyntax
     public static implicit operator ExpressionStatementSyntax?( TypedExpressionSyntax runtimeExpression ) => runtimeExpression.Implementation.ToStatement();
 
     public IUserExpression ToUserExpression( ICompilation compilation ) => this.Implementation.ToUserExpression( compilation );
+
+    public override string ToString() => this.Implementation.ToString();
 }

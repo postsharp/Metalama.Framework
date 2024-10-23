@@ -297,6 +297,17 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         public ITypeSymbol? GetExpressionType( ExpressionSyntax node )
         {
+            if ( node.IsKind( SyntaxKind.ElementAccessExpression ) )
+            {
+                // The lookup is not reliable, Roslyn does not return the proper nullability.
+                var collectionType = this.GetExpressionType( ((ElementAccessExpressionSyntax) node).Expression );
+
+                if ( collectionType is IArrayTypeSymbol arrayType )
+                {
+                    return arrayType.ElementType;   
+                }
+            }
+            
             var annotation = node.GetAnnotations( TypeAnnotationMapper.ExpressionTypeSymbolAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )

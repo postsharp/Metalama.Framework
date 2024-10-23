@@ -8,6 +8,6 @@ public class Target
     global::System.Console.WriteLine($"{typeof(global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.TemplateTypeParameters.TypeOfInInterpolatedString.Target)}");
     global::System.Console.WriteLine("System.String");
     global::System.Console.WriteLine("Metalama.Framework.Code.IMethod");
-    return (global::System.String)null !;
+    return null !;
   }
 }
