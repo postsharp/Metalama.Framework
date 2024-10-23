@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -37,6 +36,14 @@ internal class GeneratedCodeAnalyzer : DiagnosticAnalyzer
 
     private void AnalyzeSymbol( SymbolAnalysisContext context )
     {
+#if ROSLYN_4_4_0_OR_GREATER // Roslyn 4.0 doesn't have IsGeneratedCode, so just do nothing in that case.
+
+        // IsGeneratedCode is based on heuristics, so it's not going to be exactly the same as files produced by source generators, but I can't think of a better way to do this.
+        if ( !context.IsGeneratedCode )
+        {
+            return;
+        }
+
         var iAspect = context.Compilation.GetTypeByMetadataName( typeof( IAspect ).FullName! );
 
         var symbol = context.Symbol;
@@ -61,5 +68,6 @@ internal class GeneratedCodeAnalyzer : DiagnosticAnalyzer
                 context.ReportDiagnostic( diagnostic );
             }
         }
+#endif
     }
 }

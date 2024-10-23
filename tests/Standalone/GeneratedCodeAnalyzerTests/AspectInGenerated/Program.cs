@@ -1,4 +1,4 @@
-using GeneratedCodeAnalyzerTest.Components;
+using AspectInGenerated.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
