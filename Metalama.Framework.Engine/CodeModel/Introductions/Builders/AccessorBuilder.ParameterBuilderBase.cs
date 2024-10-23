@@ -22,14 +22,18 @@ internal partial class AccessorBuilder
         public override TypedConstant? DefaultValue
         {
             get => null;
-            set => throw new NotSupportedException( "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );
+            set => throw new NotSupportedException( "Cannot set the default value of accessor parameter." );
         }
 
         public override RefKind RefKind { get; set; }
 
         public override int Index { get; }
 
-        public override bool IsParams => false;
+        public sealed override bool IsParams
+        {
+            get => false;
+            set => throw new NotSupportedException( "Cannot set the params modifier on accessor parameter." );
+        }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 

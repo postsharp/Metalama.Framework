@@ -263,7 +263,7 @@ internal static class ModifierHelper
 
     private static SyntaxTokenList GetParameterSyntaxModifierList( IParameter parameter )
     {
-        var tokens = new List<SyntaxToken>();
+        var tokens = new List<SyntaxToken>( 2 );
 
         void AddToken( SyntaxKind syntaxKind )
         {
@@ -299,6 +299,11 @@ internal static class ModifierHelper
 
             default:
                 throw new AssertionFailedException( $"Unexpected parameter RefKind {parameter.RefKind}." );
+        }
+
+        if ( parameter.IsParams )
+        {
+            AddToken( SyntaxKind.ParamsKeyword );
         }
 
         return TokenList( tokens );

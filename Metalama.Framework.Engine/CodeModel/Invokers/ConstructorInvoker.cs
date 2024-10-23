@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
@@ -120,7 +121,12 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
-                this._argumentFactory( syntaxSerializationContext ).Select( Argument ),
+                this._argumentFactory( syntaxSerializationContext )
+                .Select( ( e, i ) =>
+                    Argument(
+                        NameColon( IdentifierName( this._constructor.Parameters[i].Name ) ),
+                        this._constructor.Parameters[i].RefKind.InvocationRefKindToken(),
+                        e ) ),
                 null );
         }
 
@@ -156,7 +162,12 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
-                this._argumentFactory( syntaxSerializationContext ).Select( Argument ),
+                this._argumentFactory( syntaxSerializationContext )
+                .Select( ( e, i ) =>
+                    Argument(
+                        NameColon( IdentifierName( this._constructor.Parameters[i].Name ) ),
+                        this._constructor.Parameters[i].RefKind.InvocationRefKindToken(),
+                        e ) ),
                 InitializerExpression(
                     SyntaxKind.ObjectInitializerExpression,
                     SeparatedList<ExpressionSyntax>(
