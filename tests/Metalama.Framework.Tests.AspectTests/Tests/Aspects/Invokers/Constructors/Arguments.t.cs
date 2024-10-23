@@ -5,8 +5,7 @@ public class TargetClass
   }
   [InvokerAspect]
   public void Invoker()
-  {
-    // Invoke new <target>();
+  { // Invoke new <target>();
     new global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Invokers.Constructors.Arguments.TargetClass(42, new object ());
     return;
   }

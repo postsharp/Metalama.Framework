@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
@@ -150,7 +151,7 @@ namespace Metalama.Framework.Tests.AspectTests.Runners
                         Path.GetDirectoryName( testInput.FullPath )!,
                         syntaxTree.ShortName + extension );
 
-                    this.CompareHtmlFiles( syntaxTree.HtmlOutputPath!, expectedOutputHtmlPath );
+                    this.CompareHtmlFiles( syntaxTree.HtmlOutputPath.AssertNotNull(), expectedOutputHtmlPath );
                 }
             }
         }

@@ -37,6 +37,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public ExpressionStatementSyntax ToStatement() => SyntaxFactory.ExpressionStatement( this.Syntax.RemoveParenthesis() );
 
+        public TypedExpressionSyntaxImpl( ExpressionSyntax syntax, TypedExpressionSyntaxImpl prototype )
+        {
+            this.ExpressionType = prototype.ExpressionType;
+            this.IsReferenceable = prototype.IsReferenceable;
+            this.CanBeNull = prototype.CanBeNull;
+            this.Syntax = syntax;
+        }
+
         public IUserExpression ToUserExpression( ICompilation compilation )
         {
             var factory = compilation.GetCompilationModel().Factory;

@@ -348,4 +348,11 @@ public static class SyntaxExtensions
     /// </summary>
     public static bool ContainsGlobalAttributes( this SyntaxTree tree )
         => tree.GetCompilationUnitRoot().AttributeLists.Any( list => list.Attributes.Any() );
+    
+    public static ExpressionSyntax IgnoreSuppressNullWarning( this ExpressionSyntax expression )
+        => expression switch
+        {
+            PostfixUnaryExpressionSyntax postfix when postfix.IsKind( SyntaxKind.SuppressNullableWarningExpression ) => postfix.Operand,
+            _ => expression
+        };
 }

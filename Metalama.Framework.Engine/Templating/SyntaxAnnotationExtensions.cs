@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.Templating
         private const string _colorAnnotationKind = "Metalama_Color";
         private const string _templateAnnotationKind = "Metalama_Template";
         private const string _metaVariableAnnotationKind = "Metalama_MetaVariable";
+        private const string _requiresExpressionTypeAnnotationKind = "Metalama_RequiresUserExpression";
         private const string _scopeMismatchKind = nameof(TemplatingScope.Conflict);
         private const string _buildTimeAnnotationData = nameof(TemplatingScope.CompileTimeOnly);
         private const string _runTimeAnnotationData = nameof(TemplatingScope.RunTimeOnly);
@@ -58,8 +59,12 @@ namespace Metalama.Framework.Engine.Templating
             _scopeAnnotationKind,
             _typeOfGenericTemplateTypeParameterAnnotationData );
 
+        private static readonly SyntaxAnnotation _requiresExpressionTypeAnnotation = new SyntaxAnnotation( _requiresExpressionTypeAnnotationKind );
+
         private static readonly ImmutableList<string> _templateAnnotationKinds =
             SyntaxTreeAnnotationMap.AnnotationKinds.AddRange( [_scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind] );
+        
+        
 
         public static bool HasScopeAnnotation( this SyntaxNode node ) => node.HasAnnotations( _scopeAnnotationKind );
 
@@ -333,7 +338,7 @@ namespace Metalama.Framework.Engine.Templating
         public static T AddIsTemplateAnnotation<T>( this T node )
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( _templateAnnotation );
-
+        
         public static bool IsTemplateFromAnnotation( this SyntaxNode node )
             => node switch
             {
@@ -368,5 +373,13 @@ namespace Metalama.Framework.Engine.Templating
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
 
         public static bool HasMetaVariableAnnotation( this SyntaxToken token ) => token.HasAnnotation( _metaVariableAnnotation );
+
+        public static T AddTargetRequiresUserExpressionAnnotation<T>( this T node, bool targetRequiresUserExpression = true )
+            where T : SyntaxNode
+            => targetRequiresUserExpression ? node.WithAdditionalAnnotations( _requiresExpressionTypeAnnotation ) : node;
+        
+        public static bool TargetRequiresUserExpression( this SyntaxNode node )
+            => node.HasAnnotation( _requiresExpressionTypeAnnotation );
+
     }
 }

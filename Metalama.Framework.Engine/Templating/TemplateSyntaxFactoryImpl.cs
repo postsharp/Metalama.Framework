@@ -461,8 +461,12 @@ namespace Metalama.Framework.Engine.Templating
 
             return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxSerializationContext.CompilationModel );
         }
+
+        public TypedExpressionSyntax RunTimeExpression( IUserExpression syntax, string? type = null ) => syntax.ToTypedExpressionSyntax( this.SyntaxSerializationContext );
+
+        public IUserExpression GetUserExpression( object value ) => this.GetUserExpression( value, null );
         
-        public IUserExpression GetUserExpression( object value )
+        private IUserExpression GetUserExpression( object value, string? type )
         {
             switch ( value )
             {
@@ -476,7 +480,14 @@ namespace Metalama.Framework.Engine.Templating
                             this.Compilation.GetCompilationModel(),
                             out var expressionType ) )
                     {
-                        expressionType = this._templateExpansionContext.Compilation.AssertNotNull().Cache.SystemObjectType;
+                        if ( type != null )
+                        {
+                            expressionType = new SerializableTypeId( type ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), this._templateExpansionContext.TemplateGenericArguments );
+                        }
+                        else
+                        {
+                            expressionType = this._templateExpansionContext.Compilation.AssertNotNull().Cache.SystemObjectType;
+                        }
                     }
 
                     return new SyntaxUserExpression( expression, expressionType );
@@ -489,14 +500,26 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
+        public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, string? type )
         {
             TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                 operand,
                 this.SyntaxSerializationContext.CompilationModel,
-                out var type );
+                out var expressionType );
 
-            return this._templateExpansionContext.SyntaxGenerator.SuppressNullableWarningExpression( operand, type );
+            if ( expressionType == null && type != null )
+            {
+                expressionType = new SerializableTypeId( type ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), this._templateExpansionContext.TemplateGenericArguments );
+            }
+
+            return this._templateExpansionContext.SyntaxGenerator.SuppressNullableWarningExpression( operand, expressionType );
+        }
+
+        public IUserExpression SuppressNullableWarningUserExpression( object operand, string? type )
+        {
+            var userExpression = this.GetUserExpression( operand, type );
+
+            return new SuppressNullableWarningUserExpression( userExpression );
         }
 
         public ExpressionSyntax ConditionalAccessExpression( ExpressionSyntax expression, ExpressionSyntax whenNotNullExpression )

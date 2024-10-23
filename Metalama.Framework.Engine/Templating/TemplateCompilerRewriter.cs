@@ -1390,7 +1390,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         var transformedNode = base.VisitArgument( node ).AssertNotNull();
 
-        if ( this.GetTransformationKind( node ) == TransformationKind.None && this.GetTransformationKind( node.Expression ) == TransformationKind.Transform )
+        if ( this.GetTransformationKind( node ) == TransformationKind.None &&
+             this.GetTransformationKind( node.Expression ) == TransformationKind.Transform &&
+             node.TargetRequiresUserExpression() )
         {
             var transformedArgument = (ArgumentSyntax) transformedNode;
 
@@ -2370,16 +2372,24 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// Determines if the expression will be transformed into syntax that instantiates an <see cref="IUserExpression"/>.
     /// </summary>
     private bool IsCompileTimeDynamic( ExpressionSyntax? expression )
-        => expression != null
-           && expression.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
-           && !this._templateMemberClassifier.IsTemplateParameter( expression )
-           && this.GetTransformationKind( expression ) != TransformationKind.Transform
-           && (
-               this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
-               || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
-               {
-                   Name: "Task" or "ConfiguredTaskAwaitable" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
-               });
+    {
+        if ( expression == null )
+        {
+            return false;
+        }
+
+        expression = expression.IgnoreSuppressNullWarning();
+
+        return expression.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+               && !this._templateMemberClassifier.IsTemplateParameter( expression )
+               && this.GetTransformationKind( expression ) != TransformationKind.Transform
+               && (
+                   this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
+                   || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
+                   {
+                       Name: "Task" or "ConfiguredTaskAwaitable" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
+                   });
+    }
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
     {
@@ -2662,9 +2672,42 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         if ( node.Kind() == SyntaxKind.SuppressNullableWarningExpression )
         {
-            return InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SuppressNullableWarningExpression) ) )
-                .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( this.Transform( node.Operand ) ) ) ) );
+            var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( node.Operand );
+
+            if ( expressionType is { TypeKind: TypeKind.Dynamic } )
+            {
+                expressionType = null;
+            }
+            
+            if ( node.Parent.TargetRequiresUserExpression() )
+            {
+                // We must return a UserExpression and not an ExpressionSyntax.
+
+                return InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SuppressNullableWarningUserExpression) ) )
+                    .WithArgumentList(
+                        ArgumentList(
+                            SeparatedList(
+                            [
+                                Argument( this.Transform( node.Operand ) ),
+                                Argument( SyntaxFactoryEx.LiteralExpression( expressionType?.GetSerializableTypeId().Id ) )
+                            ] ) ) )
+                    .WithAdditionalAnnotations( _userExpressionAnnotation );
+            }
+            else
+            {
+           
+
+                return InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SuppressNullableWarningExpression) ) )
+                    .WithArgumentList(
+                        ArgumentList(
+                            SeparatedList(
+                            [
+                                Argument( this.Transform( node.Operand ) ),
+                                Argument( SyntaxFactoryEx.LiteralExpression( expressionType?.GetSerializableTypeId().Id ) )
+                            ] ) ) );
+            }
         }
         else
         {
@@ -2794,19 +2837,5 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         // Fallback to the default implementation.
         return base.VisitAssignmentExpression( node );
-    }
-
-    public override SyntaxNode? VisitPostfixUnaryExpression( PostfixUnaryExpressionSyntax node )
-    {
-        if ( node.OperatorToken.IsKind( SyntaxKind.ExclamationToken ) && this.GetTransformationKind( node.Operand ) == TransformationKind.None
-            && this.GetTransformationKind( node ) == TransformationKind.None )
-        {
-            // Ignore null-forgiving ! operator in compile-time expressions.
-            return this.Visit( node.Operand );
-        }
-        else
-        {
-            return base.VisitPostfixUnaryExpression( node );
-        }
     }
 }

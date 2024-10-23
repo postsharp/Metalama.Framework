@@ -8,6 +8,8 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers;
@@ -68,17 +70,40 @@ internal abstract class Invoker<T>
 
     protected T Member { get; }
 
-    protected readonly record struct ReceiverTypedExpressionSyntax(
-        TypedExpressionSyntaxImpl TypedExpressionSyntax,
-        bool RequiresConditionalAccess,
-        AspectReferenceSpecification AspectReferenceSpecification )
+    protected readonly record struct ReceiverTypedExpressionSyntax
     {
+        public ReceiverTypedExpressionSyntax(TypedExpressionSyntaxImpl typedExpressionSyntax,
+                                             bool requiresConditionalAccess,
+                                             AspectReferenceSpecification aspectReferenceSpecification)
+        {
+            if ( requiresConditionalAccess && typedExpressionSyntax.Syntax is PostfixUnaryExpressionSyntax postfix
+                                           && postfix.IsKind( SyntaxKind.SuppressNullableWarningExpression ) )
+            {
+                this.TypedExpressionSyntax = new TypedExpressionSyntaxImpl( postfix.Operand, typedExpressionSyntax );
+            }
+            else
+            {
+                this.TypedExpressionSyntax = typedExpressionSyntax;
+            }
+
+            this.RequiresConditionalAccess = requiresConditionalAccess;
+            this.AspectReferenceSpecification = aspectReferenceSpecification;
+        }
+
         public ExpressionSyntax Syntax => this.TypedExpressionSyntax.Syntax;
+            
+
+        public TypedExpressionSyntaxImpl TypedExpressionSyntax { get; }
+
+        public bool RequiresConditionalAccess { get; init; }
+
+        public AspectReferenceSpecification AspectReferenceSpecification { get; init; }
 
         public ReceiverExpressionSyntax WithSyntax( ExpressionSyntax syntax )
             => new( syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
 
         public ReceiverExpressionSyntax ToReceiverExpressionSyntax() => new( this.Syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
+        
     }
 
     protected readonly record struct ReceiverExpressionSyntax(

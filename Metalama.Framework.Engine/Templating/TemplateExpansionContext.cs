@@ -386,6 +386,10 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             {
                 // No need to emit a cast.
             }
+            else if ( returnExpression.IgnoreSuppressNullWarning().Kind() is SyntaxKind.NullLiteralExpression or SyntaxKind.DefaultLiteralExpression )
+            {
+                // No need to emit a cast.
+            }
             else
             {
                 expression = this.SyntaxGenerator.CastExpression( returnType, expression );

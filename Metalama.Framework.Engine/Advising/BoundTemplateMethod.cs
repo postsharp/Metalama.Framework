@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -50,7 +51,9 @@ internal sealed class BoundTemplateMethod
         for ( var index = 0; index < this.TemplateMember.TemplateClassMember.RunTimeParameters.Length; index++ )
         {
             var runTimeParameter = this.TemplateMember.TemplateClassMember.RunTimeParameters[index];
-            newArguments[runTimeParameter.SourceIndex] = SyntaxFactory.IdentifierName( signature.Parameters[index].Name );
+            var parameter = signature.Parameters[index];
+
+            newArguments[runTimeParameter.SourceIndex] = TypeAnnotationMapper.AddExpressionTypeAnnotation( SyntaxFactory.IdentifierName( parameter.Name ), parameter.Type );
         }
 
         return newArguments;
