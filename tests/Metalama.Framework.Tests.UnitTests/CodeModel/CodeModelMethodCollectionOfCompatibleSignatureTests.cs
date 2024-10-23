@@ -326,7 +326,6 @@ class C
             using var testContext = this.CreateTestContext();
             const string code = """
                 using System;
-                using System.Collections;
                 using System.Collections.Generic;
                 using System.Collections.Immutable;
                 using System.Runtime.CompilerServices;
@@ -360,7 +359,7 @@ class C
                 """;
 
             var compilation = testContext.CreateCompilationModel( code );
-            var type = compilation.Types.ElementAt( 0 );
+            var type = compilation.Types.OfName( "C" ).Single();
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             var listIntType = compilation.Factory.GetTypeByReflectionType( typeof(List<int>) );
 
