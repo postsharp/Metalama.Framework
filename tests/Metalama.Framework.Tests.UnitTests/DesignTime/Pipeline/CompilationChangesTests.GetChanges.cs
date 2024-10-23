@@ -266,4 +266,29 @@ public sealed partial class CompilationChangesTests
 
         Assert.False( changes.HasChange );
     }
+
+    [Fact]
+    public void ChangeDeleteAddSyntaxTree()
+    {
+        var code = new Dictionary<string, string>();
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof( this.AddSyntaxTree_Standard ) );
+
+        code.Add( "code.cs", "class C { }" );
+
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof( this.AddSyntaxTree_Standard ) );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
+
+        Assert.False( changes.HasCompileTimeCodeChange );
+        Assert.True( changes.HasChange );
+        Assert.True( changes.IsIncremental );
+        Assert.Equal( compilation2, changes.NewProjectVersion.CompilationToAnalyze );
+        Assert.Single( changes.SyntaxTreeChanges );
+
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
+
+        Assert.Equal( SyntaxTreeChangeKind.Added, syntaxTreeChange.SyntaxTreeChangeKind );
+        Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
+        Assert.True( syntaxTreeChange.OldSyntaxTreeVersionDangerous.IsDefault );
+        Assert.NotNull( syntaxTreeChange.NewTree );
+    }
 }
