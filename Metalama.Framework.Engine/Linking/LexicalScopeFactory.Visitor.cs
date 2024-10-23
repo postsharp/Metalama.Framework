@@ -97,7 +97,10 @@ internal sealed partial class LexicalScopeFactory
 
         public override void VisitCatchDeclaration( CatchDeclarationSyntax node )
         {
-            this.AddIdentifier( node.Identifier );
+            if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) )
+            {
+                this.AddIdentifier( node.Identifier );
+            }
 
             base.VisitCatchDeclaration( node );
         }
