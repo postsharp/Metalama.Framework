@@ -59,12 +59,10 @@ namespace Metalama.Framework.Engine.Templating
             _scopeAnnotationKind,
             _typeOfGenericTemplateTypeParameterAnnotationData );
 
-        private static readonly SyntaxAnnotation _requiresExpressionTypeAnnotation = new SyntaxAnnotation( _requiresExpressionTypeAnnotationKind );
+        private static readonly SyntaxAnnotation _requiresExpressionTypeAnnotation = new( _requiresExpressionTypeAnnotationKind );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
             SyntaxTreeAnnotationMap.AnnotationKinds.AddRange( [_scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind] );
-        
-        
 
         public static bool HasScopeAnnotation( this SyntaxNode node ) => node.HasAnnotations( _scopeAnnotationKind );
 
@@ -338,7 +336,7 @@ namespace Metalama.Framework.Engine.Templating
         public static T AddIsTemplateAnnotation<T>( this T node )
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( _templateAnnotation );
-        
+
         public static bool IsTemplateFromAnnotation( this SyntaxNode node )
             => node switch
             {
@@ -377,9 +375,7 @@ namespace Metalama.Framework.Engine.Templating
         public static T AddTargetRequiresUserExpressionAnnotation<T>( this T node, bool targetRequiresUserExpression = true )
             where T : SyntaxNode
             => targetRequiresUserExpression ? node.WithAdditionalAnnotations( _requiresExpressionTypeAnnotation ) : node;
-        
-        public static bool TargetRequiresUserExpression( this SyntaxNode node )
-            => node.HasAnnotation( _requiresExpressionTypeAnnotation );
 
+        public static bool TargetRequiresUserExpression( this SyntaxNode node ) => node.HasAnnotation( _requiresExpressionTypeAnnotation );
     }
 }

@@ -1179,7 +1179,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     }
 
                     // Run standard transformations on the argument.
-                    var transformedArgument = (ArgumentSyntax) this.VisitArgument( modifiedArgument )!;
+                    var transformedArgument = (ArgumentSyntax) this.VisitArgument( modifiedArgument );
 
                     // Run-time template parameters must be of type ExpressionSyntax, while these arguments of non-template methods would be of type IExpression.
                     if ( this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope()
@@ -2678,8 +2678,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             {
                 expressionType = null;
             }
-            
-            if ( node.Parent.TargetRequiresUserExpression() )
+
+            if ( node.Parent.AssertNotNull().TargetRequiresUserExpression() )
             {
                 // We must return a UserExpression and not an ExpressionSyntax.
 
@@ -2696,8 +2696,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             }
             else
             {
-           
-
                 return InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SuppressNullableWarningExpression) ) )
                     .WithArgumentList(

@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Code;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +19,7 @@ internal class SuppressNullableWarningUserExpression : UserExpression
     protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
     {
         var underlyingSyntax = this._underlying.ToTypedExpressionSyntax( syntaxSerializationContext, targetType );
-            
+
         return syntaxSerializationContext.SyntaxGenerator.SuppressNullableWarningExpression( underlyingSyntax.Syntax, this._underlying.Type );
     }
 

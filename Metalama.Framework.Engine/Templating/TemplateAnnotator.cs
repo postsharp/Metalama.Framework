@@ -863,8 +863,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             out var transformedExpression,
             out var transformedName,
             out var transformedOperator,
-            out var scope,
-            out var isDynamicUserExpression );
+            out var scope );
 
         if ( this._syntaxTreeAnnotationMap.GetSymbol( transformedExpression ) is ITypeParameterSymbol typeParameter
              && this.GetNodeScope( transformedExpression ) == CompileTimeOnlyReturningRuntimeOnly )
@@ -878,7 +877,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var transformedNode = node
             .Update( transformedExpression, transformedOperator, (SimpleNameSyntax) transformedName )
             .AddScopeAnnotation( scope );
-        
+
         return transformedNode;
     }
 
@@ -891,8 +890,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             out var transformedExpression,
             out var transformedWhenNotNull,
             out var transformedOperator,
-            out var scope,
-            out var isDynamicUserExpression );
+            out var scope );
 
         if ( scope == CompileTimeOnlyReturningRuntimeOnly && this.GetNodeScope( transformedExpression ) == CompileTimeOnly )
         {
@@ -916,8 +914,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         out ExpressionSyntax transformedLeft,
         out ExpressionSyntax transformedRight,
         out SyntaxToken transformedOperatorToken,
-        out TemplatingScope scope,
-        out bool isDynamicUserExpression )
+        out TemplatingScope scope )
     {
         transformedRight = this.Visit( right );
 
@@ -960,9 +957,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         using ( this.WithScopeContext( context ) )
         {
             transformedLeft = this.Visit( left );
-           
         }
-        
+
         var leftScope = this.GetNodeScope( transformedLeft );
 
         if ( scope == RunTimeOrCompileTime )
@@ -1003,10 +999,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             transformedOperatorToken = transformedOperatorToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
         }
-
-        isDynamicUserExpression =
-            rightScope == CompileTimeOnlyReturningRuntimeOnly && this._syntaxTreeAnnotationMap.GetExpressionType( right ) is { TypeKind: TypeKind.Dynamic };
-
     }
 
     public override SyntaxNode VisitElementAccessExpression( ElementAccessExpressionSyntax node )
@@ -1883,7 +1875,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var (transformedOperand, scope) = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
 
         return node.Update( node.OperatorToken, transformedOperand ).WithSymbolAnnotationsFrom( node ).AddScopeAnnotation( scope );
-    
     }
 
     private (ExpressionSyntax TransformedOperand, TemplatingScope Scope) VisitUnaryExpressionOperand( ExpressionSyntax operand, SyntaxToken @operator )

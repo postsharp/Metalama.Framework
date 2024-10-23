@@ -72,9 +72,10 @@ internal abstract class Invoker<T>
 
     protected readonly record struct ReceiverTypedExpressionSyntax
     {
-        public ReceiverTypedExpressionSyntax(TypedExpressionSyntaxImpl typedExpressionSyntax,
-                                             bool requiresConditionalAccess,
-                                             AspectReferenceSpecification aspectReferenceSpecification)
+        public ReceiverTypedExpressionSyntax(
+            TypedExpressionSyntaxImpl typedExpressionSyntax,
+            bool requiresConditionalAccess,
+            AspectReferenceSpecification aspectReferenceSpecification )
         {
             if ( requiresConditionalAccess && typedExpressionSyntax.Syntax is PostfixUnaryExpressionSyntax postfix
                                            && postfix.IsKind( SyntaxKind.SuppressNullableWarningExpression ) )
@@ -91,7 +92,6 @@ internal abstract class Invoker<T>
         }
 
         public ExpressionSyntax Syntax => this.TypedExpressionSyntax.Syntax;
-            
 
         public TypedExpressionSyntaxImpl TypedExpressionSyntax { get; }
 
@@ -103,7 +103,6 @@ internal abstract class Invoker<T>
             => new( syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
 
         public ReceiverExpressionSyntax ToReceiverExpressionSyntax() => new( this.Syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
-        
     }
 
     protected readonly record struct ReceiverExpressionSyntax(
