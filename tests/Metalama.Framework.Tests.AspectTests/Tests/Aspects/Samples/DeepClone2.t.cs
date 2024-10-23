@@ -7,8 +7,8 @@ internal class AutomaticallyCloneable : ICloneable
   public virtual AutomaticallyCloneable Clone()
   {
     var clone = (AutomaticallyCloneable)this.MemberwiseClone();
-    clone._b = (ManuallyCloneable? )_b?.Clone()!;
-    clone._c = _c?.Clone()!;
+    clone._b = (ManuallyCloneable? )_b?.Clone();
+    clone._c = (_c?.Clone());
     return clone;
   }
   object ICloneable.Clone()

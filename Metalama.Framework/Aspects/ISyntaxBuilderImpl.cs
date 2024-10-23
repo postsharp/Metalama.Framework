@@ -19,7 +19,7 @@ internal interface ISyntaxBuilderImpl
 
     IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder );
 
-    IExpression ParseExpression( string code );
+    IExpression ParseExpression( string code, IType? type, bool? isReferenceable );
 
     IStatement ParseStatement( string code );
 

@@ -120,7 +120,7 @@ class TargetClass
         [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness), "DEMO02" )]
         [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), _fabricsNotAvailableErrorId )]
         [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), "DEMO02", TestLicenseKeyProvider.MetalamaUltimateProjectBoundProjectName )]
-        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKeyName, string expectedDiagnosticId, string projectName = "TestProject" )
+        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string? licenseKeyName, string expectedDiagnosticId, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
 

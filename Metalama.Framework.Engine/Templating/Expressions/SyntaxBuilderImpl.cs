@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Statements;
@@ -60,11 +61,13 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IExpression BuildInterpolatedString( InterpolatedStringBuilder interpolatedStringBuilder )
         => new InterpolatedStringUserExpression( interpolatedStringBuilder, this.Compilation );
 
-    public IExpression ParseExpression( string code )
+    public IExpression ParseExpression( string code, IType? type, bool? isReferenceable )
     {
-        var expression = SyntaxFactoryEx.ParseExpressionSafe( code ).WithAdditionalAnnotations( Formatter.Annotation );
+        var expression = SyntaxFactoryEx.ParseExpressionSafe( code )
+            .WithAdditionalAnnotations( Formatter.Annotation )
+            .WithSimplifierAnnotation();
 
-        return new SyntaxUserExpression( expression, this.Compilation.Cache.SystemObjectType );
+        return new SyntaxUserExpression( expression, type ?? this.Compilation.Cache.SystemObjectType, isReferenceable );
     }
 
     public IStatement ParseStatement( string code )
