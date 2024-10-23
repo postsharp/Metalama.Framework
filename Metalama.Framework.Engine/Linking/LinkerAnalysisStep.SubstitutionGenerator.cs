@@ -26,7 +26,6 @@ internal sealed partial class LinkerAnalysisStep
     {
         private readonly LinkerAnalysisStep _parent;
         private readonly CompilationContext _intermediateCompilationContext;
-        private readonly LinkerSyntaxHandler _syntaxHandler;
         private readonly LinkerInjectionRegistry _injectionRegistry;
         private readonly HashSet<IntermediateSymbolSemantic> _nonInlinedSemantics;
         private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
@@ -51,7 +50,6 @@ internal sealed partial class LinkerAnalysisStep
         public SubstitutionGenerator(
             LinkerAnalysisStep parent,
             CompilationContext intermediateCompilationContext,
-            LinkerSyntaxHandler syntaxHandler,
             LinkerInjectionRegistry injectionRegistry,
             HashSet<IntermediateSymbolSemantic> inlinedSemantics,
             HashSet<IntermediateSymbolSemantic> nonInlinedSemantics,
@@ -67,7 +65,6 @@ internal sealed partial class LinkerAnalysisStep
             this._concurrentTaskRunner = parent._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._parent = parent;
             this._intermediateCompilationContext = intermediateCompilationContext;
-            this._syntaxHandler = syntaxHandler;
             this._injectionRegistry = injectionRegistry;
             this._nonInlinedSemantics = nonInlinedSemantics;
             this._nonInlinedReferences = nonInlinedReferences;
@@ -256,7 +253,7 @@ internal sealed partial class LinkerAnalysisStep
                 if ( inliningSpecification.TargetSemantic.Kind == IntermediateSymbolSemanticKind.Default )
                 {
                     var referencedSymbol = inliningSpecification.TargetSemantic.Symbol;
-                    var root = this._syntaxHandler.GetCanonicalRootNode( referencedSymbol );
+                    var root = LinkerSyntaxHandler.GetCanonicalRootNode( referencedSymbol, this._injectionRegistry );
 
                     switch ( root )
                     {
