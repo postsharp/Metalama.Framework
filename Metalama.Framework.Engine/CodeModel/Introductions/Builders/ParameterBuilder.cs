@@ -19,6 +19,7 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
     private TypedConstant? _defaultValue;
     private RefKind _refKind;
     private IType _type;
+    private bool _isParams;
 
     public ParameterBuilder(
         IHasParameters declaringMember,
@@ -100,7 +101,24 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
         }
     }
 
-    public override bool IsParams => false;
+    public override bool IsParams
+    {
+        get => this._isParams;
+        set
+        {
+            this.CheckNotFrozen();
+
+            if ( this.IsReturnParameter )
+            {
+                throw new NotSupportedException( "Cannot set the params modifier on a return parameter." );
+            }
+
+            // We could check here if the parameter is the last one, but that wouldn't prevent the user from adding more parameters afterwards.
+            // So we'll let the C# compiler handle this.
+
+            this._isParams = value;
+        }
+    }
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
