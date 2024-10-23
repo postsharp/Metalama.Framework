@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Introductions.BuilderData;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
@@ -17,7 +17,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
         this._parent = parent;
     }
 
-    protected override void PopulateAllItems( Action<IRef<IParameter>> action )
+    protected override void PopulateAllItems( Action<IFullRef<IParameter>> action )
     {
         // TODO: Move to IRefCollectionStrategy.
 
@@ -39,18 +39,26 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
 
                 break;
 
-            case IBuilderRef { Builder: IMethodBaseBuilder builder }:
+            case IIntroducedRef { BuilderData: MethodBuilderData builder }:
                 foreach ( var p in builder.Parameters )
                 {
-                    action( this.RefFactory.FromBuilder<IParameter>( p ) );
+                    action( this.RefFactory.FromBuilderData<IParameter>( p ) );
                 }
 
                 break;
 
-            case IBuilderRef { Builder: IIndexerBuilder indexerBuilder }:
+            case IIntroducedRef { BuilderData: ConstructorBuilderData builder }:
+                foreach ( var p in builder.Parameters )
+                {
+                    action( this.RefFactory.FromBuilderData<IParameter>( p ) );
+                }
+
+                break;
+
+            case IIntroducedRef { BuilderData: IndexerBuilderData indexerBuilder }:
                 foreach ( var p in indexerBuilder.Parameters )
                 {
-                    action( this.RefFactory.FromBuilder<IParameter>( p ) );
+                    action( this.RefFactory.FromBuilderData<IParameter>( p ) );
                 }
 
                 break;
@@ -60,7 +68,7 @@ internal sealed class ParameterUpdatableCollection : DeclarationUpdatableCollect
         }
     }
 
-    public void Add( IParameterBuilder parameterBuilder )
+    public void Add( ParameterBuilderData parameterBuilder )
     {
         this.EnsureComplete();
 

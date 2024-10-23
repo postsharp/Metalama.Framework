@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code.Collections;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
@@ -11,11 +12,6 @@ namespace Metalama.Framework.Code
     /// </summary>
     public interface INamedType : IType, IGeneric, INamespaceOrNamedType, IEquatable<INamedType>
     {
-        /// <summary>
-        /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
-        /// </summary>
-        bool IsPartial { get; }
-
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
 
@@ -188,5 +184,11 @@ namespace Metalama.Framework.Code
         INamedType UnderlyingType { get; }
 
         new IRef<INamedType> ToRef();
+
+        new INamedType ToNullable();
+        
+        // Note that ToNonNullable, when called with Nullable<T>, can return an ITypeParameter and therefore cannot be cast to INamedType.
+
+        INamedType MakeGenericInstance( IReadOnlyList<IType> typeArguments );
     }
 }

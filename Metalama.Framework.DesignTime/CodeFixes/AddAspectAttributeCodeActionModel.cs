@@ -5,8 +5,8 @@ using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
 

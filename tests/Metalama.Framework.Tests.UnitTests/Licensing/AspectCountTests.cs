@@ -538,7 +538,7 @@ interface ITargetInterface
         [InlineData( nameof(LicenseKeys.MetalamaStarterBusiness), null )]
         [InlineData( nameof(LicenseKeys.MetalamaProfessionalBusiness), null )]
         [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness), null )]
-        public async Task InheritedAspectsCountAsync( string licenseKeyName, string? expectedErrorId )
+        public async Task InheritedAspectsCountAsync( string? licenseKeyName, string? expectedErrorId )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
 

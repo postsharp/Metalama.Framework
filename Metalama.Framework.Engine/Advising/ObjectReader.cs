@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 if ( !this.TryGetValue( key, out var value ) )
                 {
-                    throw new KeyNotFoundException();
+                    throw new KeyNotFoundException( $"The tag '{key}' is not defined." );
                 }
 
                 return value;

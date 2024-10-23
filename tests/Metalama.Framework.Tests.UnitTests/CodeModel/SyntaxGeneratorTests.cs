@@ -198,14 +198,14 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
 
-            var code = """
-                using System;
-                
-                class MyAttribute( params int[] Values ) : Attribute;
+            const string code = """
+                                using System;
 
-                [MyAttribute( null )]
-                class C;
-                """;
+                                class MyAttribute( params int[] Values ) : Attribute;
+
+                                [MyAttribute( null )]
+                                class C;
+                                """;
 
             var compilation = testContext.CreateCompilationModel( code );
             var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );

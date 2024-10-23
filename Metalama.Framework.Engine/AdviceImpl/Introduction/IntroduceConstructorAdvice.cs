@@ -6,11 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Linq;
 
@@ -24,8 +23,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         AdviceConstructorParameters<INamedType> parameters,
         PartiallyBoundTemplateMethod template,
         OverrideStrategy overrideStrategy,
-        Action<IConstructorBuilder>? buildAction,
-        IObjectReader tags )
+        Action<IConstructorBuilder>? buildAction )
         : base(
             parameters,
             null,
@@ -33,20 +31,24 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             IntroductionScope.Instance,
             overrideStrategy,
             buildAction,
-            tags,
             explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
-
-        this.Builder = new ConstructorBuilder( this, parameters.TargetDeclaration );
     }
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
+    protected override ConstructorBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+        return new ConstructorBuilder( this.AspectLayerInstance, this.TargetDeclaration );
+    }
+
+    protected override void InitializeBuilderCore(
+        ConstructorBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context )
+    {
+        base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
+
+        var templateDeclaration = this.Template.AssertNotNull().GetDeclaration( this.SourceCompilation );
 
         var typeRewriter = TemplateTypeRewriter.Get( this._template );
 
@@ -54,56 +56,59 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
         foreach ( var runtimeParameter in runtimeParameters )
         {
-            var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+            var templateParameter = templateDeclaration.Parameters[runtimeParameter.SourceIndex];
 
-            var parameterBuilder = this.Builder.AddParameter(
+            var parameterBuilder = builder.AddParameter(
                 templateParameter.Name,
                 typeRewriter.Visit( templateParameter.Type ),
                 templateParameter.RefKind,
                 templateParameter.DefaultValue );
 
-            CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
+            CopyTemplateAttributes( templateParameter, parameterBuilder, context.ServiceProvider );
         }
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceConstructor;
 
-    protected override IntroductionAdviceResult<IConstructor> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroductionAdviceResult<IConstructor> ImplementCore( ConstructorBuilder builder, in AdviceImplementationContext context )
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
         var existingImplicitConstructor =
-            this.Builder.IsStatic
+            builder.IsStatic
                 ? targetDeclaration.StaticConstructor?.IsImplicitlyDeclared == true
                     ? targetDeclaration.StaticConstructor
                     : null
                 : targetDeclaration.Constructors.FirstOrDefault( c => c.IsImplicitInstanceConstructor() );
 
         var existingConstructor =
-            this.Builder.IsStatic
+            builder.IsStatic
                 ? targetDeclaration.StaticConstructor
-                : targetDeclaration.Constructors.OfExactSignature( this.Builder );
+                : targetDeclaration.Constructors.OfExactSignature( builder );
 
         // TODO: Introduce attributes that are added not present on the existing member?
         if ( existingConstructor == null || existingImplicitConstructor != null )
         {
-            if ( existingImplicitConstructor != null && this.Builder.Parameters.Count == 0 )
+            if ( existingImplicitConstructor != null && builder.Parameters.Count == 0 )
             {
                 // Redirect if the builder has no parameters and the existing constructor is implicit.
-                this.Builder.ReplacedImplicitConstructor = existingImplicitConstructor;
+                builder.ReplacedImplicitConstructor = existingImplicitConstructor;
             }
 
+            builder.Freeze();
+
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenConstructor = new OverrideConstructorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
 
-            addTransformation( this.Builder.ToTransformation() );
-            addTransformation( overriddenConstructor );
+            var overriddenConstructor = new OverrideConstructorTransformation(
+                this.AspectLayerInstance,
+                builder.ToFullRef(),
+                this._template.ForIntroduction( builder ) );
 
-            return this.CreateSuccessResult();
+            context.AddTransformation( builder.CreateTransformation() );
+            context.AddTransformation( overriddenConstructor );
+
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {
@@ -115,7 +120,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
                         this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                  existingConstructor.DeclaringType),
                                 this ) );
 
@@ -125,12 +130,11 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
                 case OverrideStrategy.Override:
                     var overriddenMethod = new OverrideConstructorTransformation(
-                        this,
-                        existingConstructor,
-                        this._template.ForIntroduction( existingConstructor ),
-                        this.Tags );
+                        this.AspectLayerInstance,
+                        existingConstructor.ToFullRef(),
+                        this._template.ForIntroduction( existingConstructor ) );
 
-                    addTransformation( overriddenMethod );
+                    context.AddTransformation( overriddenMethod );
 
                     return this.CreateSuccessResult( AdviceOutcome.Override, existingConstructor );
 

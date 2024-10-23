@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
 using System.Collections.Generic;
@@ -11,9 +12,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal sealed partial class NamedTypeCollection
 {
-    private sealed class FlattenedList : List<IRef<INamedType>>, IUpdatableCollection<INamedType>
+    private sealed class FlattenedList : List<IFullRef<INamedType>>, IUpdatableCollection<IFullRef<INamedType>>
     {
-        public FlattenedList( CompilationModel compilation, IReadOnlyList<IRef<INamedType>> source )
+        public FlattenedList( CompilationModel compilation, IReadOnlyList<IFullRef<INamedType>> source )
         {
             this.Compilation = compilation;
             this.Capacity = source.Count;
@@ -25,7 +26,7 @@ internal sealed partial class NamedTypeCollection
                 AddRecursively( item );
             }
 
-            void AddRecursively( IRef<INamedType> item )
+            void AddRecursively( IFullRef<INamedType> item )
             {
                 this.Add( item );
 
@@ -38,8 +39,8 @@ internal sealed partial class NamedTypeCollection
 
         public CompilationModel Compilation { get; }
 
-        public IUpdatableCollection<INamedType> Clone( CompilationModel compilation ) => throw new NotSupportedException();
+        public IUpdatableCollection Clone( CompilationModel compilation ) => throw new NotSupportedException();
 
-        public ImmutableArray<IRef<INamedType>> OfName( string name ) => this.Where( r => r.Name == name ).ToImmutableArray();
+        public ImmutableArray<IFullRef<INamedType>> OfName( string name ) => this.Where( r => r.Name == name ).ToImmutableArray();
     }
 }

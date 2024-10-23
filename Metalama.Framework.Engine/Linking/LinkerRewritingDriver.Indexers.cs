@@ -81,11 +81,11 @@ namespace Metalama.Framework.Engine.Linking
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )];
             }
             else
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                return [GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )];
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )

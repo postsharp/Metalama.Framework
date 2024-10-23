@@ -21,6 +21,12 @@ internal abstract class CompilationElementVisitor
 
         switch ( element )
         {
+            case null:
+                // This can happen when an exception is displayed when the object is incompletely constructed.
+                this.VisitNull();
+
+                break;
+
             case IType type:
                 switch ( type.TypeKind )
                 {
@@ -187,4 +193,6 @@ internal abstract class CompilationElementVisitor
     protected virtual void VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => this.DefaultVisit( functionPointerType );
 
     protected virtual void VisitTypeParameter( ITypeParameter typeParameter ) => this.DefaultVisit( typeParameter );
+
+    protected virtual void VisitNull() { }
 }

@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -24,12 +24,12 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+            protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
             {
                 this.Validate();
 
-                return this._parent._proceedExpressionProvider!( this._parent._template!.EffectiveKind )
-                    .ToTypedExpressionSyntax( syntaxSerializationContext )
+                return this._parent._proceedExpressionProvider!( this._parent._methodTemplate!.EffectiveTemplateKind )
+                    .ToTypedExpressionSyntax( syntaxSerializationContext, targetType )
                     .Syntax;
             }
 
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            public override IType Type => this._parent._proceedExpressionProvider!( this._parent._template!.EffectiveKind ).Type;
+            public override IType Type => this._parent._proceedExpressionProvider!( this._parent._methodTemplate!.EffectiveTemplateKind ).Type;
 
             protected override string ToStringCore() => $"meta.{this._methodName}()";
         }

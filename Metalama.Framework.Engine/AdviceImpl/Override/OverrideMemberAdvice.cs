@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 
@@ -11,14 +10,9 @@ internal abstract class OverrideMemberAdvice<TInput, TOutput> : Advice<OverrideM
     where TInput : class, IMember
     where TOutput : class, IMember
 {
-    protected new IRef<TInput> TargetDeclaration => base.TargetDeclaration.As<TInput>();
+    protected new TInput TargetDeclaration => (TInput) base.TargetDeclaration;
 
-    protected IObjectReader Tags { get; }
-
-    protected OverrideMemberAdvice( AdviceConstructorParameters<TInput> parameters, IObjectReader tags ) : base( parameters )
-    {
-        this.Tags = tags;
-    }
+    protected OverrideMemberAdvice( AdviceConstructorParameters<TInput> parameters ) : base( parameters ) { }
 
     public override string ToString() => $"Override {this.TargetDeclaration}";
 

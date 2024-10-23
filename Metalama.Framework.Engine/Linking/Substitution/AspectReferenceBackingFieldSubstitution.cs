@@ -15,7 +15,7 @@ internal sealed class AspectReferenceBackingFieldSubstitution : SyntaxNodeSubsti
 {
     private readonly ResolvedAspectReference _aspectReference;
 
-    public override SyntaxNode TargetNode => this._aspectReference.RootNode;
+    public override SyntaxNode ReplacedNode => this._aspectReference.RootNode;
 
     public AspectReferenceBackingFieldSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
         compilationContext )

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public TemplateMember<IMemberOrNamedType> Template { get; }
 
-        public IObjectReader Tags { get; }
+        public IObjectReader Tags => this.Template.Tags;
 
         public AspectLayerId AspectLayerId { get; }
 
@@ -37,7 +37,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             ICompilation sourceCompilation,
             UserDiagnosticSink diagnosticSink,
             TemplateMember<IMemberOrNamedType> template,
-            IObjectReader tags,
             AspectLayerId aspectLayerId,
             SyntaxGenerationContext syntaxGenerationContext,
             IAspectInstanceInternal? aspectInstance, // Can be null in tests.
@@ -47,7 +46,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.SourceCompilation = sourceCompilation;
             this.DiagnosticSink = diagnosticSink;
             this.Template = template;
-            this.Tags = tags;
             this.AspectLayerId = aspectLayerId;
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.AspectInstance = aspectInstance;

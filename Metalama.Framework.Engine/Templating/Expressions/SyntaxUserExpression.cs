@@ -14,8 +14,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public SyntaxUserExpression(
             ExpressionSyntax expression,
             IType type,
-            bool isReferenceable = false,
-            bool isAssignable = false )
+            bool? isReferenceable = null,
+            bool? isAssignable = null )
         {
             this.Expression = expression;
             this.Type = type;
@@ -23,13 +23,13 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.IsReferenceable = isReferenceable;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext ) => this.Expression;
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null ) => this.Expression;
 
         public override IType Type { get; }
 
-        public override bool IsAssignable { get; }
+        public override bool? IsAssignable { get; }
 
-        private protected override bool IsReferenceable { get; }
+        private protected override bool? IsReferenceable { get; }
 
         protected ExpressionSyntax Expression { get; }
 

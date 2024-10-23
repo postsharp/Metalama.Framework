@@ -235,8 +235,8 @@ record class C() {}
 
         Assert.NotNull( typeRecordClass.PrimaryConstructor );
         Assert.Equal( 2, typeRecordClass.Constructors.Count );
-        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [] ) );
-        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [{ }] ) );
+        Assert.Single( typeRecordClass.Constructors, c => c.Parameters is [] );
+        Assert.Single( typeRecordClass.Constructors, c => c.Parameters is [{ }] );
         Assert.Equal( typeRecordClass.Constructors.Single( c => c.Parameters is [] ), typeRecordClass.PrimaryConstructor );
     }
 
@@ -292,8 +292,8 @@ struct B(int x) {}
 
         Assert.NotNull( typeStruct.PrimaryConstructor );
         Assert.Equal( 2, typeStruct.Constructors.Count );
-        Assert.Single( typeStruct.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ) );
-        Assert.Single( typeStruct.Constructors.Where( c => c.Parameters is [] ) );
+        Assert.Single( typeStruct.Constructors, c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] );
+        Assert.Single( typeStruct.Constructors, c => c.Parameters is [] );
         Assert.Equal( typeStruct.Constructors.Single( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ), typeStruct.PrimaryConstructor );
     }
 #endif
@@ -317,8 +317,8 @@ record class C(int x) {}
 
         Assert.NotNull( typeRecordClass.PrimaryConstructor );
         Assert.Equal( 2, typeRecordClass.Constructors.Count );
-        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ) );
-        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: not SpecialType.Int32 }] ) );
+        Assert.Single( typeRecordClass.Constructors, c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] );
+        Assert.Single( typeRecordClass.Constructors, c => c.Parameters is [{ Type.SpecialType: not SpecialType.Int32 }] );
 
         Assert.Equal(
             typeRecordClass.Constructors.Single( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ),
@@ -340,8 +340,8 @@ record struct D(int x) {}
 
         Assert.NotNull( typeRecordStruct.PrimaryConstructor );
         Assert.Equal( 2, typeRecordStruct.Constructors.Count );
-        Assert.Single( typeRecordStruct.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ) );
-        Assert.Single( typeRecordStruct.Constructors.Where( c => c.Parameters is [] ) );
+        Assert.Single( typeRecordStruct.Constructors, c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] );
+        Assert.Single( typeRecordStruct.Constructors, c => c.Parameters is [] );
         Assert.Equal( typeRecordStruct.Constructors.Single( c => c.Parameters.Count == 1 ), typeRecordStruct.PrimaryConstructor );
     }
 

@@ -6,11 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +18,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, IIndexer, IndexerBuilder>
 {
+    private readonly IReadOnlyList<(IType Type, string Name)> _indices;
     private readonly PartiallyBoundTemplateMethod? _getTemplate;
     private readonly PartiallyBoundTemplateMethod? _setTemplate;
 
@@ -30,41 +30,55 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IIndexerBuilder>? buildAction,
-        IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
+        : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType )
     {
+        this._indices = indices;
         this._getTemplate = getTemplate;
         this._setTemplate = setTemplate;
+    }
 
-        var hasGet = getTemplate != null;
-        var hasSet = setTemplate != null;
+    protected override IndexerBuilder CreateBuilder( in AdviceImplementationContext context )
+    {
+        var hasGet = this._getTemplate != null;
+        var hasSet = this._setTemplate != null;
 
-        this.Builder = new IndexerBuilder( this, parameters.TargetDeclaration, hasGet, hasSet );
+        var builder = new IndexerBuilder( this.AspectLayerInstance, this.TargetDeclaration, hasGet, hasSet );
 
-        foreach ( var pair in indices )
+        foreach ( var pair in this._indices )
         {
-            this.Builder.AddParameter( pair.Name, pair.Type );
+            builder.AddParameter( pair.Name, pair.Type );
         }
+
+        return builder;
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceIndexer;
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
+    protected override void InitializeBuilderCore(
+        IndexerBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context )
     {
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+        base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
+
+        var setTemplateDeclaration = this._setTemplate?.TemplateMember.GetDeclaration( this.SourceCompilation );
+        var getTemplateDeclaration = this._getTemplate?.TemplateMember.GetDeclaration( this.SourceCompilation );
+
+        var serviceProvider = context.ServiceProvider;
 
         if ( this._getTemplate != null )
         {
+            Invariant.Assert( getTemplateDeclaration != null );
+
             var typeRewriter = TemplateTypeRewriter.Get( this._getTemplate );
 
-            this.Builder.Type = typeRewriter.Visit( this._getTemplate.Declaration.ReturnType );
+            builder.Type = typeRewriter.Visit( getTemplateDeclaration.ReturnType );
         }
         else if ( this._setTemplate != null )
         {
+            Invariant.Assert( setTemplateDeclaration != null );
+
             var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
 
             var typeRewriter = TemplateTypeRewriter.Get( this._setTemplate );
@@ -73,28 +87,32 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
             {
                 // There may be an invalid template without runtime parameters.
 
-                this.Builder.Type = typeRewriter.Visit( this._setTemplate.Declaration.Parameters[lastRuntimeParameter.SourceIndex].Type );
+                builder.Type = typeRewriter.Visit( setTemplateDeclaration.Parameters[lastRuntimeParameter.SourceIndex].Type );
             }
         }
 
-        this.Builder.Accessibility =
+        builder.Accessibility =
             this._getTemplate != null
                 ? this._getTemplate.TemplateMember.Accessibility
                 : this._setTemplate.AssertNotNull().TemplateMember.Accessibility;
 
         if ( this._getTemplate != null )
         {
-            CopyTemplateAttributes( this._getTemplate.TemplateMember.Declaration, this.Builder.GetMethod.AssertNotNull(), serviceProvider );
+            Invariant.Assert( getTemplateDeclaration != null );
+
+            CopyTemplateAttributes( getTemplateDeclaration, builder.GetMethod.AssertNotNull(), serviceProvider );
 
             CopyTemplateAttributes(
-                this._getTemplate.TemplateMember.Declaration.ReturnParameter,
-                this.Builder.GetMethod!.ReturnParameter,
+                getTemplateDeclaration.ReturnParameter,
+                builder.GetMethod!.ReturnParameter,
                 serviceProvider );
         }
 
         if ( this._setTemplate != null )
         {
-            CopyTemplateAttributes( this._setTemplate.TemplateMember.Declaration, this.Builder.SetMethod!, serviceProvider );
+            Invariant.Assert( setTemplateDeclaration != null );
+
+            CopyTemplateAttributes( setTemplateDeclaration, builder.SetMethod!, serviceProvider );
 
             var lastRuntimeParameter = this._setTemplate.TemplateMember.TemplateClassMember.RunTimeParameters.LastOrDefault();
 
@@ -103,29 +121,29 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                 // There may be an invalid template without runtime parameters.
 
                 CopyTemplateAttributes(
-                    this._setTemplate.TemplateMember.Declaration.Parameters[lastRuntimeParameter.SourceIndex],
-                    this.Builder.SetMethod.AssertNotNull().Parameters.Last(),
+                    setTemplateDeclaration.Parameters[lastRuntimeParameter.SourceIndex],
+                    builder.SetMethod.AssertNotNull().Parameters.Last(),
                     serviceProvider );
             }
 
             CopyTemplateAttributes(
-                this._setTemplate.TemplateMember.Declaration.ReturnParameter,
-                this.Builder.SetMethod.AssertNotNull().ReturnParameter,
+                setTemplateDeclaration.ReturnParameter,
+                builder.SetMethod.AssertNotNull().ReturnParameter,
                 serviceProvider );
         }
 
-        var (accessorTemplateForAttributeCopy, skipLastParameter) =
+        var (accessorTemplateForAttributeCopy, accessorTemplateDeclarationForAttributeCopy, skipLastParameter) =
             this._getTemplate == null
-                ? (this._setTemplate!.TemplateMember, true)
-                : (this._getTemplate.TemplateMember, false);
+                ? (this._setTemplate!.TemplateMember, setTemplateDeclaration.AssertNotNull(), true)
+                : (this._getTemplate.TemplateMember, getTemplateDeclaration.AssertNotNull(), false);
 
         var runtimeParameters = accessorTemplateForAttributeCopy.TemplateClassMember.RunTimeParameters;
 
         for ( var i = 0; i < runtimeParameters.Length - (skipLastParameter ? 1 : 0); i++ )
         {
             var runtimeParameter = runtimeParameters[i];
-            var templateParameter = accessorTemplateForAttributeCopy.Declaration.Parameters[runtimeParameter.SourceIndex];
-            var parameterBuilder = this.Builder.Parameters[i];
+            var templateParameter = accessorTemplateDeclarationForAttributeCopy.Parameters[runtimeParameter.SourceIndex];
+            var parameterBuilder = builder.Parameters[i];
 
             CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
         }
@@ -133,56 +151,56 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
     }
 
-    protected override void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+    protected override void ValidateBuilder( IndexerBuilder builder, IDiagnosticAdder diagnosticAdder )
     {
-        base.ValidateBuilder( targetDeclaration, diagnosticAdder );
+        base.ValidateBuilder( builder, diagnosticAdder );
 
-        if ( this.Builder.Parameters.Count <= 0 )
+        var targetDeclaration = this.TargetDeclaration;
+
+        if ( builder.Parameters.Count <= 0 )
         {
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotIntroduceIndexerWithoutParameters.CreateRoslynDiagnostic(
                     targetDeclaration.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration),
+                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration),
                     this ) );
         }
 
-        if ( this.Builder.IsStatic )
+        if ( builder.IsStatic )
         {
             diagnosticAdder.Report(
                 AdviceDiagnosticDescriptors.CannotIntroduceStaticIndexer.CreateRoslynDiagnostic(
                     targetDeclaration.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration),
+                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration),
                     this ) );
         }
     }
 
-    protected override IntroductionAdviceResult<IIndexer> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroductionAdviceResult<IIndexer> ImplementCore( IndexerBuilder builder, in AdviceImplementationContext context )
     {
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
 
-        var existingDeclaration = targetDeclaration.FindClosestVisibleIndexer( this.Builder );
+        var existingDeclaration = targetDeclaration.FindClosestVisibleIndexer( builder );
 
         // TODO: Introduce attributes that are added not present on the existing member?
         if ( existingDeclaration == null )
         {
             // There is no existing declaration.
 
+            builder.Freeze();
+
             // Introduce and override using the template.
             var overrideIndexerTransformation = new OverrideIndexerTransformation(
-                this,
-                this.Builder,
-                this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
-                this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
-                this.Tags );
+                this.AspectLayerInstance,
+                builder.ToFullRef(),
+                this._getTemplate?.ForIntroduction( builder.GetMethod ),
+                this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-            addTransformation( this.Builder.ToTransformation() );
-            addTransformation( overrideIndexerTransformation );
+            context.AddTransformation( builder.CreateTransformation() );
+            context.AddTransformation( overrideIndexerTransformation );
 
-            return this.CreateSuccessResult();
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
         else
         {
@@ -192,17 +210,17 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind),
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration, existingDeclaration.DeclarationKind),
                             this ) );
             }
 
-            if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingIndexer.Type ) )
+            if ( !builder.Type.Equals( existingIndexer.Type ) )
             {
                 return
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                              existingIndexer.DeclaringType, existingIndexer.Type),
                             this ) );
             }
@@ -215,7 +233,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                         this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                  existingIndexer.DeclaringType),
                                 this ) );
 
@@ -225,43 +243,42 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
 
                 case OverrideStrategy.New:
                     // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingIndexer.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingIndexer.DeclaringType ) )
                     {
                         return this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, existingIndexer.DeclaringType),
+                                (this.AspectInstance.AspectClass.ShortName, builder, existingIndexer.DeclaringType),
                                 this ) );
                     }
                     else
                     {
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = true;
-                        this.Builder.OverriddenIndexer = existingIndexer;
+                        builder.HasNewKeyword = builder.IsNew = true;
+                        builder.OverriddenIndexer = existingIndexer;
+                        builder.Freeze();
 
                         var overrideIndexerTransformation = new OverrideIndexerTransformation(
-                            this,
-                            this.Builder,
-                            this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
-                            this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
-                            this.Tags );
+                            this.AspectLayerInstance,
+                            builder.ToFullRef(),
+                            this._getTemplate?.ForIntroduction( builder.GetMethod ),
+                            this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-                        addTransformation( this.Builder.ToTransformation() );
-                        addTransformation( overrideIndexerTransformation );
+                        context.AddTransformation( builder.CreateTransformation() );
+                        context.AddTransformation( overrideIndexerTransformation );
 
-                        return this.CreateSuccessResult( AdviceOutcome.New, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.New, builder );
                     }
 
                 case OverrideStrategy.Override:
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingIndexer.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingIndexer.DeclaringType ) )
                     {
                         var overrideIndexerTransformation = new OverrideIndexerTransformation(
-                            this,
-                            existingIndexer,
+                            this.AspectLayerInstance,
+                            existingIndexer.ToFullRef(),
                             this._getTemplate?.ForIntroduction( existingIndexer.GetMethod ),
-                            this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ),
-                            this.Tags );
+                            this._setTemplate?.ForIntroduction( existingIndexer.SetMethod ) );
 
-                        addTransformation( overrideIndexerTransformation );
+                        context.AddTransformation( overrideIndexerTransformation );
 
                         return this.CreateSuccessResult( AdviceOutcome.Override, existingIndexer );
                     }
@@ -271,27 +288,27 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
                             this.CreateFailedResult(
                                 AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                    (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                      existingIndexer.DeclaringType),
                                     this ) );
                     }
                     else
                     {
-                        this.Builder.IsOverride = true;
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = false;
-                        this.Builder.OverriddenIndexer = existingIndexer;
+                        builder.IsOverride = true;
+                        builder.HasNewKeyword = builder.IsNew = false;
+                        builder.OverriddenIndexer = existingIndexer;
+                        builder.Freeze();
 
                         var overriddenIndexer = new OverrideIndexerTransformation(
-                            this,
-                            this.Builder,
-                            this._getTemplate?.ForIntroduction( this.Builder.GetMethod ),
-                            this._setTemplate?.ForIntroduction( this.Builder.SetMethod ),
-                            this.Tags );
+                            this.AspectLayerInstance,
+                            builder.ToFullRef(),
+                            this._getTemplate?.ForIntroduction( builder.GetMethod ),
+                            this._setTemplate?.ForIntroduction( builder.SetMethod ) );
 
-                        addTransformation( this.Builder.ToTransformation() );
-                        addTransformation( overriddenIndexer );
+                        context.AddTransformation( builder.CreateTransformation() );
+                        context.AddTransformation( overriddenIndexer );
 
-                        return this.CreateSuccessResult( AdviceOutcome.Override, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.Override, builder );
                     }
 
                 default:

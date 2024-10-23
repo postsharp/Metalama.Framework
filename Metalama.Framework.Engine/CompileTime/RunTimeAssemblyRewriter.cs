@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
@@ -128,7 +129,7 @@ namespace Metalama.Compiler
             }
 
             transformedCompilation =
-                transformedCompilation.WithSyntaxTreeTransformations( new[] { SyntaxTreeTransformation.AddTree( instrinsicsSyntaxTree ) } );
+                transformedCompilation.WithSyntaxTreeTransformations( [SyntaxTreeTransformation.AddTree( instrinsicsSyntaxTree )] );
         }
 
         return transformedCompilation;
@@ -342,7 +343,7 @@ namespace Metalama.Compiler
     private T PreserveAndAddAttribute<T>( T transformedNode, T originalNode, ISymbol symbol, bool isAsyncMethod = false, bool isIteratorMethod = false )
         where T : MemberDeclarationSyntax
     {
-        var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
+        var accessibility = symbol.DeclaredAccessibility.ToOurAccessibility();
 
         if ( accessibility is Accessibility.Public or Accessibility.Protected && !isAsyncMethod && !isIteratorMethod )
         {
@@ -363,8 +364,8 @@ namespace Metalama.Compiler
         AccessorDeclarationSyntax originalNode,
         IMethodSymbol symbol )
     {
-        var isIteratorMethod = IteratorHelper.IsIteratorMethod( symbol );
-        var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
+        var isIteratorMethod = symbol.IsIteratorMethod();
+        var accessibility = symbol.DeclaredAccessibility.ToOurAccessibility();
 
         if ( accessibility is Accessibility.Public or Accessibility.Protected
              && !isIteratorMethod )
@@ -391,15 +392,14 @@ namespace Metalama.Compiler
             .WithArgumentList(
                 AttributeArgumentList(
                     SeparatedList(
-                        new[]
-                        {
-                            AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
-                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ),
-                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isAsyncMethod ) )
-                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsAsync) ) ),
-                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isIteratorMethod ) )
-                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsIteratorMethod) ) )
-                        } ) ) );
+                    [
+                        AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
+                            .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ),
+                        AttributeArgument( SyntaxFactoryEx.LiteralExpression( isAsyncMethod ) )
+                            .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsAsync) ) ),
+                        AttributeArgument( SyntaxFactoryEx.LiteralExpression( isIteratorMethod ) )
+                            .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsIteratorMethod) ) )
+                    ] ) ) );
 
         var attributeList = AttributeList( SingletonSeparatedList( attribute ) )
             .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );

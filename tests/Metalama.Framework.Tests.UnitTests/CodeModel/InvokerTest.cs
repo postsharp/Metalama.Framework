@@ -215,7 +215,7 @@ class TargetCode
                 // Testing static members.
                 var staticGenericMethod = nestedType.Methods.OfName( "StaticGenericMethod" )
                     .Single()
-                    .WithTypeArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
+                    .MakeGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
 
                 var staticNonGenericMethod = nestedType.Methods.OfName( "StaticNonGenericMethod" ).Single();
                 var staticField = nestedType.Fields.OfName( "StaticField" ).Single();
@@ -239,7 +239,7 @@ class TargetCode
 
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" )
                     .Single()
-                    .WithTypeArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
+                    .MakeGenericInstance( compilation.Factory.GetTypeByReflectionType( typeof(int) ) );
 
                 var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
                 var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
@@ -301,7 +301,7 @@ class TargetCode
                 Assert.Equal( advisedParameterList[0], advisedParameterList["i"] );
                 Assert.Equal( advisedParameterList[1], advisedParameterList["j"] );
 
-                Assert.Equal( "i", Assert.Single( advisedParameterList.Where( t => t.Type.Is( typeof(int) ) ) ).Name );
+                Assert.Equal( "i", Assert.Single( advisedParameterList, t => t.Type.Is( typeof(int) ) ).Name );
             }
         }
 

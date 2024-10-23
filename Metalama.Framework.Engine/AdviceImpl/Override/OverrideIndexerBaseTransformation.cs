@@ -2,8 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
@@ -19,25 +20,33 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIndexerTransformation
 {
-    private new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
+    private readonly IFullRef<IIndexer> _overriddenIndexer;
 
     protected OverrideIndexerBaseTransformation(
-        Advice advice,
-        IIndexer overriddenDeclaration,
-        IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags ) { }
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IIndexer> overriddenDeclaration )
+        : base( aspectLayerInstance, overriddenDeclaration )
+    {
+        this._overriddenIndexer = overriddenDeclaration;
+    }
+
+    protected override IFullRef<IPropertyOrIndexer> OverriddenPropertyOrIndexer => this._overriddenIndexer;
+
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenIndexer;
 
     protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
         MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
+        var overriddenDeclaration = this._overriddenIndexer.GetTarget( this.InitialCompilation );
+
         var setAccessorDeclarationKind =
-            this.OverriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
+            overriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
                 ? SyntaxKind.InitAccessorDeclaration
                 : SyntaxKind.SetAccessorDeclaration;
 
-        var modifiers = this.OverriddenDeclaration
+        var modifiers = overriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
@@ -48,17 +57,17 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                 IndexerDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList( modifiers ),
-                    context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration )
+                    context.SyntaxGenerator.IndexerType( overriddenDeclaration )
                         .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Token( SyntaxKind.ThisKeyword ),
                     TransformationHelper.GetIndexerOverrideParameterList(
-                        context.Compilation,
+                        context.FinalCompilation,
                         context.SyntaxGenerationContext,
-                        this.OverriddenDeclaration,
+                        overriddenDeclaration,
                         context.InjectionNameProvider.GetOverriddenByType(
-                            this.ParentAdvice.AspectInstance,
-                            this.OverriddenDeclaration,
+                            this.AspectInstance,
+                            overriddenDeclaration,
                             context.SyntaxGenerationContext ) ),
                     AccessorList(
                         List(
@@ -82,25 +91,29 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                                 .AssertNoneNull() ) ),
                     null,
                     default ),
-                this.ParentAdvice.AspectLayerId,
+                this.AspectLayerId,
                 InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
+                overriddenDeclaration.ToFullRef() )
         };
 
         return overrides;
     }
 
-    protected SyntaxUserExpression CreateProceedDynamicExpression( MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
+    protected SyntaxUserExpression CreateProceedDynamicExpression(
+        MemberInjectionContext context,
+        IMethod accessor,
+        TemplateKind templateKind,
+        IIndexer overriddenDeclaration )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
                 this.CreateProceedGetExpression( context ),
                 templateKind,
-                this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
+                overriddenDeclaration.GetMethod.AssertNotNull() ),
             MethodKind.PropertySet => new SyntaxUserExpression(
                 this.CreateProceedSetExpression( context ),
-                this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType ),
+                overriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType ),
             _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 
@@ -108,13 +121,13 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         => TransformationHelper.CreateIndexerProceedGetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration,
-            this.ParentAdvice.AspectLayerId );
+            this._overriddenIndexer.GetTarget( context.FinalCompilation ),
+            this.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
         => TransformationHelper.CreateIndexerProceedSetExpression(
             context.AspectReferenceSyntaxProvider,
             context.SyntaxGenerationContext,
-            this.OverriddenDeclaration,
-            this.ParentAdvice.AspectLayerId );
+            this._overriddenIndexer.GetTarget( context.FinalCompilation ),
+            this.AspectLayerId );
 }

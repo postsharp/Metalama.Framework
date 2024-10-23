@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
@@ -28,14 +30,14 @@ public class GenericContextTests : UnitTestClass
 
         var classC = compilation.Types.OfName( "C" ).Single();
         var classD = classC.Types.Single();
-        var genericTypeInstance = (NamedType) classC.Fields.Single().Type;
+        var genericTypeInstance = (SourceNamedType) classC.Fields.Single().Type;
 
         // Map through IType.
         var mappedClassD = genericTypeInstance.GenericContext.Map( classD );
         Assert.Equal( "C<int>.D", mappedClassD.ToString() );
 
         // Map through ITypeSymbol.
-        var mappedClassDSymbol = genericTypeInstance.GenericContext.Map( classD.GetSymbol() );
+        var mappedClassDSymbol = ((SymbolGenericContext) genericTypeInstance.GenericContext).MapToSymbol( classD.GetSymbol() );
         Assert.Equal( "C<int>.D", mappedClassDSymbol.ToString() );
     }
 
@@ -58,14 +60,14 @@ public class GenericContextTests : UnitTestClass
 
         var classC = compilation.Types.OfName( "C" ).Single();
         var classD = classC.Types.Single();
-        var genericTypeInstance = (NamedType) classC.Fields.Single().Type;
+        var genericTypeInstance = (SourceNamedType) classC.Fields.Single().Type;
 
         // Map through IType.
         var mappedClassD = genericTypeInstance.GenericContext.Map( classD );
         Assert.Equal( "C<int>.D<string>", mappedClassD.ToString() );
 
         // Map through ITypeSymbol.
-        var mappedClassDSymbol = genericTypeInstance.GenericContext.Map( classD.GetSymbol() );
+        var mappedClassDSymbol = ((SymbolGenericContext) genericTypeInstance.GenericContext).MapToSymbol( classD.GetSymbol() );
         Assert.Equal( "C<int>.D<string>", mappedClassDSymbol.ToString() );
     }
 }

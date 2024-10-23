@@ -16,7 +16,7 @@ internal sealed class ParameterExpression : UserExpression
         this._parameter = parameter;
     }
 
-    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         => SyntaxFactory.IdentifierName( this._parameter.Name );
 
     public override IType Type => this._parameter.Type;

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime.Serialization.Serializers;
@@ -32,7 +33,7 @@ internal class DeserializedAttribute : IAttributeImpl
 
     internal CompilationModel Compilation { get; }
 
-    public ICompilationElement? Translate(
+    public ICompilationElement Translate(
         CompilationModel newCompilation,
         IGenericContext? genericContext = null,
         Type? interfaceType = null )
@@ -48,13 +49,15 @@ internal class DeserializedAttribute : IAttributeImpl
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => [];
 
+    DeclarationImplementationKind IDeclarationImpl.ImplementationKind => DeclarationImplementationKind.DeserializedAttribute;
+
     bool IEquatable<IDeclaration>.Equals( IDeclaration? other ) => throw new NotImplementedException();
 
     [Memo]
     public IDeclaration ContainingDeclaration => this._serializationData.ContainingDeclaration.GetTarget( this.Compilation );
 
     [Memo]
-    private AttributeRef AttributeRef => new DeserializedAttributeRef( this._serializationData, this.GetCompilationContext() );
+    private AttributeRef AttributeRef => new DeserializedAttributeRef( this._serializationData );
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.AttributeRef;
 
@@ -88,13 +91,13 @@ internal class DeserializedAttribute : IAttributeImpl
 
     [Memo]
     public ImmutableArray<TypedConstant> ConstructorArguments
-        => this._serializationData.ConstructorArguments.SelectAsImmutableArray( x => x.Resolve( this.Compilation ) );
+        => this._serializationData.ConstructorArguments.SelectAsImmutableArray( x => x.ToTypedConstant( this.Compilation ) );
 
     [Memo]
     public INamedArgumentList NamedArguments
         => new NamedArgumentList(
             this._serializationData.NamedArguments.SelectAsMutableList(
-                x => new KeyValuePair<string, TypedConstant>( x.Key, x.Value.Resolve( this.Compilation ) ) ) );
+                x => new KeyValuePair<string, TypedConstant>( x.Key, x.Value.ToTypedConstant( this.Compilation ) ) ) );
 
     int IAspectPredecessor.PredecessorDegree => 0;
 
@@ -110,8 +113,6 @@ internal class DeserializedAttribute : IAttributeImpl
     int IAspectPredecessorImpl.TargetDeclarationDepth => 0;
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => ImmutableArray<SyntaxTree>.Empty;
-
-    ISymbol? ISdkDeclaration.Symbol => null;
 
     Location? ISdkDeclaration.DiagnosticLocation => null;
 

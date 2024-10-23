@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,14 +18,14 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         private sealed class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
+            private readonly CompilationModel _compilation;
+
             private readonly ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.Builder _builder =
                 ImmutableDictionaryOfArray<IRef<INamedType>, AttributeRef>.CreateBuilder( RefEqualityComparer<INamedType>.Default );
 
-            private readonly CompilationContext _compilationContext;
-
-            public AttributeDiscoveryVisitor( CompilationContext compilationContext )
+            public AttributeDiscoveryVisitor( CompilationModel compilation )
             {
-                this._compilationContext = compilationContext;
+                this._compilation = compilation;
             }
 
             public override void VisitAttribute( AttributeSyntax node )
@@ -34,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // We always need to resolve the constructor from the semantic model because the attribute name from
                 // the syntax may not correspond to the class name because of `using xx = yy` directives.
 
-                var semanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+                var semanticModel = this._compilation.CompilationContext.SemanticModelProvider.GetSemanticModel( node.SyntaxTree );
                 var attributeConstructor = semanticModel.GetSymbolInfo( node ).Symbol;
 
                 if ( attributeConstructor == null )
@@ -42,14 +41,14 @@ namespace Metalama.Framework.Engine.CodeModel
                     return;
                 }
 
-                var attributeType = this._compilationContext.RefFactory.FromSymbol<INamedType>( attributeConstructor.ContainingType );
+                var attributeType = this._compilation.RefFactory.FromSymbol<INamedType>( attributeConstructor.ContainingType );
 
                 // A local method that adds the attribute.
                 void IndexAttribute( SyntaxNode parentDeclaration, RefTargetKind kind )
                 {
                     void Add( SyntaxNode realDeclaration )
                     {
-                        this._builder.Add( attributeType, new SyntaxAttributeRef( attributeType, node, realDeclaration, this._compilationContext, kind ) );
+                        this._builder.Add( attributeType, new SyntaxAttributeRef( attributeType, node, realDeclaration, this._compilation.RefFactory, kind ) );
                     }
 
                     switch ( parentDeclaration )
@@ -89,16 +88,12 @@ namespace Metalama.Framework.Engine.CodeModel
                     switch ( targetKind )
                     {
                         case SyntaxKind.ModuleKeyword:
-                            this._builder.Add(
-                                attributeType,
-                                new SyntaxAttributeRef( attributeType, node, this._compilationContext.Compilation.SourceModule, this._compilationContext ) );
+                            IndexAttribute( declaration, RefTargetKind.Module );
 
                             break;
 
                         case SyntaxKind.AssemblyKeyword:
-                            this._builder.Add(
-                                attributeType,
-                                new SyntaxAttributeRef( attributeType, node, this._compilationContext.Compilation.Assembly, this._compilationContext ) );
+                            IndexAttribute( declaration, RefTargetKind.Assembly );
 
                             break;
 

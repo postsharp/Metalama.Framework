@@ -3,8 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime.Serialization;
-using Metalama.Framework.Engine.Services;
-using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
 
@@ -54,7 +52,7 @@ public class AttributeSerializationTests : SerializationTestsBase
 
         Assert.Equal( attribute.Type, roundtrip.Type );
         Assert.Equal( attribute.Constructor, roundtrip.Constructor );
-        Assert.Equal( attribute.ConstructorArguments, roundtrip.ConstructorArguments );
+        Assert.Equal( attribute.ConstructorArguments, roundtrip.ConstructorArguments, ( x, y ) => x.SequenceEqual( y ) );
         Assert.Equal( attribute.NamedArguments, roundtrip.NamedArguments );
 
         // Non-ref serialization must fail.
@@ -66,13 +64,13 @@ public class AttributeSerializationTests : SerializationTestsBase
     {
         // This is to test that two models of the same compilation have identical attribute serialization keys.
 
-        var code = """
-                   public class TheAttribute : System.Attribute;
+        const string code = """
+                            public class TheAttribute : System.Attribute;
 
-                   [TheAttribute]
-                   public class C;
+                            [TheAttribute]
+                            public class C;
 
-                   """;
+                            """;
 
         using var testContext = this.CreateTestContext( code );
 

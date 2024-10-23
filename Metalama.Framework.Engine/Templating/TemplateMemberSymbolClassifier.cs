@@ -33,14 +33,14 @@ internal abstract class TemplateMemberSymbolClassifier
         };
 
     public static bool IsTemplateParameter( IParameterSymbol parameter )
-        => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not (MethodKind.LambdaMethod or MethodKind.AnonymousFunction or MethodKind.LocalFunction) }
+        => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not (MethodKind.LambdaMethod or MethodKind.LocalFunction) }
             or IPropertySymbol
             or IEventSymbol;
 
     public bool IsRunTimeTemplateParameter( IParameterSymbol parameter ) => IsTemplateParameter( parameter ) && !this.IsCompileTimeParameter( parameter );
 
     public static bool IsTemplateTypeParameter( ITypeParameterSymbol parameter )
-        => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not (MethodKind.LambdaMethod or MethodKind.AnonymousFunction or MethodKind.LocalFunction) }
+        => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not (MethodKind.LambdaMethod or MethodKind.LocalFunction) }
             or IPropertySymbol
             or IEventSymbol;
 

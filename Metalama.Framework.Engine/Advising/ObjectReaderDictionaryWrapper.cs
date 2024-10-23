@@ -15,7 +15,18 @@ namespace Metalama.Framework.Engine.Advising
             this._inner = inner;
         }
 
-        public object? this[ string key ] => this._inner[key];
+        public object? this[ string key ]
+        {
+            get
+            {
+                if ( !this.TryGetValue( key, out var value ) )
+                {
+                    throw new KeyNotFoundException( $"The tag '{key}' is not defined." );
+                }
+
+                return value;
+            }
+        }
 
         public object Source => this._inner;
 

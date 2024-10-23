@@ -83,4 +83,10 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
     public string DiagnosticSourceDescription => this._primaryInstance.DiagnosticSourceDescription;
 
     ImmutableArray<SyntaxTree> IAspectPredecessorImpl.PredecessorTreeClosure => this._primaryInstance.PredecessorTreeClosure;
+
+    DeclarationOriginKind IDeclarationOrigin.Kind => DeclarationOriginKind.Aspect;
+
+    bool IDeclarationOrigin.IsCompilerGenerated => true;
+
+    IAspectInstance IAspectDeclarationOrigin.AspectInstance => this;
 }

@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -35,8 +35,8 @@ internal sealed class CapturedUserExpression : UserExpression
                    : null,
                _ => null
            } ??
-           ((ICompilationInternal) this._compilation).Factory.GetSpecialType( SpecialType.Object );
+           this._compilation.Factory.GetSpecialType( SpecialType.Object );
 
-    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         => TypedExpressionSyntaxImpl.FromValue( this._expression, syntaxSerializationContext ).Syntax;
 }

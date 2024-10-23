@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,7 +15,7 @@ internal static class SymbolExtensions
     public static AspectLinkerDeclarationFlags GetDeclarationFlags( this ISymbol symbol )
     {
         // TODO: Partials?
-        var declaration = symbol.GetPrimaryDeclaration();
+        var declaration = symbol.GetPrimaryDeclarationSyntax();
 
         switch ( declaration )
         {
@@ -47,7 +47,7 @@ internal static class SymbolExtensions
     {
         if ( symbol is IEventSymbol eventSymbol )
         {
-            var declaration = eventSymbol.GetPrimaryDeclaration();
+            var declaration = eventSymbol.GetPrimaryDeclarationSyntax();
 
             if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
             {
@@ -123,7 +123,7 @@ internal static class SymbolExtensions
                     goto default;
 
                 default:
-                    return SignatureTypeSymbolComparer.Instance.Equals( localMember, baseMember );
+                    return SignatureTypeComparer.Instance.Equals( localMember, baseMember );
             }
         }
     }

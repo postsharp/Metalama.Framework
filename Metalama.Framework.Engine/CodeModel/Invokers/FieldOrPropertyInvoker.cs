@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -80,7 +81,7 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
         => ref RefHelper.Wrap(
             new DelegateUserExpression(
                 context => this.CreatePropertyExpression( AspectReferenceTargetKind.Self, context ),
-                (this.Options & InvokerOptions.NullConditional) != 0 ? this.Member.Type.ToNullableType() : this.Member.Type,
+                (this.Options & InvokerOptions.NullConditional) != 0 ? this.Member.Type.ToNullable() : this.Member.Type,
                 this.IsRef(),
                 this.Member.Writeability != Writeability.None ) );
 
@@ -97,8 +98,8 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
 
     private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
 
-    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext, IType? targetType = null )
     {
-        return this.GetUserExpression().ToTypedExpressionSyntax( syntaxGenerationContext );
+        return this.GetUserExpression().ToTypedExpressionSyntax( syntaxGenerationContext, targetType );
     }
 }

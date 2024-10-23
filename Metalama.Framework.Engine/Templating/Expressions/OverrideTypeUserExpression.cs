@@ -16,12 +16,12 @@ internal sealed class OverrideTypeUserExpression : UserExpression
         this.Type = type;
     }
 
-    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
     {
-        var expression = this._expression.ToExpressionSyntax( syntaxSerializationContext );
+        var expression = this._expression.ToExpressionSyntax( syntaxSerializationContext, targetType );
 
         var expressionWithNewTypeAnnotation = TypeAnnotationMapper.AddExpressionTypeAnnotation( expression, this.Type );
-        
+
         return expressionWithNewTypeAnnotation;
     }
 

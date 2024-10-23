@@ -12,6 +12,8 @@ namespace Metalama.Framework.Code.DeclarationBuilders
 
         new TypeKindConstraint TypeKindConstraint { get; set; }
 
+        new bool AllowsRefStruct { get; set; }
+
         new VarianceKind Variance { get; set; }
 
         /// <summary>

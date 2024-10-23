@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         /// <summary>
         /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
         /// </summary>
-        public bool IsReferenceable { get; }
+        public bool? IsReferenceable { get; }
 
         public ExpressionSyntax Syntax { get; }
 
@@ -69,12 +70,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
-
-            // If IsReferenceable is not specified explicitly, attempt to infer it.
-            // The inference is currently very simple: it's referenceable only of it's just an identifier.
-            // TODO: We could support ReturnsByRef but this information is not on the expression type but on the expression itself,
-            // so it must be sent from upstream.
-            this.IsReferenceable = isReferenceable ?? syntax is IdentifierNameSyntax;
+            this.IsReferenceable = isReferenceable ?? TypeAnnotationMapper.GetExpressionIsReferenceableFromAnnotation( syntax );
 
             // Infer nullability from the expression type if we have it.
             if ( canBeNull == null && expressionType is { IsNullable: not null } )
@@ -108,7 +104,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     return runtimeExpression;
 
                 case IExpression dynamicMember:
-                    return dynamicMember.ToTypedExpressionSyntax( serializationContext );
+                    return dynamicMember.ToTypedExpressionSyntax( serializationContext, null );
 
                 case ExpressionSyntax syntax:
                     return new TypedExpressionSyntaxImpl( syntax, serializationContext.CompilationModel );
@@ -142,7 +138,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 default:
                     if ( array.Length == 0 )
                     {
-                        return Array.Empty<TypedExpressionSyntaxImpl>();
+                        return [];
                     }
 
                     var newArray = new TypedExpressionSyntaxImpl[array.Length];

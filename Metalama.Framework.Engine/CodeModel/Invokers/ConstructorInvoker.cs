@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -116,7 +117,7 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
             this._argumentFactory = argumentFactory;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
@@ -157,7 +158,7 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
             this._initializers = initializers;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext, IType? targetType = null )
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),

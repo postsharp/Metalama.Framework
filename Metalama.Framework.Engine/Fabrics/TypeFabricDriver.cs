@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -57,13 +58,14 @@ internal sealed class TypeFabricDriver : FabricDriver
 
     public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
     {
-        var templateInstance = new TemplateClassInstance( TemplateProvider.FromInstance( this.Fabric ), templateClass );
+        var templateProvider = TemplateProvider.FromInstance( this.Fabric );
+        var templateInstance = new TemplateClassInstance( templateProvider, templateClass );
         var targetType = (INamedType) aspectBuilder.Target;
         var compilation = aspectBuilder.Target.GetCompilationModel();
 
         // Prepare declarative advice.
         var declarativeAdvice = templateClass
-            .GetDeclarativeAdvice( aspectBuilder.ServiceProvider, compilation )
+            .GetDeclarativeAdvice( aspectBuilder.ServiceProvider, compilation, templateProvider, ObjectReader.Empty )
             .ToReadOnlyList();
 
         // Execute the AmendType.
@@ -82,7 +84,7 @@ internal sealed class TypeFabricDriver : FabricDriver
                 foreach ( var advice in declarativeAdvice )
                 {
                     ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
-                        advice.Declaration.AssertNotNull(),
+                        advice.GetDeclaration( compilation ),
                         advice.TemplateClassMember.Key,
                         (IAspectBuilder<IDeclaration>) aspectBuilder );
                 }

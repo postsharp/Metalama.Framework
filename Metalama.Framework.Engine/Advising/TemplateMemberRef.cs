@@ -34,7 +34,11 @@ internal readonly struct TemplateMemberRef
         this._interpretedKind = interpretedKind;
     }
 
-    public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, in ProjectServiceProvider serviceProvider )
+    public TemplateMember<T> GetTemplateMember<T>(
+        CompilationModel compilation,
+        in ProjectServiceProvider serviceProvider,
+        in TemplateProvider templateProvider,
+        IObjectReader tags )
         where T : class, IMemberOrNamedType
     {
         if ( this.IsNull )
@@ -42,7 +46,7 @@ internal readonly struct TemplateMemberRef
             throw new InvalidOperationException();
         }
 
-        // PERF: do not resolve dependencies here but upstream.
+        // TODO PERF: do not resolve dependencies here but upstream.
         var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>();
         var templateAttributeFactory = serviceProvider.GetRequiredService<TemplateAttributeFactory>();
 
@@ -72,12 +76,19 @@ internal readonly struct TemplateMemberRef
                     ThrowingDiagnosticAdder.Instance,
                     out var attribute ) )
         {
-            throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
+            throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDebugString()}'" );
         }
 
         if ( attribute is ITemplateAttribute templateAttribute )
         {
-            return TemplateMemberFactory.Create( typedSymbol, this._templateMember, templateAttribute, this._selectedKind, this._interpretedKind );
+            return TemplateMemberFactory.Create(
+                typedSymbol,
+                this._templateMember,
+                templateProvider,
+                templateAttribute,
+                tags,
+                this._selectedKind,
+                this._interpretedKind );
         }
         else
         {

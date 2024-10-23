@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Code.Types;
 using System;
 
 namespace Metalama.Framework.Code
@@ -60,5 +61,34 @@ namespace Metalama.Framework.Code
         bool Equals( SpecialType specialType );
 
         bool Equals( IType? otherType, TypeComparison typeComparison );
+
+        /// <summary>
+        /// Creates an array type whose element type is the current type.
+        /// </summary>
+        /// <param name="rank">Number of dimensions of the array.</param>
+        IArrayType MakeArrayType( int rank = 1 );
+
+        /// <summary>
+        /// Creates a pointer type pointing at the current type.
+        /// </summary>
+        /// <returns></returns>
+        IPointerType MakePointerType();
+
+        /// <summary>
+        /// Creates a nullable type from the current <see cref="IType"/>. If the current type is already nullable, returns the current type.
+        /// If the type is a value type, returns a <see cref="Nullable{T}"/> of this type.
+        /// </summary>
+        IType ToNullable();
+
+        /// <summary>
+        /// Returns the non-nullable type from the current <see cref="IType"/>. If the current type is a non-nullable reference type, returns the current type.
+        /// If the current type is a <see cref="Nullable{T}"/>, i.e. a nullable value type, returns the underlying type.
+        /// </summary>
+        /// <remarks>
+        /// Note that for non-value type type parameters, this method strips the nullable annotation, if any,
+        /// which means it returns a type whose <see cref="IType.IsNullable"/> property returns <see langword="null" />.
+        /// This is because C# has no way to express non-nullability for type parameters.
+        /// </remarks>
+        IType ToNonNullable();
     }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -20,7 +21,7 @@ internal sealed class PartiallyBoundTemplateMethod
     /// <summary>
     /// Gets the template declaration.
     /// </summary>
-    public IMethod Declaration => this.TemplateMember.Declaration;
+    public IMethod GetDeclaration( CompilationModel compilation ) => this.TemplateMember.GetDeclaration( compilation );
 
     /// <summary>
     /// Gets arguments of the template.
@@ -32,7 +33,12 @@ internal sealed class PartiallyBoundTemplateMethod
     /// </summary>
     public object?[] TypeArguments { get; }
 
-    public PartiallyBoundTemplateMethod( TemplateMember<IMethod> template, object?[] typeArguments, IObjectReader? argumentReader )
+    public TemplateProvider TemplateProvider => this.TemplateMember.TemplateProvider;
+
+    public PartiallyBoundTemplateMethod(
+        TemplateMember<IMethod> template,
+        object?[] typeArguments,
+        IObjectReader? argumentReader )
     {
         this.TemplateMember = template;
         this.TemplateArguments = argumentReader;

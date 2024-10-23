@@ -2,12 +2,14 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Serialization;
+using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Options;
 
 public partial class IncrementalKeyedCollection<TKey, TValue>
 {
-    protected internal readonly struct Item : ICompileTimeSerializable
+    protected internal readonly struct Item : ICompileTimeSerializable, IEquatable<Item>
     {
         public TValue? Value { get; }
 
@@ -38,5 +40,11 @@ public partial class IncrementalKeyedCollection<TKey, TValue>
                     constructorArguments.GetValue<bool>( nameof(IsEnabled) ) );
             }
         }
+
+        public bool Equals( Item other ) => EqualityComparer<TValue?>.Default.Equals( this.Value, other.Value ) && this.IsEnabled == other.IsEnabled;
+
+        public override bool Equals( object? obj ) => obj is Item other && this.Equals( other );
+
+        public override int GetHashCode() => HashCode.Combine( this.Value, this.IsEnabled );
     }
 }

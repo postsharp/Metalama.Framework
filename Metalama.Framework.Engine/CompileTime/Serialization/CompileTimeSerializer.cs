@@ -89,7 +89,6 @@ internal sealed class CompileTimeSerializer
         object? Try( bool shouldReportExceptionCause )
         {
             var serializationReader = new SerializationReader(
-                this._serviceProvider,
                 stream,
                 this,
                 shouldReportExceptionCause,

@@ -11,8 +11,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions;
 
 internal static class ExpressionExtensions
 {
-    public static ExpressionSyntax ToExpressionSyntax( this IUserExpression userExpression, SyntaxSerializationContext context )
-        => userExpression.ToTypedExpressionSyntax( context ).Syntax;
+    public static ExpressionSyntax ToExpressionSyntax( this IUserExpression userExpression, SyntaxSerializationContext context, IType? targetType = null )
+        => userExpression.ToTypedExpressionSyntax( context, targetType ).Syntax;
 
     public static IUserExpression ToUserExpression( this IExpression expression )
         => expression switch
@@ -34,9 +34,12 @@ internal static class ExpressionExtensions
             _ => throw new ArgumentException( $"Expression of type '{expression.GetType()}' could not be converted to IUserExpression." )
         };
 
-    public static TypedExpressionSyntax ToTypedExpressionSyntax( this IExpression expression, ISyntaxGenerationContext syntaxGenerationContext )
-        => expression.ToUserExpression( syntaxGenerationContext ).ToTypedExpressionSyntax( syntaxGenerationContext );
+    public static TypedExpressionSyntax ToTypedExpressionSyntax(
+        this IExpression expression,
+        ISyntaxGenerationContext syntaxGenerationContext,
+        IType? targetType = null )
+        => expression.ToUserExpression( syntaxGenerationContext ).ToTypedExpressionSyntax( syntaxGenerationContext, targetType );
 
-    public static ExpressionSyntax ToExpressionSyntax( this IExpression expression, SyntaxSerializationContext context )
-        => expression.ToTypedExpressionSyntax( context ).Syntax;
+    public static ExpressionSyntax ToExpressionSyntax( this IExpression expression, SyntaxSerializationContext context, IType? targetType = null )
+        => expression.ToTypedExpressionSyntax( context, targetType ).Syntax;
 }

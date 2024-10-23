@@ -1,6 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.GenericContexts;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -13,21 +17,102 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 
 public static class RefExtensions
 {
-    internal static IRefStrategy GetCollectionStrategy( this IRef reference ) => ((ICompilationBoundRefImpl) reference).Strategy;
+    internal static IFullRef<INamedType> ToFullRef( this INamedType declaration ) => (IFullRef<INamedType>) declaration.ToRef();
+
+    internal static IFullRef<IMethod> ToFullRef( this IMethod declaration ) => (IFullRef<IMethod>) declaration.ToRef();
+
+    internal static IFullRef<IField> ToFullRef( this IField declaration ) => (IFullRef<IField>) declaration.ToRef();
+
+    internal static IFullRef<IProperty> ToFullRef( this IProperty declaration ) => (IFullRef<IProperty>) declaration.ToRef();
+
+    internal static IFullRef<IIndexer> ToFullRef( this IIndexer declaration ) => (IFullRef<IIndexer>) declaration.ToRef();
+
+    internal static IFullRef<INamespace> ToFullRef( this INamespace declaration ) => (IFullRef<INamespace>) declaration.ToRef();
+
+    internal static IFullRef<IMember> ToFullRef( this IMember declaration ) => (IFullRef<IMember>) declaration.ToRef();
+
+    internal static IFullRef<IParameter> ToFullRef( this IParameter declaration ) => (IFullRef<IParameter>) declaration.ToRef();
+
+    internal static IFullRef<ITypeParameter> ToFullRef( this ITypeParameter declaration ) => (IFullRef<ITypeParameter>) declaration.ToRef();
+
+    internal static IFullRef<IType> ToFullRef( this IType declaration ) => (IFullRef<IType>) declaration.ToRef();
+
+    internal static IFullRef<IDeclaration> ToFullRef( this IDeclaration declaration ) => (IFullRef<IDeclaration>) declaration.ToRef();
+
+    internal static IFullRef<IConstructor> ToFullRef( this IConstructor declaration ) => (IFullRef<IConstructor>) declaration.ToRef();
+
+    internal static IFullRef<IEvent> ToFullRef( this IEvent declaration ) => (IFullRef<IEvent>) declaration.ToRef();
+
+    internal static IFullRef<INamespaceOrNamedType> ToFullRef( this INamespaceOrNamedType declaration )
+        => (IFullRef<INamespaceOrNamedType>) declaration.ToRef();
+
+    internal static IFullRef<T> ToFullRef<T>( this IDeclaration compilationElement )
+        where T : class, IDeclaration
+        => (IFullRef<T>) compilationElement.ToRef();
+
+    internal static IFullRef AsFullRef( this IRef reference ) => (IFullRef) reference;
+
+    internal static IFullRef<T> AsFullRef<T>( this IRef<T> reference )
+        where T : class, ICompilationElement
+        => (IFullRef<T>) reference;
+
+    /// <summary>
+    /// Converts an <see cref="IDurableRef"/> to a <see cref="IFullRef{T}"/> given a <see cref="CompilationContext"/>.
+    /// </summary>
+    internal static IFullRef<T> ToFullRef<T>( this IRef<T> reference, RefFactory refFactory )
+        where T : class, ICompilationElement
+        => reference as IFullRef<T> ?? (IFullRef<T>) ((IDurableRef) reference).ToFullRef( refFactory );
+
+    internal static IFullRef<T> AsFullRef<T>( this IRef reference )
+        where T : class, ICompilationElement
+        => (IFullRef<T>) reference.As<T>();
+
+    [Obsolete( "This call is redundant." )]
+    internal static IFullRef AsFullRef( this IFullRef reference ) => reference;
+
+    [Obsolete( "This call is redundant." )]
+    internal static IFullRef<T> AsFullRef<T>( this IFullRef<T> reference )
+        where T : class, ICompilationElement
+        => reference;
+
+    internal static bool HasSymbol( this IRef reference ) => reference is ISymbolRef;
 
     internal static IDurableRef<T> ToDurable<T>( this IRef<T> reference )
         where T : class, ICompilationElement
-        => ((IRefImpl<T>) reference).ToDurable();
+        => (IDurableRef<T>) ((IRefImpl) reference).ToDurable();
 
     internal static IRef ToDurable( this IRef reference ) => ((IRefImpl) reference).ToDurable();
 
-    internal static bool IsConvertibleTo( this IRef<IType> type, IRef<IType> otherType, ConversionKind conversionKind = ConversionKind.Default )
-        => type.GetCollectionStrategy().IsConvertibleTo( type, otherType, conversionKind );
+    internal static bool IsConvertibleTo( this IFullRef<IType> type, IType otherType, ConversionKind conversionKind = ConversionKind.Default )
+        => type.ConstructedDeclaration.Is( otherType, conversionKind );
 
-    // ReSharper disable once SuspiciousTypeConversion.Global
-    public static SyntaxTree? GetPrimarySyntaxTree<T>( this T reference, CompilationContext compilationContext )
-        where T : IRef<IDeclaration>
-        => ((IRefImpl) reference).GetClosestContainingSymbol( compilationContext ).GetPrimarySyntaxReference()?.SyntaxTree;
+    internal static bool IsConvertibleTo( this IFullRef<IType> type, IFullRef<IType> otherType, ConversionKind conversionKind = ConversionKind.Default )
+        => type.ConstructedDeclaration.Is( otherType.ConstructedDeclaration, conversionKind );
+
+    [Obsolete( "Use the PrimarySyntaxTree property instead." )]
+    internal static SyntaxTree? GetPrimarySyntaxTree( this IFullRef reference ) => reference.PrimarySyntaxTree;
+
+    public static SyntaxTree? GetPrimarySyntaxTree( this IRef reference ) => ((IFullRef) reference).PrimarySyntaxTree;
+
+    public static SyntaxTree? GetPrimarySourceSyntaxTree( this IRef reference )
+        => ((IFullRef) reference).GetClosestContainingSymbol().GetPrimarySyntaxReference()?.SyntaxTree;
+
+    internal static SyntaxTree? GetPrimarySourceSyntaxTree( this IFullRef reference )
+    {
+        var symbol = reference.GetClosestContainingSymbol();
+
+        while ( symbol.DeclaringSyntaxReferences.IsDefaultOrEmpty )
+        {
+            symbol = symbol.ContainingSymbol;
+
+            if ( symbol == null || symbol.Kind == SymbolKind.Namespace )
+            {
+                return null;
+            }
+        }
+
+        return symbol.GetPrimarySyntaxReference()?.SyntaxTree;
+    }
 
     internal static Type[] GetPossibleDeclarationInterfaceTypes( this ISymbol symbol, CompilationContext compilationContext, RefTargetKind refTargetKind )
         => symbol.GetDeclarationKind( compilationContext ).GetPossibleDeclarationInterfaceTypes( refTargetKind );
@@ -57,7 +142,7 @@ public static class RefExtensions
                 DeclarationKind.Type => [typeof(IType)],
                 DeclarationKind.Compilation => [typeof(ICompilation)],
                 DeclarationKind.NamedType => [typeof(INamedType)],
-                DeclarationKind.Method => [typeof(IMethod)],
+                DeclarationKind.Method or DeclarationKind.Operator or DeclarationKind.Finalizer => [typeof(IMethod)],
                 DeclarationKind.Property => [typeof(IProperty), typeof(IField)],
                 DeclarationKind.Indexer => [typeof(IIndexer)],
                 DeclarationKind.Field => [typeof(IField), typeof(IProperty)],
@@ -67,8 +152,6 @@ public static class RefExtensions
                 DeclarationKind.Attribute => [typeof(IAttribute)],
                 DeclarationKind.ManagedResource => [typeof(IManagedResource)],
                 DeclarationKind.Constructor => [typeof(IConstructor)],
-                DeclarationKind.Finalizer => [typeof(IMethod)],
-                DeclarationKind.Operator => [typeof(IMethod)],
                 DeclarationKind.AssemblyReference => [typeof(IAssembly)],
                 DeclarationKind.Namespace => [typeof(INamespace)],
                 _ => throw new ArgumentOutOfRangeException( nameof(declarationKind), declarationKind, null )
@@ -77,21 +160,18 @@ public static class RefExtensions
             _ => throw new ArgumentOutOfRangeException( nameof(refTargetKind), refTargetKind, null )
         };
 
-    internal static IRef<IDeclaration> ToRef( this ISymbol symbol, CompilationContext compilationContext )
-        => compilationContext.RefFactory.FromDeclarationSymbol( symbol );
+    internal static ISymbolRef<IDeclaration> ToRef( this ISymbol symbol, RefFactory refFactory ) => refFactory.FromDeclarationSymbol( symbol );
 
-    internal static IRef<INamedType> ToRef( this INamedTypeSymbol symbol, CompilationContext compilationContext )
-        => compilationContext.RefFactory.FromSymbol<INamedType>( symbol );
+    internal static ISymbolRef<INamedType> ToRef( this INamedTypeSymbol symbol, RefFactory refFactory ) => refFactory.FromSymbol<INamedType>( symbol );
 
-    internal static IRef<INamespace> ToRef( this INamespaceSymbol symbol, CompilationContext compilationContext )
-        => compilationContext.RefFactory.FromSymbol<INamespace>( symbol );
+    internal static ISymbolRef<INamespace> ToRef( this INamespaceSymbol symbol, RefFactory refFactory ) => refFactory.FromSymbol<INamespace>( symbol );
 
-    internal static IRef<IType> ToRef( this ITypeSymbol symbol, CompilationContext compilationContext )
+    internal static ISymbolRef<IType> ToRef( this ITypeSymbol symbol, RefFactory refFactory, GenericContext? genericContext = null )
         => symbol.Kind switch
         {
-            SymbolKind.TypeParameter => compilationContext.RefFactory.FromSymbol<ITypeParameter>( symbol ),
-            SymbolKind.NamedType => compilationContext.RefFactory.FromSymbol<INamedType>( symbol ),
-            _ => compilationContext.RefFactory.FromSymbol<IType>( symbol )
+            SymbolKind.TypeParameter => refFactory.FromSymbol<ITypeParameter>( symbol, genericContext ),
+            SymbolKind.NamedType => refFactory.FromSymbol<INamedType>( symbol, genericContext ),
+            _ => refFactory.FromSymbol<IType>( symbol, genericContext )
         };
 
     internal static IEqualityComparer<ISymbol> GetSymbolComparer(
@@ -112,11 +192,34 @@ public static class RefExtensions
             _ => throw new ArgumentOutOfRangeException()
         };
 
-    internal static bool IsDefinition( this IRef reference ) => ((ICompilationBoundRefImpl) reference).IsDefinition;
+    public static ISymbol? GetOriginalSymbol( this IRef reference )
+        => reference switch
+        {
+            ISymbolRef symbolRef => symbolRef.Symbol,
+            IIntroducedRef { ReplacedDeclaration: { } replacedDeclaration } => replacedDeclaration.GetOriginalSymbol(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
-    internal static IRef<T> GetDefinition<T>( this IRef<T> reference )
-        where T : class, IMemberOrNamedType
-        => (IRef<T>) ((ICompilationBoundRefImpl) reference).Definition;
+    public static ISymbol? GetOriginalSymbol( this IDeclaration declaration )
+        => declaration switch
+        {
+            SymbolBasedDeclaration symbolBased => symbolBased.Symbol,
+            _ => declaration.ToRef().GetOriginalSymbol()
+        };
 
-    internal static IRef GetDefinition( this IRef reference ) => ((ICompilationBoundRefImpl) reference).Definition;
+    internal static RefComparison ToRefComparison( this TypeComparison typeComparison )
+        => typeComparison switch
+        {
+            TypeComparison.Default => RefComparison.Default,
+            TypeComparison.IncludeNullability => RefComparison.IncludeNullability,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    
+    internal static TypeComparison ToTypeComparison( this RefComparison typeComparison )
+        => typeComparison switch
+        {
+            RefComparison.Default => TypeComparison.Default,
+            RefComparison.IncludeNullability => TypeComparison.IncludeNullability,
+            _ => throw new ArgumentOutOfRangeException()
+        };
 }

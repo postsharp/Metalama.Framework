@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -20,61 +21,63 @@ namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal sealed class OverrideConstructorTransformation : OverrideMemberTransformation
 {
-    private new IConstructor OverriddenDeclaration => (IConstructor) base.OverriddenDeclaration;
+    private readonly IFullRef<IConstructor> _overriddenDeclaration;
 
     private BoundTemplateMethod Template { get; }
 
     public OverrideConstructorTransformation(
-        Advice advice,
-        IConstructor overriddenDeclaration,
-        BoundTemplateMethod template,
-        IObjectReader tags )
-        : base( advice, overriddenDeclaration, tags )
+        AspectLayerInstance aspectLayerInstance,
+        IFullRef<IConstructor> overriddenDeclaration,
+        BoundTemplateMethod template )
+        : base( aspectLayerInstance, overriddenDeclaration )
     {
+        this._overriddenDeclaration = overriddenDeclaration;
         this.Template = template;
     }
 
+    public override IFullRef<IMember> OverriddenDeclaration => this._overriddenDeclaration;
+
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var proceedExpression = this.CreateProceedExpression( context );
+        var overriddenDeclaration = this._overriddenDeclaration.GetTarget( this.InitialCompilation );
+
+        var proceedExpression = this.CreateProceedExpression( context, overriddenDeclaration );
 
         var metaApi = MetaApi.ForConstructor(
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             new MetaApiProperties(
-                this.ParentAdvice.SourceCompilation,
+                this.InitialCompilation,
                 context.DiagnosticSink,
-                this.Template.TemplateMember.Cast(),
-                this.Tags,
-                this.ParentAdvice.AspectLayerId,
+                this.Template.TemplateMember.AsMemberOrNamedType(),
+                this.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.AspectInstance,
+                this.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
         var expansionContext = new TemplateExpansionContext(
             context,
-            this.ParentAdvice.TemplateInstance.TemplateProvider,
             metaApi,
-            this.OverriddenDeclaration,
+            overriddenDeclaration,
             this.Template,
             _ => proceedExpression,
-            this.ParentAdvice.AspectLayerId );
+            this.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.Template.TemplateMember.Declaration );
+        var templateDriver = this.Template.TemplateMember.Driver;
 
         if ( !templateDriver.TryExpandDeclaration( expansionContext, this.Template.TemplateArguments, out var newMethodBody ) )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMember>();
+            return [];
         }
 
         var modifiers =
-            this.OverriddenDeclaration
+            overriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
                 .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
         var syntax =
-            this.OverriddenDeclaration.IsStatic
+            overriddenDeclaration.IsStatic
                 ? (MemberDeclarationSyntax) MethodDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList( modifiers ),
@@ -82,9 +85,9 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(
-                            this.OverriddenDeclaration.DeclaringType,
-                            this.ParentAdvice.AspectLayerId,
-                            this.OverriddenDeclaration ) ),
+                            overriddenDeclaration.DeclaringType,
+                            this.AspectLayerId,
+                            overriddenDeclaration ) ),
                     null,
                     ParameterList(),
                     List<TypeParameterConstraintClauseSyntax>(),
@@ -93,38 +96,38 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
                 : ConstructorDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList( Token( TriviaList(), SyntaxKind.PrivateKeyword, TriviaList( ElasticSpace ) ) ),
-                    Identifier( this.OverriddenDeclaration.DeclaringType.Name ),
-                    this.GetParameterList( context ),
+                    Identifier( overriddenDeclaration.DeclaringType.Name ),
+                    this.GetParameterList( context, overriddenDeclaration ),
                     ConstructorInitializer(
                         SyntaxKind.ThisConstructorInitializer,
-                        ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsArray( x => Argument( IdentifierName( x.Name ) ) ) ) ) ),
+                        ArgumentList( SeparatedList( overriddenDeclaration.Parameters.SelectAsArray( x => Argument( IdentifierName( x.Name ) ) ) ) ) ),
                     newMethodBody,
                     null );
 
-        return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
+        return [new InjectedMember( this, syntax, this.AspectLayerId, InjectedMemberSemantic.Override, overriddenDeclaration.ToFullRef() )];
     }
 
-    private ParameterListSyntax GetParameterList( MemberInjectionContext context )
+    private ParameterListSyntax GetParameterList( MemberInjectionContext context, IConstructor overriddenDeclaration )
     {
-        var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, true );
+        var originalParameterList = context.SyntaxGenerator.ParameterList( overriddenDeclaration, context.FinalCompilation, true );
 
         var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType(
-            this.ParentAdvice.AspectInstance,
-            this.OverriddenDeclaration,
+            this.AspectInstance,
+            overriddenDeclaration,
             context.SyntaxGenerationContext );
 
         return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) );
     }
 
-    private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )
+    private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context, IConstructor overriddenDeclaration )
         => new(
-            this.OverriddenDeclaration.IsStatic
-                ? context.AspectReferenceSyntaxProvider.GetStaticConstructorReference( this.ParentAdvice.AspectLayerId )
+            overriddenDeclaration.IsStatic
+                ? context.AspectReferenceSyntaxProvider.GetStaticConstructorReference( this.AspectLayerId )
                 : context.AspectReferenceSyntaxProvider.GetConstructorReference(
-                    this.ParentAdvice.AspectLayerId,
-                    this.OverriddenDeclaration,
+                    this.AspectLayerId,
+                    overriddenDeclaration,
                     context.SyntaxGenerator ),
-            this.OverriddenDeclaration.GetCompilationModel().Cache.SystemVoidType );
+            context.FinalCompilation.Cache.SystemVoidType );
 
     public override TransformationObservability Observability => TransformationObservability.None;
 }

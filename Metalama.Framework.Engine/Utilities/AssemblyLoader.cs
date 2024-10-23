@@ -25,8 +25,19 @@ internal sealed class AssemblyLoader : IDisposable
         // (or ALCs don't exist), which means loading everything using Assembly.LoadFile works (though it's also a memory leak).
         // But in RoslynCodeAnalysisService, compiler assemblies are loaded into a separate ALC, so we have to do something different.
 
-        var alcType = Type.GetType( "System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader" );
-        var currentAlc = alcType?.GetMethod( "GetLoadContext" )!.Invoke( null, new object[] { typeof(AssemblyLoader).Assembly } );
+        Type? alcType;
+
+        try
+        {
+            alcType = Type.GetType( "System.Runtime.Loader.AssemblyLoadContext, System.Runtime.Loader" );
+        }
+        catch ( NullReferenceException )
+        {
+            // .Net Framework sometimes throws NullReferenceException when trying to resolve this type, instead of returning null.
+            alcType = null;
+        }
+
+        var currentAlc = alcType?.GetMethod( "GetLoadContext" )!.Invoke( null, [typeof(AssemblyLoader).Assembly] );
 
         if ( currentAlc != null )
         {
@@ -105,14 +116,14 @@ internal sealed class AssemblyLoader : IDisposable
         var parentContextField = type.DefineField( "_parentContext", alcType, FieldAttributes.InitOnly );
         var resolveAssemblyField = type.DefineField( "_resolveAssembly", resolveAssemblyType, FieldAttributes.InitOnly );
 
-        var ctor = type.DefineConstructor( MethodAttributes.Public, CallingConventions.Standard, new[] { alcType, resolveAssemblyType, typeof(string) } );
+        var ctor = type.DefineConstructor( MethodAttributes.Public, CallingConventions.Standard, [alcType, resolveAssemblyType, typeof(string)] );
 
         var ilg = ctor.GetILGenerator();
 
         ilg.Emit( Ldarg_0 );
         ilg.Emit( Ldarg_3 );
         ilg.Emit( Ldc_I4_1 );
-        ilg.Emit( Call, alcType.GetConstructor( new[] { typeof(string), typeof(bool) } )! );
+        ilg.Emit( Call, alcType.GetConstructor( [typeof(string), typeof(bool)] )! );
 
         ilg.Emit( Ldarg_0 );
         ilg.Emit( Ldarg_1 );
@@ -129,7 +140,7 @@ internal sealed class AssemblyLoader : IDisposable
             MethodAttributes.Family | MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.Final,
             CallingConventions.HasThis,
             typeof(Assembly),
-            new[] { typeof(AssemblyName) } );
+            [typeof(AssemblyName)] );
 
         ilg = loadMethod.GetILGenerator();
 

@@ -3,7 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Abstractions;
+using Metalama.Framework.Engine.CodeModel.Helpers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -203,5 +204,11 @@ namespace Metalama.Framework.Engine.Aspects
             => this.Predecessors.SelectMany( p => (p.Instance as IAspectPredecessorImpl)?.PredecessorTreeClosure ?? ImmutableArray<SyntaxTree>.Empty )
                 .Distinct()
                 .ToImmutableArray();
+
+        DeclarationOriginKind IDeclarationOrigin.Kind => DeclarationOriginKind.Aspect;
+
+        bool IDeclarationOrigin.IsCompilerGenerated => true;
+
+        IAspectInstance IAspectDeclarationOrigin.AspectInstance => this;
     }
 }

@@ -6,13 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Helpers;
+using Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -24,52 +21,53 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
         TemplateMember<IField>? fieldTemplate,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
-        Action<IFieldBuilder>? buildAction,
-        IObjectReader tags )
-        : base( parameters, explicitName, fieldTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null )
+        Action<IFieldBuilder>? buildAction )
+        : base( parameters, explicitName, fieldTemplate, scope, overrideStrategy, buildAction, explicitlyImplementedInterfaceType: null ) { }
+
+    protected override FieldBuilder CreateBuilder( in AdviceImplementationContext context )
     {
-        this.Builder = new FieldBuilder( this, parameters.TargetDeclaration, this.MemberName, tags );
-        this.Builder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
+        return new FieldBuilder( this.AspectLayerInstance, this.TargetDeclaration, this.MemberName );
     }
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
+    protected override void InitializeBuilderCore(
+        FieldBuilder builder,
+        TemplateAttributeProperties? templateAttributeProperties,
+        in AdviceImplementationContext context )
     {
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+        base.InitializeBuilderCore( builder, templateAttributeProperties, in context );
 
-        this.Builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
+        var templateDeclaration = this.Template?.GetDeclaration( this.SourceCompilation );
+        builder.IsRequired = templateAttributeProperties?.IsRequired ?? templateDeclaration?.IsRequired ?? false;
 
         if ( this.Template != null )
         {
-            this.Builder.Type = this.Template.Declaration.Type;
-            this.Builder.Writeability = this.Template.Declaration.Writeability;
+            builder.Type = templateDeclaration.AssertNotNull().Type;
+            builder.Writeability = templateDeclaration.Writeability;
+
+            // The InitializerExpression of template cannot be copied because it's an initializer template.
+            // However, we need to store the template because we will need it when the field is overwritten.
+            builder.InitializerTemplate = this.Template.GetInitializerTemplate();
         }
         else
         {
-            this.Builder.Type = this.SourceCompilation.GetCompilationModel().Cache.SystemObjectType;
-            this.Builder.Writeability = Writeability.All;
+            builder.Type = this.SourceCompilation.Cache.SystemObjectType;
+            builder.Writeability = Writeability.All;
         }
-    }
 
-    protected override void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
-    {
-        if ( targetDeclaration.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetDeclaration.IsReadOnly )
+        var targetType = this.TargetDeclaration;
+
+        if ( targetType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetType.IsReadOnly )
         {
-            this.Builder.Writeability = Writeability.ConstructorOnly;
+            builder.Writeability = Writeability.ConstructorOnly;
         }
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceField;
 
-    protected override IntroductionAdviceResult<IField> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override IntroductionAdviceResult<IField> ImplementCore( FieldBuilder builder, in AdviceImplementationContext context )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
-        var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
+        var targetDeclaration = this.TargetDeclaration.ForCompilation( context.MutableCompilation );
+        var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( builder.Name );
 
         if ( existingDeclaration != null )
         {
@@ -79,17 +77,17 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind),
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration, existingDeclaration.DeclarationKind),
                             this ) );
             }
 
-            if ( existingDeclaration.IsStatic != this.Builder.IsStatic )
+            if ( existingDeclaration.IsStatic != builder.IsStatic )
             {
                 return
                     this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                            (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                              existingDeclaration.DeclaringType),
                             this ) );
             }
@@ -102,7 +100,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
                         this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                (this.AspectInstance.AspectClass.ShortName, builder, targetDeclaration,
                                  existingDeclaration.DeclaringType),
                                 this ) );
 
@@ -112,20 +110,21 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
 
                 case OverrideStrategy.New:
                     // If the existing declaration is in the current type, fail, otherwise, declare a new method and override.
-                    if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                    if ( targetDeclaration.Equals( existingDeclaration.DeclaringType ) )
                     {
                         return this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceNewMemberWhenItAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.AspectInstance.AspectClass.ShortName, this.Builder, existingDeclaration.DeclaringType),
+                                (this.AspectInstance.AspectClass.ShortName, builder, existingDeclaration.DeclaringType),
                                 this ) );
                     }
                     else
                     {
-                        this.Builder.HasNewKeyword = this.Builder.IsNew = true;
-                        addTransformation( this.Builder.ToTransformation() );
+                        builder.HasNewKeyword = builder.IsNew = true;
+                        builder.Freeze();
+                        context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
-                        return this.CreateSuccessResult( AdviceOutcome.New, this.Builder );
+                        return this.CreateSuccessResult( AdviceOutcome.New, builder );
                     }
 
                 case OverrideStrategy.Override:
@@ -137,14 +136,15 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
         }
         else
         {
-            addTransformation( this.Builder.ToTransformation() );
+            builder.Freeze();
+            context.AddTransformation( builder.CreateTransformation( this.Template ) );
 
             OverrideHelper.AddTransformationsForStructField(
-                targetDeclaration.ForCompilation( compilation ),
-                this,
-                addTransformation /* We add an initializer if it does not have one */ );
+                targetDeclaration,
+                this.AspectLayerInstance,
+                context.AddTransformation /* We add an initializer if it does not have one */ );
 
-            return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+            return this.CreateSuccessResult( AdviceOutcome.Default, builder );
         }
     }
 }

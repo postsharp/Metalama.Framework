@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.SerializableIds;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -70,8 +71,8 @@ internal sealed class SymbolClassifier : ISymbolClassifier
     private static readonly ImmutableDictionary<(string Type, string Member), (string Namespace, TemplatingScope? Scope)> _wellKnownMembers =
         new (Type Type, string[] MemberNames, TemplatingScope? Scope)[]
             {
-                (typeof(DateTime), new[] { nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow) }, TemplatingScope.RunTimeOnly),
-                (typeof(DateTimeOffset), new[] { nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow) }, TemplatingScope.RunTimeOnly)
+                (typeof(DateTime), [nameof(DateTime.Now), nameof(DateTime.Today), nameof(DateTime.UtcNow)], TemplatingScope.RunTimeOnly),
+                (typeof(DateTimeOffset), [nameof(DateTimeOffset.Now), nameof(DateTimeOffset.UtcNow)], TemplatingScope.RunTimeOnly)
             }.SelectMany( t => t.MemberNames.SelectAsReadOnlyList( memberName => (t.Type, MemberName: memberName, t.Scope) ) )
             .ToImmutableDictionary(
                 t => (t.Type.Name.AssertNotNull(), t.MemberName),

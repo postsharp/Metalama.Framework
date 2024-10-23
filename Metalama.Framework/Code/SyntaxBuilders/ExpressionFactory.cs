@@ -129,8 +129,12 @@ public static class ExpressionFactory
     /// Parses a string containing a C# expression and returns an <see cref="IExpression"/>. The <see cref="IExpression.Value"/> property
     /// allows to use this expression in a template. An alternative to this method is the <see cref="ExpressionBuilder"/> class.
     /// </summary>
+    /// <param name="code">A valid C# expression.</param>
+    /// <param name="type">The resulting type of the expression, if known. This value allows to generate simpler code.</param>
+    /// <param name="isReferenceable">Indicates whether the expression can be used in <c>ref</c> or <c>out</c> situations.</param>
     /// <seealso href="@templates"/>
-    public static IExpression Parse( string code ) => SyntaxBuilder.CurrentImplementation.ParseExpression( code );
+    public static IExpression Parse( string code, IType? type = null, bool? isReferenceable = null )
+        => SyntaxBuilder.CurrentImplementation.ParseExpression( code, type, isReferenceable );
 
     /// <summary>
     /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
@@ -232,5 +236,5 @@ public static class ExpressionFactory
     /// be used when the of the nullability given expression is wrongly infered.
     /// </summary>
     public static IExpression WithNullability( this IExpression expression, bool isNullable )
-        => expression.WithType( isNullable ? expression.Type.ToNullableType() : expression.Type.ToNonNullableType() );
+        => expression.WithType( isNullable ? expression.Type.ToNullable() : expression.Type.ToNonNullable() );
 }

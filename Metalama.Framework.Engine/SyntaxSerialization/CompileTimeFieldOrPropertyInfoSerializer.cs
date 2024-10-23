@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Source;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
@@ -9,7 +10,6 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
@@ -36,5 +36,5 @@ internal sealed class CompileTimeFieldOrPropertyInfoSerializer : ObjectSerialize
 
     public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-    protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
+    protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(SourceMethodBase) );
 }

@@ -10,5 +10,5 @@ public static class MemberExtensions
     /// <summary>
     /// Determines whether a member can be overridden, ie. whether it is <c>virtual</c>, <c>abstract</c>, or <c>override</c> but not <c>sealed</c>.
     /// </summary>
-    public static bool IsOverridable( this IMember member ) => member.IsVirtual || member.IsAbstract || member is { IsOverride: true, IsSealed: false };
+    public static bool IsOverridable( this IMember member ) => (member.IsVirtual || member.IsAbstract || member.IsOverride) && !member.IsSealed;
 }

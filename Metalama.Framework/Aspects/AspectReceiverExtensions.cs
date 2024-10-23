@@ -46,13 +46,13 @@ public static class AspectReceiverExtensions
     /// Selects an <see cref="INamedType"/> in the current compilation or in a reference assembly given its reflection <see cref="Type"/>.
     /// </summary>
     public static IAspectReceiver<INamedType> SelectReflectionType( this IAspectReceiver<ICompilation> receiver, Type type )
-        => receiver.Select( c => (INamedType) ((ICompilationInternal) c).Factory.GetTypeByReflectionType( type ) );
+        => receiver.Select( c => (INamedType) c.Factory.GetTypeByReflectionType( type ) );
 
     /// <summary>
     /// Selects several <see cref="INamedType"/> in the current compilation or in a reference assembly given their reflection <see cref="Type"/>.
     /// </summary>
     public static IAspectReceiver<INamedType> SelectReflectionTypes( this IAspectReceiver<ICompilation> receiver, IEnumerable<Type> types )
-        => receiver.SelectMany( c => types.Select( t => (INamedType) ((ICompilationInternal) c).Factory.GetTypeByReflectionType( t ) ) );
+        => receiver.SelectMany( c => types.Select( t => (INamedType) c.Factory.GetTypeByReflectionType( t ) ) );
 
     /// <summary>
     /// Selects several <see cref="INamedType"/> in the current compilation or in a reference assembly given their reflection <see cref="Type"/>.

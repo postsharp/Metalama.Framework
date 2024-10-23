@@ -301,14 +301,14 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
         IProjectOptions options,
         Compilation compilation,
         TestableCancellationToken cancellationToken,
-        [NotNullWhen( true )] out AspectPipelineResultAndState? compilationResult )
+        [NotNullWhen( true )] out DesignTimeAspectPipelineResultAndState? compilationResult )
         => this.TryExecute( options, compilation, cancellationToken, out compilationResult, out _ );
 
     internal bool TryExecute(
         IProjectOptions options,
         Compilation compilation,
         TestableCancellationToken cancellationToken,
-        [NotNullWhen( true )] out AspectPipelineResultAndState? compilationResult,
+        [NotNullWhen( true )] out DesignTimeAspectPipelineResultAndState? compilationResult,
         out ImmutableArray<Diagnostic> diagnostics )
     {
         var result = this._taskRunner.RunSynchronously(
@@ -331,7 +331,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
         }
     }
 
-    private Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
+    private Task<FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>> ExecuteAsync(
         IProjectOptions projectOptions,
         Compilation compilation,
         AsyncExecutionContext executionContext,
@@ -342,7 +342,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
 
         if ( designTimePipeline == null )
         {
-            return Task.FromResult( FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( ImmutableArray<Diagnostic>.Empty ) );
+            return Task.FromResult( FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>.Failed( ImmutableArray<Diagnostic>.Empty ) );
         }
 
         // Call the execution method that assumes that the pipeline exists or waits for it.
@@ -352,13 +352,13 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
     public virtual bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )
         => this._projectClassifier.TryGetMetalamaVersion( compilation, out version );
 
-    internal Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
+    internal Task<FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         AsyncExecutionContext executionContext,
         TestableCancellationToken cancellationToken = default )
         => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
 
-    private async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
+    private async Task<FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         bool autoResumePipeline,
         AsyncExecutionContext executionContext,
@@ -368,7 +368,7 @@ public class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfi
 
         if ( pipeline == null )
         {
-            return FallibleResultWithDiagnostics<AspectPipelineResultAndState>.Failed( "Cannot get the pipeline." );
+            return FallibleResultWithDiagnostics<DesignTimeAspectPipelineResultAndState>.Failed( "Cannot get the pipeline." );
         }
 
         return await pipeline.ExecuteAsync( compilation, autoResumePipeline, executionContext, cancellationToken );

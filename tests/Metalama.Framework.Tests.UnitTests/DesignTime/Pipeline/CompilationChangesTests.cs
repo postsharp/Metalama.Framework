@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-
 using static Metalama.Testing.UnitTesting.TestCompilationFactory;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
@@ -61,8 +60,6 @@ public sealed partial class CompilationChangesTests
         using var testContext = this.CreateTestContext();
         var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
-        var emptyCode = new Dictionary<string, string>();
-
         var code1 = new Dictionary<string, string> { { "code.cs", "class C1;" } };
 
         var dependencyCompilation1 = CreateCSharpCompilation( code1, name: "Dependency" );
@@ -98,8 +95,6 @@ public sealed partial class CompilationChangesTests
     {
         using var testContext = this.CreateTestContext();
         var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
-
-        var emptyCode = new Dictionary<string, string>();
 
         var code1 = new Dictionary<string, string> { { "code.cs", "class C1;" } };
 
@@ -198,8 +193,6 @@ public sealed partial class CompilationChangesTests
         using var testContext = this.CreateTestContext();
         var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
-        var emptyCode = new Dictionary<string, string>();
-
         var code1 = new Dictionary<string, string> { { "code.cs", "class C1;" } };
 
         var dependencyCompilation1 = CreateCSharpCompilation( code1, name: "Dependency" );
@@ -237,8 +230,6 @@ public sealed partial class CompilationChangesTests
     {
         using var testContext = this.CreateTestContext();
         var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
-
-        var emptyCode = new Dictionary<string, string>();
 
         var code1 = new Dictionary<string, string> { { "code.cs", "class C1;" } };
 

@@ -55,25 +55,24 @@ internal sealed partial class LinkerRewritingDriver
                         Identifier( TriviaList( ElasticSpace ), primaryConstructorProperty.Name, default ),
                         AccessorList(
                             List(
-                                new[]
-                                {
-                                    AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        List<AttributeListSyntax>(),
-                                        TokenList(),
-                                        Token( SyntaxKind.GetKeyword ),
-                                        null,
-                                        null,
-                                        Token( SyntaxKind.SemicolonToken ) ),
-                                    AccessorDeclaration(
-                                        SyntaxKind.InitAccessorDeclaration,
-                                        List<AttributeListSyntax>(),
-                                        TokenList(),
-                                        Token( SyntaxKind.InitKeyword ),
-                                        null,
-                                        null,
-                                        Token( SyntaxKind.SemicolonToken ) )
-                                } ) ),
+                            [
+                                AccessorDeclaration(
+                                    SyntaxKind.GetAccessorDeclaration,
+                                    List<AttributeListSyntax>(),
+                                    TokenList(),
+                                    Token( SyntaxKind.GetKeyword ),
+                                    null,
+                                    null,
+                                    Token( SyntaxKind.SemicolonToken ) ),
+                                AccessorDeclaration(
+                                    SyntaxKind.InitAccessorDeclaration,
+                                    List<AttributeListSyntax>(),
+                                    TokenList(),
+                                    Token( SyntaxKind.InitKeyword ),
+                                    null,
+                                    null,
+                                    Token( SyntaxKind.SemicolonToken ) )
+                            ] ) ),
                         null,
                         null,
                         default ) );
@@ -188,7 +187,7 @@ internal sealed partial class LinkerRewritingDriver
 
             if ( isAuxiliaryForPrimaryConstructor )
             {
-                List<StatementSyntax> primaryConstructorFieldAssignments = new();
+                List<StatementSyntax> primaryConstructorFieldAssignments = [];
 
                 foreach ( var primaryConstructorField in this.LateTransformationRegistry.GetPrimaryConstructorFields( symbol.ContainingType ) )
                 {
@@ -219,7 +218,7 @@ internal sealed partial class LinkerRewritingDriver
                     switch ( member )
                     {
                         case IFieldSymbol field:
-                            var fieldDeclaration = (VariableDeclaratorSyntax) field.GetPrimaryDeclaration().AssertNotNull();
+                            var fieldDeclaration = (VariableDeclaratorSyntax) field.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             name = field.Name;
                             expression = fieldDeclaration.Initializer.AssertNotNull().Value;
@@ -227,7 +226,7 @@ internal sealed partial class LinkerRewritingDriver
                             break;
 
                         case IEventSymbol eventField:
-                            var eventFieldDeclaration = (VariableDeclaratorSyntax) eventField.GetPrimaryDeclaration().AssertNotNull();
+                            var eventFieldDeclaration = (VariableDeclaratorSyntax) eventField.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             name = eventField.Name;
                             expression = eventFieldDeclaration.Initializer.AssertNotNull().Value;
@@ -235,7 +234,7 @@ internal sealed partial class LinkerRewritingDriver
                             break;
 
                         case IPropertySymbol property:
-                            var primaryDeclaration = property.GetPrimaryDeclaration().AssertNotNull();
+                            var primaryDeclaration = property.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             switch ( primaryDeclaration )
                             {

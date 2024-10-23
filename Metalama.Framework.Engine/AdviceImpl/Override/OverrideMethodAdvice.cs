@@ -1,13 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
+using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
@@ -15,38 +11,36 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
 {
     private readonly BoundTemplateMethod _boundTemplate;
 
-    public OverrideMethodAdvice( AdviceConstructorParameters<IMethod> parameters, BoundTemplateMethod boundTemplate, IObjectReader tags )
-        : base( parameters, tags )
+    public OverrideMethodAdvice( AdviceConstructorParameters<IMethod> parameters, BoundTemplateMethod boundTemplate )
+        : base( parameters )
     {
         this._boundTemplate = boundTemplate;
     }
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideMethod;
 
-    protected override OverrideMemberAdviceResult<IMethod> Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation )
+    protected override OverrideMemberAdviceResult<IMethod> Implement( in AdviceImplementationContext context )
     {
         // TODO: order should be self if the target is introduced on the same layer.
-        var targetMethod = this.TargetDeclaration.GetTarget( compilation );
+        var targetMethod = this.TargetDeclaration;
 
         switch ( targetMethod.MethodKind )
         {
             case MethodKind.Finalizer:
-                addTransformation(
-                    new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideFinalizerTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate ) );
 
                 break;
 
             case MethodKind.Operator:
-                addTransformation(
-                    new OverrideOperatorTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideOperatorTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate ) );
 
                 break;
 
             default:
-                addTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+                context.AddTransformation(
+                    new OverrideMethodTransformation( this.AspectLayerInstance, this.TargetDeclaration.ToFullRef(), this._boundTemplate ) );
 
                 break;
         }
