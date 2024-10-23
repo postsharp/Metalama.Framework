@@ -26,9 +26,11 @@ class TargetClass
 
         var (b, _) = (1, 2);
 
-        (var c, _) = (3, 4);
+        (var c, var _, _) = (3, 4, 5);
 
         int.TryParse("1", out var d);
+        int.TryParse("2", out var _);
+        int.TryParse("3", out _);
 
         _ = from e in new int[0]
             let f = e
@@ -41,6 +43,13 @@ class TargetClass
     l:;
 
         foreach (var m in new int[] { })
+        {
+        }
+
+        try
+        {
+        }
+        catch (Exception)
         {
         }
 
