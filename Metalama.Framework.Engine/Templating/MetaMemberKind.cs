@@ -56,6 +56,8 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         Return,
 
-        DefineLocalVariable
+        DefineLocalVariable,
+
+        RunTime
     }
 }
