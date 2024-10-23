@@ -474,29 +474,26 @@ internal sealed partial class LinkerAnalysisStep
             IMethodSymbol targetSymbol,
             bool usingSimpleInlining,
             string? returnVariableIdentifier )
-        {
-            switch (root, targetSymbol)
+            => root switch
             {
-                case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
-                    return new ExpressionBodySubstitution(
-                        this._intermediateCompilationContext,
-                        arrowExpressionClause,
-                        referencingSymbol,
-                        targetSymbol,
-                        usingSimpleInlining,
-                        returnVariableIdentifier );
+                ArrowExpressionClauseSyntax arrowExpressionClause => new ExpressionBodySubstitution(
+                    this._intermediateCompilationContext,
+                    arrowExpressionClause,
+                    referencingSymbol,
+                    targetSymbol,
+                    usingSimpleInlining,
+                    returnVariableIdentifier ),
 
-                case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
-                    Invariant.Assert( returnVariableIdentifier == null );
+                MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyPartialMethod
+                    => new EmptyPartialMethodSubstitution( this._intermediateCompilationContext, emptyPartialMethod ),
 
-                    return new EmptyVoidPartialMethodSubstitution( this._intermediateCompilationContext, emptyVoidPartialMethod );
+                AccessorDeclarationSyntax { Body: null, ExpressionBody: null } emptyPartialAccessor
+                    => new EmptyPartialAccessorSubstitution( this._intermediateCompilationContext, emptyPartialAccessor ),
 
-                case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _):
-                    return new RecordParameterSubstitution( this._intermediateCompilationContext, recordParameter, targetSymbol, returnVariableIdentifier );
+                ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter
+                    => new RecordParameterSubstitution( this._intermediateCompilationContext, recordParameter, targetSymbol, returnVariableIdentifier ),
 
-                default:
-                    throw new AssertionFailedException( $"Unexpected combination: ('{root}', '{targetSymbol}')." );
-            }
-        }
+                _ => throw new AssertionFailedException( $"Unexpected syntax: '{root}'." ),
+            };
     }
 }
