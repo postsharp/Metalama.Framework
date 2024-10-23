@@ -203,9 +203,9 @@ public static class ResourceExtractor
     private static string GetHash( string input )
     {
         // Can't use HashUtilities here, because of dependency on K4os.Hash.xxHash.
-        using var md5 = MD5.Create();
+        using var sha256 = SHA256.Create();
         var inputBytes = Encoding.UTF8.GetBytes( input );
-        var hashBytes = md5.ComputeHash( inputBytes );
+        var hashBytes = sha256.ComputeHash( inputBytes );
 
         return Convert.ToBase64String( hashBytes );
     }
