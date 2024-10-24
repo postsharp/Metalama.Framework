@@ -85,6 +85,9 @@ namespace Metalama.Framework.Engine.Diagnostics
                                 return declarationKind.ToString().ToLowerInvariant();
                         }
 
+                    case SpecialType specialType:
+                        return DisplayStringFormatter.FormatSpecialType( specialType );
+
                     case Accessibility accessibility:
                         switch ( accessibility )
                         {
@@ -125,10 +128,6 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                     case Array array:
                         return string.Join( ", ", array.Cast<object>().Select( i => this.Format( "", i, formatProvider ) ) );
-              
-                    case SpecialType specialType:
-                        return DisplayStringFormatter.FormatSpecialType( specialType );
-              
                 }
             }
             catch

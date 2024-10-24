@@ -127,6 +127,17 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this._facade, otherType );
 
+    public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+        => otherType != null && this.Equals( this.Compilation.Factory.GetTypeByReflectionType( otherType ), typeComparison );
+
+    public override bool Equals( object? obj )
+        => obj switch
+        {
+            IType otherType => this.Equals( otherType ),
+            Type otherType => this.Equals( otherType ),
+            _ => false
+        };
+
     IArrayType IType.MakeArrayType( int rank ) => throw new NotImplementedException();
 
     IPointerType IType.MakePointerType() => throw new NotImplementedException();
@@ -150,7 +161,8 @@ internal sealed class SourceNamedTypeImpl : SourceMemberOrNamedType, INamedTypeI
 
     public bool IsGeneric => this._namedTypeSymbol.IsGenericType;
 
-    public bool IsCanonicalGenericInstance => this._namedTypeSymbol.OriginalDefinition == this._namedTypeSymbol && this.GenericContextForSymbolMapping.IsEmptyOrIdentity;
+    public bool IsCanonicalGenericInstance
+        => this._namedTypeSymbol.OriginalDefinition == this._namedTypeSymbol && this.GenericContextForSymbolMapping.IsEmptyOrIdentity;
 
     [Memo]
     public INamedTypeCollection Types

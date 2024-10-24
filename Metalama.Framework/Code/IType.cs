@@ -62,6 +62,8 @@ namespace Metalama.Framework.Code
 
         bool Equals( IType? otherType, TypeComparison typeComparison );
 
+        bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default );
+
         /// <summary>
         /// Creates an array type whose element type is the current type.
         /// </summary>

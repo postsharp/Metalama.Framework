@@ -129,6 +129,17 @@ namespace Metalama.Framework.Engine.CodeModel.Source
         public bool Equals( IType? otherType, TypeComparison typeComparison )
             => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
+        public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+            => otherType != null && this.Equals( this.Compilation.Factory.GetTypeByReflectionType( otherType ), typeComparison );
+
+        public override bool Equals( object? obj )
+            => obj switch
+            {
+                IType otherType => this.Equals( otherType ),
+                Type otherType => this.Equals( otherType ),
+                _ => false
+            };
+
         public IArrayType MakeArrayType( int rank = 1 ) => this.Compilation.Factory.MakeArrayType( this._typeParameterSymbol, rank ); // TODO: GenericContext?
 
         public IPointerType MakePointerType() => this.Compilation.Factory.MakePointerType( this._typeParameterSymbol );

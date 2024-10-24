@@ -190,8 +190,19 @@ internal sealed class IntroducedNamedType : IntroducedMemberOrNamedType, INamedT
 
     public bool Equals( SpecialType specialType ) => false;
 
+    public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+        => otherType != null && this.Equals( this.Compilation.Factory.GetTypeByReflectionType( otherType ), typeComparison );
+
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+
+    public override bool Equals( object? obj )
+        => obj switch
+        {
+            IType otherType => this.Equals( otherType ),
+            Type otherType => this.Equals( otherType ),
+            _ => false
+        };
 
     public IArrayType MakeArrayType( int rank = 1 ) => new ConstructedArrayType( this.Compilation, this.Ref, rank );
 
