@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -118,7 +119,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         try
         {
-
             this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
             var platformInfo = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IPlatformInfo>();
@@ -147,6 +147,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
             serviceProvider = serviceProvider
                 .WithService( this.ProjectOptions.DomainObserver );
+
+            var randomGeneratorService = contextOptions.RunnerServiceProvider.GetService<IRandomNumberProvider>() ?? new RandomNumberProvider();
+            serviceProvider = serviceProvider.WithService( randomGeneratorService );
 
             this.ServiceProvider = serviceProvider
                 .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );

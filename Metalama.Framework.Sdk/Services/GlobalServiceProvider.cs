@@ -14,6 +14,8 @@ public readonly struct GlobalServiceProvider
 {
     public ServiceProvider<IGlobalService> Underlying { get; }
 
+    public bool IsNull => this.Underlying == null;
+
     private GlobalServiceProvider( ServiceProvider<IGlobalService> serviceProvider )
     {
         this.Underlying = serviceProvider;

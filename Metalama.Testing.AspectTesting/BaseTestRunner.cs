@@ -47,6 +47,7 @@ internal abstract partial class BaseTestRunner
 {
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 
+    private readonly GlobalServiceProvider _serviceProvider;
     private readonly TestProjectReferences _references;
 
     protected ILicenseKeyProvider LicenseKeyProvider { get; }
@@ -61,6 +62,7 @@ internal abstract partial class BaseTestRunner
         ITestOutputHelper? logger,
         ILicenseKeyProvider? licenseKeyProvider )
     {
+        this._serviceProvider = serviceProvider;
         this._references = references;
         this.LicenseKeyProvider = licenseKeyProvider ?? new NullLicenseKeyProvider();
         this.ProjectDirectory = projectDirectory;
@@ -129,7 +131,7 @@ internal abstract partial class BaseTestRunner
                 var transformedOptions = this.GetContextOptions( testContextOptions )
                     with
                     {
-                        ProjectName = testInput.Options.ProjectName ?? testInput.TestName
+                        ProjectName = testInput.Options.ProjectName ?? testInput.TestName, RunnerServiceProvider = this._serviceProvider
                     };
 
                 using var testContext = new TestContext( transformedOptions );

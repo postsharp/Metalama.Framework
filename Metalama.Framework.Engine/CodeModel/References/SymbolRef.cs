@@ -190,13 +190,17 @@ internal sealed partial class SymbolRef<T> : FullRef<T>, ISymbolRef<T>
             this.CompilationContext == otherRef.CompilationContext ||
             comparison is RefComparison.Structural or RefComparison.StructuralIncludeNullability,
             "Compilation mismatch in a non-structural comparison." );
-
-        if ( !comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext ).Equals( this.Symbol, otherRef.Symbol )
-             && this.TargetKind == otherRef.TargetKind )
+        
+        if ( this.TargetKind != otherRef.TargetKind )
         {
             return false;
         }
-
+        
+        if ( !comparison.GetSymbolComparer( this.CompilationContext, otherRef.CompilationContext ).Equals( this.Symbol, otherRef.Symbol ) )
+        {
+            return false;
+        }
+        
         if ( !this._genericContextForSymbolMapping.Equals( otherRef._genericContextForSymbolMapping ) )
         {
             return false;

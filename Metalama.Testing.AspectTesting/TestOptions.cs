@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -367,6 +368,18 @@ public class TestOptions
 
     public bool? TestUnformattedOutput { get; set; }
 
+    /// <summary>
+    /// Gets or sets the number of times the test must be repeated. This can be used to reproduce random issues.
+    /// The default value is <c>1</c>. To change this option in a test, add this comment to your test file: <c>// @Repeat(int)</c>. 
+    /// </summary>
+    public int? Repeat { get; set; }
+
+    /// <summary>
+    /// Gets or sets the seed for the random number generator. The default value is random when <see cref="Repeat"/> is <c>1</c>, or <c>0</c>
+    /// otherwise. To change this option in a test, add this comment to your test file: <c>// @RandomSeed(int)</c>. 
+    /// </summary>
+    public int? RandomSeed { get; set; }
+
     internal void SetFullPaths( string directory )
     {
         for ( var i = 0; i < this.IncludedFiles.Count; i++ )
@@ -469,6 +482,10 @@ public class TestOptions
         this.IgnoreUserProfileLicenses ??= baseOptions.IgnoreUserProfileLicenses;
 
         this.TestUnformattedOutput ??= baseOptions.TestUnformattedOutput;
+
+        this.Repeat ??= baseOptions.Repeat;
+
+        this.RandomSeed ??= baseOptions.RandomSeed;
     }
 
     public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -792,6 +809,16 @@ public class TestOptions
 
                 case "TestUnformattedOutput":
                     this.TestUnformattedOutput = true;
+
+                    break;
+
+                case "Repeat":
+                    this.Repeat = int.Parse( optionArg, CultureInfo.InvariantCulture );
+
+                    break;
+
+                case "RandomSeed":
+                    this.RandomSeed = int.Parse( optionArg, CultureInfo.InvariantCulture );
 
                     break;
 
