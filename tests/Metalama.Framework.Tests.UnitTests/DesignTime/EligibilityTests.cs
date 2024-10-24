@@ -251,7 +251,7 @@ class C
             var intParameter = method.Parameters[0];
             var stringParameter = method.Parameters[1];
 
-            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBe( typeof(int) ) );
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustEqual( typeof(int) ) );
 
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
             Assert.Equal( EligibleScenarios.None, eligibility.GetEligibility( stringParameter.Type ) );

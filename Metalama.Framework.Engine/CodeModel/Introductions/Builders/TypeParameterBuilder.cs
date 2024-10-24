@@ -17,6 +17,8 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
+#pragma warning disable CS0659
+
 internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParameterBuilder
 {
     private readonly List<IType> _typeConstraints = [];

@@ -20,6 +20,8 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Introduced;
 
+#pragma warning disable CS0659
+
 internal sealed class IntroducedNamedType : IntroducedMemberOrNamedType, INamedTypeImpl
 {
     public NamedTypeBuilderData NamedTypeBuilderData { get; }
