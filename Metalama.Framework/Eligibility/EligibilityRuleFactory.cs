@@ -102,7 +102,7 @@ public static partial class EligibilityRuleFactory
     private static readonly IEligibilityRule<IDeclaration> _addInitializerRule = CreateRule<IDeclaration, IMemberOrNamedType>(
         builder =>
         {
-            builder.MustBeOfAnyType( typeof(INamedType), typeof(IConstructor) );
+            builder.MustBeInstanceOfAnyType( typeof(INamedType), typeof(IConstructor) );
 
             builder.Convert()
                 .When<INamedType>()

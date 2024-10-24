@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Visitors;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -10,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
@@ -123,6 +125,10 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                     case Array array:
                         return string.Join( ", ", array.Cast<object>().Select( i => this.Format( "", i, formatProvider ) ) );
+              
+                    case SpecialType specialType:
+                        return DisplayStringFormatter.FormatSpecialType( specialType );
+              
                 }
             }
             catch

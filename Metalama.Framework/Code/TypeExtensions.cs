@@ -40,7 +40,7 @@ namespace Metalama.Framework.Code
         public static bool IsConvertibleTo( this IType left, Type right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
             => left.Compilation.Comparers.GetTypeComparer( typeComparison ).IsConvertibleTo( left, right, kind );
 
-        [Obsolete( "This method has been renamed IsConvertibleTo." )]
+        [Obsolete( "This method has been renamed IsConvertibleTo. Also consider using Equals." )]
         public static bool Is( this IType left, SpecialType right, ConversionKind kind = default ) => IsConvertibleTo( left, right, kind );
 
         /// <summary>

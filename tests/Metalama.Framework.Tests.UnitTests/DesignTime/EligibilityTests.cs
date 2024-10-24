@@ -186,13 +186,13 @@ class ClassWithoutAspect {}
         [Fact]
         public void MustBeOfType_ThrowsWhenImpossible()
         {
-            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof(int) ) ) );
+            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeInstanceOfType( typeof(int) ) ) );
         }
 
         [Fact]
         public void MustBeOfAnyType_ThrowsWhenImpossible()
         {
-            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof(int) ) ) );
+            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeInstanceOfAnyType( typeof(int) ) ) );
         }
 
         [Fact]
@@ -210,7 +210,7 @@ class C
             var compilation = testContext.CreateCompilation( code );
             var intParameter = compilation.Types.Single().Methods.Single().Parameters[0];
 
-            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof(INamedType) ) );
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeInstanceOfType( typeof(INamedType) ) );
 
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
         }
@@ -230,7 +230,7 @@ class C
             var compilation = testContext.CreateCompilation( code );
             var intParameter = compilation.Types.Single().Methods.Single().Parameters[0];
 
-            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof(INamedType), typeof(IArrayType) ) );
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeInstanceOfAnyType( typeof(INamedType), typeof(IArrayType) ) );
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
         }
 

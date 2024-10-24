@@ -40,6 +40,8 @@ internal class DisplayStringFormatter : CompilationElementVisitor
         [SpecialType.Decimal] = "decimal"
     };
 
+    internal static string FormatSpecialType( SpecialType specialType ) => _specialType.TryGetValue( specialType, out var s ) ? s : specialType.ToString();
+
     private static readonly Dictionary<MethodKind, string> _methodKinds = new()
     {
         [MethodKind.EventAdd] = "add", [MethodKind.EventRemove] = "remove", [MethodKind.PropertyGet] = "get", [MethodKind.PropertySet] = "set"

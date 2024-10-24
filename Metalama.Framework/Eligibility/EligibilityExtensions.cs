@@ -246,7 +246,7 @@ public static partial class EligibilityExtensions
     /// </summary>
     public static void MustBeReadable( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfyAny(
-            b => b.MustBeOfType( typeof(IField) ),
+            b => b.MustBeInstanceOfType( typeof(IField) ),
             b => b.Convert().To<IPropertyOrIndexer>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
 
     /// <summary>
@@ -343,6 +343,11 @@ public static partial class EligibilityExtensions
         return type.Name;
     }
 
+    [Obsolete( "This method has been renamed IsInstanceOfType." )]
+    public static void MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
+        where T : class
+        => MustBeInstanceOfType<T>( eligibilityBuilder, type );
+
     /// <summary>
     /// Requires the validated object to be of a certain type of metadata object, e.g. an <see cref="IField"/> or <see cref="IMethod"/>.
     /// To check the type of a field, property or parameter, use code like <c>builder.Type().MustBe(typeof(string));</c> instead.
@@ -353,7 +358,7 @@ public static partial class EligibilityExtensions
     /// this method will fail with an exception, because no conversion exists from <see cref="IParameter"/> to <c>string</c>.</para>
     /// <para>On the other hand, code like <c>builder.MustBeOfType(typeof(IProperty));</c> will correctly check that a declaration is a property.</para>
     /// </remarks>
-    public static void MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
+    public static void MustBeInstanceOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
         where T : class
     {
         if ( !typeof(T).IsAssignableFrom( type ) )
@@ -368,12 +373,19 @@ public static partial class EligibilityExtensions
             d => $"{d} must be a {GetInterfaceName( type )}" );
     }
 
+    [Obsolete( "This method has been renamed MustBeInstanceOfAnyType." )]
+    public static void MustBeOfAnyType<T>(
+        this IEligibilityBuilder<T> eligibilityBuilder,
+        params Type[] types )
+        where T : class
+        => MustBeInstanceOfAnyType( eligibilityBuilder, types );
+
     /// <summary>
     /// Requires the validated object to be of one of the specified types. Note that this validates the object itself, not the declaration
     /// that it represents. For instance, if the object is an <see cref="IParameter"/> and the <paramref name="types"/> parameter
     /// is set to <c>string</c>, this method will fail with an exception no conversion exists from <see cref="IParameter"/> to <c>string</c>.
     /// </summary>
-    public static void MustBeOfAnyType<T>(
+    public static void MustBeInstanceOfAnyType<T>(
         this IEligibilityBuilder<T> eligibilityBuilder,
         params Type[] types )
         where T : class
@@ -508,13 +520,13 @@ public static partial class EligibilityExtensions
     public static void MustEqual<T>( this IEligibilityBuilder<T> eligibilityBuilder, T other )
         where T : class, IEquatable<T>
         => eligibilityBuilder.MustSatisfy( t => t.Equals( other ), x => $"{x} must equal '{other}'" );
-    
+
     public static void MustEqual( this IEligibilityBuilder<IType> eligibilityBuilder, Type otherType )
         => eligibilityBuilder.MustSatisfy( t => t.Equals( t.Compilation.Factory.GetTypeByReflectionType( otherType ) ), x => $"{x} must equal '{otherType}'" );
 
     public static void MustEqual( this IEligibilityBuilder<IType> eligibilityBuilder, SpecialType otherType )
         => eligibilityBuilder.MustSatisfy( t => t.Equals( t.Compilation.Factory.GetSpecialType( otherType ) ), x => $"{x} must equal '{otherType}'" );
-    
+
     private static void Aggregate<T>(
         this IEligibilityBuilder<T> eligibilityBuilder,
         BooleanCombinationOperator combinationOperator,
