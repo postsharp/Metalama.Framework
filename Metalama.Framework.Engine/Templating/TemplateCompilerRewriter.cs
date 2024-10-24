@@ -383,7 +383,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     // If we have a discard parameter (or a pseudo-discard one, just by naming conventions).
                     // Formally, it may be a usable parameter and we may need to map it,
                     // but it's better in general not to do so and to let the user cope with the consequences of conflicts.
-                    return this.MetaSyntaxFactory.Identifier( SyntaxFactoryEx.LiteralExpression( "_" ) );
+
+                    return this.MetaSyntaxFactory.Identifier(
+                        SyntaxFactoryEx.Default,
+                        this.MetaSyntaxFactory.Kind( SyntaxKind.UnderscoreToken ),
+                        SyntaxFactoryEx.LiteralExpression( "_" ),
+                        SyntaxFactoryEx.LiteralExpression( "_" ),
+                        SyntaxFactoryEx.Default );
                 }
 
                 if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
