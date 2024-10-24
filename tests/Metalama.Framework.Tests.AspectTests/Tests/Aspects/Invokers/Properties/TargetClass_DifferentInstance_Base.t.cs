@@ -16,12 +16,12 @@ public class TargetClass
   {
     get
     {
-      _ = ((global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance_Base.TargetClass)this.instance!).Property;
+      _ = this.instance!.Property;
       return 0;
     }
     set
     {
-      ((global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Invokers.Properties.TargetClass_DifferentInstance_Base.TargetClass)this.instance!).Property = 42;
+      this.instance!.Property = 42;
     }
   }
 }

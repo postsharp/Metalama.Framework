@@ -114,7 +114,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
             else if ( this.Template != null )
             {
                 // Case for event fields.
-                builder.Type = templateDeclaration.AssertNotNull().Type;
+                builder.Type = TemplateTypeRewriter.Unbound.Visit( templateDeclaration.AssertNotNull().Type );
             }
 
             builder.Accessibility =

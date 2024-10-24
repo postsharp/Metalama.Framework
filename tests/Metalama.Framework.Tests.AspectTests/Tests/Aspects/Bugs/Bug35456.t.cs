@@ -5,7 +5,7 @@ internal class C
   {
     private global::System.Object Template()
     {
-      return (global::System.Object)null !;
+      return null !;
     }
   }
 }
@@ -15,7 +15,7 @@ internal class D : C
   {
     private global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Bugs.Bug35456.C.Builder Template()
     {
-      return (global::Metalama.Framework.Tests.AspectTests.Tests.Aspects.Bugs.Bug35456.C.Builder)null !;
+      return null !;
     }
   }
 }

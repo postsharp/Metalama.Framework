@@ -317,5 +317,29 @@ namespace Metalama.Framework.Aspects
         /// <param name="value">The value to return.</param>
         [TemplateKeyword]
         public static void Return( dynamic? value ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, IType type ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, IType type, IExpression? value ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, IType type, dynamic value ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, Type type ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, Type type, IExpression? value ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, Type type, dynamic value ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, IExpression value ) => throw CreateException();
+
+        [CompileTime( isTemplateOnly: true )]
+        public static IExpression DefineLocalVariable( string nameHint, dynamic value ) => throw CreateException();
     }
 }

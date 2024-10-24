@@ -5,6 +5,6 @@ public class Target
   {
     var t7 = typeof(global::System.String);
     var t8 = typeof(global::System.Collections.Generic.List<global::System.String>);
-    return (global::System.String)null !;
+    return null !;
   }
 }

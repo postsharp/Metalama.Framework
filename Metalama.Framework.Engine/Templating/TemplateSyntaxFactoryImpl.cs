@@ -409,19 +409,29 @@ namespace Metalama.Framework.Engine.Templating
             {
                 case IExpression dynamicExpression:
                     {
-                        var syntax = dynamicExpression.ToTypedExpressionSyntax( this.SyntaxSerializationContext );
+                        var typedExpression = dynamicExpression.ToTypedExpressionSyntax( this.SyntaxSerializationContext );
+
+                        var syntax = typedExpression.Syntax;
 
                         // TODO: Fix the data flow. We have a UserExpression, generate an ExpressionSyntax, which may then be
                         // wrapped again into a UserExpression.
-                        if ( syntax.IsReferenceable != null )
+
+                        if ( typedExpression.ExpressionType != null )
                         {
-                            return TypeAnnotationMapper.AddIsExpressionReferenceableAnnotation( syntax, syntax.IsReferenceable.Value );
+                            syntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( syntax, typedExpression.ExpressionType );
                         }
-                        else
+
+                        if ( typedExpression.IsReferenceable != null )
                         {
-                            return syntax;
+                            syntax = TypeAnnotationMapper.AddIsExpressionReferenceableAnnotation( syntax, typedExpression.IsReferenceable.Value );
                         }
+
+                        return syntax;
                     }
+
+                case ExpressionSyntax expressionSyntax:
+                    // TODO: Fix the data flow. This method call was redundant.
+                    return expressionSyntax;
 
                 default:
                     if ( this._templateExpansionContext.SyntaxSerializationService.TrySerialize(
@@ -452,16 +462,64 @@ namespace Metalama.Framework.Engine.Templating
             return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxSerializationContext.CompilationModel );
         }
 
-        public IUserExpression GetUserExpression( object expression ) => ((IExpression) expression).ToUserExpression();
+        public TypedExpressionSyntax RunTimeExpression( IUserExpression syntax, string? type = null ) => syntax.ToTypedExpressionSyntax( this.SyntaxSerializationContext );
 
-        public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
+        public IUserExpression GetUserExpression( object value ) => this.GetUserExpression( value, null );
+        
+        private IUserExpression GetUserExpression( object value, string? type )
+        {
+            switch ( value )
+            {
+                case IExpression expression:
+                    return expression.ToUserExpression();
+
+                case ExpressionSyntax expression:
+                    // TODO: Clean the code generation, as we should not get here.
+                    if ( !TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+                            expression,
+                            this.Compilation.GetCompilationModel(),
+                            out var expressionType ) )
+                    {
+                        if ( type != null )
+                        {
+                            expressionType = new SerializableTypeId( type ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), this._templateExpansionContext.TemplateGenericArguments );
+                        }
+                        else
+                        {
+                            expressionType = this._templateExpansionContext.Compilation.AssertNotNull().Cache.SystemObjectType;
+                        }
+                    }
+
+                    return new SyntaxUserExpression( expression, expressionType );
+                
+                case TypedExpressionSyntax typedExpressionSyntax:
+                    return typedExpressionSyntax.ToUserExpression( this.Compilation );
+
+                default:
+                    throw new AssertionFailedException( $"Don't know how to convert a {value.GetType()} to a UserExpression" );
+            }
+        }
+
+        public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, string? type )
         {
             TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                 operand,
                 this.SyntaxSerializationContext.CompilationModel,
-                out var type );
+                out var expressionType );
 
-            return this._templateExpansionContext.SyntaxGenerator.SuppressNullableWarningExpression( operand, type );
+            if ( expressionType == null && type != null )
+            {
+                expressionType = new SerializableTypeId( type ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), this._templateExpansionContext.TemplateGenericArguments );
+            }
+
+            return this._templateExpansionContext.SyntaxGenerator.SuppressNullableWarningExpression( operand, expressionType );
+        }
+
+        public IUserExpression SuppressNullableWarningUserExpression( object operand, string? type )
+        {
+            var userExpression = this.GetUserExpression( operand, type );
+
+            return new SuppressNullableWarningUserExpression( userExpression );
         }
 
         public ExpressionSyntax ConditionalAccessExpression( ExpressionSyntax expression, ExpressionSyntax whenNotNullExpression )
@@ -584,5 +642,105 @@ namespace Metalama.Framework.Engine.Templating
                 TypeFactory.Implementation.GetTypeByReflectionType( type ),
                 name,
                 this._templateExpansionContext.SyntaxGenerationContext );
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IType type, ExpressionSyntax? expression )
+        {
+            var localVariableName = this._templateExpansionContext.LexicalScope.GetUniqueIdentifier( name );
+
+            var variableType = this.SyntaxSerializationContext.SyntaxGenerator.Type( type );
+
+            var declarator = SyntaxFactory.VariableDeclarator( localVariableName );
+
+            if ( expression != null )
+            {
+                declarator = declarator.WithInitializer( SyntaxFactory.EqualsValueClause( expression ) );
+            }
+
+            var variableDeclaration = SyntaxFactory.LocalDeclarationStatement(
+                default,
+                default,
+                SyntaxFactory.VariableDeclaration(
+                    variableType,
+                    SyntaxFactory.SingletonSeparatedList( declarator ) ) );
+
+            statementList.Add( new StatementOrTrivia( variableDeclaration ) );
+
+            return new SyntaxUserExpression( SyntaxFactory.IdentifierName( localVariableName ), type, true, true );
+        }
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, Type type, ExpressionSyntax? expression )
+            => this.DefineLocalVariable(
+                statementList,
+                name,
+                this._templateExpansionContext.Compilation.AssertNotNull().Factory.GetTypeByReflectionType( type ),
+                expression );
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IType type )
+            => this.DefineLocalVariable( statementList, name, type, default(ExpressionSyntax) );
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, Type type )
+            => this.DefineLocalVariable( statementList, name, type, default(ExpressionSyntax) );
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IType type, IExpression? expression )
+            => this.DefineLocalVariable( statementList, name, type, expression?.ToExpressionSyntax( this.SyntaxSerializationContext, type ) );
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, Type type, IExpression? expression )
+        {
+            var itype = this._templateExpansionContext.Compilation.AssertNotNull().Factory.GetTypeByReflectionType( type );
+
+            return this.DefineLocalVariable( statementList, name, itype, expression );
+        }
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, ExpressionSyntax expression )
+        {
+            if ( !TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+                    expression,
+                    this._templateExpansionContext.Compilation.AssertNotNull(),
+                    out var expressionType ) )
+            {
+                expressionType = this._templateExpansionContext.Compilation.Cache.SystemObjectType.ToNullable();
+            }
+
+            return this.DefineLocalVariableVar( statementList, name, expression, expressionType );
+        }
+
+        private IExpression DefineLocalVariableVar( List<StatementOrTrivia> statementList, string name, ExpressionSyntax expression, IType expressionType )
+        {
+            var localVariableName = this._templateExpansionContext.LexicalScope.GetUniqueIdentifier( name );
+
+            var declarator = SyntaxFactory.VariableDeclarator( localVariableName )
+                .WithInitializer( SyntaxFactory.EqualsValueClause( expression ) );
+
+            var varType = SyntaxFactory.IdentifierName(
+                SyntaxFactory.Identifier(
+                    default,
+                    SyntaxKind.VarKeyword,
+                    "var",
+                    "var",
+                    default ) );
+
+            var variableDeclaration = SyntaxFactory.LocalDeclarationStatement(
+                default,
+                default,
+                SyntaxFactory.VariableDeclaration(
+                    varType,
+                    SyntaxFactory.SingletonSeparatedList( declarator ) ) );
+
+            statementList.Add( new StatementOrTrivia( variableDeclaration ) );
+
+            return new SyntaxUserExpression( SyntaxFactory.IdentifierName( localVariableName ), expressionType, true, true );
+        }
+
+        public IExpression DefineLocalVariable( List<StatementOrTrivia> statementList, string name, IExpression expression )
+            => this.DefineLocalVariableVar( statementList, name, expression.ToExpressionSyntax( this.SyntaxSerializationContext ), expression.Type );
+
+        public ExpressionSyntax ConvertToExpressionSyntax( object value )
+            => value switch
+            {
+                IUserExpression userExpression => userExpression.ToExpressionSyntax( this.SyntaxSerializationContext ),
+                ExpressionSyntax expression => expression,
+                TypedExpressionSyntax typedExpressionSyntax => typedExpressionSyntax.Syntax,
+                _ => throw new AssertionFailedException( $"Unexpected expression type: {value.GetType()}" )
+            };
     }
 }
