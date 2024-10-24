@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Formatting.Output
             }
             else
             {
-                baseCall = (IExpression) meta.Target.Method.Invoke()!;
+                baseCall = (IExpression)meta.Target.Method.Invoke()!;
             }
 
             var clone = meta.Cast( meta.Target.Type.ToNonNullable(), baseCall )!;
@@ -51,7 +51,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Formatting.Output
             var clonableFields =
                 meta.Target.Type.FieldsAndProperties.Where(
                     f => f.IsAutoPropertyOrField.GetValueOrDefault() &&
-                         ( f.Type.Is( typeof(ICloneable) ) ||
+                         ( f.Type.IsConvertibleTo( typeof(ICloneable) ) ||
                            ( f.Type is INamedType { BelongsToCurrentProject: true } fieldNamedType
                              && fieldNamedType.Enhancements().GetAspects<DeepCloneAttribute>().Any() ) ) );
 

@@ -43,7 +43,7 @@ public sealed class XpoDefaultValueAutoImplementationAttribute : TypeAspect
 
     private TypedConstant GetDefaultValue( IFieldOrProperty field )
     {
-        var defaultValueAttribute = field.Attributes.FirstOrDefault( a => a.Type.Is( typeof(DefaultValueAttribute) ) );
+        var defaultValueAttribute = field.Attributes.FirstOrDefault( a => a.Type.IsConvertibleTo( typeof(DefaultValueAttribute) ) );
 
         if (defaultValueAttribute is null)
         {

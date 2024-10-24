@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ReceiverCachin
 
             var methods = types
                 .SelectMany( t => t.Methods )
-                .Where( m => m.ReturnType.Is( typeof(string) ) );
+                .Where( m => m.ReturnType.IsConvertibleTo( typeof(string) ) );
 
             methods.AddAspect<MethodAspect>();
             methods.ReportDiagnostic( m => _warning1.WithArguments( m.ToDisplayString() ) );
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ReceiverCachin
 
             var properties = types
                 .SelectMany( t => t.Properties )
-                .Where( m => m.Type.Is( typeof(string) ) );
+                .Where( m => m.Type.IsConvertibleTo( typeof(string) ) );
 
             properties.AddAspect<PropertyAspect>();
             properties.ReportDiagnostic( m => _warning1.WithArguments( m.ToDisplayString() ) );

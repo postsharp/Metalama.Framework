@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Abstractions;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,11 +13,11 @@ internal sealed class AllTypesCollection : AllMemberOrNamedTypesCollection<IName
 {
     public AllTypesCollection( INamedTypeImpl declaringType ) : base( declaringType ) { }
 
-    protected override IEqualityComparer<INamedType> Comparer => this.CompilationContext.Comparers.GetTypeComparer( Code.Comparers.TypeComparison.Default );
+    protected override IEqualityComparer<INamedType> Comparer => this.CompilationContext.Comparers.GetTypeComparer( TypeComparison.Default );
 
     public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
     {
-        return this.Where( p => p.Is( typeDefinition, ConversionKind.TypeDefinition ) );
+        return this.Where( p => p.IsConvertibleTo( typeDefinition, ConversionKind.TypeDefinition ) );
     }
 
     protected override INamedTypeCollection GetMembers( INamedType namedType ) => namedType.Types;

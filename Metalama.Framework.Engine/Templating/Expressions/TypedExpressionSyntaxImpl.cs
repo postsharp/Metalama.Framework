@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             bool? canBeNull = null )
         {
             Invariant.Assert( expressionType is not { TypeKind: TypeKind.Dynamic } );
-            
+
             if ( expressionType == null )
             {
                 TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation( syntax, compilationModel, out expressionType );
@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             {
                 // If we know the type of the current expression, check if a cast is necessary.
 
-                if ( compilationModel.Comparers.Default.Is( this.ExpressionType, targetType, ConversionKind.Implicit ) )
+                if ( compilationModel.Comparers.Default.IsConvertibleTo( this.ExpressionType, targetType, ConversionKind.Implicit ) )
                 {
                     return new TypedExpressionSyntaxImpl( this.Syntax, targetType, compilationModel, this.IsReferenceable, this.CanBeNull );
                 }

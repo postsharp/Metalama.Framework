@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.ParameterT
         public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
             base.BuildEligibility( builder );
-            builder.Parameter( 0 ).Type().MustBe( typeof(string) );
+            builder.Parameter( 0 ).Type().MustEqual( typeof(string) );
         }
 
         public override dynamic? OverrideMethod()

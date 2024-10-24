@@ -69,7 +69,7 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         return false;
     }
 
-    internal bool Is( ITypeSymbol left, ITypeSymbol right )
+    internal bool IsConvertibleTo( ITypeSymbol left, ITypeSymbol right )
     {
         if ( left is IErrorTypeSymbol )
         {
@@ -85,7 +85,7 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         {
             return true;
         }
-        else if ( left.BaseType != null && this.Is( left.BaseType, right ) )
+        else if ( left.BaseType != null && this.IsConvertibleTo( left.BaseType, right ) )
         {
             return true;
         }
@@ -93,7 +93,7 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         {
             foreach ( var i in left.Interfaces )
             {
-                if ( this.Is( i, right ) )
+                if ( this.IsConvertibleTo( i, right ) )
                 {
                     return true;
                 }

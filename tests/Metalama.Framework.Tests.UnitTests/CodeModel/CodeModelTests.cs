@@ -335,13 +335,13 @@ class C
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
-            Assert.True( parameterType.Is( typeof(int[]) ) );
-            Assert.False( parameterType.Is( typeof(int[,]) ) );
+            Assert.True( parameterType.IsConvertibleTo( typeof(int[]) ) );
+            Assert.False( parameterType.IsConvertibleTo( typeof(int[,]) ) );
 
             var arrayType = Assert.IsAssignableFrom<IArrayType>( parameterType );
 
             Assert.Equal( "int", arrayType.ElementType.ToString() );
-            Assert.True( arrayType.ElementType.Is( typeof(int) ) );
+            Assert.True( arrayType.ElementType.IsConvertibleTo( typeof(int) ) );
             Assert.Equal( 1, arrayType.Rank );
         }
 
@@ -1128,7 +1128,7 @@ namespace System { class MySystemClass {} }
             var compilation = testContext.CreateCompilationModel( "" );
             var fromType = compilation.Factory.GetSpecialType( @from );
             var toType = compilation.Factory.GetSpecialType( to );
-            var result = fromType.Is( toType, ConversionKind.Implicit );
+            var result = fromType.IsConvertibleTo( toType, ConversionKind.Implicit );
 
             Assert.Equal( expectedResult, result );
         }

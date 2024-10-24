@@ -91,7 +91,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 
             // Async iterator can have empty body and still be in iterator, returning anything is invalid.
             var block = syntaxGenerator.FormattedBlock(
-                !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
+                !methodBuilder.ReturnParameter.Type.IsConvertibleTo( typeof(void) )
                     ? methodBuilder.GetIteratorInfo().IsIteratorMethod == true
                         ?
                         [

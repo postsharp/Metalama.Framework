@@ -294,7 +294,7 @@ public static partial class EligibilityExtensions
     /// </summary>
     public static void MustNotBeVoid( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
-            p => !p.Type.Is( SpecialType.Void ),
+            p => !p.Type.Equals( SpecialType.Void ),
             member => $"{member} must not be void" );
 
     /// <summary>
@@ -465,28 +465,56 @@ public static partial class EligibilityExtensions
             member => member.TypeKind != TypeKind.Interface,
             member => $"{member} must not an interface" );
 
+    [Obsolete( "This method has been renamed MustBeConvertibleTo or MustEqual." )]
+    public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
+        => MustBeConvertibleTo( eligibilityBuilder, type, conversionKind );
+
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).
     /// </summary>
-    public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
+    public static void MustBeConvertibleTo(
+        this IEligibilityBuilder<IType> eligibilityBuilder,
+        Type type,
+        ConversionKind conversionKind = ConversionKind.Default )
         => eligibilityBuilder.MustSatisfy(
-            t => t.Is( type, conversionKind ),
-            member => $"{member} must be of type '{type}'" );
+            t => t.IsConvertibleTo( type, conversionKind ),
+            t => $"{t} must be convertible to '{type}'" );
+
+    [Obsolete( "This method has been renamed MustBeConvertibleTo or MustEqual." )]
+    public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
+        => MustBeConvertibleTo( eligibilityBuilder, type, conversionKind );
 
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as an <see cref="IType"/>).
     /// </summary>
-    public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
+    public static void MustBeConvertibleTo(
+        this IEligibilityBuilder<IType> eligibilityBuilder,
+        IType type,
+        ConversionKind conversionKind = ConversionKind.Default )
         => eligibilityBuilder.MustSatisfy(
-            t => t.Is( type, conversionKind ),
-            member => $"{member} must be of type '{type}'" );
+            t => t.IsConvertibleTo( type, conversionKind ),
+            t => $"{t} must be convertible to '{type}'" );
+
+    [Obsolete( "This method has been renamed MustBeConvertibleTo or MustEqual." )]
+    public static void MustBe<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
+        => MustBeConvertibleTo<T>( eligibilityBuilder, conversionKind );
 
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as a type parameter).
     /// </summary>
-    public static void MustBe<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
-        => eligibilityBuilder.MustBe( typeof(T), conversionKind );
+    public static void MustBeConvertibleTo<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
+        => eligibilityBuilder.MustBeConvertibleTo( typeof(T), conversionKind );
 
+    public static void MustEqual<T>( this IEligibilityBuilder<T> eligibilityBuilder, T other )
+        where T : class, IEquatable<T>
+        => eligibilityBuilder.MustSatisfy( t => t.Equals( other ), x => $"{x} must equal '{other}'" );
+    
+    public static void MustEqual( this IEligibilityBuilder<IType> eligibilityBuilder, Type otherType )
+        => eligibilityBuilder.MustSatisfy( t => t.Equals( t.Compilation.Factory.GetTypeByReflectionType( otherType ) ), x => $"{x} must equal '{otherType}'" );
+
+    public static void MustEqual( this IEligibilityBuilder<IType> eligibilityBuilder, SpecialType otherType )
+        => eligibilityBuilder.MustSatisfy( t => t.Equals( t.Compilation.Factory.GetSpecialType( otherType ) ), x => $"{x} must equal '{otherType}'" );
+    
     private static void Aggregate<T>(
         this IEligibilityBuilder<T> eligibilityBuilder,
         BooleanCombinationOperator combinationOperator,

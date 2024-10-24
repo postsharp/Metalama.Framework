@@ -63,7 +63,7 @@ internal class IntroduceMembersAttribute : TypeAspect
 
             if (result.Declaration is IMethod method)
             {
-                if (!method.ReturnType.Is( typeof(void) ))
+                if (!method.ReturnType.IsConvertibleTo( typeof(void) ))
                 {
                     ( (IAspectBuilder)builder ).With<IParameter>( method.ReturnParameter ).Outbound.AddAspect<NopAspect>();
                 }

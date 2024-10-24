@@ -16,7 +16,7 @@ internal class Aspect : OverrideMethodAspect
     [Template]
     private void CalledTemplate()
     {
-        if (meta.Target.Method.ReturnType.Is( SpecialType.Void ))
+        if (meta.Target.Method.ReturnType.IsConvertibleTo( SpecialType.Void ))
         {
             meta.Return();
         }

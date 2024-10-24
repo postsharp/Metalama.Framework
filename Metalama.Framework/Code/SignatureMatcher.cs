@@ -57,7 +57,7 @@ namespace Metalama.Framework.Code
                 }
 
                 return
-                    (parameterInfo.Value.Type == null || payload.Compilation.Comparers.Default.Is(
+                    (parameterInfo.Value.Type == null || payload.Compilation.Comparers.Default.IsConvertibleTo(
                         parameterInfo.Value.Type,
                         expectedType ))
                     && (parameterInfo.Value.RefKind == null || expectedRefKind == parameterInfo.Value.RefKind);
@@ -250,11 +250,17 @@ namespace Metalama.Framework.Code
                     => namedType.TypeArguments[0],
                 INamedType namedType when namedType.Attributes.Any( a => a.Type.FullName == "System.Runtime.CompilerServices.CollectionBuilderAttribute" )
                     => GetIterationType( namedType ),
-                INamedType { TypeKind: TypeKind.Struct or TypeKind.Class or TypeKind.RecordStruct or TypeKind.RecordClass } namedType when namedType.AllImplementedInterfaces.Any( i => i.FullName == "System.Collections.Generic.IEnumerable" )
+                INamedType { TypeKind: TypeKind.Struct or TypeKind.Class or TypeKind.RecordStruct or TypeKind.RecordClass } namedType when
+                    namedType.AllImplementedInterfaces.Any( i => i.FullName == "System.Collections.Generic.IEnumerable" )
                     => GetIterationType( namedType ),
-                INamedType { TypeKind: TypeKind.Interface, FullName: "System.Collections.Generic.IEnumerable" or "System.Collections.Generic.IReadOnlyCollection" or "System.Collections.Generic.IReadOnlyList" or "System.Collections.Generic.ICollection" or "System.Collections.Generic.IList" } namedType
+                INamedType
+                    {
+                        TypeKind: TypeKind.Interface,
+                        FullName: "System.Collections.Generic.IEnumerable" or "System.Collections.Generic.IReadOnlyCollection"
+                        or "System.Collections.Generic.IReadOnlyList" or "System.Collections.Generic.ICollection" or "System.Collections.Generic.IList"
+                    } namedType
                     => namedType.TypeArguments[0],
-                _ => null,
+                _ => null
             };
         }
 
@@ -286,8 +292,10 @@ namespace Metalama.Framework.Code
                 {
                     case 0:
                         break;
+
                     case 1:
                         return genericEnumerableInterfaces[0].TypeArguments[0];
+
                     case > 1:
                         return null;
                 }

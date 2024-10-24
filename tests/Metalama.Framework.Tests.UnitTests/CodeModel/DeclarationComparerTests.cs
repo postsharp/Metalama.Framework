@@ -36,19 +36,20 @@ class B : A, I
             var comparer = (DeclarationEqualityComparer) compilation.CompilationContext.Comparers.Default;
 
             // ReSharper disable RedundantArgumentDefaultValue
-            Assert.False( comparer.Is( typeA, typeof(int), ConversionKind.Default, bypassSymbols ) );
-            Assert.False( comparer.Is( typeA, typeof(bool), ConversionKind.Default, bypassSymbols ) );
-            Assert.False( comparer.Is( typeB, typeof(int), ConversionKind.Default, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeA, typeof(int), ConversionKind.Default, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeA, typeof(bool), ConversionKind.Default, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeB, typeof(int), ConversionKind.Default, bypassSymbols ) );
 
-            Assert.False( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Default, bypassSymbols ) );
+            Assert.False(
+                comparer.IsConvertibleTo( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Default, bypassSymbols ) );
 
-            Assert.False( comparer.Is( typeA, typeB, ConversionKind.Default, bypassSymbols ) );
-            Assert.True( comparer.Is( typeB, typeA, ConversionKind.Default, bypassSymbols ) );
-            Assert.False( comparer.Is( typeI, typeB, ConversionKind.Default, bypassSymbols ) );
-            Assert.True( comparer.Is( typeB, typeI, ConversionKind.Default, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeA, typeB, ConversionKind.Default, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeB, typeA, ConversionKind.Default, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeI, typeB, ConversionKind.Default, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeB, typeI, ConversionKind.Default, bypassSymbols ) );
 
             Assert.True(
-                comparer.Is(
+                comparer.IsConvertibleTo(
                     compilation.Factory.GetTypeByReflectionType( typeof(int) ),
                     typeof(object),
                     ConversionKind.Default,
@@ -59,13 +60,13 @@ class B : A, I
                 // Built-in implicit numeric conversions are not supported in bypassSymbols mode.
 
                 Assert.False(
-                    comparer.Is(
+                    comparer.IsConvertibleTo(
                         compilation.Factory.GetTypeByReflectionType( typeof(int) ),
                         typeof(long),
                         ConversionKind.Default ) );
 
                 Assert.False(
-                    comparer.Is(
+                    comparer.IsConvertibleTo(
                         compilation.Factory.GetTypeByReflectionType( typeof(long) ),
                         typeof(int),
                         ConversionKind.Default ) );
@@ -99,23 +100,30 @@ class B : A, I
 
             var comparer = (DeclarationEqualityComparer) compilation.CompilationContext.Comparers.Default;
 
-            Assert.False( comparer.Is( typeA, typeof(int), ConversionKind.Reference, bypassSymbols ) );
-            Assert.False( comparer.Is( typeA, typeof(bool), ConversionKind.Reference, bypassSymbols ) );
-            Assert.False( comparer.Is( typeB, typeof(int), ConversionKind.Reference, bypassSymbols ) );
-            Assert.False( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Reference, bypassSymbols ) );
-            Assert.False( comparer.Is( typeA, typeB, ConversionKind.Reference, bypassSymbols ) );
-            Assert.True( comparer.Is( typeB, typeA, ConversionKind.Reference, bypassSymbols ) );
-            Assert.False( comparer.Is( typeI, typeB, ConversionKind.Reference, bypassSymbols ) );
-            Assert.True( comparer.Is( typeB, typeI, ConversionKind.Reference, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeA, typeof(int), ConversionKind.Reference, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeA, typeof(bool), ConversionKind.Reference, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeB, typeof(int), ConversionKind.Reference, bypassSymbols ) );
 
             Assert.False(
-                comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Reference, bypassSymbols ) );
+                comparer.IsConvertibleTo( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Reference, bypassSymbols ) );
+
+            Assert.False( comparer.IsConvertibleTo( typeA, typeB, ConversionKind.Reference, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeB, typeA, ConversionKind.Reference, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeI, typeB, ConversionKind.Reference, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeB, typeI, ConversionKind.Reference, bypassSymbols ) );
 
             Assert.False(
-                comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Reference, bypassSymbols ) );
+                comparer.IsConvertibleTo(
+                    compilation.Factory.GetTypeByReflectionType( typeof(int) ),
+                    typeof(object),
+                    ConversionKind.Reference,
+                    bypassSymbols ) );
 
             Assert.False(
-                comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Reference, bypassSymbols ) );
+                comparer.IsConvertibleTo( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Reference, bypassSymbols ) );
+
+            Assert.False(
+                comparer.IsConvertibleTo( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Reference, bypassSymbols ) );
         }
 
         [Theory]
@@ -143,24 +151,42 @@ class B : A, I
 
             var comparer = (DeclarationEqualityComparer) compilation.CompilationContext.Comparers.Default;
 
-            Assert.False( comparer.Is( typeA, typeof(int), ConversionKind.Implicit, bypassSymbols ) );
-            Assert.False( comparer.Is( typeA, typeof(bool), ConversionKind.Implicit, bypassSymbols ) );
-            Assert.True( comparer.Is( typeB, typeof(int), ConversionKind.Implicit, bypassSymbols ) );
-            Assert.False( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Implicit, bypassSymbols ) );
-            Assert.False( comparer.Is( typeA, typeB, ConversionKind.Implicit, bypassSymbols ) );
-            Assert.True( comparer.Is( typeB, typeA, ConversionKind.Implicit, bypassSymbols ) );
-            Assert.False( comparer.Is( typeI, typeB, ConversionKind.Implicit, bypassSymbols ) );
-            Assert.True( comparer.Is( typeB, typeI, ConversionKind.Implicit, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeA, typeof(int), ConversionKind.Implicit, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeA, typeof(bool), ConversionKind.Implicit, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeB, typeof(int), ConversionKind.Implicit, bypassSymbols ) );
 
-            Assert.True( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Implicit, bypassSymbols ) );
+            Assert.False(
+                comparer.IsConvertibleTo( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeB, ConversionKind.Implicit, bypassSymbols ) );
+
+            Assert.False( comparer.IsConvertibleTo( typeA, typeB, ConversionKind.Implicit, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeB, typeA, ConversionKind.Implicit, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeI, typeB, ConversionKind.Implicit, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeB, typeI, ConversionKind.Implicit, bypassSymbols ) );
+
+            Assert.True(
+                comparer.IsConvertibleTo(
+                    compilation.Factory.GetTypeByReflectionType( typeof(int) ),
+                    typeof(object),
+                    ConversionKind.Implicit,
+                    bypassSymbols ) );
 
             if ( !bypassSymbols )
             {
                 // Built-in implicit numeric conversions are not supported in bypassSymbols mode.
 
-                Assert.True( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Implicit, bypassSymbols ) );
+                Assert.True(
+                    comparer.IsConvertibleTo(
+                        compilation.Factory.GetTypeByReflectionType( typeof(int) ),
+                        typeof(long),
+                        ConversionKind.Implicit,
+                        bypassSymbols ) );
 
-                Assert.False( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Implicit, bypassSymbols ) );
+                Assert.False(
+                    comparer.IsConvertibleTo(
+                        compilation.Factory.GetTypeByReflectionType( typeof(long) ),
+                        typeof(int),
+                        ConversionKind.Implicit,
+                        bypassSymbols ) );
             }
         }
 
@@ -198,19 +224,19 @@ class E : C<int> {}
 
             var comparer = (DeclarationEqualityComparer) compilation.CompilationContext.Comparers.Default;
 
-            Assert.False( comparer.Is( typeD, typeA, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.True( comparer.Is( typeD, typeB, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.False( comparer.Is( typeD, typeC, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.True( comparer.Is( typeD, typeD, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.False( comparer.Is( typeD, typeI1, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.True( comparer.Is( typeD, typeI2, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeD, typeA, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeD, typeB, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeD, typeC, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeD, typeD, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeD, typeI1, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeD, typeI2, ConversionKind.TypeDefinition, bypassSymbols ) );
 
-            Assert.True( comparer.Is( typeE, typeA, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.False( comparer.Is( typeE, typeB, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.True( comparer.Is( typeE, typeC, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.True( comparer.Is( typeE, typeE, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.True( comparer.Is( typeE, typeI1, ConversionKind.TypeDefinition, bypassSymbols ) );
-            Assert.False( comparer.Is( typeE, typeI2, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeE, typeA, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeE, typeB, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeE, typeC, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeE, typeE, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.True( comparer.IsConvertibleTo( typeE, typeI1, ConversionKind.TypeDefinition, bypassSymbols ) );
+            Assert.False( comparer.IsConvertibleTo( typeE, typeI2, ConversionKind.TypeDefinition, bypassSymbols ) );
         }
     }
 }

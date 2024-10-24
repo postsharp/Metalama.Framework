@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.Samples.Dirty
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            if (!builder.Target.ImplementedInterfaces.Any( i => i.Is( typeof(IDirty) ) ))
+            if (!builder.Target.ImplementedInterfaces.Any( i => i.IsConvertibleTo( typeof(IDirty) ) ))
             {
                 builder.ImplementInterface( typeof(IDirty) );
             }
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.Samples.Dirty
                 // If the type already implements IDirty, it must have a protected method called OnDirty, otherwise 
                 // this is a contract violation.
                 var dirtyStateProperty = builder.Target.Properties
-                    .Where( m => m.Name == nameof(DirtyState) && m.Type.Is( typeof(DirtyState) ) )
+                    .Where( m => m.Name == nameof(DirtyState) && m.Type.IsConvertibleTo( typeof(DirtyState) ) )
                     .SingleOrDefault();
 
                 if (dirtyStateProperty?.SetMethod == null)

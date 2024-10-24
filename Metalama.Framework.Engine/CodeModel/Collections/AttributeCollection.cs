@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                     {
                         var attributeType = ((AttributeRef) a).AttributeType.ToFullRef( type.GetRefFactory() ).ConstructedDeclaration;
 
-                        return attributeType.Is( type, conversionKind );
+                        return attributeType.IsConvertibleTo( type, conversionKind );
                     } ) );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         bool IAttributeCollection.Any( IType type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
 
         private bool Any( IType type, ConversionKind conversionKind = ConversionKind.Default )
-            => this.Source.Any( a => ((AttributeRef) a).AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) );
+            => this.Source.Any( a => ((AttributeRef) a).AttributeType.GetTarget( this.Compilation ).IsConvertibleTo( type, conversionKind ) );
 
         bool IAttributeCollection.Any( Type type ) => this.Any( type );
 

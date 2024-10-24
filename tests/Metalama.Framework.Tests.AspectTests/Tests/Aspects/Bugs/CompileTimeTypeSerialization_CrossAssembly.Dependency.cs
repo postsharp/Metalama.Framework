@@ -28,7 +28,7 @@ public sealed class ListImplementedTypesAttribute : TypeAspect
 
         foreach (var type in types)
         {
-            sb.Append( $"{type}: {( builder.Target.Is( type ) ? "" : "not " )}implemented; " );
+            sb.Append( $"{type}: {( builder.Target.IsConvertibleTo( type ) ? "" : "not " )}implemented; " );
         }
 
         builder.IntroduceField( "types", typeof(string), buildField: field => field.InitializerExpression = TypedConstant.Create( sb.ToString() ) );

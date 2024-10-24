@@ -113,7 +113,7 @@ public sealed class CodeFixTests : CodeFixTestClassBase
                 
                 public override void BuildAspect(IAspectBuilder<INamedType> builder)
                 {
-                    bool hasRequiredAttribute = builder.Target.Attributes.Any(a => a.Type.Is(typeof(RequiredAttribute)));
+                    bool hasRequiredAttribute = builder.Target.Attributes.Any(a => a.Type.IsConvertibleTo(typeof(RequiredAttribute)));
                     if (!hasRequiredAttribute)
                     {
                         builder.Diagnostics.Report(typeNeedsAttribute.WithArguments(builder.Target), builder.Target);
@@ -186,40 +186,40 @@ public sealed class CodeFixTests : CodeFixTestClassBase
         using var testContext = this.CreateTestContext();
 
         const string fabricCode = """
-            using Metalama.Framework.CodeFixes;
-            using Metalama.Framework.Diagnostics;
-            using Metalama.Framework.Fabrics;
+                                  using Metalama.Framework.CodeFixes;
+                                  using Metalama.Framework.Diagnostics;
+                                  using Metalama.Framework.Fabrics;
 
-            class A : Attribute;
+                                  class A : Attribute;
 
-            class Fabric : TransitiveProjectFabric
-            {
-                private static DiagnosticDefinition _diag = new("TEST01", Severity.Warning, "warning from fabric");
-
-                public override void AmendProject(IProjectAmender amender)
-                {
-                    amender
-                        .SelectMany(project => project.Types)
-                        .SelectMany(type => type.Properties)
-                        .ReportDiagnostic(prop => _diag.WithCodeFixes(CodeFixFactory.AddAttribute(prop, typeof(A))));
-                }
-            }
-            """;
+                                  class Fabric : TransitiveProjectFabric
+                                  {
+                                      private static DiagnosticDefinition _diag = new("TEST01", Severity.Warning, "warning from fabric");
+                                  
+                                      public override void AmendProject(IProjectAmender amender)
+                                      {
+                                          amender
+                                              .SelectMany(project => project.Types)
+                                              .SelectMany(type => type.Properties)
+                                              .ReportDiagnostic(prop => _diag.WithCodeFixes(CodeFixFactory.AddAttribute(prop, typeof(A))));
+                                      }
+                                  }
+                                  """;
 
         const string targetCode = """
-            class C
-            {
-                string? Name { get; set; }
-            }
-            """;
+                                  class C
+                                  {
+                                      string? Name { get; set; }
+                                  }
+                                  """;
 
         const string modifiedTargetCode = """
-            class C
-            {
-                [global::A]
-                string? Name { get; set; }
-            }
-            """;
+                                          class C
+                                          {
+                                              [global::A]
+                                              string? Name { get; set; }
+                                          }
+                                          """;
 
         // Initialize the workspace.
         var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();

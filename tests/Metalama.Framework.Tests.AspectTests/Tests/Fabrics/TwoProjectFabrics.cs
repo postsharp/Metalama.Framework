@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TwoProjectFabr
             amender
                 .SelectMany( c => c.Types )
                 .SelectMany( t => t.Methods )
-                .Where( m => m.ReturnType.Is( typeof(string) ) )
+                .Where( m => m.ReturnType.IsConvertibleTo( typeof(string) ) )
                 .AddAspect<Aspect>();
         }
     }
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TwoProjectFabr
             amender
                 .SelectMany( c => c.Types )
                 .SelectMany( t => t.Methods )
-                .Where( m => m.ReturnType.Is( typeof(int) ) )
+                .Where( m => m.ReturnType.IsConvertibleTo( typeof(int) ) )
                 .AddAspect<Aspect>();
         }
     }

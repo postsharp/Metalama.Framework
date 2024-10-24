@@ -32,8 +32,9 @@ public sealed class TestAttribute : TypeAspect
     {
         Console.WriteLine( $"Advice {adviceId}" );
 
-        if (meta.Target.Parameter.Type.Is( SpecialType.IEnumerable )
-            || meta.Target.Parameter.Type.Is( TypeFactory.GetType( SpecialType.IEnumerable_T ).WithTypeArguments( TypeFactory.GetType( SpecialType.String ) ) ))
+        if (meta.Target.Parameter.Type.IsConvertibleTo( SpecialType.IEnumerable )
+            || meta.Target.Parameter.Type.IsConvertibleTo(
+                TypeFactory.GetType( SpecialType.IEnumerable_T ).WithTypeArguments( TypeFactory.GetType( SpecialType.String ) ) ))
         {
             foreach (var item in value!)
             {

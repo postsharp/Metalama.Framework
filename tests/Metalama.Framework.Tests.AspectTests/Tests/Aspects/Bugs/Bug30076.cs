@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.AspectTests.Aspects.Bugs.Bug30076
                 var successMessage = methodName.Clone();
 
                 //find out if we're dealing with a void method
-                if (meta.Target.Method.ReturnType.Is( typeof(void) ))
+                if (meta.Target.Method.ReturnType.IsConvertibleTo( typeof(void) ))
                 {
                     //the methood is a void method and won't return anything so all we need to do
                     //is inform that it has been successful.

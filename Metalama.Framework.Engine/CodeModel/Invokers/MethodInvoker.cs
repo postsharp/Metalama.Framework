@@ -117,8 +117,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                 {
                     name = GenericName(
                         Identifier( this.GetCleanTargetMemberName() ),
-                        TypeArgumentList(
-                            SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => context.SyntaxGenerator.Type( t ) ) ) ) );
+                        TypeArgumentList( SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => context.SyntaxGenerator.Type( t ) ) ) ) );
                 }
                 else
                 {
@@ -168,7 +167,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                     .WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
 
             // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
-            if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
+            if ( GetTargetType()?.IsConvertibleTo( this.Member.DeclaringType ) ?? false )
             {
                 memberAccessExpression =
                     memberAccessExpression.WithAspectReferenceAnnotation(
@@ -196,7 +195,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                         InvocationExpression( MemberBindingExpression( name ) ) );
 
             // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
-            if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
+            if ( GetTargetType()?.IsConvertibleTo( this.Member.DeclaringType ) ?? false )
             {
                 expression = expression.WithAspectReferenceAnnotation(
                     receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );

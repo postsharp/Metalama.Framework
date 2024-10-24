@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.AspectTests.Templating.CSharpSyntax.TypeOf.Ty
             Console.WriteLine( "rt=" + rt );
             Console.WriteLine( "ct=" + ct );
 
-            if (( (IParameter)meta.Target.Parameters[0] ).Type.Is( typeof(string) )) { }
+            if (( (IParameter)meta.Target.Parameters[0] ).Type.IsConvertibleTo( typeof(string) )) { }
 
             return meta.Proceed();
         }

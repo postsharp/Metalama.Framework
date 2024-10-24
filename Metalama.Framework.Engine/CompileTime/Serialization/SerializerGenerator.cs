@@ -817,7 +817,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
         if ( fieldOrProperty.GetAttributes()
             .Any(
-                a => this._runTimeCompilationContext.SymbolComparer.Is(
+                a => this._runTimeCompilationContext.SymbolComparer.IsConvertibleTo(
                     a.AttributeClass.AssertNotNull(),
                     this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
         {

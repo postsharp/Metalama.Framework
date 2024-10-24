@@ -578,7 +578,7 @@ internal static class TemplateBindingHelper
             // void templates support any target.
             return true;
         }
-        else if ( fromType.Is( toType ) )
+        else if ( fromType.IsConvertibleTo( toType ) )
         {
             // Return types of template and target match.
             return true;

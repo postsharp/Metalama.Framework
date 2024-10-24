@@ -97,7 +97,7 @@ public static partial class EligibilityRuleFactory
                 parameter.MustNotBeVoid();
 
                 parameter.MustSatisfy(
-                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
+                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Equals( SpecialType.Void )),
                     member => $"{member} must not have void awaitable result" );
             }
 

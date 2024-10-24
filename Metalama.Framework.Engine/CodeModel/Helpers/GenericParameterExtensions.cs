@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
             }
 
             // Check types.
-            if ( a.TypeConstraints.Any( aConstraint => !b.TypeConstraints.Any( bConstraint => bConstraint.Is( aConstraint ) ) ) )
+            if ( a.TypeConstraints.Any( aConstraint => !b.TypeConstraints.Any( bConstraint => bConstraint.IsConvertibleTo( aConstraint ) ) ) )
             {
                 return false;
             }
@@ -101,7 +101,8 @@ namespace Metalama.Framework.Engine.CodeModel.Helpers
 
             // Check types.
             if ( a.ConstraintTypes.Any(
-                    aConstraint => !b.TypeConstraints.Any( bConstraint => bConstraint.Is( b.GetCompilationModel().Factory.GetIType( aConstraint ) ) ) ) )
+                    aConstraint => !b.TypeConstraints.Any(
+                        bConstraint => bConstraint.IsConvertibleTo( b.GetCompilationModel().Factory.GetIType( aConstraint ) ) ) ) )
             {
                 return false;
             }

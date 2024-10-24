@@ -68,13 +68,13 @@ internal sealed class AspectReferenceOverrideSubstitution : AspectReferenceRenam
             }
             else
             {
-                if ( this.CompilationContext.SymbolComparer.Is(
+                if ( this.CompilationContext.SymbolComparer.IsConvertibleTo(
                         targetSymbol.ContainingType,
                         this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
                 {
                     throw new AssertionFailedException( $"Resolved symbol is declared in a derived class: {targetSymbol.ContainingType}" );
                 }
-                else if ( this.CompilationContext.SymbolComparer.Is(
+                else if ( this.CompilationContext.SymbolComparer.IsConvertibleTo(
                              this.AspectReference.ContainingSemantic.Symbol.ContainingType,
                              targetSymbol.ContainingType ) )
                 {

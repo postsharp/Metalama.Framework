@@ -408,7 +408,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                     types,
                                     child =>
                                     {
-                                        if ( child.Is( baseType ) )
+                                        if ( child.IsConvertibleTo( baseType ) )
                                         {
                                             return action( child, tag, context );
                                         }

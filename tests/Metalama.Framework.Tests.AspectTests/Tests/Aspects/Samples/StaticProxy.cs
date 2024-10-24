@@ -37,7 +37,7 @@ public class ProxyAspect : TypeAspect
         foreach (var method in namedType.Methods)
         {
             implementInterfaceResult.ExplicitMembers.IntroduceMethod(
-                method.ReturnType.Is( SpecialType.Void )
+                method.ReturnType.IsConvertibleTo( SpecialType.Void )
                     ? nameof(VoidTemplate)
                     : nameof(NonVoidTemplate),
                 IntroductionScope.Instance,
@@ -55,7 +55,7 @@ public class ProxyAspect : TypeAspect
                     }
                 },
                 args:
-                /*method.ReturnType.Is( SpecialType.Void ) ? new { method, interceptedField } :*/
+                /*method.ReturnType.IsConvertibleTo( SpecialType.Void ) ? new { method, interceptedField } :*/
                 new { T = method.ReturnType, method, interceptedField } );
         }
 

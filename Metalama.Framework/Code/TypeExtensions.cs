@@ -12,21 +12,24 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public static class TypeExtensions
     {
+        [Obsolete( "This method has been renamed IsConvertibleTo." )]
+        public static bool Is( this IType left, IType right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
+            => IsConvertibleTo( left, right, kind, typeComparison );
+
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
         /// given as an <see cref="IType"/>.
         /// </summary>
-        public static bool Is( this IType left, IType right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
-            => left.Compilation.Comparers.GetTypeComparer( typeComparison ).Is( left, right, kind );
+        public static bool IsConvertibleTo(
+            this IType left,
+            IType right,
+            ConversionKind kind = default,
+            TypeComparison typeComparison = TypeComparison.Default )
+            => left.Compilation.Comparers.GetTypeComparer( typeComparison ).IsConvertibleTo( left, right, kind );
 
-        /// <summary>
-        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
-        /// given as a reflection <see cref="Type"/>.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right">Another type.</param>
+        [Obsolete( "This method has been renamed IsConvertibleTo." )]
         public static bool Is( this IType left, Type right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
-            => left.Compilation.Comparers.GetTypeComparer( typeComparison ).Is( left, right, kind );
+            => IsConvertibleTo( left, right, kind, typeComparison );
 
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
@@ -34,7 +37,19 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <param name="left"></param>
         /// <param name="right">Another type.</param>
-        public static bool Is( this IType left, SpecialType right, ConversionKind kind = default )
+        public static bool IsConvertibleTo( this IType left, Type right, ConversionKind kind = default, TypeComparison typeComparison = TypeComparison.Default )
+            => left.Compilation.Comparers.GetTypeComparer( typeComparison ).IsConvertibleTo( left, right, kind );
+
+        [Obsolete( "This method has been renamed IsConvertibleTo." )]
+        public static bool Is( this IType left, SpecialType right, ConversionKind kind = default ) => IsConvertibleTo( left, right, kind );
+
+        /// <summary>
+        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
+        /// given as a reflection <see cref="Type"/>.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right">Another type.</param>
+        public static bool IsConvertibleTo( this IType left, SpecialType right, ConversionKind kind = default )
             => (right, kind) switch
             {
                 // Using SpecialType.None is not valid.
@@ -42,7 +57,7 @@ namespace Metalama.Framework.Code
 
                 // Safe optimization.
                 (SpecialType.Void, _) => left.SpecialType == SpecialType.Void,
-                _ => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind )
+                _ => left.IsConvertibleTo( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind )
             };
 
         /// <summary>

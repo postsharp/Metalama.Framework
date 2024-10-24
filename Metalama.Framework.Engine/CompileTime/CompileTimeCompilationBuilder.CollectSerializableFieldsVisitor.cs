@@ -55,7 +55,8 @@ namespace Metalama.Framework.Engine.CompileTime
                              .Any(
                                  a =>
                                      this._compilationContext.SymbolComparer.Equals( a.AttributeClass, this._nonSerializedAttribute )
-                                     || this._compilationContext.SymbolComparer.Is( a.AttributeClass.AssertNotNull(), this._templateAttribute ) ) &&
+                                     || this._compilationContext.SymbolComparer.IsConvertibleTo( a.AttributeClass.AssertNotNull(), this._templateAttribute ) )
+                         &&
                          !this._compilationContext.SymbolClassifier.IsTemplate( fieldSymbol ) )
                     {
                         this._serializableFieldsOrProperties.Add( fieldSymbol );
@@ -81,7 +82,7 @@ namespace Metalama.Framework.Engine.CompileTime
                          .Any(
                              a =>
                                  this._compilationContext.SymbolComparer.Equals( a.AttributeClass, this._nonSerializedAttribute )
-                                 || this._compilationContext.SymbolComparer.Is( a.AttributeClass.AssertNotNull(), this._templateAttribute ) )
+                                 || this._compilationContext.SymbolComparer.IsConvertibleTo( a.AttributeClass.AssertNotNull(), this._templateAttribute ) )
                      && !this._compilationContext.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
                     this._serializableFieldsOrProperties.Add( propertySymbol );

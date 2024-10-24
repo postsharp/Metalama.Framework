@@ -105,7 +105,9 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
     {
         var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
 
-        if ( this.CompilationContext.SymbolComparer.Is( this.AspectReference.ContainingSemantic.Symbol.ContainingType, targetSymbol.ContainingType ) )
+        if ( this.CompilationContext.SymbolComparer.IsConvertibleTo(
+                this.AspectReference.ContainingSemantic.Symbol.ContainingType,
+                targetSymbol.ContainingType ) )
         {
             if ( this.AspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
             {
@@ -118,7 +120,9 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
                 return (ExpressionSyntax) rewriter.Visit( currentNode )!;
             }
         }
-        else if ( this.CompilationContext.SymbolComparer.Is( targetSymbol.ContainingType, this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
+        else if ( this.CompilationContext.SymbolComparer.IsConvertibleTo(
+                     targetSymbol.ContainingType,
+                     this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
         {
             throw new AssertionFailedException( $"Resolved symbol '{this.AspectReference.ContainingSemantic.Symbol}' is declared in a derived class." );
         }

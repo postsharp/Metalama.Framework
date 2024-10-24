@@ -382,7 +382,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                      returnExpression,
                      compilation,
                      out var expressionType ) &&
-                 compilation.Comparers.Default.Is( expressionType, returnType, ConversionKind.Implicit ) )
+                 compilation.Comparers.Default.IsConvertibleTo( expressionType, returnType, ConversionKind.Implicit ) )
             {
                 // No need to emit a cast.
             }
