@@ -9,10 +9,12 @@ internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializat
 {
     private readonly CompileTimeProject? _project;
     private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();
+    private readonly IDeserializationSurrogateProvider? _deserializationSurrogateProvider;
 
     public CompileTimeSerializationBinder( in ProjectServiceProvider serviceProvider, CompileTimeProject? project ) : base( serviceProvider )
     {
         this._project = project;
+        this._deserializationSurrogateProvider = serviceProvider.GetService<IDeserializationSurrogateProvider>();
     }
 
     public override void BindToName( Type type, out string typeName, out string assemblyName )
@@ -43,6 +45,11 @@ internal sealed class CompileTimeSerializationBinder : BaseCompileTimeSerializat
 
     public override Type? BindToType( string typeName, string assemblyName )
     {
+        if ( this._deserializationSurrogateProvider?.TryGetDeserializationSurrogate( typeName, out var surrogate ) == true )
+        {
+            return surrogate;
+        }
+
         if ( assemblyName.Equals( "mscorlib", StringComparison.Ordinal )
              || assemblyName.Equals( "System.Private.CoreLib", StringComparison.Ordinal ) )
         {
