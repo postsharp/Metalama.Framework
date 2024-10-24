@@ -114,6 +114,9 @@ internal sealed class IntroducedTypeParameter : IntroducedDeclaration, ITypePara
 
     public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
+    public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+        => otherType != null && this.Equals( this.Compilation.Factory.GetTypeByReflectionType( otherType ), typeComparison );
+
     public override int GetHashCode() => this._typeParameterBuilderData.GetHashCode();
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration.AssertNotNull()).CanBeInherited;

@@ -197,7 +197,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
                     .ToFullString() );
 
     public IExpression Cast( IExpression expression, IType targetType )
-        => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );
+        => expression.Type.IsConvertibleTo( targetType ) ? expression : new CastUserExpression( targetType, expression );
 
     public object TypedConstant( in TypedConstant typedConstant )
         => new SyntaxUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );

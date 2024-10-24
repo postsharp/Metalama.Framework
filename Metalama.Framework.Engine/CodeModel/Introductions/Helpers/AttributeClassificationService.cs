@@ -57,7 +57,7 @@ internal sealed class AttributeClassificationService : IGlobalService, IDisposab
 
         var templateAttributeType = attribute.GetCompilationModel().Cache.ITemplateAttributeType;
 
-        return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute), StringComparison.Ordinal );
+        return !attribute.Type.IsConvertibleTo( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute), StringComparison.Ordinal );
     }
 
     public bool MustCopyTemplateAttribute( AttributeData attribute )

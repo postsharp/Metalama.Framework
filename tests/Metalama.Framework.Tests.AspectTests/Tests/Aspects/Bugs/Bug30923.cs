@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.Bugs.Bug30923
         {
             base.BuildAspect( builder );
 
-            foreach (var property in builder.Target.Properties.Where( p => p.Type.Is( typeof(int) ) ))
+            foreach (var property in builder.Target.Properties.Where( p => p.Type.IsConvertibleTo( typeof(int) ) ))
             {
                 builder.With( property ).Override( nameof(TheAnswer) );
             }

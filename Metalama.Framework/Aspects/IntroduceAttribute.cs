@@ -70,7 +70,7 @@ namespace Metalama.Framework.Aspects
 
         public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder, IMemberOrNamedType adviceMember )
         {
-            builder.MustBeOfType( typeof(IMemberOrNamedType) );
+            builder.MustBeInstanceOfType( typeof(IMemberOrNamedType) );
 
             builder.MustBeExplicitlyDeclared();
 

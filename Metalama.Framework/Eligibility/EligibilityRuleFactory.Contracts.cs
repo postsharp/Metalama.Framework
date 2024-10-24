@@ -97,7 +97,7 @@ public static partial class EligibilityRuleFactory
                 parameter.MustNotBeVoid();
 
                 parameter.MustSatisfy(
-                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
+                    p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Equals( SpecialType.Void )),
                     member => $"{member} must not have void awaitable result" );
             }
 
@@ -151,7 +151,7 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityBoth = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
+                    d.MustBeInstanceOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityBoth );
                     d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityBoth );
                 } );
@@ -159,7 +159,7 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityInput = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
+                    d.MustBeInstanceOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityInput );
                     d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityInput );
                 } );
@@ -167,7 +167,7 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityOutput = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
+                    d.MustBeInstanceOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityOutput );
                     d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityOutput );
                 } );
@@ -175,7 +175,7 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityDefault = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
+                    d.MustBeInstanceOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityDefault );
                     d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityDefault );
                 } );

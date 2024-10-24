@@ -13,14 +13,15 @@ internal class MyAspect : ContractAspect
 {
     public override void Validate( dynamic? value )
     {
-        if (meta.Target.Parameter.Type is INamedType namedType && namedType.ImplementedInterfaces.Any( i => i.Definition.Is( typeof(IEnumerable<>) ) ))
+        if (meta.Target.Parameter.Type is INamedType namedType
+            && namedType.ImplementedInterfaces.Any( i => i.Definition.IsConvertibleTo( typeof(IEnumerable<>) ) ))
         {
             foreach (var c in value)
             {
                 Console.WriteLine( c );
             }
         }
-        else if (meta.Target.Parameter.Type.Is( typeof(bool) ))
+        else if (meta.Target.Parameter.Type.IsConvertibleTo( typeof(bool) ))
         {
             if (value)
             {

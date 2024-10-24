@@ -126,7 +126,9 @@ internal sealed partial class LinkerAnalysisStep
         public async Task<IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>>> RunAsync( CancellationToken cancellationToken )
         {
             var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
-            var inliningTargetNodes = this._inliningSpecifications.SelectAsReadOnlyList( x => (x.ParentContextIdentifier, ReplacedRootNode: x.ReplacedNode) ).ToHashSet();
+
+            var inliningTargetNodes = this._inliningSpecifications.SelectAsReadOnlyList( x => (x.ParentContextIdentifier, ReplacedRootNode: x.ReplacedNode) )
+                .ToHashSet();
 
             // Add substitutions to non-inlined semantics (these are always roots of inlining).
             void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )
@@ -202,7 +204,7 @@ internal sealed partial class LinkerAnalysisStep
             void ProcessInliningSpecification( InliningSpecification inliningSpecification )
             {
                 // TODO: It's weird because here we to substitute a property getter into a syntax block.
-                
+
                 // Add the inlining substitution itself.
                 AddSubstitution(
                     inliningSpecification.ParentContextIdentifier,
@@ -407,7 +409,7 @@ internal sealed partial class LinkerAnalysisStep
                         break;
 
                     case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
-                        when !this._intermediateCompilationContext.SymbolComparer.Is(
+                        when !this._intermediateCompilationContext.SymbolComparer.IsConvertibleTo(
                             nonInlinedReference.ContainingSemantic.Symbol.ContainingType,
                             symbol.ContainingType ):
                         // Base references to a declaration in another type mean base member call.

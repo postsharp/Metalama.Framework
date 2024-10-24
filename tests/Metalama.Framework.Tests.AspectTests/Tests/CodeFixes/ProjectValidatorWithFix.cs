@@ -18,7 +18,8 @@ internal class MyProjectFabric : ProjectFabric
     public override void AmendProject( IProjectAmender amender )
     {
         amender.SelectMany(
-                p => p.Types.SelectMany( t => t.Fields.Where( f => f.Accessibility != Accessibility.Private && f.Type.Is( typeof(TextWriter) ) ) ) )
+                p => p.Types.SelectMany(
+                    t => t.Fields.Where( f => f.Accessibility != Accessibility.Private && f.Type.IsConvertibleTo( typeof(TextWriter) ) ) ) )
             .ReportDiagnostic( f => _warning.WithArguments( f ).WithCodeFixes( CodeFixFactory.ChangeAccessibility( f, Accessibility.Private ) ) );
     }
 }

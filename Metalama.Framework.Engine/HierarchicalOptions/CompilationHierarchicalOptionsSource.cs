@@ -41,14 +41,14 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
                      (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider) ),
                      DerivedTypesOptions.IncludingExternalTypesDangerous ) )
         {
-            if ( attributeType.Is( aspectType ) )
+            if ( attributeType.IsConvertibleTo( aspectType ) )
             {
                 // Aspects can implement IHierarchicalOptionsProvider but their options are exposed on IAspectInstance.GetOptions
                 // or IAspectBuilder.Options and are not handled by the current facility. Because we want options defined
                 // on aspects to have absolute priority.
                 continue;
             }
-            else if ( !attributeType.Is( systemAttributeType ) )
+            else if ( !attributeType.IsConvertibleTo( systemAttributeType ) )
             {
                 continue;
             }

@@ -21,12 +21,14 @@ namespace Metalama.Framework.Code.Collections
         /// <summary>
         /// Selects the parameters of a given type.
         /// </summary>
-        public static IEnumerable<IParameter> OfParameterType( this IParameterList parameters, Type type ) => parameters.Where( p => p.Type.Is( type ) );
+        public static IEnumerable<IParameter> OfParameterType( this IParameterList parameters, Type type )
+            => parameters.Where( p => p.Type.IsConvertibleTo( type ) );
 
         /// <summary>
         /// Selects the parameters of a given type.
         /// </summary>
-        public static IEnumerable<IParameter> OfParameterType( this IParameterList parameters, IType type ) => parameters.Where( p => p.Type.Is( type ) );
+        public static IEnumerable<IParameter> OfParameterType( this IParameterList parameters, IType type )
+            => parameters.Where( p => p.Type.IsConvertibleTo( type ) );
 
         public static IParameter? OfName( this IParameterList list, string name ) => list.SingleOrDefault( p => p.Name == name );
     }

@@ -28,7 +28,7 @@ public sealed class TestAttribute : TypeAspect
     {
         Console.WriteLine( $"Advice" );
 
-        if (meta.Target.Parameter.Type.Is(
+        if (meta.Target.Parameter.Type.IsConvertibleTo(
                 TypeFactory.GetType( SpecialType.IAsyncEnumerable_T ).WithTypeArguments( TypeFactory.GetType( SpecialType.String ) ) ))
         {
             await foreach (var item in (IAsyncEnumerable<object?>)value!)

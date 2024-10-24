@@ -65,7 +65,7 @@ public class EnumViewModelAttribute : TypeAspect
         builder.Diagnostics.Suppress( _suppression, valueField );
 
         // Get the field type and decides the template.
-        var isFlags = enumType.Attributes.Any( a => a.Type.Is( typeof(FlagsAttribute) ) );
+        var isFlags = enumType.Attributes.Any( a => a.Type.IsConvertibleTo( typeof(FlagsAttribute) ) );
         var template = isFlags ? nameof(IsFlagTemplate) : nameof(IsMemberTemplate);
 
         // Introduce a property into the view-model type for each enum member.

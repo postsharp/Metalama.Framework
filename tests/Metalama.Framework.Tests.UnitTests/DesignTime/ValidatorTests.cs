@@ -715,81 +715,78 @@ public interface I {}
         public void ConstructorReference()
         {
             const string forTestOnlyAttribute = """
-                using System;
-                using Metalama.Framework.Advising;
-                using Metalama.Framework.Aspects;
-                using Metalama.Framework.Code;
-                using Metalama.Framework.Diagnostics;
-                using Metalama.Framework.Eligibility;
-                using Metalama.Framework.Validation;
+                                                using System;
+                                                using Metalama.Framework.Advising;
+                                                using Metalama.Framework.Aspects;
+                                                using Metalama.Framework.Code;
+                                                using Metalama.Framework.Diagnostics;
+                                                using Metalama.Framework.Eligibility;
+                                                using Metalama.Framework.Validation;
 
-                internal class ForTestOnlyAttribute : Aspect, IAspect<IDeclaration>
-                {
-                    private static readonly DiagnosticDefinition<IDeclaration> _warning = new(
-                        "TEST01",
-                        Severity.Warning,
-                        "'{0}' can be used only in a namespace whose name ends with '.Tests'");
-
-                    public void BuildAspect(IAspectBuilder<IDeclaration> builder)
-                    {
-                        builder.Outbound.ValidateInboundReferences(ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All);
-                    }
-
-                    public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder) { }
-
-                    private void ValidateReference(ReferenceValidationContext context)
-                    {
-                        if (!context.Origin.Type.Is(context.Destination.Type!) && !context.Origin.Namespace.FullName.EndsWith(".Tests"))
-                        {
-                            context.Diagnostics.Report(_warning.WithArguments(context.Destination.Declaration));
-                        }
-                    }
-                }
-                """;
+                                                internal class ForTestOnlyAttribute : Aspect, IAspect<IDeclaration>
+                                                {
+                                                    private static readonly DiagnosticDefinition<IDeclaration> _warning = new(
+                                                        "TEST01",
+                                                        Severity.Warning,
+                                                        "'{0}' can be used only in a namespace whose name ends with '.Tests'");
+                                                
+                                                    public void BuildAspect(IAspectBuilder<IDeclaration> builder)
+                                                    {
+                                                        builder.Outbound.ValidateInboundReferences(ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All);
+                                                    }
+                                                
+                                                    public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder) { }
+                                                
+                                                    private void ValidateReference(ReferenceValidationContext context)
+                                                    {
+                                                        if (!context.Origin.Type.IsConvertibleTo(context.Destination.Type!) && !context.Origin.Namespace.FullName.EndsWith(".Tests"))
+                                                        {
+                                                            context.Diagnostics.Report(_warning.WithArguments(context.Destination.Declaration));
+                                                        }
+                                                    }
+                                                }
+                                                """;
 
             const string target = """
-                class Target
-                {
-                    [ForTestOnly]
-                    public Target() { }
-                }
-                """;
+                                  class Target
+                                  {
+                                      [ForTestOnly]
+                                      public Target() { }
+                                  }
+                                  """;
 
             const string regularUsage = """
-                namespace ReferenceValidation;
+                                        namespace ReferenceValidation;
 
-                class Foo
-                {
-                    void M()
-                    {
-                        // These calls are FORBIDDEN because we are not in a test namespace.
-                        Target target = new();
-                        _ = new Target();
-                    }
-                }
-                """;
+                                        class Foo
+                                        {
+                                            void M()
+                                            {
+                                                // These calls are FORBIDDEN because we are not in a test namespace.
+                                                Target target = new();
+                                                _ = new Target();
+                                            }
+                                        }
+                                        """;
 
             const string testUsage = """
-                namespace ReferenceValidation.Tests;
+                                     namespace ReferenceValidation.Tests;
 
-                class Bar
-                {
-                    void M()
-                    {
-                        // This call is ALLOWED because we are in a test namespace.
-                        _ = new Target();
-                    }
-                }
-                """;
+                                     class Bar
+                                     {
+                                         void M()
+                                         {
+                                             // This call is ALLOWED because we are in a test namespace.
+                                             _ = new Target();
+                                         }
+                                     }
+                                     """;
 
             using var testContext = this.CreateTestContext();
 
             var code = new Dictionary<string, string>
             {
-                ["forTestOnlyAttribute.cs"] = forTestOnlyAttribute,
-                ["target.cs"] = target,
-                ["regularUsage.cs"] = regularUsage,
-                ["testUsage.cs"] = testUsage
+                ["forTestOnlyAttribute.cs"] = forTestOnlyAttribute, ["target.cs"] = target, ["regularUsage.cs"] = regularUsage, ["testUsage.cs"] = testUsage
             };
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );

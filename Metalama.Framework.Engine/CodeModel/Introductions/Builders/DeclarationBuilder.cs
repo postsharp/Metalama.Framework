@@ -104,7 +104,7 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl
     {
         this.CheckNotFrozen();
 
-        this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+        this.Attributes.RemoveAll( a => a.Type.IsConvertibleTo( type ) );
     }
 
     public virtual void Freeze()

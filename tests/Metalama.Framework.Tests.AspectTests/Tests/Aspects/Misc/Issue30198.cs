@@ -15,13 +15,13 @@ public class Aspect : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         // 'typeof' in an 'if'
-        if (!meta.Target.Method.Attributes.Any( a => a.Type.Is( typeof(ExcludeLoggingAttribute) ) ))
+        if (!meta.Target.Method.Attributes.Any( a => a.Type.IsConvertibleTo( typeof(ExcludeLoggingAttribute) ) ))
         {
             Console.WriteLine( "Hello, world." );
         }
 
         // 'typeof' in a 'foreach'
-        foreach (var p in meta.Target.Parameters.Where( p => !p.Attributes.Any( a => a.Type.Is( typeof(ExcludeLoggingAttribute) ) ) ))
+        foreach (var p in meta.Target.Parameters.Where( p => !p.Attributes.Any( a => a.Type.IsConvertibleTo( typeof(ExcludeLoggingAttribute) ) ) ))
         {
             Console.WriteLine( $"Param {p}" );
         }

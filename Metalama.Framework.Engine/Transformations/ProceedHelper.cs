@@ -72,10 +72,10 @@ internal static class ProceedHelper
 
                     switch ( asyncInfo )
                     {
-                        case { } when overriddenMethod.ReturnType.Is( SpecialType.Void ):
+                        case { } when overriddenMethod.ReturnType.IsConvertibleTo( SpecialType.Void ):
                             return WrapAsyncVoid( invocationExpression, overriddenMethod, true, generationContext );
 
-                        case { ResultType: var resultType } when resultType.Is( SpecialType.Void ):
+                        case { ResultType: var resultType } when resultType.IsConvertibleTo( SpecialType.Void ):
                             return (
                                 AwaitExpression(
                                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
@@ -94,7 +94,7 @@ internal static class ProceedHelper
                     }
                 }
 
-            case TemplateKind.Async when overriddenMethod.ReturnType.Is( SpecialType.Void ):
+            case TemplateKind.Async when overriddenMethod.ReturnType.IsConvertibleTo( SpecialType.Void ):
                 return WrapAsyncVoid( invocationExpression, overriddenMethod, false, generationContext );
 
             case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is

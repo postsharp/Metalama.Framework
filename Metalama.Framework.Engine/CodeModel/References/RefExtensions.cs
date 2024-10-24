@@ -84,10 +84,10 @@ public static class RefExtensions
     internal static IRef ToDurable( this IRef reference ) => ((IRefImpl) reference).ToDurable();
 
     internal static bool IsConvertibleTo( this IFullRef<IType> type, IType otherType, ConversionKind conversionKind = ConversionKind.Default )
-        => type.ConstructedDeclaration.Is( otherType, conversionKind );
+        => type.ConstructedDeclaration.IsConvertibleTo( otherType, conversionKind );
 
     internal static bool IsConvertibleTo( this IFullRef<IType> type, IFullRef<IType> otherType, ConversionKind conversionKind = ConversionKind.Default )
-        => type.ConstructedDeclaration.Is( otherType.ConstructedDeclaration, conversionKind );
+        => type.ConstructedDeclaration.IsConvertibleTo( otherType.ConstructedDeclaration, conversionKind );
 
     [Obsolete( "Use the PrimarySyntaxTree property instead." )]
     internal static SyntaxTree? GetPrimarySyntaxTree( this IFullRef reference ) => reference.PrimarySyntaxTree;
@@ -214,7 +214,7 @@ public static class RefExtensions
             TypeComparison.IncludeNullability => RefComparison.IncludeNullability,
             _ => throw new ArgumentOutOfRangeException()
         };
-    
+
     internal static TypeComparison ToTypeComparison( this RefComparison typeComparison )
         => typeComparison switch
         {

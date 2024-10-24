@@ -185,7 +185,7 @@ internal abstract class Invoker<T>
     {
         // Specifying Base or Current option with non-default target is only allowed when the method is in the inheritance hierarchy of the template target.
         if ( this.Target != null && (this.Options & InvokerOptions.OrderMask) is InvokerOptions.Base or InvokerOptions.Current &&
-             !(GetTargetType()?.Is( this.Member.DeclaringType ) ?? false) )
+             !(GetTargetType()?.IsConvertibleTo( this.Member.DeclaringType ) ?? false) )
         {
             throw GeneralDiagnosticDescriptors.CantInvokeBaseOrCurrentOutsideTargetType.CreateException(
                 (this.Member, GetTargetType()!, this.Options & InvokerOptions.OrderMask) );

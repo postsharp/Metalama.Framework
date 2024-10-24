@@ -17,6 +17,8 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Introductions.Builders;
 
+#pragma warning disable CS0659
+
 internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParameterBuilder
 {
     private readonly List<IType> _typeConstraints = [];
@@ -142,6 +144,17 @@ internal sealed class TypeParameterBuilder : NamedDeclarationBuilder, ITypeParam
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+
+    public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+        => otherType != null && this.Equals( this.Compilation.Factory.GetTypeByReflectionType( otherType ), typeComparison );
+
+    public override bool Equals( object? obj )
+        => obj switch
+        {
+            IType otherType => this.Equals( otherType ),
+            Type otherType => this.Equals( otherType ),
+            _ => false
+        };
 
     // TODO: Type constructions can't be supported with the current model because the NamedTypeBuilder would need to be frozen,
     // but when these methods would be used (in the build action), it is not frozen yet.

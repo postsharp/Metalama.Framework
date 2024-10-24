@@ -221,6 +221,9 @@ internal sealed class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBui
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
+    public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+        => otherType != null && this.Equals( this.Compilation.Factory.GetTypeByReflectionType( otherType ), typeComparison );
+
     // TODO: Type constructions can't be supported with the current model because the NamedTypeBuilder would need to be frozen,
     // but when these methods would be used (in the build action), it is not frozen yet.
 

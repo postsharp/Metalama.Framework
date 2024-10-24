@@ -72,14 +72,20 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
 
     public int GetHashCode( INamedType obj ) => this._structuralDeclarationComparer.GetHashCode( obj );
 
-    public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
+    bool ITypeComparer.Is( IType left, IType right, ConversionKind kind ) => this.IsConvertibleTo( left, right, kind );
+
+    bool ITypeComparer.IsConvertibleTo( IType left, IType right, ConversionKind kind ) => this.IsConvertibleTo( left, right, kind );
+
+    public bool IsConvertibleTo( IType left, IType right, ConversionKind kind ) => this.IsConvertibleTo( left, right, kind, bypassSymbols: false );
+
+    bool ITypeComparer.IsConvertibleTo( IType left, Type right, ConversionKind kind ) => this.IsConvertibleTo( left, right, kind );
 
     /// <param name="bypassSymbols">
     /// Does not use the symbol-based implementation, even when available. Used for testing.
     /// Note that this mode is not fully implemented for conversions that only apply to built-in type (like built-in implicit numeric conversions),
     /// because the types in question are guaranteed to be symbol-based and without introductions.
     /// </param>
-    internal bool Is( IType left, IType right, ConversionKind kind, bool bypassSymbols )
+    internal bool IsConvertibleTo( IType left, IType right, ConversionKind kind, bool bypassSymbols )
     {
         if ( kind != ConversionKind.TypeDefinition )
         {
@@ -102,7 +108,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
         {
             // If there is conversion between the original symbols, there should be conversion between the modified types.
             // If there is no conversion between symbols, we have to check the modified types because of introductions.
-            if ( this.Is( leftSymbol, rightSymbol, kind ) )
+            if ( this.IsConvertibleTo( leftSymbol, rightSymbol, kind ) )
             {
                 return true;
             }
@@ -125,19 +131,24 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
     }
 
 #pragma warning disable CA1822
-    public bool Is( IRef<IType> left, IType right, ConversionKind kind ) => left.AsFullRef().IsConvertibleTo( right, kind );
+    [Obsolete]
+    public bool Is( IRef<IType> left, IType right, ConversionKind kind ) => this.IsConvertibleTo( left, right, kind );
+
+    public bool IsConvertibleTo( IRef<IType> left, IType right, ConversionKind kind ) => left.AsFullRef().IsConvertibleTo( right, kind );
 #pragma warning restore CA1822
 
-    public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
+    bool ITypeComparer.Is( IType left, Type right, ConversionKind kind ) => this.IsConvertibleTo( left, right, kind );
 
-    internal bool Is( IType left, Type right, ConversionKind kind, bool bypassSymbols )
-        => this.Is(
+    public bool IsConvertibleTo( IType left, Type right, ConversionKind kind ) => this.IsConvertibleTo( left, right, kind, bypassSymbols: false );
+
+    internal bool IsConvertibleTo( IType left, Type right, ConversionKind kind, bool bypassSymbols )
+        => this.IsConvertibleTo(
             left,
             left.GetCompilationModel().Factory.GetTypeByReflectionType( right ),
             kind,
             bypassSymbols );
 
-    internal bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
+    internal bool IsConvertibleTo( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
     {
         // TODO: Does not take introduced interfaces into account (requires a lot of changes).
 

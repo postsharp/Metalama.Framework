@@ -69,6 +69,10 @@ namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
         public bool Equals( IType? otherType, TypeComparison typeComparison )
             => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType ); // TODO: Mapping
 
+        public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+            => otherType != null && this.Compilation.Comparers.GetTypeComparer( typeComparison )
+                .Equals( this, this.Compilation.Factory.GetTypeByReflectionType( otherType ) );
+
         public IArrayType MakeArrayType( int rank = 1 ) => this.Compilation.Factory.MakeArrayType( this.Symbol, rank );
 
         public IPointerType MakePointerType() => this.Compilation.Factory.MakePointerType( this.Symbol );
@@ -80,6 +84,14 @@ namespace Metalama.Framework.Engine.CodeModel.Source.ConstructedTypes
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
+
+        public override bool Equals( object? obj )
+            => obj switch
+            {
+                IType otherType => this.Equals( otherType ),
+                Type otherType => this.Equals( otherType ),
+                _ => false
+            };
 
         public override string ToString() => this.ToDisplayString();
 

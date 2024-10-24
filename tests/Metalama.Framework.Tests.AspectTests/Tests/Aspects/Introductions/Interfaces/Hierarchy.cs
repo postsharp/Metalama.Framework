@@ -6,7 +6,7 @@ using System;
 
 #pragma warning disable CS0067
 
-[assembly: AspectOrder(AspectOrderDirection.CompileTime, typeof(IntroductionAttribute), typeof(TestAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.CompileTime, typeof(IntroductionAttribute), typeof(TestAttribute) )]
 
 namespace Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Introductions.Interfaces.Hierarchy
 {
@@ -41,61 +41,61 @@ namespace Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Introductions.
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.ImplementInterface(typeof(IInterface), whenExists: OverrideStrategy.Ignore);
+            aspectBuilder.ImplementInterface( typeof(IInterface), whenExists: OverrideStrategy.Ignore );
         }
 
         [InterfaceMember]
         public void Foo()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
         [InterfaceMember]
         public void Goo()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
         [InterfaceMember]
         public void Zoo()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
         [InterfaceMember]
         public void Bar()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
         [InterfaceMember]
         public void Quz()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
     }
 
     public class TestAttribute : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public void Evaluator()
         {
-            Console.WriteLine($"Target type implements IBase0Interface: {meta.Target.Type.Is(typeof(IBase0Interface))}");
-            Console.WriteLine($"Target type implements IBase1Interface: {meta.Target.Type.Is(typeof(IBase1Interface))}");
-            Console.WriteLine($"Target type implements IBase2Interface: {meta.Target.Type.Is(typeof(IBase2Interface))}");
-            Console.WriteLine($"Target type implements IBase3Interface<int>: {meta.Target.Type.Is(typeof(IBase3Interface<int>))}");
-            Console.WriteLine($"Target type implements IInterface: {meta.Target.Type.Is(typeof(IInterface))}");
+            Console.WriteLine( $"Target type implements IBase0Interface: {meta.Target.Type.IsConvertibleTo( typeof(IBase0Interface) )}" );
+            Console.WriteLine( $"Target type implements IBase1Interface: {meta.Target.Type.IsConvertibleTo( typeof(IBase1Interface) )}" );
+            Console.WriteLine( $"Target type implements IBase2Interface: {meta.Target.Type.IsConvertibleTo( typeof(IBase2Interface) )}" );
+            Console.WriteLine( $"Target type implements IBase3Interface<int>: {meta.Target.Type.IsConvertibleTo( typeof(IBase3Interface<int>) )}" );
+            Console.WriteLine( $"Target type implements IInterface: {meta.Target.Type.IsConvertibleTo( typeof(IInterface) )}" );
 
             foreach (var implementedInterface in meta.Target.Type.ImplementedInterfaces)
             {
-                Console.WriteLine($"ImplementedInterfaces contains {implementedInterface}.");
+                Console.WriteLine( $"ImplementedInterfaces contains {implementedInterface}." );
             }
 
             foreach (var implementedInterface in meta.Target.Type.AllImplementedInterfaces)
             {
-                Console.WriteLine($"AllImplementedInterfaces constains {implementedInterface}.");
+                Console.WriteLine( $"AllImplementedInterfaces constains {implementedInterface}." );
             }
         }
     }
@@ -103,11 +103,11 @@ namespace Metalama.Framework.Tests.AspectTests.TestInputs.Aspects.Introductions.
     // <target>
     [Introduction]
     [Test]
-    public class TargetClass : IBase0Interface 
+    public class TargetClass : IBase0Interface
     {
         public void Foo()
         {
-            Console.WriteLine("Original interface member");
+            Console.WriteLine( "Original interface member" );
         }
     }
 

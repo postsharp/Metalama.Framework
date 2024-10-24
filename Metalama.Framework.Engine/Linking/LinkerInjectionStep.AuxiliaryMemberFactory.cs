@@ -161,7 +161,7 @@ internal sealed partial class LinkerInjectionStep
                     false, TemplateKind.IEnumerator),
                 (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable }) => (false, TemplateKind.IAsyncEnumerable),
                 (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerator }) => (false, TemplateKind.IAsyncEnumerator),
-                (false, { IsAsync: true }, _) when method.ReturnType.Is( SpecialType.Void ) => (true, TemplateKind.Default),
+                (false, { IsAsync: true }, _) when method.ReturnType.IsConvertibleTo( SpecialType.Void ) => (true, TemplateKind.Default),
                 (false, { IsAsync: true }, _) => (false, TemplateKind.Async),
                 (true, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable }) => (true, TemplateKind.IAsyncEnumerable),
                 (true, { IsAsync: true }, _) => (true, TemplateKind.Default),
@@ -175,7 +175,7 @@ internal sealed partial class LinkerInjectionStep
                 .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             TypeSyntax? returnType = null;
-            var isVoidReturning = method.GetAsyncInfo().ResultType.Is( SpecialType.Void );
+            var isVoidReturning = method.GetAsyncInfo().ResultType.Equals( SpecialType.Void );
 
             if ( !method.IsAsync )
             {

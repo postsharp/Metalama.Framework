@@ -438,8 +438,8 @@ internal partial class DeclarationEqualityComparer
                     var convertsFrom = op.Parameters[0].Type;
                     var convertsTo = op.ReturnType;
 
-                    var hasFromConversion = parent.Is( left, convertsFrom, ConversionKind.Default );
-                    var hasToConversion = parent.Is( convertsTo, right, ConversionKind.Default );
+                    var hasFromConversion = parent.IsConvertibleTo( left, convertsFrom, ConversionKind.Default );
+                    var hasToConversion = parent.IsConvertibleTo( convertsTo, right, ConversionKind.Default );
 
                     if ( hasFromConversion && hasToConversion )
                     {
@@ -468,8 +468,8 @@ internal partial class DeclarationEqualityComparer
                             liftingCount = 2;
                         }
 
-                        var hasLiftedFromConversion = parent.Is( left, nullableFrom, ConversionKind.Default );
-                        var hasLiftedToConversion = parent.Is( nullableTo, right, ConversionKind.Default );
+                        var hasLiftedFromConversion = parent.IsConvertibleTo( left, nullableFrom, ConversionKind.Default );
+                        var hasLiftedToConversion = parent.IsConvertibleTo( nullableTo, right, ConversionKind.Default );
 
                         if ( hasLiftedFromConversion && hasLiftedToConversion )
                         {
@@ -501,8 +501,8 @@ internal partial class DeclarationEqualityComparer
                         return BetterResult.Equal;
                     }
 
-                    var leftWins = parent.Is( left, right, ConversionKind.Default );
-                    var rightWins = parent.Is( right, left, ConversionKind.Default );
+                    var leftWins = parent.IsConvertibleTo( left, right, ConversionKind.Default );
+                    var rightWins = parent.IsConvertibleTo( right, left, ConversionKind.Default );
 
                     return
                         leftWins == rightWins ? BetterResult.Neither
@@ -530,8 +530,8 @@ internal partial class DeclarationEqualityComparer
                         return BetterResult.Equal;
                     }
 
-                    var leftWins = parent.Is( right, left, ConversionKind.Default );
-                    var rightWins = parent.Is( left, right, ConversionKind.Default );
+                    var leftWins = parent.IsConvertibleTo( right, left, ConversionKind.Default );
+                    var rightWins = parent.IsConvertibleTo( left, right, ConversionKind.Default );
 
                     return
                         leftWins == rightWins ? BetterResult.Neither

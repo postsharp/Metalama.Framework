@@ -11,7 +11,7 @@ public class MyAspect : TypeAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<INamedType> builder )
     {
-        builder.MustBe( typeof(MyBaseClass<>), ConversionKind.TypeDefinition );
+        builder.MustBeConvertibleTo( typeof(MyBaseClass<>), ConversionKind.TypeDefinition );
     }
 }
 

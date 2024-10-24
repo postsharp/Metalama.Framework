@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.Bugs.Bug31128
 
             base.BuildAspect( builder );
 
-            if (builder.Target.Is( typeof(BusinessObjectModel<>) ))
+            if (builder.Target.IsConvertibleTo( typeof(BusinessObjectModel<>) ))
             {
                 return;
             }
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Tests.AspectTests.Tests.Aspects.Bugs.Bug31128
             foreach (var property in GetDataClassProperties( meta.Target.Type ))
             {
                 columns.Add(
-                    property.Attributes.Any( a => a.Type.Is( typeof(KeyAttribute) ) )
+                    property.Attributes.Any( a => a.Type.IsConvertibleTo( typeof(KeyAttribute) ) )
                         ? new BusinessObjectModelColumn( property.Name ) { VisibleInDetailView = false }
                         : new BusinessObjectModelColumn( property.Name ) );
             }

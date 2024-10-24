@@ -214,7 +214,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
                     }
 
                 case OverrideStrategy.Override:
-                    if ( !builder.ReturnType.Is( existingMethod.ReturnType, ConversionKind.Reference ) )
+                    if ( !builder.ReturnType.IsConvertibleTo( existingMethod.ReturnType, ConversionKind.Reference ) )
                     {
                         return
                             this.CreateFailedResult(

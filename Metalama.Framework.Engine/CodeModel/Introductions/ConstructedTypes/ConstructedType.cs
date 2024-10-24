@@ -52,6 +52,17 @@ internal abstract class ConstructedType : ITypeImpl
 
     public abstract bool Equals( IType? otherType, TypeComparison typeComparison );
 
+    public bool Equals( Type? otherType, TypeComparison typeComparison = TypeComparison.Default )
+        => otherType != null && this.Equals( this.Compilation.Factory.GetTypeByReflectionType( otherType ), typeComparison );
+
+    public override bool Equals( object? obj )
+        => obj switch
+        {
+            IType otherType => this.Equals( otherType ),
+            Type otherType => this.Equals( otherType ),
+            _ => false
+        };
+
     public IArrayType MakeArrayType( int rank = 1 ) => new ConstructedArrayType( this.Compilation, this.ToTypeFullRef(), rank, false );
 
     public IPointerType MakePointerType() => new ConstructedPointerType( this.Compilation, this.ToTypeFullRef() );
@@ -67,4 +78,6 @@ internal abstract class ConstructedType : ITypeImpl
     protected abstract ConstructedType ForCompilation( CompilationModel compilation );
 
     public abstract int GetHashCode( TypeComparison refComparison );
+
+    public override int GetHashCode() => this.GetHashCode( TypeComparison.Default );
 }
