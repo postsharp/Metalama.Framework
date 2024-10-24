@@ -7,6 +7,26 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public static class SymbolExtensions
 {
+    private static readonly Func<IPropertySymbol, bool> _isPartialDefinition;
+    private static readonly Func<IPropertySymbol, IPropertySymbol?> _getPartialImplementationPart;
+
+    static SymbolExtensions()
+    {
+        var isPartialDefinition = typeof(IPropertySymbol).GetProperty( "IsPartialDefinition" )?.GetGetMethod();
+
+        _isPartialDefinition = isPartialDefinition == null
+            ? _ => false
+            : (Func<IPropertySymbol, bool>) Delegate.CreateDelegate( typeof(Func<IPropertySymbol, bool>), isPartialDefinition );
+
+        var getPartialImplementationPart = typeof(IPropertySymbol).GetProperty( "PartialImplementationPart" )?.GetGetMethod();
+
+        _getPartialImplementationPart = getPartialImplementationPart == null
+            ? _ => null
+            : (Func<IPropertySymbol, IPropertySymbol?>) Delegate.CreateDelegate(
+                typeof(Func<IPropertySymbol, IPropertySymbol?>),
+                getPartialImplementationPart );
+    }
+
     public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
     {
         if ( symbol == null )
@@ -49,14 +69,15 @@ public static class SymbolExtensions
 
         switch ( symbol )
         {
-            case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
-                return GetReferenceOfShortestPath( symbol ) ?? GetReferenceOfShortestPath( methodSymbol.AssociatedSymbol );
-
             case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: { } partialDefinitionSymbol }:
                 return GetReferenceOfShortestPath( partialDefinitionSymbol );
 
-            case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: null }:
-                return GetReferenceOfShortestPath( symbol );
+            case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
+                return GetReferenceOfShortestPath( symbol ) ?? GetReferenceOfShortestPath( methodSymbol.AssociatedSymbol );
+
+            // We have to use reflection here, because the properties don't exist in Roslyn 4.4, which is the only target of this project.
+            case IPropertySymbol propertySymbol when _isPartialDefinition( propertySymbol ) && _getPartialImplementationPart( propertySymbol ) is { } partialDefinitionSymbol:
+                return GetReferenceOfShortestPath( partialDefinitionSymbol );
 
             default:
                 return GetReferenceOfShortestPath( symbol );
