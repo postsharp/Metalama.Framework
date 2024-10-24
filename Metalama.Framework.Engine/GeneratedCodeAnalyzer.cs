@@ -12,6 +12,7 @@ using System.IO;
 namespace Metalama.Framework.Engine;
 
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute
+#pragma warning disable RS1022 // Do not use types from Workspaces assembly in an analyzer
 
 internal class GeneratedCodeAnalyzer : DiagnosticAnalyzer
 {
