@@ -258,13 +258,51 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                 }
                 else
                 {
-                    var testRunner = TestRunnerFactory.CreateTestRunner(
-                        testInput,
-                        this._serviceProvider.Underlying.WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) ),
-                        projectReferences,
-                        logger );
+                    var repeat = testInput.Options.Repeat ?? 1;
 
-                    await testRunner.RunAndAssertAsync( testInput, testOptions );
+                    if ( repeat == 1 )
+                    {
+                        var firstSeed = testInput.Options.RandomSeed ?? new Random().Next();
+
+                        var serviceProvider = this._serviceProvider.Underlying
+                            .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) )
+                            .WithService( new RandomNumberProvider( firstSeed ), true );
+
+                        var testRunner = TestRunnerFactory.CreateTestRunner(
+                            testInput,
+                            serviceProvider,
+                            projectReferences,
+                            logger );
+
+                        await testRunner.RunAndAssertAsync( testInput, testOptions );
+                    }
+                    else
+                    {
+                        var firstSeed = testInput.Options.RandomSeed ?? 0;
+
+                        for ( var i = 0; i < repeat; i++ )
+                        {
+                            if ( i > 0 )
+                            {
+                                logger.WriteLine( "-------------------------------------------------------------------------" );
+                            }
+                            
+                            var seed = firstSeed + i;
+                            logger.WriteLine( $"Running rep #{i + 1} of {repeat}. Seed = {seed}." );
+
+                            var serviceProvider = this._serviceProvider.Underlying
+                                .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) )
+                                .WithService( new RandomNumberProvider( seed ) );
+
+                            var testRunner = TestRunnerFactory.CreateTestRunner(
+                                testInput,
+                                serviceProvider,
+                                projectReferences,
+                                logger );
+
+                            await testRunner.RunAndAssertAsync( testInput, testOptions );
+                        }
+                    }
 
                     executionMessageSink.OnMessage( new TestPassed( test, testMetrics.ExecutionTime, logger.ToString() ) );
 

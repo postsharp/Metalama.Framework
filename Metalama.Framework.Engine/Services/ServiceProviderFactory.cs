@@ -124,7 +124,7 @@ public static class ServiceProviderFactory
 
             if ( projectOptions.IsTest )
             {
-                concurrentTaskRunner = new RandomizingSingleThreadedTaskRunner( serviceProvider );
+                concurrentTaskRunner = new RandomizingSingleThreadedTaskRunner( ((ProjectServiceProvider) projectServiceProvider).Global );
             }
             else
             {

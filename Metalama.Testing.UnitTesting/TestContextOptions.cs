@@ -2,6 +2,8 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -27,6 +29,8 @@ public record TestContextOptions
     /// Gets the set of MSBuild properties exposed to the tests.
     /// </summary>
     public ImmutableDictionary<string, string> Properties { get; init; } = ImmutableDictionary<string, string>.Empty;
+
+    public GlobalServiceProvider RunnerServiceProvider { get; init; } = (GlobalServiceProvider) ServiceProvider<IGlobalService>.Empty;
 
     /// <summary>
     /// Gets a value indicating whether the output code should be formatted.

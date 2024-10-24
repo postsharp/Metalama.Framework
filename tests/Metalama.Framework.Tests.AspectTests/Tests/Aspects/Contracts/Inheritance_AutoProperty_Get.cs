@@ -1,3 +1,6 @@
+#if TEST_OPTIONS
+// @Repeat(500)
+#endif
 using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
